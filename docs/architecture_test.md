@@ -79,9 +79,8 @@ If your database implementation is on the compiler's classpath (as it usually is
 When domain purity is compromised, you lose the ability to easily test business logic in isolation. Testing a domain rule suddenly requires mocking databases or UI states. It also couples your business rules to external libraries, making framework upgrades (e.g., Spring Boot 2 to 3, or AGP upgrades) a breaking change for your core business engine.
 
 #### Enforcing with Architecture Tests
-```kotlin
-// Conceptual Example (illustrating the rule intent)
-// (Note: This is conceptual pseudo-code showing Layer Isolation)
+```text
+Conceptual example (illustrating the rule intent, not literal Konture API):
 architecture {
     scope("..domain..") {
         hasZeroDependenciesOn(
@@ -94,6 +93,9 @@ architecture {
     }
 }
 
+```
+
+```kotlin
 // Real, compiling Konture alternative (using module boundaries):
 architecture {
     modules {
@@ -133,8 +135,8 @@ In Kotlin Multiplatform, dependency hygiene is even more delicate. A `commonMain
 Uncontrolled module dependencies lead to circular dependencies, massive compilation bottlenecks, and the loss of Gradle's incremental compilation speedups. Furthermore, leaking platform-specific configurations in KMP ruins the portability of the shared codebase, defeating the primary purpose of multiplatform development.
 
 #### Enforcing with Architecture Tests
-```kotlin
-// Conceptual Example (illustrating build-graph boundary rules)
+```text
+Conceptual example (illustrating build-graph boundary rules, not literal Konture API):
 architecture {
     modules {
         all {
@@ -144,6 +146,9 @@ architecture {
     }
 }
 
+```
+
+```kotlin
 // Real, compiling Konture alternative (restricting module-to-module dependencies):
 architecture {
     modules {
@@ -213,12 +218,14 @@ To the compiler, a function call is a function call. As long as a repository int
 Bypassing intermediate layers bypasses vital business logic. Service layers often orchestrate security checks, database transactions, input validation, audit logging, and caching. If outer layers can call data adapters directly, you create a silent security and transactional hazard that is impossible to audit manually.
 
 #### Enforcing with Architecture Tests
-```kotlin
-// Conceptual Example (illustrating restricted call-graph package rules)
+```text
+Conceptual example (illustrating restricted call-graph package rules, not literal Konture API):
 classes()
     .that().resideInAPackage("..controller..")
     .should().onlyCallMethodsInPackages("..service..", "java..", "kotlin..")
+```
 
+```kotlin
 // Real, compiling Konture dependency enforcement:
 architecture {
     classes {

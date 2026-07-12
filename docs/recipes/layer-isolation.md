@@ -49,7 +49,7 @@ class LayerIsolationTest {
             }
             where(domain) {
                 // Pure business logic domain cannot depend on outer layers
-                mayNotBeAccessedByAnyLayer()
+                mayOnlyAccessLayers()
             }
         }
     }

@@ -1,0 +1,31 @@
+// Custom typography overrides for bolder text styles
+
+h1,
+.text-alpha {
+  font-weight: 700 !important;
+}
+
+h2,
+.text-beta,
+#toctitle {
+  font-weight: 700 !important;
+}
+
+h3,
+.text-gamma {
+  font-weight: 600 !important;
+}
+
+h4,
+.text-delta {
+  font-weight: 600 !important;
+}
+
+h5,
+.text-epsilon {
+  font-weight: 600 !important;
+}
+
+h6 {
+  font-weight: 600 !important;
+}

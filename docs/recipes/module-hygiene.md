@@ -58,7 +58,7 @@ class FeatureIsolationTest {
     fun `feature modules must remain isolated from each other`() {
         Konture.modules {
             that().haveNameMatching(":feature:**")
-                .should().satisfy("No horizontal/sideways feature dependencies") { module, violations ->
+                .should().satisfy { module, violations ->
                     val siblingDeps = module.dependencies.filter { dep ->
                         dep.targetPath.startsWith(":feature:") && dep.targetPath != module.path
                     }
@@ -111,7 +111,6 @@ If a developer adds a circular dependency or sideways import, Konture prints cle
 
 * **Sideways Feature Coupling Failure**:
   ```text
-  AssertionError: Architecture violation in module rule: No horizontal/sideways feature dependencies
-  Offending modules:
-    - Module :feature:checkout depends on sideways features: :feature:profile
+  AssertionError: Architecture violation(s) detected:
+  Feature module :feature:checkout depends on sideways features: :feature:profile
   ```

@@ -62,11 +62,11 @@ class ApiDocumentationTest {
     @Test
     fun `all public-facing api classes and interfaces must declare kdocs`() {
         // Enforce KDocs on all public classes inside the primary export package
-        Konture.scope.classes()
+        Konture.scope.classes
             .withPackage("io.github.baole.konture.api..")
-            .filter { it.isPublic }
+            .filter { it.visibility == Visibility.PUBLIC }
             .assertTrue("Exposed public API must have KDoc comments") { cls ->
-                cls.hasKDoc
+                !cls.kdocText.isNullOrBlank()
             }
     }
 }

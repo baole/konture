@@ -30,6 +30,29 @@ This allows you to write lightning fast, compilation level architectural guardra
 
 ---
 
+## 🛡️ Enforce Boundaries & Prevent Erosion
+
+With multi-module builds, architecture erodes through small shortcuts—such as a feature module declaring a "sideways" dependency on a sibling feature:
+
+```mermaid
+graph TD
+    app[":app"] --> checkout[":feature:checkout"]
+    app --> profile[":feature:profile"]
+    checkout --> core[":core:network"]
+    profile --> core
+    checkout -.->|"PROHIBITED: Sideways Dependency"| profile
+
+    style app fill:#f1f5f9,stroke:#94a3b8,stroke-width:2px
+    style checkout fill:#e0f2fe,stroke:#0284c7,stroke-width:2px
+    style profile fill:#e0f2fe,stroke:#0284c7,stroke-width:2px
+    style core fill:#ecfdf5,stroke:#10b981,stroke-width:2px
+    linkStyle 4 stroke:#ef4444,stroke-width:2px,stroke-dasharray: 5 5;
+```
+
+Konture analyzes your actual Gradle build graph to enforce physical module isolation, cyclic boundaries, and layer directions directly inside your test suite.
+
+---
+
 ## 📖 Explore the Interactive Documentation
 
 For detailed conceptual overviews, advanced recipes, and complete walkthroughs, visit our official **[GitHub Pages Documentation Site](https://baole.github.io/konture/)** or explore the source files directly:
@@ -127,8 +150,8 @@ dependencies {
     testImplementation("io.github.baole:konture:0.6.6")
 
     // 🧪 Test runners (JUnit 5 is used here as a standard example, but any framework works!)
-    testImplementation("org.junit.jupiter:junit-jupiter-api:5.10.0")
-    testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:5.10.0")
+    testImplementation("org.junit.jupiter:junit-jupiter-api:5.11.0")
+    testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:5.11.0")
 
     // 📂 Declare dependencies on modules to analyze (to make sure they are compiled first)
     testImplementation(project(":core:domain"))

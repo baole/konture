@@ -1,10 +1,10 @@
 # Verifying Konture's DSL before writing a real test
 
-Konture provides a unified, consistent, and compiling API surface across all documentation (including the README and `docs/architecture_test.md`) using the premium **Fluent Lambda DSL**.
+Konture provides a unified, consistent, and compiling API surface across all documentation (including the README and `docs/architecture_test.md`) using the public rule-builder DSL and optional lambda helpers.
 
-Always use the standard Fluent Lambda DSL when writing or verifying architecture tests.
+Always verify examples against the literal public Konture API before writing or changing architecture tests.
 
-## Standard Fluent Lambda DSL Pattern
+## Standard Architecture Block Pattern
 
 All guardrails are defined within the `architecture { ... }` block, utilizing nested builder scopes for different target elements (such as `modules`, `classes`, `files`, `functions`, or `properties`).
 
@@ -12,7 +12,7 @@ Within each builder scope:
 1. Filter the elements using `that()` rules.
 2. Assert expectations on the filtered elements using `should()` and `andShould()` / `orShould()` assertions.
 
-## Starter Test Shape (Fluent Lambda DSL)
+## Starter Test Shape
 
 ```kotlin
 import io.github.baole.konture.dsl.architecture

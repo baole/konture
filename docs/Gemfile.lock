@@ -74,6 +74,8 @@ GEM
       jekyll (>= 3.0, < 5.0)
     jekyll-include-cache (0.2.1)
       jekyll (>= 3.7, < 5.0)
+    jekyll-relative-links (0.7.0)
+      jekyll (>= 3.3, < 5.0)
     jekyll-remote-theme (0.5.1)
       addressable (~> 2.0)
       jekyll (>= 3.5, < 5.0)
@@ -176,6 +178,7 @@ DEPENDENCIES
   csv
   jekyll (~> 4.3.3)
   jekyll-default-layout
+  jekyll-relative-links
   jekyll-remote-theme
   jekyll-seo-tag
   just-the-docs
@@ -217,6 +220,7 @@ CHECKSUMS
   jekyll (4.3.4) sha256=c488282c2819c392d34d3a3784eacde2cde4b61c8e3c9c9295f6c01fb1754404
   jekyll-default-layout (0.1.5) sha256=c626be4e4a5deafca123539da2cd22ff873be350cafd4da134039efdf24320af
   jekyll-include-cache (0.2.1) sha256=c7d4b9e551732a27442cb2ce853ba36a2f69c66603694b8c1184c99ab1a1a205
+  jekyll-relative-links (0.7.0) sha256=831e54c348eeae751845c0d4ac4b244bd73b664341f0e8c9f1803b16f4570835
   jekyll-remote-theme (0.5.1) sha256=364a441273f7fb5a009aac0c7e0d9a75b8dd2160b48ebaac16c3bc4086474b0a
   jekyll-sass-converter (3.1.0) sha256=83925d84f1d134410c11d0c6643b0093e82e3a3cf127e90757a85294a3862443
   jekyll-seo-tag (2.9.0) sha256=0260015a8e1df9bf195cdfb0c675b7b2883fd8cbf12556e1c1cbe36a831c6852

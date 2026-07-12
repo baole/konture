@@ -43,6 +43,7 @@ FRONT_MATTER_MAP = {
         "layout": "default",
         "title": "Recipes",
         "has_children": True,
+        "has_toc": False,
         "nav_order": 5,
         "permalink": "/recipes/"
     },
@@ -98,6 +99,7 @@ FRONT_MATTER_MAP = {
         "layout": "default",
         "title": "AI Prompts & Custom Skills",
         "has_children": True,
+        "has_toc": False,
         "nav_order": 4,
         "permalink": "/ai-prompts/"
     },
@@ -118,13 +120,42 @@ FRONT_MATTER_MAP = {
         "title": "Writing & Extending Tests (The 6 Pillars)",
         "parent": "AI Prompts & Custom Skills",
         "nav_order": 3
+    },
+    "articles/README.md": {
+        "layout": "default",
+        "title": "Articles",
+        "has_children": True,
+        "has_toc": False,
+        "nav_order": 5,
+        "permalink": "/articles/"
+    },
+    "articles/kotlin-architecture-tests-what-and-why.md": {
+        "layout": "default",
+        "title": "Kotlin Architecture Tests: What and Why",
+        "parent": "Articles",
+        "nav_order": 1,
+        "permalink": "/articles/kotlin-architecture-tests-what-and-why/"
+    },
+    "articles/kotlin-architecture-tests-why-konture-exists.md": {
+        "layout": "default",
+        "title": "Kotlin Architecture Tests: Why Konture Exists",
+        "parent": "Articles",
+        "nav_order": 2,
+        "permalink": "/articles/kotlin-architecture-tests-why-konture-exists/"
+    },
+    "articles/kotlin-architecture-tests-with-konture.md": {
+        "layout": "default",
+        "title": "Kotlin Architecture Tests with Konture",
+        "parent": "Articles",
+        "nav_order": 3,
+        "permalink": "/articles/kotlin-architecture-tests-with-konture/"
     }
 }
 
 def find_markdown_files(base_dir):
     md_files = []
     for root, _, files in os.walk(base_dir):
-        if any(ignored in root for ignored in [".git", "node_modules"]):
+        if any(ignored in root for ignored in [".git", "node_modules", "_site", ".jekyll-cache"]):
             continue
         for file in files:
             if file.endswith(".md"):
@@ -159,8 +190,12 @@ def convert_files(files):
             for key, val in metadata.items():
                 if isinstance(val, bool):
                     lines.append(f"{key}: {str(val).lower()}")
-                else:
+                elif isinstance(val, int):
                     lines.append(f"{key}: {val}")
+                else:
+                    # Escape double quotes and enclose in double quotes
+                    escaped_val = str(val).replace('"', '\\"')
+                    lines.append(f'{key}: "{escaped_val}"')
             lines.append("---")
             lines.append("") # blank line
 

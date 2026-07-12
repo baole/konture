@@ -53,12 +53,12 @@ An advanced, production-grade backend implementation of the RealWorld (Conduit) 
 *   **Integration Applied**:
     *   Configured Gradle version catalog (`gradle/libs.versions.toml`) with Konture plugins and dependencies.
     *   Applied the `io.github.baole.konture` plugin to the test modules and integrated `mavenLocal()` resolution.
-    *   Implemented [ArchitectureTest.kt](ktor-arrow-example/src/test/kotlin/io/github/nomisrev/ArchitectureTest.kt) asserting:
-        *   **Strict Layer Isolation**: Ensuring the HTTP presentation layer never references DB persistence adapters directly.
-        *   **Schema Non-Leakage**: Guaranteeing routes and public services do not expose raw SQLDelight query descriptors or database tables in their public signatures.
-        *   **Visibility Boundaries**: Demonstrating how to annotate architectural rules as `@Disabled` with detailed commentary when existing project code deliberately violates a design standard (e.g., public persistence classes instead of `internal` ones).
+    *   Implemented separate architecture test classes to group rules by category:
+        *   **[DependencyLeakageArchitectureTest.kt](ktor-arrow-example/konture-test/src/test/kotlin/io/github/nomisrev/DependencyLeakageArchitectureTest.kt)**: Ensures routes and services do not leak raw SQLDelight query descriptors or database tables in their signatures.
+        *   **[LayerIsolationArchitectureTest.kt](ktor-arrow-example/konture-test/src/test/kotlin/io/github/nomisrev/LayerIsolationArchitectureTest.kt)**: Enforces that HTTP presentation routes do not bypass service layer boundaries.
+        *   **[VisibilityArchitectureTest.kt](ktor-arrow-example/konture-test/src/test/kotlin/io/github/nomisrev/VisibilityArchitectureTest.kt)**: Verifies visibility rules (such as persistence adapters remaining internal).
 *   **How to Run**:
     ```bash
     cd showcases/ktor-arrow-example
-    ./gradlew test --tests "io.github.nomisrev.ArchitectureTest"
+    ./gradlew :konture-test:test
     ```

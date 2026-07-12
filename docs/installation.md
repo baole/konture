@@ -91,8 +91,8 @@ dependencies {
     testImplementation("io.github.baole:konture:0.6.6")
     
     // Test runner of your choice (JUnit 5 is shown as a standard example, but Kotest, TestBalloon, JUnit 4/6 work natively too!)
-    testImplementation("org.junit.jupiter:junit-jupiter-api:5.10.0")
-    testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:5.10.0")
+    testImplementation("org.junit.jupiter:junit-jupiter-api:5.11.0")
+    testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:5.11.0")
 }
 
 tasks.test {

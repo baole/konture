@@ -7,6 +7,7 @@ plugins:
   - jekyll-seo-tag
   - jekyll-default-layout
   - jekyll-remote-theme
+  - jekyll-relative-links
 keep_files: [kdoc] # Preserve pre-compiled Dokka HTML folders
 exclude: [kdoc] # Avoid processing pre-compiled Dokka HTML pages
 

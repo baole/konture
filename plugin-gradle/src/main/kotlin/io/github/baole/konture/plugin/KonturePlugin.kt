@@ -412,7 +412,23 @@ class KonturePlugin : Plugin<Project> {
                     }
                 }
             }
-            list
+            val buildDir = try {
+                sub.layout.buildDirectory.get().asFile.canonicalFile
+            } catch (e: Exception) {
+                null
+            }
+            if (buildDir != null) {
+                list.filter { dir ->
+                    try {
+                        val canonicalDir = dir.canonicalFile
+                        !canonicalDir.startsWith(buildDir)
+                    } catch (e: Exception) {
+                        true
+                    }
+                }
+            } else {
+                list
+            }
         }
 
     private fun setupConsumerLayout(project: Project) {

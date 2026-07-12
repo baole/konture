@@ -12,19 +12,20 @@ permalink: /
 
 Unlike traditional tools that rely on fragile file-path convention strings or slow, reflection-based runtime classpath scanning, Konture utilizes AST-level PSI parser analysis of `.kt` source files. This ensures your assertions run with 0% classloading or framework startup overhead.
 
----
+```mermaid
+graph TD
+    app[":app"] --> checkout[":feature:checkout"]
+    app --> profile[":feature:profile"]
+    checkout --> core[":core:network"]
+    profile --> core
+    checkout -.->|"PROHIBITED: Sideways Dependency"| profile
 
-## Why Konture?
-
-| Feature | Konture | ArchUnit (via JVM Reflection) | Traditional Linters |
-| :--- | :--- | :--- | :--- |
-| **Parsing Engine** | High-performance AST-level Kotlin PSI parser | Full JVM Reflection & Classloader scanning | Simple Regex or file-path globs |
-| **Dependency Knowledge** | Reads exact Gradle module dependency boundaries | Blind to Gradle modules & multi-project layouts | Blind to build dependency structures |
-| **Framework Startup** | **No startup cost**. Runs as lightweight JVM unit tests | Often requires DI/spring container mock setup | No runtime test integration |
-| **Kotlin Multiplatform** | Natively understands `commonMain`/`androidMain`/`iosMain` | JVM/Java targets only (blind to native/iOS/JS sources) | Limited platform context |
-| **Test Frameworks** | **Fully Agnostic** ([JUnit 4](https://junit.org/junit4/)/[5](https://junit.org/junit5/)/[6](https://junit.org/), [Kotest](https://kotest.io/), [TestBalloon](https://github.com/infix-de/testBalloon), or any other runner; the choice does not matter) | Primarily JUnit-centric runner extensions | No runtime test integration |
-| **Architecture Agnostic** | **100% Agnostic** (Fully supports any design: Clean, Layered, MVVM, Hexagonal, DDD, etc.) | Often assumes specific package topologies | Blind to structural design constructs |
-| **Execution Speed** | **Sub-second** (only parses source ASTs in-memory) | Several seconds to minutes (due to heavy reflection) | Variable, typically run as slow pre-push checks |
+    style app fill:#f1f5f9,stroke:#94a3b8,stroke-width:2px
+    style checkout fill:#e0f2fe,stroke:#0284c7,stroke-width:2px
+    style profile fill:#e0f2fe,stroke:#0284c7,stroke-width:2px
+    style core fill:#ecfdf5,stroke:#10b981,stroke-width:2px
+    linkStyle 4 stroke:#ef4444,stroke-width:2px,stroke-dasharray: 5 5;
+```
 
 ---
 
@@ -44,6 +45,20 @@ Verify architectural boundaries on multiplatform structures natively. Query and 
 
 ### 🧪 Test Framework Agnostic
 Konture is designed from the ground up to be independent of any test framework or execution runner. Whether your teams are standardizing on **[JUnit 4](https://junit.org/junit4/)**, **[JUnit 5](https://junit.org/junit5/)**, **[JUnit 6](https://junit.org/)**, or using expressive Kotlin native frameworks like **[Kotest](https://kotest.io/)** or **[TestBalloon](https://github.com/infix-de/testBalloon)**, you can declare and run your Konture guards seamlessly inside **absolutely any test runner**. Since Konture runs as standard, pure Kotlin JVM code, the choice of test runner simply does not matter.
+
+---
+
+## Why Konture?
+
+| Feature | Konture | Konsist | ArchUnit (via JVM Reflection) | Traditional Linters |
+| :--- | :--- | :--- | :--- | :--- |
+| **Parsing Engine** | High-performance AST-level Kotlin PSI parser | High-performance AST-level Kotlin PSI parser | Full JVM Reflection & Classloader scanning | Simple Regex or file-path globs |
+| **Dependency Knowledge** | **Full Gradle Graph Awareness** (reads exact physical module boundaries & dependency targets) | **No Gradle Graph Context** (blind to physical module boundaries; relies purely on package imports) | **No Gradle Graph Context** (blind to Gradle modules & multi-project layouts; scans classpath only) | Blind to build dependency structures |
+| **Framework Startup** | **No startup cost**. Runs as plain, lightweight JVM unit tests | **No startup cost**. Runs as plain, lightweight JVM unit tests | Often requires DI/spring container mock setup | No runtime test integration |
+| **Kotlin Multiplatform (KMP)** | Natively understands Gradle source-sets (`commonMain`/`androidMain`/`iosMain`) and variant dependencies | Natively understands Kotlin, but blind to physical Gradle source-set layouts or variant configurations | JVM/Java targets only (blind to native/iOS/JS sources) | Limited platform context |
+| **Test Frameworks** | **Fully Agnostic** ([JUnit 4](https://junit.org/junit4/)/[5](https://junit.org/junit5/)/[6](https://junit.org/), [Kotest](https://kotest.io/), [TestBalloon](https://github.com/infix-de/testBalloon), or any other runner; the choice does not matter) | Supports JUnit/Kotest assertion wrappers | Primarily JUnit-centric runner extensions | No runtime test integration |
+| **Architecture Agnostic** | **100% Agnostic** (Fully supports any design: Clean, Layered, MVVM, Hexagonal, DDD, etc.) | **100% Agnostic** (Enforces any custom rules) | Often assumes specific package topologies | Blind to structural design constructs |
+| **Execution Speed** | **Sub-second** (parses source ASTs in-memory, leveraging pre-extracted Gradle graphs) | **Sub-second** (parses source ASTs in-memory) | Several seconds to minutes (due to heavy reflection & class loading overhead) | Variable, typically run as slow pre-push checks |
 
 ---
 

@@ -71,12 +71,13 @@ Always use these exact API signatures. Do not hallucinate classes, fields, or fu
 You can declare multiple rules together in a single block using `Konture.architecture { ... }`.
 All declared suites (modules, classes, files, etc.) are executed even when earlier suites fail; violations are aggregated in a single report.
 ```kotlin
-import io.github.baole.konture.architecture
+import io.github.baole.konture.*
 
 Konture.architecture {
     // Declares a suite of module rules
     modules {
-        all { ... }
+        that().haveNamePath(":core:domain")
+        should().notDependOnModule(":core:data")
     }
     // Declares a suite of class rules
     classes {
@@ -89,7 +90,7 @@ Konture.architecture {
 ### 2. High-Level Layered Architecture DSL
 Use `Konture.layered { ... }` to model and restrict directional dependencies across logical layers.
 ```kotlin
-import io.github.baole.konture.layered
+import io.github.baole.konture.*
 
 Konture.layered {
     val presentation = layer("presentation") definedBy "..presentation.."
@@ -103,7 +104,7 @@ Konture.layered {
         mayOnlyAccessLayers(domain)
     }
     where(domain) {
-        mayNotBeAccessedByAnyLayer()
+        mayOnlyAccessLayers()
     }
 }
 ```
@@ -114,7 +115,7 @@ Use `Konture.modules()` to verify build-graph relationships between Gradle/Maven
 *   **Assertions (should):** `onlyDependOnModules(vararg paths)`, `notDependOnModule(path)`
 *   Module paths may be written with or without a leading `:` in both `that` and `should`; Konture normalizes them consistently.
 ```kotlin
-import io.github.baole.konture.modules
+import io.github.baole.konture.*
 
 // Traditional declarative style
 Konture.modules()
@@ -129,7 +130,7 @@ Use `Konture.classes()` to assert properties, visibility, and dependencies of Ko
 *   **Assertions (should):** `beInterfaces()`, `beInternal()`, `bePublic()`, `notHaveSignaturesWithTypesAnnotatedWith(annotation)`, `notDependOnClassesInAnyPackage(vararg pkgs)`, `onlyDependOnClassesInAnyPackage(vararg pkgs)`, `onlyBeAccessedByAnyPackage(vararg pkgs)`
 *   **Fluent Style (v0.6.1+):** You can use lambda-based blocks for ultra-flexible assertions.
 ```kotlin
-import io.github.baole.konture.classes
+import io.github.baole.konture.*
 
 // Traditional Declarative Style
 Konture.classes()
@@ -153,7 +154,7 @@ Konture.classes()
 
 ### 5. Simple Cycle Prevention
 ```kotlin
-import io.github.baole.konture.assertNoCycles
+import io.github.baole.konture.*
 
 Konture.assertNoCycles()
 ```

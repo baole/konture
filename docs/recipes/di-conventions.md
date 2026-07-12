@@ -47,7 +47,7 @@ class KoinStaticConventionTest {
     @Test
     fun `koin module configurations must be internal and kept in di packages`() {
         Konture.classes {
-            that().haveNameMatching("..di..")
+            that().resideInAPackage("..di..")
                 .should().beInternal()
         }
     }
@@ -66,7 +66,7 @@ class SpringConfigurationSanityTest {
 
     @Test
     fun `spring configuration annotations must not exist inside pure domain layers`() {
-        Konture.scope.classes()
+        Konture.scope.classes
             .withPackage("..domain..")
             .assertTrue("Domain classes must not declare Spring configuration") { cls ->
                 cls.annotations.none { ann -> 

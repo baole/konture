@@ -160,10 +160,12 @@ subprojects {
             val signingKey = providers.gradleProperty("signingKey").orNull ?: System.getenv("GPG_SIGNING_KEY")
             val signingPassword =
                 providers.gradleProperty("signingPassword").orNull ?: System.getenv("GPG_SIGNING_PASSWORD")
-            isRequired = false
             val isRelease = providers.gradleProperty("releaseBuild").orNull?.toBoolean() ?: false
-            if (isRelease && !signingKey.isNullOrEmpty() && !signingPassword.isNullOrEmpty()) {
-                useInMemoryPgpKeys(signingKey, signingPassword)
+            isRequired = isRelease
+            if (isRelease) {
+                if (!signingKey.isNullOrEmpty() && !signingPassword.isNullOrEmpty()) {
+                    useInMemoryPgpKeys(signingKey, signingPassword)
+                }
                 sign(extensions.getByType<PublishingExtension>().publications)
             }
         }
