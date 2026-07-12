@@ -1,0 +1,40 @@
+# Gradle
+.gradle/
+**/.gradle/
+build/
+**/build/
+**/target/
+
+# Kotlin
+.kotlin/
+**/.kotlin/
+
+# IntelliJ IDEA
+.idea/
+*.iml
+*.ipr
+*.iws
+out/
+
+# Local configuration
+local.properties
+*.asc
+
+# Log files
+*.log
+
+# OS generated files
+.DS_Store
+Thumbs.db
+.artifacts
+private
+
+# Jekyll
+docs/_site/
+docs/.jekyll-cache/
+_site/
+.jekyll-cache/
+.docs_temp/
+
+# Dokka API Docs
+docs/kdoc/

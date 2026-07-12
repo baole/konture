@@ -1,0 +1,12 @@
+---
+---
+{% include css/just-the-docs.scss.liquid color_scheme="dark" %}
+
+html {
+  font-size: calc(100% + 1px) !important;
+}
+
+body {
+  font-size: 1rem !important;
+}
+

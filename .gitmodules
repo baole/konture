@@ -1,0 +1,9 @@
+[submodule "showcases/nowinandroid"]
+	path = showcases/nowinandroid
+	url = https://github.com/baole/nowinandroid.git
+[submodule "showcases/kotlinconf-app"]
+	path = showcases/kotlinconf-app
+	url = https://github.com/baole/kotlinconf-app.git
+[submodule "showcases/ktor-arrow-example"]
+	path = showcases/ktor-arrow-example
+	url = https://github.com/baole/ktor-arrow-example.git

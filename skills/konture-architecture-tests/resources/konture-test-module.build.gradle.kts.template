@@ -1,0 +1,31 @@
+// Template for a dedicated Konture architecture-test module's build.gradle.kts.
+// Copy into e.g. :konture-test/build.gradle.kts and adjust:
+//   - the version catalog alias (or literal coordinates, if no catalog exists)
+//   - the list of project(":...") dependencies to match the real modules
+//     that the architecture rules need whole-graph visibility into
+
+plugins {
+    kotlin("jvm")
+}
+
+dependencies {
+    // Konture itself — confirm the alias/coordinates against
+    // gradle/libs.versions.toml or Maven Central for the latest version.
+    testImplementation(libs.konture)
+
+    // JUnit 5 — swap for the project's actual test runner if it standardizes
+    // on JUnit 4 or Kotest instead.
+    testImplementation(libs.junit.jupiter.api)
+    testRuntimeOnly(libs.junit.jupiter.engine)
+
+    // Forces every module an architecture rule needs to inspect to compile
+    // first. Replace with the REAL module paths found in settings.gradle.kts —
+    // never leave placeholder names here.
+    testImplementation(project(":core:domain"))
+    testImplementation(project(":core:data"))
+    testImplementation(project(":feature:example"))
+}
+
+tasks.test {
+    useJUnitPlatform()
+}

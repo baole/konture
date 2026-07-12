@@ -1,0 +1,16 @@
+# Example: separate GitHub Actions job for Konture architecture tests
+# (Option B from references/ci-integration.md). Adjust triggers, runner image,
+# JDK version, and Gradle invocation to match the project's existing workflow
+# conventions — this is illustrative, not a drop-in replacement for an
+# existing pipeline.
+
+architecture-tests:
+  runs-on: ubuntu-latest
+  steps:
+    - uses: actions/checkout@v4
+    - uses: actions/setup-java@v4
+      with:
+        distribution: temurin
+        java-version: "17"
+    - name: Run Konture architecture guardrails
+      run: ./gradlew :konture-test:test

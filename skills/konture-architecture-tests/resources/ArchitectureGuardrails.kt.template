@@ -1,0 +1,35 @@
+// Template starter file for the dedicated architecture-test module.
+// Copy into e.g. :konture-test/src/test/kotlin/ArchitectureGuardrails.kt
+// and replace every module/package name with the real ones found in this
+// project — see references/dsl_verification.md before trusting any method
+// name here against the resolved Konture version.
+
+import io.github.baole.konture.dsl.architecture
+import org.junit.jupiter.api.Test
+
+class ArchitectureGuardrails {
+
+    // Foundational Pillar 1 — Dependency Direction & Layer Isolation
+    @Test
+    fun `domain layer should be completely isolated from data and UI layers`() {
+        architecture {
+            modules {
+                that().haveNamePath(":core:domain")
+                should().notDependOnModule(":core:data")
+                andShould().notDependOnModule(":feature:checkout")
+            }
+        }
+    }
+
+    // Foundational Pillar 6 — API Surface & Visibility Enforcement
+    // Uncomment and adjust once the real `impl` package convention is confirmed.
+    // @Test
+    // fun `classes inside impl packages must be internal`() {
+    //     architecture {
+    //         classes {
+    //             that().resideInAPackage("..impl..")
+    //             should().beInternal()
+    //         }
+    //     }
+    // }
+}

@@ -1,0 +1,6 @@
+<div style="display: flex; align-items: center; gap: 10px;">
+  {% if site.logo %}
+    <img src="{{ site.logo | relative_url }}" alt="{{ site.title }} Logo" style="height: 36px; width: auto; display: block; border-radius: 6px;">
+  {% endif %}
+  <span style="font-size: 1.35rem; font-weight: 700; letter-spacing: -0.025em; color: inherit;">{{ site.title }}</span>
+</div>

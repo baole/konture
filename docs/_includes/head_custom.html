@@ -1,0 +1,35 @@
+<link rel="icon" type="image/png" href="{{ '/assets/images/logo.png' | relative_url }}">
+<script>
+  (function() {
+    const theme = localStorage.getItem('theme') || 
+                  (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+    
+    // Find and update the main JTD stylesheet link to load either dark or light
+    function applyTheme(targetTheme) {
+      const links = document.querySelectorAll('link[rel="stylesheet"]');
+      for (let link of links) {
+        if (link.href.includes('just-the-docs') || link.href.includes('default.css') || link.href.includes('light.css') || link.href.includes('dark.css')) {
+          const url = new URL(link.href, window.location.href);
+          const dir = url.pathname.substring(0, url.pathname.lastIndexOf('/') + 1);
+          link.href = dir + 'just-the-docs-' + targetTheme + '.css';
+          break;
+        }
+      }
+    }
+
+    // Apply immediately in head (minimizes visual layout flash)
+    applyTheme(theme);
+
+    // Also register a DOM load event listener in case stylesheets are parsed later
+    document.addEventListener('DOMContentLoaded', () => {
+      applyTheme(theme);
+    });
+
+    // Listen to OS-level dark/light mode preference changes in real time
+    window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', e => {
+      if (!localStorage.getItem('theme')) {
+        applyTheme(e.matches ? 'dark' : 'light');
+      }
+    });
+  })();
+</script>

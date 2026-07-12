@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>io.github.baole.konture.sample</groupId>
+        <artifactId>sample-maven</artifactId>
+        <version>1.0.0</version>
+        <relativePath>../pom.xml</relativePath>
+    </parent>
+
+    <artifactId>konture-test</artifactId>
+
+    <dependencies>
+        <!-- Project Modules under test -->
+        <dependency>
+            <groupId>io.github.baole.konture.sample</groupId>
+            <artifactId>domain</artifactId>
+            <version>${project.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>io.github.baole.konture.sample</groupId>
+            <artifactId>data</artifactId>
+            <version>${project.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>io.github.baole.konture.sample</groupId>
+            <artifactId>app</artifactId>
+            <version>${project.version}</version>
+            <scope>test</scope>
+        </dependency>
+
+        <!-- Konture Runtime library -->
+        <dependency>
+            <groupId>io.github.baole</groupId>
+            <artifactId>konture</artifactId>
+            <version>${konture.version}</version>
+            <scope>test</scope>
+        </dependency>
+
+        <!-- Kotlin and Testing dependencies -->
+        <dependency>
+            <groupId>org.jetbrains.kotlin</groupId>
+            <artifactId>kotlin-stdlib</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter-api</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter-engine</artifactId>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <testSourceDirectory>src/test/kotlin</testSourceDirectory>
+        <plugins>
+            <!-- Kotlin compiler for test sources -->
+            <plugin>
+                <groupId>org.jetbrains.kotlin</groupId>
+                <artifactId>kotlin-maven-plugin</artifactId>
+            </plugin>
+
+            <!-- Konture Maven Plugin for generating architecture graph contracts -->
+            <plugin>
+                <groupId>io.github.baole.konture</groupId>
+                <artifactId>konture-maven-plugin</artifactId>
+                <version>${konture.version}</version>
+                <executions>
+                    <execution>
+                        <phase>process-test-resources</phase>
+                        <goals>
+                            <goal>generate-layout</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <configuration>
+                    <excludePackages>
+                        <package>io.github.baole.konture.sample.domain.exclude..</package>
+                    </excludePackages>
+                    <excludeClasses>
+                        <class>ExcludedService</class>
+                    </excludeClasses>
+                </configuration>
+            </plugin>
+
+            <!-- Surefire Plugin for running tests -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+            </plugin>
+        </plugins>
+    </build>
+</project>
