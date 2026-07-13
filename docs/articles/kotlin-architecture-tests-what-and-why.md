@@ -1,10 +1,3 @@
----
-layout: "default"
-title: "Kotlin Architecture Tests: What and Why"
-parent: "Articles"
-nav_order: 1
-permalink: "/articles/kotlin-architecture-tests-what-and-why/"
----
 # Kotlin Architecture Tests: What They Are and Why They Matter
 
 _Your Kotlin project can compile, pass every unit test, satisfy every linter, and still violate the architecture your team depends on, especially when humans and AI agents are both moving fast._

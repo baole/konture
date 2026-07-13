@@ -47,21 +47,23 @@ When applied to the root project, the plugin automatically registers a task name
 
 ### Step 2: Configure repositories in `settings.gradle.kts`
 
-If you are trying out locally compiled versions of Konture (e.g., during development or contributing), ensure `mavenLocal()` is enabled at the top of your repository configurations:
+The Konture Gradle plugin is published to the [Gradle Plugin Portal](https://plugins.gradle.org/plugin/io.github.baole.konture), and the assertion library is published to [Maven Central](https://central.sonatype.com/artifact/io.github.baole/konture).
+
+Ensure that `gradlePluginPortal()` and `mavenCentral()` are declared in your repository configurations. If you are also trying out locally compiled versions during development or contributing, you can additionally include `mavenLocal()`:
 
 ```kotlin
 pluginManagement {
     repositories {
-        mavenLocal()
-        mavenCentral()
         gradlePluginPortal()
+        mavenCentral()
+        mavenLocal() // Only needed if testing local builds!
     }
 }
 
 dependencyResolutionManagement {
     repositories {
-        mavenLocal()
         mavenCentral()
+        mavenLocal() // Only needed if testing local builds!
     }
 }
 

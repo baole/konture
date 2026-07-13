@@ -1,10 +1,3 @@
----
-layout: "default"
-title: "Kotlin Architecture Tests with Konture"
-parent: "Articles"
-nav_order: 3
-permalink: "/articles/kotlin-architecture-tests-with-konture/"
----
 # Kotlin Architecture Tests with Konture: A Practical Guide
 
 _Set up a dedicated architecture-test module, add Konture, and write guardrails that protect module boundaries, layer isolation, conventions, and public API shape._

@@ -412,11 +412,12 @@ class KonturePlugin : Plugin<Project> {
                     }
                 }
             }
-            val buildDir = try {
-                sub.layout.buildDirectory.get().asFile.canonicalFile
-            } catch (e: Exception) {
-                null
-            }
+            val buildDir =
+                try {
+                    sub.layout.buildDirectory.get().asFile.canonicalFile
+                } catch (e: Exception) {
+                    null
+                }
             if (buildDir != null) {
                 list.filter { dir ->
                     try {

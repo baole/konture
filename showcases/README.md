@@ -52,7 +52,7 @@ An advanced, production-grade backend implementation of the RealWorld (Conduit) 
 
 *   **Integration Applied**:
     *   Configured Gradle version catalog (`gradle/libs.versions.toml`) with Konture plugins and dependencies.
-    *   Applied the `io.github.baole.konture` plugin to the test modules and integrated `mavenLocal()` resolution.
+    *   Applied the `io.github.baole.konture` plugin to the test modules and integrated resolution via Maven Central and Gradle Plugin Portal (with optional `mavenLocal()` fallback for local development).
     *   Implemented separate architecture test classes to group rules by category:
         *   **[DependencyLeakageArchitectureTest.kt](ktor-arrow-example/konture-test/src/test/kotlin/io/github/nomisrev/DependencyLeakageArchitectureTest.kt)**: Ensures routes and services do not leak raw SQLDelight query descriptors or database tables in their signatures.
         *   **[LayerIsolationArchitectureTest.kt](ktor-arrow-example/konture-test/src/test/kotlin/io/github/nomisrev/LayerIsolationArchitectureTest.kt)**: Enforces that HTTP presentation routes do not bypass service layer boundaries.

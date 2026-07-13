@@ -1,10 +1,3 @@
----
-layout: "default"
-title: "Kotlin Architecture Tests: Why Konture Exists"
-parent: "Articles"
-nav_order: 2
-permalink: "/articles/kotlin-architecture-tests-why-konture-exists/"
----
 # Kotlin Architecture Tests: Why Konture Exists
 
 _Kotlin architecture rules often live in two worlds at once: the Gradle module graph and the Kotlin source tree. Konture was built to test both._
