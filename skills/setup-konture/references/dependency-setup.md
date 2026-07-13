@@ -64,8 +64,4 @@ dependencies {
 
 ## Checking the latest version
 
-Search Maven Central (`io.github.baole` group) or the Gradle Plugin Portal
-(`io.github.baole.konture`) rather than trusting a hardcoded version in any
-doc, including this one. Report the version found to the user before locking
-it in, since Konture is a young, actively developed library and versions may
-carry breaking changes between releases.
+Search [Maven Central](https://central.sonatype.com/artifact/io.github.baole/konture) (`io.github.baole` group) or the [Gradle Plugin Portal](https://plugins.gradle.org/plugin/io.github.baole.konture) (`io.github.baole.konture`) rather than trusting a hardcoded version in any doc, including this one. Report the version found to the user before locking it in, since Konture is a young, actively developed library and versions may carry breaking changes between releases.

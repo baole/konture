@@ -28,8 +28,7 @@ doesn't match what's described:
    logical layers (e.g. `core:domain`, `core:data`, `feature:*`, `app`) so later 
    guardrails reference real module paths, not placeholders.
 3. Check the latest Konture version by looking at the plugin/library coordinates 
-   `io.github.baole.konture` and `io.github.baole:konture` on Maven Central / Gradle 
-   Plugin Portal — do not assume the version in the README is current.
+   `io.github.baole.konture` and `io.github.baole:konture` on [Maven Central](https://central.sonatype.com/artifact/io.github.baole/konture) / [Gradle Plugin Portal](https://plugins.gradle.org/plugin/io.github.baole.konture) — do not assume the version in the README is current.
 
 ## Phase 2 — Install Konture
 If the project uses a version catalog (`gradle/libs.versions.toml`), add:

@@ -1,12 +1,9 @@
----
-layout: default
-title: Overview
-nav_order: 1
-permalink: /
----
+
 # <img src="{{ '/assets/images/logo.png' | relative_url }}" width="48" style="vertical-align: middle; margin-right: 12px;" alt="Konture Logo">Konture
 
 > **Define, enforce, and automate architecture rules run as fast Kotlin unit tests against your actual Gradle build graph.**
+>
+> <a href="https://plugins.gradle.org/plugin/io.github.baole.konture"><img src="https://img.shields.io/badge/gradle%20plugin-portal-blue?style=flat-square&logo=gradle" alt="Gradle Plugin Portal"></a> <a href="https://central.sonatype.com/artifact/io.github.baole/konture"><img src="https://img.shields.io/maven-central/v/io.github.baole/konture?style=flat-square&logo=apache-maven" alt="Maven Central"></a>
 
 **Konture** is a modern, lightweight, and compile-time-efficient architecture-testing tool written natively in and for Kotlin. It bridges the gap between high-level build configurations and source-level code constraints by combining an applied **Gradle Plugin** (which extracts accurate project modules, dependencies, and target variant structures) with a declarative, fluent **Assertion Library**.
 

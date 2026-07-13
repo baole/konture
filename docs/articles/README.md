@@ -1,11 +1,3 @@
----
-layout: "default"
-title: "Articles"
-has_children: true
-has_toc: false
-nav_order: 5
-permalink: "/articles/"
----
 # Articles
 
 Long-form articles introducing Kotlin architecture testing and Konture.

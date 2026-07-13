@@ -48,7 +48,7 @@ class ProjectGraphLoaderTest {
     @Test
     fun `test settings gradle lookup fallback to user dir`() {
         val originalUserDir = System.getProperty("user.dir")
-        val uniqueTempUserDir = File("/private/tmp/konture-test-${System.currentTimeMillis()}")
+        val uniqueTempUserDir = File(tempDir, "fallback-user-dir-${System.currentTimeMillis()}")
         assertTrue(uniqueTempUserDir.mkdirs())
 
         try {

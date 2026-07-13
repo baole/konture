@@ -108,6 +108,7 @@ FILES_TO_BUMP=(
     "CONTRIBUTING.md"
     "docs/contributing.md"
     "docs/installation.md"
+    "plugin-maven/pom.xml"
 )
 
 # Backup files for rollback safety
@@ -159,6 +160,9 @@ perl -pi -e "s/version = \"\Q$OLD_VERSION\E\"/version = \"$NEW_VERSION\"/g" buil
 
 # 8. Update Gradle Plugin subproject version
 perl -pi -e "s/version = \"\Q$OLD_VERSION\E\"/version = \"$NEW_VERSION\"/g" plugin-gradle/build.gradle.kts
+
+# 8b. Update Maven Plugin and its konture-core dependency version
+perl -pi -e "s/<version>\Q$OLD_VERSION\E<\/version>/<version>$NEW_VERSION<\/version>/g" plugin-maven/pom.xml
 
 # 9. Commit and push changes inside submodules if they have dirty changes
 echo -e "\n${BLUE}[3/3] Committing and pushing version bumps in git submodules...${NC}"
