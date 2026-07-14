@@ -87,7 +87,7 @@ Konture requires applying a Gradle plugin to compile your project's build graph,
 #### Step 1: Declare inside `gradle/libs.versions.toml`
 ```toml
 [versions]
-konture = "0.6.7"
+konture = "0.6.8"
 
 [plugins]
 konture = { id = "io.github.baole.konture", version.ref = "konture" }
@@ -117,14 +117,14 @@ dependencies {
 #### Step 1: Apply the plugin in your root `build.gradle.kts`
 ```kotlin
 plugins {
-    id("io.github.baole.konture") version "0.6.7" apply true
+    id("io.github.baole.konture") version "0.6.8" apply true
 }
 ```
 
 #### Step 2: Add the dependency in your test module's `build.gradle.kts`
 ```kotlin
 dependencies {
-    testImplementation("io.github.baole:konture:0.6.7")
+    testImplementation("io.github.baole:konture:0.6.8")
 }
 ```
 
@@ -149,7 +149,7 @@ plugins {
 
 dependencies {
     // 🧬 Pull in the premium Konture assertion engine
-    testImplementation("io.github.baole:konture:0.6.7")
+    testImplementation("io.github.baole:konture:0.6.8")
 
     // 🧪 Test runners (JUnit 5 is used here as a standard example, but any framework works!)
     testImplementation("org.junit.jupiter:junit-jupiter-api:5.11.0")

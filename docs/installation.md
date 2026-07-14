@@ -37,7 +37,7 @@ Apply the Konture plugin to your **root project's `build.gradle.kts`**:
 
 ```kotlin
 plugins {
-    id("io.github.baole.konture") version "0.6.7"
+    id("io.github.baole.konture") version "0.6.8"
 }
 ```
 
@@ -90,7 +90,7 @@ repositories {
 
 dependencies {
     // The unified assertion library containing all assertion builders and styles
-    testImplementation("io.github.baole:konture:0.6.7")
+    testImplementation("io.github.baole:konture:0.6.8")
     
     // Test runner of your choice (JUnit 5 is shown as a standard example, but Kotest, TestBalloon, JUnit 4/6 work natively too!)
     testImplementation("org.junit.jupiter:junit-jupiter-api:5.11.0")

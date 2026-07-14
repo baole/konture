@@ -8,7 +8,7 @@ plugins {
 description = "Gradle configuration-time capture agent for Konture"
 
 group = "io.github.baole.konture"
-version = "0.6.7"
+version = "0.6.8"
 
 gradlePlugin {
     website.set("https://baole.github.io/konture")

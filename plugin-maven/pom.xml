@@ -6,12 +6,34 @@
 
     <groupId>io.github.baole.konture</groupId>
     <artifactId>konture-maven-plugin</artifactId>
-    <version>0.6.7</version>
+    <version>0.6.8</version>
     <packaging>maven-plugin</packaging>
 
     <name>Konture Maven Plugin</name>
     <description>Maven plugin for generating project architecture layouts for Konture</description>
     <url>https://baole.github.io/konture</url>
+
+    <licenses>
+        <license>
+            <name>The Apache License, Version 2.0</name>
+            <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+            <distribution>repo</distribution>
+        </license>
+    </licenses>
+
+    <developers>
+        <developer>
+            <id>baole</id>
+            <name>Bao Le Duc</name>
+            <email>leducbao@gmail.com</email>
+        </developer>
+    </developers>
+
+    <scm>
+        <connection>scm:git:git://github.com/baole/konture.git</connection>
+        <developerConnection>scm:git:ssh://github.com/baole/konture.git</developerConnection>
+        <url>https://github.com/baole/konture</url>
+    </scm>
 
     <prerequisites>
         <maven>3.6.3</maven>
@@ -32,7 +54,7 @@
         <dependency>
             <groupId>io.github.baole</groupId>
             <artifactId>konture-core</artifactId>
-            <version>0.6.7</version>
+            <version>0.6.8</version>
         </dependency>
 
         <!-- Kotlin and Serialization -->
@@ -127,6 +149,13 @@
             </plugin>
         </plugins>
     </build>
+
+    <distributionManagement>
+        <repository>
+            <id>ossrh</id>
+            <url>https://ossrh-staging-api.central.sonatype.com/service/local/staging/deploy/maven2/</url>
+        </repository>
+    </distributionManagement>
 
     <profiles>
         <profile>

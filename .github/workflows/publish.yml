@@ -9,6 +9,9 @@ on:
 permissions:
   contents: read
 
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
 jobs:
   publish-gradle:
     name: Publish Gradle Libraries & Plugin
@@ -24,9 +27,9 @@ jobs:
           java-version: '21'
 
       - name: Setup Gradle
-        uses: gradle/actions/setup-gradle@v3
+        uses: gradle/actions/setup-gradle@v4
         with:
-          gradle-home-cache-cleanup: true
+          cache-cleanup: on-success
 
       - name: Import GPG Key
         run: |
@@ -45,6 +48,15 @@ jobs:
             -PsigningKey="$GPG_SIGNING_KEY" \
             -PsigningPassword="$GPG_SIGNING_PASSWORD"
 
+      - name: Finalize Maven Central Deployment
+        env:
+          MAVEN_CENTRAL_USERNAME: ${{ secrets.MAVEN_CENTRAL_USERNAME }}
+          MAVEN_CENTRAL_PASSWORD: ${{ secrets.MAVEN_CENTRAL_PASSWORD }}
+        run: |
+          curl -i -X POST \
+            -u "$MAVEN_CENTRAL_USERNAME:$MAVEN_CENTRAL_PASSWORD" \
+            "https://ossrh-staging-api.central.sonatype.com/manual/upload/defaultRepository/io.github.baole"
+
       - name: Publish Plugin to Gradle Plugin Portal
         env:
           GRADLE_PUBLISH_KEY: ${{ secrets.GRADLE_PUBLISH_KEY }}
@@ -54,6 +66,7 @@ jobs:
 
   publish-maven:
     name: Publish Maven Plugin
+    needs: publish-gradle
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Code
@@ -70,6 +83,12 @@ jobs:
           gpg-private-key: ${{ secrets.GPG_SIGNING_KEY }}
           gpg-passphrase: MAVEN_GPG_PASSPHRASE
 
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v4
+
+      - name: Publish Core to Maven Local
+        run: ./gradlew publishToMavenLocal
+
       - name: Build and Deploy Maven Plugin
         working-directory: plugin-maven
         env:
@@ -79,3 +98,13 @@ jobs:
         run: |
           # Deploy with GPG signing activated in the release profile
           mvn clean deploy -P release -Dgpg.passphrase="$MAVEN_GPG_PASSPHRASE"
+
+      - name: Finalize Maven Central Deployment
+        env:
+          MAVEN_CENTRAL_USERNAME: ${{ secrets.MAVEN_CENTRAL_USERNAME }}
+          MAVEN_CENTRAL_PASSWORD: ${{ secrets.MAVEN_CENTRAL_PASSWORD }}
+        run: |
+          curl -i -X POST \
+            -u "$MAVEN_CENTRAL_USERNAME:$MAVEN_CENTRAL_PASSWORD" \
+            "https://ossrh-staging-api.central.sonatype.com/manual/upload/defaultRepository/io.github.baole.konture"
+

@@ -5,7 +5,7 @@ plugins {
 
 
 dependencies {
-    testImplementation("io.github.baole:konture:0.6.7")
+    testImplementation("io.github.baole:konture:0.6.8")
     
     testImplementation("org.junit.jupiter:junit-jupiter:5.11.0")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")

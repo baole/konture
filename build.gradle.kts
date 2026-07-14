@@ -5,7 +5,7 @@ buildscript {
     }
     dependencies {
         if (System.getProperty("archTest") != null) {
-            classpath("io.github.baole.konture:plugin-gradle:0.6.7")
+            classpath("io.github.baole.konture:plugin-gradle:0.6.8")
         }
     }
 }
@@ -25,7 +25,7 @@ if (System.getProperty("archTest") != null) {
 
 allprojects {
     group = "io.github.baole.konture"
-    version = "0.6.7"
+    version = "0.6.8"
 
     repositories {
         mavenLocal()

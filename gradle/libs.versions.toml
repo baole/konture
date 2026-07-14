@@ -7,7 +7,7 @@ dokka = "1.9.20"
 detekt = "1.23.8"
 ktlint = "12.1.1"
 gradle-publish = "2.1.1"
-konture = "0.6.7"
+konture = "0.6.8"
 
 [libraries]
 kotlin-compiler-embeddable = { module = "org.jetbrains.kotlin:kotlin-compiler-embeddable", version.ref = "kotlin" }
