@@ -1,20 +1,16 @@
 # Kotlin Architecture Tests: What They Are and Why They Matter
 
-_Your Kotlin project can compile, pass every unit test, satisfy every linter, and still violate the architecture your team depends on, especially when humans and AI agents are both moving fast._
+_A Kotlin project can compile, pass its unit tests, satisfy its linter, and still become structurally harder to change. Architecture tests exist for that gap._
 
 ![Architecture tests as an early quality gate](../assets/images/architecture-tests-quality-gate.svg)
 
-Most teams already have several quality gates.
+Most verification tools answer local questions.
 
-The compiler checks whether the code is valid Kotlin. The linter checks style and local code smells. Unit tests check expected behavior.
+The compiler asks whether the code is valid Kotlin. A linter asks whether a file follows local style and quality rules. Unit tests ask whether a function or component behaves as expected.
 
-Architecture tests add a different gate:
+Those checks are necessary. They are not the same as asking whether the system still has the shape the team depends on.
 
-> Does this change still respect the structure of the system?
-
-That question matters because architecture violations often look like normal code. A human developer or AI agent can make a change that compiles, passes tests, and still crosses a boundary the team depends on.
-
-For example, a Kotlin use case might import a database implementation.
+Consider a domain use case that starts depending on a data-layer implementation:
 
 ```kotlin
 package com.acme.checkout.domain
@@ -26,75 +22,58 @@ class GetUserUseCase(
 )
 ```
 
-The code compiles. The unit tests may still pass. `ktlint` probably has nothing to say.
+This code can compile. The unit tests can pass. `ktlint` may have nothing useful to say.
 
-And yet, something important just broke: the domain layer now knows about a data-layer implementation. A boundary that was supposed to protect the business logic has become a suggestion.
+The problem is structural: the domain layer now knows about a persistence detail. A boundary that was supposed to preserve changeability has become a convention people have to remember.
 
-That is the space architecture tests are meant to cover.
+Architecture tests turn that convention into an executable rule:
 
-They are not a replacement for the compiler, unit tests, integration tests, or linters. They answer a different question:
+```kotlin
+Konture.classes {
+    that().resideInAPackage("..domain..")
+    should().onlyDependOnClassesInAnyPackage(
+        "..domain..",
+        "kotlin..",
+        "java..",
+    )
+}
+```
 
-> Does this code still respect the structure we said the system should have?
-
-For Kotlin teams, that question matters more every year. Projects are larger. Android and Kotlin Multiplatform applications are more modular. Backend systems are often split into domain, application, infrastructure, and adapter modules. AI coding assistants can generate working code quickly, but they sometimes choose the shortest compiling path: import the available class, add the missing Gradle dependency, or reuse a nearby implementation detail. Those choices can be locally correct and architecturally wrong.
-
-Architecture tests turn those boundaries into executable checks.
+That is the core idea. Architecture tests do not prove the software is correct. They prove that specific structural decisions are still true.
 
 ## The Green Build Illusion
 
-A green build is necessary. It is not sufficient.
+A green build tells you the repository satisfied the checks you asked it to run.
 
-The compiler checks whether the code is legal Kotlin. It checks syntax, type safety, visibility rules, and whether referenced symbols are available on the classpath.
+It does not tell you that the intended architecture survived the change.
 
-Linters check local code quality. They catch formatting issues, naming conventions, complexity thresholds, unused imports, and many single-file smells.
+The compiler will accept a forbidden dependency if the symbol is on the classpath. Gradle will build a module graph that violates your design if someone declares the dependency. A unit test will not fail because a feature module imported another feature module's implementation detail unless the tested behavior changes.
 
-Unit tests check behavior. They tell you whether a function, class, or use case does what a test expects it to do.
+That is why architecture violations often look ordinary in review:
 
-None of those tools knows your architectural intent.
+- A controller calls a repository directly because it was faster than adding an application service.
+- A domain model accepts a network DTO because the DTO already has the right fields.
+- A feature implementation module imports another feature implementation module because the API module does not expose the needed contract yet.
+- A Kotlin class in an `impl` package stays public by default and becomes convenient for other modules to reuse.
+- An AI coding assistant adds a Gradle dependency because it makes the current file compile.
 
-The compiler does not know that `:domain` should not depend on `:data`. If the dependency exists in Gradle, the compiler accepts the import.
+None of those changes has to be malicious or careless. Most structural drift comes from small local optimizations that are rational in the moment and expensive in aggregate.
 
-A linter does not know that a network DTO is leaking into the UI layer. It mostly sees files and syntax, not the ownership rules behind your types.
-
-A unit test does not fail because a feature module depends on a sibling feature module. It fails only if the behavior under test breaks.
-
-Architecture violations are often valid code. That is why they slip through.
-
-## Architecture Erodes Through Small Changes
-
-Most architecture problems do not arrive as a big redesign.
-
-They arrive as tiny shortcuts:
-
-- A controller calls a repository directly because it was faster than adding a service method.
-- A domain model starts referencing a network DTO.
-- A feature implementation module imports another feature implementation module.
-- An `impl` class is left `public` and becomes someone else's dependency.
-- A UI state exposes a network response DTO instead of a mapped presentation model.
-- An AI agent adds a forbidden module dependency because it makes the current task compile.
-- A legacy package gains one more consumer because the migration is already messy.
-
-Each change is easy to justify locally. The code works. The feature ships.
-
-The cost appears later.
-
-Refactoring becomes harder because internal details have become public contracts. Build times get worse because modules depend on each other in unnecessary directions. Tests become heavier because domain code now knows about frameworks. AI-generated patches become risky when the repository has no executable way to say, "this boundary is real."
-
-Architecture tests are a way to make those rules visible to the build early, before a shortcut becomes a pattern other code starts to copy.
+Architecture tests are a way to make the aggregate cost visible early.
 
 ## What Architecture Tests Check
 
-Good architecture tests usually protect six kinds of decisions.
+Good architecture tests protect decisions that affect change velocity, module independence, public API shape, and review load. They usually fall into a few categories.
 
 ### 1. Dependency Direction and Layer Isolation
 
-In Clean Architecture, layered architecture, or ports and adapters, outer layers can depend inward. The domain or core layer should not depend outward on UI, database, network, framework, or infrastructure details.
+Layered systems depend on direction. In Clean Architecture, ports and adapters, and many domain-centered designs, outer layers may depend inward, but the core should not depend on UI, databases, transport frameworks, or platform APIs.
 
 ```mermaid
 flowchart TB
-    Outer["Outer layers<br/>UI, controllers, data adapters,<br/>network clients, frameworks"]
+    Outer["Outer layers<br/>UI, controllers, data adapters,<br/>network clients"]
     Domain["Core domain<br/>entities, use cases, contracts"]
-    Details["Concrete details<br/>Compose, Room, Retrofit,<br/>SQLUserRepository"]
+    Details["Concrete details<br/>Compose, Room, Retrofit,<br/>SQL repositories"]
 
     Outer -->|"allowed: depend inward"| Domain
     Domain -.->|"forbidden: know outward"| Details
@@ -105,155 +84,169 @@ flowchart TB
     linkStyle 1 stroke:#dc2626,stroke-width:2px,stroke-dasharray: 6 6;
 ```
 
-Typical policies:
+Typical rules:
 
-- Domain must not depend on data.
-- Domain must not import Spring, Android, Compose, Room, SQLDelight, or Ktor server APIs.
-- Application services may depend on domain, but not directly on web controllers.
+- Domain packages must not import persistence, transport, Android, Compose, Spring, or Ktor server APIs.
+- Application services may depend on domain contracts, not directly on web controllers.
+- UI modules should consume presentation state, not database or network entities.
 
-The compiler cannot infer "domain purity." If the type is visible, the compiler allows it.
+The compiler sees valid types. Architecture tests encode which valid types are unacceptable in a given layer.
 
-### 2. Module Boundary Enforcement
+### 2. Gradle Module Boundaries
 
-In a multi-module Kotlin project, Gradle modules are part of the architecture.
+In a modular Kotlin project, Gradle project dependencies are part of the architecture.
 
 ```mermaid
 graph TD
-    app[":app"] --> checkout[":feature:checkout"]
-    app --> profile[":feature:profile"]
-    checkout --> core[":core:network"]
+    app[":app"] --> checkout[":feature:checkout:impl"]
+    app --> profile[":feature:profile:impl"]
+    checkout --> checkoutApi[":feature:checkout:api"]
+    profile --> profileApi[":feature:profile:api"]
+    checkout --> core[":core:domain"]
     profile --> core
-    checkout -.->|"PROHIBITED: Sideways Dependency"| profile
+    checkout -.->|"forbidden: implementation-to-implementation"| profile
 
     style app fill:#f1f5f9,stroke:#94a3b8,stroke-width:2px
     style checkout fill:#e0f2fe,stroke:#0284c7,stroke-width:2px
     style profile fill:#e0f2fe,stroke:#0284c7,stroke-width:2px
+    style checkoutApi fill:#ecfdf5,stroke:#10b981,stroke-width:1px
+    style profileApi fill:#ecfdf5,stroke:#10b981,stroke-width:1px
     style core fill:#ecfdf5,stroke:#10b981,stroke-width:2px
-    linkStyle 4 stroke:#ef4444,stroke-width:2px,stroke-dasharray: 5 5;
+    linkStyle 6 stroke:#ef4444,stroke-width:2px,stroke-dasharray: 5 5;
 ```
 
-Typical policies:
+Typical rules:
 
-- `:feature:checkout` must not depend on `:feature:profile`.
-- `:core:domain` must not depend on `:app`.
-- Implementation modules must stay behind API modules.
-- The build graph must remain acyclic.
+- `:core:domain` must not depend on `:core:data` or `:app`.
+- Feature implementation modules must not depend on sibling feature implementation modules.
+- API modules may be depended on broadly; implementation modules should remain behind their API.
+- The Gradle project graph should not contain cycles.
 
-Gradle can enforce missing dependencies. It cannot stop someone from adding a new dependency that violates the intended design.
+This category matters for design and for build performance. Unnecessary module edges expand recompilation scope, reduce cache usefulness, and make local changes affect unrelated features.
 
-### 3. Cross-Layer Type Leakage
+### 3. Public API and Type Leakage
 
-Types from one layer should not leak into another layer's public API.
+Some architecture failures are not about imports in a private implementation. They are about what a module exposes.
 
-Typical policies:
+Typical rules:
 
-- Database entities should not be returned from REST controllers.
-- Room entities should not appear in Composable or ViewModel signatures.
-- Network DTOs should not appear in domain use cases.
-- Transport, persistence, or UI-specific types should not appear in domain APIs.
+- Public domain APIs should not expose database entities or network DTOs.
+- Public feature API packages should expose contracts and stable models, not implementation classes.
+- Persistence or framework annotations should not leak into clean business interfaces.
+- Library modules should keep implementation packages `internal` unless they are intentionally public.
 
-The compiler is happy to pass valid types around. It does not know which types represent persistence, transport, UI, or domain concepts.
+Kotlin's default `public` visibility makes this easy to get wrong. Once another module starts depending on an accidental public type, removing it becomes a breaking change.
 
 ### 4. Layer-Crossing Calls
 
-Architecture often says that components should move through layers in order.
+Some systems rely on an intermediate layer for validation, authorization, transactions, logging, or orchestration. A direct call can bypass the place where those policies live.
 
-Typical policies:
+Typical rules:
 
-- Controllers call services, not repositories directly.
-- Composables call ViewModels, not Retrofit services.
-- Route handlers call application services, not SQL adapters.
+- Controllers call application services, not repositories directly.
+- Composables call ViewModels or presenters, not Retrofit services.
+- Route handlers call use cases, not SQL adapters.
 - UI modules do not call infrastructure modules.
 
-The compiler sees a callable function. It does not know the call skipped the layer where validation, authorization, transactions, or logging live.
+These rules should be used carefully. They are valuable when the intermediate layer has a real responsibility. They are bureaucracy when the layer exists only because a diagram says so.
 
 ### 5. Dependency Injection and Wiring Conventions
 
-Some structural failures appear only at runtime.
+DI configuration is architecture in executable form. It decides which implementation backs which contract.
 
-Typical policies:
+Some wiring policies belong in integration tests. Others can be checked structurally:
 
-- Feature modules should not override core DI bindings.
-- Modules should not register unused or duplicate bindings.
-- DI modules should live in approved packages.
-- Adapter implementations should be bound to domain interfaces, not consumed directly.
+- DI modules live in approved packages.
+- Feature modules do not override core bindings.
+- Adapter implementations are bound to domain interfaces rather than consumed directly.
+- Test-only bindings do not leak into production source sets.
 
-Some of these checks belong in DI-specific integration tests. Some can be expressed as source or module rules. The important point is that wiring is architectural, not only behavioral.
+The useful rule is the one that catches a real class of production or maintenance failures, not the one that merely mirrors a preference.
 
-### 6. API Surface and Visibility
+### 6. File and Source Hygiene
 
-Kotlin's language features change how we design public contracts. By default, Kotlin classes and members are `public`. In multi-module environments, this makes accidental API exposure remarkably easy. 
+Not every structural test needs to be profound. Some rules keep navigation predictable and reduce review noise:
 
-Furthermore, Kotlin projects rely heavily on idiomatic features that Java-centric tools struggle to analyze:
-- **Top-level functions and extension functions** (which compile to synthetic classes);
-- **Kotlin `object` and `companion object` declarations** (which govern singleton patterns);
-- **Visibility controls** like `internal` (which are easily bypassed in compiled bytecode if not carefully verified).
+- One primary class per file.
+- File names match primary class names.
+- No wildcard imports.
+- Generated or migration packages are explicitly excluded.
 
-Typical policies:
-- Classes in `..impl..` packages must be explicitly marked `internal`.
-- Public API packages must contain documented interfaces, sealed classes, or clean DTOs only.
-- Implementation classes must not leak across module boundaries.
-- Top-level extension utilities must reside in designated utility packages.
+These rules should not duplicate what a formatter or linter already handles well. Architecture tests are most valuable when they need whole-project context.
 
-Once another module imports an accidental public helper or direct implementation class, refactoring it later becomes a breaking change.
+## What Architecture Tests Should Not Check
 
-## Architecture Tests Are Living Documentation
+Architecture tests become brittle when they try to govern everything.
 
-Architecture diagrams are useful. README files are useful. Onboarding docs are useful.
+They should not replace:
 
-But none of them fails CI.
+- The compiler for type safety.
+- A formatter for whitespace and style.
+- A linter for ordinary single-file smells.
+- Unit tests for behavior.
+- Integration tests for real wiring and runtime behavior.
+- Code review for judgment, naming, and design intent that is not stable enough to encode.
 
-An architecture test gives a rule an executable form:
+A bad architecture test freezes an implementation detail and calls it design. A good one protects a boundary that multiple engineers already rely on.
 
-```kotlin
-Konture.architecture {
-    // 1. Module-level structural rules
-    modules {
-        that().haveNamePath(":domain")
-        should().notDependOnModule(":data", ":app")
-    }
+## Living Documentation That Fails
 
-    // 2. Class-level source conventions
-    classes {
-        that().resideInAPackage("..domain..")
-        that().haveNameEndingWith("Repository")
-        should().beInterfaces()
-    }
-}
-```
+Architecture diagrams, READMEs, onboarding docs, and review checklists all help. None of them fails CI.
 
-The test name becomes documentation:
+An architecture test gives a rule a durable form:
 
 ```kotlin
 @Test
 fun `domain must not depend on data or app modules`() {
-    // rule here
+    Konture.modules {
+        that().haveNamePath(":domain")
+        should().notDependOnModule(":data")
+        should().notDependOnModule(":app")
+    }
 }
 ```
 
-When the test fails, the architecture is no longer an opinion in a code review. It is a broken contract.
+The test name documents the rule. The assertion defines the rule. The failure output tells the developer where the rule was broken.
 
-That changes the conversation.
+That changes the review conversation. Instead of asking a reviewer to remember every boundary under time pressure, the repository can report:
 
-Instead of saying:
+```text
+Domain boundary violated:
+  :domain depends on forbidden module :data
+```
 
-> Please do not import data from domain.
+The team still decides whether the rule is right. The test removes the need to rediscover the same violation by hand.
 
-The repository says:
+## A Concrete Example From the Showcases
 
-> This import violates the domain boundary. Here is the file that crossed it.
+The Konture repository includes a small Gradle showcase that uses the same shape as the examples above: `:app`, `:domain`, `:data`, and a dedicated `:konture-test` module.
 
-That is better feedback for humans. It is also much better feedback for AI coding agents.
+Its architecture suite does not only check one happy-path rule. It combines several structural checks:
 
-## Why This Matters More with AI-Generated Code
+- The module graph has no cycles.
+- `:domain` does not depend on `:data` or `:app`.
+- `:data` only depends on `:domain`.
+- Classes in `..domain..` only depend on domain, Kotlin, or Java packages.
+- Repository declarations in domain are interfaces.
+- Use case signatures do not leak `.data.` or `.app.` types.
 
-AI coding tools are good at local completion. They can find an available class, import it, make a test pass, and move on.
+One test deliberately proves that a bad module rule throws an `AssertionError`. That matters. A structural rule that has never failed may not be checking the thing the team thinks it is checking.
 
-Architecture is often global context.
+The sample suite is executable:
 
-An agent may not know that a repository implementation is forbidden in the domain layer. It may not know that feature modules should communicate through API modules. It may not know that a network DTO should be mapped before it reaches a UI state model. Even when the instruction is present somewhere in the repository, the agent may miss it, overfit to the immediate failing test, or make a dependency change that looks harmless in isolation.
+```bash
+./gradlew -p showcases/sample-gradle :konture-test:test
+```
 
-Prompt instructions help:
+On this repository, that command runs the architecture-test module successfully and generates the layout and dependency metadata Konture uses to evaluate module-aware rules.
+
+## Why This Matters With AI-Assisted Development
+
+AI coding assistants are good at local completion. They can import a visible class, add a missing dependency, and make a narrow test pass.
+
+Architecture is usually global context.
+
+Instructions such as this help:
 
 ```text
 Keep domain independent from data.
@@ -261,106 +254,47 @@ Do not add sideways feature dependencies.
 Map network DTOs before they reach UI state.
 ```
 
-But prompt instructions are not quality gates.
+But prompt instructions are not enforcement. They are guidance.
 
-An architecture test is.
+Architecture tests give both humans and agents the same feedback loop:
 
-If AI-generated code crosses a boundary, the same build that checks human-written code catches it early. 
+1. A change crosses a boundary.
+2. The test fails with a concrete module, file, import, or type.
+3. The developer or agent repairs the design by using the intended abstraction.
 
-Because architecture tests run as standard unit tests, they produce rich, deterministic stdout logs that pinpoint the exact files, lines, and layers that violated the rule. This transforms architecture tests from a defensive gate into a **self-healing feedback loop**:
+This is not magic, and it is not a substitute for review. It is a way to make structural rules visible to the tools already changing the code.
 
-1. **Detection**: An AI agent makes an implementation shortcut that violates a boundary.
-2. **Failure**: The architecture test fails in local verification or CI, printing exactly which file imported the forbidden dependency.
-3. **Self-Correction**: The agent parses the test failure stdout, understands the structural constraint, and automatically refactors its code to use the correct domain interface.
+## When a Rule Deserves CI Enforcement
 
-By making structural rules executable, teams can securely leverage high-speed AI generation without worrying about gradual codebase erosion or the cognitive load of reviewing bloated prompt templates.
+Not every good idea should block a build. A rule is a good candidate for CI when most of these are true:
 
-## What Makes a Good Architecture Test
+- The team can explain the cost of breaking it.
+- The rule is stable across normal feature work.
+- Violations are usually mistakes, not legitimate design choices.
+- The failure message points to an actionable fix.
+- Exceptions are rare and can be named explicitly.
+- The rule catches something the compiler, linter, or unit tests do not.
 
-A good architecture test is specific.
+If a rule fails constantly during normal development, it may be too broad. If a rule needs many quiet exclusions, it may be pretending the architecture is cleaner than it is. If nobody can explain why it exists, it should not block delivery.
 
-Bad:
-
-```text
-The project should follow clean architecture.
-```
-
-Good:
-
-```text
-Classes in packages matching ..domain.. may depend only on ..domain.., kotlin.., and java...
-```
-
-A good architecture test has a clear owner.
-
-If the team cannot explain why a rule exists, it probably should not block CI.
-
-A good architecture test is scoped.
-
-Generated code, legacy migration areas, test fixtures, and intentionally unstable packages may need explicit exclusions. That is fine, as long as the exception is deliberate and visible.
-
-A good architecture test fails for one reason.
-
-Do not bundle ten unrelated policies into one test. A red architecture test should tell the developer which design decision was broken.
-
-## Where Architecture Tests Fit in the Toolchain
-
-Architecture tests sit beside the tools you already use.
-
-```mermaid
-flowchart TD
-    subgraph QualityGates ["Verification Toolchain Hierarchy"]
-        direction BT
-        L1["Compiler<br/><b>Is it valid Kotlin?</b>"]
-        L2["Linter<br/><b>Local style & basic smells</b>"]
-        L3["Unit Tests<br/><b>Isolated component behavior</b>"]
-        L4["Integration Tests<br/><b>Collaborative system behavior</b>"]
-        L5["Architecture Tests<br/><b>Systemic structure & boundary rules</b>"]
-
-        L1 --> L2
-        L2 --> L3
-        L3 --> L4
-        L4 --> L5
-    end
-
-    style QualityGates fill:#fafafa,stroke:#e4e4e7,stroke-width:1px
-    style L1 fill:#f1f5f9,stroke:#94a3b8,stroke-width:1px
-    style L2 fill:#f1f5f9,stroke:#94a3b8,stroke-width:1px
-    style L3 fill:#e0f2fe,stroke:#38bdf8,stroke-width:1px
-    style L4 fill:#e0f2fe,stroke:#38bdf8,stroke-width:1px
-    style L5 fill:#ecfdf5,stroke:#10b981,stroke-width:2px
-```
-
-| Tool | Main question |
-| --- | --- |
-| Compiler | Is this valid Kotlin? |
-| Linter | Does this file follow local code style and simple quality rules? |
-| Unit test | Does this unit behave correctly? |
-| Integration test | Do these components work together? |
-| Architecture test | Does this code still respect the intended structure? |
-
-That final question is the missing one in many Kotlin projects.
+Start with rules that protect known pain: module cycles, domain-to-data dependencies, feature implementation coupling, public API leakage, and platform APIs leaking into shared KMP code.
 
 ## The Practical Payoff
 
-Architecture tests help teams:
+Architecture tests help teams preserve the structure that makes future changes cheaper:
 
-- Catch dependency drift early.
-- Keep domain logic framework-independent.
-- Protect Gradle module boundaries.
-- Prevent DTO and entity leakage.
-- Keep KMP shared code portable.
-- Make public APIs intentional.
-- Give AI coding agents executable feedback.
-- Turn architectural decisions into CI-enforced contracts.
+- They keep domain logic independent from frameworks and persistence.
+- They prevent accidental Gradle edges that widen recompilation.
+- They protect API modules from leaking implementation detail.
+- They make public visibility intentional.
+- They reduce repeated review comments.
+- They give AI-assisted changes a concrete structural feedback loop.
 
-The point is not to make architecture rigid.
+The goal is not rigid architecture. The goal is explicit architecture.
 
-The point is to make architecture explicit.
+Once a team has chosen a structure, the build should help protect it.
 
-Once a team has chosen its structure, the build should help protect it.
-
-In the next article, we will look at why existing options fall short for modern Kotlin ecosystems. We will explore the friction of using Java bytecode scanners on native Kotlin constructs, and why Konture was built around a specific philosophy: **true architectural integrity requires testing both the build configuration graph and the Kotlin source AST in a unified, compiler-like test loop.**
+In the next article, we will look at why Kotlin projects often need more than bytecode scanning, source scanning, or Gradle inspection alone. Modern Kotlin architecture lives in the relationship between the build graph and the source model.
 
 ---
 

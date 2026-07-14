@@ -1,22 +1,20 @@
 # Kotlin Architecture Tests with Konture: A Practical Guide
 
-_Set up a dedicated architecture-test module, add Konture, and write guardrails that protect module boundaries, layer isolation, conventions, and public API shape._
+_Set up a dedicated architecture-test module, add Konture, and grow a small suite of structural rules that protects the boundaries your Kotlin project actually depends on._
 
-The best first architecture test is not clever.
+The best first architecture test is usually not clever.
 
-It is usually something obvious that the team already agrees on:
+It is a rule the team already believes:
 
 ```text
 The domain module must not depend on the data module.
 ```
 
-That kind of rule is a good starting point because it is concrete, easy to explain, and painful when broken.
+That rule is concrete. It is easy to explain. It is painful when broken. It also exercises the right habit: encode a real architectural decision, not an idealized diagram.
 
-In this guide, we will set up Konture and build a small architecture test suite around rules like that.
+This guide uses Gradle Kotlin DSL and JUnit 5. Konture itself is test-runner agnostic, so the same rules can run from JUnit, Kotest, TestBalloon, or another Kotlin/JVM runner.
 
-The examples use Gradle Kotlin DSL and JUnit 5, but Konture itself is test-framework agnostic. You can run the same kinds of rules from Kotest, TestBalloon, JUnit 4, JUnit 6, or another Kotlin/JVM test runner.
-
-## The Target Setup
+## Target Setup
 
 Use a dedicated architecture-test module.
 
@@ -29,7 +27,7 @@ flowchart TD
             Data[":data"] --> Domain
         end
 
-        subgraph Test ["Dedicated Test Module"]
+        subgraph Test ["Architecture Tests"]
             KT[":konture-test"]
         end
     end
@@ -47,14 +45,9 @@ flowchart TD
     style KT fill:#dbeafe,stroke:#1d4ed8,stroke-width:2px
 ```
 
-Keeping architecture tests in their own module has a few advantages:
+A separate module gives the architecture suite a project-level view without adding architecture-test dependencies to production modules. It also makes CI wiring straightforward: run one task when you want structural checks.
 
-- Production modules do not need architecture-test dependencies.
-- The architecture suite can depend on all modules it needs to inspect.
-- CI can run architecture checks directly.
-- The rules become a visible project-level quality gate.
-
-In a real project, your modules may look more like this:
+In a larger project, the inspected modules may look like this:
 
 ```text
 :app
@@ -69,13 +62,11 @@ In a real project, your modules may look more like this:
 :iosApp
 ```
 
-The names do not matter. The policy does.
+The names do not matter. The policy does. Use your real modules and packages in every rule.
 
-Konture should encode your actual architecture, not a generic example.
+## Step 1: Add Konture
 
-## Step 1: Add Konture to the Build
-
-Declare the Konture version in your version catalog:
+Declare the version in your version catalog:
 
 ```toml
 [versions]
@@ -96,9 +87,9 @@ plugins {
 }
 ```
 
-The plugin generates the project layout metadata Konture needs for module-aware architecture rules.
+The plugin generates the layout metadata Konture needs for module-aware rules.
 
-## Step 2: Create a Dedicated `konture-test` Module
+## Step 2: Create the Architecture-Test Module
 
 Register the module in `settings.gradle.kts`:
 
@@ -130,9 +121,7 @@ tasks.test {
 }
 ```
 
-In a larger project, replace `:domain`, `:data`, and `:app` with the real modules your architecture tests need to inspect.
-
-For example:
+Replace the sample dependencies with the modules your rules inspect:
 
 ```kotlin
 dependencies {
@@ -147,9 +136,9 @@ dependencies {
 }
 ```
 
-The architecture-test module should see the code it checks.
+The architecture-test module should see the code and build metadata it checks.
 
-## Step 3: Write the First Module Boundary Rule
+## Step 3: Start With One Build-Graph Rule
 
 Create `konture-test/src/test/kotlin/com/acme/ArchitectureGuardrailsTest.kt`.
 
@@ -172,11 +161,9 @@ class ArchitectureGuardrailsTest {
 }
 ```
 
-This is a build-graph rule.
+This rule checks the Gradle project graph. If someone adds `implementation(project(":data"))` to `:domain`, the architecture test fails.
 
-If someone adds `implementation(project(":data"))` to the `:domain` module, the architecture test fails.
-
-In a `:core:domain` layout, the same rule would use the real module path:
+For a nested module layout, use the real paths:
 
 ```kotlin
 Konture.modules {
@@ -186,13 +173,11 @@ Konture.modules {
 }
 ```
 
-Module paths should match your Gradle project names exactly.
+Do not ship placeholder names. Architecture tests are contracts; contracts need concrete targets.
 
 ## Step 4: Add a Cycle Check
 
-Circular module dependencies make builds slower and boundaries weaker.
-
-Add a simple whole-graph rule:
+Circular module dependencies slow builds and weaken ownership boundaries.
 
 ```kotlin
 @Test
@@ -201,13 +186,11 @@ fun `module graph must not contain cycles`() {
 }
 ```
 
-This is a good default rule for multi-module projects.
+This is a useful default for multi-module projects because cycles tend to make every future boundary decision harder.
 
 ## Step 5: Protect Domain Source Code
 
-Module rules are necessary, but not always sufficient.
-
-Add a source-level package rule:
+A clean module graph does not guarantee clean source references. Add a source-level package rule:
 
 ```kotlin
 @Test
@@ -223,9 +206,7 @@ fun `domain classes must only depend on domain and standard library types`() {
 }
 ```
 
-This rule checks dependencies between parsed project classes.
-
-If your domain layer is allowed to depend on another project package, add it deliberately:
+If your domain layer deliberately depends on shared project code, say so explicitly:
 
 ```kotlin
 Konture.classes {
@@ -239,13 +220,11 @@ Konture.classes {
 }
 ```
 
-Architecture tests should reflect the real design, not an idealized design no one agreed to.
+The rule should match the architecture the team has chosen, not an architecture borrowed from an example.
 
-## Step 6: Ban Framework Imports from Domain
+## Step 6: Ban Framework Imports Where They Do Not Belong
 
-Some dependencies are external frameworks rather than project classes.
-
-For those, use a custom predicate over imports:
+External frameworks are often easier to detect through imports than through project class dependencies.
 
 ```kotlin
 @Test
@@ -264,13 +243,13 @@ fun `domain must not import framework or persistence APIs`() {
 }
 ```
 
-This protects the domain layer from framework concepts.
+Tune the prefixes for the project. A backend may ban persistence annotations from domain. An Android app may ban Android and Compose APIs from shared or domain packages. A KMP project may apply different policies to `commonMain`, `androidMain`, and `iosMain`.
 
-Adjust the forbidden prefixes for your project. A backend project may ban Spring or persistence annotations. An Android project may ban Android and Compose APIs. A KMP project may ban platform APIs from shared packages.
+Avoid broad bans that catch legitimate dependencies. For example, banning all of `kotlinx..` may block valid use of coroutines.
 
 ## Step 7: Enforce Repository Contracts
 
-A common Clean Architecture rule is that repositories in the domain layer are interfaces.
+If your architecture treats repositories in the domain layer as contracts, encode that rule:
 
 ```kotlin
 @Test
@@ -291,11 +270,11 @@ class UserRepository {
 }
 ```
 
-If your project uses a different naming convention, encode that convention instead.
+If your project uses abstract classes, ports, or a different naming convention, encode that instead. The rule should enforce your contract model, not the word `Repository` itself.
 
 ## Step 8: Keep Implementation Packages Internal
 
-Kotlin classes are public by default, so implementation details can become public accidentally.
+Kotlin classes and members are public by default. In multi-module projects, accidental public visibility becomes accidental API.
 
 ```kotlin
 @Test
@@ -307,20 +286,18 @@ fun `implementation classes must remain internal`() {
 }
 ```
 
-This is especially useful for library modules and feature modules with API/implementation splits.
-
-For example:
+This is especially useful for feature or library modules that split API and implementation:
 
 ```text
 :feature:checkout:api
 :feature:checkout:impl
 ```
 
-The API module should expose contracts. The implementation module should not become a convenient grab bag for other features.
+The API module exposes contracts. The implementation module should not become a grab bag for other features.
 
 ## Step 9: Protect Feature Module Isolation
 
-In a modular Android or KMP project, sibling feature implementations should usually not depend on each other.
+Sibling feature implementations usually should not depend on each other directly.
 
 ```kotlin
 @Test
@@ -336,42 +313,38 @@ fun `feature implementations must not depend on sibling feature implementations`
 }
 ```
 
-This rule says feature implementation modules may depend on feature API modules, core modules, and shared modules.
+This allows feature implementations to depend on feature API modules, core modules, and shared modules. It blocks implementation-to-implementation coupling.
 
-They may not depend on another feature's implementation module.
+If the app has a different modularization strategy, change the allowed list. The value is not the pattern; the value is making the intended dependency graph executable.
 
-If your app has a different modularization strategy, change the allowed list. The point is to make the intended dependency graph executable.
+## Step 10: Use the Layered DSL for Directional Rules
 
-## Step 10: Use the Layered DSL When the Rule Is Visual
-
-For package-based layer rules, the layered DSL can be more readable:
+For package-based layer rules, a layered DSL can be easier to read than a long list of package predicates.
 
 ```mermaid
 flowchart TD
     subgraph Presentation ["presentation layer ('..presentation..')"]
-        PresCls["UI & Controllers"]
+        PresCls["UI and controllers"]
     end
 
     subgraph Data ["data layer ('..data..')"]
-        DataCls["Repositories & DB Models"]
+        DataCls["Repositories and DB models"]
     end
 
     subgraph Domain ["domain layer ('..domain..')"]
-        DomCls["Entities & Use Cases"]
+        DomCls["Entities, use cases, contracts"]
     end
 
     Presentation -->|may access| Domain
     Data -->|may access| Domain
-    
-    Domain -.->|FORBIDDEN access| Presentation
-    Domain -.->|FORBIDDEN access| Data
-    Presentation -.->|FORBIDDEN| Data
-    Data -.->|FORBIDDEN| Presentation
+    Domain -.->|forbidden| Presentation
+    Domain -.->|forbidden| Data
+    Presentation -.->|forbidden| Data
+    Data -.->|forbidden| Presentation
 
     style Presentation fill:#fef08a,stroke:#eab308,stroke-width:1px
     style Data fill:#fed7aa,stroke:#f97316,stroke-width:1px
     style Domain fill:#bae6fd,stroke:#0ea5e9,stroke-width:2px
-    
     linkStyle 2,3,4,5 stroke:#ef4444,stroke-width:2px,stroke-dasharray: 5 5;
 ```
 
@@ -382,15 +355,15 @@ fun `layers must follow inward dependency direction`() {
         val presentation = layer("presentation") definedBy "..presentation.."
         val domain = layer("domain") definedBy "..domain.."
         val data = layer("data") definedBy "..data.."
- 
+
         where(presentation) {
             mayOnlyAccessLayers(domain)
         }
- 
+
         where(data) {
             mayOnlyAccessLayers(domain)
         }
- 
+
         where(domain) {
             mayOnlyAccessLayers()
         }
@@ -398,13 +371,7 @@ fun `layers must follow inward dependency direction`() {
 }
 ```
 
-This says:
-
-- Presentation can access domain.
-- Data can access domain.
-- Domain cannot access presentation or data.
-
-For ports and adapters, you might write:
+For ports and adapters, the same idea might look like this:
 
 ```kotlin
 Konture.layered {
@@ -426,11 +393,11 @@ Konture.layered {
 }
 ```
 
-Use the model your team actually uses.
+Use the model your team actually uses. A layered rule that does not match the real codebase will become friction quickly.
 
-## Step 11: Add File-Level Hygiene Rules
+## Step 11: Add File-Level Hygiene Sparingly
 
-Some rules are not deep architecture, but they keep the codebase predictable.
+Some source conventions reduce navigation cost and review noise:
 
 ```kotlin
 @Test
@@ -443,33 +410,52 @@ fun `source files should stay simple and explicit`() {
 }
 ```
 
-These rules can remove repeated code review comments.
+Do not turn architecture tests into a second linter. If `detekt`, `ktlint`, or a formatter already enforces a rule well, use that tool.
 
-Be careful not to overdo this category. If a linter already handles the rule well, prefer the linter.
+## Step 12: Run the Suite
 
-## Step 12: Run the Architecture Tests
-
-Run the dedicated test task:
+Run the dedicated task:
 
 ```bash
 ./gradlew :konture-test:test
 ```
 
-Or include it in the normal build:
+Or include it in the normal verification path:
 
 ```bash
 ./gradlew check
 ```
 
-When a rule fails, treat it like any other test failure:
+The repository's sample Gradle showcase uses the same pattern:
+
+```bash
+./gradlew -p showcases/sample-gradle :konture-test:test
+```
+
+That command runs a dedicated architecture-test module against a small `:app`, `:domain`, and `:data` project. The suite covers module dependencies, class package boundaries, repository contracts, type leakage in use case signatures, and a negative assertion that proves a deliberately wrong module rule fails.
+
+When a rule fails, handle it like any other test failure:
 
 1. Read the violation.
-2. Decide whether the rule is correct.
-3. Fix the code if the code violated the architecture.
-4. Fix the rule if the rule encoded the wrong policy.
+2. Decide whether the encoded rule is still correct.
+3. Fix the code if the code crossed the boundary.
+4. Fix the rule if the architecture decision changed.
 5. Add an explicit exception only when the exception is intentional.
 
-Do not silently weaken architecture tests until they pass. That defeats the point.
+Do not silently weaken rules until CI passes. That converts architecture tests from governance into decoration.
+
+## Rule Design Principles
+
+Add these principles before growing the suite:
+
+- **One policy per test**: a failing test name should tell the developer which decision was broken.
+- **Prove the rule can fail**: temporarily introduce a violation, run the test, confirm it fails, then remove the violation.
+- **Use real names**: avoid placeholder modules and packages in committed rules.
+- **Make exceptions visible**: generated code, migration packages, and legacy zones may need exclusions, but those exclusions should be deliberate.
+- **Avoid broad wildcards**: a wide ban is useful only when the team understands what legitimate cases it excludes.
+- **Separate structure from style**: architecture tests should protect boundaries and ownership, not formatting.
+
+The showcase projects are useful calibration material. The Now in Android suite demonstrates feature decoupling, ViewModel framework-import checks, and `:api`/`:impl` separation. The KotlinConf KMP suite demonstrates shared-core purity, backend/frontend separation, and route-to-service boundaries. Use examples like those to design rules around real architectural pressure, not abstract neatness.
 
 ## A Starter Suite
 
@@ -528,79 +514,27 @@ class ArchitectureGuardrailsTest {
 }
 ```
 
-That suite is intentionally small.
-
-Start with rules the team agrees on. Let the suite grow from real pain:
+Keep the starter suite small. Let it grow from real pain:
 
 - A boundary violation found in review.
-- A module dependency that slowed builds.
+- A module dependency that widened build impact.
 - A DTO leak that made refactoring expensive.
-- An AI-generated shortcut that crossed layers.
+- An AI-assisted patch that crossed layers.
 - A public implementation class that became hard to remove.
 
-Architecture tests are most effective when they protect decisions people already care about.
+Architecture tests work best when they protect decisions people already care about.
 
-## Best Practices
+## Rollout Guidance
 
-### Use Real Module and Package Names
+For an existing project, introduce architecture tests in stages:
 
-Do not ship placeholder rules.
+1. Start with non-controversial rules such as module cycles and domain-to-data dependencies.
+2. Run the suite locally and in CI as informational if the first pass reveals many violations.
+3. Fix or explicitly quarantine legacy violations.
+4. Turn high-confidence rules into required CI checks.
+5. Review rule changes like architecture changes, not like formatting tweaks.
 
-Bad:
-
-```kotlin
-Konture.modules {
-    that().haveNamePath(":some-module")
-    should().notDependOnModule(":other-module")
-}
-```
-
-Good:
-
-```kotlin
-Konture.modules {
-    that().haveNamePath(":feature:checkout:impl")
-    should().notDependOnModule(":feature:profile:impl")
-}
-```
-
-Architecture tests are contracts. Contracts need real names.
-
-### Keep One Policy per Test
-
-This is easier to debug:
-
-```kotlin
-@Test
-fun `domain must not depend on data`() {
-    // one rule
-}
-```
-
-This is harder to debug:
-
-```kotlin
-@Test
-fun `architecture should be clean`() {
-    // ten unrelated rules
-}
-```
-
-A failing test name should tell the developer which decision was broken.
-
-### Avoid Overbroad Wildcards
-
-Banning `android..` from domain may be reasonable.
-
-Banning `kotlinx..` from domain may be too broad if the domain legitimately uses `kotlinx.coroutines` or `kotlinx.serialization`.
-
-Broad rules are powerful. Use them carefully.
-
-### Make Exceptions Explicit
-
-Legacy code exists. Generated code exists. Migration paths exist.
-
-It is fine to exclude them deliberately:
+For generated code, test fixtures, and legacy migration areas, prefer explicit exclusions:
 
 ```kotlin
 konture {
@@ -608,38 +542,23 @@ konture {
 }
 ```
 
-What matters is that the exception is visible. Avoid quiet exclusions that make the test look stronger than it is.
-
-### Verify New Rules Against a Real Violation
-
-Before trusting a rule, make sure it can fail.
-
-Temporarily introduce a violation, run the test, confirm it fails, then remove the violation.
-
-An architecture test that has never failed may not be checking what you think it is checking.
+The exception should be visible enough that future maintainers understand the real boundary.
 
 ## Where to Go Next
 
-After the first suite is running, add rules around the places your project actually hurts:
+After the first suite is stable, add rules around the areas where the project actually hurts:
 
 - Feature module isolation.
-- KMP source set portability.
-- Public API documentation.
-- DTO and entity leakage.
-- Route or controller boundaries.
+- KMP source-set portability.
+- Public API leakage.
+- DTO and entity boundaries.
+- Route or controller dependency direction.
 - Dependency injection conventions.
 - Legacy package quarantine.
-- Naming conventions that reduce review noise.
 
-Konture is not a prescription for one architecture style.
+Konture is not a prescription for one architecture style. It is a way to make your architecture executable.
 
-It is a way to make your architecture executable.
-
-That is the real value: not another document, not another checklist, not another review habit someone has to remember.
-
-A test.
-
-Run it locally. Run it in CI. Let humans and AI agents get the same feedback.
+Run it locally. Run it in CI. Let humans and AI-assisted changes get the same structural feedback.
 
 When structure matters, make it part of the build.
 
