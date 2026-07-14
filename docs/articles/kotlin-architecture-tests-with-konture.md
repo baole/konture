@@ -49,10 +49,10 @@ flowchart TD
 
 Keeping architecture tests in their own module has a few advantages:
 
-- production modules do not need architecture-test dependencies;
-- the architecture suite can depend on all modules it needs to inspect;
-- CI can run architecture checks directly;
-- the rules become a visible project-level quality gate.
+- Production modules do not need architecture-test dependencies.
+- The architecture suite can depend on all modules it needs to inspect.
+- CI can run architecture checks directly.
+- The rules become a visible project-level quality gate.
 
 In a real project, your modules may look more like this:
 
@@ -79,7 +79,7 @@ Declare the Konture version in your version catalog:
 
 ```toml
 [versions]
-konture = "0.6.6"
+konture = "0.6.8"
 
 [plugins]
 konture = { id = "io.github.baole.konture", version.ref = "konture" }
@@ -400,9 +400,9 @@ fun `layers must follow inward dependency direction`() {
 
 This says:
 
-- presentation can access domain;
-- data can access domain;
-- domain cannot access presentation or data.
+- Presentation can access domain.
+- Data can access domain.
+- Domain cannot access presentation or data.
 
 For ports and adapters, you might write:
 
@@ -532,11 +532,11 @@ That suite is intentionally small.
 
 Start with rules the team agrees on. Let the suite grow from real pain:
 
-- a boundary violation found in review;
-- a module dependency that slowed builds;
-- a DTO leak that made refactoring expensive;
-- an AI-generated shortcut that crossed layers;
-- a public implementation class that became hard to remove.
+- A boundary violation found in review.
+- A module dependency that slowed builds.
+- A DTO leak that made refactoring expensive.
+- An AI-generated shortcut that crossed layers.
+- A public implementation class that became hard to remove.
 
 Architecture tests are most effective when they protect decisions people already care about.
 
@@ -622,14 +622,14 @@ An architecture test that has never failed may not be checking what you think it
 
 After the first suite is running, add rules around the places your project actually hurts:
 
-- feature module isolation;
-- KMP source set portability;
-- public API documentation;
-- DTO and entity leakage;
-- route or controller boundaries;
-- dependency injection conventions;
-- legacy package quarantine;
-- naming conventions that reduce review noise.
+- Feature module isolation.
+- KMP source set portability.
+- Public API documentation.
+- DTO and entity leakage.
+- Route or controller boundaries.
+- Dependency injection conventions.
+- Legacy package quarantine.
+- Naming conventions that reduce review noise.
 
 Konture is not a prescription for one architecture style.
 
@@ -642,3 +642,10 @@ A test.
 Run it locally. Run it in CI. Let humans and AI agents get the same feedback.
 
 When structure matters, make it part of the build.
+
+---
+
+## Continue the Series
+
+- [Kotlin Architecture Tests: What They Are and Why They Matter](kotlin-architecture-tests-what-and-why.md)
+- [Kotlin Architecture Tests: Why Konture Exists](kotlin-architecture-tests-why-konture-exists.md)

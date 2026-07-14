@@ -41,13 +41,16 @@ But Kotlin teams often hit gaps when they need architecture tests that understan
 
 ### ArchUnit Is Strong for JVM Bytecode
 
-ArchUnit is a mature and proven tool, especially in Java and JVM backend systems.
+ArchUnit is a mature, robust, and proven tool, especially for standard Java and JVM backend systems. It works exceptionally well when your architectural boundaries can be fully answered from compiled bytecode classes.
 
-It works well when your architecture question can be answered from compiled classes.
+However, that bytecode focus creates a significant **Compiled Desugaring Gap** for modern Kotlin projects:
 
-That is also its limitation for Kotlin projects. Kotlin developers write source-level constructs that do not always map cleanly to the shape of JVM bytecode. A rule may be easier to express against the Kotlin declaration the developer wrote, rather than the compiled form produced later.
-
-ArchUnit also does not naturally start from Gradle's project graph. It can reason about class dependencies, but `:domain`, `:data`, `:feature:checkout:api`, and `:feature:checkout:impl` are build concepts. In a large Gradle build, those concepts matter.
+- **Synthetic Bytecode Generation**: Kotlin developers write elegant, high-level source constructs that compile into complex, synthetic JVM representation.
+  - *Inline and Reified Functions*: The body of inline functions is directly injected at call sites, and reified type checks are erased and substituted with bytecode casting. A bytecode scanner sees the inlined calls rather than the clean, logical source-level architecture.
+  - *Extension Functions*: Extension functions compile to static JVM helper classes (e.g., `FileKt`). A rule verifying that a class doesn't reference a forbidden package can be easily bypassed or misidentified because the static class calls aren't linked cleanly in bytecode.
+  - *Property Delegates and Singletons*: Constructs like `by lazy` or `object` singletons are desugared into backing synthetic fields and initialization check blocks, which obscure simple structural relationships.
+- **Compiler Plugins**: Features like **Jetpack Compose** (recomposition, stable wrappers) and **Kotlinx Serialization** (synthetic serializer fields/methods) alter the generated class bytecode extensively. Writing bytecode rules for these systems becomes extremely fragile.
+- **Gradle Concept Blindness**: ArchUnit does not naturally parse or start from Gradle's project structure. It can inspect class dependencies, but concepts like `:domain`, `:data`, `:feature:checkout:api`, or source sets (like `commonMain` vs `androidMain`) are build-level configurations. Attempting to deduce module boundaries solely from bytecode package hierarchies is a leaky abstraction that breaks as projects scale.
 
 ### Source-Scanning Tools Are Good at Kotlin Declarations
 
@@ -91,10 +94,10 @@ But most architecture rules require whole-project context.
 
 A linter can inspect a file. It usually cannot answer questions like:
 
-- does this Gradle module depend on a forbidden sibling module?
-- did a feature implementation module become visible to another feature implementation?
-- does the project dependency graph contain a cycle?
-- does this public API expose a type owned by another architectural layer?
+- Does this Gradle module depend on a forbidden sibling module?
+- Did a feature implementation module become visible to another feature implementation?
+- Does the project dependency graph contain a cycle?
+- Does this public API expose a type owned by another architectural layer?
 
 Those are architectural questions, not formatting questions.
 
@@ -104,47 +107,57 @@ Konture combines two views of a Kotlin project.
 
 The first view is the build graph:
 
-- Gradle modules;
-- source sets;
-- production Kotlin source directories;
-- declared project dependencies;
-- applied plugin context.
+- Gradle modules.
+- Source sets.
+- Production Kotlin source directories.
+- Declared project dependencies.
+- Applied plugin context.
 
 The second view is the Kotlin source model:
 
-- files;
-- packages;
-- classes and interfaces;
-- imports;
-- annotations;
-- visibility;
-- functions and properties;
-- references between project classes.
+- Files.
+- Packages.
+- Classes and interfaces.
+- Imports.
+- Annotations.
+- Visibility.
+- Functions and properties.
+- References between project classes.
 
 The Gradle plugin captures the build view. The assertion library uses that captured layout and parses Kotlin source with a PSI-based static analysis model.
 
 At a high level, the flow is:
 
 ```mermaid
-flowchart LR
-    subgraph GradleView ["1. Build Graph View"]
-        GB["Gradle Build"] -->|plugin execution| KP["Konture Gradle Plugin"]
-        KP -->|extracts| LM["Layout Metadata<br/>(modules, source sets, dependencies)"]
+flowchart TB
+    Start["Kotlin project"]
+
+    subgraph BuildView ["Build graph view"]
+        GB["Gradle build"]
+        KP["Konture Gradle plugin"]
+        LM["Layout metadata<br/>modules, source sets, dependencies"]
+        GB --> KP --> LM
     end
 
-    subgraph SourceView ["2. Source Code View"]
-        KF["Kotlin Source Files"] -->|static analysis| PA["PSI-based Parser"]
-        PA -->|extracts| SM["Kotlin Source Model<br/>(packages, imports, declarations)"]
+    subgraph SourceView ["Source code view"]
+        KF["Kotlin source files"]
+        PA["PSI-based parser"]
+        SM["Source model<br/>packages, imports, declarations"]
+        KF --> PA --> SM
     end
 
-    LM -->|consumes| AT["Architecture Tests<br/>(assertions)"]
-    SM -->|consumes| AT
-    AT --> TR["Test Results<br/>(success / failure)"]
+    Start --> GB
+    Start --> KF
 
-    style GradleView fill:#faf5ff,stroke:#c084fc,stroke-width:1px
-    style SourceView fill:#f0fdf4,stroke:#4ade80,stroke-width:1px
-    style AT fill:#e0f2fe,stroke:#0284c7,stroke-width:2px,rx:10px
-    style TR fill:#ecfdf5,stroke:#10b981,stroke-width:2px
+    LM --> AT["Architecture tests<br/>module rules + source rules"]
+    SM --> AT
+    AT --> TR["Test result<br/>pass or fail the boundary"]
+
+    style Start fill:#f8fafc,stroke:#64748b,stroke-width:2px
+    style BuildView fill:#faf5ff,stroke:#a855f7,stroke-width:2px
+    style SourceView fill:#f0fdf4,stroke:#22c55e,stroke-width:2px
+    style AT fill:#dbeafe,stroke:#2563eb,stroke-width:2px
+    style TR fill:#ecfdf5,stroke:#059669,stroke-width:2px
 ```
 
 That means you can write module rules and source rules in the same test suite.
@@ -179,8 +192,8 @@ Konture is a standalone Kotlin and Gradle architecture testing library.
 
 It has two main parts:
 
-- a Gradle plugin that extracts the project layout and module dependency graph;
-- a Kotlin assertion library that lets you write architecture rules as ordinary tests.
+- A Gradle plugin that extracts the project layout and module dependency graph.
+- A Kotlin assertion library that lets you write architecture rules as ordinary tests.
 
 Those tests can run in the test framework you already use, because Konture is not tied to a custom runner.
 
@@ -206,97 +219,81 @@ A library team might protect public API packages from leaking implementation cla
 
 Konture does not decide those policies. It makes them executable.
 
-## What Konture Addresses
+## The Three Pillars of Structural Quality
 
-Konture is aimed at the architecture problems that ordinary compilation and linting do not catch well.
+A linter focuses on lines; a compiler focuses on files. Konture focuses on the larger system design. It addresses the architectural problems that ordinary compilation and style checks do not catch, organizing system verification into **Three Pillars of Structural Quality**:
 
-### Module Boundaries
+| Structural Pillar | Target Threat / Architectural Drift | Build-Level Protection (Macro) | Source-Level Protection (Micro) |
+| :--- | :--- | :--- | :--- |
+| **1. Logical Isolation** | Layer-crossing dependencies, forbidden module leaks, and architecture boundary breaches | Gradle dependency graph validation (e.g., verifying feature-to-feature implementation separation) | AST-based import analysis (e.g., ensuring domain classes do not reference framework or database layers) |
+| **2. Semantic Hermeticity** | Encapsulation bypass, public API bloat, and conceptual type pollution | Module export visibility boundaries (`api` vs `implementation` separation) | Kotlin visibility checks (e.g., validating impl packages are marked `internal`) and public signature type assertions |
+| **3. Mechanical Hygiene** | Compilation cycle chains, project layout drift, and file structure entropy | Module cycle checks (`assertNoCycles` to prevent coupling) | File layout assertions (e.g., ensuring file names match primary class names, preventing wildcard imports) |
 
-```kotlin
-Konture.modules {
-    that().haveNamePath(":core:domain")
-    should().notDependOnModule(":core:data")
-    should().notDependOnModule(":app")
-}
-```
+---
 
-This checks the real project dependency graph.
+### Pillar 1: Logical Isolation (Layers & Modules)
 
-### Cycles
+Logical Isolation ensures that high-level abstract modules (such as domain layers or core API contracts) do not compile against or depend on concrete implementation layers (such as database caches or framework-heavy UI modules). 
 
-```kotlin
-Konture.assertNoCycles()
-```
-
-This protects the build graph from circular dependencies.
-
-### Layer Isolation
+Konture allows teams to protect these boundaries at both the build and source levels in the same unified DSL:
 
 ```kotlin
-Konture.layered {
-    val presentation = layer("presentation") definedBy "..presentation.."
-    val domain = layer("domain") definedBy "..domain.."
-    val data = layer("data") definedBy "..data.."
-
-    where(presentation) {
-        mayOnlyAccessLayers(domain)
+Konture.architecture {
+    // Macro-Boundary: Verifying physical Gradle module dependencies
+    modules {
+        that().haveNamePath(":core:domain")
+        should().notDependOnModule(":core:data", ":app")
     }
 
-    where(data) {
-        mayOnlyAccessLayers(domain)
-    }
+    // Micro-Boundary: Restricting dependencies across package structures
+    layered {
+        val presentation = layer("presentation") definedBy "..presentation.."
+        val domain = layer("domain") definedBy "..domain.."
+        val data = layer("data") definedBy "..data.."
 
-    where(domain) {
-        mayOnlyAccessLayers()
+        where(presentation) { mayOnlyAccessLayers(domain) }
+        where(data) { mayOnlyAccessLayers(domain) }
+        where(domain) { mayOnlyAccessLayers() }
     }
 }
 ```
 
-This models a layered dependency direction directly in code.
+---
 
-### Source-Level Conventions
+### Pillar 2: Semantic & API Hermeticity (Visibility & Leakage)
+
+API Hermeticity protects encapsulation. In multi-module environments, Kotlin's default `public` modifier makes it exceptionally easy to leak implementation details across modules. Semantic Hermeticity ensures that modules only expose clean, abstract contracts and do not leak internal annotations or persistence models into public signatures.
 
 ```kotlin
 Konture.classes {
-    that().resideInAPackage("..domain..")
-    that().haveNameEndingWith("Repository")
-    should().beInterfaces()
-}
-```
+    // Enforcing strict Kotlin encapsulation across packages
+    that().resideInAPackage("..impl..")
+    should().beInternal()
 
-This catches a common domain convention: repositories are contracts, not concrete data implementations.
-
-### Type Leakage
-
-```kotlin
-Konture.classes {
+    // Preventing structural persistence leakage (e.g. Hibernate/Jakarta entities) into the clean Domain layer
     that().resideInAPackage("..domain..")
     should().notHaveSignaturesWithTypesAnnotatedWith("jakarta.persistence.Entity")
 }
 ```
 
-This keeps persistence types from leaking into domain APIs.
+---
 
-### Visibility Boundaries
+### Pillar 3: Mechanical Hygiene (Cycles & Layout)
 
-```kotlin
-Konture.classes {
-    that().resideInAPackage("..impl..")
-    should().beInternal()
-}
-```
-
-This prevents implementation packages from becoming accidental public API.
-
-### File Hygiene
+Mechanical Hygiene governs the structural health of the build graph and the cleanliness of individual source directories. It prevents long-term maintenance decay, compilation cycle chains, and review-noise patterns like wildcard imports or multiple unrelated class declarations in a single file.
 
 ```kotlin
+// Protecting the overall Gradle graph from compile-time dependency loops
+Konture.assertNoCycles()
+
+// Standardizing physical class and file layouts for predictable navigation
 Konture.files {
     should().notHaveWildcardImports()
     should().haveOnlyOneClassPerFile()
     should().haveNameMatchingClassName()
 }
 ```
+
 
 This lets teams encode conventions that reduce review noise and keep source structure predictable.
 
@@ -364,9 +361,17 @@ implementation(project(":feature:profile:impl"))
 
 to `:feature:checkout:impl`, the compiler will accept it. Gradle will build it. The shortcut may even solve the immediate feature request.
 
-But the architecture has drifted.
+But the architecture has drifted. And more importantly, **build velocity is about to degrade**.
 
-A Gradle-aware architecture test can fail immediately.
+### The Business Case: Architecture as a Build Performance Engine
+
+Tight coupling across module implementations doesn't just make code harder to read—it actively slows down the development cycle by disrupting Gradle’s optimization features:
+
+- **Incremental Compilation Collapse**: Gradle compiles code incrementally by checking which files have changed and only recompiling upstream code. If `:feature:checkout:impl` has a direct dependency on `:feature:profile:impl`, any local, internal implementation edit inside profile triggers a massive **compilation cascade wave** that recompiles checkout as well. 
+- **Build Cache Invalidation**: Remote and local Gradle build caching allows developers to download compiled outputs of unchanged modules. Direct coupling across implementation modules ruins build caching boundaries, resulting in massive, unnecessary cache-miss cascades.
+- **The API/Implementation Shield**: By forcing modules to only depend on abstract, lightweight `:feature:profile:api` modules, the implementation details are encapsulated. An implementation file change inside `:feature:profile:impl` has **zero** downstream dependency impact because other modules only link against the stable, unchanged `:api` module.
+
+A Gradle-aware architecture test blocks these leaks before they can slow down the team:
 
 ```kotlin
 Konture.modules {
@@ -379,20 +384,24 @@ Konture.modules {
 }
 ```
 
-The important part is that the test is checking modules as modules, not pretending they are just directories.
+The important part is that the test is checking modules as real modules, not pretending they are just directories. By treating architecture enforcement as a **build performance optimizer**, teams can directly justify its adoption as an investment in developer productivity.
 
-## Why Kotlin Source Awareness Matters
+## Why Kotlin Source Awareness Matters: API Hermeticity & Semantic Isolation
 
-Module boundaries are not enough.
+While the Gradle build graph governs **physical linkability** (macro-boundaries), Kotlin source code governs **semantic expression** (micro-boundaries). You can easily have a perfectly legal build dependency graph on paper, while completely violating architectural isolation in source code.
 
-You can have a valid module graph and still leak the wrong concepts inside source code.
+For instance, your `:data` module might correctly depend on `:domain` to implement interfaces. However, what happens when a developer accidentally exposes a database model inside a public signature of a domain boundary class? The project will compile, Gradle is happy, but **the boundary has leaked conceptually**.
 
-For example, `:data` may correctly depend on `:domain`, but a domain package might still reference an implementation detail because it is available somewhere in the test or application classpath.
+This is why true architectural integrity requires **Semantic Isolation**:
 
-Source rules catch those issues:
+- **Bytecode Blindspots**: Classpath sharing means that deep internal dependencies (like third-party libraries or internal implementation details) might leak into abstract modules because they are transitively visible during compilation.
+- **API Surface Pollution**: Standard linters cannot verify the return types of functions or class constructor parameters across an entire project. Only an AST (Abstract Syntax Tree) analyzer that maps Kotlin imports and class hierarchies can enforce strict signature purity.
+
+With Konture, you can declare strict package-level semantic contracts:
 
 ```kotlin
 Konture.classes {
+    // Ensuring domain logic depends strictly on contracts, not concrete implementations
     that().resideInAPackage("..domain..")
     should().onlyDependOnClassesInAnyPackage(
         "..domain..",
@@ -402,100 +411,87 @@ Konture.classes {
 }
 ```
 
-For external framework imports, a team can write a custom predicate:
+For external frameworks or third-party dependency pollution, you can easily compose lightweight AST-based assertions to verify import cleanliness:
 
 ```kotlin
 Konture.scopeFromPackage("com.acme.domain")
-    .assertTrue("Domain must not import framework or persistence APIs") { cls ->
-        cls.imports.none { fqName ->
+    .assertTrue("Domain layer must remain database and framework agnostic") { classModel ->
+        classModel.imports.none { fqName ->
             fqName.startsWith("org.springframework.") ||
                 fqName.startsWith("android.") ||
-                fqName.startsWith("androidx.compose.") ||
                 fqName.startsWith("jakarta.persistence.")
         }
     }
 ```
 
-That gives the team a concrete rule: domain code can use domain types and standard Kotlin or Java types, but not framework-specific APIs.
+This guarantees **API Hermeticity**: your domain layer remains a pure representation of your business logic, entirely isolated from frameworks, databases, and platform-specific code.
 
-## Why It Works for AI-Assisted Development
+## Why It Works for AI-Assisted Development: The Self-Healing Loop
 
-AI-generated code often fails in predictable architectural ways.
+AI coding assistants are highly optimized for **local success**: making the current file compile, passing the immediate unit test, and completing the requested feature as quickly as possible. However, because they lack whole-project structural context, they often make locally logical but architecturally disastrous trade-offs:
 
-It imports the concrete thing because the concrete thing is visible.
+- **Adding Accidental Dependencies**: Adding a physical dependency in a Gradle build file just to make an import compile.
+- **Leaking Concrete Models**: Importing a concrete database or API model directly into a clean, abstract domain class because it is visible on the classpath.
+- **Violating Encapsulation**: Overriding visibility modifiers or placing a class in an implementation package without understanding package conventions.
 
-It adds a Gradle dependency because that makes the reference compile.
+Vague prompt instructions like *"Follow the project architecture"* are rarely enough.
 
-It uses a DTO as a shortcut instead of mapping to a domain model.
+By running architecture tests locally or in CI, Konture provides AI agents with a **deterministic, compiler-like feedback loop**:
 
-It places a new class near a similar class without understanding the package boundary.
+1. **Detection**: An AI agent makes a change that violates a boundary or imports a forbidden type.
+2. **Deterministic Failure**: The architecture test suite fails instantly, printing a clear, human-readable stdout log specifying exactly which files, imports, or modules violated which rule.
+3. **Autonomous Self-Correction**: The AI agent parses the test failure stdout, understands the structural constraint, and automatically refactors its code to use the correct abstraction (such as introducing a domain interface or removing an illegal module dependency).
 
-Konture gives the repository an executable response.
+This transforms architecture tests from a passive quality gate into an **active, self-healing developer loop**. It allows teams to securely leverage high-speed AI development without worrying about gradual codebase erosion.
 
-Instead of relying only on a prompt like:
-
-```text
-Follow the project architecture.
-```
-
-the project can run:
-
-```bash
-./gradlew :konture-test:test
-```
-
-and tell the agent exactly which rule broke.
-
-That is the difference between guidance and enforcement.
+---
 
 ## Konture Features at a Glance
 
-Konture focuses on practical architecture checks for Kotlin projects:
+Konture is designed to provide lightweight, comprehensive, and high-performance quality gates for Kotlin software systems:
 
-- Gradle-aware module dependency rules;
-- source-level Kotlin PSI analysis;
-- architecture-agnostic rule authoring;
-- support for JVM, Android, and Kotlin Multiplatform layouts;
-- ordinary test execution with common Kotlin test frameworks;
-- module, class, file, function, and property assertions;
-- layered architecture DSL;
-- custom predicates for project-specific guardrails;
-- dedicated architecture-test module setup;
-- AI-friendly prompts and skills for setup and rule writing.
+- **Gradle-Aware Module Verification**: Enforce architectural boundaries directly on physical Gradle projects and dependencies.
+- **Source-Level Kotlin AST Analysis**: Inspect packages, imports, classes, functions, and properties using PSI-based static analysis.
+- **Architecture-Agnostic DSL**: Model Clean Architecture, hexagonal adapters, feature-API boundaries, or custom design conventions easily.
+- **KMP and Android Compatibility**: Test multiplatform source sets (`commonMain`, `androidMain`, `iosMain`) and Android module structures natively.
+- **Zero-Overhead Test Execution**: Run your architecture test suite inside standard runners like JUnit or Kotest with no custom runner dependencies.
+- **Granular Assertion Scopes**: Assert structural rules from high-level Gradle modules down to package declarations, file hygiene, and visibility modifiers.
+- **Declarative Layered DSL**: Configure directional access constraints between layers (such as presentation, domain, and data) in a single DSL block.
+- **Custom Extensible Predicates**: Write tailored AST matching logic to capture unique coding patterns or prevent forbidden framework libraries.
+- **Decoupled Architecture-Test Setup**: Keep your architectural rules completely isolated in a dedicated test module, keeping production dependencies clean.
+- **AI-Agent Alignment**: Produce clear, structured, and deterministic stdout errors that help human reviewers and AI assistants self-correct instantly.
 
-The result is a lightweight quality gate that lives with the codebase.
+---
 
 ## When Konture Is a Good Fit
 
-Konture is useful when your architecture rules mention:
+Konture is a highly effective tool when your architectural guidelines or growth pain points involve:
 
-- Gradle modules;
-- Kotlin packages;
-- source sets;
-- domain, data, UI, adapter, or infrastructure layers;
-- feature module isolation;
-- API and implementation module boundaries;
-- Kotlin visibility;
-- public API shape;
-- KMP shared-code portability;
-- project-specific coding conventions that require whole-project context.
+- **Gradle Module Boundaries**: Preventing feature implementation modules from directly referencing sibling implementation modules.
+- **API and Implementation Isolation**: Enforcing strict `:api` and `:impl` module separations to optimize compilation performance.
+- **Kotlin Package and Directory Layering**: Restricting reference directions between presentation, domain, database, and infrastructure layers.
+- **API Surface Purity**: Validating that public-facing signatures do not leak internal annotations or database-specific entities.
+- **Kotlin Visibility Compliance**: Guaranteeing that internal helper packages or implementations are explicitly declared as `internal`.
+- **KMP Platform Portability**: Checking that code in platform-independent directories does not accidentally import platform-specific APIs.
+- **Predictable Structural Conventions**: Requiring single class declarations per file, preventing wildcard imports, or ensuring file names match class names.
 
-It is less useful for rules that a compiler or linter already handles well. If the issue is formatting, use a formatter. If the issue is a simple local smell, use a linter. If the issue is behavior, write a unit or integration test.
+*Note: Konture is less useful for rules that a standard compiler or simple style linter already handles well. If the issue is code formatting, use a formatter. If the issue is local styling, use a linter. Konture is built for structural, high-level system boundaries.*
 
-Konture earns its place when the question is structural.
+---
 
 ## The Core Idea
 
-Architecture tests should not depend on memory.
+Architecture guidelines should never rely on memory. 
 
-They should not depend on a reviewer noticing every boundary violation.
+They should not depend on a developer remembering every boundary, a reviewer catching every micro-leak under review fatigue, or an AI assistant fully absorbing a complex prompt template.
 
-They should not depend on an AI assistant fully absorbing a long prompt.
+**They should simply run.**
 
-They should run.
-
-Konture exists to make Kotlin architecture rules executable against the two things Kotlin teams actually use to structure their systems: the Gradle build graph and the Kotlin source code.
-
-In the next article, we will set up Konture and write a practical starter suite of architecture tests.
+Konture bridges the gap between system design and build-time reality, giving Kotlin teams a unified, fast, and compiler-level quality gate that protects both the Gradle build graph and the Kotlin source code in a single executable test loop.
 
 ---
+
+## Continue the Series
+
+- [Kotlin Architecture Tests: What They Are and Why They Matter](kotlin-architecture-tests-what-and-why.md)
+- [Kotlin Architecture Tests with Konture: A Practical Guide](kotlin-architecture-tests-with-konture.md)

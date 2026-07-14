@@ -9,34 +9,34 @@ FRONT_MATTER_MAP = {
         "nav_order": 1,
         "permalink": "/"
     },
-    "architecture.md": {
-        "layout": "default",
-        "title": "How it Works",
-        "nav_order": 7,
-        "permalink": "/architecture.html"
-    },
     "architecture_test.md": {
         "layout": "default",
         "title": "Why Architecture Testing?",
-        "nav_order": 2,
+        "nav_order": 20,
         "permalink": "/architecture_test.html"
+    },
+    "how_it_works.md": {
+        "layout": "default",
+        "title": "How it Works",
+        "nav_order": 30,
+        "permalink": "/how_it_works.html"
     },
     "contributing.md": {
         "layout": "default",
         "title": "Contributing",
-        "nav_order": 8,
+        "nav_order": 100,
         "permalink": "/contributing.html"
     },
     "installation.md": {
         "layout": "default",
         "title": "Installation",
-        "nav_order": 3,
+        "nav_order": 50,
         "permalink": "/installation.html"
     },
     "showcases.md": {
         "layout": "default",
         "title": "Showcases",
-        "nav_order": 6,
+        "nav_order": 70,
         "permalink": "/showcases.html"
     },
     "recipes/README.md": {
@@ -44,7 +44,7 @@ FRONT_MATTER_MAP = {
         "title": "Recipes",
         "has_children": True,
         "has_toc": False,
-        "nav_order": 5,
+        "nav_order": 60,
         "permalink": "/recipes/"
     },
     "recipes/layer-isolation.md": {
@@ -97,28 +97,28 @@ FRONT_MATTER_MAP = {
     },
     "ai-prompts/README.md": {
         "layout": "default",
-        "title": "AI Prompts & Custom Skills",
+        "title": "AI Prompts & Skills",
         "has_children": True,
         "has_toc": False,
-        "nav_order": 4,
+        "nav_order": 40,
         "permalink": "/ai-prompts/"
     },
     "ai-prompts/setup-prompt.md": {
         "layout": "default",
         "title": "Onboarding & Setup",
-        "parent": "AI Prompts & Custom Skills",
+        "parent": "AI Prompts & Skills",
         "nav_order": 1
     },
     "ai-prompts/writing-tests-prompt.md": {
         "layout": "default",
         "title": "Writing & Generating Tests",
-        "parent": "AI Prompts & Custom Skills",
+        "parent": "AI Prompts & Skills",
         "nav_order": 2
     },
     "ai-prompts/konture-architecture-tests.md": {
         "layout": "default",
         "title": "Writing & Extending Tests (The 6 Pillars)",
-        "parent": "AI Prompts & Custom Skills",
+        "parent": "AI Prompts & Skills",
         "nav_order": 3
     },
     "articles/README.md": {
@@ -126,7 +126,7 @@ FRONT_MATTER_MAP = {
         "title": "Articles",
         "has_children": True,
         "has_toc": False,
-        "nav_order": 5,
+        "nav_order": 80,
         "permalink": "/articles/"
     },
     "articles/kotlin-architecture-tests-what-and-why.md": {
@@ -149,6 +149,12 @@ FRONT_MATTER_MAP = {
         "parent": "Articles",
         "nav_order": 3,
         "permalink": "/articles/kotlin-architecture-tests-with-konture/"
+    },
+    "api-docs.md": {
+        "layout": "default",
+        "title": "API Docs",
+        "nav_order": 90,
+        "permalink": "/api-docs/"
     }
 }
 
@@ -174,15 +180,37 @@ def validate_files(files):
 
 def convert_files(files):
     converted_count = 0
+    import re
+    # Matches a blockquote starting with GFM alert and all subsequent lines in that same blockquote
+    alert_pattern = r'^[ \t]*>[ \t]*\[!(NOTE|TIP|IMPORTANT|WARNING|CAUTION)\][ \t]*\n((?:[ \t]*>[ \t]*.*\n?)*)'
+
+    def replace_alert(match):
+        alert_type = match.group(1).lower()
+        blockquote_body = match.group(2)
+        if not blockquote_body.endswith("\n"):
+            blockquote_body += "\n"
+        # We append the kramdown attribute block immediately after the blockquote
+        return f"{blockquote_body}{{: .{alert_type} }}\n"
+
     for full_path, rel_path in files:
+        with open(full_path, "r", encoding="utf-8") as f:
+            content = f.read()
+
+        # Perform the GFM alert conversion
+        modified_content = re.sub(alert_pattern, replace_alert, content, flags=re.M | re.I)
+
         if rel_path in FRONT_MATTER_MAP:
             metadata = FRONT_MATTER_MAP[rel_path]
-            with open(full_path, "r", encoding="utf-8") as f:
-                content = f.read()
 
-            # Safeguard: if it already starts with front matter ---, skip
+            # Safeguard: if it already starts with front matter ---, check if alert was converted
             if content.startswith("---\n"):
-                print(f"Skipping {rel_path} (already has standard Jekyll front matter).")
+                if modified_content != content:
+                    with open(full_path, "w", encoding="utf-8") as f:
+                        f.write(modified_content)
+                    print(f"Converted GFM alerts in {rel_path} (already has front matter).")
+                    converted_count += 1
+                else:
+                    print(f"Skipping {rel_path} (already has front matter and no GFM alerts to convert).")
                 continue
 
             # Build YAML front matter block
@@ -199,14 +227,22 @@ def convert_files(files):
             lines.append("---")
             lines.append("") # blank line
 
-            new_content = "\n".join(lines) + content.lstrip("\n")
+            new_content = "\n".join(lines) + modified_content.lstrip("\n")
             with open(full_path, "w", encoding="utf-8") as f:
                 f.write(new_content)
-            print(f"Prepended front matter to {rel_path} successfully.")
+            print(f"Prepended front matter and converted GFM alerts in {rel_path} successfully.")
             converted_count += 1
         else:
-            print(f"Warning: No metadata mapped for {rel_path}.")
+            # Not in FRONT_MATTER_MAP but we can still convert alerts if present!
+            if modified_content != content:
+                with open(full_path, "w", encoding="utf-8") as f:
+                    f.write(modified_content)
+                print(f"Converted GFM alerts in unmapped file {rel_path} successfully.")
+                converted_count += 1
+            else:
+                print(f"Warning: No metadata mapped for {rel_path} and no GFM alerts found.")
     return converted_count
+
 
 def main():
     base_dir = "docs"

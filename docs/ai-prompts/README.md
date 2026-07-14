@@ -1,6 +1,6 @@
-# 🤖 AI Prompts & Custom Skills Catalog
+# 🤖 AI Prompts & Skills Catalog
 
-Welcome to the **AI Prompts & Custom Skills** directory. Konture is built from the ground up to be **AI-agent friendly**, offering structured, high-context, and API-accurate prompt assets.
+Welcome to the **AI Prompts & Skills** directory. Konture is built from the ground up to be **AI-agent friendly**, offering structured, high-context, and API-accurate prompt assets.
 
 By providing these prompts to modern AI coding assistants (such as **Gemini Advanced, Claude Pro, ChatGPT**) or loading them as system instructions in AI-integrated IDEs (such as **Cursor, Windsurf, GitHub Copilot**), you can automate architectural test setup, test generation, and review processes with zero syntax errors or hallucinations.
 

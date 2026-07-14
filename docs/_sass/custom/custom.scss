@@ -29,3 +29,117 @@ h5,
 h6 {
   font-weight: 600 !important;
 }
+
+// Custom soft-tinted backgrounds for callouts to restore vibrant colors (fully responsive in light and dark mode)
+blockquote.note, blockquote.note-title {
+  background-color: rgba(9, 105, 218, 0.07) !important; // Soft blue-tinted background
+}
+blockquote.tip, blockquote.tip-title {
+  background-color: rgba(46, 160, 67, 0.08) !important; // Soft green-tinted background
+}
+blockquote.important, blockquote.important-title {
+  background-color: rgba(137, 87, 229, 0.07) !important; // Soft purple-tinted background
+}
+blockquote.warning, blockquote.warning-title {
+  background-color: rgba(248, 81, 73, 0.08) !important; // Soft red-tinted background
+}
+blockquote.caution, blockquote.caution-title {
+  background-color: rgba(210, 153, 0, 0.08) !important; // Soft yellow-tinted background
+}
+
+// =============================================================================
+// Premium Code Block and Inline Code Enhancements
+// =============================================================================
+
+// Outer container for code blocks
+div.highlighter-rouge,
+figure.highlight {
+  position: relative !important;
+  margin: 0.5rem 0 !important;
+  overflow: hidden !important;
+  background-color: $code-background-color !important;
+
+  // Sleek, delicate outline for the rest of the borders to frame it beautifully
+  border: 1.5px solid rgba($grey-lt-100, 0.12) !important;
+  border-radius: 4px !important;
+
+  // Micro-interactive pop on hover
+  &:hover {
+    box-shadow: 0 8px 24px rgba($link-color, 0.1), 0 2px 6px rgba($link-color, 0.04) !important;
+    border-top-color: rgba($link-color, 0.25) !important;
+    border-right-color: rgba($link-color, 0.25) !important;
+    border-bottom-color: rgba($link-color, 0.25) !important;
+    transform: translateY(-1px) !important;
+  }
+}
+
+// Reset standard Jekyll margin/padding on the inner highlight container
+div.highlighter-rouge .highlight,
+figure.highlight .highlight {
+  background-color: transparent !important;
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+// Pre-formatted text area styling
+div.highlighter-rouge pre.highlight,
+figure.highlight pre.highlight {
+  margin: 0 !important;
+  padding: 1.15rem 1.4rem !important;
+  background-color: transparent !important;
+  font-family: "JetBrains Mono", "Fira Code", "SF Mono", Menlo, Monaco, Consolas, "Liberation Mono", monospace !important;
+  font-size: 0.875rem !important;
+  line-height: 1.65 !important;
+  overflow-x: auto !important;
+  border: none !important;
+}
+
+// Ensure the code tags inside preserve their clean structure and formatting
+div.highlighter-rouge code,
+figure.highlight code {
+  font-family: inherit !important;
+  font-size: inherit !important;
+  line-height: inherit !important;
+  color: inherit !important;
+  background-color: transparent !important;
+  padding: 0 !important;
+  border: none !important;
+  border-radius: 0 !important;
+}
+
+// Elegant, ultra-sleek horizontal scrollbar customization
+div.highlighter-rouge pre.highlight::-webkit-scrollbar,
+figure.highlight pre.highlight::-webkit-scrollbar {
+  height: 6px !important;
+}
+
+div.highlighter-rouge pre.highlight::-webkit-scrollbar-track,
+figure.highlight pre.highlight::-webkit-scrollbar-track {
+  background: transparent !important;
+}
+
+div.highlighter-rouge pre.highlight::-webkit-scrollbar-thumb,
+figure.highlight pre.highlight::-webkit-scrollbar-thumb {
+  background: rgba($grey-lt-100, 0.15) !important;
+  border-radius: 10px !important;
+  transition: background-color 0.2s ease !important;
+
+  &:hover {
+    background: rgba($link-color, 0.4) !important;
+  }
+}
+
+// Elegant, cohesive Inline Code styling
+code.language-plaintext.highlighter-rouge {
+  background-color: rgba($link-color, 0.08) !important;
+  color: $link-color !important;
+  border: 1.5px solid rgba($grey-lt-100 , 0.16) !important;
+  border-radius: 6px !important;
+  padding: 0.2em 0.4em !important;
+  font-family: "JetBrains Mono", "Fira Code", "SF Mono", Menlo, Monaco, Consolas, monospace !important;
+  font-size: 0.85em !important;
+  font-weight: 600 !important;
+  word-break: break-word !important;
+}
+
+

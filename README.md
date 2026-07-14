@@ -7,34 +7,18 @@
 <p align="center">
   <a href="https://baole.github.io/konture/"><img src="https://img.shields.io/badge/docs-GitHub%20Pages-blue?style=for-the-badge&logo=github" alt="GitHub Pages"></a>
   <a href="https://plugins.gradle.org/plugin/io.github.baole.konture"><img src="https://img.shields.io/badge/gradle%20plugin-portal-blue?style=for-the-badge&logo=gradle" alt="Gradle Plugin Portal"></a>
-  <a href="https://central.sonatype.com/artifact/io.github.baole/konture"><img src="https://img.shields.io/maven-central/v/io.github.baole/konture?style=for-the-badge&logo=apache-maven" alt="Maven Central"></a>
+  <a href="https://central.sonatype.com/artifact/io.github.baole/konture"><img src="https://img.shields.io/maven-central/v/io.github.baole/konture-core?style=for-the-badge&logo=apache-maven" alt="Maven Central"></a>
   <a href="https://kotlinlang.org/"><img src="https://img.shields.io/badge/kotlin-2.4.0-purple?style=for-the-badge&logo=kotlin" alt="Kotlin"></a>
   <a href="https://gradle.org/"><img src="https://img.shields.io/badge/gradle-9.6.1-blue?style=for-the-badge&logo=gradle" alt="Gradle"></a>
 </p>
 
-**Konture** is a standalone Kotlin & Gradle architecture testing library. It combines real project structure (captured directly from your applied Gradle build graph) with an AST-based static analysis parser and a premium **Fluent Lambda DSL**.
-
-This allows you to write lightning fast, compilation level architectural guardrails as regular, **test framework agnostic** unit tests—fully compatible with **[JUnit 4](https://junit.org/junit4/), [JUnit 5](https://junit.org/junit5/), [JUnit 6](https://junit.org/), [Kotest](https://kotest.io/), [TestBalloon](https://github.com/infix-de/testBalloon)**, or absolutely **any other test runner** (since it runs as a pure Kotlin/JVM library, the choice of test runner does not matter)—verifying module bounds, package isolation, interface adherence, and naming conventions without the classpath or classloader restrictions of traditional runtime testing tools.
-
-> [!NOTE]
-> **🚀 Test Framework Agnostic**
-> Konture is built with zero hard dependencies on specific test runners. Whether your codebase uses traditional JUnit, modern assertion engines like Kotest or TestBalloon, or **any other test runner of your choice**, your architectural guardrails can be written and run natively anywhere standard Kotlin test suites are executed. The underlying framework simply does not matter.
-
-> [!TIP]
-> **📐 Architecture Agnostic & Flexible**
-> Konture does not dictate, restrict, or lock you into any specific architectural style (such as Clean Architecture, Layered, MVVM, Hexagonal, or DDD). It is designed to be completely architecture-agnostic. It serves as a highly adaptable static-analysis toolbox, giving engineers the ultimate flexibility to write rules and constraints that reflexively match and protect whatever specific design patterns their codebase adopts.
-
-> [!IMPORTANT]
-> **🤖 AI-Agent Friendly & Automated Guardrails**
-> In the era of modern software development, collaborating with AI assistants (like Gemini, Claude, and Cursor) is standard practice. Konture is built from the ground up to be **AI-agent friendly**, offering a comprehensive suite of official prompts and custom skills:
-> *   **[🤖 AI Onboarding & Setup Skill](docs/ai-prompts/setup-prompt.md)**: Lets autonomous agents inspect, install, configure, and set up a dedicated test module in any repository with zero manual intervention.
-> *   **[✍️ Unified AI Test Writing & Extensible Guardrails Skill](docs/ai-prompts/writing-tests-prompt.md)**: A complete, copy-pasteable master prompt combining extensible, project-specific reasoning with compile-safe DSL API references for AI assistants.
+**Konture** is a stack- and build-tool agnostic Kotlin architecture testing library for Android, Kotlin Multiplatform (KMP), and JVM backend projects. It combines real project structure (captured directly from your project's build graph) with AST-based static analysis and a premium, architecture-agnostic **Fluent Lambda DSL** to enforce boundaries on any test framework.
 
 ---
 
-## 🛡️ Enforce Boundaries & Prevent Erosion
+## 🛡️ The problem
 
-With multi-module builds, architecture erodes through small shortcuts—such as a feature module declaring a "sideways" dependency on a sibling feature:
+With multi-module / multi-layers projects, architecture erodes through small shortcuts. For example, a feature module declaring a "sideways" dependency on a sibling feature.
 
 ```mermaid
 graph TD
@@ -51,128 +35,60 @@ graph TD
     linkStyle 4 stroke:#ef4444,stroke-width:2px,stroke-dasharray: 5 5;
 ```
 
-Konture analyzes your actual Gradle build graph to enforce physical module isolation, cyclic boundaries, and layer directions directly inside your test suite.
+Konture helps developers to analyze project structure and enforce architectural rules and boundaries directly inside the test suite.
 
 ---
 
-## 📖 Explore the Interactive Documentation
+## 🔑 Key Capabilities
 
-For detailed conceptual overviews, advanced recipes, and complete walkthroughs, visit our official **[GitHub Pages Documentation Site](https://baole.github.io/konture/)** or explore the source files directly:
-
-*   **[🚀 Full Onboarding & Setup](docs/installation.md)**
-*   **[🤖 AI Prompts & Custom Skills Catalog](docs/ai-prompts/README.md)** (Central index on how to load, open, and feed our official prompts into various AI tools)
-*   **[🤖 AI Onboarding Prompt & Custom Skill](docs/ai-prompts/setup-prompt.md)** (Autonomous system prompt to let AI agents install and configure Konture)
-*   **[✍️ Unified AI Test Writing & Extensible Guardrails Prompt](docs/ai-prompts/writing-tests-prompt.md)** (Official master prompt & custom skill to easily design, write, and review custom guardrails using AI)
-*   **[🧩 Core Architecture Concepts](docs/architecture_test.md)**
-*   **[📜 Architectural Recipes](docs/recipes/)** (Layer isolation, naming suffixes, repositories as interfaces, visibility boundaries, etc.)
-*   **[🏢 Real-World Showcases](docs/showcases.md)** (Google's Now in Android, KotlinConf App, Ktor-Arrow backend, etc.)
+*   **📦 Platform & Stack Agnostic**: Works seamlessly across Android, Kotlin Multiplatform (KMP), and Kotlin backend projects (Spring Boot, Ktor, etc.).
+*   **📐 Architecture Agnostic**: Set constraints for any design pattern (Clean, Layered, MVVM, Hexagonal, DDD) without layout restrictions.
+*   **🛠️ Build Tool Agnostic**: Engineered to support multiple build systems, starting with deep Gradle integration and designed for Maven and other build tool support.
+*   **🧪 Test Framework Agnostic**: Runs as a pure JVM library, compatible with [JUnit 4](https://junit.org/junit4/), [JUnit 5](https://junit.org/junit5/), [JUnit 6](https://junit.org/), [Kotest](https://kotest.io/), [TestBalloon](https://github.com/infix-de/testBalloon), or any other runner.
+*   **✍️ Fluent Lambda DSL**: Write expressive, readable assertions for module dependencies, package isolation, interface adherence, and naming conventions.
+*   **🤖 AI-Agent Friendly**: Includes dedicated prompts and custom skills for autonomous integration and code generation:
+    *   **[🤖 AI Onboarding & Setup](docs/ai-prompts/setup-prompt.md)**: Automated Gradle project setup.
+    *   **[✍️ AI Test Writing Guide](docs/ai-prompts/writing-tests-prompt.md)**: Context-rich master prompt for writing compile-safe DSL tests.
 
 ---
 
-## 🚀 1. Installation & Setup
+## 🚀 Getting Started
 
 > [!TIP]
-> **🤖 Save Time: Let AI Set It Up & Write Tests!**
-> Instead of manually copying and editing build configurations, you can use our official, high-context AI prompts and custom skills to let AI assistants (like Gemini, Claude, Cursor) do it for you instantly:
-> *   **[🤖 setup-konture Skill / Prompt](docs/ai-prompts/setup-prompt.md)**: Lets autonomous agents or chat assistants inspect, install, configure, and set up a dedicated test module in any repository with zero manual intervention.
-> *   **[📐 konture-architecture-tests Skill / Prompt](docs/ai-prompts/writing-tests-prompt.md)**: A complete, copy-pasteable master prompt to easily design, write, and review custom guardrails using AI with compile-safe DSL API references.
-> *   See the full **[🤖 AI Prompts & Custom Skills Catalog](docs/ai-prompts/README.md)** for a central index on how to load these.
-> 
-> *Copy the prompts first to automate your entire onboarding!*
+> **🤖 Automated Setup**: Save time by using our [🤖 setup-konture prompt / skill](docs/ai-prompts/setup-prompt.md) to let an AI assistant automatically configure your Gradle project and generate tests. See the [AI Prompts Catalog](docs/ai-prompts/README.md) for details.
 
-Konture requires applying a Gradle plugin to compile your project's build graph, and adding the assertion library to your test module.
+### Installation
 
-### Option A: Using Gradle Version Catalogs (Recommended)
+#### Gradle
 
-#### Step 1: Declare inside `gradle/libs.versions.toml`
-```toml
-[versions]
-konture = "0.6.8"
-
-[plugins]
-konture = { id = "io.github.baole.konture", version.ref = "konture" }
-
-[libraries]
-konture = { group = "io.github.baole", name = "konture", version.ref = "konture" }
-```
-
-#### Step 2: Apply the plugin in your root `build.gradle.kts`
-```kotlin
-plugins {
-    alias(libs.plugins.konture) apply true
-}
-```
-
-#### Step 3: Add the dependency in your test module's `build.gradle.kts`
-```kotlin
-dependencies {
-    testImplementation(libs.konture)
-}
-```
-
----
-
-### Option B: Traditional Gradle DSL
-
-#### Step 1: Apply the plugin in your root `build.gradle.kts`
+1. Apply the plugin to your root `build.gradle.kts`:
 ```kotlin
 plugins {
     id("io.github.baole.konture") version "0.6.8" apply true
 }
 ```
 
-#### Step 2: Add the dependency in your test module's `build.gradle.kts`
+2. Add the dependency to your test module's `build.gradle.kts`:
 ```kotlin
 dependencies {
     testImplementation("io.github.baole:konture:0.6.8")
 }
 ```
 
----
+> [!IMPORTANT]
+> We recommend running your architectural guards in a dedicated test module, such as `:konture-test` (see our [sample module](/konture-test/)).
 
-## 📦 2. Best Practice: Dedicated `konture-test` Module
+> [!NOTE]
+> For alternative Gradle plugin setup formats, refer to the [Gradle Plugin Portal](https://plugins.gradle.org/plugin/io.github.baole.konture).
 
-To keep your production codebases pristine and separate from test dependencies, we highly recommend creating a **dedicated, isolated module** (e.g., `:konture-test` or `:architecture-tests`) for running your architectural guards.
+#### Maven (Coming Soon)
 
-### Step 1: Create a new module and register it in `settings.gradle.kts`
-```kotlin
-include(":konture-test")
-```
+Support for Maven is currently in development.
 
-### Step 2: Configure `konture-test/build.gradle.kts`
-Apply the Kotlin JVM plugin, pull in the Konture assertion library, and declare dependencies on the production modules you want to verify (you can use **any** test framework of your choice, such as [JUnit 4](https://junit.org/junit4/), [JUnit 5](https://junit.org/junit5/), [JUnit 6](https://junit.org/), [Kotest](https://kotest.io/), or [TestBalloon](https://github.com/infix-de/testBalloon)):
+### Write Your First Guardrail
 
-```kotlin
-plugins {
-    kotlin("jvm")
-}
+Create a unit test to enforce architectural boundaries and conventions. Since Konture is completely architecture-agnostic, you can configure guards that match your codebase's custom patterns:
 
-dependencies {
-    // 🧬 Pull in the premium Konture assertion engine
-    testImplementation("io.github.baole:konture:0.6.8")
-
-    // 🧪 Test runners (JUnit 5 is used here as a standard example, but any framework works!)
-    testImplementation("org.junit.jupiter:junit-jupiter-api:5.11.0")
-    testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:5.11.0")
-
-    // 📂 Declare dependencies on modules to analyze (to make sure they are compiled first)
-    testImplementation(project(":core:domain"))
-    testImplementation(project(":core:data"))
-    testImplementation(project(":feature:bookmarks"))
-}
-
-tasks.test {
-    useJUnitPlatform()
-}
-```
-
----
-
-## ✍️ 3. Write Your First Guardrail
-
-Since Konture is completely architecture-agnostic, you can reflexively write assertions to match whatever target architecture pattern your codebase uses. You have the ultimate freedom to define your own boundaries, conventions, and layer structures.
-
-Create a standard unit test inside `konture-test/src/test/kotlin/` using our premium, ergonomic **Fluent Lambda DSL**:
 
 ```kotlin
 import io.github.baole.konture.dsl.architecture
@@ -206,6 +122,18 @@ class ArchitectureGuardrails {
 }
 ```
 
+
+## 📖 Documentation
+
+Visit our official **[GitHub Pages Documentation Site](https://baole.github.io/konture/)** or explore the resources directly:
+
+*   **[🚀 Onboarding & Setup](docs/installation.md)**: Manual integration guide.
+*   **[🤖 AI Prompts & Skills Catalog](docs/ai-prompts/README.md)**: Dedicated prompts for [autonomous setup](docs/ai-prompts/setup-prompt.md) and [test generation](docs/ai-prompts/writing-tests-prompt.md).
+*   **[🧩 Core Concepts](docs/architecture_test.md)**: Static-analysis engine details.
+*   **[📜 Recipes](docs/recipes/)**: Templates for common guardrails (layer isolation, interface conventions, etc.).
+*   **[🏢 Showcases](docs/showcases.md)**: Real-world configurations (Now in Android, KotlinConf, Ktor, etc.).
+
 ## 🤝 Contributing
 
-We welcome contributions of all kinds! Please see our **[Contribution Guidelines](docs/contributing.md)** (also available online as an interactive **[Contributing Guide](https://baole.github.io/konture/contributing.html)**) for details on how to set up your local development environment, import the project, run local verification builds, and submit Pull Requests.
+We welcome all contributions! Please check our **[Contribution Guidelines](docs/contributing.md)** (or the online **[Contributing Guide](https://baole.github.io/konture/contributing.html)**) for local setup, build commands, and PR workflows.
+

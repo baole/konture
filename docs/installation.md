@@ -5,8 +5,8 @@
 > Instead of manually copying and editing build configurations, you can use our official, high-context AI prompts and custom skills to let AI assistants (like Gemini, Claude, Cursor) do it for you instantly:
 > *   **[🤖 setup-konture Skill / Prompt](ai-prompts/setup-prompt.md)**: Lets autonomous agents or chat assistants inspect, install, configure, and set up a dedicated test module in any repository with zero manual intervention.
 > *   **[📐 konture-architecture-tests Skill / Prompt](ai-prompts/writing-tests-prompt.md)**: A complete, copy-pasteable master prompt to easily design, write, and review custom guardrails using AI with compile-safe DSL API references.
-> *   See the full **[🤖 AI Prompts & Custom Skills Catalog](ai-prompts/README.md)** for a central index on how to load these.
-> 
+> *   See the full **[🤖 AI Prompts & Skills Catalog](ai-prompts/README.md)** for a central index on how to load these.
+>
 > *Copy the prompts first to automate your entire onboarding!*
 
 Konture is designed to integrate into your Kotlin or Gradle project with minimal friction. It is structured into two parts:
@@ -91,7 +91,7 @@ repositories {
 dependencies {
     // The unified assertion library containing all assertion builders and styles
     testImplementation("io.github.baole:konture:0.6.8")
-    
+
     // Test runner of your choice (JUnit 5 is shown as a standard example, but Kotest, TestBalloon, JUnit 4/6 work natively too!)
     testImplementation("org.junit.jupiter:junit-jupiter-api:5.11.0")
     testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:5.11.0")
