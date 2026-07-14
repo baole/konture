@@ -2,30 +2,30 @@
 
 _Kotlin architecture has two sources of truth: the Gradle graph that decides what can link, and the Kotlin source model that decides what the code actually says. Konture exists to test both._
 
-Consider a familiar rule:
+Consider a rule from a Kotlin Multiplatform project:
 
-> The domain layer must not depend on the data layer.
+> Shared `commonMain` code must not depend on Android UI APIs.
 
-In a Kotlin project, that rule can fail in two different places.
+That rule can fail in two different places.
 
-It can fail in the build graph:
+It can fail in the build graph when the shared module is wired to a platform implementation module:
 
 ```kotlin
-// domain/build.gradle.kts
+// shared/build.gradle.kts
 dependencies {
-    implementation(project(":data"))
+    implementation(project(":androidApp"))
 }
 ```
 
 It can also fail in source:
 
 ```kotlin
-package com.acme.domain
+package com.acme.shared
 
-import com.acme.data.UserRepositoryImpl
+import android.view.View
 ```
 
-Those failures are related, but they are not identical. The first is a physical Gradle module dependency. The second is a source-level reference. A serious architecture-testing tool for Kotlin has to understand both, because large Kotlin systems are governed by both.
+Those failures are related, but they are not identical. The first is a physical Gradle module dependency. The second is a source-level import. A serious architecture-testing tool for Kotlin has to understand both, because multiplatform systems are governed by both.
 
 That is the reason Konture exists.
 
@@ -41,6 +41,8 @@ Existing tools are useful. Konture is not trying to replace the compiler, the li
 | Linters | Local style and single-file quality | Whole-project structure and architectural ownership |
 
 Kotlin architecture sits across those views.
+
+You can see that in the checked-in showcases. The Now in Android showcase includes 36 Gradle projects in `settings.gradle.kts`, including API/implementation feature splits and a dedicated `:konture-test` project. The KotlinConf KMP showcase includes 9 Gradle projects spanning shared core, backend, Android, desktop, web, admin, and architecture tests. A single-view tool can still be useful in those projects, but it will not naturally see every boundary the project uses.
 
 ### Bytecode Is Valuable, But It Is Not the Whole Kotlin Program
 
@@ -149,14 +151,14 @@ That lets a team express a boundary at both levels:
 ```kotlin
 Konture.architecture {
     modules {
-        that().haveNamePath(":domain")
-        should().notDependOnModule(":data")
+        that().haveNamePath(":shared")
+        should().notDependOnModule(":androidApp")
     }
 
     classes {
-        that().resideInAPackage("..domain..")
+        that().resideInAPackage("..shared..")
         should().onlyDependOnClassesInAnyPackage(
-            "..domain..",
+            "..shared..",
             "kotlin..",
             "java..",
         )
@@ -164,7 +166,7 @@ Konture.architecture {
 }
 ```
 
-The module rule catches the physical build dependency. The source rule catches the source-level reference pattern. Used together, they give better coverage than either view alone.
+The module rule catches the physical build dependency. The source rule catches the source-level reference pattern. Used together, they cover a boundary that neither build inspection nor source inspection can fully own alone.
 
 ## What Konture Is
 
@@ -331,18 +333,26 @@ Common failure modes:
 
 These tradeoffs do not weaken the case for architecture tests. They define the bar for using them responsibly.
 
+For example, a tempting KMP rule is:
+
+```text
+Shared code must not import kotlinx..
+```
+
+That is usually too broad. `kotlinx.coroutines` may be a legitimate shared-code dependency, while an Android framework import is not. The better rule is narrower: ban the platform or framework packages that actually violate portability, and allow the cross-platform libraries the architecture intentionally uses.
+
 Start with stable, high-signal rules. Make exceptions visible. Prove every rule can fail. Treat rule changes as architecture changes, not as a way to get CI green.
 
 ## Evidence From the Showcase Suites
 
 The repository includes showcase suites that exercise Konture at different levels of complexity.
 
-The smallest Gradle showcase models a classic `:app`, `:domain`, and `:data` project. Its architecture tests verify the module graph, source package boundaries, repository contracts, use case placement, type-leakage rules, and access rules. It also includes a negative test that asserts a deliberately wrong module rule throws an `AssertionError`, which is a useful pattern for proving a rule can actually fail.
+The smallest Gradle showcase models a classic `:app`, `:domain`, and `:data` project. Its standard architecture suite contains 14 tests covering the module graph, source package boundaries, repository contracts, use case placement, type-leakage rules, and access rules. It also includes a negative test that asserts a deliberately wrong module rule throws an `AssertionError`, which is a useful pattern for proving a rule can actually fail.
 
 The larger showcases are more representative of staff-level platform concerns:
 
-- The Now in Android suite checks that feature modules do not depend on `:app`, do not bypass repositories to reach database or network modules, keep feature API modules independent from feature implementation modules, prevent feature implementation-to-implementation coupling, and keep ViewModels away from Android framework imports.
-- The KotlinConf KMP suite checks that the shared `:core` module stays a leaf dependency, client app modules do not depend on backend implementation, backend code does not depend on frontend client modules, and backend routes do not directly import repositories or database schemas.
+- The inspected Now in Android architecture files contain 13 tests checking that feature modules do not depend on `:app`, do not bypass repositories to reach database or network modules, keep feature API modules independent from feature implementation modules, prevent feature implementation-to-implementation coupling, and keep ViewModels away from Android framework imports.
+- The inspected KotlinConf KMP boundary/backend files contain 8 tests checking that the shared `:core` module stays a leaf dependency, client app modules do not depend on backend implementation, backend code does not depend on frontend client modules, and backend routes do not directly import repositories or database schemas.
 
 Those are not toy style rules. They are executable versions of ownership and platform constraints: feature decoupling, shared-model purity, backend/frontend separation, route-service boundaries, and API surface control.
 

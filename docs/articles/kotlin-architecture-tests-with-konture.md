@@ -7,7 +7,7 @@ The best first architecture test is usually not clever.
 It is a rule the team already believes:
 
 ```text
-The domain module must not depend on the data module.
+Feature implementation modules must not depend on sibling feature implementation modules.
 ```
 
 That rule is concrete. It is easy to explain. It is painful when broken. It also exercises the right habit: encode a real architectural decision, not an idealized diagram.
@@ -23,8 +23,12 @@ flowchart TD
     subgraph Root ["Root Project Structure"]
         direction LR
         subgraph Prod ["Production Modules"]
-            App[":app"] --> Domain[":domain"]
-            Data[":data"] --> Domain
+            App[":app"] --> CheckoutImpl[":feature:checkout:impl"]
+            App --> ProfileImpl[":feature:profile:impl"]
+            CheckoutImpl --> CheckoutApi[":feature:checkout:api"]
+            ProfileImpl --> ProfileApi[":feature:profile:api"]
+            CheckoutImpl --> Core[":core:domain"]
+            ProfileImpl --> Core
         end
 
         subgraph Test ["Architecture Tests"]
@@ -33,15 +37,19 @@ flowchart TD
     end
 
     KT -->|testImplementation| App
-    KT -->|testImplementation| Data
-    KT -->|testImplementation| Domain
+    KT -->|testImplementation| CheckoutImpl
+    KT -->|testImplementation| ProfileImpl
+    KT -->|testImplementation| Core
 
     style Root fill:#fafafa,stroke:#e4e4e7,stroke-width:1px
     style Prod fill:#f0fdf4,stroke:#4ade80,stroke-width:1px
     style Test fill:#eff6ff,stroke:#3b82f6,stroke-width:2px
     style App fill:#ecfdf5,stroke:#10b981,stroke-width:1px
-    style Domain fill:#ecfdf5,stroke:#10b981,stroke-width:1px
-    style Data fill:#ecfdf5,stroke:#10b981,stroke-width:1px
+    style CheckoutImpl fill:#ecfdf5,stroke:#10b981,stroke-width:1px
+    style ProfileImpl fill:#ecfdf5,stroke:#10b981,stroke-width:1px
+    style CheckoutApi fill:#ecfdf5,stroke:#10b981,stroke-width:1px
+    style ProfileApi fill:#ecfdf5,stroke:#10b981,stroke-width:1px
+    style Core fill:#ecfdf5,stroke:#10b981,stroke-width:1px
     style KT fill:#dbeafe,stroke:#1d4ed8,stroke-width:2px
 ```
 
@@ -111,9 +119,12 @@ dependencies {
     testImplementation("org.junit.jupiter:junit-jupiter-api:5.11.0")
     testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:5.11.0")
 
-    testImplementation(project(":domain"))
-    testImplementation(project(":data"))
     testImplementation(project(":app"))
+    testImplementation(project(":core:domain"))
+    testImplementation(project(":feature:checkout:api"))
+    testImplementation(project(":feature:checkout:impl"))
+    testImplementation(project(":feature:profile:api"))
+    testImplementation(project(":feature:profile:impl"))
 }
 
 tasks.test {
@@ -121,22 +132,7 @@ tasks.test {
 }
 ```
 
-Replace the sample dependencies with the modules your rules inspect:
-
-```kotlin
-dependencies {
-    testImplementation(libs.konture)
-
-    testImplementation(project(":core:domain"))
-    testImplementation(project(":core:data"))
-    testImplementation(project(":feature:checkout:api"))
-    testImplementation(project(":feature:checkout:impl"))
-    testImplementation(project(":feature:profile:api"))
-    testImplementation(project(":feature:profile:impl"))
-}
-```
-
-The architecture-test module should see the code and build metadata it checks.
+Replace the sample dependency list with the modules your rules inspect. The architecture-test module should see the code and build metadata it checks.
 
 ## Step 3: Start With One Build-Graph Rule
 
@@ -151,19 +147,22 @@ import org.junit.jupiter.api.Test
 class ArchitectureGuardrailsTest {
 
     @Test
-    fun `domain must not depend on data or app modules`() {
+    fun `feature implementations must not depend on sibling feature implementations`() {
         Konture.modules {
-            that().haveNamePath(":domain")
-            should().notDependOnModule(":data")
-            should().notDependOnModule(":app")
+            that().haveNameMatching(":feature:**:impl")
+            should().onlyDependOnModules(
+                ":feature:**:api",
+                ":core:**",
+                ":shared",
+            )
         }
     }
 }
 ```
 
-This rule checks the Gradle project graph. If someone adds `implementation(project(":data"))` to `:domain`, the architecture test fails.
+This rule checks the Gradle project graph. If `:feature:checkout:impl` adds `implementation(project(":feature:profile:impl"))`, the architecture test fails.
 
-For a nested module layout, use the real paths:
+For a simpler layered project, use the real paths:
 
 ```kotlin
 Konture.modules {
@@ -297,7 +296,7 @@ The API module exposes contracts. The implementation module should not become a 
 
 ## Step 9: Protect Feature Module Isolation
 
-Sibling feature implementations usually should not depend on each other directly.
+If you did not start with feature isolation, add it once the basic module rules are stable. Sibling feature implementations usually should not depend on each other directly.
 
 ```kotlin
 @Test
@@ -434,6 +433,15 @@ The repository's sample Gradle showcase uses the same pattern:
 
 That command runs a dedicated architecture-test module against a small `:app`, `:domain`, and `:data` project. The suite covers module dependencies, class package boundaries, repository contracts, type leakage in use case signatures, and a negative assertion that proves a deliberately wrong module rule fails.
 
+The negative assertion demonstrates the failure shape you should expect from a real violation:
+
+```text
+Architecture violation(s) detected:
+Module :data depends on :domain, which is not allowed by pattern(s): :app
+```
+
+The fix is not to weaken the rule. The fix is to restore the intended graph, or to change the rule only if the architecture decision has genuinely changed. For the feature example above, that usually means moving the shared contract into `:feature:profile:api` and depending on that API module instead of `:feature:profile:impl`.
+
 When a rule fails, handle it like any other test failure:
 
 1. Read the violation.
@@ -457,9 +465,19 @@ Add these principles before growing the suite:
 
 The showcase projects are useful calibration material. The Now in Android suite demonstrates feature decoupling, ViewModel framework-import checks, and `:api`/`:impl` separation. The KotlinConf KMP suite demonstrates shared-core purity, backend/frontend separation, and route-to-service boundaries. Use examples like those to design rules around real architectural pressure, not abstract neatness.
 
+## What This Costs
+
+Architecture tests are cheap compared with late structural repair, but they are not free:
+
+- The first pass against an existing codebase often surfaces legacy violations and false positives that need triage before enforcement.
+- The team has to learn enough of the DSL to express policy precisely instead of encoding broad, frustrating rules.
+- Every durable rule becomes maintenance surface when the architecture changes; rule edits should be reviewed as design changes.
+
+For one focused rule set, such as feature implementation isolation or domain purity, many teams can usually move from informational CI to required CI within a sprint or two. Treat that as a rough calibration, not a promise: older codebases and large migration zones need more time.
+
 ## A Starter Suite
 
-Here is a compact starting point for a small layered project:
+Here is a compact starting point for a modular feature project:
 
 ```kotlin
 package com.acme
@@ -475,11 +493,22 @@ class ArchitectureGuardrailsTest {
     }
 
     @Test
-    fun `domain must not depend on data or app modules`() {
+    fun `feature API modules must not depend on feature implementation modules`() {
         Konture.modules {
-            that().haveNamePath(":domain")
-            should().notDependOnModule(":data")
-            should().notDependOnModule(":app")
+            that().haveNameMatching(":feature:**:api")
+            should().notDependOnModule(":feature:**:impl")
+        }
+    }
+
+    @Test
+    fun `feature implementations must not depend on sibling feature implementations`() {
+        Konture.modules {
+            that().haveNameMatching(":feature:**:impl")
+            should().onlyDependOnModules(
+                ":feature:**:api",
+                ":core:**",
+                ":shared",
+            )
         }
     }
 
@@ -492,15 +521,6 @@ class ArchitectureGuardrailsTest {
                 "kotlin..",
                 "java..",
             )
-        }
-    }
-
-    @Test
-    fun `repositories inside domain must be interfaces`() {
-        Konture.classes {
-            that().resideInAPackage("..domain..")
-            that().haveNameEndingWith("Repository")
-            should().beInterfaces()
         }
     }
 

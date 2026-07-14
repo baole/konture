@@ -128,6 +128,21 @@ This category matters for design and for build performance. Unnecessary module e
 
 Some architecture failures are not about imports in a private implementation. They are about what a module exposes.
 
+```mermaid
+flowchart LR
+    DomainApi["Public domain API<br/>UserRepository"]
+    Leak["Persistence type<br/>UserEntity"]
+    Consumer["App or feature consumer"]
+
+    DomainApi -.->|"forbidden return type"| Leak
+    Consumer -->|"now coupled to"| Leak
+
+    style DomainApi fill:#dbeafe,stroke:#2563eb,stroke-width:2px
+    style Leak fill:#fee2e2,stroke:#dc2626,stroke-width:2px
+    style Consumer fill:#f8fafc,stroke:#64748b,stroke-width:1px
+    linkStyle 0,1 stroke:#dc2626,stroke-width:2px,stroke-dasharray: 6 6;
+```
+
 Typical rules:
 
 - Public domain APIs should not expose database entities or network DTOs.
@@ -211,8 +226,8 @@ The test name documents the rule. The assertion defines the rule. The failure ou
 That changes the review conversation. Instead of asking a reviewer to remember every boundary under time pressure, the repository can report:
 
 ```text
-Domain boundary violated:
-  :domain depends on forbidden module :data
+Architecture violation(s) detected:
+Module :domain should not depend on :data, but a dependency was found.
 ```
 
 The team still decides whether the rule is right. The test removes the need to rediscover the same violation by hand.
@@ -230,7 +245,14 @@ Its architecture suite does not only check one happy-path rule. It combines seve
 - Repository declarations in domain are interfaces.
 - Use case signatures do not leak `.data.` or `.app.` types.
 
-One test deliberately proves that a bad module rule throws an `AssertionError`. That matters. A structural rule that has never failed may not be checking the thing the team thinks it is checking.
+One test deliberately proves that a bad module rule throws an `AssertionError`. The intentionally wrong assertion says `:data` should only depend on `:app`; the sample project has `:data` depending on `:domain`, so the rule fails with the same shape as a real architectural regression:
+
+```text
+Architecture violation(s) detected:
+Module :data depends on :domain, which is not allowed by pattern(s): :app
+```
+
+That matters. A structural rule that has never failed may not be checking the thing the team thinks it is checking.
 
 The sample suite is executable:
 
@@ -287,14 +309,13 @@ Architecture tests help teams preserve the structure that makes future changes c
 - They prevent accidental Gradle edges that widen recompilation.
 - They protect API modules from leaking implementation detail.
 - They make public visibility intentional.
-- They reduce repeated review comments.
-- They give AI-assisted changes a concrete structural feedback loop.
+- They turn repeated review comments into checks that fail with specific modules, files, imports, or types.
 
 The goal is not rigid architecture. The goal is explicit architecture.
 
 Once a team has chosen a structure, the build should help protect it.
 
-In the next article, we will look at why Kotlin projects often need more than bytecode scanning, source scanning, or Gradle inspection alone. Modern Kotlin architecture lives in the relationship between the build graph and the source model.
+The next article focuses on the part this primer has only hinted at: why a source-only rule misses Gradle dependency drift, why a Gradle-only rule misses source-level type leakage, and why Kotlin architecture tests need both views at once.
 
 ---
 
