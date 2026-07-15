@@ -2,7 +2,9 @@ plugins {
     kotlin("jvm")
 }
 
-pluginManager.apply("io.github.baole.konture")
+if (System.getProperty("archTest") != null) {
+    pluginManager.apply("io.github.baole.konture")
+}
 
 dependencies {
     // Rely on published SNAPSHOT artifacts from mavenLocal()
