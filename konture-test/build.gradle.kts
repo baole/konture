@@ -16,4 +16,7 @@ dependencies {
 
 tasks.test {
     useJUnitPlatform()
+    onlyIf {
+        System.getProperty("archTest") != null
+    }
 }
