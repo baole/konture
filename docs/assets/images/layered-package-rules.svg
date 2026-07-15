@@ -1,0 +1,111 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="900" height="480" viewBox="0 0 900 480" role="img" aria-labelledby="title desc">
+  <title id="title">Layered Package Rules</title>
+  <desc id="desc">Trifold diagram showing access rules for presentation, data, and domain layers. Both presentation and data layers may access domain layers, but reverse or horizontal access is strictly forbidden.</desc>
+  <defs>
+    <!-- Gradients -->
+    <linearGradient id="yellow-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#fef9c3"/>
+      <stop offset="100%" stop-color="#fef08a"/>
+    </linearGradient>
+    <linearGradient id="orange-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#ffedd5"/>
+      <stop offset="100%" stop-color="#fed7aa"/>
+    </linearGradient>
+    <linearGradient id="sky-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#e0f2fe"/>
+      <stop offset="100%" stop-color="#bae6fd"/>
+    </linearGradient>
+
+    <!-- Shadows -->
+    <filter id="shadow" x="-5%" y="-5%" width="110%" height="115%" filterUnits="userSpaceOnUse">
+      <feDropShadow dx="0" dy="4" stdDeviation="5" flood-color="#0f172a" flood-opacity="0.08"/>
+    </filter>
+
+    <style>
+      .bg { fill: #ffffff; }
+      .container { stroke-width: 1.5; rx: 16; filter: url(#shadow); }
+      .container-presentation { fill: url(#yellow-grad); stroke: #ca8a04; }
+      .container-data { fill: url(#orange-grad); stroke: #ea580c; }
+      .container-domain { fill: url(#sky-grad); stroke: #0284c7; stroke-width: 2; }
+
+      .text-title { font-family: Inter, system-ui, -apple-system, sans-serif; font-size: 15px; font-weight: 800; fill: #0f172a; }
+      .text-subtitle { font-family: "JetBrains Mono", Fira Code, monospace, Courier; font-size: 11px; font-weight: 600; fill: #334155; }
+      .text-body { font-family: Inter, system-ui, -apple-system, sans-serif; font-size: 11px; font-weight: 500; fill: #475569; }
+
+      .text-label-allowed { font-family: Inter, system-ui, -apple-system, sans-serif; font-size: 10px; font-weight: 700; fill: #16a34a; }
+      .text-label-forbidden { font-family: Inter, system-ui, -apple-system, sans-serif; font-size: 10px; font-weight: 700; fill: #dc2626; }
+
+      .arrow-allowed { stroke: #16a34a; stroke-width: 2; fill: none; marker-end: url(#arrow-green); stroke-linecap: round; }
+      .arrow-forbidden { stroke: #ef4444; stroke-width: 2; stroke-dasharray: 6 4; fill: none; marker-end: url(#arrow-red); stroke-linecap: round; }
+    </style>
+
+    <marker id="arrow-green" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto">
+      <path d="M1,1 L7,4 L1,7 Z" fill="#16a34a"/>
+    </marker>
+    <marker id="arrow-red" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto">
+      <path d="M1,1 L7,4 L1,7 Z" fill="#ef4444"/>
+    </marker>
+  </defs>
+
+  <rect class="bg" width="900" height="480"/>
+
+  <!-- PRESENTATION LAYER CONTAINER -->
+  <g transform="translate(60, 40)">
+    <rect class="container container-presentation" width="320" height="130"/>
+    <text class="text-title" x="160" y="34" text-anchor="middle" fill="#854d0e">presentation layer</text>
+    <text class="text-subtitle" x="160" y="58" text-anchor="middle" fill="#a16207">'..presentation..'</text>
+    <text class="text-body" x="160" y="90" text-anchor="middle" font-weight="600" fill="#854d0e">UI Composables, fragments,</text>
+    <text class="text-body" x="160" y="108" text-anchor="middle" font-weight="600" fill="#854d0e">ViewModels, controllers</text>
+  </g>
+
+  <!-- DATA LAYER CONTAINER -->
+  <g transform="translate(520, 40)">
+    <rect class="container container-data" width="320" height="130"/>
+    <text class="text-title" x="160" y="34" text-anchor="middle" fill="#9a3412">data layer</text>
+    <text class="text-subtitle" x="160" y="58" text-anchor="middle" fill="#c2410c">'..data..'</text>
+    <text class="text-body" x="160" y="90" text-anchor="middle" font-weight="600" fill="#9a3412">Room SQL databases, repositories,</text>
+    <text class="text-body" x="160" y="108" text-anchor="middle" font-weight="600" fill="#9a3412">persistence models, network clients</text>
+  </g>
+
+  <!-- DOMAIN LAYER CONTAINER -->
+  <g transform="translate(290, 290)">
+    <rect class="container container-domain" width="320" height="130"/>
+    <text class="text-title" x="160" y="34" text-anchor="middle" fill="#1e3a8a">domain layer</text>
+    <text class="text-subtitle" x="160" y="58" text-anchor="middle" fill="#1d4ed8">'..domain..'</text>
+    <text class="text-body" x="160" y="90" text-anchor="middle" font-weight="700" fill="#1d4ed8">Pure business entities, use cases,</text>
+    <text class="text-body" x="160" y="108" text-anchor="middle" font-weight="700" fill="#1d4ed8">clean application/domain services</text>
+  </g>
+
+  <!-- ARROWS -->
+
+  <!-- Allowed Presentation -> Domain -->
+  <path class="arrow-allowed" d="M 220 173 C 220 220, 350 220, 350 285"/>
+  <rect x="175" y="210" width="80" height="18" rx="4" fill="#f0fdf4" stroke="#bbf7d0" stroke-width="0.5"/>
+  <text class="text-label-allowed" x="215" y="222" text-anchor="middle">may access</text>
+
+  <!-- Allowed Data -> Domain -->
+  <path class="arrow-allowed" d="M 680 173 C 680 220, 550 220, 550 285"/>
+  <rect x="645" y="210" width="80" height="18" rx="4" fill="#f0fdf4" stroke="#bbf7d0" stroke-width="0.5"/>
+  <text class="text-label-allowed" x="685" y="222" text-anchor="middle">may access</text>
+
+  <!-- Forbidden Domain -> Presentation -->
+  <path class="arrow-forbidden" d="M 410 285 C 410 240, 280 240, 280 177"/>
+  <rect x="300" y="243" width="70" height="18" rx="4" fill="#fff5f5" stroke="#fecaca" stroke-width="0.5"/>
+  <text class="text-label-forbidden" x="335" y="255" text-anchor="middle">forbidden</text>
+
+  <!-- Forbidden Domain -> Data -->
+  <path class="arrow-forbidden" d="M 490 285 C 490 240, 620 240, 620 177"/>
+  <rect x="530" y="243" width="70" height="18" rx="4" fill="#fff5f5" stroke="#fecaca" stroke-width="0.5"/>
+  <text class="text-label-forbidden" x="565" y="255" text-anchor="middle">forbidden</text>
+
+  <!-- Horizontal forbidden: presentation -> data -->
+  <path class="arrow-forbidden" d="M 383 90 L 515 90"/>
+  <rect x="415" y="66" width="70" height="18" rx="4" fill="#fff5f5" stroke="#fecaca" stroke-width="0.5"/>
+  <text class="text-label-forbidden" x="450" y="78" text-anchor="middle">forbidden</text>
+
+  <!-- Horizontal forbidden: data -> presentation -->
+  <path class="arrow-forbidden" d="M 517 120 L 385 120"/>
+  <rect x="415" y="126" width="70" height="18" rx="4" fill="#fff5f5" stroke="#fecaca" stroke-width="0.5"/>
+  <text class="text-label-forbidden" x="450" y="138" text-anchor="middle">forbidden</text>
+
+</svg>

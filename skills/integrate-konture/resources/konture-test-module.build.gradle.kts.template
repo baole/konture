@@ -1,7 +1,7 @@
 // Template for a new, dedicated Konture architecture-test module's
 // build.gradle.kts. Copy into e.g. :konture-test/build.gradle.kts and adjust:
 //   - the version catalog alias (or literal coordinates — see
-//     references/dependency-setup.md for both forms)
+//     references/dependency-integration.md for both forms)
 //   - the list of project(":...") dependencies to match the real modules
 //     that architecture rules need whole-graph visibility into
 

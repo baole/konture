@@ -1,6 +1,6 @@
 # Kotlin Architecture Tests: Why Konture Exists
 
-_Kotlin architecture has two sources of truth: the Gradle graph that decides what can link, and the Kotlin source model that decides what the code actually says. Konture exists to test both._
+_Kotlin architecture has two views of the same architecture: the Gradle graph that decides what can link, and the Kotlin source model that decides what the code actually says. Konture exists to test both._
 
 Consider a rule from a Kotlin Multiplatform project:
 
@@ -43,6 +43,34 @@ Existing tools are useful. Konture is not trying to replace the compiler, the li
 Kotlin architecture sits across those views.
 
 You can see that in the checked-in showcases. The Now in Android showcase includes 36 Gradle projects in `settings.gradle.kts`, including API/implementation feature splits and a dedicated `:konture-test` project. The KotlinConf KMP showcase includes 9 Gradle projects spanning shared core, backend, Android, desktop, web, admin, and architecture tests. A single-view tool can still be useful in those projects, but it will not naturally see every boundary the project uses.
+
+## Tooling Comparison
+
+The practical question is not "Which tool is best?" It is "Which tool owns which kind of rule?"
+
+| Tooling option | Strong at | Weak at | Use it when | Combine with Konture when |
+| --- | --- | --- | --- | --- |
+| ArchUnit | Mature JVM bytecode rules and class dependency checks | Gradle project graph, KMP source sets, source-level Kotlin intent | The system is primarily JVM and the rule is visible in compiled classes | You also need module dependency policy, Kotlin visibility, or KMP/platform boundaries |
+| detekt custom rules | Kotlin PSI, style, naming, local declaration rules | Gradle module graph and cross-module dependency policy | The rule is close to lint: naming, annotations, local source conventions | A lint finding needs to line up with module ownership or public API boundaries |
+| Gradle Doctor or module-graph plugins | Build health, project graph visibility, dependency reports | Source imports, signatures, class visibility, API leakage | You need graph insight, build performance reports, or dependency hygiene | A graph edge is only half the story and source-level leakage also matters |
+| Custom PSI tools | Highly specific Kotlin source rules | Maintenance cost, build integration, graph awareness | You have a narrow organization-specific rule and the team can own the tool | The custom rule should run next to build-graph contracts |
+| Runtime or UI testing tools such as Kakao | User flows and Android UI behavior | Static architecture | You are validating behavior, screens, and interaction flows | Structural boundaries should fail before they become runtime behavior defects |
+| Plain review checklists | Judgment, nuance, exceptions | Consistency under time pressure | The rule is still evolving or depends on human design trade-offs | The checklist item becomes stable enough to execute in CI |
+
+Konture's bet is narrow: Kotlin architecture needs a single test surface that can talk about Gradle modules and Kotlin source declarations together.
+
+## The Failure Modes That Motivated It
+
+The most expensive architecture failures rarely start as "bad architecture." They start as reasonable local fixes:
+
+- A feature implementation imports another feature implementation because the API module does not expose one missing contract yet.
+- A shared KMP module accepts one Android import during a deadline, then discovers later that desktop or iOS can no longer reuse the code cleanly.
+- A public repository interface returns a database entity because the entity already has the needed fields.
+- A backend route calls a repository directly because the service layer felt like ceremony for one endpoint.
+
+Each failure creates a debt with interest. The next refactor has to pay down hidden coupling before it can make the intended change. The next platform target has to separate APIs that were supposed to be portable. The next reviewer has to reconstruct an architectural decision from scattered imports and build files.
+
+Konture was designed for that class of failure: a rule that is not purely source-level and not purely build-level, but architectural because it sits between the two.
 
 ### Bytecode Is Valuable, But It Is Not the Whole Kotlin Program
 
@@ -114,39 +142,9 @@ The source view includes:
 - Visibility and annotations.
 - References between project classes.
 
-```mermaid
-flowchart TB
-    Start["Kotlin project"]
+![Konture two view model](../assets/images/konture-two-view-model.svg)
 
-    subgraph BuildView ["Build graph view"]
-        GB["Gradle build"]
-        KP["Konture Gradle plugin"]
-        LM["Layout metadata<br/>modules, source sets, dependencies"]
-        GB --> KP --> LM
-    end
-
-    subgraph SourceView ["Source code view"]
-        KF["Kotlin source files"]
-        PA["PSI-based parser"]
-        SM["Source model<br/>packages, imports, declarations"]
-        KF --> PA --> SM
-    end
-
-    Start --> GB
-    Start --> KF
-
-    LM --> AT["Architecture tests<br/>module rules + source rules"]
-    SM --> AT
-    AT --> TR["Test result<br/>pass or fail the boundary"]
-
-    style Start fill:#f8fafc,stroke:#64748b,stroke-width:2px
-    style BuildView fill:#faf5ff,stroke:#a855f7,stroke-width:2px
-    style SourceView fill:#f0fdf4,stroke:#22c55e,stroke-width:2px
-    style AT fill:#dbeafe,stroke:#2563eb,stroke-width:2px
-    style TR fill:#ecfdf5,stroke:#059669,stroke-width:2px
-```
-
-That lets a team express a boundary at both levels:
+Konture supports both focused standalone assertions, such as `Konture.modules { ... }`, and grouped assertion blocks. Use `Konture.architecture { ... }` when related module and source rules should run as one architecture contract:
 
 ```kotlin
 Konture.architecture {
@@ -183,6 +181,20 @@ That distinction matters. An Android team may protect feature API and implementa
 
 Konture should encode the team's policy, not invent one.
 
+## API Design Philosophy
+
+The DSL is intentionally close to ordinary tests:
+
+- `Konture.modules { ... }` is for Gradle project and source-set policy.
+- `Konture.classes { ... }`, `Konture.files { ... }`, `Konture.functions { ... }`, and `Konture.properties { ... }` are for source declarations.
+- `Konture.layered { ... }` is for readable directional package rules.
+- `Konture.architecture { ... }` groups related module and source rules into one contract.
+- Functional scopes such as `scopeFromPackage` and `scopeFromModule` are escape hatches for custom predicates.
+
+That shape is deliberate. Architecture rules are reviewed by engineers who may not work on the architecture tooling. A rule should read like a test, fail like a test, and live beside the rest of the verification suite.
+
+The extension point is the predicate. When the fluent DSL is too high-level, a team can inspect imports, annotations, visibility, supertypes, file paths, source sets, or module dependencies directly and write a focused assertion. That keeps uncommon policy in project code instead of forcing Konture to grow a keyword for every organization's architecture.
+
 ## The Three Structural Jobs
 
 Architecture tests are most valuable when they protect decisions that are expensive to repair later. In Kotlin systems, those decisions usually cluster into three jobs.
@@ -203,43 +215,7 @@ Consider this common policy:
 
 > Feature implementation modules must not depend on other feature implementation modules.
 
-```mermaid
-flowchart TD
-    App[":app"]
-
-    subgraph CheckoutFeature ["Checkout Feature"]
-        CheckoutImpl[":feature:checkout:impl"]
-        CheckoutApi[":feature:checkout:api"]
-    end
-
-    subgraph ProfileFeature ["Profile Feature"]
-        ProfileImpl[":feature:profile:impl"]
-        ProfileApi[":feature:profile:api"]
-    end
-
-    subgraph Core ["Core Modules"]
-        Domain[":core:domain"]
-        Network[":core:network"]
-    end
-
-    App --> CheckoutImpl
-    App --> ProfileImpl
-    CheckoutImpl --> CheckoutApi
-    CheckoutImpl --> Domain
-    CheckoutImpl --> Network
-    ProfileImpl --> ProfileApi
-    ProfileImpl --> Domain
-    CheckoutImpl -.->|"forbidden"| ProfileImpl
-
-    style App fill:#f8fafc,stroke:#64748b,stroke-width:1px
-    style CheckoutImpl fill:#f0f9ff,stroke:#0284c7,stroke-width:1px
-    style CheckoutApi fill:#e0f2fe,stroke:#0ea5e9,stroke-width:1px
-    style ProfileImpl fill:#f0f9ff,stroke:#0284c7,stroke-width:1px
-    style ProfileApi fill:#e0f2fe,stroke:#0ea5e9,stroke-width:1px
-    style Domain fill:#f0fdf4,stroke:#16a34a,stroke-width:1px
-    style Network fill:#f0fdf4,stroke:#16a34a,stroke-width:1px
-    linkStyle 7 stroke:#ef4444,stroke-width:2px,stroke-dasharray: 5 5;
-```
+![Feature isolation modules](../assets/images/feature-isolation-modules.svg)
 
 If `:feature:checkout:impl` adds this dependency:
 
@@ -316,6 +292,8 @@ Konture.scopeFromPackage("com.acme.domain")
     }
 ```
 
+`scopeFromPackage("com.acme.domain")` selects a concrete package prefix for custom assertions. By contrast, `resideInAPackage("..domain..")` uses Konture's wildcard package matching inside fluent class rules.
+
 That is the source-level half of architecture governance: not just which modules can link, but which concepts are allowed to appear in which parts of the code.
 
 ## Tradeoffs and Failure Modes
@@ -331,7 +309,7 @@ Common failure modes:
 - **Mixed Java/Kotlin projects**: A Kotlin source rule may not cover Java code unless the project deliberately accounts for it.
 - **Rule maintenance**: Architecture evolves. Tests must evolve with deliberate architecture decisions, not block them by accident.
 
-These tradeoffs do not weaken the case for architecture tests. They define the bar for using them responsibly.
+These trade-offs do not weaken the case for architecture tests. They define the bar for using them responsibly.
 
 For example, a tempting KMP rule is:
 
@@ -364,18 +342,23 @@ The lightweight Gradle showcase can be run directly:
 
 In this repository, that command completes successfully and runs the dedicated architecture-test module after generating Konture's layout and dependency metadata.
 
-## Why This Matters With AI-Assisted Development
+## Performance and Scale
 
-AI coding assistants tend to optimize for local progress: import the visible class, add the missing dependency, satisfy the immediate test.
+Architecture tests should be cheap enough that teams keep them in the feedback loop.
 
-That behavior is useful, but it can cross boundaries the agent does not fully model. Architecture tests give agents the same structural feedback humans get:
+Konture's Gradle plugin generates layout metadata from the build, and the assertion library runs inside the normal test task. That has a few practical consequences for large projects:
 
-- The module dependency is forbidden.
-- The import crosses a layer.
-- The public signature leaks an implementation type.
-- The package visibility is wrong.
+- Keep architecture tests in a dedicated module so production modules do not inherit test-only dependencies.
+- Scope rules to the modules and packages they actually govern instead of scanning the whole project for every assertion.
+- Prefer a small number of high-signal contracts over dozens of overlapping style rules.
+- Let Gradle handle task inputs and cacheability for generated layout metadata rather than re-discovering the project graph in each test.
+- Track architecture-test task duration in CI like any other verification task.
 
-This is not autonomous architecture. It is executable feedback. The team still owns the design; the build makes violations concrete enough for humans and tools to repair.
+For 100+ module projects, the important design question is not only "Can the tool scan the repository?" It is "Can the team understand the failure and repair it quickly?" A fast rule with a vague violation still wastes review time. A slightly slower rule that identifies the forbidden module edge, import, or public signature is usually the better platform investment.
+
+## Two-View Feedback for AI-Assisted Changes
+
+AI coding assistants tend to optimize for local progress: import the visible class, add the missing dependency, satisfy the immediate test. Konture's two-view model gives them more precise repair signals. A build-graph failure says "you added or relied on the wrong module edge"; a source-model failure says "this file imported or exposed the wrong concept." Those are different fixes, and the test output should make that distinction visible.
 
 ## When Konture Is a Good Fit
 
@@ -389,6 +372,22 @@ Konture is a good fit when the rules you care about span Kotlin source and Gradl
 - File and package conventions that require project-wide context.
 
 It is less useful for formatting, ordinary style, and checks a standard linter already handles well. Use the cheapest tool that can enforce the rule accurately.
+
+## Current Limits and Roadmap Pressure
+
+Konture should be explicit about what it is not.
+
+It is not a replacement for the Kotlin compiler, bytecode analysis, runtime integration tests, or dependency vulnerability scanning. It is not the right place to verify behavior hidden behind reflection or runtime DI containers. Mixed Java/Kotlin projects need deliberate coverage because Kotlin source analysis does not automatically make Java architecture visible. Generated sources and compiler-plugin output may need exclusions or separate rules so the suite focuses on authored architecture.
+
+Build tool evolution also matters. Android Gradle Plugin, Kotlin Multiplatform source-set modeling, Kotlin compiler changes, and new generated-code patterns can all change what "the project structure" means. Konture's long-term value depends on staying honest about those inputs: Gradle metadata, Kotlin source parsing, source-set/platform awareness, and failure messages that help teams fix the design instead of fighting the tool.
+
+The roadmap pressure is therefore practical:
+
+- deeper KMP source-set and platform-aware examples,
+- clearer treatment of generated code,
+- stronger public API leakage checks,
+- better diagnostics for large rule suites,
+- smoother integration with build cache and CI reporting.
 
 ## The Core Idea
 

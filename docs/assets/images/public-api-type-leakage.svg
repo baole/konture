@@ -1,0 +1,90 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="880" height="340" viewBox="0 0 880 340" role="img" aria-labelledby="title desc">
+  <title id="title">Public API &amp; Type Leakage</title>
+  <desc id="desc">Diagram showing how returning a database or network entity from a clean public domain API leaks details to consumers, which creates tight coupling to external details.</desc>
+  <defs>
+    <!-- Gradients -->
+    <linearGradient id="blue-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#eff6ff"/>
+      <stop offset="100%" stop-color="#bfdbfe"/>
+    </linearGradient>
+    <linearGradient id="slate-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#f8fafc"/>
+      <stop offset="100%" stop-color="#e2e8f0"/>
+    </linearGradient>
+    <linearGradient id="red-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#fff5f5"/>
+      <stop offset="100%" stop-color="#fecaca"/>
+    </linearGradient>
+
+    <!-- Shadow -->
+    <filter id="shadow" x="-5%" y="-5%" width="110%" height="115%" filterUnits="userSpaceOnUse">
+      <feDropShadow dx="0" dy="2" stdDeviation="4" flood-color="#0f172a" flood-opacity="0.08"/>
+    </filter>
+
+    <style>
+      .bg { fill: #ffffff; }
+      .node { stroke-width: 1.5; rx: 12; filter: url(#shadow); }
+      .node-api { fill: url(#blue-grad); stroke: #2563eb; stroke-width: 2; }
+      .node-consumer { fill: url(#slate-grad); stroke: #64748b; }
+      .node-leak { fill: url(#red-grad); stroke: #ef4444; stroke-width: 2; }
+
+      .text-title { font-family: Inter, system-ui, -apple-system, sans-serif; font-size: 14px; font-weight: 700; fill: #0f172a; }
+      .text-code { font-family: "JetBrains Mono", Fira Code, monospace, Courier; font-size: 11px; font-weight: 600; fill: #0f172a; }
+      .text-sub { font-family: Inter, system-ui, -apple-system, sans-serif; font-size: 9px; font-weight: 500; fill: #475569; }
+      .text-desc { font-family: Inter, system-ui, -apple-system, sans-serif; font-size: 11px; font-weight: 600; fill: #b91c1c; }
+
+      .arrow { stroke: #1e293b; stroke-width: 2; fill: none; marker-end: url(#arrow-slate); stroke-linecap: round; }
+      .arrow-bad { stroke: #ef4444; stroke-width: 2; fill: none; stroke-dasharray: 6 4; marker-end: url(#arrow-red); stroke-linecap: round; }
+    </style>
+
+    <marker id="arrow-slate" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto">
+      <path d="M1,1 L7,4 L1,7 Z" fill="#1e293b"/>
+    </marker>
+    <marker id="arrow-red" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto">
+      <path d="M1,1 L7,4 L1,7 Z" fill="#ef4444"/>
+    </marker>
+  </defs>
+
+  <rect class="bg" width="880" height="340"/>
+
+  <!-- nodes -->
+  <!-- Domain API -->
+  <g transform="translate(60, 45)">
+    <rect class="node node-api" width="260" height="90"/>
+    <text class="text-title" x="130" y="28" text-anchor="middle" fill="#1e3a8a">Public Domain API</text>
+    <text class="text-code" x="130" y="52" text-anchor="middle" fill="#1d4ed8">interface UserRepository</text>
+    <text class="text-sub" x="130" y="72" text-anchor="middle" fill="#1e3a8a">Clean business logic contract</text>
+  </g>
+
+  <!-- Persistence Leak -->
+  <g transform="translate(60, 205)">
+    <rect class="node node-leak" width="260" height="90"/>
+    <text class="text-title" x="130" y="28" text-anchor="middle" fill="#7f1d1d">Persistence Detail (Leak)</text>
+    <text class="text-code" x="130" y="52" text-anchor="middle" fill="#dc2626">class UserEntity : RoomEntity</text>
+    <text class="text-sub" x="130" y="72" text-anchor="middle" fill="#7f1d1d">Database annotations &amp; schemas</text>
+  </g>
+
+  <!-- Consumer -->
+  <g transform="translate(560, 125)">
+    <rect class="node node-consumer" width="260" height="90"/>
+    <text class="text-title" x="130" y="28" text-anchor="middle">App/Feature Consumer</text>
+    <text class="text-code" x="130" y="52" text-anchor="middle">class ProfileViewModel</text>
+    <text class="text-sub" x="130" y="72" text-anchor="middle">Unrelated downstream module client</text>
+  </g>
+
+  <!-- ARROWS -->
+  <!-- Consumer -> Domain API -->
+  <path class="arrow" d="M 560 170 C 440 170, 440 90, 327 90"/>
+  <rect x="420" y="113" width="90" height="18" rx="4" fill="#f8fafc" stroke="#e2e8f0" stroke-width="0.5"/>
+  <text class="text-sub" x="465" y="125" text-anchor="middle" font-weight="700">uses contract</text>
+
+  <!-- Domain API -> Leak (accidental return type) -->
+  <path class="arrow-bad" d="M 190 137 L 190 200"/>
+  <rect x="200" y="157" width="135" height="18" rx="4" fill="#fff5f5" stroke="#fecaca" stroke-width="0.5"/>
+  <text class="text-desc" x="205" y="170">forbidden: return type</text>
+
+  <!-- Consumer -> Leak (transitive coupling) -->
+  <path class="arrow-bad" d="M 560 170 C 440 170, 440 250, 327 250"/>
+  <rect x="400" y="212" width="130" height="18" rx="4" fill="#fff5f5" stroke="#fecaca" stroke-width="0.5"/>
+  <text class="text-desc" x="465" y="225" text-anchor="middle">now coupled to DB detail</text>
+</svg>

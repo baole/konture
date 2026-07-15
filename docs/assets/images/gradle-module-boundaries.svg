@@ -1,0 +1,119 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="880" height="480" viewBox="0 0 880 480" role="img" aria-labelledby="title id">
+  <title id="title">Gradle Module Boundaries</title>
+  <desc id="desc">Diagram showing standard modular structure of a multi-module Kotlin project. The app depends on feature implementations, feature implementations depend on feature APIs and the core domain module, while feature implementations are decoupled from one another.</desc>
+  <defs>
+    <!-- Gradients -->
+    <linearGradient id="slate-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#f8fafc"/>
+      <stop offset="100%" stop-color="#e2e8f0"/>
+    </linearGradient>
+    <linearGradient id="sky-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#f0f9ff"/>
+      <stop offset="100%" stop-color="#bae6fd"/>
+    </linearGradient>
+    <linearGradient id="emerald-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#f0fdf4"/>
+      <stop offset="100%" stop-color="#bbf7d0"/>
+    </linearGradient>
+    <linearGradient id="red-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#fff5f5"/>
+      <stop offset="100%" stop-color="#fecaca"/>
+    </linearGradient>
+
+    <!-- Shadow -->
+    <filter id="shadow" x="-5%" y="-5%" width="110%" height="115%" filterUnits="userSpaceOnUse">
+      <feDropShadow dx="0" dy="2" stdDeviation="4" flood-color="#0f172a" flood-opacity="0.08"/>
+    </filter>
+
+    <style>
+      .bg { fill: #ffffff; }
+      .node { stroke-width: 1.5; rx: 10; filter: url(#shadow); }
+      .node-app { fill: url(#slate-grad); stroke: #64748b; }
+      .node-impl { fill: url(#sky-grad); stroke: #0284c7; }
+      .node-api { fill: url(#emerald-grad); stroke: #10b981; }
+      .node-core { fill: url(#emerald-grad); stroke: #10b981; stroke-width: 2; }
+
+      .text-title { font-family: Inter, system-ui, -apple-system, sans-serif; font-size: 13px; font-weight: 700; fill: #0f172a; }
+      .text-sub { font-family: Inter, system-ui, -apple-system, sans-serif; font-size: 9px; font-weight: 500; fill: #475569; }
+      .text-forbidden { font-family: Inter, system-ui, -apple-system, sans-serif; font-size: 10px; font-weight: 700; fill: #ef4444; }
+
+      .arrow { stroke: #64748b; stroke-width: 1.5; fill: none; marker-end: url(#arrow-gray); stroke-linecap: round; }
+      .arrow-bad { stroke: #ef4444; stroke-width: 2; fill: none; stroke-dasharray: 6 4; marker-end: url(#arrow-red); stroke-linecap: round; }
+    </style>
+
+    <marker id="arrow-gray" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto">
+      <path d="M1,1 L7,4 L1,7 Z" fill="#64748b"/>
+    </marker>
+    <marker id="arrow-red" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto">
+      <path d="M1,1 L7,4 L1,7 Z" fill="#ef4444"/>
+    </marker>
+  </defs>
+
+  <rect class="bg" width="880" height="480"/>
+
+  <!-- nodes -->
+  <!-- :app -->
+  <g transform="translate(340, 30)">
+    <rect class="node node-app" width="200" height="45"/>
+    <text class="text-title" x="100" y="22" text-anchor="middle">:app</text>
+    <text class="text-sub" x="100" y="36" text-anchor="middle">application module</text>
+  </g>
+
+  <!-- :feature:checkout:impl -->
+  <g transform="translate(130, 140)">
+    <rect class="node node-impl" width="200" height="45"/>
+    <text class="text-title" x="100" y="22" text-anchor="middle">:feature:checkout:impl</text>
+    <text class="text-sub" x="100" y="36" text-anchor="middle">feature implementation</text>
+  </g>
+
+  <!-- :feature:profile:impl -->
+  <g transform="translate(550, 140)">
+    <rect class="node node-impl" width="200" height="45"/>
+    <text class="text-title" x="100" y="22" text-anchor="middle">:feature:profile:impl</text>
+    <text class="text-sub" x="100" y="36" text-anchor="middle">feature implementation</text>
+  </g>
+
+  <!-- :feature:checkout:api -->
+  <g transform="translate(40, 270)">
+    <rect class="node node-api" width="200" height="45"/>
+    <text class="text-title" x="100" y="22" text-anchor="middle">:feature:checkout:api</text>
+    <text class="text-sub" x="100" y="36" text-anchor="middle">feature public interface</text>
+  </g>
+
+  <!-- :feature:profile:api -->
+  <g transform="translate(640, 270)">
+    <rect class="node node-api" width="200" height="45"/>
+    <text class="text-title" x="100" y="22" text-anchor="middle">:feature:profile:api</text>
+    <text class="text-sub" x="100" y="36" text-anchor="middle">feature public interface</text>
+  </g>
+
+  <!-- :core:domain -->
+  <g transform="translate(340, 390)">
+    <rect class="node node-core" width="200" height="45"/>
+    <text class="text-title" x="100" y="22" text-anchor="middle" fill="#065f46">:core:domain</text>
+    <text class="text-sub" x="100" y="36" text-anchor="middle" fill="#065f46">shared business rules</text>
+  </g>
+
+  <!-- ARROWS -->
+  <!-- :app -> :feature:checkout:impl -->
+  <path class="arrow" d="M 440 77 C 440 100, 230 100, 230 137"/>
+  <!-- :app -> :feature:profile:impl -->
+  <path class="arrow" d="M 440 77 C 440 100, 650 100, 650 137"/>
+
+  <!-- :feature:checkout:impl -> :feature:checkout:api -->
+  <path class="arrow" d="M 230 187 C 230 220, 140 220, 140 267"/>
+  <!-- :feature:profile:impl -> :feature:profile:api -->
+  <path class="arrow" d="M 650 187 C 650 220, 740 220, 740 267"/>
+
+  <!-- :feature:checkout:impl -> :core:domain -->
+  <path class="arrow" d="M 230 187 C 230 250, 440 250, 440 387"/>
+  <!-- :feature:profile:impl -> :core:domain -->
+  <path class="arrow" d="M 650 187 C 650 250, 440 250, 440 387"/>
+
+  <!-- FORBIDDEN LINK: checkout:impl -> profile:impl -->
+  <g>
+    <path class="arrow-bad" d="M 333 162 L 547 162"/>
+    <rect x="340" y="138" width="200" height="18" rx="4" fill="#fee2e2" stroke="#fecaca" stroke-width="0.5"/>
+    <text class="text-forbidden" x="440" y="151" text-anchor="middle">forbidden: implementation-to-implementation</text>
+  </g>
+</svg>

@@ -1,18 +1,18 @@
 ---
-name: setup-konture
+name: integrate-konture
 description: Instructions to integrate the Konture (io.github.baole.konture)
   Kotlin/Gradle architecture-testing library into a project for the first time —
   installing the plugin/dependency, scaffolding a dedicated architecture-test
   module, and deciding how it runs in CI. Use whenever the user asks to "add
   Konture", "integrate Konture into my project", "set up architecture testing",
   "install the Konture Gradle plugin", or "wire Konture into CI". This skill
-  covers first-time setup only — for writing or reviewing the actual architecture
+  covers first-time integration only — for writing or reviewing the actual architecture
   rules/tests once Konture is installed, use the konture-architecture-tests
   skill instead.
 metadata:
   keywords:
   - konture
-  - gradle plugin setup
+  - gradle plugin integration
   - architecture testing
   - kotlin
   - kmp
@@ -21,11 +21,11 @@ metadata:
   - version catalog
 ---
 
-# Setup Konture
+# Integrate Konture
 
 Konture (https://github.com/baole/konture) is a Kotlin/Gradle
 architecture-testing library. This skill covers getting it installed into a
-project and running — not writing the actual guardrails. Once setup is done,
+project and running — not writing the actual guardrails. Once integration is done,
 hand off to the **konture-architecture-tests** skill for classifying and
 authoring rules.
 
@@ -60,7 +60,7 @@ Gather this before touching any file:
 
 ### Step 2. Install Konture
 
-Read [references/dependency-setup.md](references/dependency-setup.md) for the
+Read [references/dependency-integration.md](references/dependency-integration.md) for the
 full version-catalog vs. traditional-DSL forms, and for how to check the
 actual latest Konture version (never assume a version from a doc is current —
 Konture is young and actively developed).
@@ -133,8 +133,8 @@ real architecture, verifying the DSL, and drafting the test.
 
 ## Reference files
 
-- [references/dependency-setup.md](references/dependency-setup.md) —
-  version-catalog vs. traditional dependency setup, and how to check the
+- [references/dependency-integration.md](references/dependency-integration.md) —
+  version-catalog vs. traditional dependency integration, and how to check the
   latest version.
 - [references/ci-integration.md](references/ci-integration.md) — the
   measure-first CI decision process and the three wiring options.

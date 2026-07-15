@@ -1,0 +1,93 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="800" height="480" viewBox="0 0 800 480" role="img" aria-labelledby="title desc">
+  <title id="title">Dependency Direction &amp; Layer Isolation</title>
+  <desc id="desc">Vertical layering diagram showing clean architecture rules where outer layers and concrete details depend inward onto the core domain, but the core domain is isolated and has no outward dependencies.</desc>
+  <defs>
+    <!-- Gradients -->
+    <linearGradient id="neutral-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#f8fafc"/>
+      <stop offset="100%" stop-color="#e2e8f0"/>
+    </linearGradient>
+    <linearGradient id="blue-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#eff6ff"/>
+      <stop offset="100%" stop-color="#bfdbfe"/>
+    </linearGradient>
+    <linearGradient id="red-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#fff5f5"/>
+      <stop offset="100%" stop-color="#fecaca"/>
+    </linearGradient>
+
+    <!-- Shadows -->
+    <filter id="shadow" x="-5%" y="-5%" width="110%" height="115%" filterUnits="userSpaceOnUse">
+      <feDropShadow dx="0" dy="4" stdDeviation="6" flood-color="#0f172a" flood-opacity="0.1"/>
+    </filter>
+
+    <style>
+      .bg { fill: #ffffff; }
+      
+      .box { stroke-width: 2; rx: 16; filter: url(#shadow); }
+      .box-outer { fill: url(#neutral-grad); stroke: #64748b; }
+      .box-domain { fill: url(#blue-grad); stroke: #2563eb; stroke-width: 2.5; }
+      .box-details { fill: url(#red-grad); stroke: #ef4444; }
+
+      .text-title { font-family: Inter, system-ui, -apple-system, sans-serif; font-size: 20px; font-weight: 800; fill: #0f172a; }
+      .text-subtitle { font-family: Inter, system-ui, -apple-system, sans-serif; font-size: 13px; font-weight: 500; fill: #475569; }
+      .text-body { font-family: Inter, system-ui, -apple-system, sans-serif; font-size: 11px; font-weight: 500; fill: #334155; }
+
+      .label-good { font-family: Inter, system-ui, -apple-system, sans-serif; font-size: 11px; font-weight: 700; fill: #16a34a; }
+      .label-bad { font-family: Inter, system-ui, -apple-system, sans-serif; font-size: 11px; font-weight: 700; fill: #dc2626; }
+
+      .arrow-good { stroke: #16a34a; stroke-width: 2.5; fill: none; marker-end: url(#arrow-green); stroke-linecap: round; }
+      .arrow-bad { stroke: #ef4444; stroke-width: 2.5; fill: none; stroke-dasharray: 8 5; marker-end: url(#arrow-red); stroke-linecap: round; }
+    </style>
+
+    <!-- Markers -->
+    <marker id="arrow-green" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto">
+      <path d="M1,1 L7,4 L1,7 Z" fill="#16a34a"/>
+    </marker>
+    <marker id="arrow-red" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto">
+      <path d="M1,1 L7,4 L1,7 Z" fill="#ef4444"/>
+    </marker>
+  </defs>
+
+  <rect class="bg" width="800" height="480"/>
+
+  <!-- Top Title -->
+  <text class="text-title" x="400" y="45" text-anchor="middle">Dependency Direction &amp; Layer Isolation</text>
+  <text class="text-subtitle" x="400" y="70" text-anchor="middle">Business logic must stay isolated from platforms, presentation, and details.</text>
+
+  <!-- OUTER LAYERS BLOCK -->
+  <g transform="translate(180, 100)">
+    <rect class="box box-outer" width="440" height="85"/>
+    <text class="text-title" x="220" y="32" text-anchor="middle" font-size="16">Outer Layers</text>
+    <text class="text-body" x="220" y="55" text-anchor="middle" font-weight="600" fill="#475569">UI, web controllers, data adapters, network clients, CLI entrypoints</text>
+  </g>
+
+  <!-- CORE DOMAIN BLOCK -->
+  <g transform="translate(180, 245)">
+    <rect class="box box-domain" width="440" height="85"/>
+    <text class="text-title" x="220" y="32" text-anchor="middle" font-size="16" fill="#1e3a8a">Core Domain</text>
+    <text class="text-body" x="220" y="55" text-anchor="middle" font-weight="700" fill="#1d4ed8">Entities, use cases, domain contracts, repository interfaces</text>
+  </g>
+
+  <!-- CONCRETE DETAILS BLOCK -->
+  <g transform="translate(180, 390)">
+    <rect class="box box-details" width="440" height="65"/>
+    <text class="text-title" x="220" y="28" text-anchor="middle" font-size="15" fill="#7f1d1d">Concrete Details</text>
+    <text class="text-body" x="220" y="47" text-anchor="middle" font-weight="600" fill="#991b1b">Jetpack Compose, Room DB, Retrofit, Spring Boot, Ktor Server, SQL adapters</text>
+  </g>
+
+  <!-- ARROWS -->
+  <!-- Outer Layers -> Core Domain -->
+  <g>
+    <path class="arrow-good" d="M 400 187 L 400 240"/>
+    <rect x="415" y="198" width="165" height="20" rx="4" fill="#f0fdf4" stroke="#bbf7d0" stroke-width="0.5"/>
+    <text class="label-good" x="422" y="212">allowed: depend inward</text>
+  </g>
+
+  <!-- Core Domain -> Concrete Details (FORBIDDEN) -->
+  <g>
+    <path class="arrow-bad" d="M 400 332 L 400 385"/>
+    <rect x="415" y="343" width="180" height="20" rx="4" fill="#fee2e2" stroke="#fecaca" stroke-width="0.5"/>
+    <text class="label-bad" x="422" y="357">forbidden: know outward</text>
+  </g>
+</svg>

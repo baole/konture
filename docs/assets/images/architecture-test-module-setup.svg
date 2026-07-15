@@ -1,0 +1,143 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="500" viewBox="0 0 1024 500" role="img" aria-labelledby="title desc">
+  <title id="title">Architecture Test Module Setup</title>
+  <desc id="desc">Project module layout showing production modules in a green block and the dedicated architecture testing module in a blue block on the right, which imports all production modules via testImplementation to analyze their boundaries.</desc>
+  <defs>
+    <!-- Gradients -->
+    <linearGradient id="slate-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#f8fafc"/>
+      <stop offset="100%" stop-color="#f1f5f9"/>
+    </linearGradient>
+    <linearGradient id="emerald-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#ecfdf5"/>
+      <stop offset="100%" stop-color="#a7f3d0"/>
+    </linearGradient>
+    <linearGradient id="blue-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#eff6ff"/>
+      <stop offset="100%" stop-color="#bfdbfe"/>
+    </linearGradient>
+    <linearGradient id="blue-dark-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#dbeafe"/>
+      <stop offset="100%" stop-color="#93c5fd"/>
+    </linearGradient>
+
+    <!-- Shadow -->
+    <filter id="shadow" x="-5%" y="-5%" width="110%" height="115%" filterUnits="userSpaceOnUse">
+      <feDropShadow dx="0" dy="2" stdDeviation="4" flood-color="#0f172a" flood-opacity="0.08"/>
+    </filter>
+
+    <style>
+      .bg { fill: #ffffff; }
+      .container-root { fill: #fafafa; stroke: #e4e4e7; stroke-width: 1.5; rx: 16; }
+      .container-prod { fill: #f0fdf4; stroke: #4ade80; stroke-width: 1.5; rx: 12; }
+      .container-test { fill: #eff6ff; stroke: #3b82f6; stroke-width: 2; rx: 12; }
+
+      .node { stroke-width: 1.5; rx: 10; filter: url(#shadow); }
+      .node-prod { fill: url(#emerald-grad); stroke: #10b981; }
+      .node-app { fill: url(#slate-grad); stroke: #64748b; }
+      .node-test { fill: url(#blue-dark-grad); stroke: #1d4ed8; stroke-width: 2; }
+
+      .text-title { font-family: Inter, system-ui, -apple-system, sans-serif; font-size: 13px; font-weight: 700; fill: #0f172a; }
+      .text-sub { font-family: Inter, system-ui, -apple-system, sans-serif; font-size: 9px; font-weight: 500; fill: #475569; }
+      .text-container-label { font-family: Inter, system-ui, -apple-system, sans-serif; font-size: 13px; font-weight: 800; letter-spacing: 0.5px; }
+      .text-dep { font-family: "JetBrains Mono", Fira Code, monospace, Courier; font-size: 10px; font-weight: 700; fill: #1d4ed8; }
+
+      .arrow { stroke: #64748b; stroke-width: 1.5; fill: none; marker-end: url(#arrow-gray); stroke-linecap: round; }
+      .arrow-dep { stroke: #2563eb; stroke-width: 2; stroke-dasharray: 6 4; fill: none; marker-end: url(#arrow-blue); stroke-linecap: round; }
+    </style>
+
+    <marker id="arrow-gray" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto">
+      <path d="M1,1 L7,4 L1,7 Z" fill="#64748b"/>
+    </marker>
+    <marker id="arrow-blue" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto">
+      <path d="M1,1 L7,4 L1,7 Z" fill="#2563eb"/>
+    </marker>
+  </defs>
+
+  <rect class="bg" width="1024" height="500"/>
+
+  <!-- ROOT PANEL -->
+  <g transform="translate(20, 20)">
+    <rect class="container-root" width="984" height="460"/>
+    <text class="text-container-label" x="25" y="32" fill="#71717a">ROOT PROJECT STRUCTURE</text>
+
+    <!-- PRODUCTION MODULES SUBGRAPH -->
+    <g transform="translate(30, 50)">
+      <rect class="container-prod" width="560" height="380"/>
+      <text class="text-container-label" x="20" y="24" fill="#16a34a">PRODUCTION MODULES</text>
+
+      <!-- App -->
+      <g transform="translate(200, 45)">
+        <rect class="node node-app" width="160" height="45"/>
+        <text class="text-title" x="80" y="26" text-anchor="middle">:app</text>
+      </g>
+
+      <!-- Checkout Impl -->
+      <g transform="translate(50, 130)">
+        <rect class="node node-prod" width="200" height="45"/>
+        <text class="text-title" x="100" y="22" text-anchor="middle">:feature:checkout:impl</text>
+        <text class="text-sub" x="100" y="36" text-anchor="middle">implementation</text>
+      </g>
+
+      <!-- Profile Impl -->
+      <g transform="translate(310, 130)">
+        <rect class="node node-prod" width="200" height="45"/>
+        <text class="text-title" x="100" y="22" text-anchor="middle">:feature:profile:impl</text>
+        <text class="text-sub" x="100" y="36" text-anchor="middle">implementation</text>
+      </g>
+
+      <!-- Checkout Api -->
+      <g transform="translate(50, 215)">
+        <rect class="node node-prod" width="200" height="45"/>
+        <text class="text-title" x="100" y="22" text-anchor="middle">:feature:checkout:api</text>
+        <text class="text-sub" x="100" y="36" text-anchor="middle">public interface</text>
+      </g>
+
+      <!-- Profile Api -->
+      <g transform="translate(310, 215)">
+        <rect class="node node-prod" width="200" height="45"/>
+        <text class="text-title" x="100" y="22" text-anchor="middle">:feature:profile:api</text>
+        <text class="text-sub" x="100" y="36" text-anchor="middle">public interface</text>
+      </g>
+
+      <!-- Core Domain -->
+      <g transform="translate(180, 300)">
+        <rect class="node node-prod" width="200" height="45"/>
+        <text class="text-title" x="100" y="26" text-anchor="middle">:core:domain</text>
+      </g>
+
+      <!-- Arrows inside production -->
+      <path class="arrow" d="M 280 92 C 280 110, 150 110, 150 127"/>
+      <path class="arrow" d="M 280 92 C 280 110, 410 110, 410 127"/>
+      <path class="arrow" d="M 150 177 L 150 212"/>
+      <path class="arrow" d="M 410 177 L 410 212"/>
+      <path class="arrow" d="M 150 177 C 150 260, 280 260, 280 297"/>
+      <path class="arrow" d="M 410 177 C 410 260, 280 260, 280 297"/>
+    </g>
+
+    <!-- ARCHITECTURE TESTS SUBGRAPH -->
+    <g transform="translate(630, 50)">
+      <rect class="container-test" width="320" height="380"/>
+      <text class="text-container-label" x="20" y="24" fill="#2563eb">ARCHITECTURE TESTS</text>
+
+      <g transform="translate(50, 160)">
+        <rect class="node node-test" width="220" height="60"/>
+        <text class="text-title" x="110" y="28" text-anchor="middle" fill="#1e3a8a">:konture-test</text>
+        <text class="text-sub" x="110" y="46" text-anchor="middle" fill="#1d4ed8" font-weight="700">architecture test suite</text>
+      </g>
+    </g>
+
+    <!-- DEPENDENCY ARROWS (DOTTED BLUE) -->
+    <!-- :konture-test -> :app -->
+    <path class="arrow-dep" d="M 680 210 C 600 210, 600 145, 413 145"/>
+    <text class="text-dep" x="500" y="165">testImplementation</text>
+
+    <!-- :konture-test -> :feature:checkout:impl -->
+    <path class="arrow-dep" d="M 680 210 C 580 210, 580 202.5, 283 202.5"/>
+
+    <!-- :konture-test -> :feature:profile:impl -->
+    <path class="arrow-dep" d="M 680 210 C 580 210, 580 202.5, 543 202.5"/>
+
+    <!-- :konture-test -> :core:domain -->
+    <path class="arrow-dep" d="M 680 210 C 600 210, 600 372.5, 413 372.5"/>
+  </g>
+</svg>

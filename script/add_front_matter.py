@@ -13,31 +13,31 @@ FRONT_MATTER_MAP = {
         "layout": "default",
         "title": "Why Architecture Testing?",
         "nav_order": 20,
-        "permalink": "/architecture_test.html"
+        "permalink": "/architecture_test/"
     },
     "how_it_works.md": {
         "layout": "default",
         "title": "How it Works",
         "nav_order": 30,
-        "permalink": "/how_it_works.html"
+        "permalink": "/how_it_works/"
     },
     "contributing.md": {
         "layout": "default",
         "title": "Contributing",
         "nav_order": 100,
-        "permalink": "/contributing.html"
+        "permalink": "/contributing/"
     },
     "installation.md": {
         "layout": "default",
         "title": "Installation",
         "nav_order": 50,
-        "permalink": "/installation.html"
+        "permalink": "/installation/"
     },
     "showcases.md": {
         "layout": "default",
         "title": "Showcases",
         "nav_order": 70,
-        "permalink": "/showcases.html"
+        "permalink": "/showcases/"
     },
     "recipes/README.md": {
         "layout": "default",
@@ -103,15 +103,15 @@ FRONT_MATTER_MAP = {
         "nav_order": 40,
         "permalink": "/ai-prompts/"
     },
-    "ai-prompts/setup-prompt.md": {
+    "ai-prompts/integration-prompt.md": {
         "layout": "default",
-        "title": "Onboarding & Setup",
+        "title": "Installation",
         "parent": "AI Prompts & Skills",
         "nav_order": 1
     },
     "ai-prompts/writing-tests-prompt.md": {
         "layout": "default",
-        "title": "Writing & Generating Tests",
+        "title": "Writing Tests",
         "parent": "AI Prompts & Skills",
         "nav_order": 2
     },
@@ -132,6 +132,7 @@ FRONT_MATTER_MAP = {
     "articles/kotlin-architecture-tests-what-and-why.md": {
         "layout": "default",
         "title": "Kotlin Architecture Tests: What and Why",
+        "description": "Why green Kotlin builds do not prove architectural boundaries are intact.",
         "parent": "Articles",
         "nav_order": 1,
         "permalink": "/articles/kotlin-architecture-tests-what-and-why/"
@@ -139,6 +140,7 @@ FRONT_MATTER_MAP = {
     "articles/kotlin-architecture-tests-why-konture-exists.md": {
         "layout": "default",
         "title": "Kotlin Architecture Tests: Why Konture Exists",
+        "description": "Why Kotlin architecture tests need both Gradle graph and source-model awareness.",
         "parent": "Articles",
         "nav_order": 2,
         "permalink": "/articles/kotlin-architecture-tests-why-konture-exists/"
@@ -146,6 +148,7 @@ FRONT_MATTER_MAP = {
     "articles/kotlin-architecture-tests-with-konture.md": {
         "layout": "default",
         "title": "Kotlin Architecture Tests with Konture",
+        "description": "How to set up Konture architecture tests with rule-design and rollout guidance.",
         "parent": "Articles",
         "nav_order": 3,
         "permalink": "/articles/kotlin-architecture-tests-with-konture/"

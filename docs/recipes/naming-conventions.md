@@ -39,9 +39,9 @@ class NamingConventionTest {
 
 For more complex naming conventions (such as checking matching annotations and class prefixes), you can use the ultra-concise Fluent DSL.
 
-> [!IMPORTANT]
-> A `should { }` block must either return a single `Boolean` expression (as a predicate) or perform imperative assertions using the `check(condition, message)` helper (returning `Unit`). 
+> A `should { }` block must either return a single `Boolean` expression (as a predicate) or perform imperative assertions using the `check(condition, message)` helper (returning `Unit`).
 > Multiple loose Boolean expressions inside a block will NOT work as assertions because only the final expression is evaluated. Returning other types (such as `null`, elements, or collections) is not supported and should be avoided.
+{: .important }
 
 #### 1. Single Boolean Predicate Expression
 ```kotlin

@@ -1,11 +1,23 @@
 # Layer-Crossing Call Violations
 
-A standard layered or clean architecture organizes application logic sequentially. Method calls should flow down in a structured hierarchy (e.g., Controllers call UseCases/Services, and UseCases/Services call Repositories). Skipping layers (such as letting UI/Web Controllers invoke low-level Database Repositories directly) creates bypassing shortcuts that bypass core validation rules, transactional envelopes, and business logic.
+A standard layered or clean architecture organizes application logic sequentially. Method calls should flow down in a structured hierarchy (e.g., controllers call use cases/services, and use cases/services call repositories). Skipping layers (such as letting UI/web controllers invoke low-level database repositories directly) creates shortcuts that bypass core validation rules, transactional envelopes, and business logic.
 
-```text
-[Web Controller] ---> [Business Service] ---> [Repository]
-       |                                             ^
-       +----------- PROHIBITED DIRECT CALL ----------+
+```mermaid
+flowchart LR
+    controller["Web Controller"]
+    service["Business Service"]
+    repository["Repository"]
+
+    controller -->|"call through boundary"| service
+    service -->|"coordinate persistence"| repository
+    controller -. "prohibited direct call" .-> repository
+
+    classDef presentation fill:#eff6ff,stroke:#2563eb,color:#1e3a8a
+    classDef domain fill:#ecfdf5,stroke:#059669,color:#064e3b
+    classDef data fill:#fff7ed,stroke:#ea580c,color:#7c2d12
+    class controller presentation
+    class service domain
+    class repository data
 ```
 
 ---
@@ -41,9 +53,9 @@ class LayerCrossingTest {
 }
 ```
 
-### 2. Ensuring Repositories are Only Accessed by Authorized Layers
+### 2. Ensuring Repositories Are Only Accessed by Authorized Layers
 
-Conversely, you can assert that your Repository components are strictly only dependend on (or imported by) classes inside the Service or Domain package boundary:
+Conversely, you can assert that your repository components are only depended on (or imported by) classes inside the service or domain package boundary:
 
 ```kotlin
 import io.github.baole.konture.*

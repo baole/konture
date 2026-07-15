@@ -18,40 +18,7 @@ This guide uses Gradle Kotlin DSL and JUnit 5. Konture itself is test-runner agn
 
 Use a dedicated architecture-test module.
 
-```mermaid
-flowchart TD
-    subgraph Root ["Root Project Structure"]
-        direction LR
-        subgraph Prod ["Production Modules"]
-            App[":app"] --> CheckoutImpl[":feature:checkout:impl"]
-            App --> ProfileImpl[":feature:profile:impl"]
-            CheckoutImpl --> CheckoutApi[":feature:checkout:api"]
-            ProfileImpl --> ProfileApi[":feature:profile:api"]
-            CheckoutImpl --> Core[":core:domain"]
-            ProfileImpl --> Core
-        end
-
-        subgraph Test ["Architecture Tests"]
-            KT[":konture-test"]
-        end
-    end
-
-    KT -->|testImplementation| App
-    KT -->|testImplementation| CheckoutImpl
-    KT -->|testImplementation| ProfileImpl
-    KT -->|testImplementation| Core
-
-    style Root fill:#fafafa,stroke:#e4e4e7,stroke-width:1px
-    style Prod fill:#f0fdf4,stroke:#4ade80,stroke-width:1px
-    style Test fill:#eff6ff,stroke:#3b82f6,stroke-width:2px
-    style App fill:#ecfdf5,stroke:#10b981,stroke-width:1px
-    style CheckoutImpl fill:#ecfdf5,stroke:#10b981,stroke-width:1px
-    style ProfileImpl fill:#ecfdf5,stroke:#10b981,stroke-width:1px
-    style CheckoutApi fill:#ecfdf5,stroke:#10b981,stroke-width:1px
-    style ProfileApi fill:#ecfdf5,stroke:#10b981,stroke-width:1px
-    style Core fill:#ecfdf5,stroke:#10b981,stroke-width:1px
-    style KT fill:#dbeafe,stroke:#1d4ed8,stroke-width:2px
-```
+![Architecture test module setup](../assets/images/architecture-test-module-setup.svg)
 
 A separate module gives the architecture suite a project-level view without adding architecture-test dependencies to production modules. It also makes CI wiring straightforward: run one task when you want structural checks.
 
@@ -242,6 +209,8 @@ fun `domain must not import framework or persistence APIs`() {
 }
 ```
 
+`scopeFromPackage("com.acme.domain")` selects a concrete package prefix for custom assertions. By contrast, `resideInAPackage("..domain..")` uses Konture's wildcard package matching inside fluent class rules.
+
 Tune the prefixes for the project. A backend may ban persistence annotations from domain. An Android app may ban Android and Compose APIs from shared or domain packages. A KMP project may apply different policies to `commonMain`, `androidMain`, and `iosMain`.
 
 Avoid broad bans that catch legitimate dependencies. For example, banning all of `kotlinx..` may block valid use of coroutines.
@@ -320,32 +289,7 @@ If the app has a different modularization strategy, change the allowed list. The
 
 For package-based layer rules, a layered DSL can be easier to read than a long list of package predicates.
 
-```mermaid
-flowchart TD
-    subgraph Presentation ["presentation layer ('..presentation..')"]
-        PresCls["UI and controllers"]
-    end
-
-    subgraph Data ["data layer ('..data..')"]
-        DataCls["Repositories and DB models"]
-    end
-
-    subgraph Domain ["domain layer ('..domain..')"]
-        DomCls["Entities, use cases, contracts"]
-    end
-
-    Presentation -->|may access| Domain
-    Data -->|may access| Domain
-    Domain -.->|forbidden| Presentation
-    Domain -.->|forbidden| Data
-    Presentation -.->|forbidden| Data
-    Data -.->|forbidden| Presentation
-
-    style Presentation fill:#fef08a,stroke:#eab308,stroke-width:1px
-    style Data fill:#fed7aa,stroke:#f97316,stroke-width:1px
-    style Domain fill:#bae6fd,stroke:#0ea5e9,stroke-width:2px
-    linkStyle 2,3,4,5 stroke:#ef4444,stroke-width:2px,stroke-dasharray: 5 5;
-```
+![Layered package rules](../assets/images/layered-package-rules.svg)
 
 ```kotlin
 @Test
@@ -452,6 +396,168 @@ When a rule fails, handle it like any other test failure:
 
 Do not silently weaken rules until CI passes. That converts architecture tests from governance into decoration.
 
+## Group Related Rules
+
+The examples above use focused standalone assertions such as `Konture.modules { ... }` and `Konture.classes { ... }`. When several rules describe the same boundary, group them with `Konture.architecture { ... }` so the module-level and source-level checks read as one contract:
+
+```kotlin
+@Test
+fun `shared code must stay platform independent`() {
+    Konture.architecture {
+        modules {
+            that().haveNamePath(":shared")
+            should().notDependOnModule(":androidApp")
+        }
+
+        classes {
+            that().resideInAPackage("..shared..")
+            should().onlyDependOnClassesInAnyPackage(
+                "..shared..",
+                "kotlin..",
+                "java..",
+            )
+        }
+    }
+}
+```
+
+## Advanced Patterns
+
+Once the starter suite is stable, add rules for the places where Kotlin projects usually leak architecture.
+
+### KMP Source-Set Boundaries
+
+KMP projects need source-set-specific policies. A `commonMain` rule is usually about portability; an `androidMain` rule may intentionally allow Android APIs.
+
+```kotlin
+@Test
+fun `shared common source must not import Android APIs`() {
+    val commonClasses =
+        Konture.scopeFromModule(":shared").classes.filter { cls ->
+            cls.filePath.contains("/commonMain/")
+        }
+
+    commonClasses.assertTrue("commonMain must stay platform independent") { cls ->
+        cls.imports.none { import ->
+            import.startsWith("android.") ||
+                import.startsWith("androidx.")
+        }
+    }
+}
+```
+
+You can pair that with a module rule:
+
+```kotlin
+Konture.modules {
+    that().haveNamePath(":shared")
+    should().notDependOnModule(":androidApp")
+}
+```
+
+Use the source-set names your build actually uses: `commonMain`, `androidMain`, `iosMain`, `desktopMain`, `jvmMain`, or project-specific intermediate source sets.
+
+### DI Graph Conventions
+
+Konture should not replace a runtime DI integration test. It can still protect structural DI policy:
+
+```kotlin
+@Test
+fun `hilt modules must stay in di packages`() {
+    Konture.classes {
+        that().haveAnnotationOf("dagger.Module")
+        should().resideInAPackage("..di..")
+    }
+}
+```
+
+For Koin, a similar policy may live at the file or function level:
+
+```kotlin
+@Test
+fun `production koin modules must not live in test packages`() {
+    Konture.files {
+        that().satisfy { file ->
+            file.imports.any { it == "org.koin.dsl.module" }
+        }
+        should().resideInAPackage { packageName ->
+            !packageName.contains(".test.") &&
+                !packageName.contains(".fixtures.")
+        }
+    }
+}
+```
+
+These rules do not prove the DI graph starts. They prevent wiring code from spreading into places where ownership becomes unclear.
+
+### Generated Code
+
+Generated code often violates authored-code conventions for good reasons. Treat it explicitly.
+
+```kotlin
+konture {
+    excludePackages(
+        "..generated..",
+        "..buildconfig..",
+        "..databinding..",
+    )
+}
+```
+
+Generated sources from Room, KSP, Compose resources, protobuf, serialization, or DI tools should not create false positives in rules about public API design or package ownership. If generated code is part of the public contract, test the public authored wrapper instead of the generated implementation detail.
+
+### Legacy Quarantine
+
+For legacy code, do not pretend the target architecture already exists. Quarantine it.
+
+```kotlin
+@Test
+fun `new domain code must not depend on legacy persistence`() {
+    val newDomain =
+        Konture.scopeFromPackage("com.acme.domain").classes.filterNot { cls ->
+            cls.packageName.startsWith("com.acme.domain.legacy")
+        }
+
+    newDomain.assertTrue("New domain code must not import legacy persistence") { cls ->
+        cls.imports.none { it.startsWith("com.acme.legacy.persistence.") }
+    }
+}
+```
+
+The exception is visible, named, and removable. That is better than a broad rule that fails constantly or a silent exclusion nobody remembers.
+
+### Public API Surface
+
+Architecture tests are especially useful when accidental public API creates long-lived coupling.
+
+```kotlin
+@Test
+fun `public feature api must not expose implementation or persistence types`() {
+    val apiClasses = Konture.scopeFromModule(":feature:checkout:api").classes
+
+    apiClasses.assertTrue("Public API must not leak implementation detail") { cls ->
+        val publicFunctionTypes =
+            cls.functions
+                .filter { it.visibility == io.github.baole.konture.Visibility.PUBLIC }
+                .flatMap { fn -> listOf(fn.returnType) + fn.parameters.map { it.type } }
+
+        val publicPropertyTypes =
+            cls.properties
+                .filter { it.visibility == io.github.baole.konture.Visibility.PUBLIC }
+                .map { it.type }
+
+        (publicFunctionTypes + publicPropertyTypes).none { type ->
+            type.contains(".impl.") ||
+                type.contains(".data.") ||
+                type.endsWith("Entity") ||
+                type.endsWith("Dto")
+        }
+    }
+}
+```
+
+For libraries, this is also a semantic versioning rule. If a public signature exposes a persistence entity today, removing that entity tomorrow becomes a breaking API change.
+
 ## Rule Design Principles
 
 Add these principles before growing the suite:
@@ -465,6 +571,20 @@ Add these principles before growing the suite:
 
 The showcase projects are useful calibration material. The Now in Android suite demonstrates feature decoupling, ViewModel framework-import checks, and `:api`/`:impl` separation. The KotlinConf KMP suite demonstrates shared-core purity, backend/frontend separation, and route-to-service boundaries. Use examples like those to design rules around real architectural pressure, not abstract neatness.
 
+## Troubleshooting Failures
+
+Most Konture failures fall into a few buckets.
+
+| Failure shape | What it usually means | First repair to try |
+| --- | --- | --- |
+| `Module :a depends on :b, which is not allowed` | A Gradle project dependency crossed the module policy | Depend on an API module, move the contract, or remove the edge |
+| `Circular dependency detected` | Two or more modules now form a dependency cycle | Extract a shared contract or move ownership to one side |
+| `Class ... should only depend on classes in ...` | A source import, signature, or referenced type crossed a package boundary | Map to a boundary model, invert the dependency, or narrow the rule if the architecture changed |
+| Generated or build files appear in violations | The suite is checking code the team does not author directly | Add explicit generated-code exclusions or scope the rule to production packages |
+| A rule fails for many unrelated files | The rule may be too broad or too early for enforcement | Run it informationally, quarantine legacy zones, then tighten over time |
+
+Read the first violation as a design question: is the rule still true? If yes, fix the code. If not, change the rule and leave a clear paper trail in the test name, ADR, or docs.
+
 ## What This Costs
 
 Architecture tests are cheap compared with late structural repair, but they are not free:
@@ -474,6 +594,51 @@ Architecture tests are cheap compared with late structural repair, but they are 
 - Every durable rule becomes maintenance surface when the architecture changes; rule edits should be reviewed as design changes.
 
 For one focused rule set, such as feature implementation isolation or domain purity, many teams can usually move from informational CI to required CI within a sprint or two. Treat that as a rough calibration, not a promise: older codebases and large migration zones need more time.
+
+## Metrics and Observability
+
+Treat the architecture suite like a product health signal, not just a pass/fail gate.
+
+Useful metrics:
+
+- number of architecture rules,
+- architecture-test duration in CI,
+- violation count by rule before enforcement,
+- recurring violations by module or package,
+- number of explicit exceptions and quarantined packages,
+- module fan-in and fan-out for heavily changed areas,
+- review comments that disappear after a rule becomes executable.
+
+Do not overfit the numbers. A project with five strong rules can be healthier than a project with fifty ceremonial ones. The best metric is whether the suite catches expensive structural mistakes early and explains the repair clearly.
+
+## Migration Playbook
+
+Rollout is a social problem as much as a technical one.
+
+1. Inventory the architecture decisions people already enforce in review.
+2. Pick one rule with high agreement and a clear repair path.
+3. Prove the rule fails by introducing and then removing a local violation.
+4. Run the rule in CI as informational if there are existing violations.
+5. Quarantine legacy zones explicitly instead of blocking all work.
+6. Make the rule required once new violations are rare and the team understands the failure.
+7. Add the next rule only after the previous one is boring.
+
+Expect pushback when a test blocks a shortcut that used to be invisible. That is a useful conversation if the rule is specific. It is a waste of time if the rule is vague. Keep the first rules tied to pain the team already recognizes: cycles, feature implementation coupling, platform leakage, or public DTO/entity exposure.
+
+## Maintenance and Evolution
+
+Architecture tests should change when the architecture changes.
+
+Version important rules like any other public contract: rename tests when the policy changes, remove exclusions when migration work lands, and keep old rules informational for a release window if teams need time to move. If a rule has accumulated many exceptions, schedule a rule review instead of adding one more `filterNot`.
+
+Good rule deprecation looks like this:
+
+- mark the old rule informational,
+- add the new rule beside it,
+- migrate modules incrementally,
+- delete the old rule and its quarantine list once the graph matches the new policy.
+
+The suite should describe the architecture you are choosing now, not the architecture you wished you had two years ago.
 
 ## A Starter Suite
 
@@ -544,6 +709,75 @@ Keep the starter suite small. Let it grow from real pain:
 
 Architecture tests work best when they protect decisions people already care about.
 
+## A Mature Suite Shape
+
+A mature suite is not necessarily large. It is layered by concern:
+
+```kotlin
+class ArchitectureSuiteTest {
+
+    @Test
+    fun `project graph must stay acyclic`() {
+        Konture.assertNoCycles()
+    }
+
+    @Test
+    fun `feature modules expose contracts through api modules`() {
+        Konture.architecture {
+            modules {
+                that().haveNameMatching(":feature:**:api")
+                should().notDependOnModule(":feature:**:impl")
+            }
+
+            modules {
+                that().haveNameMatching(":feature:**:impl")
+                should().onlyDependOnModules(
+                    ":feature:**:api",
+                    ":core:**",
+                    ":shared",
+                )
+            }
+        }
+    }
+
+    @Test
+    fun `domain stays independent from frameworks and persistence`() {
+        Konture.architecture {
+            modules {
+                that().haveNamePath(":core:domain")
+                should().notDependOnModule(":core:data")
+            }
+
+            classes {
+                that().resideInAPackage("..domain..")
+                should().notDependOnClassesInAnyPackage(
+                    "..data..",
+                    "..database..",
+                    "..network..",
+                    "android..",
+                    "androidx.compose..",
+                    "org.springframework..",
+                )
+            }
+        }
+    }
+
+    @Test
+    fun `shared kmp code stays platform independent`() {
+        val commonClasses =
+            Konture.scopeFromModule(":shared").classes.filter { cls ->
+                cls.filePath.contains("/commonMain/")
+            }
+
+        commonClasses.assertTrue("commonMain must not import platform APIs") { cls ->
+            cls.imports.none { it.startsWith("android.") || it.startsWith("java.awt.") }
+        }
+    }
+}
+```
+
+The suite has different jobs: graph health, feature ownership, domain purity, and platform portability. Each failure tells the developer which architectural decision was crossed.
+
 ## Rollout Guidance
 
 For an existing project, introduce architecture tests in stages:
@@ -561,6 +795,8 @@ konture {
     excludePackages("..generated..")
 }
 ```
+
+This lowercase `konture {}` block belongs in Gradle build configuration and configures the Konture plugin. It is separate from the capitalized `Konture.*` assertion APIs used in test files.
 
 The exception should be visible enough that future maintainers understand the real boundary.
 

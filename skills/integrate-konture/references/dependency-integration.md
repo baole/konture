@@ -42,7 +42,7 @@ dependencies {
 
 Use this only if the project genuinely has no version catalog. **Don't
 introduce a version catalog just for this** — that's a build-system decision
-that affects the whole project and is out of scope for a Konture setup task.
+that affects the whole project and is out of scope for a Konture integration task.
 Ask the user first if you think a catalog would help; otherwise use the
 literal form:
 

@@ -4,21 +4,28 @@ To keep modular architectures clean, implementation details must remain hidden f
 
 Implementation files should be marked with Kotlin's `internal` visibility. Furthermore, any public-facing API surface exposed across project or package boundaries must be cleanly documented using KDocs so developers can integrate them correctly.
 
-```text
-               +--------------------------------------+
-               |          PUBLIC API INTERFACE        | <--- Exposed to outside
-               +--------------------------------------+
-                                  |
-                                  v (Delegates to)
-               +--------------------------------------+
-               |     INTERNAL IMPLEMENTATION CLASS    | <--- Hidden (No direct outside access)
-               +--------------------------------------+
+```mermaid
+flowchart TB
+    outside["Outside Consumers"]
+    api["Public API Interface"]
+    implementation["Internal Implementation Class"]
+
+    outside -->|"allowed access"| api
+    api -->|"delegates to"| implementation
+    outside -. "no direct access" .-> implementation
+
+    classDef outside fill:#f8fafc,stroke:#64748b,color:#334155
+    classDef publicApi fill:#eff6ff,stroke:#2563eb,color:#1e3a8a
+    classDef internalImpl fill:#fef2f2,stroke:#dc2626,color:#7f1d1d
+    class outside outside
+    class api publicApi
+    class implementation internalImpl
 ```
 
 ---
 
 ## 💡 The Rationale
-* **True Encapsulation**: Restricting utility classes or sub-components to `internal` or `private` ensures they can be modified or refactored with zero risk of breaking dependent code modules.
+* **True Encapsulation**: Restricting utility classes or subcomponents to `internal` or `private` ensures they can be modified or refactored with zero risk of breaking dependent code modules.
 * **Maintainable API Footprint**: Keeping public surfaces minimal minimizes library or component footprints, making it much easier to preserve backwards compatibility.
 * **Rich Developer Experience**: Requiring proper KDoc comments on every exposed public class and function results in clean auto-completion popups and reliable code generation.
 

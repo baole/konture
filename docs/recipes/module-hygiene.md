@@ -16,7 +16,7 @@ graph TD
 ---
 
 ## 💡 The Rationale
-* **Compilation Speed**: Eliminating cycles and reducing unnecessary project couplings maximizes Gradle's incremental build speed and cache hit rates.
+* **Compilation Speed**: Eliminating cycles and reducing unnecessary project coupling maximizes Gradle's incremental build speed and cache hit rates.
 * **True Modularization**: Keeping feature modules isolated guarantees they can be developed, tested, and deployed independently without cascading rebuilds.
 * **Portability (KMP)**: Ensuring that shared `commonMain` code doesn't accidentally depend on platform-specific libraries (like JVM-only or Android-only targets) preserves the multiplatform promise.
 
@@ -105,7 +105,7 @@ If a developer adds a circular dependency or sideways import, Konture prints cle
 
 * **Circular Cycle Failure**:
   ```text
-  AssertionError: Circular dependency detected in project graph: 
+  AssertionError: Circular dependency detected in project graph:
     :feature:checkout -> :feature:profile -> :feature:checkout
   ```
 

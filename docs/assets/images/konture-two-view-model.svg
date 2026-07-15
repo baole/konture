@@ -1,0 +1,146 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="600" viewBox="0 0 1024 600" role="img" aria-labelledby="title desc">
+  <title id="title">Konture's Two-View Model</title>
+  <desc id="desc">Conceptual architecture of Konture showing the coordinated flow from Gradle project layout metadata on the left, Kotlin source code model on the right, converging into JUnit-based architecture tests that produce pass/fail verification results.</desc>
+  <defs>
+    <!-- Gradients -->
+    <linearGradient id="purple-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#fdf4ff"/>
+      <stop offset="100%" stop-color="#f5d0fe"/>
+    </linearGradient>
+    <linearGradient id="green-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#f0fdf4"/>
+      <stop offset="100%" stop-color="#bbf7d0"/>
+    </linearGradient>
+    <linearGradient id="blue-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#eff6ff"/>
+      <stop offset="100%" stop-color="#bfdbfe"/>
+    </linearGradient>
+    <linearGradient id="emerald-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#ecfdf5"/>
+      <stop offset="100%" stop-color="#a7f3d0"/>
+    </linearGradient>
+    <linearGradient id="slate-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#f8fafc"/>
+      <stop offset="100%" stop-color="#e2e8f0"/>
+    </linearGradient>
+
+    <!-- Shadow -->
+    <filter id="shadow" x="-5%" y="-5%" width="110%" height="115%" filterUnits="userSpaceOnUse">
+      <feDropShadow dx="0" dy="4" stdDeviation="5" flood-color="#0f172a" flood-opacity="0.08"/>
+    </filter>
+
+    <style>
+      .bg { fill: #ffffff; }
+      .container { fill: #ffffff; stroke: #e2e8f0; stroke-width: 1.5; rx: 16; }
+      .container-purple { fill: #faf5ff; stroke: #e9d5ff; stroke-width: 1.5; rx: 16; }
+      .container-green { fill: #f0fdf4; stroke: #bbf7d0; stroke-width: 1.5; rx: 16; }
+
+      .node { stroke-width: 1.5; rx: 10; filter: url(#shadow); }
+      .node-start { fill: url(#slate-grad); stroke: #64748b; }
+      .node-purple { fill: url(#purple-grad); stroke: #a855f7; }
+      .node-green { fill: url(#green-grad); stroke: #22c55e; }
+      .node-blue { fill: url(#blue-grad); stroke: #2563eb; stroke-width: 2; }
+      .node-emerald { fill: url(#emerald-grad); stroke: #059669; stroke-width: 2; }
+
+      .text-title { font-family: Inter, system-ui, -apple-system, sans-serif; font-size: 13px; font-weight: 700; fill: #0f172a; }
+      .text-sub { font-family: Inter, system-ui, -apple-system, sans-serif; font-size: 9px; font-weight: 500; fill: #475569; }
+      .text-container-label { font-family: Inter, system-ui, -apple-system, sans-serif; font-size: 14px; font-weight: 800; letter-spacing: 0.5px; }
+
+      .arrow { stroke: #475569; stroke-width: 2; fill: none; marker-end: url(#arrow-gray); stroke-linecap: round; }
+    </style>
+
+    <marker id="arrow-gray" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto">
+      <path d="M1,1 L7,4 L1,7 Z" fill="#475569"/>
+    </marker>
+  </defs>
+
+  <rect class="bg" width="1024" height="600"/>
+
+  <!-- Start point -->
+  <g transform="translate(412, 25)">
+    <rect class="node node-start" width="200" height="45"/>
+    <text class="text-title" x="100" y="26" text-anchor="middle">Kotlin Project</text>
+  </g>
+
+  <!-- BUILD GRAPH VIEW CONTAINER -->
+  <g transform="translate(40, 100)">
+    <rect class="container container-purple" width="440" height="300"/>
+    <text class="text-container-label" x="25" y="32" fill="#7e22ce">BUILD GRAPH VIEW</text>
+
+    <!-- nodes in purple container -->
+    <g transform="translate(100, 50)">
+      <rect class="node node-purple" width="240" height="45"/>
+      <text class="text-title" x="120" y="22" text-anchor="middle">Gradle Build Configuration</text>
+      <text class="text-sub" x="120" y="36" text-anchor="middle">Module definitions &amp; build script dependencies</text>
+    </g>
+
+    <g transform="translate(100, 130)">
+      <rect class="node node-purple" width="240" height="45"/>
+      <text class="text-title" x="120" y="22" text-anchor="middle">Konture Gradle Plugin</text>
+      <text class="text-sub" x="120" y="36" text-anchor="middle">Processes compile classpath &amp; module graph</text>
+    </g>
+
+    <g transform="translate(100, 210)">
+      <rect class="node node-purple" width="240" height="55"/>
+      <text class="text-title" x="120" y="22" text-anchor="middle">Captured Layout Metadata</text>
+      <text class="text-sub" x="120" y="36" text-anchor="middle">Physical project modules, source sets,</text>
+      <text class="text-sub" x="120" y="47" text-anchor="middle">and dependency coordinates</text>
+    </g>
+
+    <!-- arrows inside purple -->
+    <path class="arrow" d="M 220 97 L 220 125" stroke="#a855f7"/>
+    <path class="arrow" d="M 220 177 L 220 205" stroke="#a855f7"/>
+  </g>
+
+  <!-- SOURCE CODE VIEW CONTAINER -->
+  <g transform="translate(544, 100)">
+    <rect class="container container-green" width="440" height="300"/>
+    <text class="text-container-label" x="25" y="32" fill="#15803d">SOURCE CODE VIEW</text>
+
+    <!-- nodes in green container -->
+    <g transform="translate(100, 50)">
+      <rect class="node node-green" width="240" height="45"/>
+      <text class="text-title" x="120" y="22" text-anchor="middle">Kotlin Source Files</text>
+      <text class="text-sub" x="120" y="36" text-anchor="middle">In-memory or physical .kt source code files</text>
+    </g>
+
+    <g transform="translate(100, 130)">
+      <rect class="node node-green" width="240" height="45"/>
+      <text class="text-title" x="120" y="22" text-anchor="middle">PSI-Based Parser</text>
+      <text class="text-sub" x="120" y="36" text-anchor="middle">Extracts syntactical structure and declarations</text>
+    </g>
+
+    <g transform="translate(100, 210)">
+      <rect class="node node-green" width="240" height="55"/>
+      <text class="text-title" x="120" y="22" text-anchor="middle">Captured Source Model</text>
+      <text class="text-sub" x="120" y="36" text-anchor="middle">Fully qualified names, packages, imports,</text>
+      <text class="text-sub" x="120" y="47" text-anchor="middle">declarations, visibility, and scopes</text>
+    </g>
+
+    <!-- arrows inside green -->
+    <path class="arrow" d="M 220 97 L 220 125" stroke="#22c55e"/>
+    <path class="arrow" d="M 220 177 L 220 205" stroke="#22c55e"/>
+  </g>
+
+  <!-- OUTER SYSTEM ARROWS -->
+  <path class="arrow" d="M 512 72 C 340 72, 240 110, 240 148"/>
+  <path class="arrow" d="M 512 72 C 684 72, 784 110, 784 148"/>
+
+  <!-- ARCHITECTURE TESTS CONVERGENCE -->
+  <g transform="translate(342, 440)">
+    <rect class="node node-blue" width="340" height="60"/>
+    <text class="text-title" x="170" y="24" text-anchor="middle" fill="#1e3a8a">Coordinated Architecture Tests</text>
+    <text class="text-sub" x="170" y="42" text-anchor="middle" fill="#1d4ed8" font-weight="700">Combined verification: module structure + source syntax rules</text>
+  </g>
+
+  <!-- TEST RESULT -->
+  <g transform="translate(412, 530)">
+    <rect class="node node-emerald" width="200" height="45"/>
+    <text class="text-title" x="100" y="26" text-anchor="middle" fill="#064e3b">Test Verification Result</text>
+  </g>
+
+  <!-- arrows to convergence -->
+  <path class="arrow" d="M 240 367 C 240 415, 340 415, 412 438"/>
+  <path class="arrow" d="M 784 367 C 784 415, 684 415, 612 438"/>
+  <path class="arrow" d="M 512 502 L 512 528"/>
+</svg>

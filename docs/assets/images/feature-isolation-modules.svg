@@ -1,0 +1,151 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="960" height="500" viewBox="0 0 960 500" role="img" aria-labelledby="title desc">
+  <title id="title">Feature Isolation Modules</title>
+  <desc id="desc">Multi-module graph showing an app depending on Checkout and Profile features. Each feature is split into api and impl modules. Sibling impl modules are isolated from each other, while both depend on api modules and shared core modules.</desc>
+  <defs>
+    <!-- Gradients -->
+    <linearGradient id="slate-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#f8fafc"/>
+      <stop offset="100%" stop-color="#f1f5f9"/>
+    </linearGradient>
+    <linearGradient id="blue-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#f0f9ff"/>
+      <stop offset="100%" stop-color="#bae6fd"/>
+    </linearGradient>
+    <linearGradient id="sky-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#e0f2fe"/>
+      <stop offset="100%" stop-color="#93c5fd"/>
+    </linearGradient>
+    <linearGradient id="green-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#f0fdf4"/>
+      <stop offset="100%" stop-color="#bbf7d0"/>
+    </linearGradient>
+    <linearGradient id="red-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#fef2f2"/>
+      <stop offset="100%" stop-color="#fee2e2"/>
+    </linearGradient>
+
+    <!-- Shadow -->
+    <filter id="shadow" x="-5%" y="-5%" width="110%" height="115%" filterUnits="userSpaceOnUse">
+      <feDropShadow dx="0" dy="2" stdDeviation="4" flood-color="#0f172a" flood-opacity="0.08"/>
+    </filter>
+
+    <style>
+      .bg { fill: #ffffff; }
+      .container { fill: #ffffff; stroke: #e2e8f0; stroke-width: 1.5; rx: 16; }
+      .container-blue { fill: #f0f9ff; stroke: #bae6fd; stroke-width: 1.5; rx: 16; }
+      .container-purple { fill: #faf5ff; stroke: #e9d5ff; stroke-width: 1.5; rx: 16; }
+      .container-green { fill: #f0fdf4; stroke: #bbf7d0; stroke-width: 1.5; rx: 16; }
+
+      .node { stroke-width: 1.5; rx: 10; filter: url(#shadow); }
+      .node-app { fill: url(#slate-grad); stroke: #64748b; }
+      .node-impl { fill: url(#sky-grad); stroke: #0284c7; }
+      .node-api { fill: url(#blue-grad); stroke: #0ea5e9; }
+      .node-core { fill: url(#green-grad); stroke: #16a34a; }
+
+      .text-title { font-family: Inter, system-ui, -apple-system, sans-serif; font-size: 13px; font-weight: 700; fill: #0f172a; }
+      .text-sub { font-family: Inter, system-ui, -apple-system, sans-serif; font-size: 9px; font-weight: 500; fill: #475569; }
+      .text-forbidden { font-family: Inter, system-ui, -apple-system, sans-serif; font-size: 10px; font-weight: 700; fill: #dc2626; }
+      .text-container-label { font-family: Inter, system-ui, -apple-system, sans-serif; font-size: 12px; font-weight: 800; letter-spacing: 0.5px; }
+
+      .arrow { stroke: #64748b; stroke-width: 1.5; fill: none; marker-end: url(#arrow-gray); stroke-linecap: round; }
+      .arrow-bad { stroke: #ef4444; stroke-width: 2; fill: none; stroke-dasharray: 6 4; marker-end: url(#arrow-red); stroke-linecap: round; }
+    </style>
+
+    <marker id="arrow-gray" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto">
+      <path d="M1,1 L7,4 L1,7 Z" fill="#64748b"/>
+    </marker>
+    <marker id="arrow-red" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto">
+      <path d="M1,1 L7,4 L1,7 Z" fill="#ef4444"/>
+    </marker>
+  </defs>
+
+  <rect class="bg" width="960" height="500"/>
+
+  <!-- :app -->
+  <g transform="translate(380, 20)">
+    <rect class="node node-app" width="200" height="45"/>
+    <text class="text-title" x="100" y="26" text-anchor="middle">:app</text>
+  </g>
+
+  <!-- CHECKOUT FEATURE CONTAINER -->
+  <g transform="translate(30, 100)">
+    <rect class="container container-blue" width="410" height="180"/>
+    <text class="text-container-label" x="20" y="24" fill="#0369a1">CHECKOUT FEATURE</text>
+
+    <!-- nodes -->
+    <g transform="translate(20, 55)">
+      <rect class="node node-impl" width="160" height="45"/>
+      <text class="text-title" x="80" y="22" text-anchor="middle">:feature:checkout:impl</text>
+      <text class="text-sub" x="80" y="36" text-anchor="middle">implementation</text>
+    </g>
+
+    <g transform="translate(230, 55)">
+      <rect class="node node-api" width="160" height="45"/>
+      <text class="text-title" x="80" y="22" text-anchor="middle">:feature:checkout:api</text>
+      <text class="text-sub" x="80" y="36" text-anchor="middle">public interface</text>
+    </g>
+
+    <!-- checkout impl depends on checkout api -->
+    <path class="arrow" d="M 180 77 L 222 77"/>
+  </g>
+
+  <!-- PROFILE FEATURE CONTAINER -->
+  <g transform="translate(520, 100)">
+    <rect class="container container-purple" width="410" height="180"/>
+    <text class="text-container-label" x="20" y="24" fill="#6b21a8">PROFILE FEATURE</text>
+
+    <!-- nodes -->
+    <g transform="translate(20, 55)">
+      <rect class="node node-impl" width="160" height="45"/>
+      <text class="text-title" x="80" y="22" text-anchor="middle">:feature:profile:impl</text>
+      <text class="text-sub" x="80" y="36" text-anchor="middle">implementation</text>
+    </g>
+
+    <g transform="translate(230, 55)">
+      <rect class="node node-api" width="160" height="45"/>
+      <text class="text-title" x="80" y="22" text-anchor="middle">:feature:profile:api</text>
+      <text class="text-sub" x="80" y="36" text-anchor="middle">public interface</text>
+    </g>
+
+    <!-- profile impl depends on profile api -->
+    <path class="arrow" d="M 180 77 L 222 77"/>
+  </g>
+
+  <!-- CORE MODULES CONTAINER -->
+  <g transform="translate(240, 330)">
+    <rect class="container container-green" width="480" height="140"/>
+    <text class="text-container-label" x="25" y="24" fill="#15803d">CORE SHARED MODULES</text>
+
+    <!-- nodes -->
+    <g transform="translate(30, 50)">
+      <rect class="node node-core" width="180" height="45"/>
+      <text class="text-title" x="90" y="26" text-anchor="middle">:core:domain</text>
+    </g>
+
+    <g transform="translate(270, 50)">
+      <rect class="node node-core" width="180" height="45"/>
+      <text class="text-title" x="90" y="26" text-anchor="middle">:core:network</text>
+    </g>
+  </g>
+
+  <!-- SYSTEM ARROWS -->
+  <!-- :app -> checkout:impl -->
+  <path class="arrow" d="M 480 67 C 480 87, 130 87, 130 147"/>
+  <!-- :app -> profile:impl -->
+  <path class="arrow" d="M 480 67 C 480 87, 620 87, 620 147"/>
+
+  <!-- checkout:impl -> :core:domain -->
+  <path class="arrow" d="M 130 202 C 130 310, 360 310, 360 372"/>
+  <!-- checkout:impl -> :core:network -->
+  <path class="arrow" d="M 130 202 C 130 310, 600 310, 600 372"/>
+
+  <!-- profile:impl -> :core:domain -->
+  <path class="arrow" d="M 620 202 C 620 310, 360 310, 360 372"/>
+
+  <!-- FORBIDDEN INTER-FEATURE COUPLING -->
+  <g>
+    <path class="arrow-bad" d="M 210 177 L 532 177"/>
+    <rect x="290" y="152" width="100" height="18" rx="4" fill="#fee2e2" stroke="#fecaca" stroke-width="0.5"/>
+    <text class="text-forbidden" x="340" y="165" text-anchor="middle">forbidden</text>
+  </g>
+</svg>

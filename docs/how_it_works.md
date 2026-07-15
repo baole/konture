@@ -1,6 +1,6 @@
-# Konture Architecture Guide
+# How Konture Works
 
-This document describes the internal architecture of **Konture**, explaining the technical design, Gradle build integrations, and source code static analysis mechanisms.
+This page explains **Konture**'s internal design: how it extracts project topology at build time, shares it safely across Gradle modules, and parses Kotlin source without a full compiler pass. It's meant for readers evaluating build-tool safety (Configuration Cache, Project Isolation) or contributing to Konture itself. If you just want to know what Konture checks, see [Why Architecture Testing?](architecture_test.md).
 
 ---
 
@@ -24,6 +24,8 @@ graph TD
     end
 ```
 
+Layout extraction happens once at build time; tests only read the cached JSON and parse source files on demand.
+
 ### Key Advantages of This Architecture:
 1. **Gradle Configuration Cache Safe**: The topology is extracted during Gradle configuration and execution, allowing the task `generateArchitectureLayout` to be fully cached.
 2. **Project Isolation Compatible**: By sharing files via custom configurations and Gradle attributes rather than direct parent-to-child model access, Konture is fully compatible with Gradle's new **Project Isolation** requirement.
@@ -34,7 +36,7 @@ graph TD
 
 ## 1. The Offline Layout Contract (`layout.json`)
 
-At the heart of Konture is the `layout.json` file. It acts as the schema contract between the Gradle plugin and the test runner. 
+At the heart of Konture is the `layout.json` file. It acts as the schema contract between the Gradle plugin and the test runner.
 
 The structure of `LayoutModel` (defined in `core`) is serialized using `kotlinx-serialization`:
 
@@ -79,7 +81,7 @@ The structure of `LayoutModel` (defined in `core`) is serialized using `kotlinx-
 
 ## 2. Gradle Artifact & Sharing Architecture
 
-Gradle prevents projects from accessing other projects' internal task and file configurations directly (e.g., `parent.subprojects` is deprecated and violates Project Isolation). 
+Gradle prevents projects from accessing other projects' internal task and file configurations directly (e.g., `parent.subprojects` is deprecated and violates Project Isolation).
 
 To share the generated `layout.json` safely, Konture uses Gradle's **Consuming/Publishing Artifacts API**:
 
@@ -88,15 +90,17 @@ sequenceDiagram
     participant Root as Root Project (:generateArchitectureLayout)
     participant Out as Layout Configuration (Outgoing)
     participant Cons as Test Module (:konture-test)
-    
+
     Root->>Out: Registers layout.json as an Outgoing Artifact
     Cons->>Cons: Automatically sets up consumer layout configuration
     Cons->>Out: Resolves artifact via Attribute matching (konture.layout)
     Out-->>Cons: Copies layout.json to test/resources/layout.json
 ```
 
+The root project publishes `layout.json` as a Gradle artifact, and test modules consume it through attribute-matched configurations.
+
 ### The Sharing Mechanism:
-1. **Producer (Root Project)**: 
+1. **Producer (Root Project)**:
    - Registers the `generateArchitectureLayout` task.
    - Declares a custom consumable configuration named `kontureLayoutElements`.
    - Associates the configuration with a specific attribute: `ArtifactTypeDefinition.ARTIFACT_TYPE_ATTRIBUTE` set to `konture-layout-json`.
@@ -119,13 +123,13 @@ The component responsible is `PsiParser` inside `library`.
 
 ### Under the Hood:
 1. **Embeddable Environment**: `PsiParser` instantiates an IntelliJ core environment in-memory using `KotlinCoreEnvironment.createForProduction`.
-2. **Virtual Files**: The AST loader creates lightweight `KtFile` representations of Kotlin source code from local files on disk.
+2. **Virtual Files**: The AST loader creates lightweight `KtFile` representations of Kotlin source files from local files on disk.
 3. **AST Traversal**: It traverses the AST using `KtVisitor` and extracts:
    - Package declarations (`packageName`)
    - Class and interface structures (`KtClassOrObject`)
    - Annotations (`KtAnnotationEntry`)
    - Import lists (`KtImportDirective`)
-   - Typename references inside class bodies (signatures, property types, generics, local variables)
+   - Type-name references inside class bodies (signatures, property types, generics, local variables)
 4. **Disposal**: To avoid severe memory leaks across repeated test invocations or build daemon reuse, `PsiParser` implements a strict cleanup routine using a disposable parent context (`Disposer.dispose`).
 
 ---
@@ -142,4 +146,6 @@ For any source class `A` and target class `B`:
   2. If `A` has a star-import of `B`'s package (`import com.acme.*`).
   3. If `A` has an explicit import matching `B`'s name.
 
-This heuristic-based approach provides **99%+ accuracy** for architectural assertions while maintaining absolute independence from compiled classfiles and build-classpath states.
+This heuristic-based approach provides **99%+ accuracy** for architectural assertions while maintaining absolute independence from compiled classfiles and build-classpath states. The known boundary is ambiguous simple-name resolution: a dependency can be misattributed when two classes share the same simple name across different packages and the source file does not use an explicit import, star import, same-package reference, or fully qualified name to disambiguate it. In practice this is rare, since Kotlin style conventions and import organization make ambiguous simple-name references uncommon, but it is the trade-off that lets Konture remain source-only and classpath-independent.
+
+These design choices, offline topology extraction, artifact-based sharing, and source-level parsing, let Konture run as an ordinary, fast unit test rather than a slow, classpath-dependent static analysis pass. See [Why Architecture Testing?](architecture_test.md) for what these tests actually check.

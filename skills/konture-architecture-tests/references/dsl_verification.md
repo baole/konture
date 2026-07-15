@@ -15,7 +15,7 @@ Within each builder scope:
 ## Starter Test Shape
 
 ```kotlin
-import io.github.baole.konture.dsl.architecture
+import io.github.baole.konture.architecture
 import org.junit.jupiter.api.Test
 
 class ArchitectureGuardrails {

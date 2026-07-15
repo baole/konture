@@ -4,7 +4,7 @@
 // project — see references/dsl_verification.md before trusting any method
 // name here against the resolved Konture version.
 
-import io.github.baole.konture.dsl.architecture
+import io.github.baole.konture.architecture
 import org.junit.jupiter.api.Test
 
 class ArchitectureGuardrails {

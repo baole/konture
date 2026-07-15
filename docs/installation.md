@@ -1,35 +1,25 @@
-# Installation & Setup
 
-> [!TIP]
-> **🤖 Save Time: Let AI Set It Up & Write Tests!**
-> Instead of manually copying and editing build configurations, you can use our official, high-context AI prompts and custom skills to let AI assistants (like Gemini, Claude, Cursor) do it for you instantly:
-> *   **[🤖 setup-konture Skill / Prompt](ai-prompts/setup-prompt.md)**: Lets autonomous agents or chat assistants inspect, install, configure, and set up a dedicated test module in any repository with zero manual intervention.
-> *   **[📐 konture-architecture-tests Skill / Prompt](ai-prompts/writing-tests-prompt.md)**: A complete, copy-pasteable master prompt to easily design, write, and review custom guardrails using AI with compile-safe DSL API references.
-> *   See the full **[🤖 AI Prompts & Skills Catalog](ai-prompts/README.md)** for a central index on how to load these.
->
-> *Copy the prompts first to automate your entire onboarding!*
+# Installation
 
-Konture is designed to integrate into your Kotlin or Gradle project with minimal friction. It is structured into two parts:
-
-1. **The Gradle Plugin** (`io.github.baole.konture`): Extracts your multi-module project layout, applied plugins, and project dependency boundaries at build time, caching it safely inside your build directories.
-2. **The Assertion Library** (`io.github.baole:konture`): Provides rich, fluent DSLs (inspired by Konsist, ArchUnit, and modern declarative standards) to run assertions against your codebase.
-
----
+> **🤖 Build with AI**
+> Writing architecture tests with AI is now easier than ever! You can use our official prompts & skills:
+> *   **[🤖 Integration Prompt](ai-prompts/integration-prompt.md)**
+> *   **[📐 Writing Tests Prompt](ai-prompts/writing-tests-prompt.md)**
+> *   **[🤖 See Prompts and Skills Catalog](ai-prompts/README.md)** for a central index on how to load these.
+{: .tip }
 
 ## 💻 Supported Environments & Platforms
 
-Konture works natively across the entire spectrum of Kotlin projects:
+Konture works natively across all Kotlin environments:
 
-* **Backend / Server-Side**: Fully supports frameworks like **Spring Boot**, **Ktor**, **Micronaut**, and **Quarkus**. Runs without starting heavy dependency injection contexts or loading production classloaders.
-* **Android**: Baselines against **Android Gradle Plugin (AGP) 9.x** (with prior versions supported on a best-effort basis). It automatically extracts module variants and scopes checks to production source sets.
-* **Kotlin Multiplatform (KMP)**: Correctly identifies and queries multiplatform source directories (e.g. `commonMain`, `androidMain`, `iosMain`, `desktopMain`).
-* **Test Framework Agnostic**: Runs seamlessly inside **[JUnit 4](https://junit.org/junit4/)**, **[JUnit 5](https://junit.org/junit5/)**, **[JUnit 6](https://junit.org/)**, **[Kotest](https://kotest.io/)**, **[TestBalloon](https://github.com/infix-de/testBalloon)**, or absolutely **any other test runner** of your choice. Because Konture operates as a standalone Kotlin library rather than a customized framework runner, you can invoke your architectural assertions directly inside any test block without any runner extensions or custom boilerplate—the choice of test runner simply doesn't matter.
+* **Android**: Supports **AGP 9.x+** (older versions on a best-effort basis) and automatically handles module variants.
+* **Kotlin Multiplatform (KMP)**: Seamlessly queries multiplatform source directories (e.g., `commonMain`, `androidMain`, `iosMain`).
+* **Backend**: Fully supports JVM frameworks (like **Spring**, **Ktor**, **Micronaut**, **Quarkus**) without launching heavy DI or server contexts.
+* **Test Agnostic**: Runs inside any test runner (**JUnit 4/5/6**, **Kotest**, **TestBalloon**) as a standard library, requiring no extensions or custom boilerplate.
 
 ---
 
 ## 🛠️ Step-by-Step Setup
-
-To prevent test framework and AST-parsing dependencies from polluting your production application classpath, we highly recommend creating a **dedicated subproject** (e.g., `:architecture-test` or `:konture-test`) for your architectural rules.
 
 ### Step 1: Apply the Gradle Plugin
 
@@ -37,7 +27,7 @@ Apply the Konture plugin to your **root project's `build.gradle.kts`**:
 
 ```kotlin
 plugins {
-    id("io.github.baole.konture") version "0.6.8"
+    id("io.github.baole.konture") version "0.6.9"
 }
 ```
 
@@ -56,20 +46,14 @@ pluginManagement {
     repositories {
         gradlePluginPortal()
         mavenCentral()
-        mavenLocal() // Only needed if testing local builds!
     }
 }
 
 dependencyResolutionManagement {
     repositories {
         mavenCentral()
-        mavenLocal() // Only needed if testing local builds!
     }
 }
-
-include(":app")
-// etc...
-include(":konture-test") // Include your architecture test module!
 ```
 
 ---
@@ -81,7 +65,7 @@ Create a subfolder named `konture-test/` with a `build.gradle.kts` file:
 ```kotlin
 plugins {
     kotlin("jvm")
-    id("io.github.baole.konture")
+    id("io.github.baole.konture") // this is important!
 }
 
 repositories {
@@ -90,9 +74,10 @@ repositories {
 
 dependencies {
     // The unified assertion library containing all assertion builders and styles
-    testImplementation("io.github.baole:konture:0.6.8")
+    testImplementation("io.github.baole:konture:0.6.9")
 
-    // Test runner of your choice (JUnit 5 is shown as a standard example, but Kotest, TestBalloon, JUnit 4/6 work natively too!)
+    // Test runner of your choice (JUnit 5 is shown as a standard example,
+    // but Kotest, TestBalloon, JUnit 4/6 work natively too!)
     testImplementation("org.junit.jupiter:junit-jupiter-api:5.11.0")
     testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:5.11.0")
 }
@@ -115,7 +100,7 @@ You can write architectural tests using any of the major API paradigms supported
 
 Create a test class inside `konture-test/src/test/kotlin/io/github/baole/archtest/ArchitectureTest.kt`:
 
-### Option A: Konsist-Inspired (Fluent Scope)
+### Fluent Scope
 
 The Konsist-inspired style uses a fluent scope builder where you retrieve classes from the whole project or a module, filter them using helper functions, and call `assertTrue` with a predicate lambda.
 
@@ -139,7 +124,7 @@ class FluentArchitectureTest {
 }
 ```
 
-### Option B: ArchUnit-Inspired (Declarative Rules)
+### Declarative Rules
 
 The ArchUnit-inspired style uses a declarative rule-building builder DSL. You specify the target of the rule (`classes()` or `modules()`), filter them with `that()`, declare constraints with `should()`, and execute the validation using `check()`.
 

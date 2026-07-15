@@ -1,6 +1,5 @@
 package io.github.baole.konture
 
-import io.github.baole.konture.dsl.architecture
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 

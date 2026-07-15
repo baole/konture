@@ -12,7 +12,7 @@ graph TD
 ---
 
 ## 💡 The Rationale
-* **Purity of Business Logic**: Changing database libraries, migrating databases, or switching UI frameworks should never force changes or re-compilation of your core business use cases.
+* **Purity of Business Logic**: Changing database libraries, migrating databases, or switching UI frameworks should never force changes or recompilation of your core business use cases.
 * **Testability**: Pure domain classes can be unit-tested rapidly and reliably without mocking complex framework behaviors like database configurations, HTTP runtimes, or UI view models.
 * **Agility**: Offloads framework upgrades from your core features. Upgrading heavy tools like Spring Boot or Android Gradle Plugin doesn't risk breaking or modifying pure Kotlin rules.
 

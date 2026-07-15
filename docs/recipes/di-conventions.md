@@ -17,7 +17,7 @@ We advocate a **Dual-Testing Model** to enforce DI safety:
 
 ## 🛠️ Implementation with Konture & Container Frameworks
 
-### 1. Koin: Dynamic dry-runs + Konture Static checks
+### 1. Koin: Dynamic Dry-Runs + Konture Static Checks
 
 First, use Koin's native verifier to dynamically spin up and dry-run your module definitions:
 
@@ -69,8 +69,8 @@ class SpringConfigurationSanityTest {
         Konture.scope.classes
             .withPackage("..domain..")
             .assertTrue("Domain classes must not declare Spring configuration") { cls ->
-                cls.annotations.none { ann -> 
-                    ann.name.contains("org.springframework.context.annotation.Configuration") 
+                cls.annotations.none { ann ->
+                    ann.name.contains("org.springframework.context.annotation.Configuration")
                 }
             }
     }

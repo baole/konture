@@ -13,9 +13,9 @@ Those checks are necessary. They are not the same as asking whether the system s
 Consider a domain use case that starts depending on a data-layer implementation:
 
 ```kotlin
-package com.acme.checkout.domain
+package com.acme.domain
 
-import com.acme.checkout.data.SqlUserRepository
+import com.acme.data.SqlUserRepository
 
 class GetUserUseCase(
     private val repository: SqlUserRepository,
@@ -61,6 +61,21 @@ None of those changes has to be malicious or careless. Most structural drift com
 
 Architecture tests are a way to make the aggregate cost visible early.
 
+## Structural Drift Has a Shape
+
+Most architecture drift is not dramatic. It usually starts as one edge that looks reasonable in a pull request.
+
+![Structural drift shape](../assets/images/structural-drift-shape.svg)
+
+The second graph may still compile. The product behavior may still be correct. The damage appears later:
+
+- a profile refactor now needs checkout context,
+- unrelated feature changes invalidate more build work,
+- reviewers have to reason about a wider blast radius,
+- the next shortcut feels less unusual because the first one already exists.
+
+The right metrics are project-specific, but the useful ones are concrete: number of forbidden module edges, number of rule violations per month, module fan-in and fan-out, rebuild scope after a feature change, and repeated review comments about the same boundary. Architecture tests become persuasive when they turn those observations into a failing example instead of a style argument.
+
 ## What Architecture Tests Check
 
 Good architecture tests protect decisions that affect change velocity, module independence, public API shape, and review load. They usually fall into a few categories.
@@ -69,20 +84,7 @@ Good architecture tests protect decisions that affect change velocity, module in
 
 Layered systems depend on direction. In Clean Architecture, ports and adapters, and many domain-centered designs, outer layers may depend inward, but the core should not depend on UI, databases, transport frameworks, or platform APIs.
 
-```mermaid
-flowchart TB
-    Outer["Outer layers<br/>UI, controllers, data adapters,<br/>network clients"]
-    Domain["Core domain<br/>entities, use cases, contracts"]
-    Details["Concrete details<br/>Compose, Room, Retrofit,<br/>SQL repositories"]
-
-    Outer -->|"allowed: depend inward"| Domain
-    Domain -.->|"forbidden: know outward"| Details
-
-    style Outer fill:#f8fafc,stroke:#64748b,stroke-width:2px
-    style Domain fill:#dbeafe,stroke:#2563eb,stroke-width:2px
-    style Details fill:#fee2e2,stroke:#dc2626,stroke-width:2px
-    linkStyle 1 stroke:#dc2626,stroke-width:2px,stroke-dasharray: 6 6;
-```
+![Dependency direction layers](../assets/images/dependency-direction-layers.svg)
 
 Typical rules:
 
@@ -96,24 +98,7 @@ The compiler sees valid types. Architecture tests encode which valid types are u
 
 In a modular Kotlin project, Gradle project dependencies are part of the architecture.
 
-```mermaid
-graph TD
-    app[":app"] --> checkout[":feature:checkout:impl"]
-    app --> profile[":feature:profile:impl"]
-    checkout --> checkoutApi[":feature:checkout:api"]
-    profile --> profileApi[":feature:profile:api"]
-    checkout --> core[":core:domain"]
-    profile --> core
-    checkout -.->|"forbidden: implementation-to-implementation"| profile
-
-    style app fill:#f1f5f9,stroke:#94a3b8,stroke-width:2px
-    style checkout fill:#e0f2fe,stroke:#0284c7,stroke-width:2px
-    style profile fill:#e0f2fe,stroke:#0284c7,stroke-width:2px
-    style checkoutApi fill:#ecfdf5,stroke:#10b981,stroke-width:1px
-    style profileApi fill:#ecfdf5,stroke:#10b981,stroke-width:1px
-    style core fill:#ecfdf5,stroke:#10b981,stroke-width:2px
-    linkStyle 6 stroke:#ef4444,stroke-width:2px,stroke-dasharray: 5 5;
-```
+![Gradle module boundaries](../assets/images/gradle-module-boundaries.svg)
 
 Typical rules:
 
@@ -128,20 +113,7 @@ This category matters for design and for build performance. Unnecessary module e
 
 Some architecture failures are not about imports in a private implementation. They are about what a module exposes.
 
-```mermaid
-flowchart LR
-    DomainApi["Public domain API<br/>UserRepository"]
-    Leak["Persistence type<br/>UserEntity"]
-    Consumer["App or feature consumer"]
-
-    DomainApi -.->|"forbidden return type"| Leak
-    Consumer -->|"now coupled to"| Leak
-
-    style DomainApi fill:#dbeafe,stroke:#2563eb,stroke-width:2px
-    style Leak fill:#fee2e2,stroke:#dc2626,stroke-width:2px
-    style Consumer fill:#f8fafc,stroke:#64748b,stroke-width:1px
-    linkStyle 0,1 stroke:#dc2626,stroke-width:2px,stroke-dasharray: 6 6;
-```
+![Public API type leakage](../assets/images/public-api-type-leakage.svg)
 
 Typical rules:
 
@@ -204,6 +176,36 @@ They should not replace:
 
 A bad architecture test freezes an implementation detail and calls it design. A good one protects a boundary that multiple engineers already rely on.
 
+## How Architecture Tests Become Harmful
+
+Architecture tests are governance. Bad governance is worse than no governance because it teaches people to route around the system.
+
+Common failure modes:
+
+- **Brittle rules**: a test encodes today's folder layout rather than a durable boundary.
+- **False security**: a passing suite is treated as proof that the architecture is good.
+- **Team friction**: a rule blocks legitimate feature work, but nobody knows who owns the exception process.
+- **Over-testing generated code**: Room, KSP, Compose, serialization, or DI-generated sources create noise that authored-code rules were never meant to judge.
+- **Broad package bans**: a rule blocks too much, so engineers add exclusions until the rule no longer means anything.
+- **No negative proof**: the suite has never been seen failing against an intentional violation.
+
+The antidote is not a larger suite. It is a smaller, more explicit suite. Each rule should name the decision it protects, the cost of breaking it, and the intended repair path.
+
+## When Not to Use Them
+
+Architecture tests are not automatically worth it.
+
+They are often premature for a tiny codebase where everyone can still hold the structure in their head. They can be noisy in early-stage products where module and package boundaries are being discovered weekly. They may be a poor fit for highly dynamic or reflective code where the meaningful dependency is runtime wiring rather than visible source structure. They can also slow a monolith with heavy churn if the first suite tries to enforce the target architecture instead of the architecture the team is actually migrating toward.
+
+In those cases, lighter tools may be enough:
+
+- a short architecture decision record,
+- a module ownership note,
+- a review checklist for the next few changes,
+- a non-blocking report that counts violations before enforcing them.
+
+Use architecture tests when the boundary is stable enough to enforce and expensive enough to break.
+
 ## Living Documentation That Fails
 
 Architecture diagrams, READMEs, onboarding docs, and review checklists all help. None of them fails CI.
@@ -231,6 +233,21 @@ Module :domain should not depend on :data, but a dependency was found.
 ```
 
 The team still decides whether the rule is right. The test removes the need to rediscover the same violation by hand.
+
+## Organizational Impact
+
+The technical effect is boundary enforcement. The organizational effect is shared memory.
+
+For new engineers, architecture tests compress onboarding. They show which dependencies are allowed, which APIs are intentionally public, and where exceptions live. For experienced engineers, they reduce repetitive review comments so code review can focus on design judgment instead of policing the same imports.
+
+For teams, the trade-off is autonomy versus consistency. A platform or architecture group should not use tests to centralize every local decision. The better pattern is to encode a small set of cross-team contracts and let feature teams own the rest. When a rule changes, treat that change like an architecture decision: update the test, update the ADR or docs if one exists, and make the migration path explicit.
+
+At scale, architecture tests work best as part of governance, not as a substitute for it:
+
+- ADRs explain why a boundary exists.
+- Architecture tests check whether the boundary still holds.
+- CI reports where the boundary was crossed.
+- Reviewers decide whether the boundary or the code should change.
 
 ## A Concrete Example From the Showcases
 
@@ -285,6 +302,14 @@ Architecture tests give both humans and agents the same feedback loop:
 3. The developer or agent repairs the design by using the intended abstraction.
 
 This is not magic, and it is not a substitute for review. It is a way to make structural rules visible to the tools already changing the code.
+
+## Future Pressure on Kotlin Architecture
+
+The need for structural feedback is likely to increase, not decrease.
+
+Compose Multiplatform makes UI code portable, but it also creates new questions about which UI abstractions belong in shared code and which stay platform-specific. Kotlin 2.x and compiler-plugin-heavy stacks continue to blur the line between authored source and generated or transformed code. AI agents can produce large, locally plausible patches faster than a reviewer can inspect every module edge by hand.
+
+That does not mean every team needs more rules. It means the important rules need to be executable, narrow, and easy to repair. The future-friendly architecture suite is not the biggest one. It is the one that catches the boundaries humans and agents are most likely to cross accidentally.
 
 ## When a Rule Deserves CI Enforcement
 

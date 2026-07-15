@@ -31,15 +31,15 @@ graph TD
     subgraph Core_Libraries["Core Libraries"]
         core[core] --> api[library]
     end
-    
+
     subgraph Plugin_Tools["Plugin & Tools"]
         core --> plugin[plugin-gradle]
     end
 
     subgraph Verification_Sandbox["Verification & Sandbox"]
-        plugin -.--> konture_test["konture-test"]
-        api -.--> konture_test
-        
+        plugin -.-> konture_test["konture-test"]
+        api -.-> konture_test
+
         sample["showcases/sample-gradle"] -.-> local_maven["Local Maven (~/.m2)"]
     end
 ```
@@ -87,10 +87,10 @@ To run the unit tests across all libraries and core modules, execute:
 
 ### Running Self-Enforcing Architecture Tests
 
-The project includes an internal module (`konture-test`) designed to run architecture checks against Konture itself. This is disabled during fast local development loops. To execute these tests, run:
+The project includes an internal module (`konture-test`) designed to run architecture checks against Konture itself. These tests run as part of the standard test task:
 
 ```bash
-./gradlew test -DarchTest=true
+./gradlew test
 ```
 
 ### Aggregating Test Reports
@@ -117,15 +117,15 @@ To compile, package, and install your modified artifacts to your machine's local
 ./gradlew publishToMavenLocal
 ```
 
-This will publish the modules with version `0.6.8`:
-- `io.github.baole:konture-core:0.6.8` (shared core data models)
-- `io.github.baole:konture:0.6.8` (primary public API library)
-- `io.github.baole.konture:plugin-gradle:0.6.8` (Gradle plugin)
+This will publish the modules with version `0.6.9`:
+- `io.github.baole:konture-core:0.6.9` (shared core data models)
+- `io.github.baole:konture:0.6.9` (primary public API library)
+- `io.github.baole.konture:plugin-gradle:0.6.9` (Gradle plugin)
 
 
 ### Step 2: Test Using the `sample` Sandbox
 
-We have included a nested Gradle project under `/showcases/sample-gradle` that is preconfigured to resolve dependencies from your local Maven repository. 
+We have included a nested Gradle project under `/showcases/sample-gradle` that is preconfigured to resolve dependencies from your local Maven repository.
 
 To test your published SNAPSHOTs inside this sandbox:
 
@@ -134,13 +134,13 @@ To test your published SNAPSHOTs inside this sandbox:
 ./gradlew -p showcases/sample-gradle check
 ```
 
-> [!TIP]
 > If you make changes to the compiler plugin or Gradle tasks, you must run `./gradlew publishToMavenLocal` again so that the `sample` project picks up your latest modifications.
 >
 > To avoid daemon caching issues when iterating rapidly, you can run the sample tests with `--no-daemon` to ensure it loads the newly published JARs fresh:
 > ```bash
 > ./gradlew -p showcases/sample-gradle check --no-daemon
 > ```
+{: .tip }
 
 ---
 
@@ -160,7 +160,7 @@ To keep the codebase maintainable and accessible:
 1. **Fork the repo** and create a feature branch from `main`.
 2. **Implement your changes** and add unit tests.
 3. **Verify locally**:
-   - Run `./gradlew test` (and optionally `./gradlew test -DarchTest=true`).
+   - Run `./gradlew test`.
    - Run `./gradlew publishToMavenLocal`.
    - Run `./gradlew -p showcases/sample-gradle check` to ensure integration remains unbroken.
 4. **Commit with clear messages** (following standard/conventional commit rules).

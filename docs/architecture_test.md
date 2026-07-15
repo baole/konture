@@ -4,15 +4,15 @@
 
 ---
 
-> [!IMPORTANT]
-> **The Fallacy of the Green Build:** 
+> **The Fallacy of the Green Build:**
 > "Our build compiles, our unit tests pass, and our linter is happy—therefore, our architecture is clean."
-> 
+>
 > This is one of the most common illusions in software engineering. Compilers check language syntax, type safety, and classpath visibility. Linters check formatting, naming conventions, and simple code smells. Neither of them has a concept of architectural intent, layer isolation, or build-graph hygiene.
+{: .important }
 
 In any active software project, codebases naturally decay over time. This architectural erosion is rarely caused by dramatic redesigns; instead, it is the result of hundreds of micro-shortcuts: a domain service importing a database helper, a presentation model leaking into a database schema, or a platform-specific library sneaking into shared multiplatform code.
 
-To turn this challenge into an advantage, Konture is built from the ground up to be **AI-Agent friendly**. By utilizing our official **[AI Onboarding & Setup Skill](ai-prompts/setup-prompt.md)** and **[AI Test Writing & Extensible Guardrails Prompt](ai-prompts/writing-tests-prompt.md)**, you can guide any AI assistant to install, configure, and systematically generate, review, or extend robust, custom-tailored architectural tests for your specific codebase, ensuring no rule-bending shortcuts bypass your system's integrity.
+To turn this challenge into an advantage, Konture is built from the ground up to be **AI-Agent friendly**. By utilizing our official **[AI Onboarding & Integration Skill](ai-prompts/integration-prompt.md)** and **[AI Test Writing & Extensible Guardrails Prompt](ai-prompts/writing-tests-prompt.md)**, you can guide any AI assistant to install, configure, and systematically generate, review, or extend robust, custom-tailored architectural tests for your specific codebase, ensuring no rule-bending shortcuts bypass your system's integrity.
 
 To prevent architectural erosion, teams need a strict, automated, and **test-framework agnostic** **Architecture Quality Gate** that runs as fast as a standard unit test (integrating seamlessly with **[JUnit 4](https://junit.org/junit4/), [JUnit 5](https://junit.org/junit5/), [JUnit 6](https://junit.org/), [Kotest](https://kotest.io/), [TestBalloon](https://github.com/infix-de/testBalloon)**, or absolutely **any other test runner**—since the choice of test runner doesn't matter).
 
@@ -126,7 +126,7 @@ graph TD
 ```
 
 #### Why Your Compiler Fails
-Gradle manages compilation. It prevents you from referencing code from an unlisted module. However, Gradle cannot stop a developer or an AI assistant from editing `build.gradle.kts` and adding `implementation(project(":feature:profile"))` to the checkout module to quickly grab a helper class. 
+Gradle manages compilation. It prevents you from referencing code from an unlisted module. However, Gradle cannot stop a developer or an AI assistant from editing `build.gradle.kts` and adding `implementation(project(":feature:profile"))` to the checkout module to quickly grab a helper class.
 
 #### KMP-Specific Nuance
 In Kotlin Multiplatform, dependency hygiene is even more delicate. A `commonMain` source set must never declare a dependency on a platform-only artifact (like a native iOS library or a JVM-only package). Even if the compiler would eventually catch this during platform-specific compilation, an architecture test catches it instantly at the root Gradle model configuration stage.
@@ -180,7 +180,7 @@ The compiler is designed to pass types around. If a controller returns a databas
 *   **KMP**: Types belonging to a platform's target implementation details (e.g., iOS native `UIViewController`) leaking into the public `commonMain` API surface.
 
 #### The Risk & Strong Argument
-Type leakage violates the **Stable Dependencies Principle**. If your UI layer relies directly on your database schema or network serialization contracts, any database migration or API schema change will cascade through the entire codebase, breaking the compilation of views, view-models, and services. 
+Type leakage violates the **Stable Dependencies Principle**. If your UI layer relies directly on your database schema or network serialization contracts, any database migration or API schema change will cascade through the entire codebase, breaking the compilation of views, view-models, and services.
 
 #### Enforcing with Architecture Tests
 ```kotlin
@@ -247,7 +247,7 @@ architecture {
 Ensuring that Dependency Injection (DI) bindings are correctly declared, distinct, and actively used. Feature-level configurations must not silently override core system configurations, and registered bindings must not be left as "dead wiring."
 
 #### Why Your Compiler Fails
-Most modern DI frameworks (like Spring, Koin, or Hilt) perform resolution at runtime or during lazy initialization. Your project will compile perfectly, but it will crash immediately upon startup with a `NoSuchBeanDefinitionException` or `CircularDependencyException`. 
+Most modern DI frameworks (like Spring, Koin, or Hilt) perform resolution at runtime or during lazy initialization. Your project will compile perfectly, but it will crash immediately upon startup with a `NoSuchBeanDefinitionException` or `CircularDependencyException`.
 
 #### Practical Violations
 *   **Overriding Beans**: A bean registered in an isolated feature module unintentionally overriding a core authentication bean due to poor naming or package scanning configurations.
@@ -273,7 +273,7 @@ diGraph()
 Exposing only deliberate, public contracts across module boundaries. Internal helpers, utility functions, and concrete implementation details must remain marked with Kotlin's `internal` visibility modifier.
 
 ```text
-[:feature:payment:impl] (internal PaymentProcessor) 
+[:feature:payment:impl] (internal PaymentProcessor)
          |
   CROSSES MODULE BOUNDARY (Prohibited if public)
          v
@@ -281,7 +281,7 @@ Exposing only deliberate, public contracts across module boundaries. Internal he
 ```
 
 #### Why Your Compiler Fails
-Kotlin classes are `public` by default. If a developer forgets to type `internal` before `class PaymentProcessor`, the compiler happily exposes it to any module that depends on its parent module. 
+Kotlin classes are `public` by default. If a developer forgets to type `internal` before `class PaymentProcessor`, the compiler happily exposes it to any module that depends on its parent module.
 
 #### The Risk & Strong Argument
 Once internal implementation details leak into the public API space, other modules start consuming them. This locks your implementation in place. Refactoring an internal helper class suddenly becomes a breaking change for five other modules, destroying team agility and slowing down feature delivery.

@@ -4,9 +4,7 @@ buildscript {
         mavenCentral()
     }
     dependencies {
-        if (System.getProperty("archTest") != null) {
-            classpath("io.github.baole.konture:plugin-gradle:0.6.8")
-        }
+        classpath("io.github.baole.konture:plugin-gradle:0.6.9")
     }
 }
 
@@ -19,13 +17,11 @@ plugins {
     jacoco
 }
 
-if (System.getProperty("archTest") != null) {
-    pluginManager.apply("io.github.baole.konture")
-}
+pluginManager.apply("io.github.baole.konture")
 
 allprojects {
     group = "io.github.baole.konture"
-    version = "0.6.8"
+    version = "0.6.9"
 
     repositories {
         mavenLocal()

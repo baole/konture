@@ -1,0 +1,162 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="960" height="360" viewBox="0 0 960 360" role="img" aria-labelledby="title desc">
+  <title id="title">Structural Drift Shape</title>
+  <desc id="desc">A side-by-side comparison of a clean architecture dependency graph and one that has experienced structural drift with a forbidden dependency.</desc>
+  <defs>
+    <!-- Gradients -->
+    <linearGradient id="blue-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#eff6ff"/>
+      <stop offset="100%" stop-color="#dbeafe"/>
+    </linearGradient>
+    <linearGradient id="green-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#f0fdf4"/>
+      <stop offset="100%" stop-color="#dcfce7"/>
+    </linearGradient>
+    <linearGradient id="red-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#fef2f2"/>
+      <stop offset="100%" stop-color="#fee2e2"/>
+    </linearGradient>
+    <linearGradient id="slate-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#f8fafc"/>
+      <stop offset="100%" stop-color="#f1f5f9"/>
+    </linearGradient>
+
+    <!-- Filters/Shadows -->
+    <filter id="shadow" x="-5%" y="-5%" width="110%" height="115%" filterUnits="userSpaceOnUse">
+      <feDropShadow dx="0" dy="2" stdDeviation="4" flood-color="#0f172a" flood-opacity="0.08"/>
+    </filter>
+
+    <style>
+      .bg { fill: #ffffff; }
+      .panel-good { fill: #f8fafc; stroke: #cbd5e1; stroke-width: 1.5; rx: 16; }
+      .panel-bad { fill: #fff5f5; stroke: #fecaca; stroke-width: 1.5; rx: 16; }
+      
+      .node-impl { fill: url(#slate-grad); stroke: #94a3b8; stroke-width: 1.5; rx: 10; filter: url(#shadow); }
+      .node-api { fill: url(#blue-grad); stroke: #3b82f6; stroke-width: 1.5; rx: 10; filter: url(#shadow); }
+      .node-core { fill: url(#green-grad); stroke: #22c55e; stroke-width: 1.5; rx: 10; filter: url(#shadow); }
+      .node-bad-impl { fill: url(#red-grad); stroke: #ef4444; stroke-width: 1.5; rx: 10; filter: url(#shadow); }
+
+      .text-panel-title { font-family: Inter, system-ui, -apple-system, sans-serif; font-size: 15px; font-weight: 800; fill: #1e293b; letter-spacing: 0.5px; }
+      .text-node { font-family: Inter, system-ui, -apple-system, sans-serif; font-size: 11px; font-weight: 700; fill: #1e293b; }
+      .text-node-sub { font-family: Inter, system-ui, -apple-system, sans-serif; font-size: 9px; font-weight: 500; fill: #64748b; }
+      .text-label { font-family: Inter, system-ui, -apple-system, sans-serif; font-size: 10px; font-weight: 700; fill: #dc2626; }
+
+      .arrow { stroke: #64748b; stroke-width: 2; fill: none; marker-end: url(#arrow-gray); stroke-linecap: round; }
+      .arrow-bad { stroke: #ef4444; stroke-width: 2; fill: none; stroke-dasharray: 6 4; marker-end: url(#arrow-red); stroke-linecap: round; }
+    </style>
+
+    <!-- Markers -->
+    <marker id="arrow-gray" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto">
+      <path d="M1,1 L7,4 L1,7 Z" fill="#64748b"/>
+    </marker>
+    <marker id="arrow-red" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto">
+      <path d="M1,1 L7,4 L1,7 Z" fill="#ef4444"/>
+    </marker>
+  </defs>
+
+  <rect class="bg" width="960" height="360"/>
+
+  <!-- BEFORE PANEL -->
+  <g transform="translate(30, 20)">
+    <rect class="panel-good" width="430" height="310"/>
+    <rect x="20" y="15" width="70" height="24" rx="12" fill="#e2e8f0"/>
+    <text class="text-panel-title" x="32" y="31">BEFORE</text>
+
+    <!-- Nodes -->
+    <!-- Checkout Impl -->
+    <g transform="translate(40, 70)">
+      <rect class="node-impl" width="160" height="50"/>
+      <text class="text-node" x="80" y="24" text-anchor="middle">:feature:checkout:impl</text>
+      <text class="text-node-sub" x="80" y="38" text-anchor="middle">implementation module</text>
+    </g>
+
+    <!-- Checkout API -->
+    <g transform="translate(240, 60)">
+      <rect class="node-api" width="150" height="40"/>
+      <text class="text-node" x="75" y="24" text-anchor="middle">:feature:checkout:api</text>
+    </g>
+
+    <!-- Profile Impl -->
+    <g transform="translate(40, 210)">
+      <rect class="node-impl" width="160" height="50"/>
+      <text class="text-node" x="80" y="24" text-anchor="middle">:feature:profile:impl</text>
+      <text class="text-node-sub" x="80" y="38" text-anchor="middle">implementation module</text>
+    </g>
+
+    <!-- Profile API -->
+    <g transform="translate(240, 230)">
+      <rect class="node-api" width="150" height="40"/>
+      <text class="text-node" x="75" y="24" text-anchor="middle">:feature:profile:api</text>
+    </g>
+
+    <!-- Core Domain -->
+    <g transform="translate(240, 145)">
+      <rect class="node-core" width="150" height="40"/>
+      <text class="text-node" x="75" y="24" text-anchor="middle">:core:domain</text>
+    </g>
+
+    <!-- Arrows -->
+    <!-- CheckoutImpl -> CheckoutApi -->
+    <path class="arrow" d="M 200 95 C 220 95, 220 80, 233 80"/>
+    <!-- ProfileImpl -> ProfileApi -->
+    <path class="arrow" d="M 200 235 C 220 235, 220 250, 233 250"/>
+    <!-- CheckoutImpl -> Core -->
+    <path class="arrow" d="M 200 95 C 220 95, 220 155, 233 155"/>
+    <!-- ProfileImpl -> Core -->
+    <path class="arrow" d="M 200 235 C 220 235, 220 175, 233 175"/>
+  </g>
+
+  <!-- AFTER PANEL (DRIFT) -->
+  <g transform="translate(500, 20)">
+    <rect class="panel-bad" width="430" height="310"/>
+    <rect x="20" y="15" width="190" height="24" rx="12" fill="#fee2e2"/>
+    <text class="text-panel-title" x="32" y="31" fill="#991b1b">AFTER STRUCTURAL DRIFT</text>
+
+    <!-- Nodes -->
+    <!-- Checkout Impl (bad) -->
+    <g transform="translate(40, 70)">
+      <rect class="node-bad-impl" width="160" height="50"/>
+      <text class="text-node" x="80" y="24" text-anchor="middle">:feature:checkout:impl</text>
+      <text class="text-node-sub" x="80" y="38" text-anchor="middle">implementation module</text>
+    </g>
+
+    <!-- Checkout API -->
+    <g transform="translate(240, 60)">
+      <rect class="node-api" width="150" height="40"/>
+      <text class="text-node" x="75" y="24" text-anchor="middle">:feature:checkout:api</text>
+    </g>
+
+    <!-- Profile Impl -->
+    <g transform="translate(40, 210)">
+      <rect class="node-impl" width="160" height="50"/>
+      <text class="text-node" x="80" y="24" text-anchor="middle">:feature:profile:impl</text>
+      <text class="text-node-sub" x="80" y="38" text-anchor="middle">implementation module</text>
+    </g>
+
+    <!-- Profile API -->
+    <g transform="translate(240, 230)">
+      <rect class="node-api" width="150" height="40"/>
+      <text class="text-node" x="75" y="24" text-anchor="middle">:feature:profile:api</text>
+    </g>
+
+    <!-- Core Domain -->
+    <g transform="translate(240, 145)">
+      <rect class="node-core" width="150" height="40"/>
+      <text class="text-node" x="75" y="24" text-anchor="middle">:core:domain</text>
+    </g>
+
+    <!-- Arrows -->
+    <!-- CheckoutImpl -> CheckoutApi -->
+    <path class="arrow" d="M 200 95 C 220 95, 220 80, 233 80"/>
+    <!-- ProfileImpl -> ProfileApi -->
+    <path class="arrow" d="M 200 235 C 220 235, 220 250, 233 250"/>
+    <!-- CheckoutImpl -> Core -->
+    <path class="arrow" d="M 200 95 C 220 95, 220 155, 233 155"/>
+    <!-- ProfileImpl -> Core -->
+    <path class="arrow" d="M 200 235 C 220 235, 220 175, 233 175"/>
+
+    <!-- Forbidden drift arrow CheckoutImpl -> ProfileImpl -->
+    <path class="arrow-bad" d="M 120 120 L 120 203"/>
+    <rect x="125" y="147" width="125" height="18" rx="4" fill="#fee2e2" stroke="#fecaca" stroke-width="0.5"/>
+    <text class="text-label" x="132" y="160">forbidden: temporary reuse</text>
+  </g>
+</svg>

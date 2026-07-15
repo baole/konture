@@ -2,9 +2,7 @@ plugins {
     kotlin("jvm")
 }
 
-if (System.getProperty("archTest") != null) {
-    pluginManager.apply("io.github.baole.konture")
-}
+pluginManager.apply("io.github.baole.konture")
 
 dependencies {
     // Rely on published SNAPSHOT artifacts from mavenLocal()
@@ -16,7 +14,4 @@ dependencies {
 
 tasks.test {
     useJUnitPlatform()
-
-    // Only run this test module if -DarchTest=true is set
-    onlyIf { System.getProperty("archTest") != null }
 }

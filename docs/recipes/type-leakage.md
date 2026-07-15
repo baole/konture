@@ -1,13 +1,23 @@
 # Cross-Layer Type Leakage
 
-Type leakage occurs when technical implementation models (such as database entities annotated with `@Entity`, Room/Realm records, or network wire DTO schemas) are exposed directly in the public function signatures or property declarations of other layers (like UseCases, business Services, or UI components).
+Type leakage occurs when technical implementation models (such as database entities annotated with `@Entity`, Room/Realm records, or network wire DTO schemas) are exposed directly in the public function signatures or property declarations of other layers (like use cases, business services, or UI components).
 
 Each layer must map technical objects to domain-clean, decoupled representations before crossing boundaries.
 
-```text
-[Network DTO] ---> (MAPPED) ---> [Domain Model] ---> [UI Component]
-      |                                                    ^
-      +----------------- PROHIBITED LEAKAGE ---------------+
+```mermaid
+flowchart LR
+    dto["Network DTO"]
+    domain["Domain Model"]
+    ui["UI Component"]
+
+    dto -->|"map to clean type"| domain
+    domain -->|"expose domain-safe state"| ui
+    dto -. "prohibited leakage" .-> ui
+
+    classDef technical fill:#fff1f2,stroke:#e11d48,color:#881337
+    classDef clean fill:#ecfdf5,stroke:#059669,color:#064e3b
+    class dto technical
+    class domain,ui clean
 ```
 
 ---
@@ -48,8 +58,8 @@ class TypeLeakageTest {
                 }
 
                 // Verify that no signature type is defined in .dto. or .entity. packages
-                signatureTypes.none { type -> 
-                    type.contains(".dto.") || type.contains(".entity.") 
+                signatureTypes.none { type ->
+                    type.contains(".dto.") || type.contains(".entity.")
                 }
             }
     }
@@ -72,7 +82,7 @@ class ControllerResponseTest {
             .withNameEndingWith("Controller")
             .assertTrue("Controller return types must not be persistence entities") { cls ->
                 val returnTypes = cls.functions.map { it.returnType }
-                
+
                 // Assert no return type references a persistence entity
                 returnTypes.none { type -> type.contains(".entity.") }
             }
@@ -93,4 +103,4 @@ Offending classes:
     (at /path/to/project/showcases/sample-gradle/domain/src/main/kotlin/io.github.baole.konture/sample/domain/usecase/GetUserUseCase.kt:14)
 ```
 
-The error informs you of the failure, points straight to the offending UseCase declaration, and supplies a clickable absolute path to open the file instantly.
+The error informs you of the failure, points straight to the offending use case declaration, and supplies a clickable absolute path to open the file instantly.

@@ -1,8 +1,4 @@
-package io.github.baole.konture.dsl
-
-import io.github.baole.konture.Konture
-import io.github.baole.konture.KontureContext
-import io.github.baole.konture.architecture
+package io.github.baole.konture
 
 /**
  * Top-level entry point for defining and running architecture rule blocks.

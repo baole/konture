@@ -1,8 +1,10 @@
 title: Konture
 description: "A fast, standalone Kotlin architecture testing library that runs as fast unit tests against the actual Gradle build graph."
+baseurl: "/konture"
 logo: "/assets/images/logo.png"
 favicon_ico: "/assets/images/logo.png"
 remote_theme: "just-the-docs/just-the-docs"
+permalink: pretty
 plugins:
   - jekyll-seo-tag
   - jekyll-default-layout
