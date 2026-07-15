@@ -94,6 +94,86 @@ include(":konture-test")
 
 ---
 
+## ⚙️ Plugin Configuration
+
+The Konture Gradle plugin can be customized using the `konture { ... }` configuration block in your build configuration file (typically in your root `build.gradle.kts` or inside your dedicated `:konture-test` subproject).
+
+```kotlin
+konture {
+    // Exclude subprojects from analysis
+    excludeModules(":legacy-app", ":experimental:*")
+
+    // Exclude specific packages from being parsed
+    excludePackages("com.acme.generated..", "..databinding..")
+
+    // Exclude specific classes or patterns
+    excludeClasses("ExcludedService", "*Helper")
+
+    // Exclude certain Gradle dependency configurations from being traversed
+    excludeConfigurations("test*", "profile")
+
+    // Set the task execution log level
+    logLevel("INFO")
+}
+```
+
+### 📋 Available Settings & Matching Rules
+
+| Property / DSL Method | Default Value | Description & Matching Rules |
+| :--- | :--- | :--- |
+| **`excludeModules`** | `emptyList()` | Excludes matching Gradle subprojects from the scanned dependency graph.<br>• Supports **Module Glob Patterns**:<br>  - `*` matches exactly one segment (all characters except the colon `:`). E.g. `:feature:*` matches `:feature:api` but **not** `:feature:api:impl`.<br>  - `**` matches zero or more segments. E.g. `:feature:**` matches `:feature:api:impl`. |
+| **`excludePackages`** | `emptyList()` | Excludes class files in matching packages from being parsed or analyzed.<br>• Supports **Package Segment Wildcards (`..`)**:<br>  - `..` represents zero-or-more package segments.<br>  - E.g. `com.acme.domain..` matches `com.acme.domain` and any of its subpackages.<br>  - E.g. `..generated..` matches any package containing the segment `generated` anywhere in its hierarchy. |
+| **`excludeClasses`** | `emptyList()` | Excludes matching classes from the scope. Both fully qualified names and simple class names are checked.<br>• Supports two matching styles:<br>  - **Package Wildcards (`..`)** (e.g., `com.acme.service.ExcludedClass`).<br>  - **Simple Globs (`*`)** where `*` matches zero or more characters (e.g., `*Helper`, `*Test`). |
+| **`excludeConfigurations`** | `listOf("test", "benchmark", "profile", "testedapks")` | Excludes specific dependency configurations from being traversed in the dependency graph.<br>• Supports simple glob matching (`*`). E.g. `test*` matches `testImplementation`. |
+| **`logLevel`** | `"INFO"` | Configures logging level of the Konture plugin execution.<br>• Supported levels: `"INFO"`, `"DEBUG"`, `"WARNING"`, `"TRACE"`. |
+
+### 🧩 Wildcard & Pattern Matching in Depth
+
+Konture uses custom, lightweight matching engines optimized for Kotlin package hierarchies and Gradle module structures rather than slow or complex regular expressions.
+
+---
+
+#### 📦 Package Matching (`..`)
+Package names are dot-separated (e.g., `com.acme.feature.payment.service`).
+*   **Double Dot (`..`)**: Represents **zero or more package segments**.
+*   **Single Dot (`.`)**: Separates explicit segments.
+
+##### Examples:
+| Pattern | Matches | Does NOT Match | Why? |
+| :--- | :--- | :--- | :--- |
+| `com.acme.domain..` | `com.acme.domain`<br>`com.acme.domain.repository`<br>`com.acme.domain.repository.impl` | `com.acme.api`<br>`org.acme.domain` | Matches any package starting with `com.acme.domain` followed by zero or more segments. |
+| `..generated..` | `com.acme.generated`<br>`com.acme.feature.generated.service`<br>`generated.com.acme` | `com.acme.generate`<br>`com.acme.regenerated` | Matches any package path where `generated` is a standalone segment. |
+| `..` | *Matches everything* | None | Matches zero or more segments anywhere. |
+
+---
+
+#### 🛠️ Module Glob Matching (`*` vs `**`)
+Gradle subprojects are colon-separated (e.g., `:feature:checkout:impl`).
+*   **Single Star (`*`)**: Matches **exactly one module segment** (all characters except the colon `:`).
+*   **Double Star (`**`)**: Matches **zero or more segments** (any character sequence).
+
+##### Examples:
+| Pattern | Matches | Does NOT Match | Why? |
+| :--- | :--- | :--- | :--- |
+| `:feature:*` | `:feature:checkout`<br>`:feature:catalog` | `:feature:checkout:impl`<br>`:feature` | `*` matches exactly one level below `:feature`. |
+| `:feature:**` | `:feature:checkout`<br>`:feature:checkout:impl`<br>`:feature` | `:core:network` | `**` matches any depth of subprojects under `:feature`. |
+| `:*-api` | `:payment-api`<br>`:auth-api` | `:feature:payment-api` | Matches any root-level module ending with `-api`. |
+
+---
+
+#### 🔍 Simple Glob Matching (`*`)
+Used for configuration matching (e.g., `excludeConfigurations`) and class name matching.
+*   **Single Star (`*`)**: Matches zero or more characters of any kind.
+
+##### Examples:
+| Pattern | Matches | Does NOT Match |
+| :--- | :--- | :--- |
+| `*Helper` | `AuthHelper`<br>`Helper`<br>`com.acme.MyHelper` | `Helpers`<br>`HelperClass` |
+| `test*` | `test`<br>`testImplementation`<br>`testRuntimeOnly` | `latest` |
+
+---
+
+
 ## 🏁 Writing Your First Test
 
 You can write architectural tests using any of the major API paradigms supported by Konture. Below are quick examples of our two most popular ergonomics.

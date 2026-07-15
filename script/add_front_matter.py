@@ -29,7 +29,7 @@ FRONT_MATTER_MAP = {
     },
     "installation.md": {
         "layout": "default",
-        "title": "Installation",
+        "title": "Installation & Usages",
         "nav_order": 50,
         "permalink": "/installation/"
     },
