@@ -98,14 +98,14 @@ include(":konture-test")
 
 You can write architectural tests using any of the major API paradigms supported by Konture. Below are quick examples of our two most popular ergonomics.
 
-Create a test class inside `konture-test/src/test/kotlin/io/github/baole/archtest/ArchitectureTest.kt`:
+Create a test class inside `konture-test/src/test/kotlin/com/acme/konture/ArchitectureTest.kt`:
 
 ### Fluent Scope
 
 The Konsist-inspired style uses a fluent scope builder where you retrieve classes from the whole project or a module, filter them using helper functions, and call `assertTrue` with a predicate lambda.
 
 ```kotlin
-package io.github.baole.archtest
+package com.acme.konture
 
 import io.github.baole.konture.*
 import org.junit.jupiter.api.Test
@@ -129,7 +129,7 @@ class FluentArchitectureTest {
 The ArchUnit-inspired style uses a declarative rule-building builder DSL. You specify the target of the rule (`classes()` or `modules()`), filter them with `that()`, declare constraints with `should()`, and execute the validation using `check()`.
 
 ```kotlin
-package io.github.baole.archtest
+package com.acme.konture
 
 import io.github.baole.konture.*
 import org.junit.jupiter.api.Test
