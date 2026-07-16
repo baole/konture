@@ -4,28 +4,32 @@ _Kotlin architecture has two views of the same architecture: the Gradle graph th
 
 Consider a rule from a Kotlin Multiplatform project:
 
-> Shared `commonMain` code must not depend on Android UI APIs.
+> Presentation code must not expose transport DTOs in screen state or UI-facing APIs.
 
 That rule can fail in two different places.
 
-It can fail in the build graph when the shared module is wired to a platform implementation module:
+It can fail in the build graph when the presentation module is wired directly to a transport module:
 
 ```kotlin
-// shared/build.gradle.kts
+// feature/profile/presentation/build.gradle.kts
 dependencies {
-    implementation(project(":androidApp"))
+    implementation(project(":core:network"))
 }
 ```
 
 It can also fail in source:
 
 ```kotlin
-package com.acme.shared
+package com.acme.profile.presentation
 
-import android.view.View
+import com.acme.network.dto.UserDto
+
+data class ProfileUiState(
+    val user: UserDto,
+)
 ```
 
-Those failures are related, but they are not identical. The first is a physical Gradle module dependency. The second is a source-level import. A serious architecture-testing tool for Kotlin has to understand both, because multiplatform systems are governed by both.
+Those failures are related, but they are not identical. The first is a physical Gradle module dependency. The second is a source-level contract leak: a transport shape has become part of the presentation API. A serious architecture-testing tool for Kotlin has to understand both, because layered Kotlin systems are governed by both.
 
 That is the reason Konture exists.
 
@@ -223,7 +227,7 @@ If `:feature:checkout:impl` adds this dependency:
 implementation(project(":feature:profile:impl"))
 ```
 
-the build may still pass. The immediate feature may even ship faster. But the module graph now says checkout is coupled to profile internals.
+The build may still pass. The immediate feature may even ship faster. But the module graph now says checkout is coupled to profile internals.
 
 That has practical consequences:
 
@@ -383,11 +387,11 @@ Build tool evolution also matters. Android Gradle Plugin, Kotlin Multiplatform s
 
 The roadmap pressure is therefore practical:
 
-- deeper KMP source-set and platform-aware examples,
-- clearer treatment of generated code,
-- stronger public API leakage checks,
-- better diagnostics for large rule suites,
-- smoother integration with build cache and CI reporting.
+- Deeper KMP source-set and platform-aware examples,
+- Clearer treatment of generated code,
+- Stronger public API leakage checks,
+- Better diagnostics for large rule suites,
+- Smoother integration with build cache and CI reporting.
 
 ## The Core Idea
 

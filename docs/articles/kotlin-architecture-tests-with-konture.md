@@ -601,13 +601,13 @@ Treat the architecture suite like a product health signal, not just a pass/fail 
 
 Useful metrics:
 
-- number of architecture rules,
-- architecture-test duration in CI,
-- violation count by rule before enforcement,
-- recurring violations by module or package,
-- number of explicit exceptions and quarantined packages,
-- module fan-in and fan-out for heavily changed areas,
-- review comments that disappear after a rule becomes executable.
+- Number of architecture rules,
+- Architecture-test duration in CI,
+- Violation count by rule before enforcement,
+- Recurring violations by module or package,
+- Number of explicit exceptions and quarantined packages,
+- Module fan-in and fan-out for heavily changed areas,
+- Review comments that disappear after a rule becomes executable.
 
 Do not overfit the numbers. A project with five strong rules can be healthier than a project with fifty ceremonial ones. The best metric is whether the suite catches expensive structural mistakes early and explains the repair clearly.
 
@@ -633,10 +633,10 @@ Version important rules like any other public contract: rename tests when the po
 
 Good rule deprecation looks like this:
 
-- mark the old rule informational,
-- add the new rule beside it,
-- migrate modules incrementally,
-- delete the old rule and its quarantine list once the graph matches the new policy.
+- Mark the old rule informational,
+- Add the new rule beside it,
+- Migrate modules incrementally,
+- Delete the old rule and its quarantine list once the graph matches the new policy.
 
 The suite should describe the architecture you are choosing now, not the architecture you wished you had two years ago.
 

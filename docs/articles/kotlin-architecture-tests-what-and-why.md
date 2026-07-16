@@ -69,10 +69,10 @@ Most architecture drift is not dramatic. It usually starts as one edge that look
 
 The second graph may still compile. The product behavior may still be correct. The damage appears later:
 
-- a profile refactor now needs checkout context,
-- unrelated feature changes invalidate more build work,
-- reviewers have to reason about a wider blast radius,
-- the next shortcut feels less unusual because the first one already exists.
+- A profile refactor now needs checkout context,
+- Unrelated feature changes invalidate more build work,
+- Reviewers have to reason about a wider blast radius,
+- The next shortcut feels less unusual because the first one already exists.
 
 The right metrics are project-specific, but the useful ones are concrete: number of forbidden module edges, number of rule violations per month, module fan-in and fan-out, rebuild scope after a feature change, and repeated review comments about the same boundary. Architecture tests become persuasive when they turn those observations into a failing example instead of a style argument.
 
@@ -199,10 +199,10 @@ They are often premature for a tiny codebase where everyone can still hold the s
 
 In those cases, lighter tools may be enough:
 
-- a short architecture decision record,
-- a module ownership note,
-- a review checklist for the next few changes,
-- a non-blocking report that counts violations before enforcing them.
+- A short architecture decision record,
+- A module ownership note,
+- A review checklist for the next few changes,
+- A non-blocking report that counts violations before enforcing them.
 
 Use architecture tests when the boundary is stable enough to enforce and expensive enough to break.
 
