@@ -87,7 +87,7 @@ Kotlin source constructs do not always map neatly to the source-level design a t
 That does not make bytecode analysis wrong. It means bytecode is the wrong primary lens for rules such as:
 
 - Does `:feature:checkout:impl` depend on a sibling implementation module?
-- Does `commonMain` import an Android API?
+- Does a public UI state expose a transport DTO?
 - Does a public domain signature expose a persistence type?
 - Does an `impl` package remain internal in source?
 
@@ -370,7 +370,7 @@ Konture is a good fit when the rules you care about span Kotlin source and Gradl
 
 - Gradle module boundaries and acyclic project graphs.
 - Feature `:api` and `:impl` separation.
-- Domain or shared KMP code staying independent from frameworks and platform APIs.
+- Presentation, domain, and public API surfaces staying independent from transport, persistence, and framework types.
 - Public API signatures avoiding persistence, transport, or UI types.
 - Kotlin visibility conventions such as keeping implementation packages `internal`.
 - File and package conventions that require project-wide context.

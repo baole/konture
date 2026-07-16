@@ -324,7 +324,7 @@ Not every good idea should block a build. A rule is a good candidate for CI when
 
 If a rule fails constantly during normal development, it may be too broad. If a rule needs many quiet exclusions, it may be pretending the architecture is cleaner than it is. If nobody can explain why it exists, it should not block delivery.
 
-Start with rules that protect known pain: module cycles, domain-to-data dependencies, feature implementation coupling, public API leakage, and platform APIs leaking into shared KMP code.
+Start with rules that protect known pain: module cycles, domain-to-data dependencies, feature implementation coupling, public API leakage, and DTO or entity types leaking into presentation surfaces.
 
 ## The Practical Payoff
 

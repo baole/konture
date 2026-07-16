@@ -402,19 +402,18 @@ The examples above use focused standalone assertions such as `Konture.modules { 
 
 ```kotlin
 @Test
-fun `shared code must stay platform independent`() {
+fun `presentation boundary must hide transport models`() {
     Konture.architecture {
         modules {
-            that().haveNamePath(":shared")
-            should().notDependOnModule(":androidApp")
+            that().haveNamePath(":feature:profile:presentation")
+            should().notDependOnModule(":core:network")
         }
 
         classes {
-            that().resideInAPackage("..shared..")
-            should().onlyDependOnClassesInAnyPackage(
-                "..shared..",
-                "kotlin..",
-                "java..",
+            that().resideInAPackage("..profile.presentation..")
+            should().notDependOnClassesInAnyPackage(
+                "..network.dto..",
+                "..database..",
             )
         }
     }
@@ -425,22 +424,31 @@ fun `shared code must stay platform independent`() {
 
 Once the starter suite is stable, add rules for the places where Kotlin projects usually leak architecture.
 
-### KMP Source-Set Boundaries
+### DTO and Entity Surface Boundaries
 
-KMP projects need source-set-specific policies. A `commonMain` rule is usually about portability; an `androidMain` rule may intentionally allow Android APIs.
+The most expensive leaks often appear in public or UI-facing signatures. A screen state, presenter contract, or feature API that exposes a transport DTO has turned an implementation detail into a long-lived dependency.
 
 ```kotlin
 @Test
-fun `shared common source must not import Android APIs`() {
-    val commonClasses =
-        Konture.scopeFromModule(":shared").classes.filter { cls ->
-            cls.filePath.contains("/commonMain/")
-        }
+fun `presentation state must not expose transport or persistence types`() {
+    val presentationClasses = Konture.scopeFromPackage("com.acme.profile.presentation").classes
 
-    commonClasses.assertTrue("commonMain must stay platform independent") { cls ->
-        cls.imports.none { import ->
-            import.startsWith("android.") ||
-                import.startsWith("androidx.")
+    presentationClasses.assertTrue("Presentation API must not expose DTOs or entities") { cls ->
+        val publicFunctionTypes =
+            cls.functions
+                .filter { it.visibility == io.github.baole.konture.Visibility.PUBLIC }
+                .flatMap { fn -> listOf(fn.returnType) + fn.parameters.map { it.type } }
+
+        val publicPropertyTypes =
+            cls.properties
+                .filter { it.visibility == io.github.baole.konture.Visibility.PUBLIC }
+                .map { it.type }
+
+        (publicFunctionTypes + publicPropertyTypes).none { type ->
+            type.endsWith("Dto") ||
+                type.endsWith("Entity") ||
+                type.contains(".network.") ||
+                type.contains(".database.")
         }
     }
 }
@@ -450,12 +458,12 @@ You can pair that with a module rule:
 
 ```kotlin
 Konture.modules {
-    that().haveNamePath(":shared")
-    should().notDependOnModule(":androidApp")
+    that().haveNamePath(":feature:profile:presentation")
+    should().notDependOnModule(":core:network")
 }
 ```
 
-Use the source-set names your build actually uses: `commonMain`, `androidMain`, `iosMain`, `desktopMain`, `jvmMain`, or project-specific intermediate source sets.
+The module rule catches the physical dependency. The source rule catches the API leak even if the forbidden type arrives through a broader dependency that is otherwise allowed.
 
 ### DI Graph Conventions
 
@@ -763,20 +771,25 @@ class ArchitectureSuiteTest {
     }
 
     @Test
-    fun `shared kmp code stays platform independent`() {
-        val commonClasses =
-            Konture.scopeFromModule(":shared").classes.filter { cls ->
-                cls.filePath.contains("/commonMain/")
-            }
+    fun `presentation state does not expose transport models`() {
+        val presentationClasses = Konture.scopeFromPackage("com.acme.profile.presentation").classes
 
-        commonClasses.assertTrue("commonMain must not import platform APIs") { cls ->
-            cls.imports.none { it.startsWith("android.") || it.startsWith("java.awt.") }
+        presentationClasses.assertTrue("Presentation API must not expose transport models") { cls ->
+            val publicTypes =
+                cls.properties
+                    .filter { it.visibility == io.github.baole.konture.Visibility.PUBLIC }
+                    .map { it.type } +
+                    cls.functions
+                        .filter { it.visibility == io.github.baole.konture.Visibility.PUBLIC }
+                        .flatMap { fn -> listOf(fn.returnType) + fn.parameters.map { it.type } }
+
+            publicTypes.none { it.endsWith("Dto") || it.contains(".network.") }
         }
     }
 }
 ```
 
-The suite has different jobs: graph health, feature ownership, domain purity, and platform portability. Each failure tells the developer which architectural decision was crossed.
+The suite has different jobs: graph health, feature ownership, domain purity, and public surface control. Each failure tells the developer which architectural decision was crossed.
 
 ## Rollout Guidance
 
@@ -805,9 +818,9 @@ The exception should be visible enough that future maintainers understand the re
 After the first suite is stable, add rules around the areas where the project actually hurts:
 
 - Feature module isolation.
-- KMP source-set portability.
 - Public API leakage.
 - DTO and entity boundaries.
+- KMP source-set portability.
 - Route or controller dependency direction.
 - Dependency injection conventions.
 - Legacy package quarantine.
