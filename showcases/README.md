@@ -1,4 +1,4 @@
-# 🚀 Konture Showcases
+# 🚀 Konture showcases
 
 This directory contains a curated collection of showcase projects demonstrating how to integrate and utilize **Konture** for structural and architecture testing in both **Gradle** and **Maven** environments.
 
@@ -32,7 +32,7 @@ The fundamental starting point showcases. These lightweight, multi-module setups
 ---
 
 ### 2. 🤖 [nowinandroid](nowinandroid)
-Google's official, highly-modularized Android reference application. 
+Google's official, highly-modularized Android reference application.
 
 *   **Significance**: Serves as the premier industry reference layout for modern Android development. It models layered clean architecture, feature-by-feature modularization, and unidirectional data flow in extremely complex, large-scale codebases.
 *   **Aignment Focus**: Audited to provide a structural model of feature-feature decoupling and dependency-inversion boundaries within an enterprise Android workspace.

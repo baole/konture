@@ -56,3 +56,6 @@ jobs:
 
       - name: Build Maven Plugin
         run: mvn clean compile -f plugin-maven/pom.xml
+
+      - name: Build and Test Sample Maven Showcase
+        run: mvn clean test -f showcases/sample-maven/pom.xml
