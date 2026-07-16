@@ -23,6 +23,7 @@ plugins {
     alias(libs.plugins.dokka)
     alias(libs.plugins.detekt) apply false
     alias(libs.plugins.ktlint) apply false
+    alias(libs.plugins.spotless) apply false
     jacoco
 }
 
@@ -55,6 +56,7 @@ subprojects {
     }
     pluginManager.apply("io.gitlab.arturbosch.detekt")
     pluginManager.apply("org.jlleitschuh.gradle.ktlint")
+    pluginManager.apply("com.diffplug.spotless")
     pluginManager.apply("jacoco")
 
     configure<JacocoPluginExtension> {
@@ -88,6 +90,19 @@ subprojects {
         ignoreFailures.set(false)
         reporters {
             reporter(org.jlleitschuh.gradle.ktlint.reporter.ReporterType.PLAIN)
+        }
+    }
+
+    // Configure Spotless for license headers
+    configure<com.diffplug.gradle.spotless.SpotlessExtension> {
+        kotlin {
+            target("**/*.kt")
+            licenseHeader("""/*
+ * Copyright 2026 Bao Le Duc
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+""")
         }
     }
 

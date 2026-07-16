@@ -1,3 +1,8 @@
+/*
+ * Copyright 2026 Bao Le Duc
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 @file:OptIn(kotlin.experimental.ExperimentalTypeInference::class)
 
 package io.github.baole.konture

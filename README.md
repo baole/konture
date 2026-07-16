@@ -136,3 +136,7 @@ Visit our official **[GitHub Pages Documentation Site](https://baole.github.io/k
 ## 🤝 Contributing
 
 We welcome all contributions! Please check our **[Contribution Guidelines](docs/contributing.md)** (or the online **[Contributing Guide](https://baole.github.io/konture/contributing/)**) for local setup, build commands, and PR workflows.
+
+## 📄 License
+
+This project is licensed under the [Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt).

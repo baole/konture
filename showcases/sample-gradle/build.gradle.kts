@@ -36,5 +36,3 @@ konture {
     excludePackages("io.github.baole.konture.sample.domain.exclude..")
     excludeClasses("ExcludedService")
 }
-
-
