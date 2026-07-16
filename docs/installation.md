@@ -31,7 +31,7 @@ Apply the Konture plugin to your **root project's `build.gradle.kts`**:
 
 ```kotlin
 plugins {
-    id("io.github.baole.konture") version "0.6.9"
+    id("io.github.baole.konture") version "0.6.10"
 }
 ```
 
@@ -78,7 +78,7 @@ repositories {
 
 dependencies {
     // The only required Konture assertion library dependency
-    testImplementation("io.github.baole:konture:0.6.9")
+    testImplementation("io.github.baole:konture:0.6.10")
 
     // Plus your standard test runner of choice (JUnit 5, Kotest, TestBalloon, etc.)
 }
@@ -124,7 +124,7 @@ Create a subdirectory named `konture-test/` with a `pom.xml` file. Ensure that y
         <dependency>
             <groupId>io.github.baole</groupId>
             <artifactId>konture</artifactId>
-            <version>0.6.9</version>
+            <version>0.6.10</version>
             <scope>test</scope>
         </dependency>
 
@@ -155,7 +155,7 @@ Create a subdirectory named `konture-test/` with a `pom.xml` file. Ensure that y
             <plugin>
                 <groupId>io.github.baole.konture</groupId>
                 <artifactId>konture-maven-plugin</artifactId>
-                <version>0.6.9</version>
+                <version>0.6.10</version>
                 <executions>
                     <execution>
                         <phase>process-test-resources</phase>
@@ -227,7 +227,7 @@ For the Konture Maven plugin, add configuration options directly inside the `<co
 <plugin>
     <groupId>io.github.baole.konture</groupId>
     <artifactId>konture-maven-plugin</artifactId>
-    <version>0.6.9</version>
+    <version>0.6.10</version>
     <executions>
         <execution>
             <phase>process-test-resources</phase>

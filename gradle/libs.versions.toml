@@ -7,7 +7,7 @@ dokka = "1.9.20"
 detekt = "1.23.8"
 ktlint = "12.1.1"
 gradle-publish = "2.1.1"
-konture = "0.6.9"
+konture = "0.6.10"
 spotless = "6.25.0"
 
 [libraries]
