@@ -249,7 +249,7 @@ At scale, architecture tests work best as part of governance, not as a substitut
 - CI reports where the boundary was crossed.
 - Reviewers decide whether the boundary or the code should change.
 
-## A Concrete Example From the Showcases
+## A Concrete Example From the showcases
 
 The Konture repository includes a small Gradle showcase that uses the same shape as the examples above: `:app`, `:domain`, `:data`, and a dedicated `:konture-test` module.
 

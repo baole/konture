@@ -24,7 +24,7 @@
         <maven.compiler.target>17</maven.compiler.target>
         <kotlin.version>2.4.0</kotlin.version>
         <junit.jupiter.version>5.11.0</junit.jupiter.version>
-        <konture.version>0.6.5</konture.version>
+        <konture.version>0.6.10</konture.version>
     </properties>
 
     <dependencyManagement>

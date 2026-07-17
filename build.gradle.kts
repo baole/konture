@@ -12,7 +12,7 @@ buildscript {
     }
     dependencies {
         if (isKonturePluginRequested) {
-            classpath("io.github.baole.konture:plugin-gradle:0.6.9")
+            classpath("io.github.baole.konture:plugin-gradle:0.6.10")
         }
     }
 }
@@ -40,7 +40,7 @@ if (isKonturePluginRequested) {
 
 allprojects {
     group = "io.github.baole.konture"
-    version = "0.6.9"
+    version = "0.6.10"
 
     repositories {
         mavenLocal()

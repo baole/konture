@@ -43,7 +43,7 @@ Konture helps developers analyze project structure and enforce architectural rul
 
 *   **📦 Platform & Stack Agnostic**: Works seamlessly across Android, Kotlin Multiplatform (KMP), and Kotlin backend projects (Spring Boot, Ktor, etc.).
 *   **📐 Architecture Agnostic**: Set constraints for any design pattern (Clean, Layered, MVVM, Hexagonal, DDD) without layout restrictions.
-*   **🛠️ Build Tool Agnostic**: Engineered to support multiple build systems, starting with deep Gradle integration and designed for Maven and other build tools.
+*   **🛠️ Build Tool Agnostic**: Engineered to support multiple build systems, with deep, native support for **Gradle** and **Maven** environments.
 *   **🧪 Test Framework Agnostic**: Runs as a pure JVM library, compatible with [JUnit 4](https://junit.org/junit4/), [JUnit 5](https://junit.org/junit5/), [JUnit 6](https://junit.org/), [Kotest](https://kotest.io/), [TestBalloon](https://github.com/infix-de/testBalloon), or any other runner.
 *   **✍️ Fluent Lambda DSL**: Write expressive, readable assertions for module dependencies, package isolation, interface adherence, and naming conventions.
 *   **🤖 AI-Agent Friendly**: Includes dedicated prompts and custom skills for autonomous integration and code generation:
@@ -64,14 +64,14 @@ Konture helps developers analyze project structure and enforce architectural rul
 1. Apply the plugin to your root `build.gradle.kts`:
 ```kotlin
 plugins {
-    id("io.github.baole.konture") version "0.6.9" apply true
+    id("io.github.baole.konture") version "0.6.10" apply true
 }
 ```
 
 2. Add the dependency to your test module's `build.gradle.kts`:
 ```kotlin
 dependencies {
-    testImplementation("io.github.baole:konture:0.6.9")
+    testImplementation("io.github.baole:konture:0.6.10")
 }
 ```
 
@@ -81,9 +81,34 @@ dependencies {
 > [!NOTE]
 > For alternative Gradle plugin setup formats, refer to the [Gradle Plugin Portal](https://plugins.gradle.org/plugin/io.github.baole.konture).
 
-#### Maven (Coming Soon)
+#### Maven
 
-Support for Maven is currently in development.
+1. Add the Konture Maven Plugin to your dedicated test module's `pom.xml` (e.g., `konture-test/pom.xml`):
+```xml
+<plugin>
+    <groupId>io.github.baole.konture</groupId>
+    <artifactId>konture-maven-plugin</artifactId>
+    <version>0.6.10</version>
+    <executions>
+        <execution>
+            <phase>process-test-resources</phase>
+            <goals>
+                <goal>generate-layout</goal>
+            </goals>
+        </execution>
+    </executions>
+</plugin>
+```
+
+2. Add the dependency to the same module's `pom.xml`:
+```xml
+<dependency>
+    <groupId>io.github.baole</groupId>
+    <artifactId>konture</artifactId>
+    <version>0.6.10</version>
+    <scope>test</scope>
+</dependency>
+```
 
 ### Write Your First Guardrail
 
@@ -131,7 +156,7 @@ Visit our official **[GitHub Pages Documentation Site](https://baole.github.io/k
 *   **[🤖 AI Prompts & Skills Catalog](docs/ai-prompts/README.md)**: Dedicated prompts for [autonomous setup](docs/ai-prompts/integration-prompt.md) and [test generation](docs/ai-prompts/writing-tests-prompt.md).
 *   **[🧩 Core Concepts](docs/architecture_test.md)**: Static-analysis engine details.
 *   **[📜 Recipes](docs/recipes/)**: Templates for common guardrails (layer isolation, interface conventions, etc.).
-*   **[🏢 Showcases](docs/showcases.md)**: Real-world configurations (Now in Android, KotlinConf, Ktor, etc.).
+*   **[🏢 showcases](docs/showcases.md)**: Real-world configurations (Now in Android, KotlinConf, Ktor, etc.).
 
 ## 🤝 Contributing
 

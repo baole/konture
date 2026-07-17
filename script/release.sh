@@ -109,6 +109,7 @@ FILES_TO_BUMP=(
     "docs/contributing.md"
     "docs/installation.md"
     "plugin-maven/pom.xml"
+    "showcases/sample-maven/pom.xml"
 )
 
 # Backup files for rollback safety
@@ -164,6 +165,9 @@ perl -pi -e "s/version = \"\Q$OLD_VERSION\E\"/version = \"$NEW_VERSION\"/g" plug
 # 8b. Update Maven Plugin and its konture-core dependency version
 perl -pi -e "s/<version>\Q$OLD_VERSION\E<\/version>/<version>$NEW_VERSION<\/version>/g" plugin-maven/pom.xml
 
+# 8c. Update Sample Maven Showcase konture version
+perl -pi -e "s/<konture.version>\Q$OLD_VERSION\E<\/konture.version>/<konture.version>$NEW_VERSION<\/konture.version>/g" showcases/sample-maven/pom.xml
+
 # 9. Commit and push changes inside submodules if they have dirty changes
 echo -e "\n${BLUE}[3/3] Committing and pushing version bumps in git submodules...${NC}"
 for submodule in showcases/*; do
@@ -200,6 +204,8 @@ echo -e "  2. Run library unit and architecture tests:"
 echo -e "     ${CYAN}./gradlew test${NC}"
 echo -e "  3. Verify the nested standalone sample application:"
 echo -e "     ${CYAN}./gradlew -p showcases/sample-gradle test${NC}"
+echo -e "  4. Verify the nested standalone Maven sample application:"
+echo -e "     ${CYAN}mvn clean test -f showcases/sample-maven/pom.xml${NC}"
 echo -e "\nOnce verification passes, you can finalize the release by running:"
 echo -e "  git add ."
 echo -e "  git commit -m \"Release version $NEW_VERSION\""
