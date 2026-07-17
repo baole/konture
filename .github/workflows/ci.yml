@@ -54,8 +54,8 @@ jobs:
       - name: Build Gradle Projects
         run: ./gradlew build -x test
 
-      - name: Build Maven Plugin
-        run: mvn clean compile -f plugin-maven/pom.xml
+      - name: Build and Install Maven Plugin
+        run: mvn clean install -f plugin-maven/pom.xml
 
       - name: Build and Test Sample Maven Showcase
         run: mvn clean test -f showcases/sample-maven/pom.xml
