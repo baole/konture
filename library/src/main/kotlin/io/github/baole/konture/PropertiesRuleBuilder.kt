@@ -7,26 +7,8 @@ package io.github.baole.konture
 
 import io.github.baole.konture.core.KontureLogger
 import io.github.baole.konture.core.LogLevel
+import io.github.baole.konture.impl.BaselineManager
 import io.github.baole.konture.impl.LogicalOperator
-
-/**
- * Context wrapper for verifying property declarations.
- *
- * Provides both the target [declaration] and architectural metadata to easily query scope.
- *
- * @property declaration The underlying [PropertyDeclaration] AST model representing the property.
- * @property packageName The fully-qualified name of the package containing this property.
- * @property className The name of the surrounding class if this property is a member/nested property, or null if it's top-level.
- * @property modulePath The module subdirectory/path containing this property.
- * @property filePath The project relative path to the source file defining this property.
- */
-data class PropertyDeclarationContext(
-    val declaration: PropertyDeclaration,
-    val packageName: String,
-    val className: String?,
-    val modulePath: String,
-    val filePath: String,
-)
 
 /**
  * A builder for compiling and verifying architectural rules on Kotlin property declarations.
@@ -280,11 +262,18 @@ class PropertiesRuleBuilder(
                 "Properties rule has no assertion ('should()'). You must specify at least one assertion condition.",
             )
         for (prop in propertiesToCheck) {
+            val startIdx = violations.size
             assertion(prop, allProperties, violations)
+            for (i in startIdx until violations.size) {
+                violations[i] = "${violations[i]} (at ${prop.filePath})"
+            }
         }
 
         if (violations.isNotEmpty()) {
-            throw AssertionError("Property architecture violation(s) detected:\n" + violations.joinToString("\n"))
+            BaselineManager.handleViolations(
+                violations,
+                "Property architecture violation(s) detected:",
+            )
         }
     }
 }

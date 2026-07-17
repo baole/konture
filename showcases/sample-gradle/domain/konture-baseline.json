@@ -1,0 +1,31 @@
+{
+    "version": 1,
+    "testClasses": [
+        {
+            "name": "io.github.baole.konture.sample.DslArchitectureTest",
+            "tests": [
+                {
+                    "name": "intentional architectural violations with multiple different location types",
+                    "violations": [
+                        {
+                            "location": "domain/src/main/kotlin/io/github/baole/konture/sample/domain/GetUserUseCase.kt",
+                            "message": "File GetUserUseCase.kt should have name ending with 'Action.kt'"
+                        },
+                        {
+                            "location": "domain/src/main/kotlin/io/github/baole/konture/sample/domain/User.kt",
+                            "message": "Class io.github.baole.konture.sample.domain.User should have name ending with 'Dto'"
+                        },
+                        {
+                            "location": "domain/src/main/kotlin/io/github/baole/konture/sample/domain/User.kt",
+                            "message": "Property testid should have type 'kotlin.Int' but was 'String'"
+                        },
+                        {
+                            "location": "domain/src/main/kotlin/io/github/baole/konture/sample/domain/UserRepository.kt",
+                            "message": "Function getUser should have name ending with 'fetchUser'"
+                        }
+                    ]
+                }
+            ]
+        }
+    ]
+}

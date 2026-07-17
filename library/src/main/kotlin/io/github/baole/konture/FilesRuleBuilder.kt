@@ -7,20 +7,8 @@ package io.github.baole.konture
 
 import io.github.baole.konture.core.KontureLogger
 import io.github.baole.konture.core.LogLevel
+import io.github.baole.konture.impl.BaselineManager
 import io.github.baole.konture.impl.LogicalOperator
-
-/**
- * Context wrapper for verifying source file declarations.
- *
- * Provides both the target [declaration] and architectural metadata to easily query scope.
- *
- * @property declaration The underlying [FileDeclaration] AST model representing the source file.
- * @property modulePath The module subdirectory/path containing this file.
- */
-data class FileDeclarationContext(
-    val declaration: FileDeclaration,
-    val modulePath: String,
-)
 
 /**
  * A builder for compiling and verifying architectural rules on Kotlin source files.
@@ -271,11 +259,18 @@ class FilesRuleBuilder(
         val violations = mutableListOf<String>()
 
         for (file in filesToCheck) {
+            val startIdx = violations.size
             assertion(file, allFiles, violations)
+            for (i in startIdx until violations.size) {
+                violations[i] = "${violations[i]} (at ${file.declaration.filePath})"
+            }
         }
 
         if (violations.isNotEmpty()) {
-            throw AssertionError("File architecture violation(s) detected:\n" + violations.joinToString("\n"))
+            BaselineManager.handleViolations(
+                violations,
+                "File architecture violation(s) detected:",
+            )
         }
     }
 }

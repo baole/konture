@@ -47,7 +47,7 @@ import java.io.File
  * annotations, imports, and type references directly from source files on disk.
  */
 @OptIn(
-    org.jetbrains.kotlin.config.CompilerConfiguration.Internals::class,
+    CompilerConfiguration.Internals::class,
     org.jetbrains.kotlin.K1Deprecation::class,
 )
 internal object PsiParser {

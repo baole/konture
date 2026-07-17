@@ -40,8 +40,8 @@ class DslArchitectureTest {
     fun `unified architecture DSL context containing multiple rule types`() {
         Konture.architecture {
             modules {
-                that().haveNamePath(":domain")
-                should().notDependOnModule(":data")
+                that().haveNamePath(":data")
+                should().notDependOnModule(":domain")
             }
 
             classes {
@@ -126,6 +126,47 @@ class DslArchitectureTest {
                 should().haveAllModifiers() // empty is always matched, or can specify multiple:
                     .andShould().haveAnyVisibility(Visibility.PRIVATE, Visibility.INTERNAL)
                     .andShould().haveType("kotlin.String", "kotlin.Int")
+            }
+        }
+    }
+
+    @Test
+    fun `intentional architectural violations with multiple different location types`() {
+        Konture.architecture {
+            // 1. Module Violation (at module level)
+            modules {
+                allowEmpty()
+                that().haveNamePath(":data")
+                should().notDependOnModule(":domain")
+            }
+
+            // 2. Class Violation (at class level)
+            classes {
+                allowEmpty()
+                that().resideInAPackage("..domain..")
+                that().haveNameEndingWith("User")
+                should().haveNameEndingWith("Dto")
+            }
+
+            // 3. File Violation (at file level)
+            files {
+                allowEmpty()
+                that().haveNameEndingWith("UseCase.kt")
+                should().haveNameEndingWith("Action.kt")
+            }
+
+            // 4. Function Violation (at function level)
+            functions {
+                allowEmpty()
+                that().haveNameEndingWith("getUser")
+                should().haveNameEndingWith("fetchUser")
+            }
+
+            // 5. Property Violation (at property/line level)
+            properties {
+                allowEmpty()
+                that().haveNameEndingWith("id")
+                should().haveType("kotlin.Int")
             }
         }
     }

@@ -153,6 +153,9 @@ class ArchitectureGuardrails {
 Visit our official **[GitHub Pages Documentation Site](https://baole.github.io/konture/)** or explore the resources directly:
 
 *   **[🚀 Installation](docs/installation.md)**: Manual integration guide.
+*   **[📐 Usage Guide](docs/usage.md)**: Writing your first tests and running checks.
+*   **[⚙️ Configuration](docs/configuration.md)**: Plugin custom parameters and wildcard matching mechanics.
+*   **[🛡️ Architecture Baselines](docs/baseline.md)**: Freeze and manage pre-existing technical debt.
 *   **[🤖 AI Prompts & Skills Catalog](docs/ai-prompts/README.md)**: Dedicated prompts for [autonomous setup](docs/ai-prompts/integration-prompt.md) and [test generation](docs/ai-prompts/writing-tests-prompt.md).
 *   **[🧩 Core Concepts](docs/architecture_test.md)**: Static-analysis engine details.
 *   **[📜 Recipes](docs/recipes/)**: Templates for common guardrails (layer isolation, interface conventions, etc.).

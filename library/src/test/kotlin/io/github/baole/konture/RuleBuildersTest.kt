@@ -5,6 +5,7 @@
 
 package io.github.baole.konture
 
+import io.github.baole.konture.impl.PatternMatchers
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
 
@@ -12,7 +13,7 @@ class RuleBuildersTest : RuleBuildersTestBase() {
     @Test
     fun `test matchesSimpleGlob`() {
         val matches = { pattern: String, input: String ->
-            io.github.baole.konture.impl.PatternMatchers
+            PatternMatchers
                 .matchesSimpleGlob(pattern, input)
         }
         assertTrue(matches("*UseCase", "GetUserUseCase"))

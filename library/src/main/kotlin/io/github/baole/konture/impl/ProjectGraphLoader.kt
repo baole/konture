@@ -28,18 +28,45 @@ internal object ProjectGraphLoader {
             prettyPrint = true
         }
 
-    private fun findBuildRoot(): File {
-        var current = File(System.getProperty("user.dir")).canonicalFile
+    internal fun findBuildRoot(): File {
+        val userDir = File(System.getProperty("user.dir")).canonicalFile
+
+        // 1. Search for closest Gradle settings file walking up
+        var current = userDir
+        var gradleRoot: File? = null
         while (true) {
             val settingsGradle = File(current, "settings.gradle")
             val settingsGradleKts = File(current, "settings.gradle.kts")
             if (settingsGradle.exists() || settingsGradleKts.exists()) {
-                return current
+                gradleRoot = current
+                break
             }
             val parent = current.parentFile ?: break
             current = parent
         }
-        return File(System.getProperty("user.dir")).canonicalFile
+
+        // 2. Search for closest Maven pom.xml walking up to find the topmost pom.xml
+        current = userDir
+        var topmostPomDir: File? = null
+        while (true) {
+            val pomXml = File(current, "pom.xml")
+            if (pomXml.exists()) {
+                topmostPomDir = current
+            }
+            val parent = current.parentFile ?: break
+            current = parent
+        }
+
+        // 3. Compare and pick the deepest (most specific) root
+        if (gradleRoot != null && topmostPomDir != null) {
+            return if (gradleRoot.absolutePath.length >= topmostPomDir.absolutePath.length) {
+                gradleRoot
+            } else {
+                topmostPomDir
+            }
+        }
+
+        return gradleRoot ?: topmostPomDir ?: userDir
     }
 
     /**

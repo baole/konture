@@ -7,6 +7,7 @@ package io.github.baole.konture
 
 import io.github.baole.konture.core.KontureLogger
 import io.github.baole.konture.core.LogLevel
+import io.github.baole.konture.impl.BaselineManager
 import io.github.baole.konture.impl.LogicalOperator
 
 /**
@@ -253,11 +254,18 @@ class ClassesRuleBuilder(
         val violations = mutableListOf<String>()
 
         for (cls in classesToCheck) {
+            val startIdx = violations.size
             assertion(cls, allClasses, violations)
+            for (i in startIdx until violations.size) {
+                violations[i] = "${violations[i]} (at ${cls.filePath})"
+            }
         }
 
         if (violations.isNotEmpty()) {
-            throw AssertionError("Architecture violation(s) detected:\n" + violations.joinToString("\n"))
+            BaselineManager.handleViolations(
+                violations,
+                "Class architecture violation(s) detected:",
+            )
         }
     }
 }

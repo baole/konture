@@ -73,11 +73,20 @@ class StandardArchitectureTest {
 
     @Test
     fun `violating dependency rule should throw assertion error`() {
-        assertThrows<AssertionError> {
-            Konture.modules()
-                .that().haveNamePath(":data")
-                .should().onlyDependOnModules(":app")
-                .check()
+        val originalRecord = Konture.generateBaseline
+        val originalBaselinePath = Konture.baselinePath
+        try {
+            Konture.generateBaseline = false
+            Konture.baselinePath = "non-existent-baseline-for-test.json"
+            assertThrows<AssertionError> {
+                Konture.modules()
+                    .that().haveNamePath(":data")
+                    .should().onlyDependOnModules(":app")
+                    .check()
+            }
+        } finally {
+            Konture.generateBaseline = originalRecord
+            Konture.baselinePath = originalBaselinePath
         }
     }
 

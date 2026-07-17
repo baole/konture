@@ -7,6 +7,7 @@ package io.github.baole.konture
 
 import io.github.baole.konture.core.KontureLogger
 import io.github.baole.konture.core.LogLevel
+import io.github.baole.konture.impl.BaselineManager
 import io.github.baole.konture.impl.LogicalOperator
 
 /**
@@ -242,7 +243,10 @@ class ModulesRuleBuilder(
         }
 
         if (violations.isNotEmpty()) {
-            throw AssertionError("Architecture violation(s) detected:\n" + violations.joinToString("\n"))
+            BaselineManager.handleViolations(
+                violations,
+                "Module architecture violation(s) detected:",
+            )
         }
     }
 }

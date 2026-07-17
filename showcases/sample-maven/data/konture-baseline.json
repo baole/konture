@@ -1,0 +1,19 @@
+{
+    "version": 1,
+    "testClasses": [
+        {
+            "name": "io.github.baole.konture.sample.DslArchitectureTest",
+            "tests": [
+                {
+                    "name": "unified architecture DSL context containing multiple rule types",
+                    "violations": [
+                        {
+                            "location": ":data",
+                            "message": "should not depend on :domain, but a dependency was found."
+                        }
+                    ]
+                }
+            ]
+        }
+    ]
+}
