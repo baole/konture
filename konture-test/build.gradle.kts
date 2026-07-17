@@ -7,8 +7,8 @@ if (System.getProperty("archTest") != null) {
 }
 
 dependencies {
-    // Rely on published SNAPSHOT artifacts from mavenLocal()
-    testImplementation("io.github.baole:konture:${libs.versions.konture.get()}")
+    // Local project dependency ensures compiles always succeed without requiring publishToMavenLocal first
+    testImplementation(project(":library"))
 
     testImplementation("org.junit.jupiter:junit-jupiter:5.11.0")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
