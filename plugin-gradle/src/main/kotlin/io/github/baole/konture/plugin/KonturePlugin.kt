@@ -88,7 +88,7 @@ class KonturePlugin : Plugin<Project> {
         if (project == project.rootProject) {
             val generateTask =
                 project.tasks.register("generateArchitectureLayout", GenerateArchitectureLayout::class.java) { task ->
-                    task.outputFile.convention(project.layout.buildDirectory.file("konture/layout.json"))
+                    task.outputFile.convention(project.layout.buildDirectory.file("konture/layout_v2.json"))
                     task.rootProjectDir.set(project.rootDir)
                     task.excludeModules.set(extension.excludeModules)
                     task.excludePackages.set(extension.excludePackages)
@@ -275,10 +275,11 @@ class KonturePlugin : Plugin<Project> {
                         list.add(
                             SourceSetData(
                                 name = name,
-                                kind = "KOTLIN_JVM",
+                                kind = "ANDROID_VARIANT",
                                 production = !name.lowercase().contains("test"),
                                 srcDirs = srcDirs.map { it.absolutePath },
                                 platforms = listOf("android"),
+                                compileClasspath = compilationClasspath(proj, name),
                             ),
                         )
                     }
@@ -359,6 +360,7 @@ class KonturePlugin : Plugin<Project> {
                             production = isProduction,
                             srcDirs = sourceSet.kotlin.srcDirs.map { it.absolutePath },
                             platforms = platforms,
+                            compileClasspath = compilationClasspath(proj, name),
                         ),
                     )
                 }
@@ -376,12 +378,29 @@ class KonturePlugin : Plugin<Project> {
                             production = ss.name == "main",
                             srcDirs = ss.allSource.srcDirs.map { it.absolutePath },
                             platforms = listOf("jvm"),
+                            compileClasspath = compilationClasspath(proj, ss.name),
                         ),
                     )
                 }
             }
         }
         return list
+    }
+
+    /** Returns resolved compile-classpath paths when Gradle exposes a matching configuration. */
+    private fun compilationClasspath(
+        project: Project,
+        sourceSetName: String,
+    ): List<String> {
+        val candidates = listOf("${sourceSetName}CompileClasspath", "compileClasspath")
+        val configuration = candidates.firstNotNullOfOrNull { project.configurations.findByName(it) } ?: return emptyList()
+        if (!configuration.isCanBeResolved) return emptyList()
+        return try {
+            configuration.resolve().map { it.canonicalPath }.sorted()
+        } catch (exception: Exception) {
+            project.logger.info("Konture could not resolve compiler classpath for $sourceSetName: ${exception.message}")
+            emptyList()
+        }
     }
 
     private fun collectDependencies(proj: Project): List<DependencyData> {
@@ -521,12 +540,17 @@ class KonturePlugin : Plugin<Project> {
         project.dependencies.add("archLayoutIncoming", project.dependencies.project(mapOf("path" to ":")))
         project.dependencies.add("archDepsIncoming", project.dependencies.project(mapOf("path" to ":")))
 
-        // Register copy tasks to copy layout.json and dependencies.json to the build/resources/test/konture directory
+        // Copy only the matching v2 layout and clear layouts from previously checked-out branches.
         val copyLayoutTask =
             project.tasks.register("copyArchitectureLayout", org.gradle.api.tasks.Copy::class.java) { copy ->
                 copy.from(archLayoutIncoming)
                 copy.into(project.layout.buildDirectory.dir("resources/test/konture"))
-                copy.rename { "layout.json" }
+                copy.rename { "layout_v2.json" }
+                copy.doFirst {
+                    val target = project.layout.buildDirectory.dir("resources/test/konture").get().asFile
+                    java.io.File(target, "layout.json").delete()
+                    java.io.File(target, "layout_v2.json").delete()
+                }
             }
 
         val copyDepsTask =

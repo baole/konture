@@ -25,4 +25,8 @@ data class SourceSetModel(
     val srcDirs: List<String>,
     val kotlinFiles: List<String>,
     val platforms: List<String> = emptyList(),
+    /** Optional resolved compilation classpath used by v2 compiler-backed analysis. */
+    val compileClasspath: List<String> = emptyList(),
+    /** Optional Kotlin/JVM target metadata used to configure compiler analysis. */
+    val jvmTarget: String? = null,
 )

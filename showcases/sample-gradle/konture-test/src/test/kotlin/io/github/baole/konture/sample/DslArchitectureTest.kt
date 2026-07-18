@@ -6,6 +6,15 @@ import org.junit.jupiter.api.Test
 class DslArchitectureTest {
 
     @Test
+    fun `test source sets can be checked for prohibited Kotlin calls`() {
+        // This test itself belongs to the captured Gradle test source set.
+        Konture.files(sourceSets = SourceSets.tests()) {
+            should().notCall("io.mockk.spyk")
+        }
+        // A real violation would be: io.mockk.spyk(value)
+    }
+
+    @Test
     fun `module and class verification using auto-checking blocks`() {
         // Auto-verifying module block DSL
         Konture.modules {

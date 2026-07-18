@@ -72,6 +72,23 @@ class DeclarativeArchitectureTest {
 
 ## 🏃 Running the Tests
 
+## Source-set-scoped usage rules
+
+Konture's existing source rules inspect production source sets by default. Select test or custom source sets explicitly when a rule must inspect test code:
+
+```kotlin
+Konture.files(sourceSets = SourceSets.tests()) {
+    should().notCall("io.mockk.spyk")
+    should().notReferenceClass("io.mockk.MockK")
+}
+
+Konture.functions(sourceSets = SourceSets.named("test", "androidTest", "commonTest")) {
+    should().notCall("io.mockk.spyk")
+}
+```
+
+`SourceSets.named(...)` matches exact captured Gradle source-set names, `matchingName("*Test")` uses glob matching, and `SourceSets.of(role = SourceSetRole.TEST, kind = SourceSetKind.ANDROID)` selects a portable category. `notCall` analyzes Kotlin source calls, not runtime behavior; an unused import does not violate it.
+
 Because Konture compiled layouts run as standard unit tests on the JVM, executing them is fast and seamless. Run the tests using your build system or trigger them directly from your IDE gutter.
 
 ### 🐘 Gradle

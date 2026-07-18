@@ -9,6 +9,9 @@ import io.github.baole.konture.Dependency
 import io.github.baole.konture.Module
 import io.github.baole.konture.ProjectGraph
 import io.github.baole.konture.SourceSet
+import io.github.baole.konture.SourceSetId
+import io.github.baole.konture.SourceSetKind
+import io.github.baole.konture.SourceSetRole
 import io.github.baole.konture.core.DependencyGraphModel
 import io.github.baole.konture.core.KontureLogger
 import io.github.baole.konture.core.LayoutModel
@@ -69,6 +72,9 @@ internal class ProjectGraphLoader {
     ): ProjectGraph {
         val layoutContent = inputStream.bufferedReader().use { it.readText() }
         val layoutModel = json.decodeFromString<LayoutModel>(layoutContent)
+        require(layoutModel.schemaVersion == 2) {
+            "Konture requires layout schema v2. Regenerate the layout with the matching Konture Gradle plugin."
+        }
         val buildRoot = findBuildRoot()
 
         val levelStr = layoutModel.logLevel.uppercase()
@@ -114,47 +120,37 @@ internal class ProjectGraphLoader {
                                 "Loading module ${moduleModel.path} from $resolvedProjectDir",
                             )
 
+                            val pathsToSourceSets = linkedMapOf<String, MutableList<SourceSetId>>()
+                            moduleModel.sourceSets.forEach { sourceSetModel ->
+                                val sourceSetId =
+                                    SourceSetId(
+                                        modulePath = moduleModel.path,
+                                        name = sourceSetModel.name,
+                                        kind = sourceSetModel.kind.toPublicKind(),
+                                        role = if (sourceSetModel.production) SourceSetRole.PRODUCTION else SourceSetRole.TEST,
+                                    )
+                                sourceSetModel.kotlinFiles.forEach { filePath ->
+                                    val candidate = File(filePath)
+                                    val resolved = if (candidate.isAbsolute) candidate else File(resolvedProjectDir, filePath)
+                                    pathsToSourceSets.getOrPut(resolved.canonicalPath) { mutableListOf() }.add(sourceSetId)
+                                }
+                            }
                             val files =
-                                moduleModel.sourceSets
-                                    .filter { it.production }
-                                    .flatMap { sourceSetModel ->
-                                        sourceSetModel.kotlinFiles.mapNotNull { filePath ->
-                                            val file = File(filePath)
-                                            val resolvedFile =
-                                                if (file.isAbsolute) {
-                                                    file
-                                                } else {
-                                                    File(resolvedProjectDir, filePath)
-                                                }
-                                            val fileDecl = PsiParser.parseFile(resolvedFile)
-                                            if (fileDecl == null) {
-                                                KontureLogger.log(
-                                                    LogLevel.WARNING,
-                                                    "Failed to parse AST for Kotlin file: ${resolvedFile.absolutePath}",
-                                                )
-                                                return@mapNotNull null
-                                            }
-                                            if (isPackageExcluded(fileDecl.packageName)) {
-                                                KontureLogger.log(
-                                                    LogLevel.TRACE,
-                                                    "Skipping file ${resolvedFile.name} because package ${fileDecl.packageName} is excluded",
-                                                )
-                                                return@mapNotNull null
-                                            }
-                                            val filteredClasses =
-                                                fileDecl.classes.filter { classDecl ->
-                                                    val excluded = isClassExcluded(classDecl.name, classDecl.fqName)
-                                                    if (excluded) {
-                                                        KontureLogger.log(
-                                                            LogLevel.TRACE,
-                                                            "Skipping class ${classDecl.fqName} because of class exclusions",
-                                                        )
-                                                    }
-                                                    !excluded
-                                                }
-                                            fileDecl.copy(classes = filteredClasses)
-                                        }
+                                pathsToSourceSets.mapNotNull { (path, memberships) ->
+                                    val resolvedFile = File(path)
+                                    val fileDecl = PsiParser.parseFile(resolvedFile)
+                                    if (fileDecl == null) {
+                                        KontureLogger.log(LogLevel.WARNING, "Failed to parse AST for Kotlin file: $path")
+                                        return@mapNotNull null
                                     }
+                                    if (isPackageExcluded(fileDecl.packageName)) return@mapNotNull null
+                                    val filteredClasses = fileDecl.classes.filterNot { isClassExcluded(it.name, it.fqName) }
+                                    fileDecl.copy(
+                                        classes = filteredClasses,
+                                        sourceSets = memberships.toList(),
+                                        usages = fileDecl.usages.map { usage -> usage.copy(sourceSets = memberships.toList()) },
+                                    )
+                                }
 
                             Module(
                                 buildId = buildModel.id,
@@ -230,26 +226,26 @@ internal class ProjectGraphLoader {
      * @return The fully populated [ProjectGraph].
      * @throws IllegalArgumentException if the resource cannot be found on the classpath.
      */
-    fun loadFromResource(resourcePath: String = "/konture/layout.json"): ProjectGraph {
+    fun loadFromResource(resourcePath: String = "/konture/layout_v2.json"): ProjectGraph {
         val stream = javaClass.getResourceAsStream(resourcePath)
         if (stream != null) {
-            KontureLogger.log(LogLevel.DEBUG, "Loading layout.json from classpath resources: $resourcePath")
-            val depsPath = resourcePath.replace("layout.json", "dependencies.json")
+            KontureLogger.log(LogLevel.DEBUG, "Loading layout_v2.json from classpath resources: $resourcePath")
+            val depsPath = resourcePath.replace("layout_v2.json", "dependencies.json")
             return loadFromStream(
                 inputStream = stream,
                 depsStreamLoader = { javaClass.getResourceAsStream(depsPath) },
             )
         }
 
-        // Fallback: search for layout.json in the build directory of the build root
+        // Fallback: search for layout_v2.json in the build directory of the build root
         val buildRoot = findBuildRoot()
-        val fallbackFile = File(buildRoot, "build/konture/layout.json")
+        val fallbackFile = File(buildRoot, "build/konture/layout_v2.json")
         KontureLogger.log(
             LogLevel.WARNING,
-            "layout.json not found in classpath resources. Searching at fallback location: ${fallbackFile.absolutePath}",
+            "layout_v2.json not found in classpath resources. Searching at fallback location: ${fallbackFile.absolutePath}",
         )
         if (fallbackFile.exists()) {
-            KontureLogger.log(LogLevel.INFO, "Loaded layout.json from fallback file: ${fallbackFile.absolutePath}")
+            KontureLogger.log(LogLevel.INFO, "Loaded layout_v2.json from fallback file: ${fallbackFile.absolutePath}")
             val fallbackDepsFile = File(buildRoot, "build/konture/dependencies.json")
             return loadFromStream(
                 inputStream = fallbackFile.inputStream(),
@@ -260,8 +256,8 @@ internal class ProjectGraphLoader {
         }
 
         throw IllegalArgumentException(
-            "Could not find layout.json resource at $resourcePath " +
-                "or at fallback location: ${fallbackFile.absolutePath}",
+            "Konture layout_v2.json was not found at $resourcePath or ${fallbackFile.absolutePath}. " +
+                "Run ./gradlew generateArchitectureLayout, then rerun the architecture tests.",
         )
     }
 
@@ -277,11 +273,18 @@ internal class ProjectGraphLoader {
             return KontureContextProvider.currentContext.projectGraphLoader.loadFromStream(inputStream, depsStreamLoader)
         }
 
-        fun loadFromResource(resourcePath: String = "/konture/layout.json"): ProjectGraph {
+        fun loadFromResource(resourcePath: String = "/konture/layout_v2.json"): ProjectGraph {
             return KontureContextProvider.currentContext.projectGraphLoader.loadFromResource(resourcePath)
         }
     }
 }
+
+private fun io.github.baole.konture.core.SourceSetKind.toPublicKind(): SourceSetKind =
+    when (this) {
+        io.github.baole.konture.core.SourceSetKind.KOTLIN_JVM -> SourceSetKind.JVM
+        io.github.baole.konture.core.SourceSetKind.ANDROID_VARIANT -> SourceSetKind.ANDROID
+        io.github.baole.konture.core.SourceSetKind.KMP -> SourceSetKind.KMP
+    }
 
 /**
  * Extension on [ProjectGraph.Companion] to load the layout model from a classpath resource
@@ -290,7 +293,7 @@ internal class ProjectGraphLoader {
  * @param resourcePath Classpath resource path to load from (defaults to `/konture/layout.json`).
  * @return The loaded [ProjectGraph] instance.
  */
-fun ProjectGraph.Companion.fromResource(resourcePath: String = "/konture/layout.json"): ProjectGraph {
+fun ProjectGraph.Companion.fromResource(resourcePath: String = "/konture/layout_v2.json"): ProjectGraph {
     val graph = ProjectGraphLoader.loadFromResource(resourcePath)
     setDefault(graph)
     return graph

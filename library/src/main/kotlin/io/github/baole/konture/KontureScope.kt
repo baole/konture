@@ -25,8 +25,14 @@ class KontureScope(
          * @param graph The project graph to use (defaults to [Konture.projectGraph]).
          * @return A [KontureScope] containing all class declarations found in all modules in the project.
          */
-        fun fromProject(graph: ProjectGraph = Konture.projectGraph): KontureScope {
-            val classes = graph.getAllModules().flatMap { it.classes }
+        fun fromProject(
+            graph: ProjectGraph = Konture.projectGraph,
+            sourceSets: SourceSetSelector = SourceSets.production(),
+        ): KontureScope {
+            val classes =
+                graph.getAllModules().flatMap { module ->
+                    module.files.filter { it.membershipsFor(module.path).any(sourceSets::matches) }.flatMap { it.classes }
+                }
             return KontureScope(classes)
         }
 
@@ -41,11 +47,12 @@ class KontureScope(
         fun fromModule(
             path: String,
             graph: ProjectGraph = Konture.projectGraph,
+            sourceSets: SourceSetSelector = SourceSets.production(),
         ): KontureScope {
             val module =
                 graph.getAllModules().find { it.path == path }
                     ?: throw IllegalArgumentException("Module $path not found in project graph")
-            return KontureScope(module.classes)
+            return KontureScope(module.files.filter { it.membershipsFor(module.path).any(sourceSets::matches) }.flatMap { it.classes })
         }
 
         /**
@@ -58,11 +65,12 @@ class KontureScope(
         fun fromPackage(
             packageName: String,
             graph: ProjectGraph = Konture.projectGraph,
+            sourceSets: SourceSetSelector = SourceSets.production(),
         ): KontureScope {
             val classes =
                 graph
                     .getAllModules()
-                    .flatMap { it.classes }
+                    .flatMap { module -> module.files.filter { it.membershipsFor(module.path).any(sourceSets::matches) }.flatMap { it.classes } }
                     .filter { it.packageName == packageName || it.packageName.startsWith("$packageName.") }
             return KontureScope(classes)
         }

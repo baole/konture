@@ -16,4 +16,5 @@ package io.github.baole.konture
 data class FileDeclarationContext(
     val declaration: FileDeclaration,
     val modulePath: String,
+    val sourceSet: SourceSetId? = null,
 )

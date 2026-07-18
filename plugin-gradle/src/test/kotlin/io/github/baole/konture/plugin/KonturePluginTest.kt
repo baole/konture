@@ -31,7 +31,7 @@ class KonturePluginTest {
 
         val expectedOutputFile =
             project.layout.buildDirectory
-                .file("konture/layout.json")
+                .file("konture/layout_v2.json")
                 .get()
                 .asFile
         val actualOutputFile = task?.outputFile?.get()?.asFile
@@ -140,7 +140,7 @@ class KonturePluginTest {
                 jsonText,
             )
 
-        assertEquals(1, layoutModel.schemaVersion)
+        assertEquals(2, layoutModel.schemaVersion)
         val rootBuild = layoutModel.builds.firstOrNull { it.id == ":" }
         assertNotNull(rootBuild)
 
@@ -244,7 +244,7 @@ class KonturePluginTest {
         assertTrue(files.isNotEmpty())
         val expectedFile =
             rootProject.layout.buildDirectory
-                .file("konture/layout.json")
+                .file("konture/layout_v2.json")
                 .get()
                 .asFile
         assertEquals(expectedFile, files.first())

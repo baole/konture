@@ -30,7 +30,7 @@ import kotlinx.serialization.json.Json
 
 /**
  * A standard Gradle task that extracts the multi-project module layout, source sets, applied plugins,
- * and project dependencies, and serializes them into a structural `layout.json` schema.
+ * and project dependencies, and serializes them into the v2 `layout_v2.json` schema.
  *
  * This task acts as the "Producer" phase of Konture's offline static analysis mechanism.
  */
@@ -75,7 +75,7 @@ abstract class GenerateArchitectureLayout : DefaultTask() {
     abstract val logLevel: org.gradle.api.provider.Property<String>
 
     /**
-     * The output location of the generated `layout.json` file (typically `build/konture/layout.json` in root).
+     * The output location of the generated `layout_v2.json` file.
      */
     @get:OutputFile
     abstract val outputFile: RegularFileProperty
@@ -176,6 +176,8 @@ abstract class GenerateArchitectureLayout : DefaultTask() {
                             srcDirs = relSrcDirs,
                             kotlinFiles = files,
                             platforms = ssInput.platforms,
+                            compileClasspath = ssInput.compileClasspath,
+                            jvmTarget = ssInput.jvmTarget,
                         )
                     }
 
@@ -199,7 +201,7 @@ abstract class GenerateArchitectureLayout : DefaultTask() {
 
         val layoutModel =
             LayoutModel(
-                schemaVersion = 1,
+                schemaVersion = 2,
                 builds =
                     listOf(
                         BuildModel(

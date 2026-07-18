@@ -20,6 +20,7 @@ import io.github.baole.konture.impl.LogicalOperator
 @KontureDsl
 class ClassesRuleBuilder(
     internal val graph: ProjectGraph = Konture.projectGraph,
+    private val sourceSets: SourceSetSelector = SourceSets.production(),
 ) {
     private var thatPredicate: ((ClassDeclaration) -> Boolean)? = null
     private var shouldAssertion: (
@@ -226,7 +227,10 @@ class ClassesRuleBuilder(
      * @throws AssertionError If any of the verified classes violate the assertion rules.
      */
     fun check(g: ProjectGraph = graph) {
-        val allClasses = g.getAllModules().flatMap { it.classes }
+        val allClasses =
+            g.getAllModules().flatMap { module ->
+                module.files.filter { file -> file.membershipsFor(module.path).any(sourceSets::matches) }.flatMap { it.classes }
+            }
         val classesToCheck = allClasses.filter { thatPredicate?.invoke(it) ?: true }
 
         KontureLogger.log(

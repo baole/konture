@@ -12,6 +12,45 @@ import io.github.baole.konture.impl.PatternMatchers
 class FilesShould internal constructor(
     private val builder: FilesRuleBuilder,
 ) {
+    /** Fails for every invocation of [fqName] in the selected source file. */
+    fun notCall(fqName: String): FilesRuleBuilder {
+        builder.setShould { file, _, violations ->
+            file.declaration.usages
+                .filter { usage ->
+                    usage.kind == UsageKind.CALL &&
+                        (usage.targetFqName == fqName || fqName in usage.possibleTargetFqNames)
+                }.forEach { usage ->
+                    val unresolved = if (usage.unresolvedPossibleUsage) "unresolved possible " else ""
+                    violations.add(getMessage("usage.notCall", unresolved, fqName, usage.rawExpression, usage.line, usage.column))
+                }
+        }
+        return builder
+    }
+
+    /** Fails for every invocation of [kClass] in the selected source file. */
+    fun notCall(kClass: kotlin.reflect.KClass<*>): FilesRuleBuilder = notCall(kClass.qualifiedName ?: kClass.java.name)
+
+    /** Fails for every invocation of [T] in the selected source file. */
+    inline fun <reified T : Any> notCall(): FilesRuleBuilder = notCall(T::class)
+
+    /** Fails for every actual class/type use of [fqName]; imports alone do not match. */
+    fun notReferenceClass(fqName: String): FilesRuleBuilder {
+        builder.setShould { file, _, violations ->
+            file.declaration.usages
+                .filter { it.kind == UsageKind.CLASS_REFERENCE && it.targetFqName == fqName }
+                .forEach { usage ->
+                    violations.add(getMessage("usage.notReferenceClass", fqName, usage.rawExpression, usage.line, usage.column))
+                }
+        }
+        return builder
+    }
+
+    /** Fails for every actual class/type use of [kClass]; imports alone do not match. */
+    fun notReferenceClass(kClass: kotlin.reflect.KClass<*>): FilesRuleBuilder = notReferenceClass(kClass.qualifiedName ?: kClass.java.name)
+
+    /** Fails for every actual class/type use of [T]; imports alone do not match. */
+    inline fun <reified T : Any> notReferenceClass(): FilesRuleBuilder = notReferenceClass(T::class)
+
     infix fun resideInAPackage(packagePattern: String): FilesRuleBuilder {
         builder.setShould { file, _, violations ->
             if (!PatternMatchers.matchesPackage(packagePattern, file.declaration.packageName)) {

@@ -20,6 +20,7 @@ import io.github.baole.konture.impl.LogicalOperator
 @KontureDsl
 class PropertiesRuleBuilder(
     internal val graph: ProjectGraph = Konture.projectGraph,
+    private val sourceSets: SourceSetSelector = SourceSets.production(),
 ) {
     private var thatPredicate: ((PropertyDeclarationContext) -> Boolean)? = null
     private var shouldAssertion: (
@@ -226,7 +227,7 @@ class PropertiesRuleBuilder(
     fun check(g: ProjectGraph = graph) {
         val allProperties =
             g.getAllModules().flatMap { module ->
-                module.files.flatMap { file ->
+                module.files.filter { file -> file.membershipsFor(module.path).any(sourceSets::matches) }.flatMap { file ->
                     val topLevel =
                         file.topLevelProperties.map { prop ->
                             PropertyDeclarationContext(prop, file.packageName, null, module.path, file.filePath)

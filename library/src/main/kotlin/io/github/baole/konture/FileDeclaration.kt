@@ -15,4 +15,6 @@ data class FileDeclaration(
     val kdocText: String? = null,
     val filePath: String = "",
     val importAliases: Map<String, String> = emptyMap(),
+    val sourceSets: List<SourceSetId> = emptyList(),
+    val usages: List<SourceUsage> = emptyList(),
 )

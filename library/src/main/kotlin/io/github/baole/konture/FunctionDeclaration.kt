@@ -14,4 +14,6 @@ data class FunctionDeclaration(
     val annotations: List<AnnotationDeclaration>,
     val kdocText: String?,
     val isExtension: Boolean,
+    val sourceStartOffset: Int = -1,
+    val sourceEndOffset: Int = -1,
 )
