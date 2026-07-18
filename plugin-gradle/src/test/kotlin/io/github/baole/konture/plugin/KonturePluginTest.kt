@@ -611,10 +611,11 @@ class KonturePluginTest {
 
         val testTask = project.tasks.getByName("test") as org.gradle.api.tasks.testing.Test
         val baselinePathProp = testTask.systemProperties["konture.baseline.path"]
-        val resolvedValue = when (baselinePathProp) {
-            is org.gradle.api.provider.Provider<*> -> baselinePathProp.get()
-            else -> baselinePathProp
-        }
+        val resolvedValue =
+            when (baselinePathProp) {
+                is org.gradle.api.provider.Provider<*> -> baselinePathProp.get()
+                else -> baselinePathProp
+            }
         assertEquals("custom-baseline-test.json", resolvedValue)
     }
 
@@ -647,21 +648,23 @@ class KonturePluginTest {
             extension.baselinePath.set("dsl-baseline.json")
 
             val testTask = project.tasks.getByName("test") as org.gradle.api.tasks.testing.Test
-            
+
             // Check baseline path
             val baselinePathProp = testTask.systemProperties[KontureConstants.PROPERTY_BASELINE_PATH]
-            val resolvedPath = when (baselinePathProp) {
-                is org.gradle.api.provider.Provider<*> -> baselinePathProp.get()
-                else -> baselinePathProp
-            }
+            val resolvedPath =
+                when (baselinePathProp) {
+                    is org.gradle.api.provider.Provider<*> -> baselinePathProp.get()
+                    else -> baselinePathProp
+                }
             assertEquals("cli-override-baseline.json", resolvedPath)
 
             // Check baseline dir
             val baselineDirProp = testTask.systemProperties[KontureConstants.PROPERTY_BASELINE_DIR]
-            val resolvedDir = when (baselineDirProp) {
-                is org.gradle.api.provider.Provider<*> -> baselineDirProp.get()
-                else -> baselineDirProp
-            }
+            val resolvedDir =
+                when (baselineDirProp) {
+                    is org.gradle.api.provider.Provider<*> -> baselineDirProp.get()
+                    else -> baselineDirProp
+                }
             assertEquals("/cli-override-dir", resolvedDir)
         } finally {
             System.clearProperty(KontureConstants.PROPERTY_BASELINE_PATH)
@@ -685,10 +688,11 @@ class KonturePluginTest {
         doFirstAction.execute(childTestTask)
 
         val generateProp = childTestTask.systemProperties[KontureConstants.PROPERTY_BASELINE_GENERATE]
-        val resolvedValue = when (generateProp) {
-            is org.gradle.api.provider.Provider<*> -> generateProp.get()
-            else -> generateProp
-        }
+        val resolvedValue =
+            when (generateProp) {
+                is org.gradle.api.provider.Provider<*> -> generateProp.get()
+                else -> generateProp
+            }
         assertEquals("true", resolvedValue.toString())
     }
 }

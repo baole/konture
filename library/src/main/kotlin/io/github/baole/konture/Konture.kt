@@ -6,7 +6,7 @@
 package io.github.baole.konture
 
 import io.github.baole.konture.core.KontureConstants
-import io.github.baole.konture.impl.ProjectGraphLoader
+import io.github.baole.konture.impl.KontureContextProvider
 
 /**
  * Main entry point for Konture. All architecture assertion builders, scoping builders,
@@ -38,38 +38,32 @@ object Konture {
      * or retrieves the default graph if already initialized.
      */
     val projectGraph: ProjectGraph
-        get() =
-            if (ProjectGraph.isDefaultInitialized()) {
-                ProjectGraph.getDefault()
-            } else {
-                lazyGraph
+        get() {
+            val context = KontureContextProvider.currentContext
+            return context.projectGraph ?: run {
+                val loaded = context.projectGraphLoader.loadFromResource()
+                ProjectGraph.setDefault(loaded)
+                loaded
             }
-
-    private val lazyGraph: ProjectGraph by lazy {
-        ProjectGraphLoader.loadFromResource()
-    }
-
-    private var _baselinePath: String? = null
+        }
 
     /**
      * The file path of the baseline file relative to the baseline directory.
      * Default value is obtained from system property "konture.baseline.path" or falls back to "konture-baseline.json".
      */
     var baselinePath: String
-        get() = System.getProperty(PROPERTY_BASELINE_PATH) ?: _baselinePath ?: DEFAULT_BASELINE_FILENAME
+        get() = System.getProperty(PROPERTY_BASELINE_PATH) ?: KontureContextProvider.currentContext.baselinePath
         set(value) {
-            _baselinePath = value
+            KontureContextProvider.currentContext = KontureContextProvider.currentContext.copy(baselinePath = value)
         }
-
-    private var _generateBaseline: Boolean? = null
 
     /**
      * Flag indicating whether to generate violations into the baseline file rather than throwing [AssertionError].
      * Default value is obtained from system property "konture.baseline.generate" (as boolean) or falls back to false.
      */
     var generateBaseline: Boolean
-        get() = System.getProperty(PROPERTY_BASELINE_GENERATE)?.toBoolean() ?: _generateBaseline ?: false
+        get() = System.getProperty(PROPERTY_BASELINE_GENERATE)?.toBoolean() ?: KontureContextProvider.currentContext.generateBaseline
         set(value) {
-            _generateBaseline = value
+            KontureContextProvider.currentContext = KontureContextProvider.currentContext.copy(generateBaseline = value)
         }
 }

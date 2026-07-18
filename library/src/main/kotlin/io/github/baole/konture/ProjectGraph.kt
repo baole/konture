@@ -103,18 +103,17 @@ data class ProjectGraph(
     }
 
     companion object {
-        private var defaultGraph: ProjectGraph? = null
-
         /**
          * Checks if the default ProjectGraph is initialized.
          */
-        internal fun isDefaultInitialized(): Boolean = defaultGraph != null
+        internal fun isDefaultInitialized(): Boolean = io.github.baole.konture.impl.KontureContextProvider.currentContext.projectGraph != null
 
         /**
          * Sets the default ProjectGraph for the current JVM runtime session.
          */
         internal fun setDefault(graph: ProjectGraph) {
-            defaultGraph = graph
+            io.github.baole.konture.impl.KontureContextProvider.currentContext =
+                io.github.baole.konture.impl.KontureContextProvider.currentContext.copy(projectGraph = graph)
         }
 
         /**
@@ -123,9 +122,10 @@ data class ProjectGraph(
          * @throws IllegalStateException if the default graph has not been initialized.
          */
         internal fun getDefault(): ProjectGraph =
-            defaultGraph ?: throw IllegalStateException(
-                "Default ProjectGraph has not been initialized. " +
-                    "Make sure to apply the plugin or load a graph first.",
-            )
+            io.github.baole.konture.impl.KontureContextProvider.currentContext.projectGraph
+                ?: throw IllegalStateException(
+                    "Default ProjectGraph has not been initialized. " +
+                        "Make sure to apply the plugin or load a graph first.",
+                )
     }
 }

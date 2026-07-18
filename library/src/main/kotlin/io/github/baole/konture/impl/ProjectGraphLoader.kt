@@ -18,10 +18,10 @@ import java.io.InputStream
 import kotlinx.serialization.json.Json
 
 /**
- * Entry point object responsible for loading the layout model from JSON configurations
+ * Entry point class responsible for loading the layout model from JSON configurations
  * and parsing raw Kotlin sources into class definitions using PSI-tree analysis.
  */
-internal object ProjectGraphLoader {
+internal class ProjectGraphLoader(private val context: KontureContext) {
     private val json =
         Json {
             ignoreUnknownKeys = true
@@ -276,6 +276,23 @@ internal object ProjectGraphLoader {
             "Could not find layout.json resource at $resourcePath " +
                 "or at fallback location: ${fallbackFile.absolutePath}",
         )
+    }
+
+    companion object {
+        fun findBuildRoot(): File {
+            return KontureContextProvider.currentContext.projectGraphLoader.findBuildRoot()
+        }
+
+        fun loadFromStream(
+            inputStream: InputStream,
+            depsStreamLoader: () -> InputStream? = { null },
+        ): ProjectGraph {
+            return KontureContextProvider.currentContext.projectGraphLoader.loadFromStream(inputStream, depsStreamLoader)
+        }
+
+        fun loadFromResource(resourcePath: String = "/konture/layout.json"): ProjectGraph {
+            return KontureContextProvider.currentContext.projectGraphLoader.loadFromResource(resourcePath)
+        }
     }
 }
 

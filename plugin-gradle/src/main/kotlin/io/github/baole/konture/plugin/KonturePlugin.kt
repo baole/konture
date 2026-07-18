@@ -7,13 +7,13 @@
 
 package io.github.baole.konture.plugin
 
+import io.github.baole.konture.core.KontureConstants
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.artifacts.ProjectDependency
 import org.gradle.api.artifacts.component.ModuleComponentIdentifier
 import org.jetbrains.kotlin.gradle.dsl.KotlinProjectExtension
 import java.io.File
-import io.github.baole.konture.core.KontureConstants
 
 /**
  * The main Gradle plugin for Konture.
@@ -29,7 +29,7 @@ import io.github.baole.konture.core.KontureConstants
 class KonturePlugin : Plugin<Project> {
     override fun apply(project: Project) {
         val extension = project.extensions.create("konture", KontureExtension::class.java, project)
-  
+
         // Automatically configure consumer layout sharing on subprojects
         if (project != project.rootProject) {
             setupConsumerLayout(project)
@@ -62,9 +62,13 @@ class KonturePlugin : Plugin<Project> {
                 val isRunningGenerateBaseline =
                     project.gradle.startParameter.taskNames.any { name ->
                         name == "generateKontureBaseline" ||
-                            (name.endsWith(":generateKontureBaseline") &&
-                                (project.path == name.substringBeforeLast(":generateKontureBaseline") ||
-                                    project.path.startsWith(name.substringBeforeLast(":generateKontureBaseline") + ":")))
+                            (
+                                name.endsWith(":generateKontureBaseline") &&
+                                    (
+                                        project.path == name.substringBeforeLast(":generateKontureBaseline") ||
+                                            project.path.startsWith(name.substringBeforeLast(":generateKontureBaseline") + ":")
+                                    )
+                            )
                     }
                 testTask.systemProperty(KontureConstants.PROPERTY_BASELINE_GENERATE, (isRecordProperty || isRunningGenerateBaseline).toString())
             }

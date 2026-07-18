@@ -185,12 +185,8 @@ class BaselineTest : RuleBuildersTestBase() {
 
     @Test
     fun `test custom baseline path resolved dynamically from system property`() {
-        val baselinePathField = Konture::class.java.getDeclaredField("_baselinePath")
-        baselinePathField.isAccessible = true
-        val originalBackingValue = baselinePathField.get(Konture)
-        baselinePathField.set(Konture, null)
-
         val originalProp = System.getProperty(Konture.PROPERTY_BASELINE_PATH)
+        val originalProgrammaticValue = Konture.baselinePath
         try {
             System.setProperty(Konture.PROPERTY_BASELINE_PATH, "sys-prop-baseline.json")
             assertEquals("sys-prop-baseline.json", Konture.baselinePath)
@@ -200,18 +196,14 @@ class BaselineTest : RuleBuildersTestBase() {
             } else {
                 System.clearProperty(Konture.PROPERTY_BASELINE_PATH)
             }
-            baselinePathField.set(Konture, originalBackingValue)
+            Konture.baselinePath = originalProgrammaticValue
         }
     }
 
     @Test
     fun `test generate baseline flag resolved dynamically from system property`() {
-        val generateBaselineField = Konture::class.java.getDeclaredField("_generateBaseline")
-        generateBaselineField.isAccessible = true
-        val originalBackingValue = generateBaselineField.get(Konture)
-        generateBaselineField.set(Konture, null)
-
         val originalProp = System.getProperty(Konture.PROPERTY_BASELINE_GENERATE)
+        val originalProgrammaticValue = Konture.generateBaseline
         try {
             System.setProperty(Konture.PROPERTY_BASELINE_GENERATE, "true")
             assertTrue(Konture.generateBaseline)
@@ -224,19 +216,14 @@ class BaselineTest : RuleBuildersTestBase() {
             } else {
                 System.clearProperty(Konture.PROPERTY_BASELINE_GENERATE)
             }
-            generateBaselineField.set(Konture, originalBackingValue)
+            Konture.generateBaseline = originalProgrammaticValue
         }
     }
 
     @Test
     fun `test JVM system properties take precedence over programmatic properties`() {
-        val pathField = Konture::class.java.getDeclaredField("_baselinePath")
-        pathField.isAccessible = true
-        val origPath = pathField.get(Konture)
-
-        val genField = Konture::class.java.getDeclaredField("_generateBaseline")
-        genField.isAccessible = true
-        val origGen = genField.get(Konture)
+        val origPath = Konture.baselinePath
+        val origGen = Konture.generateBaseline
 
         try {
             System.setProperty(Konture.PROPERTY_BASELINE_PATH, "sys-path.json")
@@ -250,8 +237,8 @@ class BaselineTest : RuleBuildersTestBase() {
         } finally {
             System.clearProperty(Konture.PROPERTY_BASELINE_PATH)
             System.clearProperty(Konture.PROPERTY_BASELINE_GENERATE)
-            pathField.set(Konture, origPath)
-            genField.set(Konture, origGen)
+            Konture.baselinePath = origPath
+            Konture.generateBaseline = origGen
         }
     }
 
@@ -260,7 +247,8 @@ class BaselineTest : RuleBuildersTestBase() {
         val file1 = File(tempDir, "baseline-1.json")
         val file2 = File(tempDir, "baseline-2.json")
 
-        file1.writeText("""
+        file1.writeText(
+            """
             {
               "version": 1,
               "testClasses": [
@@ -280,9 +268,11 @@ class BaselineTest : RuleBuildersTestBase() {
                 }
               ]
             }
-        """.trimIndent())
+            """.trimIndent(),
+        )
 
-        file2.writeText("""
+        file2.writeText(
+            """
             {
               "version": 1,
               "testClasses": [
@@ -302,7 +292,8 @@ class BaselineTest : RuleBuildersTestBase() {
                 }
               ]
             }
-        """.trimIndent())
+            """.trimIndent(),
+        )
 
         BaselineManager.resetForTest()
         Konture.generateBaseline = false
@@ -314,7 +305,7 @@ class BaselineTest : RuleBuildersTestBase() {
         assertDoesNotThrow {
             BaselineManager.handleViolations(
                 listOf("Class com.example.Class1 violates rule 1"),
-                "detected"
+                "detected",
             )
         }
 
@@ -325,7 +316,7 @@ class BaselineTest : RuleBuildersTestBase() {
         assertThrows(AssertionError::class.java) {
             BaselineManager.handleViolations(
                 listOf("Class com.example.Class1 violates rule 1"),
-                "detected"
+                "detected",
             )
         }
 
@@ -333,7 +324,7 @@ class BaselineTest : RuleBuildersTestBase() {
         assertDoesNotThrow {
             BaselineManager.handleViolations(
                 listOf("Class com.example.Class2 violates rule 2"),
-                "detected"
+                "detected",
             )
         }
     }
@@ -371,12 +362,13 @@ class BaselineTest : RuleBuildersTestBase() {
         // The baseline matches only when class = BaselineTest and method = "matchingMethod".
         // But our current executing test is "test test-level isolation matching with identical messages".
         // So the same violation must NOT be suppressed because of test-level isolation.
-        val exception = assertThrows(AssertionError::class.java) {
-            BaselineManager.handleViolations(
-                listOf("Class com.example.ClassA depends on com.example.ClassB"),
-                "detected"
-            )
-        }
+        val exception =
+            assertThrows(AssertionError::class.java) {
+                BaselineManager.handleViolations(
+                    listOf("Class com.example.ClassA depends on com.example.ClassB"),
+                    "detected",
+                )
+            }
         assertTrue(exception.message!!.contains("depends on com.example.ClassB (at com.example.ClassA)"))
     }
 
@@ -384,7 +376,7 @@ class BaselineTest : RuleBuildersTestBase() {
         fun runFirst() {
             BaselineManager.handleViolations(
                 listOf("Class com.example.ClassA depends on com.example.ClassB"),
-                "detected"
+                "detected",
             )
         }
     }
@@ -393,7 +385,7 @@ class BaselineTest : RuleBuildersTestBase() {
         fun runSecond() {
             BaselineManager.handleViolations(
                 listOf("Class com.example.ClassC depends on com.example.ClassD"),
-                "detected"
+                "detected",
             )
         }
     }
@@ -432,13 +424,14 @@ class BaselineTest : RuleBuildersTestBase() {
                 fun runOther() {
                     BaselineManager.handleViolations(
                         listOf("Class com.example.ClassA depends on com.example.ClassB"),
-                        "detected"
+                        "detected",
                     )
                 }
             }
-            val exception = assertThrows(AssertionError::class.java) {
-                OtherTest().runOther()
-            }
+            val exception =
+                assertThrows(AssertionError::class.java) {
+                    OtherTest().runOther()
+                }
             assertTrue(exception.message!!.contains("depends on com.example.ClassB"))
         } finally {
             System.clearProperty(Konture.PROPERTY_BASELINE_DIR)
