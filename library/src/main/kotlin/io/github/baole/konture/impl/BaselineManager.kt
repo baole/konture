@@ -20,6 +20,7 @@ internal object BaselineManager {
             prettyPrint = true
             ignoreUnknownKeys = true
             encodeDefaults = true
+            explicitNulls = false
         }
 
     private val baselineDir: File

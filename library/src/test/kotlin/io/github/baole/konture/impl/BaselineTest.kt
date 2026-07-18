@@ -99,6 +99,17 @@ class BaselineTest : RuleBuildersTestBase() {
     }
 
     @Test
+    fun `test recording omits null violation locations from baseline JSON`() {
+        Konture.generateBaseline = true
+        BaselineManager.handleViolations(listOf("A location-less violation"), "detected")
+
+        BaselineManager.writeBaseline()
+
+        val content = File(tempDir, "test-baseline.json").readText()
+        assertFalse(content.contains("\"location\": null"))
+    }
+
+    @Test
     fun `test loading and parsing of structured baseline data`() {
         val baselineFile = File(tempDir, "test-baseline.json")
         val structuredBaseline =
