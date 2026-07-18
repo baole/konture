@@ -72,6 +72,7 @@ internal class ReflectiveAndroidSourceSet(
  * @param name The exact string name of the method to execute.
  * @return The result of the method invocation, or `null` if the method does not exist or fails.
  */
+@Suppress("SwallowedException", "TooGenericExceptionCaught")
 internal fun Any.callMethod(name: String): Any? =
     try {
         this::class.java.getMethod(name).invoke(this)

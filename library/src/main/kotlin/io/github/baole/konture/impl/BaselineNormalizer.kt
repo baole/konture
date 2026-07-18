@@ -10,6 +10,9 @@ import io.github.baole.konture.ProjectGraph
 import java.io.File
 
 internal object BaselineNormalizer {
+    private const val ROOT_PREFIX_LENGTH = 6
+    private const val ROOT_PREFIX_WITH_SEPARATOR_LENGTH = 7
+
     /**
      * Normalizes absolute file paths in violation strings to make them portable.
      */
@@ -81,9 +84,9 @@ internal object BaselineNormalizer {
     ): String {
         var normalized = path.replace("\\", "/")
         if (normalized.startsWith("<root>/")) {
-            normalized = normalized.substring(7)
+            normalized = normalized.substring(ROOT_PREFIX_WITH_SEPARATOR_LENGTH)
         } else if (normalized.startsWith("<root>")) {
-            normalized = normalized.substring(6)
+            normalized = normalized.substring(ROOT_PREFIX_LENGTH)
         }
         if (buildRoot != null) {
             val rootPath = buildRoot.canonicalPath.replace("\\", "/")
@@ -97,6 +100,7 @@ internal object BaselineNormalizer {
         return normalized
     }
 
+    @Suppress("NestedBlockDepth", "TooGenericExceptionCaught", "SwallowedException")
     fun findModuleForViolation(
         violation: FlatBaselineViolation,
         graph: ProjectGraph,

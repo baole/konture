@@ -13,7 +13,7 @@ internal class KontureContext(
     val projectGraph: ProjectGraph? = null,
     val baselineManager: BaselineManager = BaselineManager(),
 ) {
-    val projectGraphLoader: ProjectGraphLoader = ProjectGraphLoader(this)
+    val projectGraphLoader: ProjectGraphLoader = ProjectGraphLoader()
 
     fun copy(
         baselinePath: String = this.baselinePath,
@@ -38,6 +38,7 @@ internal object KontureContextProvider {
             threadLocalContext.set(value)
         }
 
+    @Suppress("TooGenericExceptionCaught", "SwallowedException")
     fun reset() {
         try {
             threadLocalContext.get()?.baselineManager?.resetForTest()

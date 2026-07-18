@@ -10,6 +10,7 @@ import io.github.baole.konture.core.LogLevel
 import java.io.File
 import kotlinx.serialization.json.Json
 
+@Suppress("NestedBlockDepth", "TooGenericExceptionCaught")
 internal object BaselineSerializer {
     val json =
         Json {

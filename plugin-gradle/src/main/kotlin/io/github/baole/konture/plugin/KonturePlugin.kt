@@ -27,6 +27,7 @@ import java.io.File
  *    allow dedicated test modules to consume the generated layout schema safely in isolated projects.
  */
 class KonturePlugin : Plugin<Project> {
+    @Suppress("CyclomaticComplexMethod")
     override fun apply(project: Project) {
         val extension = project.extensions.create("konture", KontureExtension::class.java, project)
 
@@ -35,17 +36,16 @@ class KonturePlugin : Plugin<Project> {
             setupConsumerLayout(project)
         }
 
-        val generateBaselineTask =
-            project.tasks.register("generateKontureBaseline") { task ->
-                task.group = "verification"
-                task.description = "Generates/records the architecture baseline for this module by running unit tests."
-                task.dependsOn(project.tasks.withType(org.gradle.api.tasks.testing.Test::class.java))
-                if (project == project.rootProject) {
-                    project.subprojects.forEach { subproject ->
-                        task.dependsOn(subproject.tasks.matching { t -> t.name == "generateKontureBaseline" })
-                    }
+        project.tasks.register("generateKontureBaseline") { task ->
+            task.group = "verification"
+            task.description = "Generates/records the architecture baseline for this module by running unit tests."
+            task.dependsOn(project.tasks.withType(org.gradle.api.tasks.testing.Test::class.java))
+            if (project == project.rootProject) {
+                project.subprojects.forEach { subproject ->
+                    task.dependsOn(subproject.tasks.matching { t -> t.name == "generateKontureBaseline" })
                 }
             }
+        }
 
         project.tasks.withType(org.gradle.api.tasks.testing.Test::class.java).configureEach { testTask ->
             val cliBaselinePath = project.providers.systemProperty(KontureConstants.PROPERTY_BASELINE_PATH).orNull
@@ -58,7 +58,11 @@ class KonturePlugin : Plugin<Project> {
                 testTask.systemProperty(KontureConstants.PROPERTY_BASELINE_PATH, extension.baselinePath)
             }
             testTask.doFirst {
-                val isRecordProperty = project.providers.systemProperty(KontureConstants.PROPERTY_BASELINE_GENERATE).orNull?.toBoolean() ?: false
+                val isRecordProperty =
+                    project.providers
+                        .systemProperty(KontureConstants.PROPERTY_BASELINE_GENERATE)
+                        .orNull
+                        ?.toBoolean() ?: false
                 val isRunningGenerateBaseline =
                     project.gradle.startParameter.taskNames.any { name ->
                         name == "generateKontureBaseline" ||
@@ -175,7 +179,7 @@ class KonturePlugin : Plugin<Project> {
                                 config.dependencies.mapNotNull { dep ->
                                     val g = dep.group
                                     val n = dep.name
-                                    if (g != null && n != null) "$g:$n" else null
+                                    if (g != null) "$g:$n" else null
                                 }
                             declaredMap[key] = declared
 
@@ -459,7 +463,9 @@ class KonturePlugin : Plugin<Project> {
             }
             val buildDir =
                 try {
-                    sub.layout.buildDirectory.get().asFile.canonicalFile
+                    sub.layout.buildDirectory
+                        .get()
+                        .asFile.canonicalFile
                 } catch (e: Exception) {
                     null
                 }

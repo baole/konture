@@ -6,40 +6,53 @@
 package io.github.baole.konture.impl
 
 internal object TestLocationFinder {
-    fun findTestLocation(): StackTraceElement? {
-        val stackTrace = Thread.currentThread().stackTrace
-        for (element in stackTrace) {
-            val className = element.className
-            if (className == "java.lang.Thread" || className == "java.lang.Throwable") continue
-            if (className == "io.github.baole.konture.impl.TestLocationFinder" ||
-                className == "io.github.baole.konture.impl.BaselineManager" ||
-                className == "io.github.baole.konture.impl.BaselineNormalizer" ||
-                className == "io.github.baole.konture.impl.BaselineSerializer"
-            ) {
-                continue
-            }
-            if (className.startsWith("org.junit.") ||
-                className.startsWith("junit.") ||
-                className.startsWith("org.testng.") ||
-                className.startsWith("org.gradle.") ||
-                className.startsWith("org.apache.maven.") ||
-                className.startsWith("sun.reflect.") ||
-                className.startsWith("java.lang.reflect.")
-            ) {
-                continue
-            }
-            if (element.methodName.contains("$")) continue
-            if (className.contains("Test")) return element
-            val pkg = TestLocationFinder::class.java.`package`?.name ?: "io.github.baole.konture.impl"
-            val rootPkg = pkg.substringBefore(".impl").substringBefore(".core")
-            if (className.startsWith("$rootPkg.") &&
-                !className.startsWith("$rootPkg.sample.") &&
-                !className.startsWith("$rootPkg.test.")
-            ) {
-                continue
-            }
-            return element
-        }
-        return null
+    private const val FALLBACK_PACKAGE = "io.github.baole.konture.impl"
+
+    private val ignoredClasses =
+        setOf(
+            "java.lang.Thread",
+            "java.lang.Throwable",
+            "io.github.baole.konture.impl.TestLocationFinder",
+            "io.github.baole.konture.impl.BaselineManager",
+            "io.github.baole.konture.impl.BaselineNormalizer",
+            "io.github.baole.konture.impl.BaselineSerializer",
+        )
+
+    private val frameworkPackages =
+        listOf(
+            "org.junit.",
+            "junit.",
+            "org.testng.",
+            "org.gradle.",
+            "org.apache.maven.",
+            "sun.reflect.",
+            "java.lang.reflect.",
+        )
+
+    private val rootPackage =
+        (TestLocationFinder::class.java.`package`?.name ?: FALLBACK_PACKAGE)
+            .substringBefore(".impl")
+            .substringBefore(".core")
+
+    fun findTestLocation(): StackTraceElement? = Thread.currentThread().stackTrace.firstOrNull(::isTestLocation)
+
+    private fun isTestLocation(element: StackTraceElement): Boolean {
+        val className = element.className
+        return !isIgnored(className, element.methodName) &&
+            (className.contains("Test") || !isKontureImplementation(className))
+    }
+
+    private fun isIgnored(
+        className: String,
+        methodName: String,
+    ): Boolean =
+        className in ignoredClasses ||
+            frameworkPackages.any(className::startsWith) ||
+            methodName.contains("$")
+
+    private fun isKontureImplementation(className: String): Boolean {
+        if (!className.startsWith("$rootPackage.")) return false
+        return !className.startsWith("$rootPackage.sample.") &&
+            !className.startsWith("$rootPackage.test.")
     }
 }

@@ -13,7 +13,7 @@ import io.github.baole.konture.core.LogLevel
 import java.io.File
 import java.util.concurrent.ConcurrentHashMap
 
-internal class BaselineManager() {
+internal class BaselineManager {
     private val context: KontureContext
         get() = KontureContextProvider.currentContext
 
@@ -29,6 +29,7 @@ internal class BaselineManager() {
     @Volatile
     private var isShutdownRunning = false
 
+    @Suppress("TooGenericExceptionCaught", "SwallowedException")
     private fun captureContextSnapshot() {
         if (isShutdownRunning) return
         try {
@@ -41,6 +42,7 @@ internal class BaselineManager() {
         }
     }
 
+    @get:Suppress("TooGenericExceptionCaught", "SwallowedException")
     val generateBaseline: Boolean
         get() {
             val sysProp = System.getProperty(Konture.PROPERTY_BASELINE_GENERATE)?.toBoolean()
@@ -61,6 +63,7 @@ internal class BaselineManager() {
             return capturedGenerateBaseline ?: ctxVal ?: false
         }
 
+    @get:Suppress("TooGenericExceptionCaught", "SwallowedException")
     val baselinePath: String
         get() {
             val sysProp = System.getProperty(Konture.PROPERTY_BASELINE_PATH)
@@ -81,6 +84,7 @@ internal class BaselineManager() {
             return capturedBaselinePath ?: ctxVal ?: "konture-baseline.json"
         }
 
+    @get:Suppress("TooGenericExceptionCaught", "SwallowedException")
     val projectGraph: ProjectGraph?
         get() {
             val ctxVal =
@@ -102,6 +106,7 @@ internal class BaselineManager() {
             return File(path).canonicalFile
         }
 
+    @get:Suppress("TooGenericExceptionCaught", "SwallowedException")
     val buildRoot: File? by lazy {
         try {
             context.projectGraphLoader.findBuildRoot()
@@ -121,24 +126,26 @@ internal class BaselineManager() {
             }
         }
 
-    private var loadedBaselinePath: String? = null
-    private var loadedBaselineDirProp: String? = null
-    private var loadedProjectGraph: ProjectGraph? = null
+    private data class BaselineCacheKey(
+        val path: String,
+        val directoryProperty: String?,
+        val projectGraph: ProjectGraph?,
+    )
+
+    private var loadedCacheKey: BaselineCacheKey? = null
     private var loadedViolations: Set<FlatBaselineViolation>? = null
 
     // Existing baseline violations loaded from files (per-module if project graph is available, else fallback)
+    @get:Suppress("TooGenericExceptionCaught", "SwallowedException")
     val existingViolations: Set<FlatBaselineViolation>
         get() {
             val currentPath = baselinePath
             val currentDirProp = System.getProperty(Konture.PROPERTY_BASELINE_DIR)
             val currentGraph = projectGraph
+            val cacheKey = BaselineCacheKey(currentPath, currentDirProp, currentGraph)
 
             val loaded = loadedViolations
-            if (loaded != null &&
-                currentPath == loadedBaselinePath &&
-                currentDirProp == loadedBaselineDirProp &&
-                currentGraph == loadedProjectGraph
-            ) {
+            if (loaded != null && cacheKey == loadedCacheKey) {
                 return loaded
             }
 
@@ -189,20 +196,17 @@ internal class BaselineManager() {
                 }
             }
 
-            loadedBaselinePath = currentPath
-            loadedBaselineDirProp = currentDirProp
-            loadedProjectGraph = currentGraph
+            loadedCacheKey = cacheKey
             loadedViolations = violations
             return violations
         }
 
     private var shutdownHook: Thread? = null
 
+    @Suppress("TooGenericExceptionCaught", "SwallowedException")
     fun resetForTest() {
         loadedViolations = null
-        loadedBaselinePath = null
-        loadedBaselineDirProp = null
-        loadedProjectGraph = null
+        loadedCacheKey = null
         capturedBaselinePath = null
         capturedGenerateBaseline = null
         capturedProjectGraph = null
@@ -221,6 +225,11 @@ internal class BaselineManager() {
     val recordedViolations = ConcurrentHashMap.newKeySet<FlatBaselineViolation>()
 
     init {
+        registerShutdownHook()
+    }
+
+    @Suppress("TooGenericExceptionCaught")
+    private fun registerShutdownHook() {
         // Register shutdown hook to write baseline when JVM exits (if in recording mode)
         try {
             val hook =
@@ -315,6 +324,7 @@ internal class BaselineManager() {
     /**
      * Writes the combined baseline (existing + newly recorded) to file.
      */
+    @Suppress("NestedBlockDepth", "TooGenericExceptionCaught", "SwallowedException")
     internal fun writeBaseline() {
         val graph = projectGraph
         val root = buildRoot

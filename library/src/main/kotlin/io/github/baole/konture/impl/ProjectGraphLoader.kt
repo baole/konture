@@ -21,7 +21,7 @@ import kotlinx.serialization.json.Json
  * Entry point class responsible for loading the layout model from JSON configurations
  * and parsing raw Kotlin sources into class definitions using PSI-tree analysis.
  */
-internal class ProjectGraphLoader(private val context: KontureContext) {
+internal class ProjectGraphLoader {
     private val json =
         Json {
             ignoreUnknownKeys = true
@@ -32,30 +32,17 @@ internal class ProjectGraphLoader(private val context: KontureContext) {
         val userDir = File(System.getProperty("user.dir")).canonicalFile
 
         // 1. Search for closest Gradle settings file walking up
-        var current = userDir
-        var gradleRoot: File? = null
-        while (true) {
-            val settingsGradle = File(current, "settings.gradle")
-            val settingsGradleKts = File(current, "settings.gradle.kts")
-            if (settingsGradle.exists() || settingsGradleKts.exists()) {
-                gradleRoot = current
-                break
+        val ancestorDirectories = generateSequence(userDir) { it.parentFile }
+        val gradleRoot =
+            ancestorDirectories.firstOrNull { directory ->
+                File(directory, "settings.gradle").exists() || File(directory, "settings.gradle.kts").exists()
             }
-            val parent = current.parentFile ?: break
-            current = parent
-        }
 
         // 2. Search for closest Maven pom.xml walking up to find the topmost pom.xml
-        current = userDir
-        var topmostPomDir: File? = null
-        while (true) {
-            val pomXml = File(current, "pom.xml")
-            if (pomXml.exists()) {
-                topmostPomDir = current
-            }
-            val parent = current.parentFile ?: break
-            current = parent
-        }
+        val topmostPomDir =
+            generateSequence(userDir) { it.parentFile }
+                .filter { directory -> File(directory, "pom.xml").exists() }
+                .lastOrNull()
 
         // 3. Compare and pick the deepest (most specific) root
         if (gradleRoot != null && topmostPomDir != null) {
