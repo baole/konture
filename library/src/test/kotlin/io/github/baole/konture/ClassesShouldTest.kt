@@ -772,42 +772,45 @@ class ClassesShouldTest : RuleBuildersTestBase() {
         assertEquals(1, vAss6.size)
 
         // Transitive assignability checks
-        val grandParent = ClassDeclaration(
-            name = "GrandParent",
-            fqName = "com.example.GrandParent",
-            packageName = "com.example",
-            isInterface = false,
-            isAbstract = false,
-            annotations = emptyList(),
-            imports = emptyList(),
-            referencedTypes = emptySet(),
-            filePath = "/src/GrandParent.kt",
-            supertypes = emptyList(),
-        )
-        val parent = ClassDeclaration(
-            name = "Parent",
-            fqName = "com.example.Parent",
-            packageName = "com.example",
-            isInterface = false,
-            isAbstract = false,
-            annotations = emptyList(),
-            imports = emptyList(),
-            referencedTypes = emptySet(),
-            filePath = "/src/Parent.kt",
-            supertypes = listOf("GrandParent"),
-        )
-        val child = ClassDeclaration(
-            name = "Child",
-            fqName = "com.example.Child",
-            packageName = "com.example",
-            isInterface = false,
-            isAbstract = false,
-            annotations = emptyList(),
-            imports = emptyList(),
-            referencedTypes = emptySet(),
-            filePath = "/src/Child.kt",
-            supertypes = listOf("Parent"),
-        )
+        val grandParent =
+            ClassDeclaration(
+                name = "GrandParent",
+                fqName = "com.example.GrandParent",
+                packageName = "com.example",
+                isInterface = false,
+                isAbstract = false,
+                annotations = emptyList(),
+                imports = emptyList(),
+                referencedTypes = emptySet(),
+                filePath = "/src/GrandParent.kt",
+                supertypes = emptyList(),
+            )
+        val parent =
+            ClassDeclaration(
+                name = "Parent",
+                fqName = "com.example.Parent",
+                packageName = "com.example",
+                isInterface = false,
+                isAbstract = false,
+                annotations = emptyList(),
+                imports = emptyList(),
+                referencedTypes = emptySet(),
+                filePath = "/src/Parent.kt",
+                supertypes = listOf("GrandParent"),
+            )
+        val child =
+            ClassDeclaration(
+                name = "Child",
+                fqName = "com.example.Child",
+                packageName = "com.example",
+                isInterface = false,
+                isAbstract = false,
+                annotations = emptyList(),
+                imports = emptyList(),
+                referencedTypes = emptySet(),
+                filePath = "/src/Child.kt",
+                supertypes = listOf("Parent"),
+            )
         val allHierarchy = listOf(grandParent, parent, child)
         val assertAssTransitive = builder().should().beAssignableTo("GrandParent").getShouldAssertion()!!
         val vAssTransitive = mutableListOf<String>()
@@ -885,6 +888,47 @@ class ClassesShouldTest : RuleBuildersTestBase() {
         val vDep2 = mutableListOf<String>()
         assertDepFail(dependentClass, listOf(dependentClass, accessorClass), vDep2)
         assertEquals(1, vDep2.size)
+
+        // Standard library exclusion tests (should pass because java, kotlin, and javax are excluded)
+        val classWithStd =
+            ClassDeclaration(
+                name = "ClassWithStd",
+                fqName = "com.test.ClassWithStd",
+                packageName = "com.test",
+                isInterface = false,
+                isAbstract = false,
+                annotations = emptyList(),
+                imports = listOf("java.util.UUID", "kotlin.collections.List", "javax.inject.Inject"),
+                referencedTypes = emptySet(),
+                filePath = "/src/ClassWithStd.kt",
+            )
+        val assertDepStd = builder().should().onlyDependOnClassesInAnyPackage("com.test").getShouldAssertion()!!
+        val vDepStd = mutableListOf<String>()
+        assertDepStd(classWithStd, listOf(classWithStd), vDepStd)
+        assertTrue(vDepStd.isEmpty())
+
+        // External library checking (should fail because org.json is not allowed by com.test pattern)
+        val classWithExt =
+            ClassDeclaration(
+                name = "ClassWithExt",
+                fqName = "com.test.ClassWithExt",
+                packageName = "com.test",
+                isInterface = false,
+                isAbstract = false,
+                annotations = emptyList(),
+                imports = listOf("org.json.JSONObject"),
+                referencedTypes = emptySet(),
+                filePath = "/src/ClassWithExt.kt",
+            )
+        val vDepExt = mutableListOf<String>()
+        assertDepStd(classWithExt, listOf(classWithExt), vDepExt)
+        assertEquals(1, vDepExt.size)
+
+        // notDependOnClassesInAnyPackage with external library (should fail because org.json matches forbidden pattern org.json.. or org.*)
+        val assertNotDepExt = builder().should().notDependOnClassesInAnyPackage("org.json..").getShouldAssertion()!!
+        val vNotDepExt = mutableListOf<String>()
+        assertNotDepExt(classWithExt, listOf(classWithExt), vNotDepExt)
+        assertEquals(1, vNotDepExt.size)
 
         // allFunctions
         val func1 =

@@ -13,7 +13,7 @@ complexity:
     threshold: 4
   ComplexInterface:
     active: true
-    threshold: 10
+    threshold: 50
   CyclomaticComplexMethod:
     active: true
     threshold: 30

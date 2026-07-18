@@ -110,7 +110,7 @@ Konture provides robust pre-built assertions to enforce software layout policies
 Kotlin interfaces are abstract by definition. In Konture, both abstract classes and interfaces are evaluated correctly under abstract rules.
 ```kotlin
 // Matches both interfaces and abstract classes
-classes()
+Konture.classes()
     .that().areAbstract()
     .should().bePublic()
     .check()
@@ -119,7 +119,7 @@ classes()
 ### 2. Inline & Value Classes
 Modern Kotlin value classes (`value class` with `@JvmInline`) parse with `Modifier.VALUE` instead of the legacy `Modifier.INLINE`, but they represent the same architectural concept. Konture's inline rules automatically evaluate both transparently.
 ```kotlin
-classes()
+Konture.classes()
     .that().haveNameEndingWith("Id")
     .should().beInline()
     .check()
@@ -128,7 +128,7 @@ classes()
 ### 3. Transitive Assignability (Supertypes)
 Assertions like `beAssignableTo()` evaluate recursive supertype trees. It successfully matches transitive parent classes or interfaces, no matter how deep the inheritance hierarchy is.
 ```kotlin
-classes()
+Konture.classes()
     .that().haveNameEndingWith("Service")
     .should().beAssignableTo("com.acme.core.BaseService")
     .check()

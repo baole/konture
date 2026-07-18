@@ -210,4 +210,3 @@ internal fun ClassDeclaration.collectDependencyPackages(allClasses: List<ClassDe
 
     return packages
 }
-

@@ -140,7 +140,6 @@ fun List<ClassDeclaration>.sealedClasses(): List<ClassDeclaration> = withModifie
 fun List<ClassDeclaration>.inlineClasses(): List<ClassDeclaration> =
     filter { it.modifiers.contains(Modifier.INLINE) || it.modifiers.contains(Modifier.VALUE) }
 
-
 /**
  * Filters the list of class declarations to include only those residing in packages matching the specified pattern.
  * Supports '..' segment wildcards.
@@ -555,9 +554,10 @@ fun List<ClassDeclaration>.assertOnlyDependOnClassesInAnyPackage(
     val standardExclusions = listOf("java", "javax", "kotlin")
 
     for (cls in this) {
-        val depPackages = cls.collectDependencyPackages(allClasses).filter { depPkg ->
-            depPkg != cls.packageName && standardExclusions.none { depPkg == it || depPkg.startsWith("$it.") }
-        }
+        val depPackages =
+            cls.collectDependencyPackages(allClasses).filter { depPkg ->
+                depPkg != cls.packageName && standardExclusions.none { depPkg == it || depPkg.startsWith("$it.") }
+            }
         for (depPkg in depPackages) {
             val isAllowed =
                 packagePatterns.any { pattern ->

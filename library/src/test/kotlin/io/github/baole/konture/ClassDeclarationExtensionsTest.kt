@@ -182,42 +182,45 @@ class ClassDeclarationExtensionsTest {
 
     @Test
     fun `test ClassDeclaration isAssignableTo transitively`() {
-        val grandParent = ClassDeclaration(
-            name = "GrandParent",
-            fqName = "com.example.GrandParent",
-            packageName = "com.example",
-            isInterface = false,
-            isAbstract = false,
-            annotations = emptyList(),
-            imports = emptyList(),
-            referencedTypes = emptySet(),
-            filePath = "/src/GrandParent.kt",
-            supertypes = emptyList(),
-        )
-        val parent = ClassDeclaration(
-            name = "Parent",
-            fqName = "com.example.Parent",
-            packageName = "com.example",
-            isInterface = false,
-            isAbstract = false,
-            annotations = emptyList(),
-            imports = emptyList(),
-            referencedTypes = emptySet(),
-            filePath = "/src/Parent.kt",
-            supertypes = listOf("GrandParent"),
-        )
-        val child = ClassDeclaration(
-            name = "Child",
-            fqName = "com.example.Child",
-            packageName = "com.example",
-            isInterface = false,
-            isAbstract = false,
-            annotations = emptyList(),
-            imports = emptyList(),
-            referencedTypes = emptySet(),
-            filePath = "/src/Child.kt",
-            supertypes = listOf("Parent"),
-        )
+        val grandParent =
+            ClassDeclaration(
+                name = "GrandParent",
+                fqName = "com.example.GrandParent",
+                packageName = "com.example",
+                isInterface = false,
+                isAbstract = false,
+                annotations = emptyList(),
+                imports = emptyList(),
+                referencedTypes = emptySet(),
+                filePath = "/src/GrandParent.kt",
+                supertypes = emptyList(),
+            )
+        val parent =
+            ClassDeclaration(
+                name = "Parent",
+                fqName = "com.example.Parent",
+                packageName = "com.example",
+                isInterface = false,
+                isAbstract = false,
+                annotations = emptyList(),
+                imports = emptyList(),
+                referencedTypes = emptySet(),
+                filePath = "/src/Parent.kt",
+                supertypes = listOf("GrandParent"),
+            )
+        val child =
+            ClassDeclaration(
+                name = "Child",
+                fqName = "com.example.Child",
+                packageName = "com.example",
+                isInterface = false,
+                isAbstract = false,
+                annotations = emptyList(),
+                imports = emptyList(),
+                referencedTypes = emptySet(),
+                filePath = "/src/Child.kt",
+                supertypes = listOf("Parent"),
+            )
         val allClasses = listOf(grandParent, parent, child)
 
         assertTrue(child.isAssignableTo("Parent", allClasses))
@@ -228,29 +231,31 @@ class ClassDeclarationExtensionsTest {
 
     @Test
     fun `test ClassDeclaration collectDependencyPackages`() {
-        val target = ClassDeclaration(
-            name = "Target",
-            fqName = "com.example.Target",
-            packageName = "com.example",
-            isInterface = false,
-            isAbstract = false,
-            annotations = emptyList(),
-            imports = emptyList(),
-            referencedTypes = emptySet(),
-            filePath = "/src/Target.kt",
-        )
-        val clazz = ClassDeclaration(
-            name = "MyClass",
-            fqName = "org.test.MyClass",
-            packageName = "org.test",
-            isInterface = false,
-            isAbstract = false,
-            imports = listOf("org.springframework.stereotype.Service", "com.jackson.*"),
-            supertypes = listOf("com.example.Target"),
-            annotations = listOf(AnnotationDeclaration("Service", "org.springframework.stereotype.Service")),
-            referencedTypes = setOf("com.other.Helper"),
-            filePath = "/src/MyClass.kt",
-        )
+        val target =
+            ClassDeclaration(
+                name = "Target",
+                fqName = "com.example.Target",
+                packageName = "com.example",
+                isInterface = false,
+                isAbstract = false,
+                annotations = emptyList(),
+                imports = emptyList(),
+                referencedTypes = emptySet(),
+                filePath = "/src/Target.kt",
+            )
+        val clazz =
+            ClassDeclaration(
+                name = "MyClass",
+                fqName = "org.test.MyClass",
+                packageName = "org.test",
+                isInterface = false,
+                isAbstract = false,
+                imports = listOf("org.springframework.stereotype.Service", "com.jackson.*"),
+                supertypes = listOf("com.example.Target"),
+                annotations = listOf(AnnotationDeclaration("Service", "org.springframework.stereotype.Service")),
+                referencedTypes = setOf("com.other.Helper"),
+                filePath = "/src/MyClass.kt",
+            )
 
         val dependencyPackages = clazz.collectDependencyPackages(listOf(target))
 
