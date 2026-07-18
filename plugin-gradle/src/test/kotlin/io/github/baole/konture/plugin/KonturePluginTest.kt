@@ -5,6 +5,7 @@
 
 package io.github.baole.konture.plugin
 
+import io.github.baole.konture.core.KontureConstants
 import org.gradle.testfixtures.ProjectBuilder
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
@@ -586,5 +587,112 @@ class KonturePluginTest {
                 jsonText,
             )
         assertNotNull(externalDeps)
+    }
+
+    @Test
+    fun `plugin extension configures baseline path`() {
+        val project = ProjectBuilder.builder().build()
+        project.plugins.apply("io.github.baole.konture")
+
+        val extension = project.extensions.getByName("konture") as KontureExtension
+        extension.baselinePath.set("custom-baseline.json")
+
+        assertEquals("custom-baseline.json", extension.baselinePath.get())
+    }
+
+    @Test
+    fun `plugin configures test tasks with baseline path`() {
+        val project = ProjectBuilder.builder().build()
+        project.plugins.apply("java") // Registers Test tasks
+        project.plugins.apply("io.github.baole.konture")
+
+        val extension = project.extensions.getByName("konture") as KontureExtension
+        extension.baselinePath.set("custom-baseline-test.json")
+
+        val testTask = project.tasks.getByName("test") as org.gradle.api.tasks.testing.Test
+        val baselinePathProp = testTask.systemProperties["konture.baseline.path"]
+        val resolvedValue =
+            when (baselinePathProp) {
+                is org.gradle.api.provider.Provider<*> -> baselinePathProp.get()
+                else -> baselinePathProp
+            }
+        assertEquals("custom-baseline-test.json", resolvedValue)
+    }
+
+    @Test
+    fun `root generateKontureBaseline task aggregates subprojects`() {
+        val rootProject = ProjectBuilder.builder().withName("root").build()
+        val childProject = ProjectBuilder.builder().withName("child").withParent(rootProject).build()
+
+        rootProject.plugins.apply("io.github.baole.konture")
+        childProject.plugins.apply("io.github.baole.konture")
+
+        val rootTask = rootProject.tasks.getByName("generateKontureBaseline")
+        val childTask = childProject.tasks.getByName("generateKontureBaseline")
+
+        val resolvedDeps = rootTask.taskDependencies.getDependencies(rootTask)
+        assertTrue(resolvedDeps.contains(childTask))
+    }
+
+    @Test
+    fun `cli system property override wins over Gradle DSL extension`() {
+        val project = ProjectBuilder.builder().build()
+        project.plugins.apply("java") // Registers Test tasks
+
+        System.setProperty(KontureConstants.PROPERTY_BASELINE_PATH, "cli-override-baseline.json")
+        System.setProperty(KontureConstants.PROPERTY_BASELINE_DIR, "/cli-override-dir")
+        try {
+            project.plugins.apply("io.github.baole.konture")
+
+            val extension = project.extensions.getByName("konture") as KontureExtension
+            extension.baselinePath.set("dsl-baseline.json")
+
+            val testTask = project.tasks.getByName("test") as org.gradle.api.tasks.testing.Test
+
+            // Check baseline path
+            val baselinePathProp = testTask.systemProperties[KontureConstants.PROPERTY_BASELINE_PATH]
+            val resolvedPath =
+                when (baselinePathProp) {
+                    is org.gradle.api.provider.Provider<*> -> baselinePathProp.get()
+                    else -> baselinePathProp
+                }
+            assertEquals("cli-override-baseline.json", resolvedPath)
+
+            // Check baseline dir
+            val baselineDirProp = testTask.systemProperties[KontureConstants.PROPERTY_BASELINE_DIR]
+            val resolvedDir =
+                when (baselineDirProp) {
+                    is org.gradle.api.provider.Provider<*> -> baselineDirProp.get()
+                    else -> baselineDirProp
+                }
+            assertEquals("/cli-override-dir", resolvedDir)
+        } finally {
+            System.clearProperty(KontureConstants.PROPERTY_BASELINE_PATH)
+            System.clearProperty(KontureConstants.PROPERTY_BASELINE_DIR)
+        }
+    }
+
+    @Test
+    fun `qualified root invocation enables generate mode in subproject test task`() {
+        val rootProject = ProjectBuilder.builder().withName("root").build()
+        val childProject = ProjectBuilder.builder().withName("child").withParent(rootProject).build()
+
+        rootProject.plugins.apply("io.github.baole.konture")
+        childProject.plugins.apply("java") // Registers Test tasks
+        childProject.plugins.apply("io.github.baole.konture")
+
+        rootProject.gradle.startParameter.setTaskNames(listOf(":generateKontureBaseline"))
+
+        val childTestTask = childProject.tasks.getByName("test") as org.gradle.api.tasks.testing.Test
+        val doFirstAction = childTestTask.actions.first()
+        doFirstAction.execute(childTestTask)
+
+        val generateProp = childTestTask.systemProperties[KontureConstants.PROPERTY_BASELINE_GENERATE]
+        val resolvedValue =
+            when (generateProp) {
+                is org.gradle.api.provider.Provider<*> -> generateProp.get()
+                else -> generateProp
+            }
+        assertEquals("true", resolvedValue.toString())
     }
 }

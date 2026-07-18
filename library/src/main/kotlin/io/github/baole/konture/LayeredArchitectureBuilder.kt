@@ -5,6 +5,7 @@
 
 package io.github.baole.konture
 
+import io.github.baole.konture.impl.BaselineManager
 import io.github.baole.konture.impl.LayerConstraint
 import io.github.baole.konture.impl.LayerDefinition
 import io.github.baole.konture.impl.PatternMatchers
@@ -159,7 +160,7 @@ class LayeredArchitectureBuilder(
                                     if (!allowedSet.contains(otherLayer.name)) {
                                         if (sourceCls.dependsOn(otherCls)) {
                                             violations.add(
-                                                "Layer '$name' may only access layers [${allowedLayerNames.joinToString()}], but class ${sourceCls.fqName} depends on ${otherCls.fqName} in layer '${otherLayer.name}'",
+                                                "Layer '$name' may only access layers [${allowedLayerNames.joinToString()}], but class ${sourceCls.fqName} depends on ${otherCls.fqName} in layer '${otherLayer.name}' (at ${sourceCls.filePath})",
                                             )
                                         }
                                     }
@@ -205,7 +206,7 @@ class LayeredArchitectureBuilder(
                                     if (forbiddenSet.contains(otherLayer.name)) {
                                         if (sourceCls.dependsOn(otherCls)) {
                                             violations.add(
-                                                "Layer '$name' may not access layers [${forbiddenLayerNames.joinToString()}], but class ${sourceCls.fqName} depends on ${otherCls.fqName} in layer '${otherLayer.name}'",
+                                                "Layer '$name' may not access layers [${forbiddenLayerNames.joinToString()}], but class ${sourceCls.fqName} depends on ${otherCls.fqName} in layer '${otherLayer.name}' (at ${sourceCls.filePath})",
                                             )
                                         }
                                     }
@@ -251,7 +252,7 @@ class LayeredArchitectureBuilder(
                                     if (forbiddenSet.contains(otherLayer.name)) {
                                         if (otherCls.dependsOn(targetCls)) {
                                             violations.add(
-                                                "Layer '$name' may not be accessed by layers [${forbiddenLayerNames.joinToString()}], but class ${otherCls.fqName} in layer '${otherLayer.name}' depends on ${targetCls.fqName}",
+                                                "Layer '$name' may not be accessed by layers [${forbiddenLayerNames.joinToString()}], but class ${otherCls.fqName} in layer '${otherLayer.name}' depends on ${targetCls.fqName} (at ${otherCls.filePath})",
                                             )
                                         }
                                     }
@@ -280,7 +281,10 @@ class LayeredArchitectureBuilder(
         }
 
         if (violations.isNotEmpty()) {
-            throw AssertionError("Layered architecture violation(s) detected:\n" + violations.joinToString("\n"))
+            BaselineManager.handleViolations(
+                violations,
+                "Layered architecture violation(s) detected:",
+            )
         }
     }
 }

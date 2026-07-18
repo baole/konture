@@ -18,28 +18,42 @@ import java.io.InputStream
 import kotlinx.serialization.json.Json
 
 /**
- * Entry point object responsible for loading the layout model from JSON configurations
+ * Entry point class responsible for loading the layout model from JSON configurations
  * and parsing raw Kotlin sources into class definitions using PSI-tree analysis.
  */
-internal object ProjectGraphLoader {
+internal class ProjectGraphLoader {
     private val json =
         Json {
             ignoreUnknownKeys = true
             prettyPrint = true
         }
 
-    private fun findBuildRoot(): File {
-        var current = File(System.getProperty("user.dir")).canonicalFile
-        while (true) {
-            val settingsGradle = File(current, "settings.gradle")
-            val settingsGradleKts = File(current, "settings.gradle.kts")
-            if (settingsGradle.exists() || settingsGradleKts.exists()) {
-                return current
+    internal fun findBuildRoot(): File {
+        val userDir = File(System.getProperty("user.dir")).canonicalFile
+
+        // 1. Search for closest Gradle settings file walking up
+        val ancestorDirectories = generateSequence(userDir) { it.parentFile }
+        val gradleRoot =
+            ancestorDirectories.firstOrNull { directory ->
+                File(directory, "settings.gradle").exists() || File(directory, "settings.gradle.kts").exists()
             }
-            val parent = current.parentFile ?: break
-            current = parent
+
+        // 2. Search for closest Maven pom.xml walking up to find the topmost pom.xml
+        val topmostPomDir =
+            generateSequence(userDir) { it.parentFile }
+                .filter { directory -> File(directory, "pom.xml").exists() }
+                .lastOrNull()
+
+        // 3. Compare and pick the deepest (most specific) root
+        if (gradleRoot != null && topmostPomDir != null) {
+            return if (gradleRoot.absolutePath.length >= topmostPomDir.absolutePath.length) {
+                gradleRoot
+            } else {
+                topmostPomDir
+            }
         }
-        return File(System.getProperty("user.dir")).canonicalFile
+
+        return gradleRoot ?: topmostPomDir ?: userDir
     }
 
     /**
@@ -249,6 +263,23 @@ internal object ProjectGraphLoader {
             "Could not find layout.json resource at $resourcePath " +
                 "or at fallback location: ${fallbackFile.absolutePath}",
         )
+    }
+
+    companion object {
+        fun findBuildRoot(): File {
+            return KontureContextProvider.currentContext.projectGraphLoader.findBuildRoot()
+        }
+
+        fun loadFromStream(
+            inputStream: InputStream,
+            depsStreamLoader: () -> InputStream? = { null },
+        ): ProjectGraph {
+            return KontureContextProvider.currentContext.projectGraphLoader.loadFromStream(inputStream, depsStreamLoader)
+        }
+
+        fun loadFromResource(resourcePath: String = "/konture/layout.json"): ProjectGraph {
+            return KontureContextProvider.currentContext.projectGraphLoader.loadFromResource(resourcePath)
+        }
     }
 }
 

@@ -29,9 +29,27 @@ FRONT_MATTER_MAP = {
     },
     "installation.md": {
         "layout": "default",
-        "title": "Installation & Usages",
+        "title": "Installation",
         "nav_order": 50,
         "permalink": "/installation/"
+    },
+    "usage.md": {
+        "layout": "default",
+        "title": "Usage",
+        "nav_order": 52,
+        "permalink": "/usage/"
+    },
+    "configuration.md": {
+        "layout": "default",
+        "title": "Configuration",
+        "nav_order": 54,
+        "permalink": "/configuration/"
+    },
+    "baseline.md": {
+        "layout": "default",
+        "title": "Architecture Baselines",
+        "nav_order": 56,
+        "permalink": "/baseline/"
     },
     "showcases.md": {
         "layout": "default",

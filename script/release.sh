@@ -108,6 +108,9 @@ FILES_TO_BUMP=(
     "CONTRIBUTING.md"
     "docs/contributing.md"
     "docs/installation.md"
+    "docs/usage.md"
+    "docs/configuration.md"
+    "docs/baseline.md"
     "plugin-maven/pom.xml"
     "showcases/sample-maven/pom.xml"
 )
@@ -154,6 +157,15 @@ perl -pi -e "s/\Q$OLD_VERSION\E/$NEW_VERSION/g" docs/contributing.md
 
 # 6c. Update docs/installation.md references
 perl -pi -e "s/\Q$OLD_VERSION\E/$NEW_VERSION/g" docs/installation.md
+
+# 6d. Update docs/usage.md references
+perl -pi -e "s/\Q$OLD_VERSION\E/$NEW_VERSION/g" docs/usage.md
+
+# 6e. Update docs/configuration.md references
+perl -pi -e "s/\Q$OLD_VERSION\E/$NEW_VERSION/g" docs/configuration.md
+
+# 6f. Update docs/baseline.md references
+perl -pi -e "s/\Q$OLD_VERSION\E/$NEW_VERSION/g" docs/baseline.md
 
 # 7. Update Root buildscript classpath and project version
 perl -pi -e "s/plugin-gradle:\Q$OLD_VERSION\E/plugin-gradle:$NEW_VERSION/g" build.gradle.kts

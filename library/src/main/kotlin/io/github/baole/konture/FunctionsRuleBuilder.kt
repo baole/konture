@@ -7,26 +7,8 @@ package io.github.baole.konture
 
 import io.github.baole.konture.core.KontureLogger
 import io.github.baole.konture.core.LogLevel
+import io.github.baole.konture.impl.BaselineManager
 import io.github.baole.konture.impl.LogicalOperator
-
-/**
- * Context wrapper for verifying function declarations.
- *
- * Provides both the target [declaration] and architectural metadata to easily query scope.
- *
- * @property declaration The underlying [FunctionDeclaration] AST model representing the function.
- * @property packageName The fully-qualified name of the package containing this function.
- * @property className The name of the surrounding class if this function is a member/nested function, or null if it's top-level.
- * @property modulePath The module subdirectory/path containing this function.
- * @property filePath The project relative path to the source file defining this function.
- */
-data class FunctionDeclarationContext(
-    val declaration: FunctionDeclaration,
-    val packageName: String,
-    val className: String?,
-    val modulePath: String,
-    val filePath: String,
-)
 
 /**
  * A builder for compiling and verifying architectural rules on Kotlin function declarations.
@@ -280,11 +262,18 @@ class FunctionsRuleBuilder(
                 "Functions rule has no assertion ('should()'). You must specify at least one assertion condition.",
             )
         for (func in functionsToCheck) {
+            val startIdx = violations.size
             assertion(func, allFunctions, violations)
+            for (i in startIdx until violations.size) {
+                violations[i] = "${violations[i]} (at ${func.filePath})"
+            }
         }
 
         if (violations.isNotEmpty()) {
-            throw AssertionError("Function architecture violation(s) detected:\n" + violations.joinToString("\n"))
+            BaselineManager.handleViolations(
+                violations,
+                "Function architecture violation(s) detected:",
+            )
         }
     }
 }

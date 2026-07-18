@@ -40,8 +40,8 @@ class DslArchitectureTest {
     fun `unified architecture DSL context containing multiple rule types`() {
         Konture.architecture {
             modules {
-                that().haveNamePath(":domain")
-                should().notDependOnModule(":data")
+                that().haveNamePath(":data")
+                should().notDependOnModule(":domain")
             }
 
             classes {
