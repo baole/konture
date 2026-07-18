@@ -5,6 +5,7 @@
 
 package io.github.baole.konture
 
+import io.github.baole.konture.i18n.getMessage
 import io.github.baole.konture.impl.PatternMatchers
 
 @KontureDsl
@@ -15,7 +16,7 @@ class FilesShould internal constructor(
         builder.setShould { file, _, violations ->
             if (!PatternMatchers.matchesPackage(packagePattern, file.declaration.packageName)) {
                 violations.add(
-                    "File ${file.declaration.name} should reside in package '$packagePattern' but resides in '${file.declaration.packageName}'",
+                    getMessage("file.should.resideInPackage", file.declaration.name, packagePattern, file.declaration.packageName),
                 )
             }
         }
@@ -27,7 +28,7 @@ class FilesShould internal constructor(
             val matches = packagePatterns.any { PatternMatchers.matchesPackage(it, file.declaration.packageName) }
             if (!matches) {
                 violations.add(
-                    "File ${file.declaration.name} should reside in package in [${packagePatterns.joinToString()}] but resides in '${file.declaration.packageName}'",
+                    getMessage("file.should.resideInPackageAny", file.declaration.name, packagePatterns.joinToString(), file.declaration.packageName),
                 )
             }
         }
@@ -40,7 +41,7 @@ class FilesShould internal constructor(
         builder.setShould { file, _, violations ->
             if (!predicate(file.declaration.packageName)) {
                 violations.add(
-                    "File ${file.declaration.name} should reside in package matching predicate, but resides in '${file.declaration.packageName}'",
+                    getMessage("file.should.resideInPackageMatching", file.declaration.name, "predicate", file.declaration.packageName),
                 )
             }
         }
@@ -50,7 +51,9 @@ class FilesShould internal constructor(
     infix fun haveNameEndingWith(suffix: String): FilesRuleBuilder {
         builder.setShould { file, _, violations ->
             if (!file.declaration.name.endsWith(suffix)) {
-                violations.add("File ${file.declaration.name} should have name ending with '$suffix'")
+                violations.add(
+                    getMessage("file.should.haveNameEndingWith", file.declaration.name, suffix),
+                )
             }
         }
         return builder
@@ -61,7 +64,7 @@ class FilesShould internal constructor(
             val matches = suffixes.any { file.declaration.name.endsWith(it) }
             if (!matches) {
                 violations.add(
-                    "File ${file.declaration.name} should have name ending with any of [${suffixes.joinToString()}]",
+                    getMessage("file.should.haveNameEndingWithAny", file.declaration.name, suffixes.joinToString()),
                 )
             }
         }
@@ -73,7 +76,9 @@ class FilesShould internal constructor(
     infix fun haveNameStartingWith(prefix: String): FilesRuleBuilder {
         builder.setShould { file, _, violations ->
             if (!file.declaration.name.startsWith(prefix)) {
-                violations.add("File ${file.declaration.name} should have name starting with '$prefix'")
+                violations.add(
+                    getMessage("file.should.haveNameStartingWith", file.declaration.name, prefix),
+                )
             }
         }
         return builder
@@ -84,7 +89,7 @@ class FilesShould internal constructor(
             val matches = prefixes.any { file.declaration.name.startsWith(it) }
             if (!matches) {
                 violations.add(
-                    "File ${file.declaration.name} should have name starting with any of [${prefixes.joinToString()}]",
+                    getMessage("file.should.haveNameStartingWithAny", file.declaration.name, prefixes.joinToString()),
                 )
             }
         }
@@ -96,7 +101,9 @@ class FilesShould internal constructor(
     infix fun haveNameMatching(pattern: String): FilesRuleBuilder {
         builder.setShould { file, _, violations ->
             if (!PatternMatchers.matchesSimpleGlob(pattern, file.declaration.name)) {
-                violations.add("File ${file.declaration.name} should have name matching '$pattern'")
+                violations.add(
+                    getMessage("file.should.haveNameMatching", file.declaration.name, pattern),
+                )
             }
         }
         return builder
@@ -107,7 +114,7 @@ class FilesShould internal constructor(
             val matches = patterns.any { PatternMatchers.matchesSimpleGlob(it, file.declaration.name) }
             if (!matches) {
                 violations.add(
-                    "File ${file.declaration.name} should have name matching any of [${patterns.joinToString()}]",
+                    getMessage("file.should.haveNameMatchingAny", file.declaration.name, patterns.joinToString()),
                 )
             }
         }
@@ -121,7 +128,7 @@ class FilesShould internal constructor(
             val wildcards = file.declaration.imports.filter { it.endsWith(".*") }
             if (wildcards.isNotEmpty()) {
                 violations.add(
-                    "File ${file.declaration.name} should not contain wildcard imports but contains: ${wildcards.joinToString()}",
+                    getMessage("file.should.notContainWildcardImports", file.declaration.name, wildcards.joinToString()),
                 )
             }
         }
@@ -132,9 +139,14 @@ class FilesShould internal constructor(
         builder.setShould { file, _, violations ->
             if (file.declaration.classes.size > 1) {
                 violations.add(
-                    "File ${file.declaration.name} should contain at most one class, but contains ${file.declaration.classes.size}: ${file.declaration.classes.joinToString {
-                        it.name
-                    }}",
+                    getMessage(
+                        "file.should.containAtMostOneClass",
+                        file.declaration.name,
+                        file.declaration.classes.size,
+                        file.declaration.classes.joinToString {
+                            it.name
+                        },
+                    ),
                 )
             }
         }
@@ -147,7 +159,7 @@ class FilesShould internal constructor(
             val matched = file.declaration.classes.isEmpty() || file.declaration.classes.any { it.name == expectedName }
             if (!matched) {
                 violations.add(
-                    "File ${file.declaration.name} (at ${file.declaration.filePath}) does not match any of its class names",
+                    getMessage("file.should.matchClassName", "${file.declaration.name} (at ${file.declaration.filePath})"),
                 )
             }
         }
@@ -157,7 +169,9 @@ class FilesShould internal constructor(
     fun beDocumentedWithKDoc(): FilesRuleBuilder {
         builder.setShould { file, _, violations ->
             if (file.declaration.kdocText.isNullOrBlank()) {
-                violations.add("File ${file.declaration.name} should be documented with KDoc")
+                violations.add(
+                    getMessage("file.should.beDocumented", file.declaration.name),
+                )
             }
         }
         return builder
@@ -171,7 +185,9 @@ class FilesShould internal constructor(
     ): FilesRuleBuilder {
         builder.setShould { file, allFiles, violations ->
             if (!assertion(file, allFiles)) {
-                violations.add("File ${file.declaration.name} should satisfy: $description")
+                violations.add(
+                    getMessage("file.should.satisfyCustom", file.declaration.name, description),
+                )
             }
         }
         return builder

@@ -7,6 +7,7 @@ package io.github.baole.konture
 
 import io.github.baole.konture.core.KontureLogger
 import io.github.baole.konture.core.LogLevel
+import io.github.baole.konture.i18n.getMessage
 import io.github.baole.konture.impl.BaselineManager
 import io.github.baole.konture.impl.LogicalOperator
 
@@ -171,7 +172,7 @@ class ClassesRuleBuilder(
                     val tempViolations = mutableListOf<String>()
                     assertion(cls, allCls, tempViolations)
                     if (tempViolations.isEmpty()) {
-                        violations.add("Class ${cls.fqName} should not satisfy the negated condition.")
+                        violations.add(getMessage("classes.rule.negatedSatisfied", cls.fqName))
                     }
                 }
                 a
@@ -192,7 +193,7 @@ class ClassesRuleBuilder(
                     actualAssertion(cls, allCls, temp2)
                     if (temp1.isNotEmpty() && temp2.isNotEmpty()) {
                         violations.add(
-                            "Class ${cls.fqName} should satisfy either: (${temp1.joinToString()}) OR (${temp2.joinToString()})",
+                            getMessage("classes.rule.eitherOr", cls.fqName, temp1.joinToString(), temp2.joinToString()),
                         )
                     }
                 }
@@ -205,7 +206,7 @@ class ClassesRuleBuilder(
                     val ok1 = temp1.isEmpty()
                     val ok2 = temp2.isEmpty()
                     if (ok1 == ok2) {
-                        violations.add("Class ${cls.fqName} should satisfy exactly one of the XOR assertions.")
+                        violations.add(getMessage("classes.rule.xor", cls.fqName))
                     }
                 }
             } else {
@@ -235,8 +236,7 @@ class ClassesRuleBuilder(
         if (classesToCheck.isEmpty()) {
             if (!allowEmpty) {
                 throw AssertionError(
-                    "No classes matched the filter criteria in 'that()'. " +
-                        "If this is expected, use '.allowEmpty()' or 'allowEmpty = true' on the rule builder to allow empty selections.",
+                    getMessage("classes.rule.emptySelect"),
                 )
             } else {
                 KontureLogger.log(
@@ -248,24 +248,22 @@ class ClassesRuleBuilder(
 
         val assertion =
             shouldAssertion ?: throw AssertionError(
-                "Classes rule has no assertion ('should()'). You must specify at least one assertion condition.",
+                getMessage("classes.rule.noAssertion"),
             )
 
-        val violations = mutableListOf<String>()
-
-        for (cls in classesToCheck) {
-            val startIdx = violations.size
-            assertion(cls, allClasses, violations)
-            for (i in startIdx until violations.size) {
-                violations[i] = "${violations[i]} (at ${cls.filePath})"
+        val runCheck = { list: MutableList<String> ->
+            for (cls in classesToCheck) {
+                val startIdx = list.size
+                assertion(cls, allClasses, list)
+                for (i in startIdx until list.size) {
+                    list[i] = "${list[i]} (at ${cls.filePath})"
+                }
             }
         }
 
-        if (violations.isNotEmpty()) {
-            BaselineManager.handleViolations(
-                violations,
-                "Class architecture violation(s) detected:",
-            )
-        }
+        BaselineManager.checkRule(
+            getMessage("classes.rule.violationHeader"),
+            runCheck,
+        )
     }
 }

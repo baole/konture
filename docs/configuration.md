@@ -31,6 +31,9 @@ konture {
 
     // Set the task execution log level
     logLevel("INFO")
+
+    // Set translation language for violation messages (default is "en")
+    language("fr")
 }
 ```
 
@@ -94,6 +97,7 @@ Declare your plugin configurations inside the `<configuration>` block of the `ko
 | **`excludeClasses`** | `emptyList()` | Excludes matching classes from the analysis. Fully qualified names and simple class names are checked.<br>• Supports **Package Wildcards (`..`)** and **Simple Globs (`*`)**. |
 | **`excludeConfigurations`** | `listOf("test", "benchmark", "profile")` | Excludes specific dependency configurations from being traversed.<br>• Supports simple glob matching (`*`). E.g., `test*` matches `testImplementation`. |
 | **`logLevel`** | `"INFO"` | Configures logging level of the Konture plugin execution.<br>• Supported levels: `"INFO"`, `"DEBUG"`, `"WARNING"`, `"TRACE"`. |
+| **`language`** | `"en"` | Configures translation language for architectural violation messages.<br>• Supported languages: `"en"` (English), `"fr"` (French), `"es"` (Spanish), `"it"` (Italian), `"vi"` (Vietnamese), `"zh"` / `"zh-CN"` (Simplified Chinese), `"zh-TW"` (Traditional Chinese). |
 
 ---
 
@@ -138,6 +142,59 @@ Used for configuration matching (`excludeConfigurations`) and simple class name 
 | :--- | :--- | :--- |
 | `*Helper` | `AuthHelper`<br>`Helper`<br>`com.acme.MyHelper` | `Helpers`<br>`HelperClass` |
 | `test*` | `test`<br>`testImplementation`<br>`testRuntimeOnly` | `latest` |
+
+## 🌐 Internationalization & Localization (I18n)
+
+Konture supports multi-language localization for guardrail assertion violation messages, allowing diverse and distributed teams to run architecture tests in their native languages.
+
+### 🗺️ Supported Languages
+*   **English (Default)**: `"en"`
+*   **French**: `"fr"`
+*   **Spanish**: `"es"`
+*   **Italian**: `"it"`
+*   **Vietnamese**: `"vi"`
+*   **Simplified Chinese**: `"zh"` or `"zh-CN"`
+*   **Traditional Chinese**: `"zh-TW"`
+
+---
+
+### ⚙️ How to Configure Language
+
+You can configure the target language at multiple levels:
+
+#### 1. Via Gradle Plugin Configuration
+Set the `language` parameter in your `konture` build block:
+```kotlin
+konture {
+    language("fr") // Configure French for violation messages
+}
+```
+
+#### 2. Via CLI / Build Arguments
+Override the configured language at test-execution time using the JVM system property `konture.locale`:
+```bash
+./gradlew test -Dkonture.locale=es
+```
+
+#### 3. Programmatic Thread-Isolated Customization
+You can programmatically change the locale in your Kotlin test class using `Konture.locale`. Because Konture uses a **thread-isolated context**, different test nodes can run on separate threads with distinct locales concurrently without cross-talk or race conditions:
+```kotlin
+import io.github.baole.konture.Konture
+import java.util.Locale
+import org.junit.jupiter.api.BeforeEach
+
+class ArchitectureTest {
+    @BeforeEach
+    fun setUp() {
+        Konture.locale = Locale.FRENCH // Isolated to the calling test thread
+    }
+}
+```
+
+---
+
+### 🛡️ Fallback Behavior
+If a specific translation key is missing from a localized resource bundle, Konture automatically falls back to **English** (`messages.properties`) to ensure error message delivery. If a key is completely missing from all resource bundles, Konture returns a safe placeholder fallback string of the form `[key: arguments]`.
 
 ---
 

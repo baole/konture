@@ -38,7 +38,7 @@ fun ClassesRuleBuilder.should(assertion: ClassDeclarationShouldContext.() -> Any
             val result = context.assertion()
             validateAssertionResult(result)
             if (result is Boolean && !result) {
-                violations.add("Class ${cls.fqName} failed custom assertion")
+                violations.add(io.github.baole.konture.i18n.getMessage("class.should.failedCustomAssertion", cls.fqName))
             }
         }
     }
@@ -116,7 +116,7 @@ class ClassDeclarationShouldContext internal constructor(
         message: String? = null,
     ) {
         if (!condition) {
-            addViolation(message ?: "Class $fqName failed assertion")
+            addViolation(message ?: io.github.baole.konture.i18n.getMessage("class.should.failedAssertion", fqName))
         }
     }
 
@@ -125,7 +125,7 @@ class ClassDeclarationShouldContext internal constructor(
      */
     fun assertAnnotationOf(annotationName: String) {
         if (!hasAnnotation(annotationName)) {
-            addViolation("Class $fqName should be annotated with @$annotationName")
+            addViolation(io.github.baole.konture.i18n.getMessage("class.should.haveAnnotation", fqName, annotationName))
         }
     }
 
@@ -134,7 +134,7 @@ class ClassDeclarationShouldContext internal constructor(
      */
     fun assertAllAnnotationsOf(names: List<String>) {
         if (!hasAllAnnotations(names)) {
-            addViolation("Class $fqName should have all annotations: ${names.joinToString()}")
+            addViolation(io.github.baole.konture.i18n.getMessage("class.should.haveAllAnnotations", fqName, names.joinToString()))
         }
     }
 
@@ -148,7 +148,7 @@ class ClassDeclarationShouldContext internal constructor(
      */
     fun assertAnyAnnotationOf(names: List<String>) {
         if (!hasAnyAnnotation(names)) {
-            addViolation("Class $fqName should have at least one annotation of: ${names.joinToString()}")
+            addViolation(io.github.baole.konture.i18n.getMessage("class.should.haveAtLeastOneAnnotationOf", fqName, names.joinToString()))
         }
     }
 

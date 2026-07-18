@@ -5,6 +5,7 @@
 
 package io.github.baole.konture
 
+import io.github.baole.konture.i18n.getMessage
 import io.github.baole.konture.impl.PatternMatchers
 
 /**
@@ -24,7 +25,7 @@ class ClassesShould internal constructor(
         builder.setShould { cls, _, violations ->
             if (!PatternMatchers.matchesPackage(packagePattern, cls.packageName)) {
                 violations.add(
-                    "Class ${cls.fqName} should reside in package '$packagePattern' but resides in '${cls.packageName}'",
+                    getMessage("class.should.resideInPackage", cls.fqName, packagePattern, cls.packageName),
                 )
             }
         }
@@ -42,7 +43,7 @@ class ClassesShould internal constructor(
             val matches = packagePatterns.any { PatternMatchers.matchesPackage(it, cls.packageName) }
             if (!matches) {
                 violations.add(
-                    "Class ${cls.fqName} should reside in package in [${packagePatterns.joinToString()}] but resides in '${cls.packageName}'",
+                    getMessage("class.should.resideInPackageAny", cls.fqName, packagePatterns.joinToString(), cls.packageName),
                 )
             }
         }
@@ -77,7 +78,7 @@ class ClassesShould internal constructor(
         builder.setShould { cls, _, violations ->
             if (!predicate(cls.packageName)) {
                 violations.add(
-                    "Class ${cls.fqName} should reside in package matching: $description, but resides in '${cls.packageName}'",
+                    getMessage("class.should.resideInPackageMatching", cls.fqName, description, cls.packageName),
                 )
             }
         }
@@ -92,7 +93,7 @@ class ClassesShould internal constructor(
     infix fun haveNameEndingWith(suffix: String): ClassesRuleBuilder {
         builder.setShould { cls, _, violations ->
             if (!cls.name.endsWith(suffix)) {
-                violations.add("Class ${cls.fqName} should have name ending with '$suffix'")
+                violations.add(getMessage("class.should.haveNameEndingWith", cls.fqName, suffix))
             }
         }
         return builder
@@ -107,7 +108,7 @@ class ClassesShould internal constructor(
         builder.setShould { cls, _, violations ->
             val matches = suffixes.any { cls.name.endsWith(it) }
             if (!matches) {
-                violations.add("Class ${cls.fqName} should have name ending with any of [${suffixes.joinToString()}]")
+                violations.add(getMessage("class.should.haveNameEndingWithAny", cls.fqName, suffixes.joinToString()))
             }
         }
         return builder
@@ -128,7 +129,7 @@ class ClassesShould internal constructor(
     infix fun haveNameStartingWith(prefix: String): ClassesRuleBuilder {
         builder.setShould { cls, _, violations ->
             if (!cls.name.startsWith(prefix)) {
-                violations.add("Class ${cls.fqName} should have name starting with '$prefix'")
+                violations.add(getMessage("class.should.haveNameStartingWith", cls.fqName, prefix))
             }
         }
         return builder
@@ -143,7 +144,7 @@ class ClassesShould internal constructor(
         builder.setShould { cls, _, violations ->
             val matches = prefixes.any { cls.name.startsWith(it) }
             if (!matches) {
-                violations.add("Class ${cls.fqName} should have name starting with any of [${prefixes.joinToString()}]")
+                violations.add(getMessage("class.should.haveNameStartingWithAny", cls.fqName, prefixes.joinToString()))
             }
         }
         return builder
@@ -175,7 +176,7 @@ class ClassesShould internal constructor(
     ): ClassesRuleBuilder {
         builder.setShould { cls, _, violations ->
             if (!predicate(cls.name)) {
-                violations.add("Class ${cls.fqName} should have name matching: $description, but name is '${cls.name}'")
+                violations.add(getMessage("class.should.haveNameMatching", cls.fqName, description, cls.name))
             }
         }
         return builder
@@ -190,7 +191,7 @@ class ClassesShould internal constructor(
     infix fun haveNameMatching(pattern: String): ClassesRuleBuilder {
         builder.setShould { cls, _, violations ->
             if (!PatternMatchers.matchesSimpleGlob(pattern, cls.name)) {
-                violations.add("Class ${cls.fqName} should have name matching '$pattern'")
+                violations.add(getMessage("class.should.haveNameMatchingPattern", cls.fqName, pattern))
             }
         }
         return builder
@@ -206,7 +207,7 @@ class ClassesShould internal constructor(
         builder.setShould { cls, _, violations ->
             val matches = patterns.any { PatternMatchers.matchesSimpleGlob(it, cls.name) }
             if (!matches) {
-                violations.add("Class ${cls.fqName} should have name matching any of [${patterns.joinToString()}]")
+                violations.add(getMessage("class.should.haveNameMatchingPatternAny", cls.fqName, patterns.joinToString()))
             }
         }
         return builder
@@ -230,7 +231,7 @@ class ClassesShould internal constructor(
         builder.setShould { cls, _, violations ->
             val hasAnnotation = cls.annotations.any { it.fqName == annotationFqName || it.name == annotationFqName }
             if (!hasAnnotation) {
-                violations.add("Class ${cls.fqName} should have annotation '$annotationFqName'")
+                violations.add(getMessage("class.should.haveAnnotation", cls.fqName, annotationFqName))
             }
         }
         return builder
@@ -248,7 +249,7 @@ class ClassesShould internal constructor(
     infix fun haveAllAnnotationsOf(names: List<String>): ClassesRuleBuilder {
         builder.setShould { cls, _, violations ->
             if (!cls.hasAllAnnotations(names)) {
-                violations.add("Class ${cls.fqName} should have all annotations: ${names.joinToString()}")
+                violations.add(getMessage("class.should.haveAllAnnotations", cls.fqName, names.joinToString()))
             }
         }
         return builder
@@ -271,7 +272,7 @@ class ClassesShould internal constructor(
     infix fun haveAnyAnnotationOf(names: List<String>): ClassesRuleBuilder {
         builder.setShould { cls, _, violations ->
             if (!cls.hasAnyAnnotation(names)) {
-                violations.add("Class ${cls.fqName} should have at least one annotation of: ${names.joinToString()}")
+                violations.add(getMessage("class.should.haveAtLeastOneAnnotationOf", cls.fqName, names.joinToString()))
             }
         }
         return builder
@@ -307,7 +308,7 @@ class ClassesShould internal constructor(
                     } else {
                         "argument value '$argValue'"
                     }
-                violations.add("Class ${cls.fqName} should have annotation '$annotationName' with $detail")
+                violations.add(getMessage("class.should.haveAnnotationWithDetail", cls.fqName, annotationName, detail))
             }
         }
         return builder
@@ -319,7 +320,7 @@ class ClassesShould internal constructor(
     fun beInterfaces(): ClassesRuleBuilder {
         builder.setShould { cls, _, violations ->
             if (!cls.isInterface) {
-                violations.add("Class ${cls.fqName} should be an interface")
+                violations.add(getMessage("class.should.beInterface", cls.fqName))
             }
         }
         return builder
@@ -331,7 +332,7 @@ class ClassesShould internal constructor(
     fun beEnums(): ClassesRuleBuilder {
         builder.setShould { cls, _, violations ->
             if (!cls.isEnum) {
-                violations.add("Class ${cls.fqName} should be an enum")
+                violations.add(getMessage("class.should.beEnum", cls.fqName))
             }
         }
         return builder
@@ -343,7 +344,7 @@ class ClassesShould internal constructor(
     fun beAbstract(): ClassesRuleBuilder {
         builder.setShould { cls, _, violations ->
             if (!cls.isAbstract) {
-                violations.add("Class ${cls.fqName} should be abstract")
+                violations.add(getMessage("class.should.beAbstract", cls.fqName))
             }
         }
         return builder
@@ -355,7 +356,7 @@ class ClassesShould internal constructor(
     fun beSealed(): ClassesRuleBuilder {
         builder.setShould { cls, _, violations ->
             if (!cls.modifiers.contains(Modifier.SEALED)) {
-                violations.add("Class ${cls.fqName} should be sealed")
+                violations.add(getMessage("class.should.beSealed", cls.fqName))
             }
         }
         return builder
@@ -367,7 +368,7 @@ class ClassesShould internal constructor(
     fun beData(): ClassesRuleBuilder {
         builder.setShould { cls, _, violations ->
             if (!cls.modifiers.contains(Modifier.DATA)) {
-                violations.add("Class ${cls.fqName} should be a data class")
+                violations.add(getMessage("class.should.beData", cls.fqName))
             }
         }
         return builder
@@ -379,7 +380,7 @@ class ClassesShould internal constructor(
     fun beInline(): ClassesRuleBuilder {
         builder.setShould { cls, _, violations ->
             if (!cls.modifiers.contains(Modifier.INLINE)) {
-                violations.add("Class ${cls.fqName} should be an inline class")
+                violations.add(getMessage("class.should.beInline", cls.fqName))
             }
         }
         return builder
@@ -391,7 +392,7 @@ class ClassesShould internal constructor(
     infix fun haveModifier(modifier: Modifier): ClassesRuleBuilder {
         builder.setShould { cls, _, violations ->
             if (!cls.modifiers.contains(modifier)) {
-                violations.add("Class ${cls.fqName} should have modifier '$modifier'")
+                violations.add(getMessage("class.should.haveModifier", cls.fqName, modifier))
             }
         }
         return builder
@@ -414,7 +415,7 @@ class ClassesShould internal constructor(
             val missing = modifiers.filter { !cls.modifiers.contains(it) }
             if (missing.isNotEmpty()) {
                 violations.add(
-                    "Class ${cls.fqName} should have all modifiers: ${modifiers.joinToString()}, but is missing: ${missing.joinToString()}",
+                    getMessage("class.should.haveAllModifiers", cls.fqName, modifiers.joinToString(), missing.joinToString()),
                 )
             }
         }
@@ -443,7 +444,7 @@ class ClassesShould internal constructor(
     infix fun haveAnyModifier(modifiers: List<Modifier>): ClassesRuleBuilder {
         builder.setShould { cls, _, violations ->
             if (!modifiers.any { cls.modifiers.contains(it) }) {
-                violations.add("Class ${cls.fqName} should have any of the modifiers: ${modifiers.joinToString()}")
+                violations.add(getMessage("class.should.haveAnyModifiers", cls.fqName, modifiers.joinToString()))
             }
         }
         return builder
@@ -462,7 +463,7 @@ class ClassesShould internal constructor(
     infix fun haveVisibility(visibility: Visibility): ClassesRuleBuilder {
         builder.setShould { cls, _, violations ->
             if (cls.visibility != visibility) {
-                violations.add("Class ${cls.fqName} should have $visibility visibility, but is ${cls.visibility}")
+                violations.add(getMessage("class.should.haveVisibility", cls.fqName, visibility, cls.visibility))
             }
         }
         return builder
@@ -484,7 +485,7 @@ class ClassesShould internal constructor(
         builder.setShould { cls, _, violations ->
             if (!visibilities.contains(cls.visibility)) {
                 violations.add(
-                    "Class ${cls.fqName} should have any of visibilities: ${visibilities.joinToString()}, but is ${cls.visibility}",
+                    getMessage("class.should.haveAnyVisibility", cls.fqName, visibilities.joinToString(), cls.visibility),
                 )
             }
         }
@@ -512,7 +513,7 @@ class ClassesShould internal constructor(
     infix fun beAssignableTo(superType: String): ClassesRuleBuilder {
         builder.setShould { cls, _, violations ->
             if (!cls.supertypes.contains(superType)) {
-                violations.add("Class ${cls.fqName} should be assignable to $superType")
+                violations.add(getMessage("class.should.beAssignableTo", cls.fqName, superType))
             }
         }
         return builder
@@ -533,7 +534,7 @@ class ClassesShould internal constructor(
     infix fun beAssignableToAnyOf(superTypes: List<String>): ClassesRuleBuilder {
         builder.setShould { cls, _, violations ->
             if (!superTypes.any { cls.supertypes.contains(it) }) {
-                violations.add("Class ${cls.fqName} should be assignable to any of: ${superTypes.joinToString()}")
+                violations.add(getMessage("class.should.beAssignableToAny", cls.fqName, superTypes.joinToString()))
             }
         }
         return builder
@@ -563,7 +564,7 @@ class ClassesShould internal constructor(
             val missing = superTypes.filter { !cls.supertypes.contains(it) }
             if (missing.isNotEmpty()) {
                 violations.add(
-                    "Class ${cls.fqName} should be assignable to all of: ${superTypes.joinToString()}, but is missing: ${missing.joinToString()}",
+                    getMessage("class.should.beAssignableToAll", cls.fqName, superTypes.joinToString(), missing.joinToString()),
                 )
             }
         }
@@ -583,7 +584,7 @@ class ClassesShould internal constructor(
     fun beDocumentedWithKDoc(): ClassesRuleBuilder {
         builder.setShould { cls, _, violations ->
             if (cls.kdocText?.isBlank() != false) {
-                violations.add("Class ${cls.fqName} should be documented with a KDoc comment")
+                violations.add(getMessage("class.should.beDocumented", cls.fqName))
             }
         }
         return builder
@@ -607,7 +608,13 @@ class ClassesShould internal constructor(
                     }
                 if (!isAllowed) {
                     violations.add(
-                        "Class ${targetCls.fqName} is accessed by ${accessor.fqName} (in package ${accessor.packageName}), which is not allowed by package pattern(s): ${packagePatterns.joinToString()}",
+                        getMessage(
+                            "class.should.notAccessForbiddenPackage",
+                            targetCls.fqName,
+                            accessor.fqName,
+                            accessor.packageName,
+                            packagePatterns.joinToString(),
+                        ),
                     )
                 }
             }
@@ -644,7 +651,13 @@ class ClassesShould internal constructor(
                     }
                 if (!isAllowed) {
                     violations.add(
-                        "Class ${cls.fqName} depends on ${dep.fqName} (in package ${dep.packageName}), which is not allowed by package pattern(s): ${packagePatterns.joinToString()}",
+                        getMessage(
+                            "class.should.notDependOnForbiddenPackage",
+                            cls.fqName,
+                            dep.fqName,
+                            dep.packageName,
+                            packagePatterns.joinToString(),
+                        ),
                     )
                 }
             }
@@ -681,7 +694,13 @@ class ClassesShould internal constructor(
                     }
                 if (isForbidden) {
                     violations.add(
-                        "Class ${cls.fqName} depends on ${dep.fqName} (in package ${dep.packageName}), which is forbidden by package pattern(s): ${packagePatterns.joinToString()}",
+                        getMessage(
+                            "class.should.notDependOnForbiddenPackageExplicit",
+                            cls.fqName,
+                            dep.fqName,
+                            dep.packageName,
+                            packagePatterns.joinToString(),
+                        ),
                     )
                 }
             }
@@ -717,7 +736,7 @@ class ClassesShould internal constructor(
                     }
                 if (forbiddenAnnotation != null) {
                     violations.add(
-                        "Class ${cls.fqName} exposes signature type ${resolved.fqName} annotated with @${forbiddenAnnotation.name}, which is forbidden",
+                        getMessage("class.should.notExposeForbiddenSignature", cls.fqName, resolved.fqName, forbiddenAnnotation.name),
                     )
                 }
             }
@@ -760,7 +779,7 @@ class ClassesShould internal constructor(
     ): ClassesRuleBuilder {
         builder.setShould { cls, allClasses, violations ->
             if (!assertion(cls, allClasses)) {
-                violations.add("Class ${cls.fqName} should satisfy: $description")
+                violations.add(getMessage("class.should.satisfyCustom", cls.fqName, description))
             }
         }
         return builder
@@ -792,7 +811,7 @@ class ClassesShould internal constructor(
                     temp
                 }
             if (tempViolationsList.all { it.isNotEmpty() }) {
-                violations.add("Class ${cls.fqName} should satisfy at least one of the nested assertions.")
+                violations.add(getMessage("class.should.satisfyAtLeastOneNested", cls.fqName))
             }
         }
         return builder
@@ -831,7 +850,7 @@ class ClassesShould internal constructor(
                 val temp = mutableListOf<String>()
                 assertion(cls, allCls, temp)
                 if (temp.isEmpty()) {
-                    violations.add("Class ${cls.fqName} should not satisfy the nested assertion.")
+                    violations.add(getMessage("class.should.notSatisfyNested", cls.fqName))
                 }
             }
         }

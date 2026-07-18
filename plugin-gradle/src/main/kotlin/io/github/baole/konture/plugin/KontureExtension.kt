@@ -26,6 +26,7 @@ open class KontureExtension(
             .convention(listOf("test", "benchmark", "profile", "testedapks"))
     val logLevel: Property<String> = project.objects.property(String::class.java).convention("INFO")
     val baselinePath: Property<String> = project.objects.property(String::class.java).convention("konture-baseline.json")
+    val language: Property<String> = project.objects.property(String::class.java).convention("en")
 
     fun logLevel(level: String) {
         logLevel.set(level)
@@ -33,6 +34,10 @@ open class KontureExtension(
 
     fun baselinePath(path: String) {
         baselinePath.set(path)
+    }
+
+    fun language(lang: String) {
+        language.set(lang)
     }
 
     fun excludeModules(vararg modules: String) {

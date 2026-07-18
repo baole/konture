@@ -34,7 +34,7 @@ fun FunctionsRuleBuilder.should(assertion: FunctionDeclarationShouldContext.() -
             val result = context.assertion()
             validateAssertionResult(result)
             if (result is Boolean && !result) {
-                violations.add("Function ${func.declaration.name} failed custom assertion")
+                violations.add(io.github.baole.konture.i18n.getMessage("function.should.failedCustomAssertion", func.declaration.name))
             }
         }
     }
@@ -82,7 +82,7 @@ class FunctionDeclarationShouldContext internal constructor(
         message: String? = null,
     ) {
         if (!condition) {
-            addViolation(message ?: "Function $name failed assertion")
+            addViolation(message ?: io.github.baole.konture.i18n.getMessage("function.should.failedAssertion", name))
         }
     }
 
@@ -116,7 +116,7 @@ class FunctionDeclarationShouldContext internal constructor(
      */
     fun assertAnnotationOf(annotationName: String) {
         if (!hasAnnotation(annotationName)) {
-            addViolation("Function $name should be annotated with @$annotationName")
+            addViolation(io.github.baole.konture.i18n.getMessage("function.should.haveAnnotation", name, annotationName))
         }
     }
 
@@ -125,7 +125,7 @@ class FunctionDeclarationShouldContext internal constructor(
      */
     fun assertAllAnnotationsOf(names: List<String>) {
         if (!hasAllAnnotations(names)) {
-            addViolation("Function $name should have all annotations: ${names.joinToString()}")
+            addViolation(io.github.baole.konture.i18n.getMessage("function.should.haveAllAnnotations", name, names.joinToString()))
         }
     }
 
@@ -139,7 +139,7 @@ class FunctionDeclarationShouldContext internal constructor(
      */
     fun assertAnyAnnotationOf(names: List<String>) {
         if (!hasAnyAnnotation(names)) {
-            addViolation("Function $name should have at least one annotation of: ${names.joinToString()}")
+            addViolation(io.github.baole.konture.i18n.getMessage("function.should.haveAnyAnnotation", name, names.joinToString()))
         }
     }
 
@@ -172,7 +172,7 @@ class FunctionDeclarationShouldContext internal constructor(
     ) {
         val matched = parameters.any { predicate(it) }
         if (!matched) {
-            addViolation("Function $name should have at least one parameter matching: $message")
+            addViolation(io.github.baole.konture.i18n.getMessage("function.should.haveAnyParameterMatching", name, message))
         }
     }
 }

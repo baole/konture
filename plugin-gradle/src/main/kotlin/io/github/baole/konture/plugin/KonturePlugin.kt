@@ -50,12 +50,18 @@ class KonturePlugin : Plugin<Project> {
         project.tasks.withType(org.gradle.api.tasks.testing.Test::class.java).configureEach { testTask ->
             val cliBaselinePath = project.providers.systemProperty(KontureConstants.PROPERTY_BASELINE_PATH).orNull
             val cliBaselineDir = project.providers.systemProperty(KontureConstants.PROPERTY_BASELINE_DIR).orNull
+            val cliLanguage = project.providers.systemProperty(KontureConstants.PROPERTY_LOCALE).orNull
 
             testTask.systemProperty(KontureConstants.PROPERTY_BASELINE_DIR, cliBaselineDir ?: project.projectDir.absolutePath)
             if (cliBaselinePath != null) {
                 testTask.systemProperty(KontureConstants.PROPERTY_BASELINE_PATH, cliBaselinePath)
             } else {
                 testTask.systemProperty(KontureConstants.PROPERTY_BASELINE_PATH, extension.baselinePath)
+            }
+            if (cliLanguage != null) {
+                testTask.systemProperty(KontureConstants.PROPERTY_LOCALE, cliLanguage)
+            } else {
+                testTask.systemProperty(KontureConstants.PROPERTY_LOCALE, extension.language)
             }
             testTask.doFirst {
                 val isRecordProperty =

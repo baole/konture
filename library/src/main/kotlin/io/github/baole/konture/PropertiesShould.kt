@@ -5,6 +5,7 @@
 
 package io.github.baole.konture
 
+import io.github.baole.konture.i18n.getMessage
 import io.github.baole.konture.impl.PatternMatchers
 
 @KontureDsl
@@ -15,7 +16,7 @@ class PropertiesShould internal constructor(
         builder.setShould { prop, _, violations ->
             if (!PatternMatchers.matchesPackage(packagePattern, prop.packageName)) {
                 violations.add(
-                    "Property ${prop.declaration.name} should reside in package '$packagePattern' but resides in '${prop.packageName}'",
+                    getMessage("property.should.resideInPackage", prop.declaration.name, packagePattern, prop.packageName),
                 )
             }
         }
@@ -27,7 +28,7 @@ class PropertiesShould internal constructor(
             val matches = packagePatterns.any { PatternMatchers.matchesPackage(it, prop.packageName) }
             if (!matches) {
                 violations.add(
-                    "Property ${prop.declaration.name} should reside in package in [${packagePatterns.joinToString()}] but resides in '${prop.packageName}'",
+                    getMessage("property.should.resideInPackageAny", prop.declaration.name, packagePatterns.joinToString(), prop.packageName),
                 )
             }
         }
@@ -43,7 +44,7 @@ class PropertiesShould internal constructor(
         builder.setShould { prop, _, violations ->
             if (!predicate(prop.packageName)) {
                 violations.add(
-                    "Property ${prop.declaration.name} should reside in package matching predicate, but resides in '${prop.packageName}'",
+                    getMessage("property.should.resideInPackageMatching", prop.declaration.name, prop.packageName),
                 )
             }
         }
@@ -53,7 +54,9 @@ class PropertiesShould internal constructor(
     infix fun haveNameEndingWith(suffix: String): PropertiesRuleBuilder {
         builder.setShould { prop, _, violations ->
             if (!prop.declaration.name.endsWith(suffix)) {
-                violations.add("Property ${prop.declaration.name} should have name ending with '$suffix'")
+                violations.add(
+                    getMessage("property.should.haveNameEndingWith", prop.declaration.name, suffix),
+                )
             }
         }
         return builder
@@ -64,7 +67,7 @@ class PropertiesShould internal constructor(
             val matches = suffixes.any { prop.declaration.name.endsWith(it) }
             if (!matches) {
                 violations.add(
-                    "Property ${prop.declaration.name} should have name ending with any of [${suffixes.joinToString()}]",
+                    getMessage("property.should.haveNameEndingWithAny", prop.declaration.name, suffixes.joinToString()),
                 )
             }
         }
@@ -76,7 +79,9 @@ class PropertiesShould internal constructor(
     infix fun haveNameStartingWith(prefix: String): PropertiesRuleBuilder {
         builder.setShould { prop, _, violations ->
             if (!prop.declaration.name.startsWith(prefix)) {
-                violations.add("Property ${prop.declaration.name} should have name starting with '$prefix'")
+                violations.add(
+                    getMessage("property.should.haveNameStartingWith", prop.declaration.name, prefix),
+                )
             }
         }
         return builder
@@ -87,7 +92,7 @@ class PropertiesShould internal constructor(
             val matches = prefixes.any { prop.declaration.name.startsWith(it) }
             if (!matches) {
                 violations.add(
-                    "Property ${prop.declaration.name} should have name starting with any of [${prefixes.joinToString()}]",
+                    getMessage("property.should.haveNameStartingWithAny", prop.declaration.name, prefixes.joinToString()),
                 )
             }
         }
@@ -99,7 +104,9 @@ class PropertiesShould internal constructor(
     infix fun haveNameMatching(pattern: String): PropertiesRuleBuilder {
         builder.setShould { prop, _, violations ->
             if (!PatternMatchers.matchesSimpleGlob(pattern, prop.declaration.name)) {
-                violations.add("Property ${prop.declaration.name} should have name matching '$pattern'")
+                violations.add(
+                    getMessage("property.should.haveNameMatching", prop.declaration.name, pattern),
+                )
             }
         }
         return builder
@@ -110,7 +117,7 @@ class PropertiesShould internal constructor(
             val matches = patterns.any { PatternMatchers.matchesSimpleGlob(it, prop.declaration.name) }
             if (!matches) {
                 violations.add(
-                    "Property ${prop.declaration.name} should have name matching any of [${patterns.joinToString()}]",
+                    getMessage("property.should.haveNameMatchingAny", prop.declaration.name, patterns.joinToString()),
                 )
             }
         }
@@ -122,7 +129,9 @@ class PropertiesShould internal constructor(
     fun bePublic(): PropertiesRuleBuilder {
         builder.setShould { prop, _, violations ->
             if (prop.declaration.visibility != Visibility.PUBLIC) {
-                violations.add("Property ${prop.declaration.name} should be public")
+                violations.add(
+                    getMessage("property.should.bePublic", prop.declaration.name),
+                )
             }
         }
         return builder
@@ -131,7 +140,9 @@ class PropertiesShould internal constructor(
     fun beInternal(): PropertiesRuleBuilder {
         builder.setShould { prop, _, violations ->
             if (prop.declaration.visibility != Visibility.INTERNAL) {
-                violations.add("Property ${prop.declaration.name} should be internal")
+                violations.add(
+                    getMessage("property.should.beInternal", prop.declaration.name),
+                )
             }
         }
         return builder
@@ -140,7 +151,9 @@ class PropertiesShould internal constructor(
     fun bePrivate(): PropertiesRuleBuilder {
         builder.setShould { prop, _, violations ->
             if (prop.declaration.visibility != Visibility.PRIVATE) {
-                violations.add("Property ${prop.declaration.name} should be private")
+                violations.add(
+                    getMessage("property.should.bePrivate", prop.declaration.name),
+                )
             }
         }
         return builder
@@ -149,7 +162,9 @@ class PropertiesShould internal constructor(
     fun beProtected(): PropertiesRuleBuilder {
         builder.setShould { prop, _, violations ->
             if (prop.declaration.visibility != Visibility.PROTECTED) {
-                violations.add("Property ${prop.declaration.name} should be protected")
+                violations.add(
+                    getMessage("property.should.beProtected", prop.declaration.name),
+                )
             }
         }
         return builder
@@ -158,7 +173,9 @@ class PropertiesShould internal constructor(
     fun beVar(): PropertiesRuleBuilder {
         builder.setShould { prop, _, violations ->
             if (!prop.declaration.isVar) {
-                violations.add("Property ${prop.declaration.name} should be var (mutable)")
+                violations.add(
+                    getMessage("property.should.beVar", prop.declaration.name),
+                )
             }
         }
         return builder
@@ -167,7 +184,9 @@ class PropertiesShould internal constructor(
     fun beVal(): PropertiesRuleBuilder {
         builder.setShould { prop, _, violations ->
             if (prop.declaration.isVar) {
-                violations.add("Property ${prop.declaration.name} should be val (read-only)")
+                violations.add(
+                    getMessage("property.should.beVal", prop.declaration.name),
+                )
             }
         }
         return builder
@@ -177,7 +196,7 @@ class PropertiesShould internal constructor(
         builder.setShould { prop, _, violations ->
             if (prop.declaration.type != typeFqName) {
                 violations.add(
-                    "Property ${prop.declaration.name} should have type '$typeFqName' but was '${prop.declaration.type}'",
+                    getMessage("property.should.haveType", prop.declaration.name, typeFqName, prop.declaration.type),
                 )
             }
         }
@@ -188,7 +207,7 @@ class PropertiesShould internal constructor(
         builder.setShould { prop, _, violations ->
             if (!typeFqNames.contains(prop.declaration.type)) {
                 violations.add(
-                    "Property ${prop.declaration.name} should have type in [${typeFqNames.joinToString()}] but was '${prop.declaration.type}'",
+                    getMessage("property.should.haveTypeAny", prop.declaration.name, typeFqNames.joinToString(), prop.declaration.type),
                 )
             }
         }
@@ -204,7 +223,9 @@ class PropertiesShould internal constructor(
                     it.name == annotationName || it.fqName == annotationName
                 }
             if (!hasAnnotation) {
-                violations.add("Property ${prop.declaration.name} should be annotated with @$annotationName")
+                violations.add(
+                    getMessage("property.should.haveAnnotation", prop.declaration.name, annotationName),
+                )
             }
         }
         return builder
@@ -218,7 +239,7 @@ class PropertiesShould internal constructor(
                 }
             if (!hasAnnotation) {
                 violations.add(
-                    "Property ${prop.declaration.name} should be annotated with any of [${annotationNames.joinToString()}]",
+                    getMessage("property.should.haveAnnotationAny", prop.declaration.name, annotationNames.joinToString()),
                 )
             }
         }
@@ -236,7 +257,9 @@ class PropertiesShould internal constructor(
     infix fun haveAllAnnotationsOf(names: List<String>): PropertiesRuleBuilder {
         builder.setShould { prop, _, violations ->
             if (!prop.hasAllAnnotations(names)) {
-                violations.add("Property ${prop.declaration.name} should have all annotations: ${names.joinToString()}")
+                violations.add(
+                    getMessage("property.should.haveAllAnnotations", prop.declaration.name, names.joinToString()),
+                )
             }
         }
         return builder
@@ -254,7 +277,7 @@ class PropertiesShould internal constructor(
         builder.setShould { prop, _, violations ->
             if (!prop.hasAnyAnnotation(names)) {
                 violations.add(
-                    "Property ${prop.declaration.name} should have at least one annotation of: ${names.joinToString()}",
+                    getMessage("property.should.haveAnyAnnotation", prop.declaration.name, names.joinToString()),
                 )
             }
         }
@@ -272,7 +295,9 @@ class PropertiesShould internal constructor(
     infix fun haveModifier(modifier: Modifier): PropertiesRuleBuilder {
         builder.setShould { prop, _, violations ->
             if (!prop.declaration.modifiers.contains(modifier)) {
-                violations.add("Property ${prop.declaration.name} should have modifier: $modifier")
+                violations.add(
+                    getMessage("property.should.haveModifier", prop.declaration.name, modifier),
+                )
             }
         }
         return builder
@@ -288,7 +313,7 @@ class PropertiesShould internal constructor(
             val missing = modifiers.filter { !prop.declaration.modifiers.contains(it) }
             if (missing.isNotEmpty()) {
                 violations.add(
-                    "Property ${prop.declaration.name} should have all modifiers: ${modifiers.joinToString()}, but is missing: ${missing.joinToString()}",
+                    getMessage("property.should.haveAllModifiers", prop.declaration.name, modifiers.joinToString(), missing.joinToString()),
                 )
             }
         }
@@ -311,7 +336,7 @@ class PropertiesShould internal constructor(
         builder.setShould { prop, _, violations ->
             if (!modifiers.any { prop.declaration.modifiers.contains(it) }) {
                 violations.add(
-                    "Property ${prop.declaration.name} should have at least one modifier of: ${modifiers.joinToString()}",
+                    getMessage("property.should.haveAnyModifier", prop.declaration.name, modifiers.joinToString()),
                 )
             }
         }
@@ -332,7 +357,7 @@ class PropertiesShould internal constructor(
         builder.setShould { prop, _, violations ->
             if (prop.declaration.visibility != visibility) {
                 violations.add(
-                    "Property ${prop.declaration.name} should have visibility: $visibility but was: ${prop.declaration.visibility}",
+                    getMessage("property.should.haveVisibility", prop.declaration.name, visibility, prop.declaration.visibility),
                 )
             }
         }
@@ -348,7 +373,7 @@ class PropertiesShould internal constructor(
         builder.setShould { prop, _, violations ->
             if (!visibilities.contains(prop.declaration.visibility)) {
                 violations.add(
-                    "Property ${prop.declaration.name} should have any visibility of: ${visibilities.joinToString()} but was: ${prop.declaration.visibility}",
+                    getMessage("property.should.haveAnyVisibility", prop.declaration.name, visibilities.joinToString(), prop.declaration.visibility),
                 )
             }
         }
@@ -365,7 +390,9 @@ class PropertiesShould internal constructor(
     fun beExtension(): PropertiesRuleBuilder {
         builder.setShould { prop, _, violations ->
             if (!prop.declaration.isExtension) {
-                violations.add("Property ${prop.declaration.name} should be an extension property")
+                violations.add(
+                    getMessage("property.should.beExtension", prop.declaration.name),
+                )
             }
         }
         return builder
@@ -374,7 +401,9 @@ class PropertiesShould internal constructor(
     fun beConst(): PropertiesRuleBuilder {
         builder.setShould { prop, _, violations ->
             if (!prop.declaration.modifiers.contains(Modifier.CONST)) {
-                violations.add("Property ${prop.declaration.name} should be const val")
+                violations.add(
+                    getMessage("property.should.beConst", prop.declaration.name),
+                )
             }
         }
         return builder
@@ -383,7 +412,9 @@ class PropertiesShould internal constructor(
     fun beLateinit(): PropertiesRuleBuilder {
         builder.setShould { prop, _, violations ->
             if (!prop.declaration.modifiers.contains(Modifier.LATEINIT)) {
-                violations.add("Property ${prop.declaration.name} should be lateinit var")
+                violations.add(
+                    getMessage("property.should.beLateinit", prop.declaration.name),
+                )
             }
         }
         return builder
@@ -392,7 +423,9 @@ class PropertiesShould internal constructor(
     fun beDocumentedWithKDoc(): PropertiesRuleBuilder {
         builder.setShould { prop, _, violations ->
             if (prop.declaration.kdocText.isNullOrBlank()) {
-                violations.add("Property ${prop.declaration.name} should be documented with KDoc")
+                violations.add(
+                    getMessage("property.should.beDocumented", prop.declaration.name),
+                )
             }
         }
         return builder
@@ -407,7 +440,9 @@ class PropertiesShould internal constructor(
     ): PropertiesRuleBuilder {
         builder.setShould { prop, allProps, violations ->
             if (!assertion(prop, allProps)) {
-                violations.add("Property ${prop.declaration.name} should satisfy: $description")
+                violations.add(
+                    getMessage("property.should.satisfyCustom", prop.declaration.name, description),
+                )
             }
         }
         return builder

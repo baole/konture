@@ -55,3 +55,10 @@ We use a Python post-processing script, [add_front_matter.py](file:///Users/baol
 - **Kotlin Format**: Spotless + Ktlint are configured. Always run `./gradlew spotlessApply` before pushing or committing changes.
 - **Java/Kotlin Source Headers**: File modification tools should maintain the copyright/license headers at the top of Kotlin files (automatically handled by spotless).
 - **Detekt static analysis**: Checked during compilation and tests. Ensure no new warnings are introduced.
+
+## 🌐 Internationalization (i18n)
+
+- **Always consider i18n** for user-visible strings, including errors, warnings, logs, assertion messages, and baseline parsing.
+- **Do not add or depend on hard-coded English message formats** when equivalent message keys or localization utilities exist.
+- **Preserve locale-neutral behavior** for persisted data such as baselines: normalize and parse localized messages through the existing i18n-aware utilities.
+- **Test relevant locale variants** whenever changing user-visible messages, message parsing, or baseline matching.

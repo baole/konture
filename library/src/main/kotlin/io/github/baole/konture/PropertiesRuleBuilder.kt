@@ -7,6 +7,7 @@ package io.github.baole.konture
 
 import io.github.baole.konture.core.KontureLogger
 import io.github.baole.konture.core.LogLevel
+import io.github.baole.konture.i18n.getMessage
 import io.github.baole.konture.impl.BaselineManager
 import io.github.baole.konture.impl.LogicalOperator
 
@@ -167,7 +168,9 @@ class PropertiesRuleBuilder(
                     val tempViolations = mutableListOf<String>()
                     assertion(prop, allProps, tempViolations)
                     if (tempViolations.isEmpty()) {
-                        violations.add("Property ${prop.declaration.name} should not satisfy the negated condition.")
+                        violations.add(
+                            getMessage("properties.rule.negatedSatisfied", prop.declaration.name),
+                        )
                     }
                 }
                 a
@@ -188,7 +191,7 @@ class PropertiesRuleBuilder(
                     actualAssertion(prop, allProps, temp2)
                     if (temp1.isNotEmpty() && temp2.isNotEmpty()) {
                         violations.add(
-                            "Property ${prop.declaration.name} should satisfy either: (${temp1.joinToString()}) OR (${temp2.joinToString()})",
+                            getMessage("properties.rule.eitherOr", prop.declaration.name, temp1.joinToString(), temp2.joinToString()),
                         )
                     }
                 }
@@ -202,7 +205,7 @@ class PropertiesRuleBuilder(
                     val ok2 = temp2.isEmpty()
                     if (ok1 == ok2) {
                         violations.add(
-                            "Property ${prop.declaration.name} should satisfy exactly one of the XOR assertions.",
+                            getMessage("properties.rule.xor", prop.declaration.name),
                         )
                     }
                 }
@@ -245,8 +248,7 @@ class PropertiesRuleBuilder(
         if (propertiesToCheck.isEmpty()) {
             if (!allowEmpty) {
                 throw AssertionError(
-                    "No properties matched the filter criteria in 'that()'. " +
-                        "If this is expected, use '.allowEmpty()' or 'allowEmpty = true' on the rule builder to allow empty selections.",
+                    getMessage("properties.rule.emptySelect"),
                 )
             } else {
                 KontureLogger.log(
@@ -255,25 +257,24 @@ class PropertiesRuleBuilder(
                 )
             }
         }
-        val violations = mutableListOf<String>()
-
         val assertion =
             shouldAssertion ?: throw AssertionError(
-                "Properties rule has no assertion ('should()'). You must specify at least one assertion condition.",
+                getMessage("properties.rule.noAssertion"),
             )
-        for (prop in propertiesToCheck) {
-            val startIdx = violations.size
-            assertion(prop, allProperties, violations)
-            for (i in startIdx until violations.size) {
-                violations[i] = "${violations[i]} (at ${prop.filePath})"
+
+        val runCheck = { list: MutableList<String> ->
+            for (prop in propertiesToCheck) {
+                val startIdx = list.size
+                assertion(prop, allProperties, list)
+                for (i in startIdx until list.size) {
+                    list[i] = "${list[i]} (at ${prop.filePath})"
+                }
             }
         }
 
-        if (violations.isNotEmpty()) {
-            BaselineManager.handleViolations(
-                violations,
-                "Property architecture violation(s) detected:",
-            )
-        }
+        BaselineManager.checkRule(
+            getMessage("properties.rule.violationHeader"),
+            runCheck,
+        )
     }
 }

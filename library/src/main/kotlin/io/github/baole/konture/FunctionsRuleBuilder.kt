@@ -7,6 +7,7 @@ package io.github.baole.konture
 
 import io.github.baole.konture.core.KontureLogger
 import io.github.baole.konture.core.LogLevel
+import io.github.baole.konture.i18n.getMessage
 import io.github.baole.konture.impl.BaselineManager
 import io.github.baole.konture.impl.LogicalOperator
 
@@ -167,7 +168,9 @@ class FunctionsRuleBuilder(
                     val tempViolations = mutableListOf<String>()
                     assertion(func, allFuncs, tempViolations)
                     if (tempViolations.isEmpty()) {
-                        violations.add("Function ${func.declaration.name} should not satisfy the negated condition.")
+                        violations.add(
+                            getMessage("functions.rule.negatedSatisfied", func.declaration.name),
+                        )
                     }
                 }
                 a
@@ -188,7 +191,7 @@ class FunctionsRuleBuilder(
                     actualAssertion(func, allFuncs, temp2)
                     if (temp1.isNotEmpty() && temp2.isNotEmpty()) {
                         violations.add(
-                            "Function ${func.declaration.name} should satisfy either: (${temp1.joinToString()}) OR (${temp2.joinToString()})",
+                            getMessage("functions.rule.eitherOr", func.declaration.name, temp1.joinToString(), temp2.joinToString()),
                         )
                     }
                 }
@@ -202,7 +205,7 @@ class FunctionsRuleBuilder(
                     val ok2 = temp2.isEmpty()
                     if (ok1 == ok2) {
                         violations.add(
-                            "Function ${func.declaration.name} should satisfy exactly one of the XOR assertions.",
+                            getMessage("functions.rule.xor", func.declaration.name),
                         )
                     }
                 }
@@ -245,8 +248,7 @@ class FunctionsRuleBuilder(
         if (functionsToCheck.isEmpty()) {
             if (!allowEmpty) {
                 throw AssertionError(
-                    "No functions matched the filter criteria in 'that()'. " +
-                        "If this is expected, use '.allowEmpty()' or 'allowEmpty = true' on the rule builder to allow empty selections.",
+                    getMessage("functions.rule.emptySelect"),
                 )
             } else {
                 KontureLogger.log(
@@ -255,25 +257,24 @@ class FunctionsRuleBuilder(
                 )
             }
         }
-        val violations = mutableListOf<String>()
-
         val assertion =
             shouldAssertion ?: throw AssertionError(
-                "Functions rule has no assertion ('should()'). You must specify at least one assertion condition.",
+                getMessage("functions.rule.noAssertion"),
             )
-        for (func in functionsToCheck) {
-            val startIdx = violations.size
-            assertion(func, allFunctions, violations)
-            for (i in startIdx until violations.size) {
-                violations[i] = "${violations[i]} (at ${func.filePath})"
+
+        val runCheck = { list: MutableList<String> ->
+            for (func in functionsToCheck) {
+                val startIdx = list.size
+                assertion(func, allFunctions, list)
+                for (i in startIdx until list.size) {
+                    list[i] = "${list[i]} (at ${func.filePath})"
+                }
             }
         }
 
-        if (violations.isNotEmpty()) {
-            BaselineManager.handleViolations(
-                violations,
-                "Function architecture violation(s) detected:",
-            )
-        }
+        BaselineManager.checkRule(
+            getMessage("functions.rule.violationHeader"),
+            runCheck,
+        )
     }
 }
