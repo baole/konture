@@ -129,3 +129,85 @@ internal fun AnnotationDeclaration.matchesName(annotationName: String): Boolean 
     fqName == annotationName ||
         name == annotationName ||
         fqName.endsWith(".$annotationName")
+
+/**
+ * Recursively checks whether this class declaration is assignable to the given [superType].
+ */
+internal fun ClassDeclaration.isAssignableTo(
+    superType: String,
+    allClasses: List<ClassDeclaration>,
+    visited: MutableSet<String> = mutableSetOf(),
+): Boolean {
+    if (!visited.add(this.fqName)) return false
+
+    if (supertypes.contains(superType) || supertypes.any { it.substringBefore("<").trim() == superType }) return true
+
+    for (directSuper in supertypes) {
+        val cleanSuperName = directSuper.substringBefore("<").removeSuffix("?").trim()
+        if (cleanSuperName == superType) return true
+
+        val resolved = resolveTypeReference(cleanSuperName, allClasses)
+        if (resolved != null) {
+            if (resolved.fqName == superType || resolved.name == superType) return true
+            if (resolved.isAssignableTo(superType, allClasses, visited)) return true
+        }
+    }
+
+    return false
+}
+
+/**
+ * Collects all package names that this class depends on (both internal and external).
+ */
+internal fun ClassDeclaration.collectDependencyPackages(allClasses: List<ClassDeclaration>): Set<String> {
+    val packages = mutableSetOf<String>()
+
+    fun extractPackage(fqName: String): String? {
+        val clean = fqName.substringBefore("<").trim()
+        if (!clean.contains('.')) return null
+
+        val segments = clean.split('.')
+        val classIndex = segments.indexOfFirst { it.isNotEmpty() && it[0].isUpperCase() }
+        return if (classIndex > 0) {
+            segments.take(classIndex).joinToString(".")
+        } else if (classIndex == 0) {
+            null
+        } else {
+            segments.dropLast(1).joinToString(".")
+        }
+    }
+
+    // 1. Extract from imports
+    for (imp in imports) {
+        if (imp.endsWith(".*")) {
+            packages.add(imp.removeSuffix(".*"))
+        } else {
+            extractPackage(imp)?.let { packages.add(it) }
+        }
+    }
+
+    // 2. Extract from referencedTypes FQNs
+    for (ref in referencedTypes) {
+        extractPackage(ref)?.let { packages.add(it) }
+    }
+
+    // 3. Extract from supertypes FQNs
+    for (superType in supertypes) {
+        extractPackage(superType)?.let { packages.add(it) }
+    }
+
+    // 4. Extract from annotations
+    for (ann in annotations) {
+        extractPackage(ann.fqName)?.let { packages.add(it) }
+    }
+
+    // 5. Check dependencies resolved against allClasses
+    for (other in allClasses) {
+        if (other.fqName != this.fqName && this.dependsOn(other)) {
+            packages.add(other.packageName)
+        }
+    }
+
+    return packages
+}
+

@@ -343,7 +343,7 @@ class ClassesShould internal constructor(
      */
     fun beAbstract(): ClassesRuleBuilder {
         builder.setShould { cls, _, violations ->
-            if (!cls.isAbstract) {
+            if (!cls.isAbstract && !cls.isInterface) {
                 violations.add(getMessage("class.should.beAbstract", cls.fqName))
             }
         }
@@ -379,7 +379,7 @@ class ClassesShould internal constructor(
      */
     fun beInline(): ClassesRuleBuilder {
         builder.setShould { cls, _, violations ->
-            if (!cls.modifiers.contains(Modifier.INLINE)) {
+            if (!cls.modifiers.contains(Modifier.INLINE) && !cls.modifiers.contains(Modifier.VALUE)) {
                 violations.add(getMessage("class.should.beInline", cls.fqName))
             }
         }
@@ -511,8 +511,8 @@ class ClassesShould internal constructor(
      * Asserts that selected classes extend or implement specified supertype.
      */
     infix fun beAssignableTo(superType: String): ClassesRuleBuilder {
-        builder.setShould { cls, _, violations ->
-            if (!cls.supertypes.contains(superType)) {
+        builder.setShould { cls, allClasses, violations ->
+            if (!cls.isAssignableTo(superType, allClasses)) {
                 violations.add(getMessage("class.should.beAssignableTo", cls.fqName, superType))
             }
         }
@@ -532,8 +532,8 @@ class ClassesShould internal constructor(
      * @param superTypes The list of supertypes, at least one of which must be matched.
      */
     infix fun beAssignableToAnyOf(superTypes: List<String>): ClassesRuleBuilder {
-        builder.setShould { cls, _, violations ->
-            if (!superTypes.any { cls.supertypes.contains(it) }) {
+        builder.setShould { cls, allClasses, violations ->
+            if (!superTypes.any { cls.isAssignableTo(it, allClasses) }) {
                 violations.add(getMessage("class.should.beAssignableToAny", cls.fqName, superTypes.joinToString()))
             }
         }
@@ -560,8 +560,8 @@ class ClassesShould internal constructor(
      * @param superTypes The list of supertypes that must all be matched.
      */
     infix fun beAssignableToAllOf(superTypes: List<String>): ClassesRuleBuilder {
-        builder.setShould { cls, _, violations ->
-            val missing = superTypes.filter { !cls.supertypes.contains(it) }
+        builder.setShould { cls, allClasses, violations ->
+            val missing = superTypes.filter { !cls.isAssignableTo(it, allClasses) }
             if (missing.isNotEmpty()) {
                 violations.add(
                     getMessage("class.should.beAssignableToAll", cls.fqName, superTypes.joinToString(), missing.joinToString()),

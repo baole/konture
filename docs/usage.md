@@ -102,6 +102,50 @@ mvn test
 
 ---
 
+## 🛡️ Key Architectural Guardrails
+
+Konture provides robust pre-built assertions to enforce software layout policies with high-level structural awareness.
+
+### 1. Abstract & Interface Alignment
+Kotlin interfaces are abstract by definition. In Konture, both abstract classes and interfaces are evaluated correctly under abstract rules.
+```kotlin
+// Matches both interfaces and abstract classes
+classes()
+    .that().areAbstract()
+    .should().bePublic()
+    .check()
+```
+
+### 2. Inline & Value Classes
+Modern Kotlin value classes (`value class` with `@JvmInline`) parse with `Modifier.VALUE` instead of the legacy `Modifier.INLINE`, but they represent the same architectural concept. Konture's inline rules automatically evaluate both transparently.
+```kotlin
+classes()
+    .that().haveNameEndingWith("Id")
+    .should().beInline()
+    .check()
+```
+
+### 3. Transitive Assignability (Supertypes)
+Assertions like `beAssignableTo()` evaluate recursive supertype trees. It successfully matches transitive parent classes or interfaces, no matter how deep the inheritance hierarchy is.
+```kotlin
+classes()
+    .that().haveNameEndingWith("Service")
+    .should().beAssignableTo("com.acme.core.BaseService")
+    .check()
+```
+
+### 4. Dependency Package Isolation
+The `assertOnlyDependOnClassesInAnyPackage()` assertion enforces layer isolation by evaluating both internal dependencies and external libraries, while seamlessly excluding standard platform namespaces (`java.*`, `javax.*`, `kotlin.*`).
+```kotlin
+// Ensure domain model only depends on the core business layer
+Konture.scope
+    .classes
+    .withPackage("..domain..")
+    .assertOnlyDependOnClassesInAnyPackage("..domain..", "..core..")
+```
+
+---
+
 ## 🔍 Interpreting Failure Traces
 
 When an architectural constraint is violated, Konture throws a detailed, well-formatted `AssertionError` to abort your build. The trace is designed to make debugging effortless.

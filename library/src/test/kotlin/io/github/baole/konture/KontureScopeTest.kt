@@ -490,6 +490,8 @@ class KontureScopeTest {
         // --- assertAreAbstract ---
         listOf(classAbstract).assertAreAbstract()
         KontureScope(listOf(classAbstract)).assertAreAbstract()
+        listOf(classInterface).assertAreAbstract()
+        KontureScope(listOf(classInterface)).assertAreAbstract()
 
         assertThrows<AssertionError> {
             listOf(classA).assertAreAbstract()
@@ -512,8 +514,22 @@ class KontureScopeTest {
         }
 
         // --- assertAreInline ---
+        val classValue = ClassDeclaration(
+            name = "ClassValue",
+            fqName = "com.example.ClassValue",
+            packageName = "com.example",
+            isInterface = false,
+            isAbstract = false,
+            annotations = emptyList(),
+            imports = emptyList(),
+            referencedTypes = emptySet(),
+            filePath = "/src/ClassValue.kt",
+            modifiers = setOf(Modifier.VALUE)
+        )
         listOf(classInline).assertAreInline()
         KontureScope(listOf(classInline)).assertAreInline()
+        listOf(classValue).assertAreInline()
+        KontureScope(listOf(classValue)).assertAreInline()
 
         assertThrows<AssertionError> {
             listOf(classA).assertAreInline()
@@ -537,6 +553,47 @@ class KontureScopeTest {
         // --- assertAreAssignableTo ---
         listOf(classWithParent).assertAreAssignableTo("com.example.ParentType", "SomeOtherType")
         KontureScope(listOf(classWithParent)).assertAreAssignableTo("com.example.ParentType")
+
+        // Transitive assignability
+        val grandParent = ClassDeclaration(
+            name = "GrandParent",
+            fqName = "com.example.GrandParent",
+            packageName = "com.example",
+            isInterface = false,
+            isAbstract = false,
+            annotations = emptyList(),
+            imports = emptyList(),
+            referencedTypes = emptySet(),
+            filePath = "/src/GrandParent.kt",
+            supertypes = emptyList(),
+        )
+        val parent = ClassDeclaration(
+            name = "Parent",
+            fqName = "com.example.Parent",
+            packageName = "com.example",
+            isInterface = false,
+            isAbstract = false,
+            annotations = emptyList(),
+            imports = emptyList(),
+            referencedTypes = emptySet(),
+            filePath = "/src/Parent.kt",
+            supertypes = listOf("GrandParent"),
+        )
+        val child = ClassDeclaration(
+            name = "Child",
+            fqName = "com.example.Child",
+            packageName = "com.example",
+            isInterface = false,
+            isAbstract = false,
+            annotations = emptyList(),
+            imports = emptyList(),
+            referencedTypes = emptySet(),
+            filePath = "/src/Child.kt",
+            supertypes = listOf("Parent"),
+        )
+        val allHierarchyClasses = listOf(grandParent, parent, child)
+        listOf(child).assertAreAssignableTo("GrandParent", allClasses = allHierarchyClasses)
+        KontureScope(listOf(child)).assertAreAssignableTo("GrandParent", allClasses = allHierarchyClasses)
 
         assertThrows<AssertionError> {
             listOf(classWithParent).assertAreAssignableTo("com.example.NonExistentParent")
@@ -612,6 +669,37 @@ class KontureScopeTest {
             listOf(
                 classForbidden,
             ).assertOnlyBeAccessedByAnyPackage("..example..", allClasses = listOf(classDepBad, classForbidden))
+        }
+
+        // Test standard library exclusions (should be ignored) and external dependencies
+        val classWithStdLib = ClassDeclaration(
+            name = "ClassWithStdLib",
+            fqName = "com.example.ClassWithStdLib",
+            packageName = "com.example",
+            isInterface = false,
+            isAbstract = false,
+            annotations = emptyList(),
+            imports = listOf("java.util.UUID", "kotlin.collections.List", "javax.inject.Inject"),
+            referencedTypes = emptySet(),
+            filePath = "/src/ClassWithStdLib.kt",
+        )
+        // This should pass because java, kotlin, and javax are standard exclusions
+        listOf(classWithStdLib).assertOnlyDependOnClassesInAnyPackage("..example..", allClasses = listOf(classWithStdLib))
+
+        // This should fail because "org.json" package is not allowed by pattern "..example.." and is not a standard exclusion
+        val classWithExternalLib = ClassDeclaration(
+            name = "ClassWithExternalLib",
+            fqName = "com.example.ClassWithExternalLib",
+            packageName = "com.example",
+            isInterface = false,
+            isAbstract = false,
+            annotations = emptyList(),
+            imports = listOf("org.json.JSONObject"),
+            referencedTypes = emptySet(),
+            filePath = "/src/ClassWithExternalLib.kt",
+        )
+        assertThrows<AssertionError> {
+            listOf(classWithExternalLib).assertOnlyDependOnClassesInAnyPackage("..example..", allClasses = listOf(classWithExternalLib))
         }
     }
 }

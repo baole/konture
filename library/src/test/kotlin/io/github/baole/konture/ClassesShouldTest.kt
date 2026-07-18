@@ -128,11 +128,28 @@ class ClassesShouldTest : RuleBuildersTestBase() {
                 filePath = "/src/InlineClass.kt",
                 modifiers = setOf(Modifier.INLINE),
             )
+        val valueClass =
+            ClassDeclaration(
+                name = "ValueClass",
+                fqName = "com.example.ValueClass",
+                packageName = "com.example",
+                isInterface = false,
+                isAbstract = false,
+                annotations = emptyList(),
+                imports = emptyList(),
+                referencedTypes = emptySet(),
+                filePath = "/src/ValueClass.kt",
+                modifiers = setOf(Modifier.VALUE),
+            )
         val ruleInline = ClassesRuleBuilder(projectGraph).should().beInline()
         val assertInline = ruleInline.getShouldAssertion()!!
         val v5 = mutableListOf<String>()
         assertInline(inlineClass, emptyList(), v5)
         assertTrue(v5.isEmpty())
+
+        val v5b = mutableListOf<String>()
+        assertInline(valueClass, emptyList(), v5b)
+        assertTrue(v5b.isEmpty())
 
         val v6 = mutableListOf<String>()
         assertInline(classA, emptyList(), v6)
@@ -215,8 +232,13 @@ class ClassesShouldTest : RuleBuildersTestBase() {
         assertAbstract(classC, emptyList(), vAbstract)
         assertTrue(vAbstract.isEmpty())
 
-        assertAbstract(classA, emptyList(), vAbstract)
-        assertEquals(1, vAbstract.size)
+        val vAbstractB = mutableListOf<String>()
+        assertAbstract(classB, emptyList(), vAbstractB)
+        assertTrue(vAbstractB.isEmpty()) // Interfaces are abstract too
+
+        val vAbstractA = mutableListOf<String>()
+        assertAbstract(classA, emptyList(), vAbstractA)
+        assertEquals(1, vAbstractA.size)
 
         val ruleShouldPrivate = ClassesRuleBuilder(projectGraph).should().bePrivate()
         val assertPrivate = ruleShouldPrivate.getShouldAssertion()!!
@@ -748,6 +770,59 @@ class ClassesShouldTest : RuleBuildersTestBase() {
         val vAss6 = mutableListOf<String>()
         assertAssAllVarargFail(testClass, emptyList(), vAss6)
         assertEquals(1, vAss6.size)
+
+        // Transitive assignability checks
+        val grandParent = ClassDeclaration(
+            name = "GrandParent",
+            fqName = "com.example.GrandParent",
+            packageName = "com.example",
+            isInterface = false,
+            isAbstract = false,
+            annotations = emptyList(),
+            imports = emptyList(),
+            referencedTypes = emptySet(),
+            filePath = "/src/GrandParent.kt",
+            supertypes = emptyList(),
+        )
+        val parent = ClassDeclaration(
+            name = "Parent",
+            fqName = "com.example.Parent",
+            packageName = "com.example",
+            isInterface = false,
+            isAbstract = false,
+            annotations = emptyList(),
+            imports = emptyList(),
+            referencedTypes = emptySet(),
+            filePath = "/src/Parent.kt",
+            supertypes = listOf("GrandParent"),
+        )
+        val child = ClassDeclaration(
+            name = "Child",
+            fqName = "com.example.Child",
+            packageName = "com.example",
+            isInterface = false,
+            isAbstract = false,
+            annotations = emptyList(),
+            imports = emptyList(),
+            referencedTypes = emptySet(),
+            filePath = "/src/Child.kt",
+            supertypes = listOf("Parent"),
+        )
+        val allHierarchy = listOf(grandParent, parent, child)
+        val assertAssTransitive = builder().should().beAssignableTo("GrandParent").getShouldAssertion()!!
+        val vAssTransitive = mutableListOf<String>()
+        assertAssTransitive(child, allHierarchy, vAssTransitive)
+        assertTrue(vAssTransitive.isEmpty())
+
+        val assertAssAnyTransitive = builder().should().beAssignableToAnyOf("GrandParent", "WrongType").getShouldAssertion()!!
+        val vAssAnyTransitive = mutableListOf<String>()
+        assertAssAnyTransitive(child, allHierarchy, vAssAnyTransitive)
+        assertTrue(vAssAnyTransitive.isEmpty())
+
+        val assertAssAllTransitive = builder().should().beAssignableToAllOf("GrandParent", "Parent").getShouldAssertion()!!
+        val vAssAllTransitive = mutableListOf<String>()
+        assertAssAllTransitive(child, allHierarchy, vAssAllTransitive)
+        assertTrue(vAssAllTransitive.isEmpty())
 
         // beDocumentedWithKDoc
         val assertKDoc = builder().should().beDocumentedWithKDoc().getShouldAssertion()!!

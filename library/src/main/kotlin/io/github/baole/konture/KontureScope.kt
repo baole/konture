@@ -137,7 +137,9 @@ fun List<ClassDeclaration>.dataClasses(): List<ClassDeclaration> = withModifier(
 
 fun List<ClassDeclaration>.sealedClasses(): List<ClassDeclaration> = withModifier(Modifier.SEALED)
 
-fun List<ClassDeclaration>.inlineClasses(): List<ClassDeclaration> = withModifier(Modifier.INLINE)
+fun List<ClassDeclaration>.inlineClasses(): List<ClassDeclaration> =
+    filter { it.modifiers.contains(Modifier.INLINE) || it.modifiers.contains(Modifier.VALUE) }
+
 
 /**
  * Filters the list of class declarations to include only those residing in packages matching the specified pattern.
@@ -361,7 +363,7 @@ fun List<ClassDeclaration>.assertAreEnums() {
  * @throws AssertionError if any class is not abstract.
  */
 fun List<ClassDeclaration>.assertAreAbstract() {
-    assertTrue("Classes must be abstract") { it.isAbstract }
+    assertTrue("Classes must be abstract") { it.isAbstract || it.isInterface }
 }
 
 /**
@@ -403,7 +405,7 @@ fun List<ClassDeclaration>.assertAreData() {
  * @throws AssertionError if any class is not marked with the 'inline' or 'value' modifier.
  */
 fun List<ClassDeclaration>.assertAreInline() {
-    assertTrue("Classes must be inline classes") { it.modifiers.contains(Modifier.INLINE) }
+    assertTrue("Classes must be inline classes") { it.modifiers.contains(Modifier.INLINE) || it.modifiers.contains(Modifier.VALUE) }
 }
 
 /**
@@ -480,9 +482,12 @@ fun List<ClassDeclaration>.assertAreProtected() = assertHaveVisibility(Visibilit
  * @param superTypes The allowed supertype names. At least one must match.
  * @throws AssertionError if any class is not assignable to any of the specified supertypes.
  */
-fun List<ClassDeclaration>.assertAreAssignableTo(vararg superTypes: String) {
+fun List<ClassDeclaration>.assertAreAssignableTo(
+    vararg superTypes: String,
+    allClasses: List<ClassDeclaration> = Konture.projectGraph.getAllModules().flatMap { it.classes },
+) {
     assertTrue("Classes must be assignable to any of: ${superTypes.joinToString()}") { clazz ->
-        superTypes.any { clazz.supertypes.contains(it) }
+        superTypes.any { clazz.isAssignableTo(it, allClasses) }
     }
 }
 
@@ -547,19 +552,20 @@ fun List<ClassDeclaration>.assertOnlyDependOnClassesInAnyPackage(
     allClasses: List<ClassDeclaration> = Konture.projectGraph.getAllModules().flatMap { it.classes },
 ) {
     val violations = mutableListOf<String>()
+    val standardExclusions = listOf("java", "javax", "kotlin")
+
     for (cls in this) {
-        val dependencies =
-            allClasses.filter { other ->
-                other.fqName != cls.fqName && cls.dependsOn(other)
-            }
-        for (dep in dependencies) {
+        val depPackages = cls.collectDependencyPackages(allClasses).filter { depPkg ->
+            depPkg != cls.packageName && standardExclusions.none { depPkg == it || depPkg.startsWith("$it.") }
+        }
+        for (depPkg in depPackages) {
             val isAllowed =
                 packagePatterns.any { pattern ->
-                    PatternMatchers.matchesPackage(pattern, dep.packageName)
+                    PatternMatchers.matchesPackage(pattern, depPkg)
                 }
             if (!isAllowed) {
                 violations.add(
-                    "Class ${cls.fqName} depends on ${dep.fqName} (in package ${dep.packageName}), which is not allowed by package pattern(s): ${packagePatterns.joinToString()}",
+                    "Class ${cls.fqName} depends on package $depPkg, which is not allowed by package pattern(s): ${packagePatterns.joinToString()}",
                 )
             }
         }
@@ -703,7 +709,10 @@ fun KontureScope.assertAreProtected() = classes.assertAreProtected()
  * @param superTypes The allowed supertype names. At least one must match.
  * @throws AssertionError if any class is not assignable to any of the specified supertypes.
  */
-fun KontureScope.assertAreAssignableTo(vararg superTypes: String) = classes.assertAreAssignableTo(*superTypes)
+fun KontureScope.assertAreAssignableTo(
+    vararg superTypes: String,
+    allClasses: List<ClassDeclaration> = Konture.projectGraph.getAllModules().flatMap { it.classes },
+) = classes.assertAreAssignableTo(*superTypes, allClasses = allClasses)
 
 /**
  * Asserts that the selected classes in the scope are only accessed by classes residing in packages matching the specified patterns.

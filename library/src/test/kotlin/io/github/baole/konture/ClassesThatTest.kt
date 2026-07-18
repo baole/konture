@@ -146,7 +146,38 @@ class ClassesThatTest : RuleBuildersTestBase() {
 
         val ruleAbstract = ClassesRuleBuilder(projectGraph).that().areAbstract()
         assertTrue(ruleAbstract.getThatPredicate()!!(classC))
+        assertTrue(ruleAbstract.getThatPredicate()!!(classB)) // Interfaces qualify as abstract
         assertFalse(ruleAbstract.getThatPredicate()!!(classA))
+
+        val classInlineMod = ClassDeclaration(
+            name = "MyInline",
+            fqName = "com.example.MyInline",
+            packageName = "com.example",
+            isInterface = false,
+            isAbstract = false,
+            annotations = emptyList(),
+            imports = emptyList(),
+            referencedTypes = emptySet(),
+            filePath = "/src/MyInline.kt",
+            modifiers = setOf(Modifier.INLINE),
+        )
+        val classValueMod = ClassDeclaration(
+            name = "MyValue",
+            fqName = "com.example.MyValue",
+            packageName = "com.example",
+            isInterface = false,
+            isAbstract = false,
+            annotations = emptyList(),
+            imports = emptyList(),
+            referencedTypes = emptySet(),
+            filePath = "/src/MyValue.kt",
+            modifiers = setOf(Modifier.VALUE),
+        )
+
+        val ruleInline = ClassesRuleBuilder(projectGraph).that().beInline()
+        assertTrue(ruleInline.getThatPredicate()!!(classInlineMod))
+        assertTrue(ruleInline.getThatPredicate()!!(classValueMod))
+        assertFalse(ruleInline.getThatPredicate()!!(classA))
 
         val rulePrivate = ClassesRuleBuilder(projectGraph).that().bePrivate()
         assertTrue(rulePrivate.getThatPredicate()!!(classPrivate))
@@ -306,5 +337,73 @@ class ClassesThatTest : RuleBuildersTestBase() {
                 projectGraph,
             ).that().haveAnnotationWithArgument("MyAnno", "wrong", "foo")
         assertFalse(ruleAnnoArgWrongName.getThatPredicate()!!(classWithAnnoArg))
+
+        // areAssignableTo checks
+        val grandParent = ClassDeclaration(
+            name = "GrandParent",
+            fqName = "com.example.GrandParent",
+            packageName = "com.example",
+            isInterface = false,
+            isAbstract = false,
+            annotations = emptyList(),
+            imports = emptyList(),
+            referencedTypes = emptySet(),
+            filePath = "/src/GrandParent.kt",
+            supertypes = emptyList(),
+        )
+        val parent = ClassDeclaration(
+            name = "Parent",
+            fqName = "com.example.Parent",
+            packageName = "com.example",
+            isInterface = false,
+            isAbstract = false,
+            annotations = emptyList(),
+            imports = emptyList(),
+            referencedTypes = emptySet(),
+            filePath = "/src/Parent.kt",
+            supertypes = listOf("GrandParent"),
+        )
+        val child = ClassDeclaration(
+            name = "Child",
+            fqName = "com.example.Child",
+            packageName = "com.example",
+            isInterface = false,
+            isAbstract = false,
+            annotations = emptyList(),
+            imports = emptyList(),
+            referencedTypes = emptySet(),
+            filePath = "/src/Child.kt",
+            supertypes = listOf("Parent"),
+        )
+
+        val fileGrandParent = FileDeclaration("GrandParent.kt", "com.example", classes = listOf(grandParent))
+        val fileParent = FileDeclaration("Parent.kt", "com.example", classes = listOf(parent))
+        val fileChild = FileDeclaration("Child.kt", "com.example", classes = listOf(child))
+
+        val hierarchyModule = Module(
+            buildId = ":",
+            path = ":hierarchy",
+            projectDir = "hierarchy",
+            appliedPlugins = listOf("kotlin"),
+            sourceSets = emptyList(),
+            dependencies = emptyList(),
+            files = listOf(fileGrandParent, fileParent, fileChild),
+        )
+        val hierarchyGraph = ProjectGraph(
+            builds = mapOf(":" to listOf(hierarchyModule)),
+        )
+
+        val ruleAssign = ClassesRuleBuilder(hierarchyGraph).that().areAssignableTo("GrandParent")
+        val predAssign = ruleAssign.getThatPredicate()!!
+        assertTrue(predAssign(child))
+        assertTrue(predAssign(parent))
+        assertFalse(predAssign(grandParent))
+
+        val ruleAssignAny = ClassesRuleBuilder(hierarchyGraph).that().areAssignableToAnyOf("GrandParent", "NonExistent")
+        assertTrue(ruleAssignAny.getThatPredicate()!!(child))
+
+        val ruleAssignAll = ClassesRuleBuilder(hierarchyGraph).that().areAssignableToAllOf("Parent", "GrandParent")
+        assertTrue(ruleAssignAll.getThatPredicate()!!(child))
+        assertFalse(ruleAssignAll.getThatPredicate()!!(parent))
     }
 }

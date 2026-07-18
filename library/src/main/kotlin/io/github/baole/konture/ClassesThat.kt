@@ -262,7 +262,7 @@ class ClassesThat internal constructor(
      * Restricts the rules to abstract classes only.
      */
     fun areAbstract(): ClassesRuleBuilder {
-        builder.setThat { it.isAbstract }
+        builder.setThat { it.isAbstract || it.isInterface }
         return builder
     }
 
@@ -366,13 +366,17 @@ class ClassesThat internal constructor(
 
     fun beData(): ClassesRuleBuilder = haveModifier(Modifier.DATA)
 
-    fun beInline(): ClassesRuleBuilder = haveModifier(Modifier.INLINE)
+    fun beInline(): ClassesRuleBuilder {
+        builder.setThat { it.modifiers.contains(Modifier.INLINE) || it.modifiers.contains(Modifier.VALUE) }
+        return builder
+    }
 
     /**
      * Restricts the rules to classes extending or implementing the specified type.
      */
     infix fun areAssignableTo(superType: String): ClassesRuleBuilder {
-        builder.setThat { it.supertypes.contains(superType) }
+        val allClasses = builder.graph.getAllModules().flatMap { it.classes }
+        builder.setThat { it.isAssignableTo(superType, allClasses) }
         return builder
     }
 
@@ -389,7 +393,8 @@ class ClassesThat internal constructor(
      * @param superTypes The list of supertypes, at least one of which must be matched.
      */
     infix fun areAssignableToAnyOf(superTypes: List<String>): ClassesRuleBuilder {
-        builder.setThat { cls -> superTypes.any { cls.supertypes.contains(it) } }
+        val allClasses = builder.graph.getAllModules().flatMap { it.classes }
+        builder.setThat { cls -> superTypes.any { cls.isAssignableTo(it, allClasses) } }
         return builder
     }
 
@@ -413,7 +418,8 @@ class ClassesThat internal constructor(
      * @param superTypes The list of supertypes that must all be matched.
      */
     infix fun areAssignableToAllOf(superTypes: List<String>): ClassesRuleBuilder {
-        builder.setThat { cls -> superTypes.all { cls.supertypes.contains(it) } }
+        val allClasses = builder.graph.getAllModules().flatMap { it.classes }
+        builder.setThat { cls -> superTypes.all { cls.isAssignableTo(it, allClasses) } }
         return builder
     }
 
