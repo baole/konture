@@ -15,6 +15,11 @@ object KontureConstants {
     const val PROPERTY_BASELINE_PATH = "konture.baseline.path"
 
     /**
+     * System property key used to override the target translation language / locale.
+     */
+    const val PROPERTY_LOCALE = "konture.locale"
+
+    /**
      * System property key used to enable/disable baseline generation mode.
      */
     const val PROPERTY_BASELINE_GENERATE = "konture.baseline.generate"

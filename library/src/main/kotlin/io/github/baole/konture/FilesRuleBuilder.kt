@@ -7,6 +7,7 @@ package io.github.baole.konture
 
 import io.github.baole.konture.core.KontureLogger
 import io.github.baole.konture.core.LogLevel
+import io.github.baole.konture.i18n.getMessage
 import io.github.baole.konture.impl.BaselineManager
 import io.github.baole.konture.impl.LogicalOperator
 
@@ -171,7 +172,7 @@ class FilesRuleBuilder(
                     val tempViolations = mutableListOf<String>()
                     assertion(file, allFiles, tempViolations)
                     if (tempViolations.isEmpty()) {
-                        violations.add("File ${file.declaration.name} should not satisfy the negated condition.")
+                        violations.add(getMessage("files.rule.negatedSatisfied", file.declaration.name))
                     }
                 }
                 a
@@ -192,7 +193,7 @@ class FilesRuleBuilder(
                     actualAssertion(file, allFiles, temp2)
                     if (temp1.isNotEmpty() && temp2.isNotEmpty()) {
                         violations.add(
-                            "File ${file.declaration.name} should satisfy either: (${temp1.joinToString()}) OR (${temp2.joinToString()})",
+                            getMessage("files.rule.eitherOr", file.declaration.name, temp1.joinToString(), temp2.joinToString()),
                         )
                     }
                 }
@@ -206,7 +207,7 @@ class FilesRuleBuilder(
                     val ok2 = temp2.isEmpty()
                     if (ok1 == ok2) {
                         violations.add(
-                            "File ${file.declaration.name} should satisfy exactly one of the XOR assertions.",
+                            getMessage("files.rule.xor", file.declaration.name),
                         )
                     }
                 }
@@ -239,10 +240,7 @@ class FilesRuleBuilder(
         )
         if (filesToCheck.isEmpty()) {
             if (!allowEmpty) {
-                throw AssertionError(
-                    "No files matched the filter criteria in 'that()'. " +
-                        "If this is expected, use '.allowEmpty()' or 'allowEmpty = true' on the rule builder to allow empty selections.",
-                )
+                throw AssertionError(getMessage("files.rule.emptySelect"))
             } else {
                 KontureLogger.log(
                     LogLevel.WARNING,
@@ -253,24 +251,22 @@ class FilesRuleBuilder(
 
         val assertion =
             shouldAssertion ?: throw AssertionError(
-                "Files rule has no assertion ('should()'). You must specify at least one assertion condition.",
+                getMessage("files.rule.noAssertion"),
             )
 
-        val violations = mutableListOf<String>()
-
-        for (file in filesToCheck) {
-            val startIdx = violations.size
-            assertion(file, allFiles, violations)
-            for (i in startIdx until violations.size) {
-                violations[i] = "${violations[i]} (at ${file.declaration.filePath})"
+        val runCheck = { list: MutableList<String> ->
+            for (file in filesToCheck) {
+                val startIdx = list.size
+                assertion(file, allFiles, list)
+                for (i in startIdx until list.size) {
+                    list[i] = "${list[i]} (at ${file.declaration.filePath})"
+                }
             }
         }
 
-        if (violations.isNotEmpty()) {
-            BaselineManager.handleViolations(
-                violations,
-                "File architecture violation(s) detected:",
-            )
-        }
+        BaselineManager.checkRule(
+            getMessage("files.rule.violationHeader"),
+            runCheck,
+        )
     }
 }

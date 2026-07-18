@@ -11,6 +11,7 @@ import io.github.baole.konture.ProjectGraph
 import io.github.baole.konture.core.KontureLogger
 import io.github.baole.konture.core.LogLevel
 import java.io.File
+import java.util.Locale
 import java.util.concurrent.ConcurrentHashMap
 
 internal class BaselineManager {
@@ -27,6 +28,12 @@ internal class BaselineManager {
     private var capturedProjectGraph: ProjectGraph? = null
 
     @Volatile
+    private var capturedBuildRoot: File? = null
+
+    @Volatile
+    private var hasCapturedBuildRoot = false
+
+    @Volatile
     private var isShutdownRunning = false
 
     @Suppress("TooGenericExceptionCaught", "SwallowedException")
@@ -37,6 +44,13 @@ internal class BaselineManager {
             capturedGenerateBaseline = ctx.generateBaseline
             capturedBaselinePath = ctx.baselinePath
             capturedProjectGraph = ctx.projectGraph
+            capturedBuildRoot =
+                try {
+                    ctx.projectGraphLoader.findBuildRoot()
+                } catch (e: Exception) {
+                    null
+                }
+            hasCapturedBuildRoot = true
         } catch (e: Exception) {
             // Ignore
         }
@@ -50,6 +64,7 @@ internal class BaselineManager {
                 capturedGenerateBaseline = sysProp
                 return sysProp
             }
+            if (isShutdownRunning) return capturedGenerateBaseline ?: false
             val ctxVal =
                 try {
                     context.generateBaseline
@@ -71,6 +86,7 @@ internal class BaselineManager {
                 capturedBaselinePath = sysProp
                 return sysProp
             }
+            if (isShutdownRunning) return capturedBaselinePath ?: "konture-baseline.json"
             val ctxVal =
                 try {
                     context.baselinePath
@@ -87,6 +103,7 @@ internal class BaselineManager {
     @get:Suppress("TooGenericExceptionCaught", "SwallowedException")
     val projectGraph: ProjectGraph?
         get() {
+            if (isShutdownRunning) return capturedProjectGraph
             val ctxVal =
                 try {
                     context.projectGraph
@@ -107,13 +124,20 @@ internal class BaselineManager {
         }
 
     @get:Suppress("TooGenericExceptionCaught", "SwallowedException")
-    val buildRoot: File? by lazy {
-        try {
-            context.projectGraphLoader.findBuildRoot()
-        } catch (e: Exception) {
-            null
+    val buildRoot: File?
+        get() {
+            if (isShutdownRunning) return capturedBuildRoot
+            if (hasCapturedBuildRoot) return capturedBuildRoot
+            return try {
+                context.projectGraphLoader.findBuildRoot().also {
+                    capturedBuildRoot = it
+                    hasCapturedBuildRoot = true
+                }
+            } catch (e: Exception) {
+                hasCapturedBuildRoot = true
+                null
+            }
         }
-    }
 
     val baselineFile: File
         get() {
@@ -210,6 +234,8 @@ internal class BaselineManager {
         capturedBaselinePath = null
         capturedGenerateBaseline = null
         capturedProjectGraph = null
+        capturedBuildRoot = null
+        hasCapturedBuildRoot = false
         recordedViolations.clear()
         shutdownHook?.let {
             try {
@@ -321,6 +347,91 @@ internal class BaselineManager {
         }
     }
 
+    fun checkRule(
+        violationHeader: String,
+        runCheck: (MutableList<String>) -> Unit,
+    ) {
+        val userLocale = Konture.locale
+
+        // 1. Run in English to get English violations for baseline matching
+        val englishViolations = mutableListOf<String>()
+        Konture.locale = Locale.ENGLISH
+        try {
+            runCheck(englishViolations)
+        } finally {
+            Konture.locale = userLocale
+        }
+
+        if (englishViolations.isEmpty()) return
+
+        // 2. Filter using baseline
+        val unmatchedIndices = getNewViolationIndices(englishViolations)
+
+        if (unmatchedIndices.isNotEmpty() || generateBaseline) {
+            if (generateBaseline) {
+                handleViolations(englishViolations, violationHeader)
+            } else {
+                // Run in user locale to get localized violations for throwing AssertionError
+                val localizedViolations = mutableListOf<String>()
+                runCheck(localizedViolations)
+
+                val unmatchedLocalized =
+                    unmatchedIndices.map { index ->
+                        if (index < localizedViolations.size) localizedViolations[index] else englishViolations[index]
+                    }
+
+                throwNewViolations(unmatchedLocalized, violationHeader)
+            }
+        }
+    }
+
+    private fun getNewViolationIndices(violations: List<String>): List<Int> {
+        captureContextSnapshot()
+        if (violations.isEmpty()) return emptyList()
+
+        val testLoc = TestLocationFinder.findTestLocation()
+        val testClass = testLoc?.className ?: "UnknownTest"
+        val testMethod = testLoc?.methodName ?: "unknownMethod"
+
+        val indices = mutableListOf<Int>()
+        violations.forEachIndexed { index, violation ->
+            val normMsg = BaselineNormalizer.normalize(violation, buildRoot)
+            val (location, cleanMsg) = BaselineNormalizer.parseLocationAndMessage(normMsg, buildRoot)
+            val norm =
+                FlatBaselineViolation(
+                    testClass = testClass,
+                    testMethod = testMethod,
+                    location = location,
+                    message = cleanMsg,
+                )
+            if (!existingViolations.contains(norm)) {
+                indices.add(index)
+            }
+        }
+        return indices
+    }
+
+    private fun throwNewViolations(
+        unmatchedLocalized: List<String>,
+        header: String,
+    ) {
+        if (unmatchedLocalized.isEmpty()) return
+        val message =
+            buildString {
+                appendLine(header)
+                unmatchedLocalized.forEach { rawViolation ->
+                    val normMsg = BaselineNormalizer.normalize(rawViolation, buildRoot)
+                    val (location, cleanMsg) = BaselineNormalizer.parseLocationAndMessage(normMsg, buildRoot)
+                    if (location != null) {
+                        appendLine("  - $cleanMsg (at $location)")
+                    } else {
+                        appendLine("  - $cleanMsg")
+                    }
+                }
+            }
+        throw AssertionError(message)
+    }
+
     /**
      * Writes the combined baseline (existing + newly recorded) to file.
      */
@@ -424,6 +535,13 @@ internal class BaselineManager {
             header: String,
         ) {
             KontureContextProvider.currentContext.baselineManager.handleViolations(violations, header)
+        }
+
+        fun checkRule(
+            violationHeader: String,
+            runCheck: (MutableList<String>) -> Unit,
+        ) {
+            KontureContextProvider.currentContext.baselineManager.checkRule(violationHeader, runCheck)
         }
 
         fun writeBaseline() {

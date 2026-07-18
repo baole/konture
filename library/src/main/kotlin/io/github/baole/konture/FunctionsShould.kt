@@ -5,6 +5,7 @@
 
 package io.github.baole.konture
 
+import io.github.baole.konture.i18n.getMessage
 import io.github.baole.konture.impl.PatternMatchers
 
 @KontureDsl
@@ -15,7 +16,7 @@ class FunctionsShould internal constructor(
         builder.setShould { func, _, violations ->
             if (!PatternMatchers.matchesPackage(packagePattern, func.packageName)) {
                 violations.add(
-                    "Function ${func.declaration.name} should reside in package '$packagePattern' but resides in '${func.packageName}'",
+                    getMessage("function.should.resideInPackage", func.declaration.name, packagePattern, func.packageName),
                 )
             }
         }
@@ -27,7 +28,7 @@ class FunctionsShould internal constructor(
             val matches = packagePatterns.any { PatternMatchers.matchesPackage(it, func.packageName) }
             if (!matches) {
                 violations.add(
-                    "Function ${func.declaration.name} should reside in package in [${packagePatterns.joinToString()}] but resides in '${func.packageName}'",
+                    getMessage("function.should.resideInPackageAny", func.declaration.name, packagePatterns.joinToString(), func.packageName),
                 )
             }
         }
@@ -43,7 +44,7 @@ class FunctionsShould internal constructor(
         builder.setShould { func, _, violations ->
             if (!predicate(func.packageName)) {
                 violations.add(
-                    "Function ${func.declaration.name} should reside in package matching predicate, but resides in '${func.packageName}'",
+                    getMessage("function.should.resideInPackageMatching", func.declaration.name, func.packageName),
                 )
             }
         }
@@ -53,7 +54,9 @@ class FunctionsShould internal constructor(
     infix fun haveNameEndingWith(suffix: String): FunctionsRuleBuilder {
         builder.setShould { func, _, violations ->
             if (!func.declaration.name.endsWith(suffix)) {
-                violations.add("Function ${func.declaration.name} should have name ending with '$suffix'")
+                violations.add(
+                    getMessage("function.should.haveNameEndingWith", func.declaration.name, suffix),
+                )
             }
         }
         return builder
@@ -64,7 +67,7 @@ class FunctionsShould internal constructor(
             val matches = suffixes.any { func.declaration.name.endsWith(it) }
             if (!matches) {
                 violations.add(
-                    "Function ${func.declaration.name} should have name ending with any of [${suffixes.joinToString()}]",
+                    getMessage("function.should.haveNameEndingWithAny", func.declaration.name, suffixes.joinToString()),
                 )
             }
         }
@@ -76,7 +79,9 @@ class FunctionsShould internal constructor(
     infix fun haveNameStartingWith(prefix: String): FunctionsRuleBuilder {
         builder.setShould { func, _, violations ->
             if (!func.declaration.name.startsWith(prefix)) {
-                violations.add("Function ${func.declaration.name} should have name starting with '$prefix'")
+                violations.add(
+                    getMessage("function.should.haveNameStartingWith", func.declaration.name, prefix),
+                )
             }
         }
         return builder
@@ -87,7 +92,7 @@ class FunctionsShould internal constructor(
             val matches = prefixes.any { func.declaration.name.startsWith(it) }
             if (!matches) {
                 violations.add(
-                    "Function ${func.declaration.name} should have name starting with any of [${prefixes.joinToString()}]",
+                    getMessage("function.should.haveNameStartingWithAny", func.declaration.name, prefixes.joinToString()),
                 )
             }
         }
@@ -99,7 +104,9 @@ class FunctionsShould internal constructor(
     infix fun haveNameMatching(pattern: String): FunctionsRuleBuilder {
         builder.setShould { func, _, violations ->
             if (!PatternMatchers.matchesSimpleGlob(pattern, func.declaration.name)) {
-                violations.add("Function ${func.declaration.name} should have name matching '$pattern'")
+                violations.add(
+                    getMessage("function.should.haveNameMatching", func.declaration.name, pattern),
+                )
             }
         }
         return builder
@@ -110,7 +117,7 @@ class FunctionsShould internal constructor(
             val matches = patterns.any { PatternMatchers.matchesSimpleGlob(it, func.declaration.name) }
             if (!matches) {
                 violations.add(
-                    "Function ${func.declaration.name} should have name matching any of [${patterns.joinToString()}]",
+                    getMessage("function.should.haveNameMatchingAny", func.declaration.name, patterns.joinToString()),
                 )
             }
         }
@@ -122,7 +129,9 @@ class FunctionsShould internal constructor(
     fun bePublic(): FunctionsRuleBuilder {
         builder.setShould { func, _, violations ->
             if (func.declaration.visibility != Visibility.PUBLIC) {
-                violations.add("Function ${func.declaration.name} should be public")
+                violations.add(
+                    getMessage("function.should.bePublic", func.declaration.name),
+                )
             }
         }
         return builder
@@ -131,7 +140,9 @@ class FunctionsShould internal constructor(
     fun beInternal(): FunctionsRuleBuilder {
         builder.setShould { func, _, violations ->
             if (func.declaration.visibility != Visibility.INTERNAL) {
-                violations.add("Function ${func.declaration.name} should be internal")
+                violations.add(
+                    getMessage("function.should.beInternal", func.declaration.name),
+                )
             }
         }
         return builder
@@ -140,7 +151,9 @@ class FunctionsShould internal constructor(
     fun bePrivate(): FunctionsRuleBuilder {
         builder.setShould { func, _, violations ->
             if (func.declaration.visibility != Visibility.PRIVATE) {
-                violations.add("Function ${func.declaration.name} should be private")
+                violations.add(
+                    getMessage("function.should.bePrivate", func.declaration.name),
+                )
             }
         }
         return builder
@@ -149,7 +162,9 @@ class FunctionsShould internal constructor(
     fun beProtected(): FunctionsRuleBuilder {
         builder.setShould { func, _, violations ->
             if (func.declaration.visibility != Visibility.PROTECTED) {
-                violations.add("Function ${func.declaration.name} should be protected")
+                violations.add(
+                    getMessage("function.should.beProtected", func.declaration.name),
+                )
             }
         }
         return builder
@@ -158,7 +173,9 @@ class FunctionsShould internal constructor(
     fun beSuspend(): FunctionsRuleBuilder {
         builder.setShould { func, _, violations ->
             if (!func.declaration.modifiers.contains(Modifier.SUSPEND)) {
-                violations.add("Function ${func.declaration.name} should be suspend")
+                violations.add(
+                    getMessage("function.should.beSuspend", func.declaration.name),
+                )
             }
         }
         return builder
@@ -167,7 +184,9 @@ class FunctionsShould internal constructor(
     fun beInline(): FunctionsRuleBuilder {
         builder.setShould { func, _, violations ->
             if (!func.declaration.modifiers.contains(Modifier.INLINE)) {
-                violations.add("Function ${func.declaration.name} should be inline")
+                violations.add(
+                    getMessage("function.should.beInline", func.declaration.name),
+                )
             }
         }
         return builder
@@ -176,7 +195,9 @@ class FunctionsShould internal constructor(
     fun beOpen(): FunctionsRuleBuilder {
         builder.setShould { func, _, violations ->
             if (!func.declaration.modifiers.contains(Modifier.OPEN)) {
-                violations.add("Function ${func.declaration.name} should be open")
+                violations.add(
+                    getMessage("function.should.beOpen", func.declaration.name),
+                )
             }
         }
         return builder
@@ -185,7 +206,9 @@ class FunctionsShould internal constructor(
     fun beAbstract(): FunctionsRuleBuilder {
         builder.setShould { func, _, violations ->
             if (!func.declaration.modifiers.contains(Modifier.ABSTRACT)) {
-                violations.add("Function ${func.declaration.name} should be abstract")
+                violations.add(
+                    getMessage("function.should.beAbstract", func.declaration.name),
+                )
             }
         }
         return builder
@@ -195,7 +218,7 @@ class FunctionsShould internal constructor(
         builder.setShould { func, _, violations ->
             if (func.declaration.returnType != typeFqName) {
                 violations.add(
-                    "Function ${func.declaration.name} should have return type '$typeFqName' but was '${func.declaration.returnType}'",
+                    getMessage("function.should.haveReturnType", func.declaration.name, typeFqName, func.declaration.returnType),
                 )
             }
         }
@@ -206,7 +229,7 @@ class FunctionsShould internal constructor(
         builder.setShould { func, _, violations ->
             if (!typeFqNames.contains(func.declaration.returnType)) {
                 violations.add(
-                    "Function ${func.declaration.name} should have return type in [${typeFqNames.joinToString()}] but was '${func.declaration.returnType}'",
+                    getMessage("function.should.haveReturnTypeAny", func.declaration.name, typeFqNames.joinToString(), func.declaration.returnType),
                 )
             }
         }
@@ -222,7 +245,9 @@ class FunctionsShould internal constructor(
                     it.name == annotationName || it.fqName == annotationName
                 }
             if (!hasAnnotation) {
-                violations.add("Function ${func.declaration.name} should be annotated with @$annotationName")
+                violations.add(
+                    getMessage("function.should.haveAnnotation", func.declaration.name, annotationName),
+                )
             }
         }
         return builder
@@ -236,7 +261,7 @@ class FunctionsShould internal constructor(
                 }
             if (!hasAnnotation) {
                 violations.add(
-                    "Function ${func.declaration.name} should be annotated with any of [${annotationNames.joinToString()}]",
+                    getMessage("function.should.haveAnnotationAny", func.declaration.name, annotationNames.joinToString()),
                 )
             }
         }
@@ -254,7 +279,9 @@ class FunctionsShould internal constructor(
     infix fun haveAllAnnotationsOf(names: List<String>): FunctionsRuleBuilder {
         builder.setShould { func, _, violations ->
             if (!func.hasAllAnnotations(names)) {
-                violations.add("Function ${func.declaration.name} should have all annotations: ${names.joinToString()}")
+                violations.add(
+                    getMessage("function.should.haveAllAnnotations", func.declaration.name, names.joinToString()),
+                )
             }
         }
         return builder
@@ -272,7 +299,7 @@ class FunctionsShould internal constructor(
         builder.setShould { func, _, violations ->
             if (!func.hasAnyAnnotation(names)) {
                 violations.add(
-                    "Function ${func.declaration.name} should have at least one annotation of: ${names.joinToString()}",
+                    getMessage("function.should.haveAnyAnnotation", func.declaration.name, names.joinToString()),
                 )
             }
         }
@@ -290,7 +317,9 @@ class FunctionsShould internal constructor(
     infix fun haveModifier(modifier: Modifier): FunctionsRuleBuilder {
         builder.setShould { func, _, violations ->
             if (!func.declaration.modifiers.contains(modifier)) {
-                violations.add("Function ${func.declaration.name} should have modifier: $modifier")
+                violations.add(
+                    getMessage("function.should.haveModifier", func.declaration.name, modifier),
+                )
             }
         }
         return builder
@@ -306,7 +335,7 @@ class FunctionsShould internal constructor(
             val missing = modifiers.filter { !func.declaration.modifiers.contains(it) }
             if (missing.isNotEmpty()) {
                 violations.add(
-                    "Function ${func.declaration.name} should have all modifiers: ${modifiers.joinToString()}, but is missing: ${missing.joinToString()}",
+                    getMessage("function.should.haveAllModifiers", func.declaration.name, modifiers.joinToString(), missing.joinToString()),
                 )
             }
         }
@@ -329,7 +358,7 @@ class FunctionsShould internal constructor(
         builder.setShould { func, _, violations ->
             if (!modifiers.any { func.declaration.modifiers.contains(it) }) {
                 violations.add(
-                    "Function ${func.declaration.name} should have at least one modifier of: ${modifiers.joinToString()}",
+                    getMessage("function.should.haveAnyModifier", func.declaration.name, modifiers.joinToString()),
                 )
             }
         }
@@ -350,7 +379,7 @@ class FunctionsShould internal constructor(
         builder.setShould { func, _, violations ->
             if (func.declaration.visibility != visibility) {
                 violations.add(
-                    "Function ${func.declaration.name} should have visibility: $visibility but was: ${func.declaration.visibility}",
+                    getMessage("function.should.haveVisibility", func.declaration.name, visibility, func.declaration.visibility),
                 )
             }
         }
@@ -366,7 +395,7 @@ class FunctionsShould internal constructor(
         builder.setShould { func, _, violations ->
             if (!visibilities.contains(func.declaration.visibility)) {
                 violations.add(
-                    "Function ${func.declaration.name} should have any visibility of: ${visibilities.joinToString()} but was: ${func.declaration.visibility}",
+                    getMessage("function.should.haveAnyVisibility", func.declaration.name, visibilities.joinToString(), func.declaration.visibility),
                 )
             }
         }
@@ -395,7 +424,7 @@ class FunctionsShould internal constructor(
             if (!match) {
                 val currentTypes = func.declaration.parameters.map { it.type }
                 violations.add(
-                    "Function ${func.declaration.name} should take exactly parameter types: [${types.joinToString()}] but took: [${currentTypes.joinToString()}]",
+                    getMessage("function.should.haveParameterTypes", func.declaration.name, types.joinToString(), currentTypes.joinToString()),
                 )
             }
         }
@@ -424,7 +453,7 @@ class FunctionsShould internal constructor(
                 }
             if (!hasAny) {
                 violations.add(
-                    "Function ${func.declaration.name} should have at least one parameter of any type of: ${types.joinToString()}",
+                    getMessage("function.should.haveAnyParameterType", func.declaration.name, types.joinToString()),
                 )
             }
         }
@@ -441,7 +470,9 @@ class FunctionsShould internal constructor(
     fun beExtension(): FunctionsRuleBuilder {
         builder.setShould { func, _, violations ->
             if (!func.declaration.isExtension) {
-                violations.add("Function ${func.declaration.name} should be an extension function")
+                violations.add(
+                    getMessage("function.should.beExtension", func.declaration.name),
+                )
             }
         }
         return builder
@@ -450,7 +481,9 @@ class FunctionsShould internal constructor(
     fun beDocumentedWithKDoc(): FunctionsRuleBuilder {
         builder.setShould { func, _, violations ->
             if (func.declaration.kdocText.isNullOrBlank()) {
-                violations.add("Function ${func.declaration.name} should be documented with KDoc")
+                violations.add(
+                    getMessage("function.should.beDocumented", func.declaration.name),
+                )
             }
         }
         return builder
@@ -464,7 +497,9 @@ class FunctionsShould internal constructor(
     ): FunctionsRuleBuilder {
         builder.setShould { func, allFuncs, violations ->
             if (!assertion(func, allFuncs)) {
-                violations.add("Function ${func.declaration.name} should satisfy: $description")
+                violations.add(
+                    getMessage("function.should.satisfyCustom", func.declaration.name, description),
+                )
             }
         }
         return builder

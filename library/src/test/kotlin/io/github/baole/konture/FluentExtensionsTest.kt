@@ -232,7 +232,7 @@ class FluentExtensionsTest {
         assertTrue(violations.isEmpty())
         contextA.assertAnnotationOf("OtherAnnotation")
         assertEquals(1, violations.size)
-        assertTrue(violations[0].contains("should be annotated with @OtherAnnotation"))
+        assertTrue(violations[0].contains("should have annotation 'OtherAnnotation'"))
 
         violations.clear()
         contextA.assertAllAnnotationsOf("MyAnnotation")

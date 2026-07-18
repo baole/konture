@@ -43,6 +43,10 @@ class BaselineForkedJvmTest {
 
         assertTrue(exited, "Forked JVM process timed out. Output:\n$output")
         assertEquals(0, process.exitValue(), "Forked JVM exited with an error. Output:\n$output")
+        assertTrue(
+            "Failed to register baseline shutdown hook" !in output,
+            "Shutdown must not initialize a new context or register another hook. Output:\n$output",
+        )
 
         assertTrue(expectedFile.exists(), "Expected baseline file was not created. Process output:\n$output")
 

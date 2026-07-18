@@ -71,7 +71,13 @@ class LayeredArchitectureBuilder(
                                 if (otherLayer != null && otherLayer.name != name) {
                                     if (otherCls.dependsOn(targetCls)) {
                                         violations.add(
-                                            "Layer '$name' may not be accessed by any layer, but class ${otherCls.fqName} in layer '${otherLayer.name}' depends on ${targetCls.fqName}",
+                                            io.github.baole.konture.i18n.getMessage(
+                                                "layered.architecture.mayNotBeAccessed",
+                                                name,
+                                                otherCls.fqName,
+                                                otherLayer.name,
+                                                targetCls.fqName,
+                                            ),
                                         )
                                     }
                                 }
@@ -112,7 +118,14 @@ class LayeredArchitectureBuilder(
                                     if (!allowedSet.contains(otherLayer.name)) {
                                         if (otherCls.dependsOn(targetCls)) {
                                             violations.add(
-                                                "Layer '$name' may only be accessed by layers [${allowedLayerNames.joinToString()}], but class ${otherCls.fqName} in layer '${otherLayer.name}' depends on ${targetCls.fqName}",
+                                                io.github.baole.konture.i18n.getMessage(
+                                                    "layered.architecture.mayOnlyBeAccessed",
+                                                    name,
+                                                    allowedLayerNames.joinToString(),
+                                                    otherCls.fqName,
+                                                    otherLayer.name,
+                                                    targetCls.fqName,
+                                                ),
                                             )
                                         }
                                     }
@@ -160,7 +173,15 @@ class LayeredArchitectureBuilder(
                                     if (!allowedSet.contains(otherLayer.name)) {
                                         if (sourceCls.dependsOn(otherCls)) {
                                             violations.add(
-                                                "Layer '$name' may only access layers [${allowedLayerNames.joinToString()}], but class ${sourceCls.fqName} depends on ${otherCls.fqName} in layer '${otherLayer.name}' (at ${sourceCls.filePath})",
+                                                io.github.baole.konture.i18n.getMessage(
+                                                    "layered.architecture.mayOnlyAccess",
+                                                    name,
+                                                    allowedLayerNames.joinToString(),
+                                                    sourceCls.fqName,
+                                                    otherCls.fqName,
+                                                    otherLayer.name,
+                                                    sourceCls.filePath,
+                                                ),
                                             )
                                         }
                                     }
@@ -206,7 +227,15 @@ class LayeredArchitectureBuilder(
                                     if (forbiddenSet.contains(otherLayer.name)) {
                                         if (sourceCls.dependsOn(otherCls)) {
                                             violations.add(
-                                                "Layer '$name' may not access layers [${forbiddenLayerNames.joinToString()}], but class ${sourceCls.fqName} depends on ${otherCls.fqName} in layer '${otherLayer.name}' (at ${sourceCls.filePath})",
+                                                io.github.baole.konture.i18n.getMessage(
+                                                    "layered.architecture.mayNotAccess",
+                                                    name,
+                                                    forbiddenLayerNames.joinToString(),
+                                                    sourceCls.fqName,
+                                                    otherCls.fqName,
+                                                    otherLayer.name,
+                                                    sourceCls.filePath,
+                                                ),
                                             )
                                         }
                                     }
@@ -252,7 +281,15 @@ class LayeredArchitectureBuilder(
                                     if (forbiddenSet.contains(otherLayer.name)) {
                                         if (otherCls.dependsOn(targetCls)) {
                                             violations.add(
-                                                "Layer '$name' may not be accessed by layers [${forbiddenLayerNames.joinToString()}], but class ${otherCls.fqName} in layer '${otherLayer.name}' depends on ${targetCls.fqName} (at ${otherCls.filePath})",
+                                                io.github.baole.konture.i18n.getMessage(
+                                                    "layered.architecture.mayNotBeAccessedBy",
+                                                    name,
+                                                    forbiddenLayerNames.joinToString(),
+                                                    otherCls.fqName,
+                                                    otherLayer.name,
+                                                    targetCls.fqName,
+                                                    otherCls.filePath,
+                                                ),
                                             )
                                         }
                                     }
@@ -274,17 +311,16 @@ class LayeredArchitectureBuilder(
 
     fun check(g: ProjectGraph = graph) {
         val allClasses = g.getAllModules().flatMap { it.classes }
-        val violations = mutableListOf<String>()
 
-        for (constraint in constraints) {
-            constraint.verify(layers, allClasses, violations)
+        val runCheck = { list: MutableList<String> ->
+            for (constraint in constraints) {
+                constraint.verify(layers, allClasses, list)
+            }
         }
 
-        if (violations.isNotEmpty()) {
-            BaselineManager.handleViolations(
-                violations,
-                "Layered architecture violation(s) detected:",
-            )
-        }
+        BaselineManager.checkRule(
+            io.github.baole.konture.i18n.getMessage("layered.architecture.violationHeader"),
+            runCheck,
+        )
     }
 }

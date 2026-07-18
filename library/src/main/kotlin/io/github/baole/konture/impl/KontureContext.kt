@@ -6,12 +6,16 @@
 package io.github.baole.konture.impl
 
 import io.github.baole.konture.ProjectGraph
+import java.util.Locale
 
+@Suppress("LongParameterList")
 internal class KontureContext(
     val baselinePath: String = "konture-baseline.json",
     val generateBaseline: Boolean = false,
     val projectGraph: ProjectGraph? = null,
     val baselineManager: BaselineManager = BaselineManager(),
+    val locale: Locale = Locale.ENGLISH,
+    val isLocaleOverridden: Boolean = false,
 ) {
     val projectGraphLoader: ProjectGraphLoader = ProjectGraphLoader()
 
@@ -19,12 +23,16 @@ internal class KontureContext(
         baselinePath: String = this.baselinePath,
         generateBaseline: Boolean = this.generateBaseline,
         projectGraph: ProjectGraph? = this.projectGraph,
+        locale: Locale = this.locale,
+        isLocaleOverridden: Boolean = this.isLocaleOverridden,
     ): KontureContext {
         return KontureContext(
             baselinePath = baselinePath,
             generateBaseline = generateBaseline,
             projectGraph = projectGraph,
             baselineManager = this.baselineManager,
+            locale = locale,
+            isLocaleOverridden = isLocaleOverridden,
         )
     }
 }

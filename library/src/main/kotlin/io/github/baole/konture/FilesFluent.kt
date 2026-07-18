@@ -34,7 +34,7 @@ fun FilesRuleBuilder.should(assertion: FileDeclarationShouldContext.() -> Any?):
             val result = context.assertion()
             validateAssertionResult(result)
             if (result is Boolean && !result) {
-                violations.add("File ${file.declaration.name} failed custom assertion")
+                violations.add(io.github.baole.konture.i18n.getMessage("file.should.failedCustomAssertion", file.declaration.name))
             }
         }
     }
@@ -79,7 +79,7 @@ class FileDeclarationShouldContext internal constructor(
         message: String? = null,
     ) {
         if (!condition) {
-            addViolation(message ?: "File $name failed assertion")
+            addViolation(message ?: io.github.baole.konture.i18n.getMessage("file.should.failedAssertion", name))
         }
     }
 
@@ -105,8 +105,9 @@ class FileDeclarationShouldContext internal constructor(
      * Asserts that this file does not use any wildcard star imports.
      */
     fun assertNoWildcardImports() {
-        if (imports.any { it.endsWith(".*") }) {
-            addViolation("File $name should not contain wildcard imports")
+        val wildcards = imports.filter { it.endsWith(".*") }
+        if (wildcards.isNotEmpty()) {
+            addViolation(io.github.baole.konture.i18n.getMessage("file.should.notContainWildcardImports", name, wildcards.joinToString()))
         }
     }
 
@@ -115,7 +116,14 @@ class FileDeclarationShouldContext internal constructor(
      */
     fun assertOnlyOneClassPerFile() {
         if (classes.size > 1) {
-            addViolation("File $name should contain at most one class, but contains ${classes.size}")
+            addViolation(
+                io.github.baole.konture.i18n.getMessage(
+                    "file.should.containAtMostOneClass",
+                    name,
+                    classes.size,
+                    classes.joinToString { it.name },
+                ),
+            )
         }
     }
 }

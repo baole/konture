@@ -7,6 +7,7 @@ package io.github.baole.konture
 
 import io.github.baole.konture.core.KontureLogger
 import io.github.baole.konture.core.LogLevel
+import io.github.baole.konture.i18n.getMessage
 import io.github.baole.konture.impl.BaselineManager
 import io.github.baole.konture.impl.LogicalOperator
 
@@ -158,7 +159,9 @@ class ModulesRuleBuilder(
                     val tempViolations = mutableListOf<String>()
                     assertion(module, g, tempViolations)
                     if (tempViolations.isEmpty()) {
-                        violations.add("Module ${module.path} should not satisfy the negated condition.")
+                        violations.add(
+                            getMessage("modules.rule.negatedSatisfied", module.path),
+                        )
                     }
                 }
                 a
@@ -179,7 +182,7 @@ class ModulesRuleBuilder(
                     actualAssertion(module, g, temp2)
                     if (temp1.isNotEmpty() && temp2.isNotEmpty()) {
                         violations.add(
-                            "Module ${module.path} should satisfy either: (${temp1.joinToString()}) OR (${temp2.joinToString()})",
+                            getMessage("modules.rule.eitherOr", module.path, temp1.joinToString(), temp2.joinToString()),
                         )
                     }
                 }
@@ -192,7 +195,9 @@ class ModulesRuleBuilder(
                     val ok1 = temp1.isEmpty()
                     val ok2 = temp2.isEmpty()
                     if (ok1 == ok2) {
-                        violations.add("Module ${module.path} should satisfy exactly one of the XOR assertions.")
+                        violations.add(
+                            getMessage("modules.rule.xor", module.path),
+                        )
                     }
                 }
             } else {
@@ -212,7 +217,6 @@ class ModulesRuleBuilder(
      * @throws AssertionError If any of the verified modules violate the assertion rules.
      */
     fun check(g: ProjectGraph = graph) {
-        val violations = mutableListOf<String>()
         val allModules = g.getAllModules()
         val modulesToCheck = allModules.filter { thatPredicate?.invoke(it) ?: true }
         KontureLogger.log(
@@ -222,8 +226,7 @@ class ModulesRuleBuilder(
         if (modulesToCheck.isEmpty()) {
             if (!allowEmpty) {
                 throw AssertionError(
-                    "No modules matched the filter criteria in 'that()'. " +
-                        "If this is expected, use '.allowEmpty()' or 'allowEmpty = true' on the rule builder to allow empty selections.",
+                    getMessage("modules.rule.emptySelect"),
                 )
             } else {
                 KontureLogger.log(
@@ -235,18 +238,18 @@ class ModulesRuleBuilder(
 
         val assertion =
             shouldAssertion ?: throw AssertionError(
-                "Modules rule has no assertion ('should()'). You must specify at least one assertion condition.",
+                getMessage("modules.rule.noAssertion"),
             )
 
-        for (module in modulesToCheck) {
-            assertion(module, g, violations)
+        val runCheck = { list: MutableList<String> ->
+            for (module in modulesToCheck) {
+                assertion(module, g, list)
+            }
         }
 
-        if (violations.isNotEmpty()) {
-            BaselineManager.handleViolations(
-                violations,
-                "Module architecture violation(s) detected:",
-            )
-        }
+        BaselineManager.checkRule(
+            getMessage("modules.rule.violationHeader"),
+            runCheck,
+        )
     }
 }

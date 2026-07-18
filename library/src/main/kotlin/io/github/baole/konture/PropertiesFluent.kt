@@ -34,7 +34,7 @@ fun PropertiesRuleBuilder.should(assertion: PropertyDeclarationShouldContext.() 
             val result = context.assertion()
             validateAssertionResult(result)
             if (result is Boolean && !result) {
-                violations.add("Property ${prop.declaration.name} failed custom assertion")
+                violations.add(io.github.baole.konture.i18n.getMessage("property.should.failedCustomAssertion", prop.declaration.name))
             }
         }
     }
@@ -83,7 +83,7 @@ class PropertyDeclarationShouldContext internal constructor(
         message: String? = null,
     ) {
         if (!condition) {
-            addViolation(message ?: "Property $name failed assertion")
+            addViolation(message ?: io.github.baole.konture.i18n.getMessage("property.should.failedAssertion", name))
         }
     }
 
@@ -117,7 +117,7 @@ class PropertyDeclarationShouldContext internal constructor(
      */
     fun assertAnnotationOf(annotationName: String) {
         if (!hasAnnotation(annotationName)) {
-            addViolation("Property $name should be annotated with @$annotationName")
+            addViolation(io.github.baole.konture.i18n.getMessage("property.should.haveAnnotation", name, annotationName))
         }
     }
 
@@ -126,7 +126,7 @@ class PropertyDeclarationShouldContext internal constructor(
      */
     fun assertAllAnnotationsOf(names: List<String>) {
         if (!hasAllAnnotations(names)) {
-            addViolation("Property $name should have all annotations: ${names.joinToString()}")
+            addViolation(io.github.baole.konture.i18n.getMessage("property.should.haveAllAnnotations", name, names.joinToString()))
         }
     }
 
@@ -140,7 +140,7 @@ class PropertyDeclarationShouldContext internal constructor(
      */
     fun assertAnyAnnotationOf(names: List<String>) {
         if (!hasAnyAnnotation(names)) {
-            addViolation("Property $name should have at least one annotation of: ${names.joinToString()}")
+            addViolation(io.github.baole.konture.i18n.getMessage("property.should.haveAnyAnnotation", name, names.joinToString()))
         }
     }
 

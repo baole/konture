@@ -5,6 +5,7 @@
 
 package io.github.baole.konture
 
+import io.github.baole.konture.i18n.getMessage
 import io.github.baole.konture.impl.PatternMatchers
 import io.github.baole.konture.impl.normalizeModulePath
 
@@ -30,7 +31,7 @@ class ModulesShould internal constructor(
                 }
             if (dependsOnTarget) {
                 violations.add(
-                    "Module ${module.path} should not depend on $normalizedTarget, but a dependency was found.",
+                    getMessage("module.should.notDependOnModule", module.path, normalizedTarget),
                 )
             }
         }
@@ -53,7 +54,12 @@ class ModulesShould internal constructor(
                 }
             if (offending.isNotEmpty()) {
                 violations.add(
-                    "Module ${module.path} should not depend on any of [${normalizedTargets.joinToString()}], but dependencies were found: ${offending.joinToString { it.targetPath }}",
+                    getMessage(
+                        "module.should.notDependOnModuleAny",
+                        module.path,
+                        normalizedTargets.joinToString(),
+                        offending.joinToString { it.targetPath },
+                    ),
                 )
             }
         }
@@ -89,7 +95,7 @@ class ModulesShould internal constructor(
             if (offendingDeps.isNotEmpty()) {
                 val paths = offendingDeps.joinToString { it.targetPath }
                 violations.add(
-                    "Module ${module.path} should not depend on $description, but dependency found to: $paths",
+                    getMessage("module.should.notDependOnModulePredicate", module.path, description, paths),
                 )
             }
         }
@@ -118,7 +124,7 @@ class ModulesShould internal constructor(
                     }
                 if (!isAllowed) {
                     violations.add(
-                        "Module ${module.path} depends on ${dep.targetPath}, which is not allowed by pattern(s): ${normalizedPatterns.joinToString()}",
+                        getMessage("module.should.onlyDependOnModulesPattern", module.path, dep.targetPath, normalizedPatterns.joinToString()),
                     )
                 }
             }
@@ -154,7 +160,7 @@ class ModulesShould internal constructor(
             for (dep in module.dependencies) {
                 if (!predicate(dep.targetPath)) {
                     violations.add(
-                        "Module ${module.path} depends on ${dep.targetPath}, which is not allowed by: $description",
+                        getMessage("module.should.onlyDependOnModulesPredicate", module.path, dep.targetPath, description),
                     )
                 }
             }
@@ -187,7 +193,9 @@ class ModulesShould internal constructor(
                         dep.path == pattern || PatternMatchers.matchesModuleGlob(pattern, dep.path)
                     }
                 if (!isAllowed) {
-                    violations.add("Module ${module.path} is depended on by ${dep.path}, which is not allowed.")
+                    violations.add(
+                        getMessage("module.should.notBeDependedOnByModules", module.path, dep.path),
+                    )
                 }
             }
         }
@@ -226,7 +234,7 @@ class ModulesShould internal constructor(
             for (dep in dependents) {
                 if (!predicate(dep.path)) {
                     violations.add(
-                        "Module ${module.path} is depended on by ${dep.path}, which is not allowed by: $description",
+                        getMessage("module.should.notBeDependedOnByModulesPredicate", module.path, dep.path, description),
                     )
                 }
             }
@@ -255,7 +263,9 @@ class ModulesShould internal constructor(
     ): ModulesRuleBuilder {
         builder.setShould { module, graph, violations ->
             if (!assertion(module, graph)) {
-                violations.add("Module ${module.path} should satisfy: $description")
+                violations.add(
+                    getMessage("module.should.satisfyCustom", module.path, description),
+                )
             }
         }
         return builder
@@ -287,7 +297,9 @@ class ModulesShould internal constructor(
                     temp
                 }
             if (tempViolationsList.all { it.isNotEmpty() }) {
-                violations.add("Module ${module.path} should satisfy at least one of the nested assertions.")
+                violations.add(
+                    getMessage("module.should.satisfyAtLeastOneNested", module.path),
+                )
             }
         }
         return builder
@@ -326,7 +338,9 @@ class ModulesShould internal constructor(
                 val temp = mutableListOf<String>()
                 assertion(module, g, temp)
                 if (temp.isEmpty()) {
-                    violations.add("Module ${module.path} should not satisfy the nested assertion.")
+                    violations.add(
+                        getMessage("module.should.notSatisfyNested", module.path),
+                    )
                 }
             }
         }
@@ -366,7 +380,7 @@ class ModulesShould internal constructor(
                         "${it.group}:${it.name}:${it.version}${if (it.isTransitive) " (transitive)" else ""}"
                     }
                 violations.add(
-                    "Module ${module.path} should not depend on external libraries [${coordinates.joinToString()}], but found: $coords",
+                    getMessage("module.should.notDependOnExternalLibraries", module.path, coordinates.joinToString(), coords),
                 )
             }
         }
@@ -409,7 +423,7 @@ class ModulesShould internal constructor(
                         "${it.group}:${it.name}:${it.version}${if (it.isTransitive) " (transitive)" else ""}"
                     }
                 violations.add(
-                    "Module ${module.path} depends on external libraries not in the allowed list [${coordinates.joinToString()}]: $coords",
+                    getMessage("module.should.onlyDependOnExternalLibraries", module.path, coordinates.joinToString(), coords),
                 )
             }
         }

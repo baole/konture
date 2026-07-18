@@ -7,6 +7,7 @@ package io.github.baole.konture
 
 import io.github.baole.konture.core.KontureConstants
 import io.github.baole.konture.impl.KontureContextProvider
+import java.util.Locale
 
 /**
  * Main entry point for Konture. All architecture assertion builders, scoping builders,
@@ -17,6 +18,11 @@ object Konture {
      * System property key used to override the path of baseline files.
      */
     const val PROPERTY_BASELINE_PATH = KontureConstants.PROPERTY_BASELINE_PATH
+
+    /**
+     * System property key used to override the target translation language / locale.
+     */
+    const val PROPERTY_LOCALE = KontureConstants.PROPERTY_LOCALE
 
     /**
      * System property key used to enable/disable baseline generation mode.
@@ -32,6 +38,30 @@ object Konture {
      * Default baseline filename fallback when no custom path is configured.
      */
     const val DEFAULT_BASELINE_FILENAME = KontureConstants.DEFAULT_BASELINE_FILENAME
+
+    /**
+     * The target translation locale for architectural guardrail messages.
+     * Can be configured via system property "konture.locale" or programmatically.
+     */
+    var locale: Locale
+        get() {
+            if (KontureContextProvider.currentContext.isLocaleOverridden) {
+                return KontureContextProvider.currentContext.locale
+            }
+            val systemProp = System.getProperty(PROPERTY_LOCALE)
+            return if (systemProp != null) {
+                Locale.forLanguageTag(systemProp)
+            } else {
+                KontureContextProvider.currentContext.locale
+            }
+        }
+        set(value) {
+            KontureContextProvider.currentContext =
+                KontureContextProvider.currentContext.copy(
+                    locale = value,
+                    isLocaleOverridden = true,
+                )
+        }
 
     /**
      * Lazily and thread-safely loads the [ProjectGraph] from the default resource path on first use,
