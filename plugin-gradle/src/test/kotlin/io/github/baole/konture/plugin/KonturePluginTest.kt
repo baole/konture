@@ -9,6 +9,7 @@ import io.github.baole.konture.core.KontureConstants
 import io.github.baole.konture.core.LayoutModel
 import org.gradle.testfixtures.ProjectBuilder
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
@@ -371,38 +372,6 @@ class KonturePluginTest {
     }
 
     @Test
-    fun `testReflectiveAndroidSourceSetWithStubs`() {
-        // Stub classes to simulate AGP's AndroidSourceSet and SourceDirectorySet
-        class StubSourceDirectorySet(
-            private val dirs: Set<java.io.File>,
-        ) {
-            fun getSrcDirs(): Set<java.io.File> = dirs
-        }
-
-        class StubAndroidSourceSet(
-            private val nameStr: String,
-            private val javaDirs: Set<java.io.File>,
-            private val kotlinDirs: Set<java.io.File>,
-        ) {
-            fun getName(): String = nameStr
-
-            fun getJava(): Any = StubSourceDirectorySet(javaDirs)
-
-            fun getKotlin(): Any = StubSourceDirectorySet(kotlinDirs)
-        }
-
-        val javaPaths = setOf(java.io.File("/path/to/java1"), java.io.File("/path/to/java2"))
-        val kotlinPaths = setOf(java.io.File("/path/to/kotlin1"))
-        val stubSourceSet = StubAndroidSourceSet("main", javaPaths, kotlinPaths)
-
-        val reflectiveSourceSet = ReflectiveAndroidSourceSet(stubSourceSet)
-
-        assertEquals("main", reflectiveSourceSet.name)
-        assertEquals(javaPaths, reflectiveSourceSet.javaSrcDirs)
-        assertEquals(kotlinPaths, reflectiveSourceSet.kotlinSrcDirs)
-    }
-
-    @Test
     fun `testKmpSourceSetExtraction`() {
         val rootProject = ProjectBuilder.builder().withName("root").build()
         val kmpProject =
@@ -422,7 +391,6 @@ class KonturePluginTest {
             )
         kotlinExt.jvm("desktop")
         kotlinExt.iosX64("ios")
-
         // Collect source sets via the helper function inside KonturePlugin
         val plugin = KonturePlugin()
         val sourceSets = plugin.collectSourceSets(kmpProject)
@@ -455,7 +423,7 @@ class KonturePluginTest {
     }
 
     @Test
-    fun `testKmpSourceSetPlatformTargetsWithReflection`() {
+    fun `testKmpSourceSetPlatformTargetsWithTypedApi`() {
         val rootProject = ProjectBuilder.builder().withName("root").build()
         val kmpProject =
             ProjectBuilder
@@ -474,6 +442,11 @@ class KonturePluginTest {
             )
         kotlinExt.jvm("desktop")
         kotlinExt.iosX64("ios")
+        val commonSourceSet = kotlinExt.sourceSets.getByName("commonMain")
+        kotlinExt.sourceSets.getByName("desktopMain").dependsOn(commonSourceSet)
+        kotlinExt.sourceSets.getByName("iosMain").dependsOn(commonSourceSet)
+        val intermediate = kotlinExt.sourceSets.create("intermediateCode")
+        kotlinExt.sourceSets.getByName("desktopMain").dependsOn(intermediate)
 
         val plugin = KonturePlugin()
         val sourceSets = plugin.collectSourceSets(kmpProject)
@@ -483,10 +456,20 @@ class KonturePluginTest {
         assertNotNull(desktopMain)
         // Verify it extracts platform target metadata correctly!
         assertTrue(desktopMain?.platforms?.contains("jvm") == true)
+        assertTrue(desktopMain?.dependsOnSourceSets?.contains("commonMain") == true)
+        assertTrue(sourceSets.firstOrNull { it.name == "intermediateCode" }?.production == true)
+
+        val commonMain = sourceSets.firstOrNull { it.name == "commonMain" }
+        assertNotNull(commonMain)
+        assertTrue(commonMain?.targetNames?.isNotEmpty() == true)
+        assertFalse(commonMain?.targetNames?.contains("desktop") == true)
 
         val iosMain = sourceSets.firstOrNull { it.name == "iosMain" }
         assertNotNull(iosMain)
         assertTrue(iosMain?.platforms?.contains("native") == true)
+        assertTrue(iosMain?.targetNames?.isNotEmpty() == true)
+        assertFalse(iosMain?.targetNames?.contains("desktop") == true)
+        assertTrue(iosMain?.dependencyConfigurations?.contains("iosMainImplementation") == true)
     }
 
     @Test

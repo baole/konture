@@ -27,6 +27,7 @@ gradlePlugin {
 
 dependencies {
     compileOnly(libs.kotlin.gradle.plugin)
+    compileOnly(libs.android.gradle.plugin.api)
     implementation(project(":core"))
     implementation(libs.kotlinx.serialization.json)
 

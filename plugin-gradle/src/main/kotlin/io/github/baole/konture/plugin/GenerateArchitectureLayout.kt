@@ -176,6 +176,9 @@ abstract class GenerateArchitectureLayout : DefaultTask() {
                             srcDirs = relSrcDirs,
                             kotlinFiles = files,
                             platforms = ssInput.platforms,
+                            targetNames = ssInput.targetNames,
+                            dependsOnSourceSets = ssInput.dependsOnSourceSets,
+                            dependencyConfigurations = ssInput.dependencyConfigurations,
                             compileClasspath = ssInput.compileClasspath,
                             jvmTarget = ssInput.jvmTarget,
                         )

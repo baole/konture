@@ -10,4 +10,5 @@ data class ParameterDeclaration(
     val type: String,
     val hasDefaultValue: Boolean,
     val annotations: List<AnnotationDeclaration>,
+    val resolvedType: String? = null,
 )

@@ -89,6 +89,32 @@ Konture.functions(sourceSets = SourceSets.named("test", "androidTest", "commonTe
 
 `SourceSets.named(...)` matches exact captured Gradle source-set names, `matchingName("*Test")` uses glob matching, and `SourceSets.of(role = SourceSetRole.TEST, kind = SourceSetKind.ANDROID)` selects a portable category. `notCall` analyzes Kotlin source calls, not runtime behavior; an unused import does not violate it.
 
+## Type-safe type and annotation rules
+
+Where a rule identifies a concrete Kotlin type or annotation, Konture also accepts a `KClass` or a reified type parameter. The existing string overloads remain useful for package patterns, unresolved or generated symbols, and source syntax that cannot be represented by a runtime class.
+
+```kotlin
+Konture.classes {
+    that().haveAnnotationOf<Inject>()
+    should().beAssignableTo(Repository::class)
+}
+
+Konture.functions {
+    that().haveReturnTypeOf<Result<*>>()
+    should().haveParameterTypes(String::class, UserId::class)
+}
+
+Konture.properties {
+    should().haveTypeOf<StateFlow<*>>()
+}
+
+Konture.files {
+    should().notReferenceClass<LegacyClient>()
+}
+```
+
+Typed function and property rules compare the resolved raw declared type. For example, `List::class` matches `List<String>`, while explicit imports and import aliases resolve to their fully qualified types. Ambiguous references, generic arguments, nullability, type aliases, and type parameters still require the existing string or custom assertion APIs.
+
 Because Konture compiled layouts run as standard unit tests on the JVM, executing them is fast and seamless. Run the tests using your build system or trigger them directly from your IDE gutter.
 
 ### 🐘 Gradle

@@ -5,45 +5,21 @@
 
 package io.github.baole.konture.impl
 
-import io.github.baole.konture.AnnotationArgumentDeclaration
-import io.github.baole.konture.AnnotationDeclaration
 import io.github.baole.konture.ClassDeclaration
-import io.github.baole.konture.ConstructorDeclaration
 import io.github.baole.konture.FileDeclaration
 import io.github.baole.konture.FunctionDeclaration
-import io.github.baole.konture.Modifier
-import io.github.baole.konture.ParameterDeclaration
 import io.github.baole.konture.PropertyDeclaration
-import io.github.baole.konture.SourceUsage
-import io.github.baole.konture.UsageKind
-import io.github.baole.konture.Visibility
-import org.jetbrains.kotlin.cli.jvm.compiler.EnvironmentConfigFiles
-import org.jetbrains.kotlin.cli.jvm.compiler.KotlinCoreEnvironment
-import org.jetbrains.kotlin.com.intellij.openapi.project.Project
-import org.jetbrains.kotlin.com.intellij.openapi.util.Disposer
-import org.jetbrains.kotlin.com.intellij.psi.PsiFileFactory
-import org.jetbrains.kotlin.config.CompilerConfiguration
-import org.jetbrains.kotlin.idea.KotlinFileType
-import org.jetbrains.kotlin.psi.KtAnnotationEntry
-import org.jetbrains.kotlin.psi.KtCallExpression
-import org.jetbrains.kotlin.psi.KtClass
-import org.jetbrains.kotlin.psi.KtClassLiteralExpression
+import io.github.baole.konture.impl.psi.DeclarationParser
+import io.github.baole.konture.impl.psi.DeclaredClassScanner
+import io.github.baole.konture.impl.psi.PsiEnvironment
+import io.github.baole.konture.impl.psi.SymbolLookup
+import io.github.baole.konture.impl.psi.TypeAliasDefinition
+import io.github.baole.konture.impl.psi.TypeAliasScanner
+import io.github.baole.konture.impl.psi.TypeResolutionContext
+import io.github.baole.konture.impl.psi.UsageExtractor
 import org.jetbrains.kotlin.psi.KtClassOrObject
-import org.jetbrains.kotlin.psi.KtConstructor
-import org.jetbrains.kotlin.psi.KtDeclaration
-import org.jetbrains.kotlin.psi.KtDotQualifiedExpression
-import org.jetbrains.kotlin.psi.KtElement
-import org.jetbrains.kotlin.psi.KtFile
 import org.jetbrains.kotlin.psi.KtFunction
-import org.jetbrains.kotlin.psi.KtModifierListOwner
-import org.jetbrains.kotlin.psi.KtNamedFunction
-import org.jetbrains.kotlin.psi.KtObjectDeclaration
-import org.jetbrains.kotlin.psi.KtParameter
 import org.jetbrains.kotlin.psi.KtProperty
-import org.jetbrains.kotlin.psi.KtSimpleNameExpression
-import org.jetbrains.kotlin.psi.KtTreeVisitorVoid
-import org.jetbrains.kotlin.psi.KtTypeReference
-import org.jetbrains.kotlin.psi.psiUtil.parents
 import java.io.File
 
 /**
@@ -53,38 +29,66 @@ import java.io.File
  * This parser avoids compiling source code to bytecode, enabling lightweight and fast analysis of class structures,
  * annotations, imports, and type references directly from source files on disk.
  */
-@OptIn(
-    CompilerConfiguration.Internals::class,
-    org.jetbrains.kotlin.K1Deprecation::class,
-)
 internal object PsiParser {
-    private val disposable = Disposer.newDisposable()
-    private val project: Project by lazy {
-        val configuration = CompilerConfiguration()
-        val environment =
-            KotlinCoreEnvironment.createForProduction(
-                disposable,
-                configuration,
-                EnvironmentConfigFiles.JVM_CONFIG_FILES,
-            )
-        environment.project
+    private val environment = PsiEnvironment()
+
+    /**
+     * Scans a list of files to quickly extract all fully-qualified class names declared in them.
+     */
+    @Suppress("SwallowedException", "TooGenericExceptionCaught")
+    fun getDeclaredClassFqNames(files: List<File>): Set<String> {
+        val fqNames = mutableSetOf<String>()
+        files.forEach { file ->
+            if (file.exists() && file.name.endsWith(".kt")) {
+                try {
+                    val content = file.readText()
+                    val ktFile = environment.createKtFile(file.name, content)
+                    fqNames.addAll(DeclaredClassScanner.collectFqNames(ktFile))
+                } catch (e: Exception) {
+                    // Ignore parsing issues for individual files in global scan
+                }
+            }
+        }
+        return fqNames
+    }
+
+    /**
+     * Scans Kotlin files for type aliases and maps each alias FQ name to its declaration
+     * context. The source scanner retains enclosing-class scopes because nested aliases are an
+     * experimental language feature that may not be represented by all supported Kotlin PSI
+     * versions. The target is resolved at use time so alias chains and
+     * Kotlin's normal import precedence remain supported.
+     */
+    @Suppress("SwallowedException", "TooGenericExceptionCaught")
+    fun getDeclaredTypeAliases(files: List<File>): Map<String, TypeAliasDefinition> {
+        val aliases = mutableMapOf<String, TypeAliasDefinition>()
+        files.forEach { file ->
+            if (!file.exists() || !file.name.endsWith(".kt")) return@forEach
+            try {
+                val content = file.readText()
+                val ktFile = environment.createKtFile(file.name, content)
+                aliases.putAll(TypeAliasScanner.scan(ktFile, content))
+            } catch (e: Exception) {
+                // Ignore parsing issues for individual files in global scan.
+            }
+        }
+        return aliases
     }
 
     /**
      * Parses a Kotlin source file (`.kt`) and returns a [FileDeclaration] representing the complete file.
      *
      * @param file The Kotlin source file on disk to parse.
+     * @param symbolLookup Global project-wide symbol lookup to assist with type resolution.
      * @return A [FileDeclaration] extracted from the source file, or null if the file does not exist.
      */
-    fun parseFile(file: File): FileDeclaration? {
+    fun parseFile(
+        file: File,
+        symbolLookup: SymbolLookup? = null,
+    ): FileDeclaration? {
         if (!file.exists()) return null
         val content = file.readText()
-        val ktFile =
-            PsiFileFactory.getInstance(project).createFileFromText(
-                file.name,
-                KotlinFileType.INSTANCE,
-                content,
-            ) as KtFile
+        val ktFile = environment.createKtFile(file.name, content)
 
         val packageName = ktFile.packageFqName.asString()
         val imports: List<String> = ktFile.importDirectives.mapNotNull { it.importPath?.toString() }
@@ -99,26 +103,51 @@ internal object PsiParser {
                         null
                     }
                 }.toMap()
+        val fileDeclaredFqNames = DeclaredClassScanner.collectFqNames(ktFile)
+        val fileTypeAliases = TypeAliasScanner.scan(ktFile, content)
+
+        val isClassDeclared = { fqName: String ->
+            fileDeclaredFqNames.contains(fqName) || (symbolLookup?.isClassDeclared(fqName) ?: false)
+        }
+        val resolveTypeAlias = { fqName: String -> fileTypeAliases[fqName] ?: symbolLookup?.resolveTypeAlias(fqName) }
+
+        val context =
+            TypeResolutionContext(
+                packageName = packageName,
+                imports = imports,
+                importAliases = importAliases,
+                isClassDeclared = isClassDeclared,
+                resolveTypeAlias = resolveTypeAlias,
+            )
 
         val classes = mutableListOf<ClassDeclaration>()
         val topLevelFunctions = mutableListOf<FunctionDeclaration>()
         val topLevelProperties = mutableListOf<PropertyDeclaration>()
-        val usages = extractUsages(ktFile, content, packageName, imports, importAliases, file.absolutePath)
+        val usages =
+            UsageExtractor.extract(
+                ktFile,
+                content,
+                packageName,
+                imports,
+                importAliases,
+                file.absolutePath,
+                isClassDeclared,
+            )
 
         ktFile.declarations.forEach { declaration ->
             when (declaration) {
                 is KtClassOrObject -> {
-                    parseClassOrObject(declaration, packageName, imports, file.absolutePath, importAliases)?.let {
+                    DeclarationParser.parseClassOrObject(declaration, file.absolutePath, context)?.let {
                         classes.add(it)
                     }
                 }
 
                 is KtFunction -> {
-                    topLevelFunctions.add(parseFunction(declaration, imports, packageName, importAliases))
+                    topLevelFunctions.add(DeclarationParser.parseFunction(declaration, context))
                 }
 
                 is KtProperty -> {
-                    topLevelProperties.add(parseProperty(declaration, imports, packageName, importAliases))
+                    topLevelProperties.add(DeclarationParser.parseProperty(declaration, context))
                 }
             }
         }
@@ -144,387 +173,10 @@ internal object PsiParser {
         )
     }
 
-    private fun extractUsages(
-        file: KtFile,
-        content: String,
-        packageName: String,
-        imports: List<String>,
-        aliases: Map<String, String>,
-        filePath: String,
-    ): List<SourceUsage> {
-        val usages = mutableListOf<SourceUsage>()
-        val seen = mutableSetOf<String>()
-
-        fun location(element: KtElement): Pair<Int, Int> {
-            val offset = element.textRange.startOffset
-            val line = content.substring(0, offset).count { it == '\n' } + 1
-            val previousBreak = content.lastIndexOf('\n', startIndex = (offset - 1).coerceAtLeast(0))
-            return line to offset - previousBreak
-        }
-
-        fun enclosing(element: KtElement): Triple<KtNamedFunction?, String?, String?> =
-            Triple(
-                element.parents.filterIsInstance<KtNamedFunction>().firstOrNull(),
-                element.parents.filterIsInstance<KtClassOrObject>().firstOrNull()?.fqName?.asString(),
-                element.parents.filterIsInstance<KtProperty>().firstOrNull()?.name,
-            )
-
-        fun add(
-            kind: UsageKind,
-            target: String,
-            element: KtElement,
-            raw: String,
-            possible: List<String> = emptyList(),
-            unresolved: Boolean = false,
-        ) {
-            val (line, column) = location(element)
-            val key = "$kind:$target:${element.textRange.startOffset}:$unresolved"
-            if (!seen.add(key)) return
-            val (function, clazz, property) = enclosing(element)
-            usages +=
-                SourceUsage(
-                    kind = kind,
-                    targetFqName = target,
-                    filePath = filePath,
-                    line = line,
-                    column = column,
-                    enclosingFunction = function?.name,
-                    enclosingClass = clazz,
-                    enclosingProperty = property,
-                    rawExpression = raw,
-                    possibleTargetFqNames = possible,
-                    unresolvedPossibleUsage = unresolved,
-                    confidence = if (unresolved) io.github.baole.konture.ResolutionConfidence.POSSIBLE else io.github.baole.konture.ResolutionConfidence.RESOLVED,
-                    sourceStartOffset = element.textRange.startOffset,
-                    sourceEndOffset = element.textRange.endOffset,
-                    enclosingFunctionStartOffset = function?.textRange?.startOffset ?: -1,
-                    enclosingFunctionEndOffset = function?.textRange?.endOffset ?: -1,
-                )
-        }
-
-        fun resolve(
-            raw: String,
-            element: KtElement,
-        ): Pair<String?, List<String>> {
-            if (raw.contains('.')) return raw to emptyList()
-            if (element.parents.filterIsInstance<KtNamedFunction>().any { it.name == raw }) return null to emptyList()
-            aliases[raw]?.let { return it to emptyList() }
-            val explicit = imports.filter { !it.endsWith(".*") && it.substringAfterLast('.') == raw }
-            if (explicit.size == 1) return explicit.single() to emptyList()
-            if (explicit.size > 1) return null to explicit
-            val wildcard = imports.filter { it.endsWith(".*") }.map { "${it.removeSuffix(".*")}.$raw" }
-            if (wildcard.size == 1) return wildcard.single() to emptyList()
-            if (wildcard.size > 1) return null to wildcard
-            return if (packageName.isEmpty()) raw to emptyList() else "$packageName.$raw" to emptyList()
-        }
-        file.accept(
-            object : KtTreeVisitorVoid() {
-                override fun visitCallExpression(expression: KtCallExpression) {
-                    super.visitCallExpression(expression)
-                    val raw = expression.calleeExpression?.text ?: return
-                    val (target, possible) = resolve(raw, expression)
-                    if (raw.substringAfterLast('.').firstOrNull()?.isUpperCase() == true) {
-                        if (target != null) add(UsageKind.CLASS_REFERENCE, target, expression, raw)
-                    } else if (target != null) {
-                        add(UsageKind.CALL, target, expression, raw)
-                    } else if (possible.isNotEmpty()) {
-                        add(UsageKind.CALL, raw, expression, raw, possible, unresolved = true)
-                    }
-                }
-
-                override fun visitTypeReference(typeReference: KtTypeReference) {
-                    super.visitTypeReference(typeReference)
-                    Regex("[A-Za-z_][A-Za-z0-9_.]*").findAll(typeReference.text).forEach { match ->
-                        val raw = match.value
-                        if (raw.substringAfterLast('.').firstOrNull()?.isUpperCase() == true) {
-                            resolve(raw, typeReference).first?.let { add(UsageKind.CLASS_REFERENCE, it, typeReference, raw) }
-                        }
-                    }
-                }
-
-                override fun visitAnnotationEntry(annotationEntry: KtAnnotationEntry) {
-                    super.visitAnnotationEntry(annotationEntry)
-                    val raw = annotationEntry.typeReference?.text ?: return
-                    resolve(raw, annotationEntry).first?.let { add(UsageKind.CLASS_REFERENCE, it, annotationEntry, raw) }
-                }
-
-                override fun visitClassLiteralExpression(expression: KtClassLiteralExpression) {
-                    super.visitClassLiteralExpression(expression)
-                    val raw = expression.receiverExpression?.text ?: return
-                    resolve(raw, expression).first?.let { add(UsageKind.CLASS_REFERENCE, it, expression, raw) }
-                }
-
-                override fun visitDotQualifiedExpression(expression: KtDotQualifiedExpression) {
-                    super.visitDotQualifiedExpression(expression)
-                    val raw = expression.receiverExpression.text
-                    if (raw.substringAfterLast('.').firstOrNull()?.isUpperCase() == true) {
-                        resolve(raw, expression).first?.let { add(UsageKind.CLASS_REFERENCE, it, expression, raw) }
-                    }
-                }
-            },
-        )
-        return usages
-    }
-
-    private fun parseClassOrObject(
-        classOrObject: KtClassOrObject,
-        packageName: String,
-        imports: List<String>,
-        filePath: String,
-        importAliases: Map<String, String> = emptyMap(),
-    ): ClassDeclaration? {
-        val simpleName = classOrObject.name ?: return null
-        val fqName =
-            classOrObject.fqName?.asString() ?: if (packageName.isNotEmpty()) "$packageName.$simpleName" else simpleName
-
-        val isInterface = (classOrObject as? KtClass)?.isInterface() ?: false
-        val isAbstract = classOrObject.hasModifier(org.jetbrains.kotlin.lexer.KtTokens.ABSTRACT_KEYWORD)
-        val isEnum = (classOrObject as? KtClass)?.isEnum() ?: false
-
-        val annotations = parseAnnotations(classOrObject.annotationEntries, imports, packageName, importAliases)
-
-        // Gather all referenced types in this class
-        val referencedTypes = mutableSetOf<String>()
-        classOrObject.accept(
-            object : KtTreeVisitorVoid() {
-                override fun visitTypeReference(typeReference: KtTypeReference) {
-                    super.visitTypeReference(typeReference)
-                    val typeText = typeReference.text
-                    val tokens = typeText.split("<", ">", ",", "?", " ", "(", ")", "->").filter { it.isNotEmpty() }
-                    tokens.forEach { token ->
-                        val parts = token.split(".")
-                        val simpleNamePart = parts.lastOrNull()
-                        if (simpleNamePart != null && simpleNamePart.isNotEmpty() && simpleNamePart[0].isUpperCase()) {
-                            referencedTypes.add(token)
-                        }
-                    }
-                }
-
-                override fun visitSimpleNameExpression(expression: KtSimpleNameExpression) {
-                    super.visitSimpleNameExpression(expression)
-                    val text = expression.text
-                    if (text.isNotEmpty() && text[0].isUpperCase()) {
-                        referencedTypes.add(text)
-                    }
-                }
-            },
-        )
-
-        val visibility = classOrObject.extractVisibility()
-        val modifiers = classOrObject.extractModifiers()
-        val supertypes = classOrObject.extractSupertypes()
-
-        val primaryConstructor =
-            classOrObject.primaryConstructor?.let {
-                parseConstructor(it, imports, packageName, importAliases)
-            }
-        val secondaryConstructors =
-            classOrObject.secondaryConstructors.map {
-                parseConstructor(
-                    it,
-                    imports,
-                    packageName,
-                    importAliases,
-                )
-            }
-
-        val functions =
-            classOrObject.declarations.filterIsInstance<KtFunction>().map {
-                parseFunction(it, imports, packageName, importAliases)
-            }
-        val properties =
-            classOrObject.declarations.filterIsInstance<KtProperty>().map {
-                parseProperty(it, imports, packageName, importAliases)
-            }
-
-        val companionObject =
-            classOrObject.companionObjects.firstOrNull()?.let { companion ->
-                parseClassOrObject(companion, packageName, imports, filePath, importAliases)
-            }
-
-        val kdocText = classOrObject.extractKDoc()
-
-        return ClassDeclaration(
-            name = simpleName,
-            fqName = fqName,
-            packageName = packageName,
-            isInterface = isInterface,
-            isAbstract = isAbstract,
-            isEnum = isEnum,
-            annotations = annotations,
-            imports = imports,
-            referencedTypes = referencedTypes,
-            filePath = filePath,
-            visibility = visibility,
-            modifiers = modifiers,
-            supertypes = supertypes,
-            primaryConstructor = primaryConstructor,
-            secondaryConstructors = secondaryConstructors,
-            functions = functions,
-            properties = properties,
-            companionObject = companionObject,
-            kdocText = kdocText,
-            importAliases = importAliases,
-        )
-    }
-
-    private fun parseAnnotations(
-        entries: List<KtAnnotationEntry>,
-        imports: List<String>,
-        packageName: String,
-        importAliases: Map<String, String> = emptyMap(),
-    ): List<AnnotationDeclaration> =
-        entries.map { entry ->
-            val name = entry.typeReference?.text ?: ""
-            var resolvedFqName = importAliases[name] ?: name
-            if (resolvedFqName == name && !name.contains(".")) {
-                val imported = imports.firstOrNull { it.endsWith(".$name") || it == name }
-                if (imported != null) {
-                    resolvedFqName = imported
-                } else if (packageName.isNotEmpty()) {
-                    resolvedFqName = "$packageName.$name"
-                }
-            }
-            val arguments =
-                entry.valueArguments.map { arg ->
-                    val argName = arg.getArgumentName()?.asName?.asString()
-                    val argValue = arg.getArgumentExpression()?.text ?: ""
-                    AnnotationArgumentDeclaration(argName, argValue)
-                }
-            AnnotationDeclaration(name, resolvedFqName, arguments)
-        }
-
-    private fun parseParameters(
-        psiParams: List<KtParameter>,
-        imports: List<String>,
-        packageName: String,
-        importAliases: Map<String, String> = emptyMap(),
-    ): List<ParameterDeclaration> =
-        psiParams.map { param ->
-            val name = param.name ?: ""
-            val type = param.typeReference?.text ?: ""
-            val hasDefaultValue = param.hasDefaultValue()
-            val annotations = parseAnnotations(param.annotationEntries, imports, packageName, importAliases)
-            ParameterDeclaration(name, type, hasDefaultValue, annotations)
-        }
-
-    private fun parseConstructor(
-        constructor: KtConstructor<*>,
-        imports: List<String>,
-        packageName: String,
-        importAliases: Map<String, String> = emptyMap(),
-    ): ConstructorDeclaration {
-        val visibility = constructor.extractVisibility()
-        val parameters = parseParameters(constructor.valueParameters, imports, packageName, importAliases)
-        val annotations = parseAnnotations(constructor.annotationEntries, imports, packageName, importAliases)
-        return ConstructorDeclaration(visibility, parameters, annotations)
-    }
-
-    private fun parseFunction(
-        function: KtFunction,
-        imports: List<String>,
-        packageName: String,
-        importAliases: Map<String, String> = emptyMap(),
-    ): FunctionDeclaration {
-        val name = function.name ?: ""
-        val visibility = function.extractVisibility()
-        val modifiers = function.extractModifiers()
-        val returnType = function.typeReference?.text ?: "Unit"
-        val parameters = parseParameters(function.valueParameters, imports, packageName, importAliases)
-        val annotations = parseAnnotations(function.annotationEntries, imports, packageName, importAliases)
-        val kdocText = function.extractKDoc()
-        val isExtension = function.receiverTypeReference != null
-        return FunctionDeclaration(
-            name,
-            visibility,
-            modifiers,
-            returnType,
-            parameters,
-            annotations,
-            kdocText,
-            isExtension,
-            function.textRange.startOffset,
-            function.textRange.endOffset,
-        )
-    }
-
-    private fun parseProperty(
-        property: KtProperty,
-        imports: List<String>,
-        packageName: String,
-        importAliases: Map<String, String> = emptyMap(),
-    ): PropertyDeclaration {
-        val name = property.name ?: ""
-        val visibility = property.extractVisibility()
-        val modifiers = property.extractModifiers()
-        val type = property.typeReference?.text ?: ""
-        val isVal = property.isVar.not()
-        val annotations = parseAnnotations(property.annotationEntries, imports, packageName, importAliases)
-        val kdocText = property.extractKDoc()
-        val isExtension = property.receiverTypeReference != null
-        return PropertyDeclaration(name, visibility, modifiers, type, isVal, annotations, kdocText, isExtension)
-    }
-
-    private fun KtModifierListOwner.extractVisibility(): Visibility {
-        val modifierList = this.modifierList ?: return Visibility.PUBLIC
-        return when {
-            modifierList.hasModifier(org.jetbrains.kotlin.lexer.KtTokens.PRIVATE_KEYWORD) -> Visibility.PRIVATE
-            modifierList.hasModifier(org.jetbrains.kotlin.lexer.KtTokens.PROTECTED_KEYWORD) -> Visibility.PROTECTED
-            modifierList.hasModifier(org.jetbrains.kotlin.lexer.KtTokens.INTERNAL_KEYWORD) -> Visibility.INTERNAL
-            else -> Visibility.PUBLIC
-        }
-    }
-
-    private fun KtModifierListOwner.extractModifiers(): Set<Modifier> {
-        val modifierList = this.modifierList ?: return emptySet()
-        val modifiers = mutableSetOf<Modifier>()
-        if (modifierList.hasModifier(org.jetbrains.kotlin.lexer.KtTokens.SEALED_KEYWORD)) modifiers.add(Modifier.SEALED)
-        if (modifierList.hasModifier(org.jetbrains.kotlin.lexer.KtTokens.OPEN_KEYWORD)) modifiers.add(Modifier.OPEN)
-        if (modifierList.hasModifier(
-                org.jetbrains.kotlin.lexer.KtTokens.ABSTRACT_KEYWORD,
-            )
-        ) {
-            modifiers.add(Modifier.ABSTRACT)
-        }
-        if (modifierList.hasModifier(org.jetbrains.kotlin.lexer.KtTokens.DATA_KEYWORD)) modifiers.add(Modifier.DATA)
-        if (modifierList.hasModifier(org.jetbrains.kotlin.lexer.KtTokens.VALUE_KEYWORD)) modifiers.add(Modifier.VALUE)
-        if (modifierList.hasModifier(org.jetbrains.kotlin.lexer.KtTokens.INNER_KEYWORD)) modifiers.add(Modifier.INNER)
-        if (modifierList.hasModifier(org.jetbrains.kotlin.lexer.KtTokens.INLINE_KEYWORD)) modifiers.add(Modifier.INLINE)
-        if (modifierList.hasModifier(
-                org.jetbrains.kotlin.lexer.KtTokens.SUSPEND_KEYWORD,
-            )
-        ) {
-            modifiers.add(Modifier.SUSPEND)
-        }
-        if (modifierList.hasModifier(org.jetbrains.kotlin.lexer.KtTokens.EXPECT_KEYWORD)) modifiers.add(Modifier.EXPECT)
-        if (modifierList.hasModifier(org.jetbrains.kotlin.lexer.KtTokens.ACTUAL_KEYWORD)) modifiers.add(Modifier.ACTUAL)
-        if (modifierList.hasModifier(org.jetbrains.kotlin.lexer.KtTokens.CONST_KEYWORD)) modifiers.add(Modifier.CONST)
-        if (modifierList.hasModifier(
-                org.jetbrains.kotlin.lexer.KtTokens.LATEINIT_KEYWORD,
-            )
-        ) {
-            modifiers.add(Modifier.LATEINIT)
-        }
-        if (this is KtObjectDeclaration) {
-            if (this.isCompanion()) {
-                modifiers.add(Modifier.COMPANION)
-            }
-            modifiers.add(Modifier.OBJECT)
-        }
-        return modifiers
-    }
-
-    private fun KtClassOrObject.extractSupertypes(): List<String> =
-        this.superTypeListEntries.mapNotNull {
-            it.typeReference?.text
-        }
-
-    private fun KtElement.extractKDoc(): String? = (this as? KtDeclaration)?.docComment?.text
-
     /**
      * Disposes of the underlying IntelliJ compiler resources and environments.
      */
     fun dispose() {
-        Disposer.dispose(disposable)
+        environment.dispose()
     }
 }

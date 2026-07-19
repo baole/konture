@@ -16,6 +16,8 @@ import io.github.baole.konture.core.DependencyGraphModel
 import io.github.baole.konture.core.KontureLogger
 import io.github.baole.konture.core.LayoutModel
 import io.github.baole.konture.core.LogLevel
+import io.github.baole.konture.impl.psi.MapSymbolLookup
+import io.github.baole.konture.impl.psi.TypeAliasDefinition
 import java.io.File
 import java.io.InputStream
 import kotlinx.serialization.json.Json
@@ -66,6 +68,7 @@ internal class ProjectGraphLoader {
      * @param inputStream The source stream containing `layout.json` contents.
      * @return The instantiated, fully loaded [ProjectGraph].
      */
+    @Suppress("CyclomaticComplexMethod")
     fun loadFromStream(
         inputStream: InputStream,
         depsStreamLoader: () -> InputStream? = { null },
@@ -101,6 +104,163 @@ internal class ProjectGraphLoader {
                     PatternMatchers.matchesSimpleGlob(pattern, simpleName)
             }
         }
+
+        // Build a declared-symbol registry per source set. Production code must not see test
+        // sources or test-only dependencies during type resolution.
+        val sourceSetModels = mutableMapOf<Triple<String, String, String>, io.github.baole.konture.core.SourceSetModel>()
+        val declaredClassesBySourceSet = mutableMapOf<Triple<String, String, String>, Set<String>>()
+        val declaredTypeAliasesBySourceSet = mutableMapOf<Triple<String, String, String>, Map<String, TypeAliasDefinition>>()
+        layoutModel.builds.forEach { buildModel ->
+            buildModel.modules
+                .filter { !isModuleExcluded(it.path) }
+                .forEach { moduleModel ->
+                    val resolvedProjectDir =
+                        if (File(moduleModel.projectDir).isAbsolute) {
+                            File(moduleModel.projectDir)
+                        } else {
+                            File(buildRoot, moduleModel.projectDir)
+                        }
+                    moduleModel.sourceSets.forEach { sourceSetModel ->
+                        val key = Triple(buildModel.id, moduleModel.path, sourceSetModel.name)
+                        sourceSetModels[key] = sourceSetModel
+                        val files =
+                            sourceSetModel.kotlinFiles.map { filePath ->
+                                val candidate = File(filePath)
+                                if (candidate.isAbsolute) candidate else File(resolvedProjectDir, filePath)
+                            }
+                        declaredClassesBySourceSet[key] = PsiParser.getDeclaredClassFqNames(files)
+                        declaredTypeAliasesBySourceSet[key] = PsiParser.getDeclaredTypeAliases(files)
+                    }
+                }
+        }
+
+        fun isTestConfiguration(configuration: String): Boolean {
+            var start = 0
+            while (true) {
+                val index = configuration.indexOf("test", start, ignoreCase = true)
+                if (index == -1) return false
+                val end = index + 4
+                val leftBoundary = index == 0 || configuration[index].isUpperCase() || !configuration[index - 1].isLetterOrDigit()
+                val rightBoundary = end == configuration.length || configuration[end].isUpperCase() || !configuration[end].isLetterOrDigit()
+                if (leftBoundary && rightBoundary) return true
+                start = index + 1
+            }
+        }
+
+        fun isCompileVisible(
+            sourceSet: io.github.baole.konture.core.SourceSetModel,
+            configuration: String,
+        ): Boolean {
+            val normalized = configuration.lowercase()
+            if (normalized.contains("runtimeonly") || normalized == "runtime") return false
+            if (!isTestConfiguration(configuration)) return true
+            if (sourceSet.production) return false
+
+            val sourceSetName = sourceSet.name.lowercase()
+            return when {
+                sourceSetName.contains("androidtest") -> normalized.contains("androidtest")
+                sourceSetName.contains("commontest") -> normalized.contains("commontest")
+                else -> !normalized.contains("androidtest") && !normalized.contains("commontest")
+            }
+        }
+
+        fun hasCompatiblePlatforms(
+            consumer: io.github.baole.konture.core.SourceSetModel,
+            candidate: io.github.baole.konture.core.SourceSetModel,
+        ): Boolean {
+            val consumerPlatforms = consumer.platforms.toSet()
+            if (consumerPlatforms.isEmpty() || !candidate.platforms.toSet().containsAll(consumerPlatforms)) return false
+
+            // A candidate must support every consumer platform. "native" is only a platform
+            // family, so native consumers additionally require every concrete target identity
+            // to be covered. Missing metadata deliberately fails closed.
+            return if ("native" in consumerPlatforms) {
+                consumer.targetNames.isNotEmpty() &&
+                    candidate.targetNames.isNotEmpty() &&
+                    candidate.targetNames.toSet().containsAll(consumer.targetNames)
+            } else {
+                true
+            }
+        }
+
+        data class VisibleSymbols(
+            val classes: Set<String>,
+            val typeAliases: Map<String, TypeAliasDefinition>,
+        )
+        val visibleSymbolsCache = mutableMapOf<Triple<String, String, String>, VisibleSymbols>()
+
+        fun visibleSymbolsFor(sourceSetKey: Triple<String, String, String>): VisibleSymbols =
+            visibleSymbolsCache.getOrPut(sourceSetKey) {
+                val visited = mutableSetOf<Triple<String, String, String>>()
+
+                fun collect(key: Triple<String, String, String>): VisibleSymbols {
+                    if (!visited.add(key)) return VisibleSymbols(emptySet(), emptyMap())
+                    val sourceSet = sourceSetModels[key] ?: return VisibleSymbols(emptySet(), emptyMap())
+                    val model =
+                        layoutModel.builds.firstOrNull { it.id == key.first }?.modules?.firstOrNull { it.path == key.second }
+                            ?: return VisibleSymbols(emptySet(), emptyMap())
+
+                    fun sourceSetClosure(start: Triple<String, String, String>): Set<Triple<String, String, String>> {
+                        val closure = mutableSetOf<Triple<String, String, String>>()
+
+                        fun visit(candidate: Triple<String, String, String>) {
+                            if (!closure.add(candidate)) return
+                            sourceSetModels.getValue(candidate).dependsOnSourceSets.forEach { parentName ->
+                                val parent = Triple(candidate.first, candidate.second, parentName)
+                                if (sourceSetModels.containsKey(parent)) visit(parent)
+                            }
+                        }
+                        visit(start)
+                        return closure
+                    }
+                    val ownSourceSets =
+                        if (sourceSet.kind == io.github.baole.konture.core.SourceSetKind.KMP) {
+                            sourceSetClosure(key)
+                        } else {
+                            sourceSetModels.keys.filter { candidate ->
+                                candidate.first == key.first && candidate.second == key.second &&
+                                    (candidate == key || (!sourceSet.production && sourceSetModels.getValue(candidate).production))
+                            }.toSet()
+                        }
+                    val dependencySourceSets =
+                        model.dependencies
+                            .filter { dependency ->
+                                !isModuleExcluded(dependency.targetPath) &&
+                                    isCompileVisible(sourceSet, dependency.configuration) &&
+                                    (
+                                        sourceSet.kind != io.github.baole.konture.core.SourceSetKind.KMP ||
+                                            ownSourceSets.any { candidate ->
+                                                dependency.configuration in
+                                                    sourceSetModels.getValue(candidate).dependencyConfigurations
+                                            }
+                                    )
+                            }
+                            .flatMap { dependency ->
+                                sourceSetModels.keys.filter { candidate ->
+                                    candidate.first == dependency.targetBuildId && candidate.second == dependency.targetPath &&
+                                        sourceSetModels.getValue(candidate).production &&
+                                        (
+                                            sourceSet.kind != io.github.baole.konture.core.SourceSetKind.KMP ||
+                                                hasCompatiblePlatforms(sourceSet, sourceSetModels.getValue(candidate))
+                                        )
+                                }
+                            }
+                    val dependencySymbols = dependencySourceSets.map(::collect)
+                    return VisibleSymbols(
+                        classes =
+                            (
+                                ownSourceSets.flatMap { declaredClassesBySourceSet[it].orEmpty() } +
+                                    dependencySymbols.flatMap { it.classes }
+                            ).toSet(),
+                        typeAliases =
+                            (
+                                ownSourceSets.flatMap { declaredTypeAliasesBySourceSet[it].orEmpty().entries } +
+                                    dependencySymbols.flatMap { it.typeAliases.entries }
+                            ).associate { it.toPair() },
+                    )
+                }
+                collect(sourceSetKey)
+            }
 
         val builds =
             layoutModel.builds.associate { buildModel ->
@@ -138,7 +298,15 @@ internal class ProjectGraphLoader {
                             val files =
                                 pathsToSourceSets.mapNotNull { (path, memberships) ->
                                     val resolvedFile = File(path)
-                                    val fileDecl = PsiParser.parseFile(resolvedFile)
+                                    val symbols =
+                                        memberships
+                                            .map { membership -> visibleSymbolsFor(Triple(buildModel.id, moduleModel.path, membership.name)) }
+                                    val symbolLookup =
+                                        MapSymbolLookup(
+                                            declaredClasses = symbols.flatMap { it.classes }.toSet(),
+                                            typeAliases = symbols.flatMap { it.typeAliases.entries }.associate { it.toPair() },
+                                        )
+                                    val fileDecl = PsiParser.parseFile(resolvedFile, symbolLookup)
                                     if (fileDecl == null) {
                                         KontureLogger.log(LogLevel.WARNING, "Failed to parse AST for Kotlin file: $path")
                                         return@mapNotNull null

@@ -16,4 +16,5 @@ data class FunctionDeclaration(
     val isExtension: Boolean,
     val sourceStartOffset: Int = -1,
     val sourceEndOffset: Int = -1,
+    val resolvedReturnType: String? = null,
 )
