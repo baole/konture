@@ -64,14 +64,14 @@ Konture helps developers analyze project structure and enforce architectural rul
 1. Apply the plugin to your root `build.gradle.kts`:
 ```kotlin
 plugins {
-    id("io.github.baole.konture") version "0.6.10" apply true
+    id("io.github.baole.konture") version "0.7.0" apply true
 }
 ```
 
 2. Add the dependency to your test module's `build.gradle.kts`:
 ```kotlin
 dependencies {
-    testImplementation("io.github.baole:konture:0.6.10")
+    testImplementation("io.github.baole:konture:0.7.0")
 }
 ```
 
@@ -88,7 +88,7 @@ dependencies {
 <plugin>
     <groupId>io.github.baole.konture</groupId>
     <artifactId>konture-maven-plugin</artifactId>
-    <version>0.6.10</version>
+    <version>0.7.0</version>
     <executions>
         <execution>
             <phase>process-test-resources</phase>
@@ -105,7 +105,7 @@ dependencies {
 <dependency>
     <groupId>io.github.baole</groupId>
     <artifactId>konture</artifactId>
-    <version>0.6.10</version>
+    <version>0.7.0</version>
     <scope>test</scope>
 </dependency>
 ```

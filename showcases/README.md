@@ -18,6 +18,8 @@ The fundamental starting point showcases. These lightweight, multi-module setups
     *   **Layer Isolation**: Chained layered architecture builders preventing bypass shortcuts.
     *   **Cross-Layer Type Leakage**: Custom functional `KontureScope` assertions ensuring domain UseCase signatures do not leak lower-level technical data/app coordinates.
     *   **Call Violations**: Enforcing that domain UseCases are only called by authorized presentation controllers using `onlyBeAccessedByAnyPackage(...)`.
+    *   **Test-source usage rules**: Demonstrating source-set-scoped rules that inspect Kotlin test sources without expanding default production rules.
+      The runnable selector example is in `sample-gradle`; the Maven plugin currently captures Maven main sources only.
     *   **Visibility boundaries**: Verifying public and internal modifier distributions on domain and data models.
 *   **How to Run (Gradle)**:
     ```bash

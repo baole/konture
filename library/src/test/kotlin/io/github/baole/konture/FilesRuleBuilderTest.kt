@@ -10,6 +10,30 @@ import org.junit.jupiter.api.Test
 
 class FilesRuleBuilderTest : RuleBuildersTestBase() {
     @Test
+    fun `source-set selector and usage assertions inspect test files only when selected`() {
+        val testSourceSet = SourceSetId(":app", "test", SourceSetKind.JVM, SourceSetRole.TEST)
+        val usage = SourceUsage(UsageKind.CALL, "io.mockk.spyk", "/src/Test.kt", 4, 9, rawExpression = "spyk")
+        val file =
+            FileDeclaration(
+                name = "Test.kt",
+                packageName = "example",
+                filePath = "/src/Test.kt",
+                sourceSets = listOf(testSourceSet),
+                usages = listOf(usage),
+            )
+        val module = Module(":", ":app", "app", emptyList(), emptyList(), emptyList(), listOf(file))
+        val graph = ProjectGraph(mapOf(":" to listOf(module)))
+
+        FilesRuleBuilder(graph, SourceSets.production()).allowEmpty().should().notCall("io.mockk.spyk").check()
+        val error =
+            assertThrows(AssertionError::class.java) {
+                FilesRuleBuilder(graph, SourceSets.tests()).should().notCall("io.mockk.spyk").check()
+            }
+        assertTrue(error.message!!.contains("spyk"))
+        assertTrue(error.message!!.contains("test source set"))
+    }
+
+    @Test
     fun `test files rule builder filtering and assertions`() {
         val files =
             projectGraph.getAllModules().flatMap { module ->

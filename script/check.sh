@@ -56,7 +56,7 @@ fi
 
 # Step 5: Build Maven Plugin
 echo -e "\n${BLUE}[5/5] Building Maven plugin...${NC}"
-if mvn clean compile -f plugin-maven/pom.xml; then
+if ./gradlew -q :core:publishToMavenLocal && mvn clean compile -f plugin-maven/pom.xml; then
     echo -e "${GREEN}[SUCCESS] Maven plugin compilation passed!${NC}"
 else
     echo -e "${RED}[ERROR] Maven plugin compilation failed.${NC}"

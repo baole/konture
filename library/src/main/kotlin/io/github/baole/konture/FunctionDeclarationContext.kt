@@ -22,4 +22,6 @@ data class FunctionDeclarationContext(
     val className: String?,
     val modulePath: String,
     val filePath: String,
+    val sourceSet: SourceSetId? = null,
+    val usages: List<SourceUsage> = emptyList(),
 )

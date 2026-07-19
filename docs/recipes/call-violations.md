@@ -31,7 +31,17 @@ flowchart LR
 
 ## 🛠️ Implementation with Konture
 
-You can detect skipped boundaries by setting up package import and class dependency blocks on your structural groups using the `classes()` DSL.
+The existing examples below are dependency/reference based: they identify structural coupling, not a compiler-resolved call graph. Use the source-call rule when you need to ban a specific Kotlin callable.
+
+```kotlin
+Konture.files(sourceSets = SourceSets.tests()) {
+    should().notCall("io.mockk.spyk")
+}
+```
+
+This detects calls written in Kotlin source (including aliases and wildcard imports), not runtime behavior. An unused `spyk` import is not a violation.
+
+You can also detect skipped boundaries by setting up package import and class dependency blocks on your structural groups using the `classes()` DSL.
 
 ### 1. Banning Direct Repository Calls from Controllers
 

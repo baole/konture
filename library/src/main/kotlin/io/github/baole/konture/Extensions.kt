@@ -17,6 +17,8 @@ fun Konture.modules() = ModulesRuleBuilder(projectGraph)
  */
 fun Konture.classes() = ClassesRuleBuilder(projectGraph)
 
+fun Konture.classes(sourceSets: SourceSetSelector) = ClassesRuleBuilder(projectGraph, sourceSets)
+
 /**
  * Access the layered-architecture rule builder.
  * Allows defining high-level layers and declaring directional access constraints between them.
@@ -29,17 +31,23 @@ fun Konture.layeredArchitecture() = LayeredArchitectureBuilder(projectGraph)
  */
 fun Konture.functions() = FunctionsRuleBuilder(projectGraph)
 
+fun Konture.functions(sourceSets: SourceSetSelector) = FunctionsRuleBuilder(projectGraph, sourceSets)
+
 /**
  * Access the property-level declarative assertion rule builder.
  * Allows filtering and assertion of property declarations (both top-level and class properties).
  */
 fun Konture.properties() = PropertiesRuleBuilder(projectGraph)
 
+fun Konture.properties(sourceSets: SourceSetSelector) = PropertiesRuleBuilder(projectGraph, sourceSets)
+
 /**
  * Access the file-level declarative assertion rule builder.
  * Allows filtering and assertion of source files and their imports, package, or wildcard usages.
  */
 fun Konture.files() = FilesRuleBuilder(projectGraph)
+
+fun Konture.files(sourceSets: SourceSetSelector) = FilesRuleBuilder(projectGraph, sourceSets)
 
 /**
  * Verifies that there are no package or module dependency cycles in the project.
@@ -54,20 +62,34 @@ fun Konture.assertNoCycles() = projectGraph.assertNoCycles()
  */
 val Konture.scope: KontureScope get() = KontureScope.fromProject(projectGraph)
 
+fun Konture.scope(sourceSets: SourceSetSelector) = KontureScope.fromProject(projectGraph, sourceSets)
+
 /**
  * Retrieves a class-level functional [KontureScope] scoped to a specific module path.
  */
 fun Konture.scopeFromModule(path: String) = KontureScope.fromModule(path, projectGraph)
+
+fun Konture.scopeFromModule(
+    path: String,
+    sourceSets: SourceSetSelector,
+) = KontureScope.fromModule(path, projectGraph, sourceSets)
 
 /**
  * Retrieves a class-level functional [KontureScope] scoped to a specific package name.
  */
 fun Konture.scopeFromPackage(packageName: String) = KontureScope.fromPackage(packageName, projectGraph)
 
+fun Konture.scopeFromPackage(
+    packageName: String,
+    sourceSets: SourceSetSelector,
+) = KontureScope.fromPackage(packageName, projectGraph, sourceSets)
+
 /**
  * Retrieves a file-level functional [KontureFileScope] representing all files in the project.
  */
 val Konture.fileScope: KontureFileScope get() = KontureFileScope.fromProject(projectGraph)
+
+fun Konture.fileScope(sourceSets: SourceSetSelector) = KontureFileScope.fromProject(projectGraph, sourceSets)
 
 /**
  * Retrieves a file-level functional [KontureFileScope] scoped to a specific module path.
@@ -97,12 +119,26 @@ fun Konture.classes(block: ClassesRuleBuilder.() -> Unit) {
     ClassesRuleBuilder(projectGraph).apply(block).check()
 }
 
+fun Konture.classes(
+    sourceSets: SourceSetSelector,
+    block: ClassesRuleBuilder.() -> Unit,
+) {
+    ClassesRuleBuilder(projectGraph, sourceSets).apply(block).check()
+}
+
 /**
  * Define and run function dependency/structural rules inside a block-based DSL context.
  * Automatically checks the rules at the end of the block.
  */
 fun Konture.functions(block: FunctionsRuleBuilder.() -> Unit) {
     FunctionsRuleBuilder(projectGraph).apply(block).check()
+}
+
+fun Konture.functions(
+    sourceSets: SourceSetSelector,
+    block: FunctionsRuleBuilder.() -> Unit,
+) {
+    FunctionsRuleBuilder(projectGraph, sourceSets).apply(block).check()
 }
 
 /**
@@ -113,12 +149,26 @@ fun Konture.properties(block: PropertiesRuleBuilder.() -> Unit) {
     PropertiesRuleBuilder(projectGraph).apply(block).check()
 }
 
+fun Konture.properties(
+    sourceSets: SourceSetSelector,
+    block: PropertiesRuleBuilder.() -> Unit,
+) {
+    PropertiesRuleBuilder(projectGraph, sourceSets).apply(block).check()
+}
+
 /**
  * Define and run source file dependency/structural rules inside a block-based DSL context.
  * Automatically checks the rules at the end of the block.
  */
 fun Konture.files(block: FilesRuleBuilder.() -> Unit) {
     FilesRuleBuilder(projectGraph).apply(block).check()
+}
+
+fun Konture.files(
+    sourceSets: SourceSetSelector,
+    block: FilesRuleBuilder.() -> Unit,
+) {
+    FilesRuleBuilder(projectGraph, sourceSets).apply(block).check()
 }
 
 /**

@@ -20,6 +20,7 @@ import io.github.baole.konture.impl.LogicalOperator
 @KontureDsl
 class FilesRuleBuilder(
     internal val graph: ProjectGraph = Konture.projectGraph,
+    private val sourceSets: SourceSetSelector = SourceSets.production(),
 ) {
     private var thatPredicate: ((FileDeclarationContext) -> Boolean)? = null
     private var shouldAssertion: (
@@ -228,8 +229,10 @@ class FilesRuleBuilder(
     fun check(g: ProjectGraph = graph) {
         val allFiles =
             g.getAllModules().flatMap { module ->
-                module.files.map { file ->
-                    FileDeclarationContext(file, module.path)
+                module.files.flatMap { file ->
+                    file.membershipsFor(module.path).filter(sourceSets::matches).map { sourceSet ->
+                        FileDeclarationContext(file, module.path, sourceSet)
+                    }
                 }
             }
         val filesToCheck = allFiles.filter { thatPredicate?.invoke(it) ?: true }
@@ -259,7 +262,8 @@ class FilesRuleBuilder(
                 val startIdx = list.size
                 assertion(file, allFiles, list)
                 for (i in startIdx until list.size) {
-                    list[i] = "${list[i]} (at ${file.declaration.filePath})"
+                    val usageSuffix = "${file.modulePath}, ${file.sourceSet?.name ?: "unknown"} source set, ${file.declaration.filePath}"
+                    list[i] = "${list[i]} (at $usageSuffix)"
                 }
             }
         }

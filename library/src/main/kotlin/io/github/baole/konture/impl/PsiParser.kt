@@ -14,6 +14,8 @@ import io.github.baole.konture.FunctionDeclaration
 import io.github.baole.konture.Modifier
 import io.github.baole.konture.ParameterDeclaration
 import io.github.baole.konture.PropertyDeclaration
+import io.github.baole.konture.SourceUsage
+import io.github.baole.konture.UsageKind
 import io.github.baole.konture.Visibility
 import org.jetbrains.kotlin.cli.jvm.compiler.EnvironmentConfigFiles
 import org.jetbrains.kotlin.cli.jvm.compiler.KotlinCoreEnvironment
@@ -23,20 +25,25 @@ import org.jetbrains.kotlin.com.intellij.psi.PsiFileFactory
 import org.jetbrains.kotlin.config.CompilerConfiguration
 import org.jetbrains.kotlin.idea.KotlinFileType
 import org.jetbrains.kotlin.psi.KtAnnotationEntry
+import org.jetbrains.kotlin.psi.KtCallExpression
 import org.jetbrains.kotlin.psi.KtClass
+import org.jetbrains.kotlin.psi.KtClassLiteralExpression
 import org.jetbrains.kotlin.psi.KtClassOrObject
 import org.jetbrains.kotlin.psi.KtConstructor
 import org.jetbrains.kotlin.psi.KtDeclaration
+import org.jetbrains.kotlin.psi.KtDotQualifiedExpression
 import org.jetbrains.kotlin.psi.KtElement
 import org.jetbrains.kotlin.psi.KtFile
 import org.jetbrains.kotlin.psi.KtFunction
 import org.jetbrains.kotlin.psi.KtModifierListOwner
+import org.jetbrains.kotlin.psi.KtNamedFunction
 import org.jetbrains.kotlin.psi.KtObjectDeclaration
 import org.jetbrains.kotlin.psi.KtParameter
 import org.jetbrains.kotlin.psi.KtProperty
 import org.jetbrains.kotlin.psi.KtSimpleNameExpression
 import org.jetbrains.kotlin.psi.KtTreeVisitorVoid
 import org.jetbrains.kotlin.psi.KtTypeReference
+import org.jetbrains.kotlin.psi.psiUtil.parents
 import java.io.File
 
 /**
@@ -96,6 +103,7 @@ internal object PsiParser {
         val classes = mutableListOf<ClassDeclaration>()
         val topLevelFunctions = mutableListOf<FunctionDeclaration>()
         val topLevelProperties = mutableListOf<PropertyDeclaration>()
+        val usages = extractUsages(ktFile, content, packageName, imports, importAliases, file.absolutePath)
 
         ktFile.declarations.forEach { declaration ->
             when (declaration) {
@@ -132,7 +140,130 @@ internal object PsiParser {
             kdocText = fileKDoc,
             filePath = file.absolutePath,
             importAliases = importAliases,
+            usages = usages,
         )
+    }
+
+    private fun extractUsages(
+        file: KtFile,
+        content: String,
+        packageName: String,
+        imports: List<String>,
+        aliases: Map<String, String>,
+        filePath: String,
+    ): List<SourceUsage> {
+        val usages = mutableListOf<SourceUsage>()
+        val seen = mutableSetOf<String>()
+
+        fun location(element: KtElement): Pair<Int, Int> {
+            val offset = element.textRange.startOffset
+            val line = content.substring(0, offset).count { it == '\n' } + 1
+            val previousBreak = content.lastIndexOf('\n', startIndex = (offset - 1).coerceAtLeast(0))
+            return line to offset - previousBreak
+        }
+
+        fun enclosing(element: KtElement): Triple<KtNamedFunction?, String?, String?> =
+            Triple(
+                element.parents.filterIsInstance<KtNamedFunction>().firstOrNull(),
+                element.parents.filterIsInstance<KtClassOrObject>().firstOrNull()?.fqName?.asString(),
+                element.parents.filterIsInstance<KtProperty>().firstOrNull()?.name,
+            )
+
+        fun add(
+            kind: UsageKind,
+            target: String,
+            element: KtElement,
+            raw: String,
+            possible: List<String> = emptyList(),
+            unresolved: Boolean = false,
+        ) {
+            val (line, column) = location(element)
+            val key = "$kind:$target:${element.textRange.startOffset}:$unresolved"
+            if (!seen.add(key)) return
+            val (function, clazz, property) = enclosing(element)
+            usages +=
+                SourceUsage(
+                    kind = kind,
+                    targetFqName = target,
+                    filePath = filePath,
+                    line = line,
+                    column = column,
+                    enclosingFunction = function?.name,
+                    enclosingClass = clazz,
+                    enclosingProperty = property,
+                    rawExpression = raw,
+                    possibleTargetFqNames = possible,
+                    unresolvedPossibleUsage = unresolved,
+                    confidence = if (unresolved) io.github.baole.konture.ResolutionConfidence.POSSIBLE else io.github.baole.konture.ResolutionConfidence.RESOLVED,
+                    sourceStartOffset = element.textRange.startOffset,
+                    sourceEndOffset = element.textRange.endOffset,
+                    enclosingFunctionStartOffset = function?.textRange?.startOffset ?: -1,
+                    enclosingFunctionEndOffset = function?.textRange?.endOffset ?: -1,
+                )
+        }
+
+        fun resolve(
+            raw: String,
+            element: KtElement,
+        ): Pair<String?, List<String>> {
+            if (raw.contains('.')) return raw to emptyList()
+            if (element.parents.filterIsInstance<KtNamedFunction>().any { it.name == raw }) return null to emptyList()
+            aliases[raw]?.let { return it to emptyList() }
+            val explicit = imports.filter { !it.endsWith(".*") && it.substringAfterLast('.') == raw }
+            if (explicit.size == 1) return explicit.single() to emptyList()
+            if (explicit.size > 1) return null to explicit
+            val wildcard = imports.filter { it.endsWith(".*") }.map { "${it.removeSuffix(".*")}.$raw" }
+            if (wildcard.size == 1) return wildcard.single() to emptyList()
+            if (wildcard.size > 1) return null to wildcard
+            return if (packageName.isEmpty()) raw to emptyList() else "$packageName.$raw" to emptyList()
+        }
+        file.accept(
+            object : KtTreeVisitorVoid() {
+                override fun visitCallExpression(expression: KtCallExpression) {
+                    super.visitCallExpression(expression)
+                    val raw = expression.calleeExpression?.text ?: return
+                    val (target, possible) = resolve(raw, expression)
+                    if (raw.substringAfterLast('.').firstOrNull()?.isUpperCase() == true) {
+                        if (target != null) add(UsageKind.CLASS_REFERENCE, target, expression, raw)
+                    } else if (target != null) {
+                        add(UsageKind.CALL, target, expression, raw)
+                    } else if (possible.isNotEmpty()) {
+                        add(UsageKind.CALL, raw, expression, raw, possible, unresolved = true)
+                    }
+                }
+
+                override fun visitTypeReference(typeReference: KtTypeReference) {
+                    super.visitTypeReference(typeReference)
+                    Regex("[A-Za-z_][A-Za-z0-9_.]*").findAll(typeReference.text).forEach { match ->
+                        val raw = match.value
+                        if (raw.substringAfterLast('.').firstOrNull()?.isUpperCase() == true) {
+                            resolve(raw, typeReference).first?.let { add(UsageKind.CLASS_REFERENCE, it, typeReference, raw) }
+                        }
+                    }
+                }
+
+                override fun visitAnnotationEntry(annotationEntry: KtAnnotationEntry) {
+                    super.visitAnnotationEntry(annotationEntry)
+                    val raw = annotationEntry.typeReference?.text ?: return
+                    resolve(raw, annotationEntry).first?.let { add(UsageKind.CLASS_REFERENCE, it, annotationEntry, raw) }
+                }
+
+                override fun visitClassLiteralExpression(expression: KtClassLiteralExpression) {
+                    super.visitClassLiteralExpression(expression)
+                    val raw = expression.receiverExpression?.text ?: return
+                    resolve(raw, expression).first?.let { add(UsageKind.CLASS_REFERENCE, it, expression, raw) }
+                }
+
+                override fun visitDotQualifiedExpression(expression: KtDotQualifiedExpression) {
+                    super.visitDotQualifiedExpression(expression)
+                    val raw = expression.receiverExpression.text
+                    if (raw.substringAfterLast('.').firstOrNull()?.isUpperCase() == true) {
+                        resolve(raw, expression).first?.let { add(UsageKind.CLASS_REFERENCE, it, expression, raw) }
+                    }
+                }
+            },
+        )
+        return usages
     }
 
     private fun parseClassOrObject(
@@ -312,6 +443,8 @@ internal object PsiParser {
             annotations,
             kdocText,
             isExtension,
+            function.textRange.startOffset,
+            function.textRange.endOffset,
         )
     }
 

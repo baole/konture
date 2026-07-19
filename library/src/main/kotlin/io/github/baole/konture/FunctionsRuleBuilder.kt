@@ -20,6 +20,7 @@ import io.github.baole.konture.impl.LogicalOperator
 @KontureDsl
 class FunctionsRuleBuilder(
     internal val graph: ProjectGraph = Konture.projectGraph,
+    private val sourceSets: SourceSetSelector = SourceSets.production(),
 ) {
     private var thatPredicate: ((FunctionDeclarationContext) -> Boolean)? = null
     private var shouldAssertion: (
@@ -227,17 +228,41 @@ class FunctionsRuleBuilder(
         val allFunctions =
             g.getAllModules().flatMap { module ->
                 module.files.flatMap { file ->
-                    val topLevel =
-                        file.topLevelFunctions.map { func ->
-                            FunctionDeclarationContext(func, file.packageName, null, module.path, file.filePath)
-                        }
-                    val members =
-                        file.classes.flatMap { cls ->
-                            cls.functions.map { func ->
-                                FunctionDeclarationContext(func, file.packageName, cls.name, module.path, file.filePath)
+                    file.membershipsFor(module.path).filter(sourceSets::matches).flatMap { sourceSet ->
+                        val topLevel =
+                            file.topLevelFunctions.map { func ->
+                                FunctionDeclarationContext(
+                                    func,
+                                    file.packageName,
+                                    null,
+                                    module.path,
+                                    file.filePath,
+                                    sourceSet,
+                                    file.usages.filter {
+                                        it.enclosingFunctionStartOffset == func.sourceStartOffset &&
+                                            it.enclosingFunctionEndOffset == func.sourceEndOffset
+                                    },
+                                )
                             }
-                        }
-                    topLevel + members
+                        val members =
+                            file.classes.flatMap { cls ->
+                                cls.functions.map { func ->
+                                    FunctionDeclarationContext(
+                                        func,
+                                        file.packageName,
+                                        cls.name,
+                                        module.path,
+                                        file.filePath,
+                                        sourceSet,
+                                        file.usages.filter {
+                                            it.enclosingFunctionStartOffset == func.sourceStartOffset &&
+                                                it.enclosingFunctionEndOffset == func.sourceEndOffset
+                                        },
+                                    )
+                                }
+                            }
+                        topLevel + members
+                    }
                 }
             }
         val functionsToCheck = allFunctions.filter { thatPredicate?.invoke(it) ?: true }
@@ -267,7 +292,7 @@ class FunctionsRuleBuilder(
                 val startIdx = list.size
                 assertion(func, allFunctions, list)
                 for (i in startIdx until list.size) {
-                    list[i] = "${list[i]} (at ${func.filePath})"
+                    list[i] = "${list[i]} (at ${func.modulePath}, ${func.sourceSet?.name ?: "unknown"} source set, ${func.filePath})"
                 }
             }
         }

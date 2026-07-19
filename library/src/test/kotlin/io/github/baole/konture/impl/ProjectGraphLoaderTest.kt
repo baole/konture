@@ -39,7 +39,7 @@ class ProjectGraphLoaderTest {
     fun `test invalid log level fallback`() {
         val layoutModel =
             LayoutModel(
-                schemaVersion = 1,
+                schemaVersion = LayoutModel.CURRENT_SCHEMA_VERSION,
                 logLevel = "SUPER_VERBOSE_UNKNOWN_LEVEL",
                 builds = emptyList(),
             )
@@ -74,7 +74,7 @@ class ProjectGraphLoaderTest {
                 )
             val layoutModel =
                 LayoutModel(
-                    schemaVersion = 1,
+                    schemaVersion = LayoutModel.CURRENT_SCHEMA_VERSION,
                     builds = listOf(buildModel),
                 )
             val jsonString = json.encodeToString(layoutModel)
@@ -147,7 +147,7 @@ class ProjectGraphLoaderTest {
 
         val layoutModel =
             LayoutModel(
-                schemaVersion = 1,
+                schemaVersion = LayoutModel.CURRENT_SCHEMA_VERSION,
                 builds = listOf(buildModel),
                 exclusions = exclusions,
             )
@@ -191,7 +191,7 @@ class ProjectGraphLoaderTest {
 
         val layoutModel =
             LayoutModel(
-                schemaVersion = 1,
+                schemaVersion = LayoutModel.CURRENT_SCHEMA_VERSION,
                 builds = listOf(buildModel),
             )
 
@@ -229,7 +229,7 @@ class ProjectGraphLoaderTest {
     @Test
     fun `test lazy loading of external dependencies from directory`() {
         val buildModel = BuildModel(id = ":", modules = emptyList())
-        val layoutModel = LayoutModel(schemaVersion = 1, builds = listOf(buildModel))
+        val layoutModel = LayoutModel(schemaVersion = LayoutModel.CURRENT_SCHEMA_VERSION, builds = listOf(buildModel))
         val layoutFile = File(tempDir, "layout.json")
         layoutFile.writeText(json.encodeToString(layoutModel))
 
@@ -268,7 +268,7 @@ class ProjectGraphLoaderTest {
     @Test
     fun `test lazy loading fallback when dependencies file is missing`() {
         val buildModel = BuildModel(id = ":", modules = emptyList())
-        val layoutModel = LayoutModel(schemaVersion = 1, builds = listOf(buildModel))
+        val layoutModel = LayoutModel(schemaVersion = LayoutModel.CURRENT_SCHEMA_VERSION, builds = listOf(buildModel))
         val layoutFile = File(tempDir, "layout.json")
         layoutFile.writeText(json.encodeToString(layoutModel))
 

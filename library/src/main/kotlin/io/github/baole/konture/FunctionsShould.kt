@@ -12,6 +12,27 @@ import io.github.baole.konture.impl.PatternMatchers
 class FunctionsShould internal constructor(
     private val builder: FunctionsRuleBuilder,
 ) {
+    /** Fails when the selected function invokes [fqName]. */
+    fun notCall(fqName: String): FunctionsRuleBuilder {
+        builder.setShould { function, _, violations ->
+            function.usages
+                .filter { usage ->
+                    usage.kind == UsageKind.CALL &&
+                        (usage.targetFqName == fqName || fqName in usage.possibleTargetFqNames)
+                }.forEach { usage ->
+                    val unresolved = if (usage.unresolvedPossibleUsage) "unresolved possible " else ""
+                    violations.add(getMessage("usage.notCall", unresolved, fqName, usage.rawExpression, usage.line, usage.column))
+                }
+        }
+        return builder
+    }
+
+    /** Fails when the selected function invokes [kClass]. */
+    fun notCall(kClass: kotlin.reflect.KClass<*>): FunctionsRuleBuilder = notCall(kClass.qualifiedName ?: kClass.java.name)
+
+    /** Fails when the selected function invokes [T]. */
+    inline fun <reified T : Any> notCall(): FunctionsRuleBuilder = notCall(T::class)
+
     infix fun resideInAPackage(packagePattern: String): FunctionsRuleBuilder {
         builder.setShould { func, _, violations ->
             if (!PatternMatchers.matchesPackage(packagePattern, func.packageName)) {

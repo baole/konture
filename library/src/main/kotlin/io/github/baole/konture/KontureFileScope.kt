@@ -21,8 +21,11 @@ class KontureFileScope(
          *
          * @param graph The project graph to use (defaults to [Konture.projectGraph]).
          */
-        fun fromProject(graph: ProjectGraph = Konture.projectGraph): KontureFileScope {
-            val files = graph.getAllModules().flatMap { it.files }
+        fun fromProject(
+            graph: ProjectGraph = Konture.projectGraph,
+            sourceSets: SourceSetSelector = SourceSets.production(),
+        ): KontureFileScope {
+            val files = graph.getAllModules().flatMap { module -> module.files.filter { it.membershipsFor(module.path).any(sourceSets::matches) } }
             return KontureFileScope(files)
         }
 
@@ -35,11 +38,12 @@ class KontureFileScope(
         fun fromModule(
             path: String,
             graph: ProjectGraph = Konture.projectGraph,
+            sourceSets: SourceSetSelector = SourceSets.production(),
         ): KontureFileScope {
             val module =
                 graph.getAllModules().find { it.path == path }
                     ?: throw IllegalArgumentException("Module $path not found in project graph")
-            return KontureFileScope(module.files)
+            return KontureFileScope(module.files.filter { it.membershipsFor(module.path).any(sourceSets::matches) })
         }
 
         /**
@@ -51,11 +55,12 @@ class KontureFileScope(
         fun fromPackage(
             packageName: String,
             graph: ProjectGraph = Konture.projectGraph,
+            sourceSets: SourceSetSelector = SourceSets.production(),
         ): KontureFileScope {
             val files =
                 graph
                     .getAllModules()
-                    .flatMap { it.files }
+                    .flatMap { module -> module.files.filter { it.membershipsFor(module.path).any(sourceSets::matches) } }
                     .filter { it.packageName == packageName || it.packageName.startsWith("$packageName.") }
             return KontureFileScope(files)
         }

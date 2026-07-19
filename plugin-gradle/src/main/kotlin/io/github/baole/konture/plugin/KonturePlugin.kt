@@ -11,7 +11,6 @@ import io.github.baole.konture.core.KontureConstants
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.artifacts.ProjectDependency
-import org.gradle.api.artifacts.component.ModuleComponentIdentifier
 import org.jetbrains.kotlin.gradle.dsl.KotlinProjectExtension
 import java.io.File
 
@@ -63,32 +62,30 @@ class KonturePlugin : Plugin<Project> {
             } else {
                 testTask.systemProperty(KontureConstants.PROPERTY_LOCALE, extension.language)
             }
-            testTask.doFirst {
-                val isRecordProperty =
-                    project.providers
-                        .systemProperty(KontureConstants.PROPERTY_BASELINE_GENERATE)
-                        .orNull
-                        ?.toBoolean() ?: false
-                val isRunningGenerateBaseline =
-                    project.gradle.startParameter.taskNames.any { name ->
-                        name == "generateKontureBaseline" ||
-                            (
-                                name.endsWith(":generateKontureBaseline") &&
-                                    (
-                                        project.path == name.substringBeforeLast(":generateKontureBaseline") ||
-                                            project.path.startsWith(name.substringBeforeLast(":generateKontureBaseline") + ":")
-                                    )
-                            )
-                    }
-                testTask.systemProperty(KontureConstants.PROPERTY_BASELINE_GENERATE, (isRecordProperty || isRunningGenerateBaseline).toString())
-            }
+            val isRecordProperty =
+                project.providers.systemProperty(KontureConstants.PROPERTY_BASELINE_GENERATE).orNull?.toBoolean() ?: false
+            val isRunningGenerateBaseline =
+                project.gradle.startParameter.taskNames.any { name ->
+                    name == "generateKontureBaseline" ||
+                        (
+                            name.endsWith(":generateKontureBaseline") &&
+                                (
+                                    project.path == name.substringBeforeLast(":generateKontureBaseline") ||
+                                        project.path.startsWith(name.substringBeforeLast(":generateKontureBaseline") + ":")
+                                )
+                        )
+                }
+            testTask.systemProperty(
+                KontureConstants.PROPERTY_BASELINE_GENERATE,
+                (isRecordProperty || isRunningGenerateBaseline).toString(),
+            )
         }
 
         // Root/Producer logic
         if (project == project.rootProject) {
             val generateTask =
                 project.tasks.register("generateArchitectureLayout", GenerateArchitectureLayout::class.java) { task ->
-                    task.outputFile.convention(project.layout.buildDirectory.file("konture/layout.json"))
+                    task.outputFile.convention(project.layout.buildDirectory.file("konture/layout_v2.json"))
                     task.rootProjectDir.set(project.rootDir)
                     task.excludeModules.set(extension.excludeModules)
                     task.excludePackages.set(extension.excludePackages)
@@ -101,6 +98,16 @@ class KonturePlugin : Plugin<Project> {
                 project.tasks.register("generateDependencyGraph", GenerateDependencyGraph::class.java) { task ->
                     task.outputFile.convention(project.layout.buildDirectory.file("konture/dependencies.json"))
                 }
+            val detectExternalDependencyRules =
+                project.tasks.register("detectKontureExternalDependencyRules", DetectExternalDependencyRules::class.java) { task ->
+                    task.resultFile.convention(project.layout.buildDirectory.file("konture/external-dependency-rules.txt"))
+                }
+            val dependencyGraphRequired = detectExternalDependencyRules.flatMap { it.resultFile }
+            generateDepsTask.configure { task ->
+                task.dependsOn(detectExternalDependencyRules)
+                task.inputs.file(dependencyGraphRequired)
+                task.onlyIf { dependencyGraphRequired.get().asFile.readText().trim().toBoolean() }
+            }
 
             // Eagerly evaluate project mapping and source directory listings during configuration phase
             // by using afterEvaluate block. This ensures full Configuration Cache compatibility
@@ -167,17 +174,12 @@ class KonturePlugin : Plugin<Project> {
                     task.buildFiles.from(filesCollection)
 
                     val declaredMap = mutableMapOf<String, List<String>>()
-                    val resolvedProvidersMap = mutableMapOf<String, org.gradle.api.provider.Provider<List<String>>>()
+                    val resolvedMap = mutableMapOf<String, List<String>>()
 
                     project.allprojects.forEach { sub ->
                         val resolvableConfigs =
                             sub.configurations.filter { config ->
-                                config.isCanBeResolved &&
-                                    !config.name.lowercase().contains("test") &&
-                                    !config.name.lowercase().contains("benchmark") &&
-                                    !config.name.lowercase().contains("incoming") &&
-                                    !config.name.lowercase().startsWith("arch") &&
-                                    !config.name.lowercase().startsWith("koarch")
+                                config.isCanBeResolved && isKontureDependencyConfiguration(config.name)
                             }
                         resolvableConfigs.forEach { config ->
                             val key = "${sub.path}:${config.name}"
@@ -189,43 +191,21 @@ class KonturePlugin : Plugin<Project> {
                                 }
                             declaredMap[key] = declared
 
-                            val resolvedProvider =
-                                project.provider {
-                                    try {
-                                        config.incoming.resolutionResult.allComponents.mapNotNull { component ->
-                                            val id = component.id
-                                            if (id is ModuleComponentIdentifier) {
-                                                "${id.group}:${id.module}:${id.version}"
-                                            } else {
-                                                null
-                                            }
-                                        }
-                                    } catch (e: Exception) {
-                                        project.logger.warn(
-                                            "Failed to resolve incoming artifacts for configuration '${config.name}' in project '${sub.path}': ${e.message}",
-                                            e,
-                                        )
-                                        emptyList()
-                                    }
+                            // Do not resolve Gradle configurations while writing the configuration cache.
+                            // Direct external dependencies are sufficient for Konture's optional dependency graph;
+                            // transitive resolution remains deliberately out of the configuration phase.
+                            resolvedMap[key] =
+                                config.dependencies.mapNotNull { dependency ->
+                                    val group = dependency.group ?: return@mapNotNull null
+                                    val version = dependency.version ?: return@mapNotNull null
+                                    "$group:${dependency.name}:$version"
                                 }
-                            resolvedProvidersMap[key] = resolvedProvider
                         }
                     }
 
                     task.declaredDependencies.set(declaredMap)
 
-                    task.resolvedDependencies.set(
-                        project.provider {
-                            resolvedProvidersMap.mapValues { entry ->
-                                try {
-                                    entry.value.get()
-                                } catch (e: Exception) {
-                                    project.logger.warn("Failed to resolve configuration dependency values for entry '${entry.key}': ${e.message}", e)
-                                    emptyList()
-                                }
-                            }
-                        },
-                    )
+                    task.resolvedDependencies.set(resolvedMap)
                 }
             }
 
@@ -257,6 +237,14 @@ class KonturePlugin : Plugin<Project> {
         }
     }
 
+    private fun isKontureDependencyConfiguration(name: String): Boolean {
+        val normalized = name.lowercase()
+        return normalized == "compileclasspath" ||
+            normalized == "runtimeclasspath" ||
+            normalized.endsWith("compileclasspath") ||
+            normalized.endsWith("runtimeclasspath")
+    }
+
     internal fun collectSourceSets(proj: Project): List<SourceSetData> {
         val list = mutableListOf<SourceSetData>()
         val androidExt = proj.extensions.findByName("android")
@@ -275,10 +263,11 @@ class KonturePlugin : Plugin<Project> {
                         list.add(
                             SourceSetData(
                                 name = name,
-                                kind = "KOTLIN_JVM",
+                                kind = "ANDROID_VARIANT",
                                 production = !name.lowercase().contains("test"),
                                 srcDirs = srcDirs.map { it.absolutePath },
                                 platforms = listOf("android"),
+                                compileClasspath = compilationClasspath(proj, name),
                             ),
                         )
                     }
@@ -359,6 +348,7 @@ class KonturePlugin : Plugin<Project> {
                             production = isProduction,
                             srcDirs = sourceSet.kotlin.srcDirs.map { it.absolutePath },
                             platforms = platforms,
+                            compileClasspath = compilationClasspath(proj, name),
                         ),
                     )
                 }
@@ -376,12 +366,29 @@ class KonturePlugin : Plugin<Project> {
                             production = ss.name == "main",
                             srcDirs = ss.allSource.srcDirs.map { it.absolutePath },
                             platforms = listOf("jvm"),
+                            compileClasspath = compilationClasspath(proj, ss.name),
                         ),
                     )
                 }
             }
         }
         return list
+    }
+
+    /** Returns resolved compile-classpath paths when Gradle exposes a matching configuration. */
+    private fun compilationClasspath(
+        project: Project,
+        sourceSetName: String,
+    ): List<String> {
+        val candidates = listOf("${sourceSetName}CompileClasspath", "compileClasspath")
+        val configuration = candidates.firstNotNullOfOrNull { project.configurations.findByName(it) } ?: return emptyList()
+        if (!configuration.isCanBeResolved) return emptyList()
+        return try {
+            configuration.resolve().map { it.canonicalPath }.sorted()
+        } catch (exception: Exception) {
+            project.logger.info("Konture could not resolve compiler classpath for $sourceSetName: ${exception.message}")
+            emptyList()
+        }
     }
 
     private fun collectDependencies(proj: Project): List<DependencyData> {
@@ -521,12 +528,20 @@ class KonturePlugin : Plugin<Project> {
         project.dependencies.add("archLayoutIncoming", project.dependencies.project(mapOf("path" to ":")))
         project.dependencies.add("archDepsIncoming", project.dependencies.project(mapOf("path" to ":")))
 
-        // Register copy tasks to copy layout.json and dependencies.json to the build/resources/test/konture directory
+        // Copy only the matching v2 layout and clear layouts from previously checked-out branches.
+        val cleanLayoutResources =
+            project.tasks.register("cleanArchitectureLayoutResources", org.gradle.api.tasks.Delete::class.java) { delete ->
+                delete.delete(
+                    project.layout.buildDirectory.file("resources/test/konture/layout.json"),
+                    project.layout.buildDirectory.file("resources/test/konture/layout_v2.json"),
+                )
+            }
         val copyLayoutTask =
             project.tasks.register("copyArchitectureLayout", org.gradle.api.tasks.Copy::class.java) { copy ->
                 copy.from(archLayoutIncoming)
                 copy.into(project.layout.buildDirectory.dir("resources/test/konture"))
-                copy.rename { "layout.json" }
+                copy.rename { "layout_v2.json" }
+                copy.dependsOn(cleanLayoutResources)
             }
 
         val copyDepsTask =
@@ -536,10 +551,29 @@ class KonturePlugin : Plugin<Project> {
                 copy.rename { "dependencies.json" }
             }
 
+        val cleanDependencyResource =
+            project.tasks.register("cleanArchitectureDependencyResource", org.gradle.api.tasks.Delete::class.java) { delete ->
+                delete.delete(project.layout.buildDirectory.file("resources/test/konture/dependencies.json"))
+            }
+        val rootDetector =
+            project.rootProject.tasks.findByName("detectKontureExternalDependencyRules") as? DetectExternalDependencyRules
+        rootDetector?.testSources?.from(project.fileTree("src") { pattern -> pattern.include("**/*.kt") })
+        copyDepsTask.configure { task ->
+            task.dependsOn(cleanDependencyResource)
+            if (rootDetector == null) {
+                task.onlyIf { false }
+            } else {
+                val detectorOutput = rootDetector.resultFile
+                task.dependsOn(rootDetector)
+                task.inputs.file(detectorOutput)
+                task.onlyIf { detectorOutput.get().asFile.readText().trim().toBoolean() }
+            }
+        }
         // Make processTestResources depend on copy tasks
         project.tasks.configureEach { task ->
             if (task.name == "processTestResources") {
                 task.dependsOn(copyLayoutTask)
+                task.dependsOn(cleanDependencyResource)
                 task.dependsOn(copyDepsTask)
             }
         }

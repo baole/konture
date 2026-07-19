@@ -6,6 +6,7 @@
 package io.github.baole.konture.plugin
 
 import io.github.baole.konture.core.KontureConstants
+import io.github.baole.konture.core.LayoutModel
 import org.gradle.testfixtures.ProjectBuilder
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
@@ -31,7 +32,7 @@ class KonturePluginTest {
 
         val expectedOutputFile =
             project.layout.buildDirectory
-                .file("konture/layout.json")
+                .file("konture/layout_v2.json")
                 .get()
                 .asFile
         val actualOutputFile = task?.outputFile?.get()?.asFile
@@ -76,6 +77,41 @@ class KonturePluginTest {
         // Verify copy architecture layout task was registered automatically
         val copyTask = subProject.tasks.findByName("copyArchitectureLayout")
         assertNotNull(copyTask)
+    }
+
+    @Test
+    fun `external dependency rule detector follows Kotlin test sources`() {
+        val project = ProjectBuilder.builder().build()
+        val source = project.file("src/test/kotlin/ArchitectureTest.kt")
+        source.parentFile.mkdirs()
+        source.writeText("// should().notDependOnExternalLibraries(\"a:b\")\nclass ArchitectureTest")
+        val result = project.layout.buildDirectory.file("konture/requires-dependencies.txt").get().asFile
+        val task = project.tasks.create("detectExternalRules", DetectExternalDependencyRules::class.java)
+        task.testSources.from(source)
+        task.resultFile.set(result)
+
+        task.detect()
+        assertEquals("false", result.readText())
+
+        source.writeText("class ArchitectureTest { fun rule() = should().notDependOnExternalLibraries(\"a:b\") }")
+        task.detect()
+        assertEquals("true", result.readText())
+    }
+
+    @Test
+    fun `root detector includes custom test source sets of Konture consumers`() {
+        val root = ProjectBuilder.builder().withName("root").build()
+        root.plugins.apply("io.github.baole.konture")
+        val consumer = ProjectBuilder.builder().withName("architecture").withParent(root).build()
+        consumer.plugins.apply("io.github.baole.konture")
+        val source = consumer.file("src/commonTest/kotlin/ArchitectureTest.kt")
+        source.parentFile.mkdirs()
+        source.writeText("fun rule() = should().onlyDependOnExternalLibraries(\"a:b\")")
+
+        val detector = root.tasks.getByName("detectKontureExternalDependencyRules") as DetectExternalDependencyRules
+        detector.detect()
+
+        assertEquals("true", detector.resultFile.get().asFile.readText())
     }
 
     @Test
@@ -140,7 +176,7 @@ class KonturePluginTest {
                 jsonText,
             )
 
-        assertEquals(1, layoutModel.schemaVersion)
+        assertEquals(LayoutModel.CURRENT_SCHEMA_VERSION, layoutModel.schemaVersion)
         val rootBuild = layoutModel.builds.firstOrNull { it.id == ":" }
         assertNotNull(rootBuild)
 
@@ -244,7 +280,7 @@ class KonturePluginTest {
         assertTrue(files.isNotEmpty())
         val expectedFile =
             rootProject.layout.buildDirectory
-                .file("konture/layout.json")
+                .file("konture/layout_v2.json")
                 .get()
                 .asFile
         assertEquals(expectedFile, files.first())
@@ -677,16 +713,13 @@ class KonturePluginTest {
         val rootProject = ProjectBuilder.builder().withName("root").build()
         val childProject = ProjectBuilder.builder().withName("child").withParent(rootProject).build()
 
+        rootProject.gradle.startParameter.setTaskNames(listOf(":generateKontureBaseline"))
+
         rootProject.plugins.apply("io.github.baole.konture")
         childProject.plugins.apply("java") // Registers Test tasks
         childProject.plugins.apply("io.github.baole.konture")
 
-        rootProject.gradle.startParameter.setTaskNames(listOf(":generateKontureBaseline"))
-
         val childTestTask = childProject.tasks.getByName("test") as org.gradle.api.tasks.testing.Test
-        val doFirstAction = childTestTask.actions.first()
-        doFirstAction.execute(childTestTask)
-
         val generateProp = childTestTask.systemProperties[KontureConstants.PROPERTY_BASELINE_GENERATE]
         val resolvedValue =
             when (generateProp) {

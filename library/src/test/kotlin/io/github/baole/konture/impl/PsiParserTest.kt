@@ -222,6 +222,37 @@ class PsiParserTest {
     }
 
     @Test
+    fun `extracts resolved calls and class references without import-only false positives`() {
+        val file =
+            File(tempDir, "Usages.kt").apply {
+                writeText(
+                    """
+                    package example
+                    import io.mockk.spyk as partialSpy
+                    import io.mockk.MockK
+                    import io.mockk.*
+
+                    @MockK class Subject : MockK {
+                        fun direct() = io.mockk.spyk(this)
+                        fun alias() = partialSpy(this)
+                        fun wildcard() = spyk(this)
+                        fun local() { fun spyk(value: Any) = value; spyk(this) }
+                        val type: MockK? = null
+                        val literal = MockK::class
+                    }
+                    """.trimIndent(),
+                )
+            }
+
+        val declaration = PsiParser.parseFile(file)!!
+        val mockkCalls = declaration.usages.filter { it.kind == io.github.baole.konture.UsageKind.CALL && it.targetFqName == "io.mockk.spyk" }
+        assertEquals(3, mockkCalls.size)
+        assertTrue(mockkCalls.all { it.line > 0 && it.column > 0 })
+        assertTrue(mockkCalls.none { it.enclosingFunction == "local" })
+        assertTrue(declaration.usages.any { it.kind == io.github.baole.konture.UsageKind.CLASS_REFERENCE && it.targetFqName == "io.mockk.MockK" })
+    }
+
+    @Test
     fun `test top level declarations`() {
         val ktContent =
             """
