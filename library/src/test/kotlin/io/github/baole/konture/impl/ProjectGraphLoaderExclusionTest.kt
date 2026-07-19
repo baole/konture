@@ -141,7 +141,7 @@ class ProjectGraphLoaderExclusionTest {
 
         val layoutModel =
             LayoutModel(
-                schemaVersion = 2,
+                schemaVersion = LayoutModel.CURRENT_SCHEMA_VERSION,
                 builds = listOf(buildModel),
                 exclusions = exclusions,
             )
@@ -287,7 +287,7 @@ class ProjectGraphLoaderExclusionTest {
 
         val layoutModel =
             LayoutModel(
-                schemaVersion = 2,
+                schemaVersion = LayoutModel.CURRENT_SCHEMA_VERSION,
                 builds =
                     listOf(
                         BuildModel(

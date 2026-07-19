@@ -201,7 +201,7 @@ abstract class GenerateArchitectureLayout : DefaultTask() {
 
         val layoutModel =
             LayoutModel(
-                schemaVersion = 2,
+                schemaVersion = LayoutModel.CURRENT_SCHEMA_VERSION,
                 builds =
                     listOf(
                         BuildModel(

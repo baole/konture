@@ -23,4 +23,9 @@ data class LayoutModel(
     val builds: List<BuildModel>,
     val exclusions: ExclusionsModel = ExclusionsModel(),
     val logLevel: String = "INFO",
-)
+) {
+    companion object {
+        /** Current version of the serialized Konture layout schema. */
+        const val CURRENT_SCHEMA_VERSION: Int = 2
+    }
+}

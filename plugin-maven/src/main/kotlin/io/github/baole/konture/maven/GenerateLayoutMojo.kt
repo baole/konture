@@ -20,7 +20,7 @@ import org.apache.maven.plugins.annotations.ResolutionScope
 import org.apache.maven.project.MavenProject
 
 /**
- * Maven Mojo that generates Konture's layout.json and dependencies.json schemas
+ * Maven Mojo that generates Konture's layout_v2.json and dependencies.json schemas
  * at compile/test-resource generation time.
  */
 @Mojo(
@@ -81,7 +81,7 @@ class GenerateLayoutMojo : AbstractMojo() {
             )
 
             val layoutModel = LayoutModel(
-                schemaVersion = 1,
+                schemaVersion = LayoutModel.CURRENT_SCHEMA_VERSION,
                 builds = listOf(BuildModel(id = ":", modules = modules)),
                 exclusions = exclusions,
                 logLevel = logLevel
@@ -118,7 +118,7 @@ class GenerateLayoutMojo : AbstractMojo() {
                 outputDir.mkdirs()
             }
 
-            val layoutFile = File(outputDir, "layout.json")
+            val layoutFile = File(outputDir, "layout_v2.json")
             val depsFile = File(outputDir, "dependencies.json")
 
             layoutFile.writeText(json.encodeToString(LayoutModel.serializer(), layoutModel))

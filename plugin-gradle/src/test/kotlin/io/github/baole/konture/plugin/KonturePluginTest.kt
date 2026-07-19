@@ -6,6 +6,7 @@
 package io.github.baole.konture.plugin
 
 import io.github.baole.konture.core.KontureConstants
+import io.github.baole.konture.core.LayoutModel
 import org.gradle.testfixtures.ProjectBuilder
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
@@ -175,7 +176,7 @@ class KonturePluginTest {
                 jsonText,
             )
 
-        assertEquals(2, layoutModel.schemaVersion)
+        assertEquals(LayoutModel.CURRENT_SCHEMA_VERSION, layoutModel.schemaVersion)
         val rootBuild = layoutModel.builds.firstOrNull { it.id == ":" }
         assertNotNull(rootBuild)
 
