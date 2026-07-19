@@ -140,11 +140,17 @@ internal fun ClassDeclaration.isAssignableTo(
 ): Boolean {
     if (!visited.add(this.fqName)) return false
 
-    if (supertypes.contains(superType) || supertypes.any { it.substringBefore("<").trim() == superType }) return true
+    fun matchesSupertype(typeReference: String): Boolean {
+        val cleanSupertype = typeReference.substringBefore("<").removeSuffix("?").trim()
+        return cleanSupertype == superType ||
+            (!superType.contains('.') && cleanSupertype.substringAfterLast('.') == superType)
+    }
+
+    if (supertypes.any(::matchesSupertype)) return true
 
     for (directSuper in supertypes) {
         val cleanSuperName = directSuper.substringBefore("<").removeSuffix("?").trim()
-        if (cleanSuperName == superType) return true
+        if (matchesSupertype(cleanSuperName)) return true
 
         val resolved = resolveTypeReference(cleanSuperName, allClasses)
         if (resolved != null) {

@@ -214,6 +214,16 @@ class PropertiesThat internal constructor(
         return builder
     }
 
+    /** Restricts the rules to properties with the specified raw type. */
+    infix fun haveType(type: kotlin.reflect.KClass<*>): PropertiesRuleBuilder {
+        val expectedType = type.toKontureTypeReference()
+        builder.setThat { property -> property.declaration.resolvedType?.let { matchesKotlinType(it, expectedType) } == true }
+        return builder
+    }
+
+    /** Restricts the rules to properties with the specified raw type. */
+    inline fun <reified T : Any> haveTypeOf(): PropertiesRuleBuilder = haveType(T::class)
+
     /**
      * Restricts the rules to properties with any of the specified types.
      */

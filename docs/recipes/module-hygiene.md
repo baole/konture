@@ -28,7 +28,9 @@ Konture accesses the processed `layout.json` module graph directly, making it ex
 
 ### 1. No Circular Module Dependencies
 
-Simply call `assertNoCycles()` in any JUnit test block to scan your entire multi-module graph instantly, catching complex split-configuration loops:
+Simply call `assertNoCycles()` in any JUnit test block to scan your entire multi-module graph instantly, catching complex split-configuration loops.
+
+By default, `assertNoCycles()` ignores dependency configurations containing `"test"` case-insensitively (such as Gradle's `testImplementation`, `androidTestImplementation`, or Maven's `test` scope). This prevents false positives when a test-only project or dedicated architecture-testing module depends back on the production module under test.
 
 ```kotlin
 import io.github.baole.konture.*
@@ -38,8 +40,14 @@ class ModuleCycleTest {
 
     @Test
     fun `no circular dependencies allowed in the build graph`() {
-        // Scans the entire project build hierarchy for circular dependency cycles
+        // Scans the entire project build hierarchy for circular dependency cycles (excluding test configurations)
         Konture.assertNoCycles()
+    }
+
+    @Test
+    fun `strictly enforce no cycles anywhere including in tests`() {
+        // Includes test-only dependencies in the cycle detection traversal
+        Konture.assertNoCycles(includeTestConfigurations = true)
     }
 }
 ```
