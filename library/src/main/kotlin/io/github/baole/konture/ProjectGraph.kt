@@ -8,6 +8,7 @@ package io.github.baole.konture
 import io.github.baole.konture.core.DependencyGraphModel
 import io.github.baole.konture.i18n.getMessage
 import io.github.baole.konture.impl.ModuleKey
+import kotlin.jvm.JvmOverloads
 
 /**
  * Represents the complete structural graph of the multi-project/composite build.
@@ -67,18 +68,43 @@ data class ProjectGraph(
      * Detects dependency cycles in the module graph and throws an [AssertionError] if a cycle is found.
      * The verification is performed using a Depth-First Search (DFS) traversal.
      *
+     * @param includeTestConfigurations if true, test-related dependency configurations will also be analyzed
+     * for cycles. If false (default), they are skipped.
      * @throws AssertionError if any circular dependency is detected.
      */
-    fun assertNoCycles() {
+    @JvmOverloads
+    fun assertNoCycles(includeTestConfigurations: Boolean = false) {
         val visited = mutableSetOf<ModuleKey>()
         val recursionStack = mutableSetOf<ModuleKey>()
         val cycle = mutableListOf<ModuleKey>()
 
         for (key in moduleMap.keys) {
             if (key !in visited) {
-                dfs(key, visited, recursionStack, cycle)
+                dfs(key, visited, recursionStack, cycle, includeTestConfigurations)
             }
         }
+    }
+
+    private fun Dependency.isTestConfiguration(): Boolean {
+        val name = configuration
+        var start = 0
+        while (true) {
+            val index = name.indexOf("test", start, ignoreCase = true)
+            if (index == -1) break
+            val end = index + 4
+
+            // Check Left Boundary (starts the string, is an uppercase letter, or is preceded by a non-alphanumeric character)
+            val leftOk = index == 0 || name[index].isUpperCase() || !name[index - 1].isLetterOrDigit()
+
+            // Check Right Boundary (ends the string, is followed by an uppercase letter, or is followed by a non-alphanumeric character)
+            val rightOk = end == name.length || name[end].isUpperCase() || !name[end].isLetterOrDigit()
+
+            if (leftOk && rightOk) {
+                return true
+            }
+            start = index + 1
+        }
+        return false
     }
 
     @Suppress("NestedBlockDepth")
@@ -87,6 +113,7 @@ data class ProjectGraph(
         visited: MutableSet<ModuleKey>,
         recursionStack: MutableSet<ModuleKey>,
         cycle: MutableList<ModuleKey>,
+        includeTestConfigurations: Boolean,
     ): Boolean {
         visited.add(key)
         recursionStack.add(key)
@@ -95,6 +122,9 @@ data class ProjectGraph(
         val module = moduleMap[key]
         if (module != null) {
             for (dep in module.dependencies) {
+                if (!includeTestConfigurations && dep.isTestConfiguration()) {
+                    continue
+                }
                 val depKey = ModuleKey(dep.targetBuildId, dep.targetPath)
                 if (depKey in recursionStack) {
                     cycle.add(depKey)
@@ -108,7 +138,7 @@ data class ProjectGraph(
                     throw AssertionError("Circular dependency detected in project graph: $cyclePath")
                 }
                 if (depKey !in visited) {
-                    if (dfs(depKey, visited, recursionStack, cycle)) return true
+                    if (dfs(depKey, visited, recursionStack, cycle, includeTestConfigurations)) return true
                 }
             }
         }
