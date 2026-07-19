@@ -6,6 +6,7 @@
 package io.github.baole.konture
 
 import io.github.baole.konture.core.DependencyGraphModel
+import io.github.baole.konture.i18n.getMessage
 import io.github.baole.konture.impl.ModuleKey
 
 /**
@@ -17,13 +18,27 @@ import io.github.baole.konture.impl.ModuleKey
  */
 data class ProjectGraph(
     val builds: Map<String, List<Module>>,
-    private val externalDependenciesLoader: () -> DependencyGraphModel = {
+    private val externalDependenciesLoader: () -> DependencyGraphModel? = {
         DependencyGraphModel()
     },
 ) {
-    val externalDependencies: DependencyGraphModel by lazy {
+    private val loadedExternalDependencies: DependencyGraphModel? by lazy {
         externalDependenciesLoader()
     }
+
+    val externalDependencies: DependencyGraphModel by lazy {
+        loadedExternalDependencies ?: DependencyGraphModel()
+    }
+
+    /**
+     * Returns the external dependency graph or reports that the test was not prepared for an
+     * external-dependency assertion. The Gradle plugin normally detects direct assertion usage
+     * and generates this graph automatically.
+     */
+    internal fun requireExternalDependencies(): DependencyGraphModel =
+        checkNotNull(loadedExternalDependencies) {
+            getMessage("dependencyGraph.required")
+        }
     private val moduleMap: Map<ModuleKey, Module> =
         builds
             .flatMap { (buildId, modules) ->

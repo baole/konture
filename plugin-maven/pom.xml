@@ -6,7 +6,7 @@
 
     <groupId>io.github.baole.konture</groupId>
     <artifactId>konture-maven-plugin</artifactId>
-    <version>0.6.10</version>
+    <version>0.7.0</version>
     <packaging>maven-plugin</packaging>
 
     <name>Konture Maven Plugin</name>
@@ -54,7 +54,7 @@
         <dependency>
             <groupId>io.github.baole</groupId>
             <artifactId>konture-core</artifactId>
-            <version>0.6.10</version>
+            <version>0.7.0</version>
         </dependency>
 
         <!-- Kotlin and Serialization -->

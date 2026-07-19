@@ -405,4 +405,21 @@ class ModulesRuleBuilderTest : RuleBuildersTestBase() {
         assert4(moduleA, graph, v4)
         assertTrue(v4.isEmpty())
     }
+
+    @Test
+    fun `external dependency assertions fail when their graph is absent`() {
+        val graph =
+            ProjectGraph(
+                builds = mapOf(":" to listOf(moduleA)),
+                externalDependenciesLoader = { null },
+            )
+
+        val rule = ModulesRuleBuilder(graph).should().notDependOnExternalLibraries("com.example:library")
+
+        val failure = assertThrows(IllegalStateException::class.java) {
+            rule.getShouldAssertion()!!.invoke(moduleA, graph, mutableListOf())
+        }
+
+        assertTrue(failure.message!!.contains("dependencies.json"))
+    }
 }

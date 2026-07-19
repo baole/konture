@@ -215,7 +215,7 @@ internal class ProjectGraphLoader {
                     KontureLogger.log(LogLevel.WARNING, "Failed to read dependencies.json content: ${e.message}")
                     DependencyGraphModel()
                 }
-            } ?: DependencyGraphModel()
+            }
         }
     }
 

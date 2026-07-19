@@ -37,6 +37,12 @@ konture {
 }
 ```
 
+### Automatic test inputs
+
+The Gradle plugin generates and copies `layout_v2.json` before Konture test resources are processed, so normal architecture tests do not need a separate layout task. The plugin detects direct calls to `notDependOnExternalLibraries` and `onlyDependOnExternalLibraries` in Kotlin sources below a Konture consumer's `src/` directory—including custom, KMP, and Android test source-set conventions. It generates `dependencies.json` only when at least one consumer needs those rules.
+
+Adding or removing a direct assertion automatically changes the detector input and therefore enables or skips dependency-graph generation on the next test run. Indirect wrapper functions are intentionally fail-closed: if the graph was not prepared, the assertion reports that `dependencies.json` is required rather than passing with an empty dependency set.
+
 ---
 
 ### 📦 Maven Configuration
@@ -47,7 +53,7 @@ Declare your plugin configurations inside the `<configuration>` block of the `ko
 <plugin>
     <groupId>io.github.baole.konture</groupId>
     <artifactId>konture-maven-plugin</artifactId>
-    <version>0.6.10</version>
+    <version>0.7.0</version>
     <executions>
         <execution>
             <phase>process-test-resources</phase>

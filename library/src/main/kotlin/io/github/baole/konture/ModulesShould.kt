@@ -361,7 +361,7 @@ class ModulesShould internal constructor(
         includeTransitive: Boolean = true,
     ): ModulesRuleBuilder {
         builder.setShould { module, graph, violations ->
-            val resolvedDeps = graph.externalDependencies.modules[module.path] ?: emptyList()
+            val resolvedDeps = graph.requireExternalDependencies().modules[module.path] ?: emptyList()
             val offending =
                 resolvedDeps.filter { dep ->
                     if (!includeTransitive && dep.isTransitive) return@filter false
@@ -404,7 +404,7 @@ class ModulesShould internal constructor(
         includeTransitive: Boolean = true,
     ): ModulesRuleBuilder {
         builder.setShould { module, graph, violations ->
-            val resolvedDeps = graph.externalDependencies.modules[module.path] ?: emptyList()
+            val resolvedDeps = graph.requireExternalDependencies().modules[module.path] ?: emptyList()
             val offending =
                 resolvedDeps.filter { dep ->
                     if (!includeTransitive && dep.isTransitive) return@filter false
