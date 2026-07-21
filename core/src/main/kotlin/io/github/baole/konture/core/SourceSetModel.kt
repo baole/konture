@@ -25,6 +25,12 @@ data class SourceSetModel(
     val srcDirs: List<String>,
     val kotlinFiles: List<String>,
     val platforms: List<String> = emptyList(),
+    /** Concrete Kotlin/Native target identities associated with this source set (for example, `IOS_ARM64`). */
+    val targetNames: List<String> = emptyList(),
+    /** Source sets in this source set's Kotlin compilation/dependsOn visibility closure. */
+    val dependsOnSourceSets: List<String> = emptyList(),
+    /** Gradle configurations that own dependencies declared for this source set. */
+    val dependencyConfigurations: List<String> = emptyList(),
     /** Optional resolved compilation classpath used by v2 compiler-backed analysis. */
     val compileClasspath: List<String> = emptyList(),
     /** Optional Kotlin/JVM target metadata used to configure compiler analysis. */

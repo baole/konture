@@ -15,6 +15,9 @@ data class SourceSetData(
     val production: Boolean,
     val srcDirs: List<String>,
     val platforms: List<String> = emptyList(),
+    val targetNames: List<String> = emptyList(),
+    val dependsOnSourceSets: List<String> = emptyList(),
+    val dependencyConfigurations: List<String> = emptyList(),
     val compileClasspath: List<String> = emptyList(),
     val jvmTarget: String? = null,
 ) : Serializable
