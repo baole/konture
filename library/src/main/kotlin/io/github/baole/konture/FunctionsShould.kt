@@ -151,7 +151,7 @@ class FunctionsShould internal constructor(
         builder.setShould { func, _, violations ->
             if (func.declaration.visibility != Visibility.PUBLIC) {
                 violations.add(
-                    getMessage("function.should.bePublic", func.qualifiedName),
+                    getMessage("function.should.bePublic", func.qualifiedName, func.declaration.visibility),
                 )
             }
         }
@@ -162,7 +162,7 @@ class FunctionsShould internal constructor(
         builder.setShould { func, _, violations ->
             if (func.declaration.visibility != Visibility.INTERNAL) {
                 violations.add(
-                    getMessage("function.should.beInternal", func.qualifiedName),
+                    getMessage("function.should.beInternal", func.qualifiedName, func.declaration.visibility),
                 )
             }
         }
@@ -173,7 +173,7 @@ class FunctionsShould internal constructor(
         builder.setShould { func, _, violations ->
             if (func.declaration.visibility != Visibility.PRIVATE) {
                 violations.add(
-                    getMessage("function.should.bePrivate", func.qualifiedName),
+                    getMessage("function.should.bePrivate", func.qualifiedName, func.declaration.visibility),
                 )
             }
         }
@@ -184,7 +184,7 @@ class FunctionsShould internal constructor(
         builder.setShould { func, _, violations ->
             if (func.declaration.visibility != Visibility.PROTECTED) {
                 violations.add(
-                    getMessage("function.should.beProtected", func.qualifiedName),
+                    getMessage("function.should.beProtected", func.qualifiedName, func.declaration.visibility),
                 )
             }
         }

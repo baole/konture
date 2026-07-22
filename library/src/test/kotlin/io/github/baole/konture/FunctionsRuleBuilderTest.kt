@@ -153,6 +153,10 @@ class FunctionsRuleBuilderTest : RuleBuildersTestBase() {
             v3f2.all { it.contains("com.example.MyService.processInternal") },
             "Expected fully-qualified function name in violations, got: $v3f2",
         )
+        assertTrue(
+            v3f2.any { it.contains("should be public, but is ") },
+            "Expected the actual visibility in the violation, got: $v3f2",
+        )
     }
 
     @Test

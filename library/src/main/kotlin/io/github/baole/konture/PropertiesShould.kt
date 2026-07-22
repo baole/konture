@@ -130,7 +130,7 @@ class PropertiesShould internal constructor(
         builder.setShould { prop, _, violations ->
             if (prop.declaration.visibility != Visibility.PUBLIC) {
                 violations.add(
-                    getMessage("property.should.bePublic", prop.qualifiedName),
+                    getMessage("property.should.bePublic", prop.qualifiedName, prop.declaration.visibility),
                 )
             }
         }
@@ -141,7 +141,7 @@ class PropertiesShould internal constructor(
         builder.setShould { prop, _, violations ->
             if (prop.declaration.visibility != Visibility.INTERNAL) {
                 violations.add(
-                    getMessage("property.should.beInternal", prop.qualifiedName),
+                    getMessage("property.should.beInternal", prop.qualifiedName, prop.declaration.visibility),
                 )
             }
         }
@@ -152,7 +152,7 @@ class PropertiesShould internal constructor(
         builder.setShould { prop, _, violations ->
             if (prop.declaration.visibility != Visibility.PRIVATE) {
                 violations.add(
-                    getMessage("property.should.bePrivate", prop.qualifiedName),
+                    getMessage("property.should.bePrivate", prop.qualifiedName, prop.declaration.visibility),
                 )
             }
         }
@@ -163,7 +163,7 @@ class PropertiesShould internal constructor(
         builder.setShould { prop, _, violations ->
             if (prop.declaration.visibility != Visibility.PROTECTED) {
                 violations.add(
-                    getMessage("property.should.beProtected", prop.qualifiedName),
+                    getMessage("property.should.beProtected", prop.qualifiedName, prop.declaration.visibility),
                 )
             }
         }
