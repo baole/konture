@@ -195,7 +195,7 @@ class ClassesRuleBuilder(
                     actualAssertion(cls, allCls, temp2)
                     if (temp1.isNotEmpty() && temp2.isNotEmpty()) {
                         violations.add(
-                            getMessage("classes.rule.eitherOr", cls.fqName, temp1.joinToString(), temp2.joinToString()),
+                            getMessage("classes.rule.eitherOr", cls.fqName, temp1.joinToString("; "), temp2.joinToString("; ")),
                         )
                     }
                 }

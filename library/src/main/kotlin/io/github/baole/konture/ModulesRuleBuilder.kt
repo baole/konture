@@ -182,7 +182,7 @@ class ModulesRuleBuilder(
                     actualAssertion(module, g, temp2)
                     if (temp1.isNotEmpty() && temp2.isNotEmpty()) {
                         violations.add(
-                            getMessage("modules.rule.eitherOr", module.path, temp1.joinToString(), temp2.joinToString()),
+                            getMessage("modules.rule.eitherOr", module.path, temp1.joinToString("; "), temp2.joinToString("; ")),
                         )
                     }
                 }

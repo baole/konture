@@ -158,6 +158,10 @@ class BaselineTest : RuleBuildersTestBase() {
                 )
             }
         assertTrue(exception.message!!.contains("depends on com.example.ClassB (at com.other.ClassC)"))
+        assertTrue(
+            exception.message!!.contains("Total: 1 violation(s)"),
+            "Expected a violation count summary, got: ${exception.message}",
+        )
     }
 
     @Test

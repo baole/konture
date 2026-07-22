@@ -195,7 +195,7 @@ class FilesRuleBuilder(
                     actualAssertion(file, allFiles, temp2)
                     if (temp1.isNotEmpty() && temp2.isNotEmpty()) {
                         violations.add(
-                            getMessage("files.rule.eitherOr", file.declaration.name, temp1.joinToString(), temp2.joinToString()),
+                            getMessage("files.rule.eitherOr", file.declaration.name, temp1.joinToString("; "), temp2.joinToString("; ")),
                         )
                     }
                 }

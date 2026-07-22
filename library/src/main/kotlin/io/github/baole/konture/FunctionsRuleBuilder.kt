@@ -193,7 +193,7 @@ class FunctionsRuleBuilder(
                     actualAssertion(func, allFuncs, temp2)
                     if (temp1.isNotEmpty() && temp2.isNotEmpty()) {
                         violations.add(
-                            getMessage("functions.rule.eitherOr", func.qualifiedName, temp1.joinToString(), temp2.joinToString()),
+                            getMessage("functions.rule.eitherOr", func.qualifiedName, temp1.joinToString("; "), temp2.joinToString("; ")),
                         )
                     }
                 }

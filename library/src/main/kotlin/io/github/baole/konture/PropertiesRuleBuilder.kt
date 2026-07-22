@@ -193,7 +193,7 @@ class PropertiesRuleBuilder(
                     actualAssertion(prop, allProps, temp2)
                     if (temp1.isNotEmpty() && temp2.isNotEmpty()) {
                         violations.add(
-                            getMessage("properties.rule.eitherOr", prop.qualifiedName, temp1.joinToString(), temp2.joinToString()),
+                            getMessage("properties.rule.eitherOr", prop.qualifiedName, temp1.joinToString("; "), temp2.joinToString("; ")),
                         )
                     }
                 }
