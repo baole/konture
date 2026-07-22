@@ -46,6 +46,30 @@ class I18nTest {
     }
 
     @Test
+    fun testClassShouldBeAssignableFromTranslations() {
+        // English
+        Konture.locale = Locale.ENGLISH
+        assertEquals(
+            "Class A should be assignable from B",
+            getMessage("class.should.beAssignableFrom", "A", "B"),
+        )
+
+        // Spanish
+        Konture.locale = Locale.forLanguageTag("es")
+        assertEquals(
+            "La clase A debería ser asignable desde B",
+            getMessage("class.should.beAssignableFrom", "A", "B"),
+        )
+
+        // French
+        Konture.locale = Locale.FRENCH
+        assertEquals(
+            "La classe A devrait être assignable depuis B",
+            getMessage("class.should.beAssignableFrom", "A", "B"),
+        )
+    }
+
+    @Test
     fun testLanguageTranslations() {
         // Spanish
         Konture.locale = Locale.forLanguageTag("es")

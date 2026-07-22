@@ -718,6 +718,39 @@ class ClassesShouldTest : RuleBuildersTestBase() {
         assertTrue(builder().should().beInternal().getShouldAssertion() != null)
         assertTrue(builder().should().bePrivate().getShouldAssertion() != null)
 
+        // beAssignableFrom
+        val childClass =
+            ClassDeclaration(
+                name = "ChildClass",
+                fqName = "com.test.ChildClass",
+                packageName = "com.test",
+                isInterface = false,
+                isAbstract = false,
+                annotations = emptyList(),
+                imports = emptyList(),
+                referencedTypes = emptySet(),
+                filePath = "/src/ChildClass.kt",
+                modifiers = emptySet(),
+                visibility = Visibility.PUBLIC,
+                supertypes = listOf("com.test.TestClass"),
+                kdocText = null,
+            )
+
+        val assertAssignableFrom = builder().should().beAssignableFrom("com.test.ChildClass").getShouldAssertion()!!
+        val vAssign1 = mutableListOf<String>()
+        assertAssignableFrom(testClass, listOf(testClass, childClass), vAssign1)
+        assertTrue(vAssign1.isEmpty())
+
+        val assertAssignableFromFail = builder().should().beAssignableFrom("com.test.WrongClass").getShouldAssertion()!!
+        val vAssign2 = mutableListOf<String>()
+        assertAssignableFromFail(testClass, listOf(testClass, childClass), vAssign2)
+        assertEquals(1, vAssign2.size)
+
+        val assertAssignableFromSelf = builder().should().beAssignableFrom("com.test.TestClass").getShouldAssertion()!!
+        val vAssign3 = mutableListOf<String>()
+        assertAssignableFromSelf(testClass, listOf(testClass, childClass), vAssign3)
+        assertTrue(vAssign3.isEmpty())
+
         // beAssignableTo, beAssignableToAnyOf, beAssignableToAllOf
         val assertAss = builder().should().beAssignableTo("com.test.SuperInterface").getShouldAssertion()!!
         val vAss1 = mutableListOf<String>()
