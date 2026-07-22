@@ -15,6 +15,7 @@ data class PropertyDeclaration(
     val kdocText: String?,
     val isExtension: Boolean = false,
     val resolvedType: String? = null,
+    val sourceLine: Int = -1,
 ) {
     val isVar: Boolean get() = !isVal
 }

@@ -293,7 +293,7 @@ class FunctionsRuleBuilder(
                 val startIdx = list.size
                 assertion(func, allFunctions, list)
                 for (i in startIdx until list.size) {
-                    list[i] = "${list[i]} (at ${ViolationLocation.of(func.modulePath, func.sourceSet?.name, func.filePath)})"
+                    list[i] = "${list[i]} (at ${ViolationLocation.of(func.modulePath, func.sourceSet?.name, func.filePath, func.declaration.sourceLine)})"
                 }
             }
         }

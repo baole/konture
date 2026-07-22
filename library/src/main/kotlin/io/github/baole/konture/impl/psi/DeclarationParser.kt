@@ -151,6 +151,7 @@ internal object DeclarationParser {
             companionObject = companionObject,
             kdocText = kdocText,
             importAliases = context.importAliases,
+            sourceLine = lineOf(classOrObject),
         )
     }
 
@@ -241,6 +242,7 @@ internal object DeclarationParser {
             function.textRange.startOffset,
             function.textRange.endOffset,
             resolvedReturnType,
+            sourceLine = lineOf(function),
         )
     }
 
@@ -262,7 +264,19 @@ internal object DeclarationParser {
             )
         val kdocText = property.extractKDoc()
         val isExtension = property.receiverTypeReference != null
-        return PropertyDeclaration(name, visibility, modifiers, type, isVal, annotations, kdocText, isExtension, resolvedType)
+        return PropertyDeclaration(
+            name, visibility, modifiers, type, isVal, annotations, kdocText, isExtension, resolvedType,
+            sourceLine =
+                lineOf(
+                    property,
+                ),
+        )
+    }
+
+    private fun lineOf(element: KtElement): Int {
+        val offset = element.textRange.startOffset
+        val text = element.containingFile.text
+        return text.substring(0, offset).count { it == '\n' } + 1
     }
 
     private fun KtModifierListOwner.extractVisibility(): Visibility {
