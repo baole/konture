@@ -149,3 +149,27 @@ For any source class `A` and target class `B`:
 This heuristic-based approach provides **99%+ accuracy** for architectural assertions while maintaining absolute independence from compiled classfiles and build-classpath states. The known boundary is ambiguous simple-name resolution: a dependency can be misattributed when two classes share the same simple name across different packages and the source file does not use an explicit import, star import, same-package reference, or fully qualified name to disambiguate it. In practice this is rare, since Kotlin style conventions and import organization make ambiguous simple-name references uncommon, but it is the trade-off that lets Konture remain source-only and classpath-independent.
 
 These design choices, offline topology extraction, artifact-based sharing, and source-level parsing, let Konture run as an ordinary, fast unit test rather than a slow, classpath-dependent static analysis pass. See [Why Architecture Testing?](architecture_test.md) for what these tests actually check.
+
+---
+
+## 5. Violation Message Format
+
+When a rule fails, every violation follows a uniform shape so it can be read at a glance and clicked through in an IDE, regardless of whether the subject is a class, file, function, or property:
+
+```
+<Subject> <fully-qualified name> <what was expected>[, but <actual>] (at <module>, <source set> source set, <file>:<line>)
+```
+
+For example:
+
+```
+Function architecture violation(s) detected:
+  - Function com.acme.web.UserController.handle should be public, but is INTERNAL (at :web, main source set, src/main/kotlin/com/acme/web/UserController.kt:42)
+Total: 1 violation(s)
+```
+
+- **Fully-qualified name** identifies the subject unambiguously even when the same simple name appears in several packages or classes.
+- **Actual value** is shown alongside the expectation where it is cheap to compute (for example, the actual visibility), so the mismatch is visible without opening the file.
+- **Location** names the module and source set as well as the file and line, which matters in multi-module and multiplatform projects; module rules embed the module path in the message itself. Composite `either/or` rules separate the sub-conditions of each branch with `; `.
+
+All message text is localized; see [Configuration](configuration.md) for selecting a language. Because baselines match on this text, changing it requires a one-time regeneration — see [Architecture Baselines](baseline.md).

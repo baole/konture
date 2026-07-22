@@ -115,7 +115,7 @@ Konture supports a multi-class baseline schema, grouping all recorded violations
           "name": "repositories should be interfaces",
           "violations": [
             {
-              "location": "com/acme/database/SomeRepository.kt",
+              "location": ":database, main source set, com/acme/database/SomeRepository.kt:12",
               "message": "Class com.acme.database.SomeRepository must be declared as interface"
             }
           ]
@@ -129,7 +129,7 @@ Konture supports a multi-class baseline schema, grouping all recorded violations
           "name": "controllers should only depend on services",
           "violations": [
             {
-              "location": "com/acme/web/SomeController.kt",
+              "location": ":web, main source set, com/acme/web/SomeController.kt:34",
               "message": "Class com.acme.web.SomeController depends on repository directly"
             }
           ]
@@ -139,4 +139,16 @@ Konture supports a multi-class baseline schema, grouping all recorded violations
   ]
 }
 ```
+
+## 🔄 Regenerating Baselines After an Upgrade
+
+Baseline entries are matched against the exact violation text a rule produces. When an upgrade improves the wording or location of violation messages, previously recorded entries no longer match and their violations resurface as if new.
+
+After upgrading Konture, regenerate your baselines once and commit the result:
+
+```bash
+./gradlew generateKontureBaseline
+```
+
+This is a one-time step per upgrade that changes message formatting; it does not weaken any rule, it only refreshes the stored text.
 
