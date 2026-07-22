@@ -16,7 +16,7 @@ class PropertiesShould internal constructor(
         builder.setShould { prop, _, violations ->
             if (!PatternMatchers.matchesPackage(packagePattern, prop.packageName)) {
                 violations.add(
-                    getMessage("property.should.resideInPackage", prop.declaration.name, packagePattern, prop.packageName),
+                    getMessage("property.should.resideInPackage", prop.qualifiedName, packagePattern, prop.packageName),
                 )
             }
         }
@@ -28,7 +28,7 @@ class PropertiesShould internal constructor(
             val matches = packagePatterns.any { PatternMatchers.matchesPackage(it, prop.packageName) }
             if (!matches) {
                 violations.add(
-                    getMessage("property.should.resideInPackageAny", prop.declaration.name, packagePatterns.joinToString(), prop.packageName),
+                    getMessage("property.should.resideInPackageAny", prop.qualifiedName, packagePatterns.joinToString(), prop.packageName),
                 )
             }
         }
@@ -44,7 +44,7 @@ class PropertiesShould internal constructor(
         builder.setShould { prop, _, violations ->
             if (!predicate(prop.packageName)) {
                 violations.add(
-                    getMessage("property.should.resideInPackageMatching", prop.declaration.name, prop.packageName),
+                    getMessage("property.should.resideInPackageMatching", prop.qualifiedName, prop.packageName),
                 )
             }
         }
@@ -55,7 +55,7 @@ class PropertiesShould internal constructor(
         builder.setShould { prop, _, violations ->
             if (!prop.declaration.name.endsWith(suffix)) {
                 violations.add(
-                    getMessage("property.should.haveNameEndingWith", prop.declaration.name, suffix),
+                    getMessage("property.should.haveNameEndingWith", prop.qualifiedName, suffix),
                 )
             }
         }
@@ -67,7 +67,7 @@ class PropertiesShould internal constructor(
             val matches = suffixes.any { prop.declaration.name.endsWith(it) }
             if (!matches) {
                 violations.add(
-                    getMessage("property.should.haveNameEndingWithAny", prop.declaration.name, suffixes.joinToString()),
+                    getMessage("property.should.haveNameEndingWithAny", prop.qualifiedName, suffixes.joinToString()),
                 )
             }
         }
@@ -80,7 +80,7 @@ class PropertiesShould internal constructor(
         builder.setShould { prop, _, violations ->
             if (!prop.declaration.name.startsWith(prefix)) {
                 violations.add(
-                    getMessage("property.should.haveNameStartingWith", prop.declaration.name, prefix),
+                    getMessage("property.should.haveNameStartingWith", prop.qualifiedName, prefix),
                 )
             }
         }
@@ -92,7 +92,7 @@ class PropertiesShould internal constructor(
             val matches = prefixes.any { prop.declaration.name.startsWith(it) }
             if (!matches) {
                 violations.add(
-                    getMessage("property.should.haveNameStartingWithAny", prop.declaration.name, prefixes.joinToString()),
+                    getMessage("property.should.haveNameStartingWithAny", prop.qualifiedName, prefixes.joinToString()),
                 )
             }
         }
@@ -105,7 +105,7 @@ class PropertiesShould internal constructor(
         builder.setShould { prop, _, violations ->
             if (!PatternMatchers.matchesSimpleGlob(pattern, prop.declaration.name)) {
                 violations.add(
-                    getMessage("property.should.haveNameMatching", prop.declaration.name, pattern),
+                    getMessage("property.should.haveNameMatching", prop.qualifiedName, pattern),
                 )
             }
         }
@@ -117,7 +117,7 @@ class PropertiesShould internal constructor(
             val matches = patterns.any { PatternMatchers.matchesSimpleGlob(it, prop.declaration.name) }
             if (!matches) {
                 violations.add(
-                    getMessage("property.should.haveNameMatchingAny", prop.declaration.name, patterns.joinToString()),
+                    getMessage("property.should.haveNameMatchingAny", prop.qualifiedName, patterns.joinToString()),
                 )
             }
         }
@@ -130,7 +130,7 @@ class PropertiesShould internal constructor(
         builder.setShould { prop, _, violations ->
             if (prop.declaration.visibility != Visibility.PUBLIC) {
                 violations.add(
-                    getMessage("property.should.bePublic", prop.declaration.name),
+                    getMessage("property.should.bePublic", prop.qualifiedName),
                 )
             }
         }
@@ -141,7 +141,7 @@ class PropertiesShould internal constructor(
         builder.setShould { prop, _, violations ->
             if (prop.declaration.visibility != Visibility.INTERNAL) {
                 violations.add(
-                    getMessage("property.should.beInternal", prop.declaration.name),
+                    getMessage("property.should.beInternal", prop.qualifiedName),
                 )
             }
         }
@@ -152,7 +152,7 @@ class PropertiesShould internal constructor(
         builder.setShould { prop, _, violations ->
             if (prop.declaration.visibility != Visibility.PRIVATE) {
                 violations.add(
-                    getMessage("property.should.bePrivate", prop.declaration.name),
+                    getMessage("property.should.bePrivate", prop.qualifiedName),
                 )
             }
         }
@@ -163,7 +163,7 @@ class PropertiesShould internal constructor(
         builder.setShould { prop, _, violations ->
             if (prop.declaration.visibility != Visibility.PROTECTED) {
                 violations.add(
-                    getMessage("property.should.beProtected", prop.declaration.name),
+                    getMessage("property.should.beProtected", prop.qualifiedName),
                 )
             }
         }
@@ -174,7 +174,7 @@ class PropertiesShould internal constructor(
         builder.setShould { prop, _, violations ->
             if (!prop.declaration.isVar) {
                 violations.add(
-                    getMessage("property.should.beVar", prop.declaration.name),
+                    getMessage("property.should.beVar", prop.qualifiedName),
                 )
             }
         }
@@ -185,7 +185,7 @@ class PropertiesShould internal constructor(
         builder.setShould { prop, _, violations ->
             if (prop.declaration.isVar) {
                 violations.add(
-                    getMessage("property.should.beVal", prop.declaration.name),
+                    getMessage("property.should.beVal", prop.qualifiedName),
                 )
             }
         }
@@ -196,7 +196,7 @@ class PropertiesShould internal constructor(
         builder.setShould { prop, _, violations ->
             if (prop.declaration.type != typeFqName) {
                 violations.add(
-                    getMessage("property.should.haveType", prop.declaration.name, typeFqName, prop.declaration.type),
+                    getMessage("property.should.haveType", prop.qualifiedName, typeFqName, prop.declaration.type),
                 )
             }
         }
@@ -223,7 +223,7 @@ class PropertiesShould internal constructor(
         builder.setShould { prop, _, violations ->
             if (!typeFqNames.contains(prop.declaration.type)) {
                 violations.add(
-                    getMessage("property.should.haveTypeAny", prop.declaration.name, typeFqNames.joinToString(), prop.declaration.type),
+                    getMessage("property.should.haveTypeAny", prop.qualifiedName, typeFqNames.joinToString(), prop.declaration.type),
                 )
             }
         }
@@ -240,7 +240,7 @@ class PropertiesShould internal constructor(
                 }
             if (!hasAnnotation) {
                 violations.add(
-                    getMessage("property.should.haveAnnotation", prop.declaration.name, annotationName),
+                    getMessage("property.should.haveAnnotation", prop.qualifiedName, annotationName),
                 )
             }
         }
@@ -255,7 +255,7 @@ class PropertiesShould internal constructor(
                 }
             if (!hasAnnotation) {
                 violations.add(
-                    getMessage("property.should.haveAnnotationAny", prop.declaration.name, annotationNames.joinToString()),
+                    getMessage("property.should.haveAnnotationAny", prop.qualifiedName, annotationNames.joinToString()),
                 )
             }
         }
@@ -274,7 +274,7 @@ class PropertiesShould internal constructor(
         builder.setShould { prop, _, violations ->
             if (!prop.hasAllAnnotations(names)) {
                 violations.add(
-                    getMessage("property.should.haveAllAnnotations", prop.declaration.name, names.joinToString()),
+                    getMessage("property.should.haveAllAnnotations", prop.qualifiedName, names.joinToString()),
                 )
             }
         }
@@ -293,7 +293,7 @@ class PropertiesShould internal constructor(
         builder.setShould { prop, _, violations ->
             if (!prop.hasAnyAnnotation(names)) {
                 violations.add(
-                    getMessage("property.should.haveAnyAnnotation", prop.declaration.name, names.joinToString()),
+                    getMessage("property.should.haveAnyAnnotation", prop.qualifiedName, names.joinToString()),
                 )
             }
         }
@@ -312,7 +312,7 @@ class PropertiesShould internal constructor(
         builder.setShould { prop, _, violations ->
             if (!prop.declaration.modifiers.contains(modifier)) {
                 violations.add(
-                    getMessage("property.should.haveModifier", prop.declaration.name, modifier),
+                    getMessage("property.should.haveModifier", prop.qualifiedName, modifier),
                 )
             }
         }
@@ -329,7 +329,7 @@ class PropertiesShould internal constructor(
             val missing = modifiers.filter { !prop.declaration.modifiers.contains(it) }
             if (missing.isNotEmpty()) {
                 violations.add(
-                    getMessage("property.should.haveAllModifiers", prop.declaration.name, modifiers.joinToString(), missing.joinToString()),
+                    getMessage("property.should.haveAllModifiers", prop.qualifiedName, modifiers.joinToString(), missing.joinToString()),
                 )
             }
         }
@@ -352,7 +352,7 @@ class PropertiesShould internal constructor(
         builder.setShould { prop, _, violations ->
             if (!modifiers.any { prop.declaration.modifiers.contains(it) }) {
                 violations.add(
-                    getMessage("property.should.haveAnyModifier", prop.declaration.name, modifiers.joinToString()),
+                    getMessage("property.should.haveAnyModifier", prop.qualifiedName, modifiers.joinToString()),
                 )
             }
         }
@@ -373,7 +373,7 @@ class PropertiesShould internal constructor(
         builder.setShould { prop, _, violations ->
             if (prop.declaration.visibility != visibility) {
                 violations.add(
-                    getMessage("property.should.haveVisibility", prop.declaration.name, visibility, prop.declaration.visibility),
+                    getMessage("property.should.haveVisibility", prop.qualifiedName, visibility, prop.declaration.visibility),
                 )
             }
         }
@@ -389,7 +389,7 @@ class PropertiesShould internal constructor(
         builder.setShould { prop, _, violations ->
             if (!visibilities.contains(prop.declaration.visibility)) {
                 violations.add(
-                    getMessage("property.should.haveAnyVisibility", prop.declaration.name, visibilities.joinToString(), prop.declaration.visibility),
+                    getMessage("property.should.haveAnyVisibility", prop.qualifiedName, visibilities.joinToString(), prop.declaration.visibility),
                 )
             }
         }
@@ -407,7 +407,7 @@ class PropertiesShould internal constructor(
         builder.setShould { prop, _, violations ->
             if (!prop.declaration.isExtension) {
                 violations.add(
-                    getMessage("property.should.beExtension", prop.declaration.name),
+                    getMessage("property.should.beExtension", prop.qualifiedName),
                 )
             }
         }
@@ -418,7 +418,7 @@ class PropertiesShould internal constructor(
         builder.setShould { prop, _, violations ->
             if (!prop.declaration.modifiers.contains(Modifier.CONST)) {
                 violations.add(
-                    getMessage("property.should.beConst", prop.declaration.name),
+                    getMessage("property.should.beConst", prop.qualifiedName),
                 )
             }
         }
@@ -429,7 +429,7 @@ class PropertiesShould internal constructor(
         builder.setShould { prop, _, violations ->
             if (!prop.declaration.modifiers.contains(Modifier.LATEINIT)) {
                 violations.add(
-                    getMessage("property.should.beLateinit", prop.declaration.name),
+                    getMessage("property.should.beLateinit", prop.qualifiedName),
                 )
             }
         }
@@ -440,7 +440,7 @@ class PropertiesShould internal constructor(
         builder.setShould { prop, _, violations ->
             if (prop.declaration.kdocText.isNullOrBlank()) {
                 violations.add(
-                    getMessage("property.should.beDocumented", prop.declaration.name),
+                    getMessage("property.should.beDocumented", prop.qualifiedName),
                 )
             }
         }
@@ -457,7 +457,7 @@ class PropertiesShould internal constructor(
         builder.setShould { prop, allProps, violations ->
             if (!assertion(prop, allProps)) {
                 violations.add(
-                    getMessage("property.should.satisfyCustom", prop.declaration.name, description),
+                    getMessage("property.should.satisfyCustom", prop.qualifiedName, description),
                 )
             }
         }

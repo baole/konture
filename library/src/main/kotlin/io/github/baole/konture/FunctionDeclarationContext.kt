@@ -24,4 +24,12 @@ data class FunctionDeclarationContext(
     val filePath: String,
     val sourceSet: SourceSetId? = null,
     val usages: List<SourceUsage> = emptyList(),
-)
+) {
+    /**
+     * The fully-qualified name of the function, combining package, enclosing class (if any), and
+     * simple name (e.g. `com.acme.UserService.getUser`), used to identify it unambiguously in
+     * violation messages.
+     */
+    val qualifiedName: String
+        get() = listOfNotNull(packageName.ifEmpty { null }, className, declaration.name).joinToString(".")
+}

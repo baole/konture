@@ -37,7 +37,7 @@ class FunctionsShould internal constructor(
         builder.setShould { func, _, violations ->
             if (!PatternMatchers.matchesPackage(packagePattern, func.packageName)) {
                 violations.add(
-                    getMessage("function.should.resideInPackage", func.declaration.name, packagePattern, func.packageName),
+                    getMessage("function.should.resideInPackage", func.qualifiedName, packagePattern, func.packageName),
                 )
             }
         }
@@ -49,7 +49,7 @@ class FunctionsShould internal constructor(
             val matches = packagePatterns.any { PatternMatchers.matchesPackage(it, func.packageName) }
             if (!matches) {
                 violations.add(
-                    getMessage("function.should.resideInPackageAny", func.declaration.name, packagePatterns.joinToString(), func.packageName),
+                    getMessage("function.should.resideInPackageAny", func.qualifiedName, packagePatterns.joinToString(), func.packageName),
                 )
             }
         }
@@ -65,7 +65,7 @@ class FunctionsShould internal constructor(
         builder.setShould { func, _, violations ->
             if (!predicate(func.packageName)) {
                 violations.add(
-                    getMessage("function.should.resideInPackageMatching", func.declaration.name, func.packageName),
+                    getMessage("function.should.resideInPackageMatching", func.qualifiedName, func.packageName),
                 )
             }
         }
@@ -76,7 +76,7 @@ class FunctionsShould internal constructor(
         builder.setShould { func, _, violations ->
             if (!func.declaration.name.endsWith(suffix)) {
                 violations.add(
-                    getMessage("function.should.haveNameEndingWith", func.declaration.name, suffix),
+                    getMessage("function.should.haveNameEndingWith", func.qualifiedName, suffix),
                 )
             }
         }
@@ -88,7 +88,7 @@ class FunctionsShould internal constructor(
             val matches = suffixes.any { func.declaration.name.endsWith(it) }
             if (!matches) {
                 violations.add(
-                    getMessage("function.should.haveNameEndingWithAny", func.declaration.name, suffixes.joinToString()),
+                    getMessage("function.should.haveNameEndingWithAny", func.qualifiedName, suffixes.joinToString()),
                 )
             }
         }
@@ -101,7 +101,7 @@ class FunctionsShould internal constructor(
         builder.setShould { func, _, violations ->
             if (!func.declaration.name.startsWith(prefix)) {
                 violations.add(
-                    getMessage("function.should.haveNameStartingWith", func.declaration.name, prefix),
+                    getMessage("function.should.haveNameStartingWith", func.qualifiedName, prefix),
                 )
             }
         }
@@ -113,7 +113,7 @@ class FunctionsShould internal constructor(
             val matches = prefixes.any { func.declaration.name.startsWith(it) }
             if (!matches) {
                 violations.add(
-                    getMessage("function.should.haveNameStartingWithAny", func.declaration.name, prefixes.joinToString()),
+                    getMessage("function.should.haveNameStartingWithAny", func.qualifiedName, prefixes.joinToString()),
                 )
             }
         }
@@ -126,7 +126,7 @@ class FunctionsShould internal constructor(
         builder.setShould { func, _, violations ->
             if (!PatternMatchers.matchesSimpleGlob(pattern, func.declaration.name)) {
                 violations.add(
-                    getMessage("function.should.haveNameMatching", func.declaration.name, pattern),
+                    getMessage("function.should.haveNameMatching", func.qualifiedName, pattern),
                 )
             }
         }
@@ -138,7 +138,7 @@ class FunctionsShould internal constructor(
             val matches = patterns.any { PatternMatchers.matchesSimpleGlob(it, func.declaration.name) }
             if (!matches) {
                 violations.add(
-                    getMessage("function.should.haveNameMatchingAny", func.declaration.name, patterns.joinToString()),
+                    getMessage("function.should.haveNameMatchingAny", func.qualifiedName, patterns.joinToString()),
                 )
             }
         }
@@ -151,7 +151,7 @@ class FunctionsShould internal constructor(
         builder.setShould { func, _, violations ->
             if (func.declaration.visibility != Visibility.PUBLIC) {
                 violations.add(
-                    getMessage("function.should.bePublic", func.declaration.name),
+                    getMessage("function.should.bePublic", func.qualifiedName),
                 )
             }
         }
@@ -162,7 +162,7 @@ class FunctionsShould internal constructor(
         builder.setShould { func, _, violations ->
             if (func.declaration.visibility != Visibility.INTERNAL) {
                 violations.add(
-                    getMessage("function.should.beInternal", func.declaration.name),
+                    getMessage("function.should.beInternal", func.qualifiedName),
                 )
             }
         }
@@ -173,7 +173,7 @@ class FunctionsShould internal constructor(
         builder.setShould { func, _, violations ->
             if (func.declaration.visibility != Visibility.PRIVATE) {
                 violations.add(
-                    getMessage("function.should.bePrivate", func.declaration.name),
+                    getMessage("function.should.bePrivate", func.qualifiedName),
                 )
             }
         }
@@ -184,7 +184,7 @@ class FunctionsShould internal constructor(
         builder.setShould { func, _, violations ->
             if (func.declaration.visibility != Visibility.PROTECTED) {
                 violations.add(
-                    getMessage("function.should.beProtected", func.declaration.name),
+                    getMessage("function.should.beProtected", func.qualifiedName),
                 )
             }
         }
@@ -195,7 +195,7 @@ class FunctionsShould internal constructor(
         builder.setShould { func, _, violations ->
             if (!func.declaration.modifiers.contains(Modifier.SUSPEND)) {
                 violations.add(
-                    getMessage("function.should.beSuspend", func.declaration.name),
+                    getMessage("function.should.beSuspend", func.qualifiedName),
                 )
             }
         }
@@ -206,7 +206,7 @@ class FunctionsShould internal constructor(
         builder.setShould { func, _, violations ->
             if (!func.declaration.modifiers.contains(Modifier.INLINE)) {
                 violations.add(
-                    getMessage("function.should.beInline", func.declaration.name),
+                    getMessage("function.should.beInline", func.qualifiedName),
                 )
             }
         }
@@ -217,7 +217,7 @@ class FunctionsShould internal constructor(
         builder.setShould { func, _, violations ->
             if (!func.declaration.modifiers.contains(Modifier.OPEN)) {
                 violations.add(
-                    getMessage("function.should.beOpen", func.declaration.name),
+                    getMessage("function.should.beOpen", func.qualifiedName),
                 )
             }
         }
@@ -228,7 +228,7 @@ class FunctionsShould internal constructor(
         builder.setShould { func, _, violations ->
             if (!func.declaration.modifiers.contains(Modifier.ABSTRACT)) {
                 violations.add(
-                    getMessage("function.should.beAbstract", func.declaration.name),
+                    getMessage("function.should.beAbstract", func.qualifiedName),
                 )
             }
         }
@@ -239,7 +239,7 @@ class FunctionsShould internal constructor(
         builder.setShould { func, _, violations ->
             if (func.declaration.returnType != typeFqName) {
                 violations.add(
-                    getMessage("function.should.haveReturnType", func.declaration.name, typeFqName, func.declaration.returnType),
+                    getMessage("function.should.haveReturnType", func.qualifiedName, typeFqName, func.declaration.returnType),
                 )
             }
         }
@@ -271,7 +271,7 @@ class FunctionsShould internal constructor(
         builder.setShould { func, _, violations ->
             if (!typeFqNames.contains(func.declaration.returnType)) {
                 violations.add(
-                    getMessage("function.should.haveReturnTypeAny", func.declaration.name, typeFqNames.joinToString(), func.declaration.returnType),
+                    getMessage("function.should.haveReturnTypeAny", func.qualifiedName, typeFqNames.joinToString(), func.declaration.returnType),
                 )
             }
         }
@@ -288,7 +288,7 @@ class FunctionsShould internal constructor(
                 }
             if (!hasAnnotation) {
                 violations.add(
-                    getMessage("function.should.haveAnnotation", func.declaration.name, annotationName),
+                    getMessage("function.should.haveAnnotation", func.qualifiedName, annotationName),
                 )
             }
         }
@@ -303,7 +303,7 @@ class FunctionsShould internal constructor(
                 }
             if (!hasAnnotation) {
                 violations.add(
-                    getMessage("function.should.haveAnnotationAny", func.declaration.name, annotationNames.joinToString()),
+                    getMessage("function.should.haveAnnotationAny", func.qualifiedName, annotationNames.joinToString()),
                 )
             }
         }
@@ -322,7 +322,7 @@ class FunctionsShould internal constructor(
         builder.setShould { func, _, violations ->
             if (!func.hasAllAnnotations(names)) {
                 violations.add(
-                    getMessage("function.should.haveAllAnnotations", func.declaration.name, names.joinToString()),
+                    getMessage("function.should.haveAllAnnotations", func.qualifiedName, names.joinToString()),
                 )
             }
         }
@@ -341,7 +341,7 @@ class FunctionsShould internal constructor(
         builder.setShould { func, _, violations ->
             if (!func.hasAnyAnnotation(names)) {
                 violations.add(
-                    getMessage("function.should.haveAnyAnnotation", func.declaration.name, names.joinToString()),
+                    getMessage("function.should.haveAnyAnnotation", func.qualifiedName, names.joinToString()),
                 )
             }
         }
@@ -360,7 +360,7 @@ class FunctionsShould internal constructor(
         builder.setShould { func, _, violations ->
             if (!func.declaration.modifiers.contains(modifier)) {
                 violations.add(
-                    getMessage("function.should.haveModifier", func.declaration.name, modifier),
+                    getMessage("function.should.haveModifier", func.qualifiedName, modifier),
                 )
             }
         }
@@ -377,7 +377,7 @@ class FunctionsShould internal constructor(
             val missing = modifiers.filter { !func.declaration.modifiers.contains(it) }
             if (missing.isNotEmpty()) {
                 violations.add(
-                    getMessage("function.should.haveAllModifiers", func.declaration.name, modifiers.joinToString(), missing.joinToString()),
+                    getMessage("function.should.haveAllModifiers", func.qualifiedName, modifiers.joinToString(), missing.joinToString()),
                 )
             }
         }
@@ -400,7 +400,7 @@ class FunctionsShould internal constructor(
         builder.setShould { func, _, violations ->
             if (!modifiers.any { func.declaration.modifiers.contains(it) }) {
                 violations.add(
-                    getMessage("function.should.haveAnyModifier", func.declaration.name, modifiers.joinToString()),
+                    getMessage("function.should.haveAnyModifier", func.qualifiedName, modifiers.joinToString()),
                 )
             }
         }
@@ -421,7 +421,7 @@ class FunctionsShould internal constructor(
         builder.setShould { func, _, violations ->
             if (func.declaration.visibility != visibility) {
                 violations.add(
-                    getMessage("function.should.haveVisibility", func.declaration.name, visibility, func.declaration.visibility),
+                    getMessage("function.should.haveVisibility", func.qualifiedName, visibility, func.declaration.visibility),
                 )
             }
         }
@@ -437,7 +437,7 @@ class FunctionsShould internal constructor(
         builder.setShould { func, _, violations ->
             if (!visibilities.contains(func.declaration.visibility)) {
                 violations.add(
-                    getMessage("function.should.haveAnyVisibility", func.declaration.name, visibilities.joinToString(), func.declaration.visibility),
+                    getMessage("function.should.haveAnyVisibility", func.qualifiedName, visibilities.joinToString(), func.declaration.visibility),
                 )
             }
         }
@@ -466,7 +466,7 @@ class FunctionsShould internal constructor(
             if (!match) {
                 val currentTypes = func.declaration.parameters.map { it.type }
                 violations.add(
-                    getMessage("function.should.haveParameterTypes", func.declaration.name, types.joinToString(), currentTypes.joinToString()),
+                    getMessage("function.should.haveParameterTypes", func.qualifiedName, types.joinToString(), currentTypes.joinToString()),
                 )
             }
         }
@@ -524,7 +524,7 @@ class FunctionsShould internal constructor(
                 }
             if (!hasAny) {
                 violations.add(
-                    getMessage("function.should.haveAnyParameterType", func.declaration.name, types.joinToString()),
+                    getMessage("function.should.haveAnyParameterType", func.qualifiedName, types.joinToString()),
                 )
             }
         }
@@ -563,7 +563,7 @@ class FunctionsShould internal constructor(
         builder.setShould { func, _, violations ->
             if (!func.declaration.isExtension) {
                 violations.add(
-                    getMessage("function.should.beExtension", func.declaration.name),
+                    getMessage("function.should.beExtension", func.qualifiedName),
                 )
             }
         }
@@ -574,7 +574,7 @@ class FunctionsShould internal constructor(
         builder.setShould { func, _, violations ->
             if (func.declaration.kdocText.isNullOrBlank()) {
                 violations.add(
-                    getMessage("function.should.beDocumented", func.declaration.name),
+                    getMessage("function.should.beDocumented", func.qualifiedName),
                 )
             }
         }
@@ -590,7 +590,7 @@ class FunctionsShould internal constructor(
         builder.setShould { func, allFuncs, violations ->
             if (!assertion(func, allFuncs)) {
                 violations.add(
-                    getMessage("function.should.satisfyCustom", func.declaration.name, description),
+                    getMessage("function.should.satisfyCustom", func.qualifiedName, description),
                 )
             }
         }

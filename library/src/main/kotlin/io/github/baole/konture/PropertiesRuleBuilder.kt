@@ -171,7 +171,7 @@ class PropertiesRuleBuilder(
                     assertion(prop, allProps, tempViolations)
                     if (tempViolations.isEmpty()) {
                         violations.add(
-                            getMessage("properties.rule.negatedSatisfied", prop.declaration.name),
+                            getMessage("properties.rule.negatedSatisfied", prop.qualifiedName),
                         )
                     }
                 }
@@ -193,7 +193,7 @@ class PropertiesRuleBuilder(
                     actualAssertion(prop, allProps, temp2)
                     if (temp1.isNotEmpty() && temp2.isNotEmpty()) {
                         violations.add(
-                            getMessage("properties.rule.eitherOr", prop.declaration.name, temp1.joinToString(), temp2.joinToString()),
+                            getMessage("properties.rule.eitherOr", prop.qualifiedName, temp1.joinToString(), temp2.joinToString()),
                         )
                     }
                 }
@@ -207,7 +207,7 @@ class PropertiesRuleBuilder(
                     val ok2 = temp2.isEmpty()
                     if (ok1 == ok2) {
                         violations.add(
-                            getMessage("properties.rule.xor", prop.declaration.name),
+                            getMessage("properties.rule.xor", prop.qualifiedName),
                         )
                     }
                 }

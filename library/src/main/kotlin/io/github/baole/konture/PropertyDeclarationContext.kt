@@ -24,4 +24,12 @@ data class PropertyDeclarationContext(
     val modulePath: String,
     val filePath: String,
     val sourceSet: SourceSetId? = null,
-)
+) {
+    /**
+     * The fully-qualified name of the property, combining package, enclosing class (if any), and
+     * simple name (e.g. `com.acme.UserService.repository`), used to identify it unambiguously in
+     * violation messages.
+     */
+    val qualifiedName: String
+        get() = listOfNotNull(packageName.ifEmpty { null }, className, declaration.name).joinToString(".")
+}

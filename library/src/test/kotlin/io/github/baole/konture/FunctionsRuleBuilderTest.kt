@@ -149,6 +149,10 @@ class FunctionsRuleBuilderTest : RuleBuildersTestBase() {
         val v3f2 = mutableListOf<String>()
         assert3(filtered1.first { it.declaration.name == "processInternal" }, contexts, v3f2)
         assertEquals(5, v3f2.size) // Not public, not suspend, different return type, no annotation, no kdoc
+        assertTrue(
+            v3f2.all { it.contains("com.example.MyService.processInternal") },
+            "Expected fully-qualified function name in violations, got: $v3f2",
+        )
     }
 
     @Test
