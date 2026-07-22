@@ -180,10 +180,16 @@ internal object BaselineNormalizer {
         graph: ProjectGraph,
         buildRoot: File?,
     ): Module? {
-        val location = violation.location ?: return null
-        if (location.startsWith(":")) {
-            return graph.getAllModules().firstOrNull { it.path == location }
+        val rawLocation = violation.location ?: return null
+        // Structured locations are formatted as ":module, <sourceSet> source set, <file>".
+        // A bare module violation is just ":module"; a class/file violation is just the file path.
+        val hasStructure = rawLocation.contains(", ")
+        val modulePathToken = rawLocation.substringBefore(",").trim()
+        if (modulePathToken.startsWith(":")) {
+            graph.getAllModules().firstOrNull { it.path == modulePathToken }?.let { return it }
+            if (!hasStructure) return null
         }
+        val location = if (hasStructure) rawLocation.substringAfterLast(", ").trim() else rawLocation
         val root = buildRoot
         val resolvedLoc =
             if (root != null) {
