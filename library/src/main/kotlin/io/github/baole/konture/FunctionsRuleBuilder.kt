@@ -10,6 +10,7 @@ import io.github.baole.konture.core.LogLevel
 import io.github.baole.konture.i18n.getMessage
 import io.github.baole.konture.impl.BaselineManager
 import io.github.baole.konture.impl.LogicalOperator
+import io.github.baole.konture.impl.ViolationLocation
 
 /**
  * A builder for compiling and verifying architectural rules on Kotlin function declarations.
@@ -292,7 +293,7 @@ class FunctionsRuleBuilder(
                 val startIdx = list.size
                 assertion(func, allFunctions, list)
                 for (i in startIdx until list.size) {
-                    list[i] = "${list[i]} (at ${func.modulePath}, ${func.sourceSet?.name ?: "unknown"} source set, ${func.filePath})"
+                    list[i] = "${list[i]} (at ${ViolationLocation.of(func.modulePath, func.sourceSet?.name, func.filePath)})"
                 }
             }
         }
