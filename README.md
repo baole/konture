@@ -21,7 +21,7 @@
 In multi-module, multi-layer projects, architecture erodes through small shortcuts. For example, a feature module might declare a "sideways" dependency on a sibling feature.
 
 <p align="center">
-  <img src="docs/assets/images/prohibited-sideways-dependency.svg" width="260" alt="Prohibited sideways dependency between feature modules">
+  <img src="docs/assets/images/prohibited-sideways-dependency.svg" width="286" alt="Prohibited sideways dependency between feature modules">
 </p>
 
 Konture helps developers analyze project structure and enforce architectural rules and boundaries directly inside the test suite.
