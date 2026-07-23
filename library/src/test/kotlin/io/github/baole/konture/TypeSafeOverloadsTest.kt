@@ -10,6 +10,10 @@ import org.junit.jupiter.api.Test
 
 private annotation class TypeSafeMarker
 
+private open class TypeSafeParent
+
+private class TypeSafeChild : TypeSafeParent()
+
 private class User
 
 private class Outer {
@@ -218,6 +222,34 @@ class TypeSafeOverloadsTest {
             )
         val graph = graphWith(declaration, packageName = packageName)
 
+        val parentDecl =
+            ClassDeclaration(
+                name = "TypeSafeParent",
+                fqName = TypeSafeParent::class.qualifiedName!!,
+                packageName = packageName,
+                isInterface = false,
+                isAbstract = false,
+                annotations = emptyList(),
+                imports = emptyList(),
+                referencedTypes = emptySet(),
+                filePath = "/src/TypeSafeParent.kt",
+                supertypes = emptyList(),
+            )
+        val childDecl =
+            ClassDeclaration(
+                name = "TypeSafeChild",
+                fqName = TypeSafeChild::class.qualifiedName!!,
+                packageName = packageName,
+                isInterface = false,
+                isAbstract = false,
+                annotations = emptyList(),
+                imports = emptyList(),
+                referencedTypes = emptySet(),
+                filePath = "/src/TypeSafeChild.kt",
+                supertypes = listOf("TypeSafeParent"),
+            )
+        val graphWithBoth = graphWith(packageName = packageName, declarations = listOf(parentDecl, childDecl))
+
         // ClassesThat overloads
         assertTrue(ClassesRuleBuilder(graph).that().haveAnnotationOf(TypeSafeMarker::class).getThatPredicate()!!(declaration))
         assertTrue(ClassesRuleBuilder(graph).that().haveAllAnnotationsOf(TypeSafeMarker::class).getThatPredicate()!!(declaration))
@@ -228,6 +260,8 @@ class TypeSafeOverloadsTest {
         assertTrue(ClassesRuleBuilder(graph).that().areAssignableTo(CharSequence::class).getThatPredicate()!!(declaration))
         assertTrue(ClassesRuleBuilder(graph).that().areAssignableToAnyOf(CharSequence::class, Number::class).getThatPredicate()!!(declaration))
         assertTrue(ClassesRuleBuilder(graph).that().areAssignableToAllOf(CharSequence::class, Cloneable::class).getThatPredicate()!!(declaration))
+        assertTrue(ClassesRuleBuilder(graphWithBoth).that().areAssignableFrom(TypeSafeChild::class).getThatPredicate()!!(parentDecl))
+        assertTrue(ClassesRuleBuilder(graphWithBoth).that().areAssignableFrom<TypeSafeChild>().getThatPredicate()!!(parentDecl))
         assertTrue(ClassesRuleBuilder(graph).that().resideInPackageOf(TypeSafeMarker::class).getThatPredicate()!!(declaration))
         assertTrue(ClassesRuleBuilder(graph).that().resideInPackageOf<TypeSafeMarker>().getThatPredicate()!!(declaration))
 
@@ -255,6 +289,16 @@ class TypeSafeOverloadsTest {
         assertTrue(violations.isEmpty())
 
         ClassesRuleBuilder(graph).should().beAssignableTo<CharSequence>().getShouldAssertion()!!(declaration, emptyList(), violations)
+        assertTrue(violations.isEmpty())
+
+        ClassesRuleBuilder(
+            graphWithBoth,
+        ).should().beAssignableFrom(TypeSafeChild::class).getShouldAssertion()!!(parentDecl, listOf(parentDecl, childDecl), violations)
+        assertTrue(violations.isEmpty())
+
+        ClassesRuleBuilder(
+            graphWithBoth,
+        ).should().beAssignableFrom<TypeSafeChild>().getShouldAssertion()!!(parentDecl, listOf(parentDecl, childDecl), violations)
         assertTrue(violations.isEmpty())
 
         ClassesRuleBuilder(
@@ -531,12 +575,13 @@ class TypeSafeOverloadsTest {
         function: FunctionDeclaration? = null,
         property: PropertyDeclaration? = null,
         packageName: String = "example",
+        declarations: List<ClassDeclaration>? = null,
     ): ProjectGraph {
         val file =
             FileDeclaration(
                 name = "Example.kt",
                 packageName = packageName,
-                classes = declaration?.let(::listOf) ?: emptyList(),
+                classes = declarations ?: (declaration?.let(::listOf) ?: emptyList()),
                 topLevelFunctions = function?.let(::listOf) ?: emptyList(),
                 topLevelProperties = property?.let(::listOf) ?: emptyList(),
                 filePath = "/src/Example.kt",

@@ -168,14 +168,37 @@ Konture.classes()
     .check()
 ```
 
-### 3. Transitive Assignability (Supertypes)
-Assertions like `beAssignableTo()` evaluate recursive supertype trees. It successfully matches transitive parent classes or interfaces, no matter how deep the inheritance hierarchy is.
+### 3. Transitive Assignability (Supertypes & Subtypes)
+Assertions like `beAssignableTo()` and `beAssignableFrom()` evaluate recursive inheritance trees:
+
+*   **Supertype Check (`beAssignableTo`)**: Verifies that the selected classes implement or extend a specified supertype (inheritance up the tree).
+*   **Subtype Check (`beAssignableFrom`)**: Verifies that the selected classes are supertypes of (assignable from) a specified subtype (inheritance down the tree).
+
+Both assertions fully support transitive lookups, type-safe `KClass` parameters, and `reified` type parameters:
+
 ```kotlin
+// UP: Ensure services extend BaseService
 Konture.classes()
     .that().haveNameEndingWith("Service")
-    .should().beAssignableTo("com.acme.core.BaseService")
+    .should().beAssignableTo(BaseService::class)
+    .check()
+
+// DOWN: Ensure base controllers are assignable from a specific specialized controller
+Konture.classes()
+    .that().haveNameEndingWith("Controller")
+    .should().beAssignableFrom<SpecializedController>()
     .check()
 ```
+
+Similarly, you can filter classes during selection using `areAssignableFrom()`:
+
+```kotlin
+Konture.classes()
+    .that().areAssignableFrom<BaseService>()
+    .should().bePublic()
+    .check()
+```
+
 
 ### 4. Dependency Package Isolation
 The `assertOnlyDependOnClassesInAnyPackage()` assertion enforces layer isolation by evaluating both internal dependencies and external libraries, while seamlessly excluding standard platform namespaces (`java.*`, `javax.*`, `kotlin.*`).

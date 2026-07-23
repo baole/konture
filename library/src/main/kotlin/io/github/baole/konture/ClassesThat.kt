@@ -431,6 +431,26 @@ class ClassesThat internal constructor(
     fun areAssignableToAllOf(vararg superTypes: String): ClassesRuleBuilder = areAssignableToAllOf(superTypes.asList())
 
     /**
+     * Restricts the rules to classes that are assignable from the specified subtype.
+     *
+     * @param subType The subtype that must extend or implement the selected classes.
+     */
+    infix fun areAssignableFrom(subType: String): ClassesRuleBuilder {
+        val allClasses = builder.graph.getAllModules().flatMap { it.classes }
+        builder.setThat { cls ->
+            val subTypeDecl = allClasses.find { it.fqName == subType || it.name == subType }
+            if (subTypeDecl != null) {
+                subTypeDecl.fqName == cls.fqName ||
+                    subTypeDecl.isAssignableTo(cls.fqName, allClasses) ||
+                    subTypeDecl.isAssignableTo(cls.name, allClasses)
+            } else {
+                subType == cls.fqName || subType == cls.name
+            }
+        }
+        return builder
+    }
+
+    /**
      * Restricts the rules to classes matching the specified predicate.
      *
      * @param predicate The predicate to filter classes.

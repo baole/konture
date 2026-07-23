@@ -369,4 +369,27 @@ internal interface ClassesShouldMetadataAssertions {
      * @param superTypes The vararg list of supertypes that must all be matched.
      */
     fun beAssignableToAllOf(vararg superTypes: String): ClassesRuleBuilder = beAssignableToAllOf(superTypes.asList())
+
+    /**
+     * Asserts that selected classes are assignable from the specified subtype.
+     *
+     * @param subType The subtype that must extend or implement the selected classes.
+     */
+    infix fun beAssignableFrom(subType: String): ClassesRuleBuilder {
+        builder.setShould { cls, allClasses, violations ->
+            val subTypeDecl = allClasses.find { it.fqName == subType || it.name == subType }
+            val isAssignable =
+                if (subTypeDecl != null) {
+                    subTypeDecl.fqName == cls.fqName ||
+                        subTypeDecl.isAssignableTo(cls.fqName, allClasses) ||
+                        subTypeDecl.isAssignableTo(cls.name, allClasses)
+                } else {
+                    subType == cls.fqName || subType == cls.name
+                }
+            if (!isAssignable) {
+                violations.add(getMessage("class.should.beAssignableFrom", cls.fqName, subType))
+            }
+        }
+        return builder
+    }
 }

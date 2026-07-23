@@ -59,6 +59,14 @@ fun ClassesShould.beAssignableToAnyOf(vararg superTypes: KClass<*>): ClassesRule
 fun ClassesShould.beAssignableToAllOf(vararg superTypes: KClass<*>): ClassesRuleBuilder =
     beAssignableToAllOf(*superTypes.map { it.kontureQualifiedName() }.toTypedArray())
 
+infix fun ClassesThat.areAssignableFrom(subType: KClass<*>): ClassesRuleBuilder = areAssignableFrom(subType.kontureQualifiedName())
+
+inline fun <reified T : Any> ClassesThat.areAssignableFrom(): ClassesRuleBuilder = areAssignableFrom(T::class)
+
+infix fun ClassesShould.beAssignableFrom(subType: KClass<*>): ClassesRuleBuilder = beAssignableFrom(subType.kontureQualifiedName())
+
+inline fun <reified T : Any> ClassesShould.beAssignableFrom(): ClassesRuleBuilder = beAssignableFrom(T::class)
+
 infix fun FunctionsThat.haveAnnotationOf(annotation: KClass<out Annotation>): FunctionsRuleBuilder =
     haveAnnotationOf(
         annotation.kontureQualifiedName(),
