@@ -53,7 +53,16 @@ fun Konture.files(sourceSets: SourceSetSelector) = FilesRuleBuilder(projectGraph
  * Verifies that there are no package or module dependency cycles in the project.
  * Throws an [AssertionError] if a cycle is detected.
  */
-fun Konture.assertNoCycles() = projectGraph.assertNoCycles()
+fun Konture.assertNoCycles() = projectGraph.assertNoCycles(includeTestConfigurations = false)
+
+/**
+ * Verifies that there are no package or module dependency cycles in the project.
+ * Throws an [AssertionError] if a cycle is detected.
+ *
+ * @param includeTestConfigurations if true, test-related dependency configurations will also be analyzed
+ * for cycles. If false, they are skipped.
+ */
+fun Konture.assertNoCycles(includeTestConfigurations: Boolean) = projectGraph.assertNoCycles(includeTestConfigurations)
 
 // Functional scope entry-points
 

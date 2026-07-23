@@ -28,7 +28,7 @@ class FilesShould internal constructor(
     }
 
     /** Fails for every invocation of [kClass] in the selected source file. */
-    fun notCall(kClass: kotlin.reflect.KClass<*>): FilesRuleBuilder = notCall(kClass.qualifiedName ?: kClass.java.name)
+    fun notCall(kClass: kotlin.reflect.KClass<*>): FilesRuleBuilder = notCall(kClass.kontureQualifiedName())
 
     /** Fails for every invocation of [T] in the selected source file. */
     inline fun <reified T : Any> notCall(): FilesRuleBuilder = notCall(T::class)
@@ -46,7 +46,7 @@ class FilesShould internal constructor(
     }
 
     /** Fails for every actual class/type use of [kClass]; imports alone do not match. */
-    fun notReferenceClass(kClass: kotlin.reflect.KClass<*>): FilesRuleBuilder = notReferenceClass(kClass.qualifiedName ?: kClass.java.name)
+    fun notReferenceClass(kClass: kotlin.reflect.KClass<*>): FilesRuleBuilder = notReferenceClass(kClass.kontureQualifiedName())
 
     /** Fails for every actual class/type use of [T]; imports alone do not match. */
     inline fun <reified T : Any> notReferenceClass(): FilesRuleBuilder = notReferenceClass(T::class)

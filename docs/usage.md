@@ -89,6 +89,32 @@ Konture.functions(sourceSets = SourceSets.named("test", "androidTest", "commonTe
 
 `SourceSets.named(...)` matches exact captured Gradle source-set names, `matchingName("*Test")` uses glob matching, and `SourceSets.of(role = SourceSetRole.TEST, kind = SourceSetKind.ANDROID)` selects a portable category. `notCall` analyzes Kotlin source calls, not runtime behavior; an unused import does not violate it.
 
+## Type-safe type and annotation rules
+
+Where a rule identifies a concrete Kotlin type or annotation, Konture also accepts a `KClass` or a reified type parameter. The existing string overloads remain useful for package patterns, unresolved or generated symbols, and source syntax that cannot be represented by a runtime class.
+
+```kotlin
+Konture.classes {
+    that().haveAnnotationOf<Inject>()
+    should().beAssignableTo(Repository::class)
+}
+
+Konture.functions {
+    that().haveReturnTypeOf<Result<*>>()
+    should().haveParameterTypes(String::class, UserId::class)
+}
+
+Konture.properties {
+    should().haveTypeOf<StateFlow<*>>()
+}
+
+Konture.files {
+    should().notReferenceClass<LegacyClient>()
+}
+```
+
+Typed function and property rules compare the resolved raw declared type. For example, `List::class` matches `List<String>`, while explicit imports and import aliases resolve to their fully qualified types. Ambiguous references, generic arguments, nullability, type aliases, and type parameters still require the existing string or custom assertion APIs.
+
 Because Konture compiled layouts run as standard unit tests on the JVM, executing them is fast and seamless. Run the tests using your build system or trigger them directly from your IDE gutter.
 
 ### 🐘 Gradle
@@ -142,14 +168,37 @@ Konture.classes()
     .check()
 ```
 
-### 3. Transitive Assignability (Supertypes)
-Assertions like `beAssignableTo()` evaluate recursive supertype trees. It successfully matches transitive parent classes or interfaces, no matter how deep the inheritance hierarchy is.
+### 3. Transitive Assignability (Supertypes & Subtypes)
+Assertions like `beAssignableTo()` and `beAssignableFrom()` evaluate recursive inheritance trees:
+
+*   **Supertype Check (`beAssignableTo`)**: Verifies that the selected classes implement or extend a specified supertype (inheritance up the tree).
+*   **Subtype Check (`beAssignableFrom`)**: Verifies that the selected classes are supertypes of (assignable from) a specified subtype (inheritance down the tree).
+
+Both assertions fully support transitive lookups, type-safe `KClass` parameters, and `reified` type parameters:
+
 ```kotlin
+// UP: Ensure services extend BaseService
 Konture.classes()
     .that().haveNameEndingWith("Service")
-    .should().beAssignableTo("com.acme.core.BaseService")
+    .should().beAssignableTo(BaseService::class)
+    .check()
+
+// DOWN: Ensure base controllers are assignable from a specific specialized controller
+Konture.classes()
+    .that().haveNameEndingWith("Controller")
+    .should().beAssignableFrom<SpecializedController>()
     .check()
 ```
+
+Similarly, you can filter classes during selection using `areAssignableFrom()`:
+
+```kotlin
+Konture.classes()
+    .that().areAssignableFrom<BaseService>()
+    .should().bePublic()
+    .check()
+```
+
 
 ### 4. Dependency Package Isolation
 The `assertOnlyDependOnClassesInAnyPackage()` assertion enforces layer isolation by evaluating both internal dependencies and external libraries, while seamlessly excluding standard platform namespaces (`java.*`, `javax.*`, `kotlin.*`).

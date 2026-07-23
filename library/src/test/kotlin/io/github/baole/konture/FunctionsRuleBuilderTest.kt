@@ -788,4 +788,131 @@ class FunctionsRuleBuilderTest : RuleBuildersTestBase() {
                 .bePublic()
         ruleNot.check() // passes
     }
+
+    @Test
+    fun `test functions rule builder overloads`() {
+        val fObj =
+            FunctionDeclaration(
+                name = "processData",
+                visibility = Visibility.PUBLIC,
+                modifiers = emptySet(),
+                returnType = "String",
+                parameters =
+                    listOf(
+                        ParameterDeclaration("id", "Int", hasDefaultValue = false, annotations = emptyList(), resolvedType = "kotlin.Int"),
+                    ),
+                annotations = emptyList(),
+                kdocText = null,
+                isExtension = false,
+                resolvedReturnType = "kotlin.String",
+            )
+        val fileDecl =
+            FileDeclaration(
+                name = "Processor.kt",
+                packageName = "com.example.service",
+                classes = emptyList(),
+                topLevelFunctions = listOf(fObj),
+                filePath = "/src/Processor.kt",
+            )
+        val mockModule =
+            Module(
+                buildId = ":",
+                path = ":service",
+                projectDir = "service",
+                appliedPlugins = listOf("kotlin"),
+                sourceSets = emptyList(),
+                dependencies = emptyList(),
+                files = listOf(fileDecl),
+            )
+        val graph = ProjectGraph(mapOf(":" to listOf(mockModule)))
+
+        val callUsage =
+            SourceUsage(
+                kind = UsageKind.CALL,
+                targetFqName = "com.example.Logger.log",
+                filePath = "/src/Processor.kt",
+                line = 10,
+                column = 5,
+            )
+        val context =
+            FunctionDeclarationContext(
+                fObj,
+                packageName = "com.example.service",
+                className = null,
+                modulePath = ":service",
+                filePath = "/src/Processor.kt",
+                usages = listOf(callUsage),
+            )
+
+        // 1. notCall overloads
+        val notCallRule1 = FunctionsRuleBuilder(graph).should().notCall("com.example.Logger.log")
+        val vNotCall1 = mutableListOf<String>()
+        notCallRule1.getShouldAssertion()!!(context, emptyList(), vNotCall1)
+        assertEquals(1, vNotCall1.size)
+        assertTrue(vNotCall1[0].contains("Logger.log"))
+
+        val notCallRule2 = FunctionsRuleBuilder(graph).should().notCall(String::class)
+        val vNotCall2 = mutableListOf<String>()
+        notCallRule2.getShouldAssertion()!!(context, emptyList(), vNotCall2)
+        assertTrue(vNotCall2.isEmpty())
+
+        val notCallRule3 = FunctionsRuleBuilder(graph).should().notCall<Int>()
+        val vNotCall3 = mutableListOf<String>()
+        notCallRule3.getShouldAssertion()!!(context, emptyList(), vNotCall3)
+        assertTrue(vNotCall3.isEmpty())
+
+        // 2. resideInAPackage(vararg)
+        val resideRule1 = FunctionsRuleBuilder(graph).should().resideInAPackage("com.example..", "other..")
+        val vReside1 = mutableListOf<String>()
+        resideRule1.getShouldAssertion()!!(context, emptyList(), vReside1)
+        assertTrue(vReside1.isEmpty())
+
+        val resideRule2 = FunctionsRuleBuilder(graph).should().resideInAPackage("other..", "another..")
+        val vReside2 = mutableListOf<String>()
+        resideRule2.getShouldAssertion()!!(context, emptyList(), vReside2)
+        assertEquals(1, vReside2.size)
+
+        // 3. haveReturnType overloads
+        val returnRule1 = FunctionsRuleBuilder(graph).should().haveReturnType(String::class)
+        val vReturn1 = mutableListOf<String>()
+        returnRule1.getShouldAssertion()!!(context, emptyList(), vReturn1)
+        assertTrue(vReturn1.isEmpty())
+
+        val returnRule2 = FunctionsRuleBuilder(graph).should().haveReturnType(Int::class)
+        val vReturn2 = mutableListOf<String>()
+        returnRule2.getShouldAssertion()!!(context, emptyList(), vReturn2)
+        assertEquals(1, vReturn2.size)
+
+        val returnRule3 = FunctionsRuleBuilder(graph).should().haveReturnTypeOf<String>()
+        val vReturn3 = mutableListOf<String>()
+        returnRule3.getShouldAssertion()!!(context, emptyList(), vReturn3)
+        assertTrue(vReturn3.isEmpty())
+
+        // 4. haveParameterTypes overloads
+        val paramRule1 = FunctionsRuleBuilder(graph).should().haveParameterTypes(Int::class)
+        val vParam1 = mutableListOf<String>()
+        paramRule1.getShouldAssertion()!!(context, emptyList(), vParam1)
+        assertTrue(vParam1.isEmpty())
+
+        val paramRule2 = FunctionsRuleBuilder(graph).should().haveParameterTypes(String::class)
+        val vParam2 = mutableListOf<String>()
+        paramRule2.getShouldAssertion()!!(context, emptyList(), vParam2)
+        assertEquals(1, vParam2.size)
+
+        // 5. haveAnyParameterType overloads
+        val anyParamRule1 = FunctionsRuleBuilder(graph).should().haveAnyParameterType(Int::class)
+        val vAnyParam1 = mutableListOf<String>()
+        anyParamRule1.getShouldAssertion()!!(context, emptyList(), vAnyParam1)
+        assertTrue(vAnyParam1.isEmpty())
+
+        val anyParamRule2 = FunctionsRuleBuilder(graph).should().haveAnyParameterType(String::class)
+        val vAnyParam2 = mutableListOf<String>()
+        anyParamRule2.getShouldAssertion()!!(context, emptyList(), vAnyParam2)
+        assertEquals(1, vAnyParam2.size)
+
+        val anyParamRule3 = FunctionsRuleBuilder(graph).should().haveAnyParameterTypeOf<Int>()
+        val vAnyParam3 = mutableListOf<String>()
+        anyParamRule3.getShouldAssertion()!!(context, emptyList(), vAnyParam3)
+        assertTrue(vAnyParam3.isEmpty())
+    }
 }

@@ -203,6 +203,22 @@ class PropertiesShould internal constructor(
         return builder
     }
 
+    /** Asserts that selected properties have the specified raw type. */
+    infix fun haveType(type: kotlin.reflect.KClass<*>): PropertiesRuleBuilder {
+        val expectedType = type.toKontureTypeReference()
+        builder.setShould { property, _, violations ->
+            if (property.declaration.resolvedType?.let { matchesKotlinType(it, expectedType) } != true) {
+                violations.add(
+                    getMessage("property.should.haveType", property.declaration.name, type.kontureQualifiedName(), property.declaration.type),
+                )
+            }
+        }
+        return builder
+    }
+
+    /** Asserts that selected properties have the specified raw type. */
+    inline fun <reified T : Any> haveTypeOf(): PropertiesRuleBuilder = haveType(T::class)
+
     infix fun haveType(typeFqNames: List<String>): PropertiesRuleBuilder {
         builder.setShould { prop, _, violations ->
             if (!typeFqNames.contains(prop.declaration.type)) {

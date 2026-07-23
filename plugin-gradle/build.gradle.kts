@@ -5,10 +5,10 @@ plugins {
     alias(libs.plugins.gradle.publish)
 }
 
-description = "Gradle configuration-time capture agent for Konture"
+description = "Gradle configuration-time capture agent that feeds Konture your project's real build graph, enabling fast, build-tool-aware Kotlin architecture tests across Android, KMP, and JVM projects."
 
 group = "io.github.baole.konture"
-version = "0.7.0"
+version = "0.7.1"
 
 gradlePlugin {
     website.set("https://baole.github.io/konture")
@@ -19,7 +19,7 @@ gradlePlugin {
             id = "io.github.baole.konture"
             implementationClass = "io.github.baole.konture.plugin.KonturePlugin"
             displayName = "Kotlin Architecture Testing Tool Plugin"
-            description = "Gradle configuration-time capture agent for Konture"
+            description = "Gradle configuration-time capture agent that feeds Konture your project's real build graph, enabling fast, build-tool-aware Kotlin architecture tests across Android, KMP, and JVM projects."
             tags.set(listOf("kotlin", "architecture", "testing", "archunit", "konture"))
         }
     }
@@ -27,6 +27,7 @@ gradlePlugin {
 
 dependencies {
     compileOnly(libs.kotlin.gradle.plugin)
+    compileOnly(libs.android.gradle.plugin.api)
     implementation(project(":core"))
     implementation(libs.kotlinx.serialization.json)
 

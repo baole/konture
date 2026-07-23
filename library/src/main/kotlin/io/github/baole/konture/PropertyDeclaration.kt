@@ -14,6 +14,7 @@ data class PropertyDeclaration(
     val annotations: List<AnnotationDeclaration>,
     val kdocText: String?,
     val isExtension: Boolean = false,
+    val resolvedType: String? = null,
 ) {
     val isVar: Boolean get() = !isVal
 }

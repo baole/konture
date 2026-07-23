@@ -28,7 +28,7 @@ class FunctionsShould internal constructor(
     }
 
     /** Fails when the selected function invokes [kClass]. */
-    fun notCall(kClass: kotlin.reflect.KClass<*>): FunctionsRuleBuilder = notCall(kClass.qualifiedName ?: kClass.java.name)
+    fun notCall(kClass: kotlin.reflect.KClass<*>): FunctionsRuleBuilder = notCall(kClass.kontureQualifiedName())
 
     /** Fails when the selected function invokes [T]. */
     inline fun <reified T : Any> notCall(): FunctionsRuleBuilder = notCall(T::class)
@@ -246,6 +246,27 @@ class FunctionsShould internal constructor(
         return builder
     }
 
+    /** Asserts that selected functions have the specified raw return type. */
+    infix fun haveReturnType(type: kotlin.reflect.KClass<*>): FunctionsRuleBuilder {
+        val expectedType = type.toKontureTypeReference()
+        builder.setShould { function, _, violations ->
+            if (function.declaration.resolvedReturnType?.let { matchesKotlinType(it, expectedType) } != true) {
+                violations.add(
+                    getMessage(
+                        "function.should.haveReturnType",
+                        function.declaration.name,
+                        type.kontureQualifiedName(),
+                        function.declaration.returnType,
+                    ),
+                )
+            }
+        }
+        return builder
+    }
+
+    /** Asserts that selected functions have the specified raw return type. */
+    inline fun <reified T : Any> haveReturnTypeOf(): FunctionsRuleBuilder = haveReturnType(T::class)
+
     infix fun haveReturnType(typeFqNames: List<String>): FunctionsRuleBuilder {
         builder.setShould { func, _, violations ->
             if (!typeFqNames.contains(func.declaration.returnType)) {
@@ -459,6 +480,35 @@ class FunctionsShould internal constructor(
      */
     fun haveParameterTypes(vararg types: String): FunctionsRuleBuilder = haveParameterTypes(types.asList())
 
+    /** Asserts that selected functions take exactly these raw parameter types in order. */
+    fun haveParameterTypes(
+        first: kotlin.reflect.KClass<*>,
+        vararg additional: kotlin.reflect.KClass<*>,
+    ): FunctionsRuleBuilder {
+        val types = arrayOf(first, *additional).map { it.toKontureTypeReference() }
+        builder.setShould { function, _, violations ->
+            val matches =
+                function.declaration.parameters.size == types.size &&
+                    function.declaration.parameters.zip(types).all {
+                            (parameter, type) ->
+                        parameter.resolvedType?.let { matchesKotlinType(it, type) } == true
+                    }
+            if (!matches) {
+                violations.add(
+                    getMessage(
+                        "function.should.haveParameterTypes",
+                        function.declaration.name,
+                        types.joinToString {
+                            it.qualifiedName
+                        },
+                        function.declaration.parameters.joinToString { it.type },
+                    ),
+                )
+            }
+        }
+        return builder
+    }
+
     /**
      * Asserts that selected functions have at least one parameter of one of the specified types.
      *
@@ -487,6 +537,27 @@ class FunctionsShould internal constructor(
      * @param types The vararg list of possible parameter types.
      */
     fun haveAnyParameterType(vararg types: String): FunctionsRuleBuilder = haveAnyParameterType(types.asList())
+
+    /** Asserts that selected functions have a parameter of any specified raw type. */
+    fun haveAnyParameterType(
+        first: kotlin.reflect.KClass<*>,
+        vararg additional: kotlin.reflect.KClass<*>,
+    ): FunctionsRuleBuilder {
+        val types = arrayOf(first, *additional).map { it.toKontureTypeReference() }
+        builder.setShould { function, _, violations ->
+            if (function.declaration.parameters.none {
+                        parameter ->
+                    parameter.resolvedType?.let { resolvedType -> types.any { matchesKotlinType(resolvedType, it) } } == true
+                }
+            ) {
+                violations.add(getMessage("function.should.haveAnyParameterType", function.declaration.name, types.joinToString { it.qualifiedName }))
+            }
+        }
+        return builder
+    }
+
+    /** Asserts that selected functions have a parameter of raw type [T]. */
+    inline fun <reified T : Any> haveAnyParameterTypeOf(): FunctionsRuleBuilder = haveAnyParameterType(T::class)
 
     fun beExtension(): FunctionsRuleBuilder {
         builder.setShould { func, _, violations ->

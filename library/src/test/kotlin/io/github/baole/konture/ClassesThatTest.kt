@@ -412,5 +412,17 @@ class ClassesThatTest : RuleBuildersTestBase() {
         val ruleAssignAll = ClassesRuleBuilder(hierarchyGraph).that().areAssignableToAllOf("Parent", "GrandParent")
         assertTrue(ruleAssignAll.getThatPredicate()!!(child))
         assertFalse(ruleAssignAll.getThatPredicate()!!(parent))
+
+        // areAssignableFrom checks
+        val ruleAssignableFromChild = ClassesRuleBuilder(hierarchyGraph).that().areAssignableFrom("Child")
+        val predAssignableFromChild = ruleAssignableFromChild.getThatPredicate()!!
+        assertTrue(predAssignableFromChild(grandParent))
+        assertTrue(predAssignableFromChild(parent))
+        assertTrue(predAssignableFromChild(child))
+
+        val ruleAssignableFromParent = ClassesRuleBuilder(hierarchyGraph).that().areAssignableFrom("Parent")
+        val predAssignableFromParent = ruleAssignableFromParent.getThatPredicate()!!
+        assertTrue(predAssignableFromParent(grandParent))
+        assertFalse(predAssignableFromParent(child))
     }
 }

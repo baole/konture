@@ -1,5 +1,6 @@
 [versions]
 kotlin = "2.4.0"
+agp = "8.5.2"
 kotlinx-serialization = "1.8.0"
 junit = "5.11.0"
 junit-platform = "1.11.0"
@@ -7,12 +8,13 @@ dokka = "1.9.20"
 detekt = "1.23.8"
 ktlint = "12.1.1"
 gradle-publish = "2.1.1"
-konture = "0.7.0"
+konture = "0.7.1"
 spotless = "6.25.0"
 
 [libraries]
 kotlin-compiler-embeddable = { module = "org.jetbrains.kotlin:kotlin-compiler-embeddable", version.ref = "kotlin" }
 kotlin-gradle-plugin = { module = "org.jetbrains.kotlin:kotlin-gradle-plugin", version.ref = "kotlin" }
+android-gradle-plugin-api = { module = "com.android.tools.build:gradle-api", version.ref = "agp" }
 kotlinx-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "kotlinx-serialization" }
 
 junit-jupiter-api = { module = "org.junit.jupiter:junit-jupiter-api", version.ref = "junit" }
