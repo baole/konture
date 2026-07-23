@@ -10,6 +10,7 @@ ktlint = "12.1.1"
 gradle-publish = "2.1.1"
 konture = "0.7.1"
 spotless = "6.25.0"
+nmcp = "0.0.9"
 
 [libraries]
 kotlin-compiler-embeddable = { module = "org.jetbrains.kotlin:kotlin-compiler-embeddable", version.ref = "kotlin" }
@@ -30,3 +31,5 @@ detekt = { id = "io.gitlab.arturbosch.detekt", version.ref = "detekt" }
 ktlint = { id = "org.jlleitschuh.gradle.ktlint", version.ref = "ktlint" }
 gradle-publish = { id = "com.gradle.plugin-publish", version.ref = "gradle-publish" }
 spotless = { id = "com.diffplug.spotless", version.ref = "spotless" }
+nmcp = { id = "com.gradleup.nmcp", version.ref = "nmcp" }
+

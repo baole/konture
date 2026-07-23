@@ -25,6 +25,8 @@ plugins {
     alias(libs.plugins.detekt) apply false
     alias(libs.plugins.ktlint) apply false
     alias(libs.plugins.spotless) apply false
+    alias(libs.plugins.nmcp)
+    `maven-publish`
     jacoco
 }
 
@@ -52,6 +54,9 @@ allprojects {
 
 subprojects {
     pluginManager.apply("maven-publish")
+    if (project.name != "plugin-gradle" && project.name != "konture-test") {
+        pluginManager.apply("com.gradleup.nmcp")
+    }
     pluginManager.apply("signing")
     if (project.name == "library") {
         pluginManager.apply("org.jetbrains.dokka")
@@ -133,6 +138,19 @@ subprojects {
                         from(components["java"])
                     }
                 }
+                plugins.withId("com.gradleup.nmcp") {
+                    configure<nmcp.NmcpExtension> {
+                        publish("mavenJava") {
+                            username =
+                                providers.gradleProperty("mavenCentralUsername").orNull
+                                    ?: System.getenv("MAVEN_CENTRAL_USERNAME")
+                            password =
+                                providers.gradleProperty("mavenCentralPassword").orNull
+                                    ?: System.getenv("MAVEN_CENTRAL_PASSWORD")
+                            publicationType = "AUTOMATIC"
+                        }
+                    }
+                }
             }
         }
     }
@@ -197,7 +215,6 @@ subprojects {
                 if (!signingKey.isNullOrEmpty() && !signingPassword.isNullOrEmpty()) {
                     useInMemoryPgpKeys(signingKey, signingPassword)
                 }
-                sign(extensions.getByType<PublishingExtension>().publications)
             }
         }
     }
