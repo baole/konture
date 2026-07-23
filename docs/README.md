@@ -15,22 +15,9 @@
 
 In multi-module, multi-layer projects, architecture erodes through small shortcuts. For example, a feature module might declare a "sideways" dependency on a sibling feature.
 
-<div align="center" markdown="1">
+<div align="center">
 
-```mermaid
-graph TD
-    app[":app"] --> checkout[":feature:checkout"]
-    app --> profile[":feature:profile"]
-    checkout --> core[":core:network"]
-    profile --> core
-    checkout -.->|"PROHIBITED: Sideways Dependency"| profile
-
-    style app fill:#f1f5f9,stroke:#94a3b8,stroke-width:2px
-    style checkout fill:#e0f2fe,stroke:#0284c7,stroke-width:2px
-    style profile fill:#e0f2fe,stroke:#0284c7,stroke-width:2px
-    style core fill:#ecfdf5,stroke:#10b981,stroke-width:2px
-    linkStyle 4 stroke:#ef4444,stroke-width:2px,stroke-dasharray: 5 5;
-```
+<img src="{{ '/assets/images/prohibited-sideways-dependency.svg' | relative_url }}" width="260" alt="Prohibited sideways dependency between feature modules">
 
 </div>
 
