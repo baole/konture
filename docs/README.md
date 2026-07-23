@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="docs/assets/images/logo.png" width="160" alt="Konture Logo">
+  <img src="assets/images/logo.png" width="160" alt="Konture Logo">
 </p>
 
 <h1 align="center">🧬 Konture: Kotlin Architecture Testing Guardrails</h1>
