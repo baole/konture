@@ -53,7 +53,7 @@ Declare your plugin configurations inside the `<configuration>` block of the `ko
 <plugin>
     <groupId>io.github.baole.konture</groupId>
     <artifactId>konture-maven-plugin</artifactId>
-    <version>0.7.0</version>
+    <version>0.7.1</version>
     <executions>
         <execution>
             <phase>process-test-resources</phase>
