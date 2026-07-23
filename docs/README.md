@@ -1,4 +1,8 @@
-# <img src="assets/images/logo.png" width="48" style="vertical-align: middle; margin-right: 12px;" alt="Konture Logo">Konture
+<p align="center">
+  <img src="docs/assets/images/logo.png" width="160" alt="Konture Logo">
+</p>
+
+<h1 align="center">🧬 Konture: Kotlin Architecture Testing Guardrails</h1>
 
 <p align="center">
   <a href="https://baole.github.io/konture/"><img src="https://img.shields.io/badge/docs-GitHub%20Pages-blue?style=for-the-badge&logo=github" alt="GitHub Pages"></a>
