@@ -159,7 +159,7 @@ Before running `spotlessApply` on changed Kotlin files, add your identity to the
 
 ```properties
 konture.contributor.name=Jane Doe
-konture.contributor.github=jane-doe
+konture.contributor.github=@jane-doe
 ```
 
 `spotlessApply` initializes a header for every new Kotlin file. After formatting all subprojects, the Git-aware `updateKotlinContributors` task appends your identity once to each modified Kotlin file. The header retains the project copyright and lists individual contributors separately.
