@@ -153,6 +153,17 @@ To keep the codebase maintainable and accessible:
 - **No Placeholders**: Do not check in unfinished placeholders, dummy logs, or commented-out code blocks. Use TODO comments sparingly with issue or username references.
 - **Write Tests**: Every bug fix, refactoring, or new feature should be accompanied by corresponding unit tests inside its module.
 
+### Configure Contributor Attribution
+
+Before running `spotlessApply` on changed Kotlin files, add your identity to the ignored root `local.properties` file:
+
+```properties
+konture.contributor.name=Jane Doe
+konture.contributor.github=jane-doe
+```
+
+`spotlessApply` initializes a header for every new Kotlin file. After formatting all subprojects, the Git-aware `updateKotlinContributors` task appends your identity once to each modified Kotlin file. The header retains the project copyright and lists individual contributors separately.
+
 ---
 
 ## 🤝 7. Submitting a Pull Request
