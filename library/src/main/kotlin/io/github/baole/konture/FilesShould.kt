@@ -1,5 +1,6 @@
 /*
- * Copyright 2026 Bao Le Duc
+ * Copyright 2026 The Konture Contributors
+ * Contributors: Bao Le Duc (@baole)
  * SPDX-License-Identifier: Apache-2.0
  */
 
@@ -7,6 +8,7 @@ package io.github.baole.konture
 
 import io.github.baole.konture.i18n.getMessage
 import io.github.baole.konture.impl.PatternMatchers
+import kotlin.reflect.KClass
 
 @KontureDsl
 class FilesShould internal constructor(
@@ -28,7 +30,7 @@ class FilesShould internal constructor(
     }
 
     /** Fails for every invocation of [kClass] in the selected source file. */
-    fun notCall(kClass: kotlin.reflect.KClass<*>): FilesRuleBuilder = notCall(kClass.kontureQualifiedName())
+    fun notCall(kClass: KClass<*>): FilesRuleBuilder = notCall(kClass.kontureQualifiedName())
 
     /** Fails for every invocation of [T] in the selected source file. */
     inline fun <reified T : Any> notCall(): FilesRuleBuilder = notCall(T::class)
@@ -46,7 +48,7 @@ class FilesShould internal constructor(
     }
 
     /** Fails for every actual class/type use of [kClass]; imports alone do not match. */
-    fun notReferenceClass(kClass: kotlin.reflect.KClass<*>): FilesRuleBuilder = notReferenceClass(kClass.kontureQualifiedName())
+    fun notReferenceClass(kClass: KClass<*>): FilesRuleBuilder = notReferenceClass(kClass.kontureQualifiedName())
 
     /** Fails for every actual class/type use of [T]; imports alone do not match. */
     inline fun <reified T : Any> notReferenceClass(): FilesRuleBuilder = notReferenceClass(T::class)

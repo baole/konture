@@ -8,6 +8,7 @@ import io.gitlab.arturbosch.detekt.extensions.DetektExtension
 import org.jlleitschuh.gradle.ktlint.KtlintExtension
 import org.jlleitschuh.gradle.ktlint.reporter.ReporterType
 import com.diffplug.gradle.spotless.SpotlessExtension
+import org.jetbrains.dokka.gradle.DokkaTaskPartial
 
 plugins {
     id("io.gitlab.arturbosch.detekt")
@@ -70,7 +71,7 @@ tasks.matching { it.name == "spotlessApply" }.configureEach {
 }
 
 plugins.withId("org.jetbrains.dokka") {
-    tasks.withType<org.jetbrains.dokka.gradle.DokkaTaskPartial>().configureEach {
+    tasks.withType<DokkaTaskPartial>().configureEach {
         dokkaSourceSets.configureEach {
             perPackageOption {
                 matchingRegex.set("io\\.github\\.baole\\.konture\\.impl(\\..*)?")

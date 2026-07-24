@@ -1,10 +1,12 @@
 /*
- * Copyright 2026 Bao Le Duc
+ * Copyright 2026 The Konture Contributors
+ * Contributors: Bao Le Duc (@baole)
  * SPDX-License-Identifier: Apache-2.0
  */
 
 package io.github.baole.konture.impl
 
+import io.github.baole.konture.Konture
 import io.github.baole.konture.Module
 import io.github.baole.konture.ProjectGraph
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -139,8 +141,8 @@ object ForkedJvmProgrammaticPathApp {
     @JvmStatic
     fun main(args: Array<String>) {
         val customPath = args[0]
-        io.github.baole.konture.Konture.generateBaseline = true
-        io.github.baole.konture.Konture.baselinePath = customPath
+        Konture.generateBaseline = true
+        Konture.baselinePath = customPath
 
         BaselineManager.handleViolations(
             listOf("Class com.example.ForkedProgrammaticClass violates programmatic rule"),
@@ -179,9 +181,9 @@ object ForkedJvmDistributedBaselineApp {
                 builds = mapOf(":" to listOf(moduleA, moduleB)),
             )
 
-        io.github.baole.konture.Konture.generateBaseline = true
-        io.github.baole.konture.Konture.baselinePath = "my-baseline.json"
-        io.github.baole.konture.ProjectGraph.setDefault(graph)
+        Konture.generateBaseline = true
+        Konture.baselinePath = "my-baseline.json"
+        ProjectGraph.setDefault(graph)
 
         BaselineManager.handleViolations(
             listOf(

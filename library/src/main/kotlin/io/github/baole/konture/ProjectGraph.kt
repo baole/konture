@@ -1,5 +1,6 @@
 /*
- * Copyright 2026 Bao Le Duc
+ * Copyright 2026 The Konture Contributors
+ * Contributors: Bao Le Duc (@baole)
  * SPDX-License-Identifier: Apache-2.0
  */
 
@@ -7,6 +8,7 @@ package io.github.baole.konture
 
 import io.github.baole.konture.core.DependencyGraphModel
 import io.github.baole.konture.i18n.getMessage
+import io.github.baole.konture.impl.KontureContextProvider
 import io.github.baole.konture.impl.ModuleKey
 import kotlin.jvm.JvmOverloads
 
@@ -152,14 +154,14 @@ data class ProjectGraph(
         /**
          * Checks if the default ProjectGraph is initialized.
          */
-        internal fun isDefaultInitialized(): Boolean = io.github.baole.konture.impl.KontureContextProvider.currentContext.projectGraph != null
+        internal fun isDefaultInitialized(): Boolean = KontureContextProvider.currentContext.projectGraph != null
 
         /**
          * Sets the default ProjectGraph for the current JVM runtime session.
          */
         internal fun setDefault(graph: ProjectGraph) {
-            io.github.baole.konture.impl.KontureContextProvider.currentContext =
-                io.github.baole.konture.impl.KontureContextProvider.currentContext.copy(projectGraph = graph)
+            KontureContextProvider.currentContext =
+                KontureContextProvider.currentContext.copy(projectGraph = graph)
         }
 
         /**
@@ -168,7 +170,7 @@ data class ProjectGraph(
          * @throws IllegalStateException if the default graph has not been initialized.
          */
         internal fun getDefault(): ProjectGraph =
-            io.github.baole.konture.impl.KontureContextProvider.currentContext.projectGraph
+            KontureContextProvider.currentContext.projectGraph
                 ?: throw IllegalStateException(
                     "Default ProjectGraph has not been initialized. " +
                         "Make sure to apply the plugin or load a graph first.",

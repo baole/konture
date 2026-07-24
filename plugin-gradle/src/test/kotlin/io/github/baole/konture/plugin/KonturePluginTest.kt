@@ -1,18 +1,30 @@
 /*
- * Copyright 2026 Bao Le Duc
+ * Copyright 2026 The Konture Contributors
+ * Contributors: Bao Le Duc (@baole)
  * SPDX-License-Identifier: Apache-2.0
  */
 
 package io.github.baole.konture.plugin
 
+import io.github.baole.konture.core.DependencyGraphModel
 import io.github.baole.konture.core.KontureConstants
 import io.github.baole.konture.core.LayoutModel
+import org.gradle.api.GradleException
+import org.gradle.api.Plugin
+import org.gradle.api.Project
+import org.gradle.api.internal.project.ProjectInternal
+import org.gradle.api.provider.Provider
+import org.gradle.api.tasks.testing.Test as GradleTestTask
 import org.gradle.testfixtures.ProjectBuilder
+import org.jetbrains.kotlin.gradle.dsl.KotlinMultiplatformExtension
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertNotNull
+import org.junit.jupiter.api.Assertions.assertThrows
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
+import java.io.File
+import kotlinx.serialization.json.Json
 
 class KonturePluginTest {
     @Test
@@ -142,9 +154,9 @@ class KonturePluginTest {
 
         // Create some source files in child-a source dirs to test file walking
         val childADir = childA.projectDir
-        val srcDir = java.io.File(childADir, "src/main/kotlin/com/example")
+        val srcDir = File(childADir, "src/main/kotlin/com/example")
         srcDir.mkdirs()
-        val dummyFile = java.io.File(srcDir, "Example.kt")
+        val dummyFile = File(srcDir, "Example.kt")
         dummyFile.writeText("package com.example\nclass Example")
 
         // Add a project dependency from child-a to child-b
@@ -153,9 +165,9 @@ class KonturePluginTest {
         )
 
         // Run afterEvaluate hooks to eagerly configure tasks
-        (rootProject as org.gradle.api.internal.project.ProjectInternal).evaluate()
-        (childA as org.gradle.api.internal.project.ProjectInternal).evaluate()
-        (childB as org.gradle.api.internal.project.ProjectInternal).evaluate()
+        (rootProject as ProjectInternal).evaluate()
+        (childA as ProjectInternal).evaluate()
+        (childB as ProjectInternal).evaluate()
 
         // Run the task
         val task = rootProject.tasks.getByName("generateArchitectureLayout") as GenerateArchitectureLayout
@@ -171,8 +183,8 @@ class KonturePluginTest {
 
         val jsonText = outputFile.readText()
         val layoutModel =
-            kotlinx.serialization.json.Json.decodeFromString(
-                io.github.baole.konture.core.LayoutModel
+            Json.decodeFromString(
+                LayoutModel
                     .serializer(),
                 jsonText,
             )
@@ -207,7 +219,7 @@ class KonturePluginTest {
         val task = rootProject.tasks.getByName("generateArchitectureLayout") as GenerateArchitectureLayout
 
         // Manually build custom ModuleData with an external source directory
-        val externalDir = java.io.File("/some/external/absolute/path") // absolute path not under root
+        val externalDir = File("/some/external/absolute/path") // absolute path not under root
         val sourceSet =
             SourceSetData(
                 name = "external",
@@ -309,8 +321,8 @@ class KonturePluginTest {
 
         val jsonText = outputFile.readText()
         val layoutModel =
-            kotlinx.serialization.json.Json.decodeFromString(
-                io.github.baole.konture.core.LayoutModel
+            Json.decodeFromString(
+                LayoutModel
                     .serializer(),
                 jsonText,
             )
@@ -334,8 +346,8 @@ class KonturePluginTest {
         rootProject.plugins.apply("io.github.baole.konture")
 
         // Run afterEvaluate hooks to eagerly configure tasks
-        (rootProject as org.gradle.api.internal.project.ProjectInternal).evaluate()
-        (child as org.gradle.api.internal.project.ProjectInternal).evaluate()
+        (rootProject as ProjectInternal).evaluate()
+        (child as ProjectInternal).evaluate()
 
         val task = rootProject.tasks.getByName("generateArchitectureLayout") as GenerateArchitectureLayout
         task.outputFile
@@ -349,8 +361,8 @@ class KonturePluginTest {
 
         val jsonText = outputFile.readText()
         val layoutModel =
-            kotlinx.serialization.json.Json.decodeFromString(
-                io.github.baole.konture.core.LayoutModel
+            Json.decodeFromString(
+                LayoutModel
                     .serializer(),
                 jsonText,
             )
@@ -387,7 +399,7 @@ class KonturePluginTest {
         // Retrieve KMP extension and define targets to register source sets
         val kotlinExt =
             kmpProject.extensions.getByType(
-                org.jetbrains.kotlin.gradle.dsl.KotlinMultiplatformExtension::class.java,
+                KotlinMultiplatformExtension::class.java,
             )
         kotlinExt.jvm("desktop")
         kotlinExt.iosX64("ios")
@@ -438,7 +450,7 @@ class KonturePluginTest {
         // Retrieve KMP extension and define targets to register source sets
         val kotlinExt =
             kmpProject.extensions.getByType(
-                org.jetbrains.kotlin.gradle.dsl.KotlinMultiplatformExtension::class.java,
+                KotlinMultiplatformExtension::class.java,
             )
         kotlinExt.jvm("desktop")
         kotlinExt.iosX64("ios")
@@ -488,12 +500,12 @@ class KonturePluginTest {
                 .withParent(rootProject)
                 .build()
 
-        class DummyDynamicFeaturePlugin : org.gradle.api.Plugin<org.gradle.api.Project> {
-            override fun apply(target: org.gradle.api.Project) = Unit
+        class DummyDynamicFeaturePlugin : Plugin<Project> {
+            override fun apply(target: Project) = Unit
         }
 
-        class DummyAndroidTestPlugin : org.gradle.api.Plugin<org.gradle.api.Project> {
-            override fun apply(target: org.gradle.api.Project) = Unit
+        class DummyAndroidTestPlugin : Plugin<Project> {
+            override fun apply(target: Project) = Unit
         }
 
         dynamicFeature.plugins.apply(DummyDynamicFeaturePlugin::class.java)
@@ -546,7 +558,7 @@ class KonturePluginTest {
         val collectDepsMethod =
             KonturePlugin::class.java.getDeclaredMethod(
                 "collectDependencies",
-                org.gradle.api.Project::class.java,
+                Project::class.java,
             )
         collectDepsMethod.isAccessible = true
         @Suppress("UNCHECKED_CAST")
@@ -564,7 +576,7 @@ class KonturePluginTest {
         task.logLevel.set("INVALID_LOG_LEVEL")
 
         val exception =
-            org.junit.jupiter.api.Assertions.assertThrows(org.gradle.api.GradleException::class.java) {
+            assertThrows(GradleException::class.java) {
                 task.generate()
             }
         assertTrue(exception.message?.contains("Invalid log level: 'INVALID_LOG_LEVEL'") == true)
@@ -585,8 +597,8 @@ class KonturePluginTest {
         rootProject.plugins.apply("io.github.baole.konture")
 
         // Evaluate to configure task properties
-        (rootProject as org.gradle.api.internal.project.ProjectInternal).evaluate()
-        (child as org.gradle.api.internal.project.ProjectInternal).evaluate()
+        (rootProject as ProjectInternal).evaluate()
+        (child as ProjectInternal).evaluate()
 
         val task = rootProject.tasks.getByName("generateDependencyGraph") as GenerateDependencyGraph
         task.outputFile
@@ -600,8 +612,8 @@ class KonturePluginTest {
 
         val jsonText = outputFile.readText()
         val externalDeps =
-            kotlinx.serialization.json.Json.decodeFromString(
-                io.github.baole.konture.core.DependencyGraphModel
+            Json.decodeFromString(
+                DependencyGraphModel
                     .serializer(),
                 jsonText,
             )
@@ -628,11 +640,11 @@ class KonturePluginTest {
         val extension = project.extensions.getByName("konture") as KontureExtension
         extension.baselinePath.set("custom-baseline-test.json")
 
-        val testTask = project.tasks.getByName("test") as org.gradle.api.tasks.testing.Test
+        val testTask = project.tasks.getByName("test") as GradleTestTask
         val baselinePathProp = testTask.systemProperties["konture.baseline.path"]
         val resolvedValue =
             when (baselinePathProp) {
-                is org.gradle.api.provider.Provider<*> -> baselinePathProp.get()
+                is Provider<*> -> baselinePathProp.get()
                 else -> baselinePathProp
             }
         assertEquals("custom-baseline-test.json", resolvedValue)
@@ -666,13 +678,13 @@ class KonturePluginTest {
             val extension = project.extensions.getByName("konture") as KontureExtension
             extension.baselinePath.set("dsl-baseline.json")
 
-            val testTask = project.tasks.getByName("test") as org.gradle.api.tasks.testing.Test
+            val testTask = project.tasks.getByName("test") as GradleTestTask
 
             // Check baseline path
             val baselinePathProp = testTask.systemProperties[KontureConstants.PROPERTY_BASELINE_PATH]
             val resolvedPath =
                 when (baselinePathProp) {
-                    is org.gradle.api.provider.Provider<*> -> baselinePathProp.get()
+                    is Provider<*> -> baselinePathProp.get()
                     else -> baselinePathProp
                 }
             assertEquals("cli-override-baseline.json", resolvedPath)
@@ -681,7 +693,7 @@ class KonturePluginTest {
             val baselineDirProp = testTask.systemProperties[KontureConstants.PROPERTY_BASELINE_DIR]
             val resolvedDir =
                 when (baselineDirProp) {
-                    is org.gradle.api.provider.Provider<*> -> baselineDirProp.get()
+                    is Provider<*> -> baselineDirProp.get()
                     else -> baselineDirProp
                 }
             assertEquals("/cli-override-dir", resolvedDir)
@@ -702,11 +714,11 @@ class KonturePluginTest {
         childProject.plugins.apply("java") // Registers Test tasks
         childProject.plugins.apply("io.github.baole.konture")
 
-        val childTestTask = childProject.tasks.getByName("test") as org.gradle.api.tasks.testing.Test
+        val childTestTask = childProject.tasks.getByName("test") as GradleTestTask
         val generateProp = childTestTask.systemProperties[KontureConstants.PROPERTY_BASELINE_GENERATE]
         val resolvedValue =
             when (generateProp) {
-                is org.gradle.api.provider.Provider<*> -> generateProp.get()
+                is Provider<*> -> generateProp.get()
                 else -> generateProp
             }
         assertEquals("true", resolvedValue.toString())

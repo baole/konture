@@ -1,10 +1,12 @@
 /*
- * Copyright 2026 Bao Le Duc
+ * Copyright 2026 The Konture Contributors
+ * Contributors: Bao Le Duc (@baole)
  * SPDX-License-Identifier: Apache-2.0
  */
 
 package io.github.baole.konture.impl.psi
 
+import org.jetbrains.kotlin.K1Deprecation
 import org.jetbrains.kotlin.cli.jvm.compiler.EnvironmentConfigFiles
 import org.jetbrains.kotlin.cli.jvm.compiler.KotlinCoreEnvironment
 import org.jetbrains.kotlin.com.intellij.openapi.project.Project
@@ -20,7 +22,7 @@ import org.jetbrains.kotlin.psi.KtFile
 /** Owns the Kotlin compiler PSI project used for source parsing. */
 @OptIn(
     CompilerConfiguration.Internals::class,
-    org.jetbrains.kotlin.K1Deprecation::class,
+    K1Deprecation::class,
 )
 internal class PsiEnvironment {
     private var disposable = Disposer.newDisposable()

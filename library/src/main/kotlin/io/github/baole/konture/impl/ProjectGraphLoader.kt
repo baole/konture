@@ -1,5 +1,6 @@
 /*
- * Copyright 2026 Bao Le Duc
+ * Copyright 2026 The Konture Contributors
+ * Contributors: Bao Le Duc (@baole)
  * SPDX-License-Identifier: Apache-2.0
  */
 
@@ -16,10 +17,14 @@ import io.github.baole.konture.core.DependencyGraphModel
 import io.github.baole.konture.core.KontureLogger
 import io.github.baole.konture.core.LayoutModel
 import io.github.baole.konture.core.LogLevel
+import io.github.baole.konture.core.SourceSetKind as CoreSourceSetKind
+import io.github.baole.konture.core.SourceSetModel
 import io.github.baole.konture.impl.psi.MapSymbolLookup
 import io.github.baole.konture.impl.psi.TypeAliasDefinition
 import java.io.File
+import java.io.IOException
 import java.io.InputStream
+import kotlinx.serialization.SerializationException
 import kotlinx.serialization.json.Json
 
 /**
@@ -107,7 +112,7 @@ internal class ProjectGraphLoader {
 
         // Build a declared-symbol registry per source set. Production code must not see test
         // sources or test-only dependencies during type resolution.
-        val sourceSetModels = mutableMapOf<Triple<String, String, String>, io.github.baole.konture.core.SourceSetModel>()
+        val sourceSetModels = mutableMapOf<Triple<String, String, String>, SourceSetModel>()
         val declaredClassesBySourceSet = mutableMapOf<Triple<String, String, String>, Set<String>>()
         val declaredTypeAliasesBySourceSet = mutableMapOf<Triple<String, String, String>, Map<String, TypeAliasDefinition>>()
         layoutModel.builds.forEach { buildModel ->
@@ -148,7 +153,7 @@ internal class ProjectGraphLoader {
         }
 
         fun isCompileVisible(
-            sourceSet: io.github.baole.konture.core.SourceSetModel,
+            sourceSet: SourceSetModel,
             configuration: String,
         ): Boolean {
             val normalized = configuration.lowercase()
@@ -165,8 +170,8 @@ internal class ProjectGraphLoader {
         }
 
         fun hasCompatiblePlatforms(
-            consumer: io.github.baole.konture.core.SourceSetModel,
-            candidate: io.github.baole.konture.core.SourceSetModel,
+            consumer: SourceSetModel,
+            candidate: SourceSetModel,
         ): Boolean {
             val consumerPlatforms = consumer.platforms.toSet()
             if (consumerPlatforms.isEmpty() || !candidate.platforms.toSet().containsAll(consumerPlatforms)) return false
@@ -214,7 +219,7 @@ internal class ProjectGraphLoader {
                         return closure
                     }
                     val ownSourceSets =
-                        if (sourceSet.kind == io.github.baole.konture.core.SourceSetKind.KMP) {
+                        if (sourceSet.kind == CoreSourceSetKind.KMP) {
                             sourceSetClosure(key)
                         } else {
                             sourceSetModels.keys.filter { candidate ->
@@ -228,7 +233,7 @@ internal class ProjectGraphLoader {
                                 !isModuleExcluded(dependency.targetPath) &&
                                     isCompileVisible(sourceSet, dependency.configuration) &&
                                     (
-                                        sourceSet.kind != io.github.baole.konture.core.SourceSetKind.KMP ||
+                                        sourceSet.kind != CoreSourceSetKind.KMP ||
                                             ownSourceSets.any { candidate ->
                                                 dependency.configuration in
                                                     sourceSetModels.getValue(candidate).dependencyConfigurations
@@ -240,7 +245,7 @@ internal class ProjectGraphLoader {
                                     candidate.first == dependency.targetBuildId && candidate.second == dependency.targetPath &&
                                         sourceSetModels.getValue(candidate).production &&
                                         (
-                                            sourceSet.kind != io.github.baole.konture.core.SourceSetKind.KMP ||
+                                            sourceSet.kind != CoreSourceSetKind.KMP ||
                                                 hasCompatiblePlatforms(sourceSet, sourceSetModels.getValue(candidate))
                                         )
                                 }
@@ -376,10 +381,10 @@ internal class ProjectGraphLoader {
                     KontureLogger.log(LogLevel.DEBUG, "Lazy loading external dependencies schema...")
                     val content = stream.bufferedReader().use { it.readText() }
                     json.decodeFromString<DependencyGraphModel>(content)
-                } catch (e: kotlinx.serialization.SerializationException) {
+                } catch (e: SerializationException) {
                     KontureLogger.log(LogLevel.WARNING, "Failed to parse dependencies.json structure: ${e.message}")
                     DependencyGraphModel()
-                } catch (e: java.io.IOException) {
+                } catch (e: IOException) {
                     KontureLogger.log(LogLevel.WARNING, "Failed to read dependencies.json content: ${e.message}")
                     DependencyGraphModel()
                 }
@@ -447,11 +452,11 @@ internal class ProjectGraphLoader {
     }
 }
 
-private fun io.github.baole.konture.core.SourceSetKind.toPublicKind(): SourceSetKind =
+private fun CoreSourceSetKind.toPublicKind(): SourceSetKind =
     when (this) {
-        io.github.baole.konture.core.SourceSetKind.KOTLIN_JVM -> SourceSetKind.JVM
-        io.github.baole.konture.core.SourceSetKind.ANDROID_VARIANT -> SourceSetKind.ANDROID
-        io.github.baole.konture.core.SourceSetKind.KMP -> SourceSetKind.KMP
+        CoreSourceSetKind.KOTLIN_JVM -> SourceSetKind.JVM
+        CoreSourceSetKind.ANDROID_VARIANT -> SourceSetKind.ANDROID
+        CoreSourceSetKind.KMP -> SourceSetKind.KMP
     }
 
 /**

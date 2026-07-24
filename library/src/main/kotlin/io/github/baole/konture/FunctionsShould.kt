@@ -1,5 +1,6 @@
 /*
- * Copyright 2026 Bao Le Duc
+ * Copyright 2026 The Konture Contributors
+ * Contributors: Bao Le Duc (@baole)
  * SPDX-License-Identifier: Apache-2.0
  */
 
@@ -7,6 +8,7 @@ package io.github.baole.konture
 
 import io.github.baole.konture.i18n.getMessage
 import io.github.baole.konture.impl.PatternMatchers
+import kotlin.reflect.KClass
 
 @KontureDsl
 class FunctionsShould internal constructor(
@@ -28,7 +30,7 @@ class FunctionsShould internal constructor(
     }
 
     /** Fails when the selected function invokes [kClass]. */
-    fun notCall(kClass: kotlin.reflect.KClass<*>): FunctionsRuleBuilder = notCall(kClass.kontureQualifiedName())
+    fun notCall(kClass: KClass<*>): FunctionsRuleBuilder = notCall(kClass.kontureQualifiedName())
 
     /** Fails when the selected function invokes [T]. */
     inline fun <reified T : Any> notCall(): FunctionsRuleBuilder = notCall(T::class)
@@ -247,7 +249,7 @@ class FunctionsShould internal constructor(
     }
 
     /** Asserts that selected functions have the specified raw return type. */
-    infix fun haveReturnType(type: kotlin.reflect.KClass<*>): FunctionsRuleBuilder {
+    infix fun haveReturnType(type: KClass<*>): FunctionsRuleBuilder {
         val expectedType = type.toKontureTypeReference()
         builder.setShould { function, _, violations ->
             if (function.declaration.resolvedReturnType?.let { matchesKotlinType(it, expectedType) } != true) {
@@ -482,8 +484,8 @@ class FunctionsShould internal constructor(
 
     /** Asserts that selected functions take exactly these raw parameter types in order. */
     fun haveParameterTypes(
-        first: kotlin.reflect.KClass<*>,
-        vararg additional: kotlin.reflect.KClass<*>,
+        first: KClass<*>,
+        vararg additional: KClass<*>,
     ): FunctionsRuleBuilder {
         val types = arrayOf(first, *additional).map { it.toKontureTypeReference() }
         builder.setShould { function, _, violations ->
@@ -540,8 +542,8 @@ class FunctionsShould internal constructor(
 
     /** Asserts that selected functions have a parameter of any specified raw type. */
     fun haveAnyParameterType(
-        first: kotlin.reflect.KClass<*>,
-        vararg additional: kotlin.reflect.KClass<*>,
+        first: KClass<*>,
+        vararg additional: KClass<*>,
     ): FunctionsRuleBuilder {
         val types = arrayOf(first, *additional).map { it.toKontureTypeReference() }
         builder.setShould { function, _, violations ->
