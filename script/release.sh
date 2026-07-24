@@ -96,6 +96,7 @@ fi
 FILES_TO_BUMP=(
     "gradle/libs.versions.toml"
     "build.gradle.kts"
+    "build-logic/src/main/kotlin/konture.kotlin.gradle.kts"
     "plugin-gradle/build.gradle.kts"
     "docs/scripts.js"
     "showcases/sample-gradle/build.gradle.kts"
@@ -170,6 +171,7 @@ perl -pi -e "s/\Q$OLD_VERSION\E/$NEW_VERSION/g" docs/baseline.md
 # 7. Update Root buildscript classpath and project version
 perl -pi -e "s/plugin-gradle:\Q$OLD_VERSION\E/plugin-gradle:$NEW_VERSION/g" build.gradle.kts
 perl -pi -e "s/version = \"\Q$OLD_VERSION\E\"/version = \"$NEW_VERSION\"/g" build.gradle.kts
+perl -pi -e "s/version = \"\Q$OLD_VERSION\E\"/version = \"$NEW_VERSION\"/g" build-logic/src/main/kotlin/konture.kotlin.gradle.kts
 
 # 8. Update Gradle Plugin subproject version
 perl -pi -e "s/version = \"\Q$OLD_VERSION\E\"/version = \"$NEW_VERSION\"/g" plugin-gradle/build.gradle.kts
