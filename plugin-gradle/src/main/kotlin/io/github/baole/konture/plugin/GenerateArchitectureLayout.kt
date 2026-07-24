@@ -1,5 +1,6 @@
 /*
- * Copyright 2026 Bao Le Duc
+ * Copyright 2026 The Konture Contributors
+ * Contributors: Bao Le Duc (@baole)
  * SPDX-License-Identifier: Apache-2.0
  */
 
@@ -46,7 +47,7 @@ abstract class GenerateArchitectureLayout : DefaultTask() {
     /**
      * The root project directory of the build, used to resolve and serialize relative paths.
      */
-    @get:Input
+    @get:org.gradle.api.tasks.Internal
     abstract val rootProjectDir: org.gradle.api.provider.Property<File>
 
     /**
@@ -129,14 +130,14 @@ abstract class GenerateArchitectureLayout : DefaultTask() {
 
         val moduleModels =
             modules.get().map { input ->
-                val moduleDir = File(input.projectDir).canonicalFile
+                val moduleDir = File(input.projectDir).let { if (it.isAbsolute) it.canonicalFile else File(rootDir, input.projectDir).canonicalFile }
                 val relProjectDir = if (moduleDir == rootDir) "." else moduleDir.relativeTo(rootDir).path
 
                 val sourceSetModels =
                     input.sourceSets.map { ssInput ->
                         val files = mutableListOf<String>()
                         ssInput.srcDirs.forEach { dirPath ->
-                            val dirFile = File(dirPath).canonicalFile
+                            val dirFile = File(dirPath).let { if (it.isAbsolute) it.canonicalFile else File(rootDir, dirPath).canonicalFile }
                             val isGenerated =
                                 try {
                                     val rel = dirFile.relativeTo(moduleDir).path
