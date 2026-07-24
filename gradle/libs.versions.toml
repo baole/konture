@@ -8,7 +8,7 @@ dokka = "1.9.20"
 detekt = "1.23.8"
 ktlint = "12.1.1"
 gradle-publish = "2.1.1"
-konture = "0.7.2"
+konture = "0.7.3"
 spotless = "6.25.0"
 nmcp = "0.0.9"
 

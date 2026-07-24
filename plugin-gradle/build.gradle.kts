@@ -16,7 +16,7 @@ plugins {
 description = "Gradle configuration-time capture agent that feeds Konture your project's real build graph, enabling fast, build-tool-aware Kotlin architecture tests across Android, KMP, and JVM projects."
 
 group = "io.github.baole.konture"
-version = "0.7.2"
+version = "0.7.3"
 
 gradlePlugin {
     website.set("https://baole.github.io/konture")

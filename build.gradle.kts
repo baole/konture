@@ -13,7 +13,7 @@ buildscript {
     }
     dependencies {
         if (isKonturePluginRequested) {
-            classpath("io.github.baole.konture:plugin-gradle:0.7.2")
+            classpath("io.github.baole.konture:plugin-gradle:0.7.3")
         }
     }
 }
