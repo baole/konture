@@ -4,14 +4,14 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import io.gitlab.arturbosch.detekt.extensions.DetektExtension
+import dev.detekt.gradle.extensions.DetektExtension
 import org.jlleitschuh.gradle.ktlint.KtlintExtension
 import org.jlleitschuh.gradle.ktlint.reporter.ReporterType
 import com.diffplug.gradle.spotless.SpotlessExtension
 import org.jetbrains.dokka.gradle.DokkaTaskPartial
 
 plugins {
-    id("io.gitlab.arturbosch.detekt")
+    id("dev.detekt")
     id("org.jlleitschuh.gradle.ktlint")
     id("com.diffplug.spotless")
     jacoco
@@ -34,9 +34,9 @@ tasks.withType<Test> {
 
 configure<DetektExtension> {
     config.setFrom(files("${rootProject.projectDir}/config/detekt/detekt.yml"))
-    buildUponDefaultConfig = true
-    parallel = true
-    ignoreFailures = false
+    buildUponDefaultConfig.set(true)
+    parallel.set(true)
+    ignoreFailures.set(false)
 }
 
 configure<KtlintExtension> {

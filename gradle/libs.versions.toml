@@ -5,7 +5,7 @@ kotlinx-serialization = "1.8.0"
 junit = "5.11.0"
 junit-platform = "1.11.0"
 dokka = "1.9.20"
-detekt = "1.23.8"
+detekt = "2.0.0-alpha.5"
 ktlint = "12.1.1"
 gradle-publish = "2.1.1"
 konture = "0.7.3"
@@ -22,7 +22,7 @@ junit-jupiter-api = { module = "org.junit.jupiter:junit-jupiter-api", version.re
 junit-jupiter-engine = { module = "org.junit.jupiter:junit-jupiter-engine", version.ref = "junit" }
 junit-platform-launcher = { module = "org.junit.platform:junit-platform-launcher", version.ref = "junit-platform" }
 
-detekt-plugin = { module = "io.gitlab.arturbosch.detekt:detekt-gradle-plugin", version.ref = "detekt" }
+detekt-plugin = { module = "dev.detekt:detekt-gradle-plugin", version.ref = "detekt" }
 ktlint-plugin = { module = "org.jlleitschuh.gradle:ktlint-gradle", version.ref = "ktlint" }
 spotless-plugin = { module = "com.diffplug.spotless:spotless-plugin-gradle", version.ref = "spotless" }
 dokka-plugin = { module = "org.jetbrains.dokka:dokka-gradle-plugin", version.ref = "dokka" }
@@ -33,7 +33,7 @@ nmcp-plugin = { module = "com.gradleup.nmcp:nmcp", version.ref = "nmcp" }
 kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
 kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
 dokka = { id = "org.jetbrains.dokka", version.ref = "dokka" }
-detekt = { id = "io.gitlab.arturbosch.detekt", version.ref = "detekt" }
+detekt = { id = "dev.detekt", version.ref = "detekt" }
 ktlint = { id = "org.jlleitschuh.gradle.ktlint", version.ref = "ktlint" }
 gradle-publish = { id = "com.gradle.plugin-publish", version.ref = "gradle-publish" }
 spotless = { id = "com.diffplug.spotless", version.ref = "spotless" }
