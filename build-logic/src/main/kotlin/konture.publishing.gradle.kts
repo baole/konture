@@ -102,4 +102,6 @@ configure<SigningExtension> {
             useInMemoryPgpKeys(signingKey, signingPassword)
         }
     }
+    val publishing = extensions.getByType<PublishingExtension>()
+    sign(publishing.publications)
 }
