@@ -265,11 +265,16 @@ internal object DeclarationParser {
         val kdocText = property.extractKDoc()
         val isExtension = property.receiverTypeReference != null
         return PropertyDeclaration(
-            name, visibility, modifiers, type, isVal, annotations, kdocText, isExtension, resolvedType,
-            sourceLine =
-                lineOf(
-                    property,
-                ),
+            name = name,
+            visibility = visibility,
+            modifiers = modifiers,
+            type = type,
+            isVal = isVal,
+            annotations = annotations,
+            kdocText = kdocText,
+            isExtension = isExtension,
+            resolvedType = resolvedType,
+            sourceLine = lineOf(property),
         )
     }
 
