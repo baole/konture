@@ -101,6 +101,11 @@ class PsiParserTest {
         assertEquals("User", function.parameters.first().type)
         assertEquals("com.example.models.User", function.parameters.first().resolvedType)
 
+        // Verify source line numbers are captured for navigation in violation messages
+        assertEquals(9, property.sourceLine)
+        assertEquals(11, function.sourceLine)
+        assertTrue(serviceClass.sourceLine in 7..8, "Expected class line near its declaration, got ${serviceClass.sourceLine}")
+
         // Verify BaseService interface
         val interfaceClass = classes.first { it.name == "BaseService" }
         assertTrue(interfaceClass.isInterface)

@@ -158,6 +158,10 @@ class BaselineTest : RuleBuildersTestBase() {
                 )
             }
         assertTrue(exception.message!!.contains("depends on com.example.ClassB (at com.other.ClassC)"))
+        assertTrue(
+            exception.message!!.contains("Total: 1 violation(s)"),
+            "Expected a violation count summary, got: ${exception.message}",
+        )
     }
 
     @Test
@@ -181,6 +185,19 @@ class BaselineTest : RuleBuildersTestBase() {
         val m3 = BaselineManager.findModuleForViolation(v3, graph)
         assertNotNull(m3)
         assertEquals(":moduleC", m3?.path)
+
+        // Case 4: Structured location ":module, <sourceSet> source set, <file>" resolves to its module
+        // (previously orphaned because the whole string started with ":" but never matched a module path)
+        val v4 =
+            FlatBaselineViolation(
+                "TestClass",
+                "testMethod",
+                ":moduleA, main source set, moduleA/src/main/kotlin/Foo.kt",
+                "some message",
+            )
+        val m4 = BaselineManager.findModuleForViolation(v4, graph)
+        assertNotNull(m4)
+        assertEquals(":moduleA", m4?.path)
     }
 
     @Test

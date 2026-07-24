@@ -41,4 +41,5 @@ data class ClassDeclaration(
     val kdocText: String? = null,
     val importAliases: Map<String, String> = emptyMap(),
     val isEnum: Boolean = false,
+    val sourceLine: Int = -1,
 )

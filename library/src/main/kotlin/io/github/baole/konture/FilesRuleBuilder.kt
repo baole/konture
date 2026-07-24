@@ -10,6 +10,7 @@ import io.github.baole.konture.core.LogLevel
 import io.github.baole.konture.i18n.getMessage
 import io.github.baole.konture.impl.BaselineManager
 import io.github.baole.konture.impl.LogicalOperator
+import io.github.baole.konture.impl.ViolationLocation
 
 /**
  * A builder for compiling and verifying architectural rules on Kotlin source files.
@@ -194,7 +195,7 @@ class FilesRuleBuilder(
                     actualAssertion(file, allFiles, temp2)
                     if (temp1.isNotEmpty() && temp2.isNotEmpty()) {
                         violations.add(
-                            getMessage("files.rule.eitherOr", file.declaration.name, temp1.joinToString(), temp2.joinToString()),
+                            getMessage("files.rule.eitherOr", file.declaration.name, temp1.joinToString("; "), temp2.joinToString("; ")),
                         )
                     }
                 }
@@ -262,8 +263,7 @@ class FilesRuleBuilder(
                 val startIdx = list.size
                 assertion(file, allFiles, list)
                 for (i in startIdx until list.size) {
-                    val usageSuffix = "${file.modulePath}, ${file.sourceSet?.name ?: "unknown"} source set, ${file.declaration.filePath}"
-                    list[i] = "${list[i]} (at $usageSuffix)"
+                    list[i] = "${list[i]} (at ${ViolationLocation.of(file.modulePath, file.sourceSet?.name, file.declaration.filePath)})"
                 }
             }
         }

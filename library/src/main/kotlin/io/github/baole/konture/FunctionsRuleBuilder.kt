@@ -10,6 +10,7 @@ import io.github.baole.konture.core.LogLevel
 import io.github.baole.konture.i18n.getMessage
 import io.github.baole.konture.impl.BaselineManager
 import io.github.baole.konture.impl.LogicalOperator
+import io.github.baole.konture.impl.ViolationLocation
 
 /**
  * A builder for compiling and verifying architectural rules on Kotlin function declarations.
@@ -170,7 +171,7 @@ class FunctionsRuleBuilder(
                     assertion(func, allFuncs, tempViolations)
                     if (tempViolations.isEmpty()) {
                         violations.add(
-                            getMessage("functions.rule.negatedSatisfied", func.declaration.name),
+                            getMessage("functions.rule.negatedSatisfied", func.qualifiedName),
                         )
                     }
                 }
@@ -192,7 +193,7 @@ class FunctionsRuleBuilder(
                     actualAssertion(func, allFuncs, temp2)
                     if (temp1.isNotEmpty() && temp2.isNotEmpty()) {
                         violations.add(
-                            getMessage("functions.rule.eitherOr", func.declaration.name, temp1.joinToString(), temp2.joinToString()),
+                            getMessage("functions.rule.eitherOr", func.qualifiedName, temp1.joinToString("; "), temp2.joinToString("; ")),
                         )
                     }
                 }
@@ -206,7 +207,7 @@ class FunctionsRuleBuilder(
                     val ok2 = temp2.isEmpty()
                     if (ok1 == ok2) {
                         violations.add(
-                            getMessage("functions.rule.xor", func.declaration.name),
+                            getMessage("functions.rule.xor", func.qualifiedName),
                         )
                     }
                 }
@@ -292,7 +293,7 @@ class FunctionsRuleBuilder(
                 val startIdx = list.size
                 assertion(func, allFunctions, list)
                 for (i in startIdx until list.size) {
-                    list[i] = "${list[i]} (at ${func.modulePath}, ${func.sourceSet?.name ?: "unknown"} source set, ${func.filePath})"
+                    list[i] = "${list[i]} (at ${ViolationLocation.of(func.modulePath, func.sourceSet?.name, func.filePath, func.declaration.sourceLine)})"
                 }
             }
         }

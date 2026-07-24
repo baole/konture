@@ -10,6 +10,7 @@ import io.github.baole.konture.core.LogLevel
 import io.github.baole.konture.i18n.getMessage
 import io.github.baole.konture.impl.BaselineManager
 import io.github.baole.konture.impl.LogicalOperator
+import io.github.baole.konture.impl.ViolationLocation
 
 /**
  * A builder for compiling and verifying architectural rules on Kotlin classes.
@@ -194,7 +195,7 @@ class ClassesRuleBuilder(
                     actualAssertion(cls, allCls, temp2)
                     if (temp1.isNotEmpty() && temp2.isNotEmpty()) {
                         violations.add(
-                            getMessage("classes.rule.eitherOr", cls.fqName, temp1.joinToString(), temp2.joinToString()),
+                            getMessage("classes.rule.eitherOr", cls.fqName, temp1.joinToString("; "), temp2.joinToString("; ")),
                         )
                     }
                 }
@@ -227,11 +228,16 @@ class ClassesRuleBuilder(
      * @throws AssertionError If any of the verified classes violate the assertion rules.
      */
     fun check(g: ProjectGraph = graph) {
-        val allClasses =
+        val located =
             g.getAllModules().flatMap { module ->
-                module.files.filter { file -> file.membershipsFor(module.path).any(sourceSets::matches) }.flatMap { it.classes }
-            }
-        val classesToCheck = allClasses.filter { thatPredicate?.invoke(it) ?: true }
+                module.files.flatMap { file ->
+                    file.membershipsFor(module.path).filter(sourceSets::matches).flatMap { sourceSet ->
+                        file.classes.map { cls -> ClassLocation(cls, module.path, sourceSet.name) }
+                    }
+                }
+            }.distinctBy { it.cls.fqName to it.cls.filePath }
+        val allClasses = located.map { it.cls }
+        val classesToCheck = located.filter { thatPredicate?.invoke(it.cls) ?: true }
 
         KontureLogger.log(
             LogLevel.DEBUG,
@@ -256,11 +262,11 @@ class ClassesRuleBuilder(
             )
 
         val runCheck = { list: MutableList<String> ->
-            for (cls in classesToCheck) {
+            for ((cls, modulePath, sourceSetName) in classesToCheck) {
                 val startIdx = list.size
                 assertion(cls, allClasses, list)
                 for (i in startIdx until list.size) {
-                    list[i] = "${list[i]} (at ${cls.filePath})"
+                    list[i] = "${list[i]} (at ${ViolationLocation.of(modulePath, sourceSetName, cls.filePath, cls.sourceLine)})"
                 }
             }
         }
@@ -271,3 +277,10 @@ class ClassesRuleBuilder(
         )
     }
 }
+
+/** Pairs a class with the module path and source set it was selected from, for violation locations. */
+private data class ClassLocation(
+    val cls: ClassDeclaration,
+    val modulePath: String,
+    val sourceSetName: String?,
+)

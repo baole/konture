@@ -15,6 +15,7 @@ package io.github.baole.konture
  * @property className The name of the surrounding class if this property is a member/nested property, or null if it's top-level.
  * @property modulePath The module subdirectory/path containing this property.
  * @property filePath The project relative path to the source file defining this property.
+ * @property sourceSet The source set this property was selected from, or null if unknown.
  */
 data class PropertyDeclarationContext(
     val declaration: PropertyDeclaration,
@@ -22,4 +23,13 @@ data class PropertyDeclarationContext(
     val className: String?,
     val modulePath: String,
     val filePath: String,
-)
+    val sourceSet: SourceSetId? = null,
+) {
+    /**
+     * The fully-qualified name of the property, combining package, enclosing class (if any), and
+     * simple name (e.g. `com.acme.UserService.repository`), used to identify it unambiguously in
+     * violation messages.
+     */
+    val qualifiedName: String
+        get() = listOfNotNull(packageName.ifEmpty { null }, className, declaration.name).joinToString(".")
+}

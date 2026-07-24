@@ -89,4 +89,21 @@ class ClassesRuleBuilderTest : RuleBuildersTestBase() {
         assertion1(classB, emptyList(), vB)
         assertEquals(1, vB.size)
     }
+
+    @Test
+    fun `class violation location includes module and source set`() {
+        val error =
+            assertThrows(AssertionError::class.java) {
+                ClassesRuleBuilder(projectGraph)
+                    .that()
+                    .haveNameStartingWith("ClassA")
+                    .should()
+                    .beInterfaces()
+                    .check()
+            }
+        assertTrue(
+            error.message!!.contains("(at :moduleA, main source set, /src/ClassA.kt)"),
+            "Expected uniform module + source set location, got: ${error.message}",
+        )
+    }
 }

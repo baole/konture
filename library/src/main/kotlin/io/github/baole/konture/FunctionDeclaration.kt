@@ -17,4 +17,5 @@ data class FunctionDeclaration(
     val sourceStartOffset: Int = -1,
     val sourceEndOffset: Int = -1,
     val resolvedReturnType: String? = null,
+    val sourceLine: Int = -1,
 )

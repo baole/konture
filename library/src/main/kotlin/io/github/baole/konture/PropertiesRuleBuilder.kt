@@ -10,6 +10,7 @@ import io.github.baole.konture.core.LogLevel
 import io.github.baole.konture.i18n.getMessage
 import io.github.baole.konture.impl.BaselineManager
 import io.github.baole.konture.impl.LogicalOperator
+import io.github.baole.konture.impl.ViolationLocation
 
 /**
  * A builder for compiling and verifying architectural rules on Kotlin property declarations.
@@ -170,7 +171,7 @@ class PropertiesRuleBuilder(
                     assertion(prop, allProps, tempViolations)
                     if (tempViolations.isEmpty()) {
                         violations.add(
-                            getMessage("properties.rule.negatedSatisfied", prop.declaration.name),
+                            getMessage("properties.rule.negatedSatisfied", prop.qualifiedName),
                         )
                     }
                 }
@@ -192,7 +193,7 @@ class PropertiesRuleBuilder(
                     actualAssertion(prop, allProps, temp2)
                     if (temp1.isNotEmpty() && temp2.isNotEmpty()) {
                         violations.add(
-                            getMessage("properties.rule.eitherOr", prop.declaration.name, temp1.joinToString(), temp2.joinToString()),
+                            getMessage("properties.rule.eitherOr", prop.qualifiedName, temp1.joinToString("; "), temp2.joinToString("; ")),
                         )
                     }
                 }
@@ -206,7 +207,7 @@ class PropertiesRuleBuilder(
                     val ok2 = temp2.isEmpty()
                     if (ok1 == ok2) {
                         violations.add(
-                            getMessage("properties.rule.xor", prop.declaration.name),
+                            getMessage("properties.rule.xor", prop.qualifiedName),
                         )
                     }
                 }
@@ -227,20 +228,22 @@ class PropertiesRuleBuilder(
     fun check(g: ProjectGraph = graph) {
         val allProperties =
             g.getAllModules().flatMap { module ->
-                module.files.filter { file -> file.membershipsFor(module.path).any(sourceSets::matches) }.flatMap { file ->
-                    val topLevel =
-                        file.topLevelProperties.map { prop ->
-                            PropertyDeclarationContext(prop, file.packageName, null, module.path, file.filePath)
-                        }
-                    val members =
-                        file.classes.flatMap { cls ->
-                            cls.properties.map { prop ->
-                                PropertyDeclarationContext(prop, file.packageName, cls.name, module.path, file.filePath)
+                module.files.flatMap { file ->
+                    file.membershipsFor(module.path).filter(sourceSets::matches).flatMap { sourceSet ->
+                        val topLevel =
+                            file.topLevelProperties.map { prop ->
+                                PropertyDeclarationContext(prop, file.packageName, null, module.path, file.filePath, sourceSet)
                             }
-                        }
-                    topLevel + members
+                        val members =
+                            file.classes.flatMap { cls ->
+                                cls.properties.map { prop ->
+                                    PropertyDeclarationContext(prop, file.packageName, cls.name, module.path, file.filePath, sourceSet)
+                                }
+                            }
+                        topLevel + members
+                    }
                 }
-            }
+            }.distinctBy { Triple(it.className, it.declaration.name, it.filePath) }
         val propertiesToCheck = allProperties.filter { thatPredicate?.invoke(it) ?: true }
         KontureLogger.log(
             LogLevel.DEBUG,
@@ -268,7 +271,7 @@ class PropertiesRuleBuilder(
                 val startIdx = list.size
                 assertion(prop, allProperties, list)
                 for (i in startIdx until list.size) {
-                    list[i] = "${list[i]} (at ${prop.filePath})"
+                    list[i] = "${list[i]} (at ${ViolationLocation.of(prop.modulePath, prop.sourceSet?.name, prop.filePath, prop.declaration.sourceLine)})"
                 }
             }
         }

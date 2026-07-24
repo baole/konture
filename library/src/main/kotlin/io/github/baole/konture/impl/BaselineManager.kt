@@ -10,6 +10,7 @@ import io.github.baole.konture.Module
 import io.github.baole.konture.ProjectGraph
 import io.github.baole.konture.core.KontureLogger
 import io.github.baole.konture.core.LogLevel
+import io.github.baole.konture.i18n.getMessage
 import java.io.File
 import java.util.Locale
 import java.util.concurrent.ConcurrentHashMap
@@ -342,6 +343,7 @@ internal class BaselineManager {
                             appendLine("  - ${it.message}")
                         }
                     }
+                    append(getMessage("rule.violationCount", newViolations.size))
                 }
             throw AssertionError(message)
         }
@@ -428,6 +430,7 @@ internal class BaselineManager {
                         appendLine("  - $cleanMsg")
                     }
                 }
+                append(getMessage("rule.violationCount", unmatchedLocalized.size))
             }
         throw AssertionError(message)
     }
