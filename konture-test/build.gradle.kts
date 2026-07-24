@@ -1,5 +1,11 @@
+/*
+ * Copyright 2026 The Konture Contributors
+ * Contributors: Bao Le Duc (@baole)
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 plugins {
-    kotlin("jvm")
+    id("konture.kotlin")
 }
 
 if (System.getProperty("archTest") != null) {

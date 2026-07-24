@@ -1,5 +1,13 @@
+/*
+ * Copyright 2026 The Konture Contributors
+ * Contributors: Bao Le Duc (@baole)
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 plugins {
-    alias(libs.plugins.kotlin.jvm)
+    id("konture.kotlin")
+    id("konture.quality")
+    id("konture.publishing")
     alias(libs.plugins.kotlin.serialization)
 }
 
