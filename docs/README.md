@@ -11,7 +11,7 @@
   <a href="https://kotlinlang.org/"><img src="https://img.shields.io/badge/kotlin-2.4.0-purple?style=for-the-badge&logo=kotlin" alt="Kotlin"></a>
   <a href="https://gradle.org/"><img src="https://img.shields.io/badge/gradle-9.6.1-blue?style=for-the-badge&logo=gradle" alt="Gradle"></a>
   <img src="https://img.shields.io/badge/coverage-%E2%89%A580%25-brightgreen?style=for-the-badge&logo=jacoco" alt="Code Coverage">
-</p>
+<a href="https://github.com/baole/konture/actions/workflows/ci.yml"><img src="https://github.com/baole/konture/actions/workflows/ci.yml/badge.svg?style=for-the-badge" alt="Build Status"></a></p>
 
 > **Define, enforce, and automate architecture rules run as fast Kotlin unit tests against your actual Gradle build graph.**
 
