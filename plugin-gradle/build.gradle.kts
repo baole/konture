@@ -12,10 +12,17 @@ plugins {
     alias(libs.plugins.kotlin.serialization)
     alias(libs.plugins.gradle.publish)
 }
+private val descriptionText =
+    """
+    Gradle configuration-time capture agent that feeds
+    Konture your project's real build graph, enabling fast,
+    build-tool-aware Kotlin architecture tests across Android,
+    KMP, and JVM projects.
+    """.trimIndent()
+private val groupId = "io.github.baole.konture"
 
-description = "Gradle configuration-time capture agent that feeds Konture your project's real build graph, enabling fast, build-tool-aware Kotlin architecture tests across Android, KMP, and JVM projects."
-
-group = "io.github.baole.konture"
+description = descriptionText
+group = groupId
 version = "0.7.3"
 
 gradlePlugin {
@@ -24,10 +31,10 @@ gradlePlugin {
 
     plugins {
         create("konture") {
-            id = "io.github.baole.konture"
+            id = groupId
             implementationClass = "io.github.baole.konture.plugin.KonturePlugin"
             displayName = "Kotlin Architecture Testing Tool Plugin"
-            description = "Gradle configuration-time capture agent that feeds Konture your project's real build graph, enabling fast, build-tool-aware Kotlin architecture tests across Android, KMP, and JVM projects."
+            description = descriptionText
             tags.set(listOf("kotlin", "architecture", "testing", "archunit", "konture"))
         }
     }

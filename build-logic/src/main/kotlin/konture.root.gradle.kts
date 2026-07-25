@@ -4,13 +4,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import io.github.baole.konture.buildlogic.UpdateKotlinContributors
-import org.gradle.api.tasks.Delete
-import org.gradle.api.tasks.SourceSetContainer
-import org.gradle.api.tasks.testing.Test
-import org.gradle.api.tasks.testing.TestReport
-import org.gradle.testing.jacoco.tasks.JacocoCoverageVerification
-import org.gradle.testing.jacoco.tasks.JacocoReport
 import org.jetbrains.dokka.gradle.DokkaMultiModuleTask
 
 plugins {

@@ -17,8 +17,10 @@ plugins {
     jacoco
 }
 
+val libs = extensions.getByType<VersionCatalogsExtension>().named("libs")
+
 configure<JacocoPluginExtension> {
-    toolVersion = "0.8.12"
+    toolVersion = libs.findVersion("jacoco").get().requiredVersion
 }
 
 tasks.withType<JacocoReport> {
