@@ -4,11 +4,11 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import com.diffplug.gradle.spotless.SpotlessExtension
 import dev.detekt.gradle.extensions.DetektExtension
+import org.jetbrains.dokka.gradle.DokkaTaskPartial
 import org.jlleitschuh.gradle.ktlint.KtlintExtension
 import org.jlleitschuh.gradle.ktlint.reporter.ReporterType
-import com.diffplug.gradle.spotless.SpotlessExtension
-import org.jetbrains.dokka.gradle.DokkaTaskPartial
 
 plugins {
     id("dev.detekt")
@@ -17,8 +17,10 @@ plugins {
     jacoco
 }
 
+val libs = extensions.getByType<VersionCatalogsExtension>().named("libs")
+
 configure<JacocoPluginExtension> {
-    toolVersion = "0.8.12"
+    toolVersion = libs.findVersion("jacoco").get().requiredVersion
 }
 
 tasks.withType<JacocoReport> {
@@ -30,6 +32,28 @@ tasks.withType<JacocoReport> {
 
 tasks.withType<Test> {
     finalizedBy(tasks.withType<JacocoReport>())
+}
+
+tasks.withType<JacocoCoverageVerification> {
+    dependsOn(tasks.withType<JacocoReport>())
+    val reportFile = layout.buildDirectory.file("reports/jacoco/test/html/index.html")
+    doFirst {
+        logger.lifecycle("Coverage Report: file://${reportFile.get().asFile.absolutePath}")
+    }
+    violationRules {
+        rule {
+            element = "BUNDLE"
+            limit {
+                counter = "INSTRUCTION"
+                value = "COVEREDRATIO"
+                minimum = "0.80".toBigDecimal()
+            }
+        }
+    }
+}
+
+tasks.matching { it.name == "check" }.configureEach {
+    dependsOn(tasks.withType<JacocoCoverageVerification>())
 }
 
 configure<DetektExtension> {

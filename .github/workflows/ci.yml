@@ -39,20 +39,15 @@ jobs:
         with:
           cache-cleanup: on-success
 
-      - name: Run KtLint Checks
-        run: ./gradlew ktlintCheck
+      - name: Run Unified Verification (Lint, Detekt, Tests, Coverage)
+        run: ./gradlew check --continue
 
-      - name: Run Detekt Static Analysis
-        run: ./gradlew detekt
+      - name: Build Gradle Projects
+        run: ./gradlew assemble
 
       - name: Publish Core to Maven Local
         run: ./gradlew publishToMavenLocal
 
-      - name: Run Unit and Architecture Tests
-        run: ./gradlew test
-
-      - name: Build Gradle Projects
-        run: ./gradlew build -x test
 
       - name: Build and Install Maven Plugin
         run: mvn clean install -f plugin-maven/pom.xml

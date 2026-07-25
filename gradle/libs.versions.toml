@@ -2,8 +2,7 @@
 kotlin = "2.4.0"
 agp = "8.5.2"
 kotlinx-serialization = "1.8.0"
-junit = "5.11.0"
-junit-platform = "1.11.0"
+junit = "6.1.2"
 dokka = "1.9.20"
 detekt = "2.0.0-alpha.5"
 ktlint = "12.1.1"
@@ -11,6 +10,7 @@ gradle-publish = "2.1.1"
 konture = "0.7.3"
 spotless = "6.25.0"
 nmcp = "0.0.9"
+jacoco = "0.8.12"
 
 [libraries]
 kotlin-compiler-embeddable = { module = "org.jetbrains.kotlin:kotlin-compiler-embeddable", version.ref = "kotlin" }
@@ -18,9 +18,10 @@ kotlin-gradle-plugin = { module = "org.jetbrains.kotlin:kotlin-gradle-plugin", v
 android-gradle-plugin-api = { module = "com.android.tools.build:gradle-api", version.ref = "agp" }
 kotlinx-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "kotlinx-serialization" }
 
+junit-jupiter = { module = "org.junit.jupiter:junit-jupiter", version.ref = "junit" }
 junit-jupiter-api = { module = "org.junit.jupiter:junit-jupiter-api", version.ref = "junit" }
 junit-jupiter-engine = { module = "org.junit.jupiter:junit-jupiter-engine", version.ref = "junit" }
-junit-platform-launcher = { module = "org.junit.platform:junit-platform-launcher", version.ref = "junit-platform" }
+junit-platform-launcher = { module = "org.junit.platform:junit-platform-launcher", version.ref = "junit" }
 
 detekt-plugin = { module = "dev.detekt:detekt-gradle-plugin", version.ref = "detekt" }
 ktlint-plugin = { module = "org.jlleitschuh.gradle:ktlint-gradle", version.ref = "ktlint" }

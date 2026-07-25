@@ -18,30 +18,12 @@ echo -e "${BLUE}================================================================
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 cd "$SCRIPT_DIR/.."
 
-# Step 1: Run KtLint check
-echo -e "\n${BLUE}[1/5] Running KtLint style audits...${NC}"
-if ./gradlew ktlintCheck; then
-    echo -e "${GREEN}[SUCCESS] KtLint checks passed!${NC}"
+# Step 1: Run unified Gradle checks (KtLint, Detekt, Tests, Coverage Thresholds)
+echo -e "\n${BLUE}[1/3] Running unified Gradle checks (lint, detekt, tests, coverage)...${NC}"
+if ./gradlew -q check --continue; then
+    echo -e "${GREEN}[SUCCESS] All Gradle quality and coverage verification checks passed!${NC}"
 else
-    echo -e "${RED}[ERROR] KtLint found style violations. Run ./gradlew ktlintFormat to auto-fix.${NC}"
-    exit 1
-fi
-
-# Step 2: Run Detekt static analysis
-echo -e "\n${BLUE}[2/5] Running Detekt static analysis...${NC}"
-if ./gradlew detekt; then
-    echo -e "${GREEN}[SUCCESS] Detekt static analysis passed!${NC}"
-else
-    echo -e "${RED}[ERROR] Detekt found quality violations.${NC}"
-    exit 1
-fi
-
-# Step 3: Run Unit and Architecture Tests
-echo -e "\n${BLUE}[3/5] Running Unit and Architecture tests...${NC}"
-if ./gradlew test; then
-    echo -e "${GREEN}[SUCCESS] All tests passed!${NC}"
-else
-    echo -e "${RED}[ERROR] Test execution failed.${NC}"
+    echo -e "${RED}[ERROR] Gradle checks or coverage thresholds failed. Run ./script/format.sh to auto-fix styling issues.${NC}"
     exit 1
 fi
 
@@ -54,8 +36,8 @@ else
     exit 1
 fi
 
-# Step 5: Build Maven Plugin
-echo -e "\n${BLUE}[5/5] Building Maven plugin...${NC}"
+# Step 3: Build Maven Plugin
+echo -e "\n${BLUE}[3/3] Building Maven plugin...${NC}"
 if ./gradlew -q :core:publishToMavenLocal && mvn clean compile -f plugin-maven/pom.xml; then
     echo -e "${GREEN}[SUCCESS] Maven plugin compilation passed!${NC}"
 else

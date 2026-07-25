@@ -10,7 +10,8 @@
   <a href="https://central.sonatype.com/artifact/io.github.baole/konture"><img src="https://img.shields.io/maven-central/v/io.github.baole/konture-core?style=for-the-badge&logo=apache-maven" alt="Maven Central"></a>
   <a href="https://kotlinlang.org/"><img src="https://img.shields.io/badge/kotlin-2.4.0-purple?style=for-the-badge&logo=kotlin" alt="Kotlin"></a>
   <a href="https://gradle.org/"><img src="https://img.shields.io/badge/gradle-9.6.1-blue?style=for-the-badge&logo=gradle" alt="Gradle"></a>
-</p>
+  <img src="https://img.shields.io/badge/coverage-%E2%89%A580%25-brightgreen?style=for-the-badge&logo=jacoco" alt="Code Coverage">
+<a href="https://github.com/baole/konture/actions/workflows/ci.yml"><img src="https://github.com/baole/konture/actions/workflows/ci.yml/badge.svg?style=for-the-badge" alt="Build Status"></a></p>
 
 **Konture** is a stack- and build-tool agnostic Kotlin architecture testing library for Android, Kotlin Multiplatform (KMP), and JVM backend projects. It combines real project structure (captured directly from your project's build graph) with AST-based static analysis and a premium, architecture-agnostic **Fluent Lambda DSL** to enforce boundaries on any test framework.
 

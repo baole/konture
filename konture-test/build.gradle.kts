@@ -16,8 +16,8 @@ dependencies {
     // Local project dependency ensures compiles always succeed without requiring publishToMavenLocal first
     testImplementation(project(":library"))
 
-    testImplementation("org.junit.jupiter:junit-jupiter:5.11.0")
-    testRuntimeOnly("org.junit.platform:junit-platform-launcher")
+    testImplementation(libs.junit.jupiter)
+    testRuntimeOnly(libs.junit.platform.launcher)
 }
 
 tasks.test {
