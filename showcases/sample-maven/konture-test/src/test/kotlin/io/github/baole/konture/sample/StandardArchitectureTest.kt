@@ -1,7 +1,7 @@
 package io.github.baole.konture.sample
 
 import io.github.baole.konture.*
-import assertFalse
+import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 
