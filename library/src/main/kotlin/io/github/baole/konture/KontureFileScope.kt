@@ -1,11 +1,13 @@
 /*
- * Copyright 2026 Bao Le Duc
+ * Copyright 2026 The Konture Contributors
+ * Contributors: Bao Le Duc (@baole)
  * SPDX-License-Identifier: Apache-2.0
  */
 
 package io.github.baole.konture
 
 import io.github.baole.konture.impl.PatternMatchers
+import kotlin.jvm.JvmName
 
 /**
  * Represents a scope containing a set of Kotlin files for checking file-level rules.
@@ -82,27 +84,27 @@ operator fun KontureFileScope.minus(other: KontureFileScope): KontureFileScope {
 /**
  * Filters the list of file declarations to include only those whose names end with the specified suffix.
  */
-@kotlin.jvm.JvmName("withFileNameEndingWith")
+@JvmName("withFileNameEndingWith")
 fun List<FileDeclaration>.withNameEndingWith(suffix: String): List<FileDeclaration> = filter { it.name.endsWith(suffix) }
 
 /**
  * Filters the list of file declarations to include only those whose names start with the specified prefix.
  */
-@kotlin.jvm.JvmName("withFileNameStartingWith")
+@JvmName("withFileNameStartingWith")
 fun List<FileDeclaration>.withNameStartingWith(prefix: String): List<FileDeclaration> = filter { it.name.startsWith(prefix) }
 
 /**
  * Filters the list of file declarations to include only those whose names match the specified glob pattern.
  * Supports '*' wildcards.
  */
-@kotlin.jvm.JvmName("withFileNameMatching")
+@JvmName("withFileNameMatching")
 fun List<FileDeclaration>.withNameMatching(pattern: String): List<FileDeclaration> = filter { PatternMatchers.matchesSimpleGlob(pattern, it.name) }
 
 /**
  * Filters the list of file declarations to include only those residing in packages matching the specified pattern.
  * Supports '..' wildcards.
  */
-@kotlin.jvm.JvmName("withFilePackage")
+@JvmName("withFilePackage")
 fun List<FileDeclaration>.withPackage(packagePattern: String): List<FileDeclaration> =
     filter { PatternMatchers.matchesPackage(packagePattern, it.packageName) }
 
@@ -118,7 +120,7 @@ fun KontureFileScope.withPackage(packagePattern: String) = KontureFileScope(file
 
 // Assertion extensions on List<FileDeclaration> and KontureFileScope
 
-@kotlin.jvm.JvmName("assertFilesTrue")
+@JvmName("assertFilesTrue")
 fun List<FileDeclaration>.assertTrue(
     additionalMessage: String? = null,
     predicate: (FileDeclaration) -> Boolean,
@@ -158,7 +160,7 @@ fun List<FileDeclaration>.assertFileNameMatchesClassName(additionalMessage: Stri
     }
 }
 
-@kotlin.jvm.JvmName("assertFilesHasKDoc")
+@JvmName("assertFilesHasKDoc")
 fun List<FileDeclaration>.assertHasKDoc(additionalMessage: String? = null) {
     assertTrue(additionalMessage) { it.kdocText?.isNotBlank() == true }
 }

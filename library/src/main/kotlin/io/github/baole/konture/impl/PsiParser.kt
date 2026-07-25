@@ -1,5 +1,6 @@
 /*
- * Copyright 2026 Bao Le Duc
+ * Copyright 2026 The Konture Contributors
+ * Contributors: Bao Le Duc (@baole)
  * SPDX-License-Identifier: Apache-2.0
  */
 
@@ -17,6 +18,7 @@ import io.github.baole.konture.impl.psi.TypeAliasDefinition
 import io.github.baole.konture.impl.psi.TypeAliasScanner
 import io.github.baole.konture.impl.psi.TypeResolutionContext
 import io.github.baole.konture.impl.psi.UsageExtractor
+import org.jetbrains.kotlin.kdoc.psi.impl.KDocImpl
 import org.jetbrains.kotlin.psi.KtClassOrObject
 import org.jetbrains.kotlin.psi.KtFunction
 import org.jetbrains.kotlin.psi.KtProperty
@@ -155,7 +157,7 @@ internal object PsiParser {
         // Search for file-level KDoc
         val fileKDoc =
             ktFile.children
-                .filterIsInstance<org.jetbrains.kotlin.kdoc.psi.impl.KDocImpl>()
+                .filterIsInstance<KDocImpl>()
                 .firstOrNull()
                 ?.text
 

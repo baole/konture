@@ -1,12 +1,15 @@
 /*
- * Copyright 2026 Bao Le Duc
+ * Copyright 2026 The Konture Contributors
+ * Contributors: Bao Le Duc (@baole)
  * SPDX-License-Identifier: Apache-2.0
  */
 
 package io.github.baole.konture.impl.psi
 
+import org.jetbrains.kotlin.com.intellij.psi.PsiComment
 import org.jetbrains.kotlin.psi.KtClassOrObject
 import org.jetbrains.kotlin.psi.KtFile
+import org.jetbrains.kotlin.psi.KtStringTemplateExpression
 
 internal object TypeAliasScanner {
     fun scan(
@@ -55,8 +58,8 @@ internal object TypeAliasScanner {
         var element = ktFile.findElementAt(offset)
         while (element != null) {
             if (
-                element is org.jetbrains.kotlin.com.intellij.psi.PsiComment ||
-                element is org.jetbrains.kotlin.psi.KtStringTemplateExpression
+                element is PsiComment ||
+                element is KtStringTemplateExpression
             ) {
                 return false
             }

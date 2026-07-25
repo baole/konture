@@ -1,19 +1,25 @@
 /*
- * Copyright 2026 Bao Le Duc
+ * Copyright 2026 The Konture Contributors
+ * Contributors: Bao Le Duc (@baole)
  * SPDX-License-Identifier: Apache-2.0
  */
 
 package io.github.baole.konture.impl
 
+import io.github.baole.konture.Modifier
+import io.github.baole.konture.UsageKind
+import io.github.baole.konture.Visibility
 import io.github.baole.konture.impl.psi.MapSymbolLookup
 import io.github.baole.konture.isAssignableTo
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertNotNull
+import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.io.TempDir
 import java.io.File
+import java.io.Serializable
 
 @Suppress("LargeClass")
 class PsiParserTest {
@@ -63,8 +69,8 @@ class PsiParserTest {
         assertEquals("com.example.domain", serviceClass.packageName)
         assertTrue(serviceClass.isAbstract)
         assertFalse(serviceClass.isInterface)
-        assertEquals(io.github.baole.konture.Visibility.PUBLIC, serviceClass.visibility)
-        assertTrue(serviceClass.modifiers.contains(io.github.baole.konture.Modifier.ABSTRACT))
+        assertEquals(Visibility.PUBLIC, serviceClass.visibility)
+        assertTrue(serviceClass.modifiers.contains(Modifier.ABSTRACT))
         assertTrue(serviceClass.supertypes.contains("com.example.domain.BaseService"))
 
         // Verify annotations
@@ -151,7 +157,7 @@ class PsiParserTest {
         // Verify lateinitProp has LATEINIT modifier
         val lateinitProp = holderClass.properties.first { it.name == "lateinitProp" }
         assertTrue(lateinitProp.isVar)
-        assertTrue(lateinitProp.modifiers.contains(io.github.baole.konture.Modifier.LATEINIT))
+        assertTrue(lateinitProp.modifiers.contains(Modifier.LATEINIT))
 
         // Verify companion object const val
         val companion = holderClass.companionObject
@@ -159,7 +165,7 @@ class PsiParserTest {
         val constProp = companion!!.properties.first { it.name == "CONST_PROP" }
         assertTrue(constProp.isVal)
         assertFalse(constProp.isVar)
-        assertTrue(constProp.modifiers.contains(io.github.baole.konture.Modifier.CONST))
+        assertTrue(constProp.modifiers.contains(Modifier.CONST))
 
         // Verify top-level extension property
         assertEquals(1, fileDecl.topLevelProperties.size)
@@ -261,8 +267,7 @@ class PsiParserTest {
     fun `test parse non-existent file returns null`() {
         val nonExistent = File(tempDir, "DoesNotExist.kt")
         val fileDecl = PsiParser.parseFile(nonExistent)
-        org.junit.jupiter.api.Assertions
-            .assertNull(fileDecl)
+        assertNull(fileDecl)
     }
 
     @Test
@@ -289,11 +294,11 @@ class PsiParserTest {
             }
 
         val declaration = PsiParser.parseFile(file)!!
-        val mockkCalls = declaration.usages.filter { it.kind == io.github.baole.konture.UsageKind.CALL && it.targetFqName == "io.mockk.spyk" }
+        val mockkCalls = declaration.usages.filter { it.kind == UsageKind.CALL && it.targetFqName == "io.mockk.spyk" }
         assertEquals(3, mockkCalls.size)
         assertTrue(mockkCalls.all { it.line > 0 && it.column > 0 })
         assertTrue(mockkCalls.none { it.enclosingFunction == "local" })
-        assertTrue(declaration.usages.any { it.kind == io.github.baole.konture.UsageKind.CLASS_REFERENCE && it.targetFqName == "io.mockk.MockK" })
+        assertTrue(declaration.usages.any { it.kind == UsageKind.CLASS_REFERENCE && it.targetFqName == "io.mockk.MockK" })
     }
 
     @Test
@@ -391,25 +396,25 @@ class PsiParserTest {
         assertNotNull(fileDecl)
 
         val sealed = fileDecl!!.classes.first { it.name == "SealedClass" }
-        assertTrue(sealed.modifiers.contains(io.github.baole.konture.Modifier.SEALED))
+        assertTrue(sealed.modifiers.contains(Modifier.SEALED))
 
         val inner = fileDecl.classes.first { it.name == "InnerClass" }
-        assertTrue(inner.modifiers.contains(io.github.baole.konture.Modifier.INNER))
+        assertTrue(inner.modifiers.contains(Modifier.INNER))
 
         val valueClass = fileDecl.classes.first { it.name == "ValueClass" }
-        assertTrue(valueClass.modifiers.contains(io.github.baole.konture.Modifier.VALUE))
+        assertTrue(valueClass.modifiers.contains(Modifier.VALUE))
 
         val hostClass = fileDecl.classes.first { it.name == "HostClass" }
         assertNotNull(hostClass.companionObject)
-        assertTrue(hostClass.companionObject!!.modifiers.contains(io.github.baole.konture.Modifier.COMPANION))
-        assertTrue(hostClass.companionObject.modifiers.contains(io.github.baole.konture.Modifier.OBJECT))
+        assertTrue(hostClass.companionObject!!.modifiers.contains(Modifier.COMPANION))
+        assertTrue(hostClass.companionObject.modifiers.contains(Modifier.OBJECT))
 
         val prop = hostClass.properties.first { it.name == "lateinitProp" }
-        assertTrue(prop.modifiers.contains(io.github.baole.konture.Modifier.LATEINIT))
+        assertTrue(prop.modifiers.contains(Modifier.LATEINIT))
         assertFalse(prop.isVal)
 
         val funDecl = hostClass.functions.first { it.name == "asyncFun" }
-        assertTrue(funDecl.modifiers.contains(io.github.baole.konture.Modifier.SUSPEND))
+        assertTrue(funDecl.modifiers.contains(Modifier.SUSPEND))
     }
 
     @Test
@@ -756,7 +761,7 @@ class PsiParserTest {
 
         assertEquals(listOf("java.io.Serializable"), imported.supertypes)
         assertEquals(listOf("kotlin.CharSequence"), default.supertypes)
-        assertTrue(imported.isAssignableTo(java.io.Serializable::class.qualifiedName!!, classes))
+        assertTrue(imported.isAssignableTo(Serializable::class.qualifiedName!!, classes))
         assertTrue(default.isAssignableTo(CharSequence::class.qualifiedName!!, classes))
         assertTrue(imported.isAssignableTo("Serializable", classes))
         assertTrue(default.isAssignableTo("CharSequence", classes))

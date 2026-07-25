@@ -1,11 +1,13 @@
 /*
- * Copyright 2026 Bao Le Duc
+ * Copyright 2026 The Konture Contributors
+ * Contributors: Bao Le Duc (@baole)
  * SPDX-License-Identifier: Apache-2.0
  */
 
 package io.github.baole.konture
 
 import io.github.baole.konture.impl.PatternMatchers
+import kotlin.reflect.KClass
 
 @KontureDsl
 class PropertiesThat internal constructor(
@@ -215,7 +217,7 @@ class PropertiesThat internal constructor(
     }
 
     /** Restricts the rules to properties with the specified raw type. */
-    infix fun haveType(type: kotlin.reflect.KClass<*>): PropertiesRuleBuilder {
+    infix fun haveType(type: KClass<*>): PropertiesRuleBuilder {
         val expectedType = type.toKontureTypeReference()
         builder.setThat { property -> property.declaration.resolvedType?.let { matchesKotlinType(it, expectedType) } == true }
         return builder

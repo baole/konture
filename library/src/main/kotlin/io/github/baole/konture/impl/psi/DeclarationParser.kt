@@ -1,5 +1,6 @@
 /*
- * Copyright 2026 Bao Le Duc
+ * Copyright 2026 The Konture Contributors
+ * Contributors: Bao Le Duc (@baole)
  * SPDX-License-Identifier: Apache-2.0
  */
 
@@ -14,6 +15,7 @@ import io.github.baole.konture.Modifier
 import io.github.baole.konture.ParameterDeclaration
 import io.github.baole.konture.PropertyDeclaration
 import io.github.baole.konture.Visibility
+import org.jetbrains.kotlin.lexer.KtTokens
 import org.jetbrains.kotlin.psi.KtAnnotationEntry
 import org.jetbrains.kotlin.psi.KtClass
 import org.jetbrains.kotlin.psi.KtClassOrObject
@@ -43,7 +45,7 @@ internal object DeclarationParser {
         val classContext = context.withClassScope(fqName)
 
         val isInterface = (classOrObject as? KtClass)?.isInterface() ?: false
-        val isAbstract = classOrObject.hasModifier(org.jetbrains.kotlin.lexer.KtTokens.ABSTRACT_KEYWORD)
+        val isAbstract = classOrObject.hasModifier(KtTokens.ABSTRACT_KEYWORD)
         val isEnum = (classOrObject as? KtClass)?.isEnum() ?: false
 
         val annotations =
@@ -287,9 +289,9 @@ internal object DeclarationParser {
     private fun KtModifierListOwner.extractVisibility(): Visibility {
         val modifierList = this.modifierList ?: return Visibility.PUBLIC
         return when {
-            modifierList.hasModifier(org.jetbrains.kotlin.lexer.KtTokens.PRIVATE_KEYWORD) -> Visibility.PRIVATE
-            modifierList.hasModifier(org.jetbrains.kotlin.lexer.KtTokens.PROTECTED_KEYWORD) -> Visibility.PROTECTED
-            modifierList.hasModifier(org.jetbrains.kotlin.lexer.KtTokens.INTERNAL_KEYWORD) -> Visibility.INTERNAL
+            modifierList.hasModifier(KtTokens.PRIVATE_KEYWORD) -> Visibility.PRIVATE
+            modifierList.hasModifier(KtTokens.PROTECTED_KEYWORD) -> Visibility.PROTECTED
+            modifierList.hasModifier(KtTokens.INTERNAL_KEYWORD) -> Visibility.INTERNAL
             else -> Visibility.PUBLIC
         }
     }
@@ -297,29 +299,29 @@ internal object DeclarationParser {
     private fun KtModifierListOwner.extractModifiers(): Set<Modifier> {
         val modifierList = this.modifierList ?: return emptySet()
         val modifiers = mutableSetOf<Modifier>()
-        if (modifierList.hasModifier(org.jetbrains.kotlin.lexer.KtTokens.SEALED_KEYWORD)) modifiers.add(Modifier.SEALED)
-        if (modifierList.hasModifier(org.jetbrains.kotlin.lexer.KtTokens.OPEN_KEYWORD)) modifiers.add(Modifier.OPEN)
+        if (modifierList.hasModifier(KtTokens.SEALED_KEYWORD)) modifiers.add(Modifier.SEALED)
+        if (modifierList.hasModifier(KtTokens.OPEN_KEYWORD)) modifiers.add(Modifier.OPEN)
         if (modifierList.hasModifier(
-                org.jetbrains.kotlin.lexer.KtTokens.ABSTRACT_KEYWORD,
+                KtTokens.ABSTRACT_KEYWORD,
             )
         ) {
             modifiers.add(Modifier.ABSTRACT)
         }
-        if (modifierList.hasModifier(org.jetbrains.kotlin.lexer.KtTokens.DATA_KEYWORD)) modifiers.add(Modifier.DATA)
-        if (modifierList.hasModifier(org.jetbrains.kotlin.lexer.KtTokens.VALUE_KEYWORD)) modifiers.add(Modifier.VALUE)
-        if (modifierList.hasModifier(org.jetbrains.kotlin.lexer.KtTokens.INNER_KEYWORD)) modifiers.add(Modifier.INNER)
-        if (modifierList.hasModifier(org.jetbrains.kotlin.lexer.KtTokens.INLINE_KEYWORD)) modifiers.add(Modifier.INLINE)
+        if (modifierList.hasModifier(KtTokens.DATA_KEYWORD)) modifiers.add(Modifier.DATA)
+        if (modifierList.hasModifier(KtTokens.VALUE_KEYWORD)) modifiers.add(Modifier.VALUE)
+        if (modifierList.hasModifier(KtTokens.INNER_KEYWORD)) modifiers.add(Modifier.INNER)
+        if (modifierList.hasModifier(KtTokens.INLINE_KEYWORD)) modifiers.add(Modifier.INLINE)
         if (modifierList.hasModifier(
-                org.jetbrains.kotlin.lexer.KtTokens.SUSPEND_KEYWORD,
+                KtTokens.SUSPEND_KEYWORD,
             )
         ) {
             modifiers.add(Modifier.SUSPEND)
         }
-        if (modifierList.hasModifier(org.jetbrains.kotlin.lexer.KtTokens.EXPECT_KEYWORD)) modifiers.add(Modifier.EXPECT)
-        if (modifierList.hasModifier(org.jetbrains.kotlin.lexer.KtTokens.ACTUAL_KEYWORD)) modifiers.add(Modifier.ACTUAL)
-        if (modifierList.hasModifier(org.jetbrains.kotlin.lexer.KtTokens.CONST_KEYWORD)) modifiers.add(Modifier.CONST)
+        if (modifierList.hasModifier(KtTokens.EXPECT_KEYWORD)) modifiers.add(Modifier.EXPECT)
+        if (modifierList.hasModifier(KtTokens.ACTUAL_KEYWORD)) modifiers.add(Modifier.ACTUAL)
+        if (modifierList.hasModifier(KtTokens.CONST_KEYWORD)) modifiers.add(Modifier.CONST)
         if (modifierList.hasModifier(
-                org.jetbrains.kotlin.lexer.KtTokens.LATEINIT_KEYWORD,
+                KtTokens.LATEINIT_KEYWORD,
             )
         ) {
             modifiers.add(Modifier.LATEINIT)

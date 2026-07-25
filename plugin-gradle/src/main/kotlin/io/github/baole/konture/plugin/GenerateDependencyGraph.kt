@@ -1,5 +1,6 @@
 /*
- * Copyright 2026 Bao Le Duc
+ * Copyright 2026 The Konture Contributors
+ * Contributors: Bao Le Duc (@baole)
  * SPDX-License-Identifier: Apache-2.0
  */
 
@@ -10,6 +11,7 @@ import io.github.baole.konture.core.KontureLogger
 import io.github.baole.konture.core.LogLevel
 import io.github.baole.konture.core.ResolvedDependencyModel
 import org.gradle.api.DefaultTask
+import org.gradle.api.file.ConfigurableFileCollection
 import org.gradle.api.file.RegularFileProperty
 import org.gradle.api.provider.MapProperty
 import org.gradle.api.tasks.CacheableTask
@@ -38,7 +40,7 @@ abstract class GenerateDependencyGraph : DefaultTask() {
      */
     @get:InputFiles
     @get:PathSensitive(PathSensitivity.RELATIVE)
-    abstract val buildFiles: org.gradle.api.file.ConfigurableFileCollection
+    abstract val buildFiles: ConfigurableFileCollection
 
     @get:Input
     abstract val declaredDependencies: MapProperty<String, List<String>>

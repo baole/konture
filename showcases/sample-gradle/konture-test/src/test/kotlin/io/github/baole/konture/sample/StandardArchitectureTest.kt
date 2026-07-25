@@ -1,6 +1,7 @@
 package io.github.baole.konture.sample
 
 import io.github.baole.konture.*
+import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 
@@ -145,9 +146,9 @@ class StandardArchitectureTest {
         val serviceNames = allClasses.map { it.name }
         val packageNames = allClasses.map { it.packageName }
         
-        org.junit.jupiter.api.Assertions.assertFalse(serviceNames.contains("ExcludedService"), "ExcludedService should have been excluded")
-        org.junit.jupiter.api.Assertions.assertFalse(serviceNames.contains("ExcludedClassInExcludedPackage"), "ExcludedClassInExcludedPackage should have been excluded")
-        org.junit.jupiter.api.Assertions.assertFalse(packageNames.any { it.startsWith("io.github.baole.konture.sample.domain.exclude") }, "Packages matching exclusion pattern should have been excluded")
+        assertFalse(serviceNames.contains("ExcludedService"), "ExcludedService should have been excluded")
+        assertFalse(serviceNames.contains("ExcludedClassInExcludedPackage"), "ExcludedClassInExcludedPackage should have been excluded")
+        assertFalse(packageNames.any { it.startsWith("io.github.baole.konture.sample.domain.exclude") }, "Packages matching exclusion pattern should have been excluded")
     }
 
     @Test

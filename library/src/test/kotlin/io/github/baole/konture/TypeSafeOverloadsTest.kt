@@ -1,10 +1,12 @@
 /*
- * Copyright 2026 Bao Le Duc
+ * Copyright 2026 The Konture Contributors
+ * Contributors: Bao Le Duc (@baole)
  * SPDX-License-Identifier: Apache-2.0
  */
 
 package io.github.baole.konture
 
+import org.junit.jupiter.api.Assertions.assertThrows
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 
@@ -121,7 +123,7 @@ class TypeSafeOverloadsTest {
         val graph = ProjectGraph(mapOf(":" to listOf(Module(":", ":app", "app", emptyList(), emptyList(), emptyList(), listOf(file)))))
 
         val error =
-            org.junit.jupiter.api.Assertions.assertThrows(AssertionError::class.java) {
+            assertThrows(AssertionError::class.java) {
                 FilesRuleBuilder(graph).should().notReferenceClass<String>().check()
             }
 
@@ -182,7 +184,7 @@ class TypeSafeOverloadsTest {
     fun `scoped usage rejects local classes without a stable qualified name`() {
         class Local
 
-        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException::class.java) {
+        assertThrows(IllegalArgumentException::class.java) {
             FilesRuleBuilder(graphWith()).should().notCall(Local::class)
         }
     }

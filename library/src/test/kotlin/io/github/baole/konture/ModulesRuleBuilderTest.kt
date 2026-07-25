@@ -1,10 +1,13 @@
 /*
- * Copyright 2026 Bao Le Duc
+ * Copyright 2026 The Konture Contributors
+ * Contributors: Bao Le Duc (@baole)
  * SPDX-License-Identifier: Apache-2.0
  */
 
 package io.github.baole.konture
 
+import io.github.baole.konture.core.DependencyGraphModel
+import io.github.baole.konture.core.ResolvedDependencyModel
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
 
@@ -339,7 +342,7 @@ class ModulesRuleBuilderTest : RuleBuildersTestBase() {
     @Test
     fun `test external dependencies assertions`() {
         val dep1 =
-            io.github.baole.konture.core.ResolvedDependencyModel(
+            ResolvedDependencyModel(
                 "org.jetbrains.kotlin",
                 "kotlin-stdlib",
                 "1.9.0",
@@ -347,7 +350,7 @@ class ModulesRuleBuilderTest : RuleBuildersTestBase() {
                 isTransitive = false,
             )
         val dep2 =
-            io.github.baole.konture.core.ResolvedDependencyModel(
+            ResolvedDependencyModel(
                 "com.google.guava",
                 "guava",
                 "32.0.0",
@@ -356,7 +359,7 @@ class ModulesRuleBuilderTest : RuleBuildersTestBase() {
             )
 
         val externalDeps =
-            io.github.baole.konture.core.DependencyGraphModel(
+            DependencyGraphModel(
                 modules =
                     mapOf(
                         ":moduleA" to listOf(dep1, dep2),

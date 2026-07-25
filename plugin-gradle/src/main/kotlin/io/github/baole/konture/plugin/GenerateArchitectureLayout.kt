@@ -1,5 +1,6 @@
 /*
- * Copyright 2026 Bao Le Duc
+ * Copyright 2026 The Konture Contributors
+ * Contributors: Bao Le Duc (@baole)
  * SPDX-License-Identifier: Apache-2.0
  */
 
@@ -15,11 +16,15 @@ import io.github.baole.konture.core.ModuleModel
 import io.github.baole.konture.core.SourceSetKind
 import io.github.baole.konture.core.SourceSetModel
 import org.gradle.api.DefaultTask
+import org.gradle.api.GradleException
+import org.gradle.api.file.ConfigurableFileCollection
 import org.gradle.api.file.RegularFileProperty
 import org.gradle.api.provider.ListProperty
+import org.gradle.api.provider.Property
 import org.gradle.api.tasks.CacheableTask
 import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.InputFiles
+import org.gradle.api.tasks.Internal
 import org.gradle.api.tasks.Optional
 import org.gradle.api.tasks.OutputFile
 import org.gradle.api.tasks.PathSensitive
@@ -41,13 +46,13 @@ abstract class GenerateArchitectureLayout : DefaultTask() {
      */
     @get:InputFiles
     @get:PathSensitive(PathSensitivity.RELATIVE)
-    abstract val sourceFiles: org.gradle.api.file.ConfigurableFileCollection
+    abstract val sourceFiles: ConfigurableFileCollection
 
     /**
      * The root project directory of the build, used to resolve and serialize relative paths.
      */
-    @get:Input
-    abstract val rootProjectDir: org.gradle.api.provider.Property<File>
+    @get:Internal
+    abstract val rootProjectDir: Property<File>
 
     /**
      * Lazily populated list of module configurations from all projects in the build.
@@ -72,7 +77,7 @@ abstract class GenerateArchitectureLayout : DefaultTask() {
     abstract val excludeConfigurations: ListProperty<String>
 
     @get:Input
-    abstract val logLevel: org.gradle.api.provider.Property<String>
+    abstract val logLevel: Property<String>
 
     /**
      * The output location of the generated `layout_v2.json` file.
@@ -91,7 +96,7 @@ abstract class GenerateArchitectureLayout : DefaultTask() {
             try {
                 LogLevel.valueOf(levelStr)
             } catch (e: IllegalArgumentException) {
-                throw org.gradle.api.GradleException(
+                throw GradleException(
                     "Invalid log level: '$levelStr'. Valid levels are: TRACE, DEBUG, INFO, WARNING, ERROR",
                 )
             }
@@ -129,14 +134,14 @@ abstract class GenerateArchitectureLayout : DefaultTask() {
 
         val moduleModels =
             modules.get().map { input ->
-                val moduleDir = File(input.projectDir).canonicalFile
+                val moduleDir = File(input.projectDir).let { if (it.isAbsolute) it.canonicalFile else File(rootDir, input.projectDir).canonicalFile }
                 val relProjectDir = if (moduleDir == rootDir) "." else moduleDir.relativeTo(rootDir).path
 
                 val sourceSetModels =
                     input.sourceSets.map { ssInput ->
                         val files = mutableListOf<String>()
                         ssInput.srcDirs.forEach { dirPath ->
-                            val dirFile = File(dirPath).canonicalFile
+                            val dirFile = File(dirPath).let { if (it.isAbsolute) it.canonicalFile else File(rootDir, dirPath).canonicalFile }
                             val isGenerated =
                                 try {
                                     val rel = dirFile.relativeTo(moduleDir).path
@@ -157,14 +162,10 @@ abstract class GenerateArchitectureLayout : DefaultTask() {
 
                         val relSrcDirs =
                             ssInput.srcDirs.map { dirPath ->
-                                val dirFile = File(dirPath).canonicalFile
-                                if (dirFile.isAbsolute) {
-                                    try {
-                                        dirFile.relativeTo(moduleDir).path
-                                    } catch (e: IllegalArgumentException) {
-                                        dirPath
-                                    }
-                                } else {
+                                val dirFile = File(dirPath).let { if (it.isAbsolute) it.canonicalFile else File(rootDir, dirPath).canonicalFile }
+                                try {
+                                    dirFile.relativeTo(moduleDir).path
+                                } catch (e: IllegalArgumentException) {
                                     dirPath
                                 }
                             }

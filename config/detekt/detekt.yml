@@ -1,7 +1,3 @@
-build:
-  maxIssues: 0
-  excludeCorrectable: false
-
 config:
   validation: true
   warningsAsErrors: false
@@ -10,37 +6,37 @@ complexity:
   active: true
   ComplexCondition:
     active: true
-    threshold: 4
+    allowedConditions: 4
   ComplexInterface:
     active: true
-    threshold: 50
+    allowedDefinitions: 50
   CyclomaticComplexMethod:
     active: true
-    threshold: 30
+    allowedComplexity: 30
     ignoreSingleWhenExpression: false
     ignoreSimpleWhenEntries: false
   LargeClass:
     active: true
-    threshold: 600
+    allowedLines: 600
   LongMethod:
     active: true
-    threshold: 300
+    allowedLines: 300
   LongParameterList:
     active: true
-    functionThreshold: 10
-    constructorThreshold: 10
+    allowedFunctionParameters: 10
+    allowedConstructorParameters: 10
     ignoreDefaultParameters: false
     ignoreDataClasses: true
   NestedBlockDepth:
     active: true
-    threshold: 4
+    allowedDepth: 4
   TooManyFunctions:
     active: true
-    thresholdInFiles: 100
-    thresholdInClasses: 100
-    thresholdInInterfaces: 100
-    thresholdInObjects: 100
-    thresholdInEnums: 11
+    allowedFunctionsPerFile: 100
+    allowedFunctionsPerClass: 100
+    allowedFunctionsPerInterface: 100
+    allowedFunctionsPerObject: 100
+    allowedFunctionsPerEnum: 11
 
 coroutines:
   active: true
@@ -140,6 +136,8 @@ potential-bugs:
 
 style:
   active: true
+  UnnecessaryFullyQualifiedName:
+    active: true
   CollapsibleIfStatements:
     active: false
   ForbiddenComment:
@@ -160,7 +158,7 @@ style:
   MaxLineLength:
     active: false
     maxLineLength: 120
-  MayBeConst:
+  MayBeConstant:
     active: true
   ModifierOrder:
     active: true
@@ -171,11 +169,13 @@ style:
     max: 8
   SafeCast:
     active: true
-  UnusedImports:
+  UnusedImport:
     active: true
   UnusedPrivateClass:
     active: true
-  UnusedPrivateMember:
+  UnusedPrivateFunction:
+    active: true
+  UnusedPrivateProperty:
     active: true
   UseDataClass:
     active: false

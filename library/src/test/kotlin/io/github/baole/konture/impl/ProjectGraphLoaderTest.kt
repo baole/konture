@@ -1,5 +1,6 @@
 /*
- * Copyright 2026 Bao Le Duc
+ * Copyright 2026 The Konture Contributors
+ * Contributors: Bao Le Duc (@baole)
  * SPDX-License-Identifier: Apache-2.0
  */
 
@@ -13,6 +14,7 @@ import io.github.baole.konture.core.KontureLogger
 import io.github.baole.konture.core.LayoutModel
 import io.github.baole.konture.core.LogLevel
 import io.github.baole.konture.core.ModuleModel
+import io.github.baole.konture.core.ResolvedDependencyModel
 import io.github.baole.konture.core.SourceSetKind
 import io.github.baole.konture.core.SourceSetModel
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -836,7 +838,7 @@ class ProjectGraphLoaderTest {
         layoutFile.writeText(json.encodeToString(layoutModel))
 
         val dep =
-            io.github.baole.konture.core.ResolvedDependencyModel(
+            ResolvedDependencyModel(
                 "org.jetbrains",
                 "annotations",
                 "24.0.0",

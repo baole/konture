@@ -1,15 +1,17 @@
 /*
- * Copyright 2026 Bao Le Duc
+ * Copyright 2026 The Konture Contributors
+ * Contributors: Bao Le Duc (@baole)
  * SPDX-License-Identifier: Apache-2.0
  */
 
-@file:OptIn(kotlin.experimental.ExperimentalTypeInference::class)
+@file:OptIn(ExperimentalTypeInference::class)
 
 package io.github.baole.konture
 
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import kotlin.experimental.ExperimentalTypeInference
 
 class FluentExtensionsTest {
     private lateinit var anno1: AnnotationDeclaration

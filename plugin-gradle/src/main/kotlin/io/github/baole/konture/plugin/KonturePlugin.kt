@@ -1,5 +1,6 @@
 /*
- * Copyright 2026 Bao Le Duc
+ * Copyright 2026 The Konture Contributors
+ * Contributors: Bao Le Duc (@baole)
  * SPDX-License-Identifier: Apache-2.0
  */
 
@@ -12,6 +13,12 @@ import io.github.baole.konture.core.KontureConstants
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.artifacts.ProjectDependency
+import org.gradle.api.attributes.Usage
+import org.gradle.api.tasks.Copy
+import org.gradle.api.tasks.Delete
+import org.gradle.api.tasks.PathSensitivity
+import org.gradle.api.tasks.SourceSetContainer
+import org.gradle.api.tasks.testing.Test
 import org.jetbrains.kotlin.gradle.dsl.KotlinMultiplatformExtension
 import org.jetbrains.kotlin.gradle.dsl.KotlinProjectExtension
 import org.jetbrains.kotlin.gradle.plugin.mpp.KotlinNativeTarget
@@ -41,7 +48,7 @@ class KonturePlugin : Plugin<Project> {
         project.tasks.register(TASK_GENERATE_BASELINE) { task ->
             task.group = TASK_GROUP_VERIFICATION
             task.description = TASK_DESC_BASELINE
-            task.dependsOn(project.tasks.withType(org.gradle.api.tasks.testing.Test::class.java))
+            task.dependsOn(project.tasks.withType(Test::class.java))
             if (project == project.rootProject) {
                 project.subprojects.forEach { subproject ->
                     task.dependsOn(subproject.tasks.matching { t -> t.name == TASK_GENERATE_BASELINE })
@@ -49,12 +56,14 @@ class KonturePlugin : Plugin<Project> {
             }
         }
 
-        project.tasks.withType(org.gradle.api.tasks.testing.Test::class.java).configureEach { testTask ->
+        project.tasks.withType(Test::class.java).configureEach { testTask ->
             val cliBaselinePath = project.providers.systemProperty(KontureConstants.PROPERTY_BASELINE_PATH).orNull
             val cliBaselineDir = project.providers.systemProperty(KontureConstants.PROPERTY_BASELINE_DIR).orNull
             val cliLanguage = project.providers.systemProperty(KontureConstants.PROPERTY_LOCALE).orNull
 
-            testTask.systemProperty(KontureConstants.PROPERTY_BASELINE_DIR, cliBaselineDir ?: project.projectDir.absolutePath)
+            if (cliBaselineDir != null) {
+                testTask.systemProperty(KontureConstants.PROPERTY_BASELINE_DIR, cliBaselineDir)
+            }
             if (cliBaselinePath != null) {
                 testTask.systemProperty(KontureConstants.PROPERTY_BASELINE_PATH, cliBaselinePath)
             } else {
@@ -82,6 +91,22 @@ class KonturePlugin : Plugin<Project> {
                 KontureConstants.PROPERTY_BASELINE_GENERATE,
                 (isRecordProperty || isRunningGenerateBaseline).toString(),
             )
+
+            // Register baseline file as an input for build cache and up-to-date tracking
+            val baselineFileProvider =
+                if (cliBaselinePath != null) {
+                    project.layout.projectDirectory.file(cliBaselinePath)
+                } else {
+                    project.layout.projectDirectory.file(extension.baselinePath)
+                }
+            testTask.inputs.file(baselineFileProvider)
+                .withPathSensitivity(PathSensitivity.RELATIVE)
+                .optional()
+
+            if (isRecordProperty || isRunningGenerateBaseline) {
+                testTask.outputs.file(baselineFileProvider)
+                testTask.outputs.upToDateWhen { false }
+            }
         }
 
         // Root/Producer logic
@@ -151,7 +176,7 @@ class KonturePlugin : Plugin<Project> {
 
                             ModuleData(
                                 path = sub.path,
-                                projectDir = sub.projectDir.absolutePath,
+                                projectDir = if (sub.projectDir == project.rootDir) "." else sub.projectDir.relativeTo(project.rootDir).path,
                                 appliedPlugins = plugins,
                                 sourceSets = sourceSets,
                                 dependencies = dependencies,
@@ -218,8 +243,8 @@ class KonturePlugin : Plugin<Project> {
                 config.isCanBeResolved = false
                 config.attributes { attrs ->
                     attrs.attribute(
-                        org.gradle.api.attributes.Usage.USAGE_ATTRIBUTE,
-                        project.objects.named(org.gradle.api.attributes.Usage::class.java, USAGE_LAYOUT),
+                        Usage.USAGE_ATTRIBUTE,
+                        project.objects.named(Usage::class.java, USAGE_LAYOUT),
                     )
                 }
                 config.outgoing.artifact(generateTask.flatMap { it.outputFile })
@@ -231,8 +256,8 @@ class KonturePlugin : Plugin<Project> {
                 config.isCanBeResolved = false
                 config.attributes { attrs ->
                     attrs.attribute(
-                        org.gradle.api.attributes.Usage.USAGE_ATTRIBUTE,
-                        project.objects.named(org.gradle.api.attributes.Usage::class.java, USAGE_DEPS),
+                        Usage.USAGE_ATTRIBUTE,
+                        project.objects.named(Usage::class.java, USAGE_DEPS),
                     )
                 }
                 config.outgoing.artifact(generateDepsTask.flatMap { it.outputFile })
@@ -263,7 +288,7 @@ class KonturePlugin : Plugin<Project> {
                         name = name,
                         kind = KIND_ANDROID,
                         production = !name.lowercase().contains(SUBSTRING_TEST_LOWERCASE),
-                        srcDirs = srcDirs.map { File(it).absolutePath },
+                        srcDirs = srcDirs.map { toRelPath(proj, File(it)) },
                         platforms = listOf(PLATFORM_ANDROID),
                         compileClasspath = compilationClasspath(proj, name),
                     ),
@@ -361,7 +386,7 @@ class KonturePlugin : Plugin<Project> {
                             name = name,
                             kind = kind,
                             production = isProduction,
-                            srcDirs = sourceSet.kotlin.srcDirs.map { it.absolutePath },
+                            srcDirs = sourceSet.kotlin.srcDirs.map { toRelPath(proj, it) },
                             platforms = platforms,
                             targetNames = if (isKmp) sourceSetTargets[name]?.toList() ?: emptyList() else emptyList(),
                             dependsOnSourceSets =
@@ -380,7 +405,7 @@ class KonturePlugin : Plugin<Project> {
         }
 
         if (list.isEmpty()) {
-            val javaSourceSets = proj.extensions.findByName(EXTENSION_SOURCE_SETS) as? org.gradle.api.tasks.SourceSetContainer
+            val javaSourceSets = proj.extensions.findByName(EXTENSION_SOURCE_SETS) as? SourceSetContainer
             if (javaSourceSets != null) {
                 for (ss in javaSourceSets) {
                     list.add(
@@ -388,7 +413,7 @@ class KonturePlugin : Plugin<Project> {
                             name = ss.name,
                             kind = KIND_JVM,
                             production = ss.name == NAME_MAIN_LOWERCASE,
-                            srcDirs = ss.allSource.srcDirs.map { it.absolutePath },
+                            srcDirs = ss.allSource.srcDirs.map { toRelPath(proj, it) },
                             platforms = listOf(PLATFORM_JVM),
                             compileClasspath = compilationClasspath(proj, ss.name),
                         ),
@@ -397,6 +422,19 @@ class KonturePlugin : Plugin<Project> {
             }
         }
         return list
+    }
+
+    private fun toRelPath(
+        proj: Project,
+        file: File,
+    ): String {
+        val rootDir = proj.rootDir.canonicalFile
+        val canonical = file.canonicalFile
+        return if (canonical.startsWith(rootDir)) {
+            canonical.relativeTo(rootDir).path
+        } else {
+            canonical.name
+        }
     }
 
     /** Returns resolved compile-classpath paths when Gradle exposes a matching configuration. */
@@ -408,7 +446,7 @@ class KonturePlugin : Plugin<Project> {
         val configuration = candidates.firstNotNullOfOrNull { project.configurations.findByName(it) } ?: return emptyList()
         if (!configuration.isCanBeResolved) return emptyList()
         return try {
-            configuration.resolve().map { it.canonicalPath }.sorted()
+            configuration.resolve().map { toRelPath(project, it) }.sorted()
         } catch (exception: Exception) {
             project.logger.info("Konture could not resolve compiler classpath for $sourceSetName: ${exception.message}")
             emptyList()
@@ -480,7 +518,7 @@ class KonturePlugin : Plugin<Project> {
                 }
             }
             if (list.isEmpty()) {
-                val javaSourceSets = sub.extensions.findByName(EXTENSION_SOURCE_SETS) as? org.gradle.api.tasks.SourceSetContainer
+                val javaSourceSets = sub.extensions.findByName(EXTENSION_SOURCE_SETS) as? SourceSetContainer
                 if (javaSourceSets != null) {
                     for (ss in javaSourceSets) {
                         list.addAll(ss.allSource.srcDirs)
@@ -525,8 +563,8 @@ class KonturePlugin : Plugin<Project> {
                 config.isCanBeResolved = true
                 config.attributes { attrs ->
                     attrs.attribute(
-                        org.gradle.api.attributes.Usage.USAGE_ATTRIBUTE,
-                        project.objects.named(org.gradle.api.attributes.Usage::class.java, USAGE_LAYOUT),
+                        Usage.USAGE_ATTRIBUTE,
+                        project.objects.named(Usage::class.java, USAGE_LAYOUT),
                     )
                 }
             }
@@ -537,8 +575,8 @@ class KonturePlugin : Plugin<Project> {
                 config.isCanBeResolved = true
                 config.attributes { attrs ->
                     attrs.attribute(
-                        org.gradle.api.attributes.Usage.USAGE_ATTRIBUTE,
-                        project.objects.named(org.gradle.api.attributes.Usage::class.java, USAGE_DEPS),
+                        Usage.USAGE_ATTRIBUTE,
+                        project.objects.named(Usage::class.java, USAGE_DEPS),
                     )
                 }
             }
@@ -549,14 +587,14 @@ class KonturePlugin : Plugin<Project> {
 
         // Copy only the matching v2 layout and clear layouts from previously checked-out branches.
         val cleanLayoutResources =
-            project.tasks.register(TASK_CLEAN_LAYOUT_RESOURCES, org.gradle.api.tasks.Delete::class.java) { delete ->
+            project.tasks.register(TASK_CLEAN_LAYOUT_RESOURCES, Delete::class.java) { delete ->
                 delete.delete(
                     project.layout.buildDirectory.file("$PATH_RESOURCES_TEST_KONTURE/$FILE_LAYOUT"),
                     project.layout.buildDirectory.file("$PATH_RESOURCES_TEST_KONTURE/$FILE_LAYOUT_V2"),
                 )
             }
         val copyLayoutTask =
-            project.tasks.register(TASK_COPY_LAYOUT, org.gradle.api.tasks.Copy::class.java) { copy ->
+            project.tasks.register(TASK_COPY_LAYOUT, Copy::class.java) { copy ->
                 copy.from(archLayoutIncoming)
                 copy.into(project.layout.buildDirectory.dir(PATH_RESOURCES_TEST_KONTURE))
                 copy.rename { FILE_LAYOUT_V2 }
@@ -564,14 +602,14 @@ class KonturePlugin : Plugin<Project> {
             }
 
         val copyDepsTask =
-            project.tasks.register(TASK_COPY_DEPS, org.gradle.api.tasks.Copy::class.java) { copy ->
+            project.tasks.register(TASK_COPY_DEPS, Copy::class.java) { copy ->
                 copy.from(archDepsIncoming)
                 copy.into(project.layout.buildDirectory.dir(PATH_RESOURCES_TEST_KONTURE))
                 copy.rename { FILE_DEPENDENCIES }
             }
 
         val cleanDependencyResource =
-            project.tasks.register(TASK_CLEAN_DEPS_RESOURCE, org.gradle.api.tasks.Delete::class.java) { delete ->
+            project.tasks.register(TASK_CLEAN_DEPS_RESOURCE, Delete::class.java) { delete ->
                 delete.delete(project.layout.buildDirectory.file("$PATH_RESOURCES_TEST_KONTURE/$FILE_DEPENDENCIES"))
             }
         val rootDetector =

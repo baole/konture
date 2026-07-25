@@ -1,11 +1,13 @@
 /*
- * Copyright 2026 Bao Le Duc
+ * Copyright 2026 The Konture Contributors
+ * Contributors: Bao Le Duc (@baole)
  * SPDX-License-Identifier: Apache-2.0
  */
 
 package io.github.baole.konture
 
 import io.github.baole.konture.impl.PatternMatchers
+import kotlin.jvm.JvmName
 
 /**
  * Represents a scope containing a set of classes for writing architecture rules in a Konsist-inspired fluent DSL.
@@ -204,7 +206,7 @@ fun KontureScope.withNameMatching(pattern: String) = KontureScope(classes.withNa
 
 // Assertion extensions on List<ClassDeclaration>
 
-@kotlin.jvm.JvmName("assertClassesTrue")
+@JvmName("assertClassesTrue")
 fun List<ClassDeclaration>.assertTrue(
     additionalMessage: String? = null,
     predicate: (ClassDeclaration) -> Boolean,
@@ -225,7 +227,7 @@ fun List<ClassDeclaration>.assertTrue(
     }
 }
 
-@kotlin.jvm.JvmName("assertClassesHasKDoc")
+@JvmName("assertClassesHasKDoc")
 fun List<ClassDeclaration>.assertHasKDoc(additionalMessage: String? = null) {
     assertTrue(additionalMessage) { it.kdocText?.isNotBlank() == true }
 }
