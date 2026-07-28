@@ -1,5 +1,6 @@
 /*
- * Copyright 2026 Bao Le Duc
+ * Copyright 2026 The Konture Contributors
+ * Contributors: Bao Le Duc, Octavio Calleya Garcia (@octaviospain)
  * SPDX-License-Identifier: Apache-2.0
  */
 
@@ -75,6 +76,15 @@ class KontureContext(
         val builder = FilesRuleBuilder(projectGraph)
         builder.apply(block)
         addSuite("files") { builder.check() }
+    }
+
+    /**
+     * Declares a suite of slice rules inside this architecture validation context.
+     */
+    fun slices(block: SlicesRuleBuilder.() -> Unit) {
+        val builder = SlicesRuleBuilder(projectGraph)
+        builder.apply(block)
+        addSuite("slices") { builder.check() }
     }
 
     /**

@@ -1,5 +1,6 @@
 /*
- * Copyright 2026 Bao Le Duc
+ * Copyright 2026 The Konture Contributors
+ * Contributors: Bao Le Duc, Octavio Calleya Garcia (@octaviospain)
  * SPDX-License-Identifier: Apache-2.0
  */
 
@@ -48,6 +49,15 @@ fun Konture.properties(sourceSets: SourceSetSelector) = PropertiesRuleBuilder(pr
 fun Konture.files() = FilesRuleBuilder(projectGraph)
 
 fun Konture.files(sourceSets: SourceSetSelector) = FilesRuleBuilder(projectGraph, sourceSets)
+
+/**
+ * Access the slice declarative assertion rule builder.
+ * Groups packages into slices by a capture-group pattern and asserts relationships between them,
+ * such as cycle-freedom.
+ */
+fun Konture.slices() = SlicesRuleBuilder(projectGraph)
+
+fun Konture.slices(sourceSets: SourceSetSelector) = SlicesRuleBuilder(projectGraph, sourceSets)
 
 /**
  * Verifies that there are no package or module dependency cycles in the project.
@@ -178,6 +188,21 @@ fun Konture.files(
     block: FilesRuleBuilder.() -> Unit,
 ) {
     FilesRuleBuilder(projectGraph, sourceSets).apply(block).check()
+}
+
+/**
+ * Define and run slice rules inside a block-based DSL context.
+ * Automatically checks the rules at the end of the block.
+ */
+fun Konture.slices(block: SlicesRuleBuilder.() -> Unit) {
+    SlicesRuleBuilder(projectGraph).apply(block).check()
+}
+
+fun Konture.slices(
+    sourceSets: SourceSetSelector,
+    block: SlicesRuleBuilder.() -> Unit,
+) {
+    SlicesRuleBuilder(projectGraph, sourceSets).apply(block).check()
 }
 
 /**

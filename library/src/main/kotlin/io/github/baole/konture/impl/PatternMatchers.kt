@@ -1,5 +1,6 @@
 /*
- * Copyright 2026 Bao Le Duc
+ * Copyright 2026 The Konture Contributors
+ * Contributors: Bao Le Duc, Octavio Calleya Garcia (@octaviospain)
  * SPDX-License-Identifier: Apache-2.0
  */
 
@@ -7,6 +8,7 @@ package io.github.baole.konture.impl
 
 import io.github.baole.konture.core.KontureLogger
 import io.github.baole.konture.core.LogLevel
+import java.util.concurrent.ConcurrentHashMap
 
 /**
  * Core utility class containing pattern matching algorithms for module glob patterns and package path patterns.
@@ -143,5 +145,68 @@ internal object PatternMatchers {
     ): Boolean {
         val regexString = "^" + pattern.split("*").joinToString(".*") { Regex.escape(it) } + "$"
         return Regex(regexString).matches(input)
+    }
+
+    /**
+     * Derives the slice key for a package from a slice pattern containing a single capture group.
+     *
+     * A slice pattern is a package pattern with exactly one capture token: `(*)` captures one package
+     * segment, `(**)` captures one or more segments. The captured text is the slice key — packages
+     * that produce the same key belong to the same slice. Surrounding `..` behaves as in
+     * [packagePatternToRegex] (zero or more segments).
+     *
+     * For example `"com.acme.(*).."` yields `payment` for `com.acme.payment` and `com.acme.payment.api`,
+     * and `null` for `com.other.thing`.
+     *
+     * @param pattern The slice pattern, which must contain exactly one `(*)` or `(**)` capture token.
+     * @param packageName The package name to derive a slice key from.
+     * @return The captured slice key, or null if the package does not match the pattern.
+     * @throws IllegalArgumentException if the pattern does not contain exactly one capture token.
+     */
+    fun sliceKeyFor(
+        pattern: String,
+        packageName: String,
+    ): String? = sliceRegexFor(pattern).matchEntire(packageName)?.groupValues?.get(1)
+
+    private val sliceRegexCache = ConcurrentHashMap<String, Regex>()
+
+    private fun sliceRegexFor(pattern: String): Regex =
+        sliceRegexCache.getOrPut(pattern) {
+            val doubleStar = pattern.indexOf("(**)")
+            val singleStar = pattern.indexOf("(*)")
+            val (token, captureRegex) =
+                when {
+                    doubleStar != -1 -> "(**)" to "(.+)"
+                    singleStar != -1 -> "(*)" to "([^.]+)"
+                    else -> throw IllegalArgumentException(
+                        "Slice pattern '$pattern' must contain a capture group: '(*)' for one segment or '(**)' for one or more.",
+                    )
+                }
+            val firstIndex = pattern.indexOf(token)
+            require(pattern.indexOf(token, firstIndex + token.length) == -1) {
+                "Slice pattern '$pattern' must contain exactly one capture group."
+            }
+            val left = sliceSideToRegex(pattern.substring(0, firstIndex))
+            val right = sliceSideToRegex(pattern.substring(firstIndex + token.length))
+            Regex("^$left$captureRegex$right$")
+        }
+
+    private fun sliceSideToRegex(side: String): String {
+        val builder = StringBuilder()
+        var i = 0
+        while (i < side.length) {
+            if (side.startsWith("..", i)) {
+                // Trailing '..' matches any suffix; an interior '..' must land on a segment boundary.
+                builder.append(if (i + 2 == side.length) ".*" else "(?:.*\\.)?")
+                i += 2
+            } else if (side[i] == '.') {
+                builder.append("\\.")
+                i += 1
+            } else {
+                builder.append(Regex.escape(side[i].toString()))
+                i += 1
+            }
+        }
+        return builder.toString()
     }
 }
