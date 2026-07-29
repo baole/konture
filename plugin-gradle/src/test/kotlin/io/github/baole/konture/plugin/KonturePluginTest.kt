@@ -15,6 +15,7 @@ import org.gradle.api.Project
 import org.gradle.api.internal.project.ProjectInternal
 import org.gradle.api.provider.Provider
 import org.gradle.api.tasks.testing.Test as GradleTestTask
+import org.gradle.testkit.runner.GradleRunner
 import org.gradle.testfixtures.ProjectBuilder
 import org.jetbrains.kotlin.gradle.dsl.KotlinMultiplatformExtension
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -24,7 +25,9 @@ import org.junit.jupiter.api.Assertions.assertThrows
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import java.io.File
+import java.nio.file.Path
 import kotlinx.serialization.json.Json
+import org.junit.jupiter.api.io.TempDir
 
 class KonturePluginTest {
     @Test
@@ -648,6 +651,55 @@ class KonturePluginTest {
                 else -> baselinePathProp
             }
         assertEquals("custom-baseline-test.json", resolvedValue)
+    }
+
+    @Test
+    fun `test task accepts a missing baseline file`(
+        @TempDir projectDir: Path,
+    ) {
+        projectDir.resolve("settings.gradle.kts").toFile().writeText("rootProject.name = \"missing-baseline\"")
+        projectDir.resolve("build.gradle.kts").toFile().writeText(
+            """
+            plugins {
+                java
+                id("io.github.baole.konture")
+            }
+
+            repositories {
+                mavenCentral()
+            }
+
+            dependencies {
+                testImplementation("org.junit.jupiter:junit-jupiter:5.12.0")
+                testRuntimeOnly("org.junit.platform:junit-platform-launcher")
+            }
+
+            tasks.test {
+                useJUnitPlatform()
+            }
+            """.trimIndent(),
+        )
+        val sourceFile = projectDir.resolve("src/test/java/PassingTest.java").toFile()
+        sourceFile.parentFile.mkdirs()
+        sourceFile.writeText(
+            """
+            import org.junit.jupiter.api.Test;
+
+            class PassingTest {
+                @Test void passes() { }
+            }
+            """.trimIndent(),
+        )
+
+        val result =
+            GradleRunner
+                .create()
+                .withProjectDir(projectDir.toFile())
+                .withPluginClasspath()
+                .withArguments("test", "--stacktrace")
+                .build()
+
+        assertEquals("SUCCESS", result.task(":test")?.outcome?.name)
     }
 
     @Test

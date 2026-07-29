@@ -8,6 +8,7 @@ package io.github.baole.konture
 
 import io.github.baole.konture.i18n.getMessage
 import io.github.baole.konture.impl.PatternMatchers
+import io.github.baole.konture.impl.ViolationLocation
 import kotlin.reflect.KClass
 
 @KontureDsl
@@ -23,7 +24,10 @@ class FunctionsShould internal constructor(
                         (usage.targetFqName == fqName || fqName in usage.possibleTargetFqNames)
                 }.forEach { usage ->
                     val unresolved = if (usage.unresolvedPossibleUsage) "unresolved possible " else ""
-                    violations.add(getMessage("usage.notCall", unresolved, fqName, usage.rawExpression, usage.line, usage.column))
+                    violations.add(
+                        "${getMessage("usage.notCall", unresolved, fqName, usage.rawExpression, usage.line, usage.column)} " +
+                            "(at ${ViolationLocation.of(function.modulePath, function.sourceSet?.name, usage.filePath, usage.line, usage.column)})",
+                    )
                 }
         }
         return builder
