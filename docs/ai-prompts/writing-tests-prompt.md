@@ -60,13 +60,13 @@ project's intended architecture is unclear.
    `:konture-test` or `:architecture-tests`.
 2. If no dedicated module exists, report that the setup is missing and recommend
    creating one rather than placing architecture tests inside production modules.
-3. Confirm the test module has `testImplementation(project(":..."))`
-   dependencies on the production modules the rules need to inspect.
+3. Confirm the test module applies the Konture Gradle plugin (`alias(libs.plugins.konture)` or `id("io.github.baole.konture")`) and has `testImplementation(libs.konture)`. Confirm it reuses the project's existing test framework dependencies (e.g. `libs.junit.jupiter`, `libs.kotest`, `libs.kotlin.test`). Note: `konture-test` does **not** need `testImplementation(project(":..."))` dependencies on production modules, as Konture discovers multi-module layout and source files automatically via its Gradle plugin.
 
 ## Phase 5 — Write compile-safe Konture tests
 Use the Konture DSL APIs that are present in the installed project version.
-Prefer existing local test style, naming, JUnit/Kotest conventions, and package
-layout.
+Strictly reuse the project's existing test framework annotations and style (e.g., Kotest `FunSpec`/`StringSpec`, JUnit 5 `@Test`, JUnit 4 `@Test`, or `kotlin.test` `@Test`). Do **not** introduce JUnit 5 imports or annotations if the project standardizes on Kotest or another test library.
+
+**Prefer Wildcard & Pattern Matching**: Use wildcard/pattern selectors (`haveNameMatching(":core:domain**")`, `haveNameMatching(":feature:**")`, `resideInAPackage("..domain..")`) rather than hardcoding long lists of full individual module or package names. Wildcards and patterns ensure rules automatically cover newly created modules and packages.
 
 Common rule shapes:
 
@@ -75,8 +75,9 @@ import io.github.baole.konture.*
 
 Konture.architecture {
     modules {
-        that().haveNamePath(":core:domain")
-        should().notDependOnModule(":core:data")
+        that().haveNameMatching(":core:domain**")
+        should().notDependOnModule(":core:data**")
+        andShould().notDependOnModule(":feature:**")
     }
 
     classes {
@@ -110,8 +111,8 @@ Konture.layered {
 import io.github.baole.konture.*
 
 Konture.modules()
-    .that().haveNamePath(":feature:checkout")
-    .should().notDependOnModule(":feature:payment")
+    .that().haveNameMatching(":feature:**:impl")
+    .should().onlyDependOnModules(":feature:**:api", ":core:**", ":shared")
     .check()
 ```
 

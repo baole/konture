@@ -58,8 +58,13 @@ plugins {
 }
 ```
 
-2. Add the dependency to your test module's `build.gradle.kts`:
+2. Apply the plugin and add the dependency in your test module's `build.gradle.kts` (e.g. `konture-test/build.gradle.kts`):
 ```kotlin
+plugins {
+    kotlin("jvm")
+    id("io.github.baole.konture")
+}
+
 dependencies {
     testImplementation("io.github.baole:konture:0.7.4")
 }
@@ -114,11 +119,11 @@ class ArchitectureGuardrails {
     @Test
     fun `domain layer should be completely isolated from data and UI layers`() {
         architecture {
-            // 🎯 Select modules inside domain
+            // 🎯 Select modules via wildcard pattern matching
             modules {
-                that().haveNamePath(":core:domain")
-                should().notDependOnModule(":core:data")
-                andShould().notDependOnModule(":feature:checkout")
+                that().haveNameMatching(":core:domain**")
+                should().notDependOnModule(":core:data**")
+                andShould().notDependOnModule(":feature:**")
             }
         }
     }

@@ -1,31 +1,27 @@
 // Template for a new, dedicated Konture architecture-test module's
-// build.gradle.kts. Copy into e.g. :konture-test/build.gradle.kts and adjust:
-//   - the version catalog alias (or literal coordinates — see
-//     references/dependency-integration.md for both forms)
-//   - the list of project(":...") dependencies to match the real modules
-//     that architecture rules need whole-graph visibility into
+// build.gradle.kts. Copy into e.g. :konture-test/build.gradle.kts and adjust
+// version catalog aliases or literal coordinates as needed.
+//
+// NOTE: Do NOT add project(":...") dependencies for production modules here.
+// Konture automatically discovers project layout and source files across
+// all subprojects via plugin artifact sharing.
 
 plugins {
     kotlin("jvm")
+    alias(libs.plugins.konture) // or id("io.github.baole.konture")
 }
 
 dependencies {
-    // Konture itself.
+    // Konture assertion library.
     testImplementation(libs.konture)
 
-    // JUnit 5 — swap for the project's actual test runner if it standardizes
-    // on JUnit 4 or Kotest instead.
-    testImplementation(libs.junit.jupiter.api)
-    testRuntimeOnly(libs.junit.jupiter.engine)
-
-    // Forces every module an architecture rule needs to inspect to compile
-    // first. Replace with the REAL module paths found in settings.gradle.kts —
-    // never leave placeholder names here.
-    testImplementation(project(":core:domain"))
-    testImplementation(project(":core:data"))
-    testImplementation(project(":feature:example"))
+    // Reuse the target project's existing test framework dependency from catalog/build files
+    // (e.g. libs.junit.jupiter, libs.kotest.runner.junit5, libs.kotlin.test, etc.).
+    // Do NOT force-add JUnit 5 if the project standardizes on Kotest, JUnit 4, or another framework.
+    testImplementation(libs.junit.jupiter.api) // Replace with project's actual test lib
+    testRuntimeOnly(libs.junit.jupiter.engine) // Replace/remove to match project
 }
 
 tasks.test {
-    useJUnitPlatform()
+    useJUnitPlatform() // Match project's test runner config
 }
