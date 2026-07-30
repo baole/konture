@@ -83,15 +83,9 @@ plugins {
 dependencies {
     testImplementation(libs.konture)
 
+    // Reuse your project's existing test framework dependencies (JUnit 5, Kotest, TestBalloon, etc.)
     testImplementation("org.junit.jupiter:junit-jupiter-api:5.11.0")
     testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:5.11.0")
-
-    testImplementation(project(":app"))
-    testImplementation(project(":core:domain"))
-    testImplementation(project(":feature:checkout:api"))
-    testImplementation(project(":feature:checkout:impl"))
-    testImplementation(project(":feature:profile:api"))
-    testImplementation(project(":feature:profile:impl"))
 }
 
 tasks.test {
@@ -99,7 +93,7 @@ tasks.test {
 }
 ```
 
-Replace the sample dependency list with the modules your rules inspect. The architecture-test module should see the code and build metadata it checks.
+Because the Konture Gradle plugin automatically discovers and serializes multi-module layout metadata across the entire project via root task artifact sharing, `konture-test` does not need `testImplementation(project(":..."))` dependencies on production app modules.
 
 ## Step 3: Start With One Build-Graph Rule
 
@@ -129,13 +123,13 @@ class ArchitectureGuardrailsTest {
 
 This rule checks the Gradle project graph. If `:feature:checkout:impl` adds `implementation(project(":feature:profile:impl"))`, the architecture test fails.
 
-For a simpler layered project, use the real paths:
+For a simpler layered project, use wildcard pattern matching:
 
 ```kotlin
 Konture.modules {
-    that().haveNamePath(":core:domain")
-    should().notDependOnModule(":core:data")
-    should().notDependOnModule(":app")
+    that().haveNameMatching(":core:domain**")
+    should().notDependOnModule(":core:data**")
+    should().notDependOnModule(":app**")
 }
 ```
 

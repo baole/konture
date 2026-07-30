@@ -99,9 +99,9 @@ class KonturePlugin : Plugin<Project> {
                 } else {
                     project.layout.projectDirectory.file(extension.baselinePath)
                 }
-            testTask.inputs.file(baselineFileProvider)
+            testTask.inputs.files(baselineFileProvider)
+                .withPropertyName("kontureBaseline")
                 .withPathSensitivity(PathSensitivity.RELATIVE)
-                .optional()
 
             if (isRecordProperty || isRunningGenerateBaseline) {
                 testTask.outputs.file(baselineFileProvider)

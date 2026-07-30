@@ -1,5 +1,6 @@
 /*
- * Copyright 2026 Bao Le Duc
+ * Copyright 2026 The Konture Contributors
+ * Contributors: Bao Le Duc (@baole)
  * SPDX-License-Identifier: Apache-2.0
  */
 
@@ -858,6 +859,7 @@ class FunctionsRuleBuilderTest : RuleBuildersTestBase() {
         notCallRule1.getShouldAssertion()!!(context, emptyList(), vNotCall1)
         assertEquals(1, vNotCall1.size)
         assertTrue(vNotCall1[0].contains("Logger.log"))
+        assertTrue(vNotCall1[0].contains(":service, unknown source set, /src/Processor.kt:10:5"))
 
         val notCallRule2 = FunctionsRuleBuilder(graph).should().notCall(String::class)
         val vNotCall2 = mutableListOf<String>()

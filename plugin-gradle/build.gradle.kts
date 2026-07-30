@@ -23,7 +23,7 @@ private val groupId = "io.github.baole.konture"
 
 description = descriptionText
 group = groupId
-version = "0.7.3"
+version = "0.7.4"
 
 gradlePlugin {
     website.set("https://baole.github.io/konture")
@@ -48,6 +48,7 @@ dependencies {
 
     testImplementation(libs.junit.jupiter.api)
     testImplementation(libs.kotlin.gradle.plugin)
+    testImplementation(gradleTestKit())
     testRuntimeOnly(libs.junit.jupiter.engine)
     testRuntimeOnly(libs.junit.platform.launcher)
 }

@@ -54,14 +54,19 @@ Konture helps developers analyze project structure and enforce architectural rul
 1. Apply the plugin to your root `build.gradle.kts`:
 ```kotlin
 plugins {
-    id("io.github.baole.konture") version "0.7.3" apply true
+    id("io.github.baole.konture") version "0.7.4" apply true
 }
 ```
 
-2. Add the dependency to your test module's `build.gradle.kts`:
+2. Apply the plugin and add the dependency in your test module's `build.gradle.kts` (e.g. `konture-test/build.gradle.kts`):
 ```kotlin
+plugins {
+    kotlin("jvm")
+    id("io.github.baole.konture")
+}
+
 dependencies {
-    testImplementation("io.github.baole:konture:0.7.3")
+    testImplementation("io.github.baole:konture:0.7.4")
 }
 ```
 
@@ -78,7 +83,7 @@ dependencies {
 <plugin>
     <groupId>io.github.baole.konture</groupId>
     <artifactId>konture-maven-plugin</artifactId>
-    <version>0.7.3</version>
+    <version>0.7.4</version>
     <executions>
         <execution>
             <phase>process-test-resources</phase>
@@ -95,7 +100,7 @@ dependencies {
 <dependency>
     <groupId>io.github.baole</groupId>
     <artifactId>konture</artifactId>
-    <version>0.7.3</version>
+    <version>0.7.4</version>
     <scope>test</scope>
 </dependency>
 ```
@@ -114,11 +119,11 @@ class ArchitectureGuardrails {
     @Test
     fun `domain layer should be completely isolated from data and UI layers`() {
         architecture {
-            // 🎯 Select modules inside domain
+            // 🎯 Select modules via wildcard pattern matching
             modules {
-                that().haveNamePath(":core:domain")
-                should().notDependOnModule(":core:data")
-                andShould().notDependOnModule(":feature:checkout")
+                that().haveNameMatching(":core:domain**")
+                should().notDependOnModule(":core:data**")
+                andShould().notDependOnModule(":feature:**")
             }
         }
     }

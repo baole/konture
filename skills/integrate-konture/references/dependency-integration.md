@@ -30,13 +30,20 @@ plugins {
 }
 ```
 
-Reference the library from the dedicated test module:
+Configure the dedicated test module (`konture-test/build.gradle.kts`):
 
 ```kotlin
+plugins {
+    kotlin("jvm")
+    alias(libs.plugins.konture)
+}
+
 dependencies {
     testImplementation(libs.konture)
 }
 ```
+
+> **Note**: Do **not** add `testImplementation(project(":..."))` dependencies for production modules in `konture-test/build.gradle.kts`. Konture extracts multi-module topology across the entire project automatically via plugin artifact sharing.
 
 ## Option B — traditional DSL (no version catalog)
 
@@ -57,6 +64,11 @@ plugins {
 Dedicated test module `build.gradle.kts`:
 
 ```kotlin
+plugins {
+    kotlin("jvm")
+    id("io.github.baole.konture")
+}
+
 dependencies {
     testImplementation("io.github.baole:konture:<latest-version>")
 }

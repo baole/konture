@@ -53,10 +53,7 @@ Gather this before touching any file:
 2. **Module list** — read `settings.gradle.kts` for every module/subproject and
    identify logical layers (e.g. `core:domain`, `core:data`, `feature:*`,
    `app`) so later steps reference real module paths, not placeholders.
-3. **Existing architecture-testing tooling** — if the project already uses
-   Konsist, detekt architecture rules, or another architecture-testing tool,
-   flag the overlap and ask whether to replace it or run alongside it, rather
-   than silently duplicating coverage.
+3. **Existing test framework & architecture tooling** — inspect `gradle/libs.versions.toml` or module `build.gradle.kts` files to discover which testing framework/libraries the project uses (e.g. Kotest, JUnit 5, JUnit 4, TestBalloon, `kotlin.test`). Also check if the project already uses Konsist or detekt architecture rules to flag overlap.
 
 ### Step 2. Install Konture
 
@@ -83,9 +80,9 @@ modules.
    `:konture-test` doesn't.
 2. Use
    [resources/konture-test-module.build.gradle.kts.template](resources/konture-test-module.build.gradle.kts.template)
-   as the starting `build.gradle.kts`. Replace every placeholder
-   `project(":...")` dependency with the real modules found in Step 1 — this
-   also forces those modules to compile before the architecture tests run.
+   as the starting `build.gradle.kts`. Ensure the Konture plugin (`alias(libs.plugins.konture)` or `id("io.github.baole.konture")`) is applied in `plugins { ... }`.
+   **Reuse existing test framework dependencies**: Check the test framework discovered in Step 1 and reuse its dependency alias/coordinates in `konture-test/build.gradle.kts` (e.g. `libs.junit.jupiter.api`, `libs.kotest.runner.junit5`, `libs.kotlin.test`). Do **not** force-add JUnit 5 if the project standardizes on Kotest, JUnit 4, or another framework.
+   Do **not** add `testImplementation(project(":..."))` dependencies for production modules, as Konture discovers multi-module layout automatically.
 3. Don't write actual architecture rules yet — that's Step 5 / the
    `konture-architecture-tests` skill's job. It's fine to leave the module with
    zero tests at this point, or at most one trivial smoke-test rule to confirm
