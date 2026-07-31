@@ -113,6 +113,12 @@ FRONT_MATTER_MAP = {
         "parent": "Recipes",
         "nav_order": 8
     },
+    "recipes/onion-architecture.md": {
+        "layout": "default",
+        "title": "Onion Architecture",
+        "parent": "Recipes",
+        "nav_order": 9
+    },
     "ai-prompts/README.md": {
         "layout": "default",
         "title": "AI Prompts & Skills",
