@@ -1,5 +1,6 @@
 /*
- * Copyright 2026 Bao Le Duc
+ * Copyright 2026 The Konture Contributors
+ * Contributors: Bao Le Duc, Octavio Calleya Garcia (@octaviospain)
  * SPDX-License-Identifier: Apache-2.0
  */
 
@@ -1011,6 +1012,66 @@ class ClassesShouldTest : RuleBuildersTestBase() {
         assertProp(classWithProp, emptyList(), vPr)
         assertEquals(1, vPr.size)
         assertTrue(vPr[0].contains("Property myProp in class com.test.TestClass has violations"))
+    }
+
+    @Test
+    fun `test classes notBeAccessedByAnyPackage flags accessors in forbidden packages`() {
+        fun builder() = ClassesRuleBuilder(projectGraph)
+
+        val target =
+            ClassDeclaration(
+                name = "DomainModel",
+                fqName = "com.acme.domain.DomainModel",
+                packageName = "com.acme.domain",
+                isInterface = false,
+                isAbstract = false,
+                annotations = emptyList(),
+                imports = emptyList(),
+                referencedTypes = emptySet(),
+                filePath = "/src/DomainModel.kt",
+            )
+        val forbiddenAccessor =
+            ClassDeclaration(
+                name = "WebController",
+                fqName = "com.acme.web.WebController",
+                packageName = "com.acme.web",
+                isInterface = false,
+                isAbstract = false,
+                annotations = emptyList(),
+                imports = listOf("com.acme.domain.DomainModel"),
+                referencedTypes = setOf("com.acme.domain.DomainModel"),
+                filePath = "/src/WebController.kt",
+            )
+        val allowedAccessor =
+            ClassDeclaration(
+                name = "DomainService",
+                fqName = "com.acme.domain.DomainService",
+                packageName = "com.acme.domain",
+                isInterface = false,
+                isAbstract = false,
+                annotations = emptyList(),
+                imports = listOf("com.acme.domain.DomainModel"),
+                referencedTypes = setOf("com.acme.domain.DomainModel"),
+                filePath = "/src/DomainService.kt",
+            )
+
+        // An accessor residing in a forbidden package produces one violation
+        val assertForbidden = builder().should().notBeAccessedByAnyPackage("..web..").getShouldAssertion()!!
+        val vForbidden = mutableListOf<String>()
+        assertForbidden(target, listOf(target, forbiddenAccessor, allowedAccessor), vForbidden)
+        assertEquals(1, vForbidden.size)
+
+        // Only an allowed accessor present: no violation
+        val assertClean = builder().should().notBeAccessedByAnyPackage("..web..").getShouldAssertion()!!
+        val vClean = mutableListOf<String>()
+        assertClean(target, listOf(target, allowedAccessor), vClean)
+        assertTrue(vClean.isEmpty())
+
+        // No accessors at all: vacuous pass, consistent with the forward assertions
+        val assertVacuous = builder().should().notBeAccessedByAnyPackage("..web..").getShouldAssertion()!!
+        val vVacuous = mutableListOf<String>()
+        assertVacuous(target, listOf(target), vVacuous)
+        assertTrue(vVacuous.isEmpty())
     }
 
     @Test

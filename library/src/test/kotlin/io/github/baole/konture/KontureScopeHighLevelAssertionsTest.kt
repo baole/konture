@@ -1,5 +1,6 @@
 /*
- * Copyright 2026 Bao Le Duc
+ * Copyright 2026 The Konture Contributors
+ * Contributors: Bao Le Duc, Octavio Calleya Garcia (@octaviospain)
  * SPDX-License-Identifier: Apache-2.0
  */
 
@@ -310,6 +311,58 @@ internal class KontureScopeHighLevelAssertionsTest : KontureScopeTestFixture() {
             )
         assertThrows<AssertionError> {
             listOf(classWithExternalLib).assertOnlyDependOnClassesInAnyPackage("..example..", allClasses = listOf(classWithExternalLib))
+        }
+    }
+
+    @Test
+    fun `test High-level notBeAccessedByAnyPackage denylist assertion`() {
+        val domainModel =
+            ClassDeclaration(
+                name = "DomainModel",
+                fqName = "com.example.domain.DomainModel",
+                packageName = "com.example.domain",
+                isInterface = false,
+                isAbstract = false,
+                annotations = emptyList(),
+                imports = emptyList(),
+                referencedTypes = emptySet(),
+                filePath = "/src/DomainModel.kt",
+            )
+        val domainService =
+            ClassDeclaration(
+                name = "DomainService",
+                fqName = "com.example.domain.DomainService",
+                packageName = "com.example.domain",
+                isInterface = false,
+                isAbstract = false,
+                annotations = emptyList(),
+                imports = listOf("com.example.domain.DomainModel"),
+                referencedTypes = setOf("com.example.domain.DomainModel"),
+                filePath = "/src/DomainService.kt",
+            )
+        val webController =
+            ClassDeclaration(
+                name = "WebController",
+                fqName = "com.example.web.WebController",
+                packageName = "com.example.web",
+                isInterface = false,
+                isAbstract = false,
+                annotations = emptyList(),
+                imports = listOf("com.example.domain.DomainModel"),
+                referencedTypes = setOf("com.example.domain.DomainModel"),
+                filePath = "/src/WebController.kt",
+            )
+
+        // Accessed only by a same-layer service: passes on both receivers
+        listOf(domainModel).assertNotBeAccessedByAnyPackage("..web..", allClasses = listOf(domainModel, domainService))
+        KontureScope(listOf(domainModel)).assertNotBeAccessedByAnyPackage("..web..", allClasses = listOf(domainModel, domainService))
+
+        // Accessed by a forbidden layer: fails on both receivers
+        assertThrows<AssertionError> {
+            listOf(domainModel).assertNotBeAccessedByAnyPackage("..web..", allClasses = listOf(domainModel, webController))
+        }
+        assertThrows<AssertionError> {
+            KontureScope(listOf(domainModel)).assertNotBeAccessedByAnyPackage("..web..", allClasses = listOf(domainModel, webController))
         }
     }
 }

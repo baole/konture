@@ -1,5 +1,6 @@
 /*
- * Copyright 2026 Bao Le Duc
+ * Copyright 2026 The Konture Contributors
+ * Contributors: Bao Le Duc, Octavio Calleya Garcia (@octaviospain)
  * SPDX-License-Identifier: Apache-2.0
  */
 
@@ -68,6 +69,49 @@ internal interface ClassesShouldDependencyAssertions {
      */
     infix fun onlyBeAccessedByAnyPackage(packagePatterns: List<String>): ClassesRuleBuilder =
         onlyBeAccessedByAnyPackage(*packagePatterns.toTypedArray())
+
+    /**
+     * Asserts that selected classes are not accessed by any class residing in packages matching the specified patterns.
+     *
+     * @param packagePatterns Package wildcard patterns representing forbidden accessing classes.
+     */
+    fun notBeAccessedByAnyPackage(vararg packagePatterns: String): ClassesRuleBuilder {
+        builder.setShould { targetCls, allClasses, violations ->
+            val accessingClasses =
+                allClasses.filter { other ->
+                    other.fqName != targetCls.fqName && other.dependsOn(targetCls)
+                }
+            for (accessor in accessingClasses) {
+                val isForbidden =
+                    packagePatterns.any { pattern ->
+                        PatternMatchers.matchesPackage(pattern, accessor.packageName)
+                    }
+                if (isForbidden) {
+                    violations.add(
+                        getMessage(
+                            "class.should.beAccessedByForbiddenPackage",
+                            targetCls.fqName,
+                            accessor.fqName,
+                            accessor.packageName,
+                            packagePatterns.joinToString(),
+                        ),
+                    )
+                }
+            }
+        }
+        return builder
+    }
+
+    /**
+     * Asserts that selected classes are not accessed by any class residing in packages matching the specified pattern.
+     */
+    infix fun notBeAccessedByAnyPackage(packagePattern: String): ClassesRuleBuilder = notBeAccessedByAnyPackage(listOf(packagePattern))
+
+    /**
+     * Asserts that selected classes are not accessed by any class residing in packages matching the specified patterns.
+     */
+    infix fun notBeAccessedByAnyPackage(packagePatterns: List<String>): ClassesRuleBuilder =
+        notBeAccessedByAnyPackage(*packagePatterns.toTypedArray())
 
     /**
      * Asserts that selected classes depend only on classes residing in packages matching the specified patterns.
