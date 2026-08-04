@@ -1,6 +1,6 @@
 /*
  * Copyright 2026 The Konture Contributors
- * Contributors: Bao Le Duc (@baole)
+ * Contributors: Bao Le Duc (@baole), Octavio Calleya Garcia (@octaviospain)
  * SPDX-License-Identifier: Apache-2.0
  */
 
@@ -545,6 +545,50 @@ fun List<ClassDeclaration>.assertOnlyBeAccessedByAnyPackage(
 }
 
 /**
+ * Asserts that the selected classes are not accessed by any class residing in packages matching the specified patterns.
+ *
+ * ### Example:
+ * ```kotlin
+ * domainModels.assertNotBeAccessedByAnyPackage("..web..", "..adapter..")
+ * ```
+ *
+ * @param packagePatterns Package wildcard patterns representing forbidden accessing classes.
+ * @param allClasses The complete collection of class declarations used for dependency resolution. Defaults to all classes in the loaded project graph.
+ * @throws AssertionError if any forbidden class accesses any of the target classes.
+ */
+fun List<ClassDeclaration>.assertNotBeAccessedByAnyPackage(
+    vararg packagePatterns: String,
+    allClasses: List<ClassDeclaration> = Konture.projectGraph.getAllModules().flatMap { it.classes },
+) {
+    val violations = mutableListOf<String>()
+    for (targetCls in this) {
+        val accessingClasses =
+            allClasses.filter { other ->
+                other.fqName != targetCls.fqName && other.dependsOn(targetCls)
+            }
+        for (accessor in accessingClasses) {
+            val isForbidden =
+                packagePatterns.any { pattern ->
+                    PatternMatchers.matchesPackage(pattern, accessor.packageName)
+                }
+            if (isForbidden) {
+                violations.add(
+                    "Class ${targetCls.fqName} is accessed by ${accessor.fqName} (in package ${accessor.packageName}), which is forbidden by package pattern(s): ${packagePatterns.joinToString()}",
+                )
+            }
+        }
+    }
+    if (violations.isNotEmpty()) {
+        throw AssertionError(
+            buildString {
+                appendLine("Assertion failed! The following classes violate access rules:")
+                violations.forEach { appendLine("  - $it") }
+            },
+        )
+    }
+}
+
+/**
  * Asserts that the selected classes depend only on classes residing in packages matching the specified patterns.
  *
  * ### Example:
@@ -735,6 +779,18 @@ fun KontureScope.assertOnlyBeAccessedByAnyPackage(
     vararg packagePatterns: String,
     allClasses: List<ClassDeclaration> = Konture.projectGraph.getAllModules().flatMap { it.classes },
 ) = classes.assertOnlyBeAccessedByAnyPackage(*packagePatterns, allClasses = allClasses)
+
+/**
+ * Asserts that the selected classes in the scope are not accessed by any class residing in packages matching the specified patterns.
+ *
+ * @param packagePatterns Package wildcard patterns representing forbidden accessing classes.
+ * @param allClasses The complete collection of class declarations used for dependency resolution. Defaults to all classes in the loaded project graph.
+ * @throws AssertionError if any forbidden class accesses any of the target classes.
+ */
+fun KontureScope.assertNotBeAccessedByAnyPackage(
+    vararg packagePatterns: String,
+    allClasses: List<ClassDeclaration> = Konture.projectGraph.getAllModules().flatMap { it.classes },
+) = classes.assertNotBeAccessedByAnyPackage(*packagePatterns, allClasses = allClasses)
 
 /**
  * Asserts that the selected classes in the scope depend only on classes residing in packages matching the specified patterns.

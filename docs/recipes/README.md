@@ -3,6 +3,7 @@
 Welcome to the Konture Recipes catalog! This section provides copy-pasteable, battle-tested templates to secure your Kotlin projects against design erosion.
 
 *   [Layer Isolation & Dependency Direction](layer-isolation.md)
+*   [Onion Architecture](onion-architecture.md)
 *   [Module Boundary Enforcement (Build-Graph Hygiene)](module-hygiene.md)
 *   [Cross-Layer Type Leakage](type-leakage.md)
 *   [Layer-Crossing Call Violations](call-violations.md)
