@@ -1,5 +1,6 @@
 /*
- * Copyright 2026 Bao Le Duc
+ * Copyright 2026 The Konture Contributors
+ * Contributors: Bao Le Duc (@baole)
  * SPDX-License-Identifier: Apache-2.0
  */
 
@@ -106,4 +107,52 @@ class ClassesRuleBuilderTest : RuleBuildersTestBase() {
             "Expected uniform module + source set location, got: ${error.message}",
         )
     }
+
+    @Test
+    fun `test classes rule builder notCall and notReferenceClass`() {
+        val usageCall =
+            SourceUsage(
+                kind = UsageKind.CALL,
+                targetFqName = "com.example.Logger.log",
+                filePath = "/src/ClassA.kt",
+                line = 10,
+                column = 5,
+                enclosingClass = "ClassA",
+                rawExpression = "Logger.log",
+            )
+        val usageRef =
+            SourceUsage(
+                kind = UsageKind.CLASS_REFERENCE,
+                targetFqName = "com.example.Service",
+                filePath = "/src/ClassA.kt",
+                line = 12,
+                column = 5,
+                enclosingClass = "ClassA",
+                rawExpression = "Service",
+            )
+        val fileDeclWithUsages = FileDeclaration("ClassA.kt", "com.example", classes = listOf(classA), usages = listOf(usageCall, usageRef), filePath = "/src/ClassA.kt")
+
+        val moduleWithUsages = moduleA.copy(files = listOf(fileDeclWithUsages))
+        val graphWithUsages = ProjectGraph(builds = mapOf(":" to listOf(moduleWithUsages)))
+
+        val ruleCall =
+            ClassesRuleBuilder(graphWithUsages)
+                .should()
+                .notCall("com.example.Logger.log")
+        val vCall = mutableListOf<String>()
+        ruleCall.getShouldAssertion()!!(classA, emptyList(), vCall)
+        assertEquals(1, vCall.size)
+        assertTrue(vCall[0].contains("Logger.log"))
+
+        val ruleRef =
+            ClassesRuleBuilder(graphWithUsages)
+                .should()
+                .notReferenceClass("com.example.Service")
+        val vRef = mutableListOf<String>()
+        ruleRef.getShouldAssertion()!!(classA, emptyList(), vRef)
+        assertEquals(1, vRef.size)
+        assertTrue(vRef[0].contains("com.example.Service"))
+    }
 }
+
+

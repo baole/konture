@@ -238,4 +238,51 @@ class FilesShould internal constructor(
         builder.setShould { file, _, violations -> assertion(file, violations) }
         return builder
     }
+
+    fun anyOf(vararg blocks: FilesShould.() -> Unit): FilesRuleBuilder {
+        builder.setShould { file, allFiles, violations ->
+            val anyPassed = blocks.any { block ->
+                val subBuilder = FilesRuleBuilder(builder.graph).allowEmpty()
+                FilesShould(subBuilder).apply(block)
+                val subAssertion = subBuilder.getShouldAssertion()
+                val subViolations = mutableListOf<String>()
+                subAssertion?.invoke(file, allFiles, subViolations)
+                subViolations.isEmpty()
+            }
+            if (!anyPassed) {
+                violations.add("File ${file.declaration.name} does not satisfy any of the specified conditions")
+            }
+        }
+        return builder
+    }
+
+    fun allOf(vararg blocks: FilesShould.() -> Unit): FilesRuleBuilder {
+        builder.setShould { file, allFiles, violations ->
+            blocks.forEach { block ->
+                val subBuilder = FilesRuleBuilder(builder.graph).allowEmpty()
+                FilesShould(subBuilder).apply(block)
+                val subAssertion = subBuilder.getShouldAssertion()
+                subAssertion?.invoke(file, allFiles, violations)
+            }
+        }
+        return builder
+    }
+
+    fun noneOf(vararg blocks: FilesShould.() -> Unit): FilesRuleBuilder {
+        builder.setShould { file, allFiles, violations ->
+            val anyPassed = blocks.any { block ->
+                val subBuilder = FilesRuleBuilder(builder.graph).allowEmpty()
+                FilesShould(subBuilder).apply(block)
+                val subAssertion = subBuilder.getShouldAssertion()
+                val subViolations = mutableListOf<String>()
+                subAssertion?.invoke(file, allFiles, subViolations)
+                subViolations.isEmpty()
+            }
+            if (anyPassed) {
+                violations.add("File ${file.declaration.name} satisfies one of the forbidden conditions")
+            }
+        }
+        return builder
+    }
 }
+

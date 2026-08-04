@@ -1,5 +1,6 @@
 /*
- * Copyright 2026 Bao Le Duc
+ * Copyright 2026 The Konture Contributors
+ * Contributors: Bao Le Duc (@baole)
  * SPDX-License-Identifier: Apache-2.0
  */
 
@@ -249,3 +250,13 @@ inline fun <reified T : Any> PropertyAssertionScope.haveTypeOf() = haveType(T::c
 fun PropertyAssertionScope.haveAnnotationOf(annotation: KClass<out Annotation>) = haveAnnotationOf(annotation.kontureQualifiedName())
 
 inline fun <reified T : Annotation> PropertyAssertionScope.haveAnnotationOfType() = haveAnnotationOf(T::class)
+
+inline fun <reified T : Any> FunctionsShould.notReferenceClass(): FunctionsRuleBuilder = notReferenceClass(T::class)
+
+inline fun <reified T : Any> PropertiesShould.notCall(): PropertiesRuleBuilder = notCall(T::class)
+
+inline fun <reified T : Any> PropertiesShould.notReferenceClass(): PropertiesRuleBuilder = notReferenceClass(T::class)
+
+
+
+

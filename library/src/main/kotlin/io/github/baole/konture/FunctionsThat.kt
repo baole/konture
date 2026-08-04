@@ -35,6 +35,9 @@ class FunctionsThat internal constructor(
         return builder
     }
 
+    infix fun resideInPackageOf(type: KClass<*>): FunctionsRuleBuilder = resideInAPackage(type.toKonturePackageReference().packageName)
+
+
     infix fun haveNameEndingWith(suffix: String): FunctionsRuleBuilder {
         builder.setThat { it.declaration.name.endsWith(suffix) }
         return builder

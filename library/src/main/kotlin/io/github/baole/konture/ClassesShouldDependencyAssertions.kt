@@ -1,6 +1,6 @@
 /*
  * Copyright 2026 The Konture Contributors
- * Contributors: Bao Le Duc, Octavio Calleya Garcia (@octaviospain)
+ * Contributors: Bao Le Duc (@baole), Octavio Calleya Garcia (@octaviospain)
  * SPDX-License-Identifier: Apache-2.0
  */
 
@@ -8,6 +8,7 @@ package io.github.baole.konture
 
 import io.github.baole.konture.i18n.getMessage
 import io.github.baole.konture.impl.PatternMatchers
+import kotlin.reflect.KClass
 
 /**
  * Fluent API for defining assertion rules on Kotlin classes.
@@ -316,4 +317,54 @@ internal interface ClassesShouldDependencyAssertions {
      */
     infix fun notDependOnClassesInAnyPackage(packagePatterns: List<String>): ClassesRuleBuilder =
         notDependOnClassesInAnyPackage(*packagePatterns.toTypedArray())
+
+    /** Fails for every invocation of [fqName] in the selected class. */
+    fun notCall(fqName: String): ClassesRuleBuilder {
+        builder.setShould { cls, _, violations ->
+            val fileUsages = builder.graph.getAllModules()
+                .flatMap { it.files }
+                .find { file -> file.filePath == cls.filePath || file.classes.any { it.fqName == cls.fqName } }
+                ?.usages.orEmpty()
+
+            fileUsages
+                .filter { usage ->
+                    usage.kind == UsageKind.CALL &&
+                        (usage.enclosingClass == cls.name || usage.enclosingClass == null) &&
+                        (usage.targetFqName == fqName || usage.targetFqName.endsWith(".$fqName") || fqName in usage.possibleTargetFqNames || usage.rawExpression == fqName)
+                }.forEach { usage ->
+                    val unresolved = if (usage.unresolvedPossibleUsage) "unresolved possible " else ""
+                    violations.add(getMessage("usage.notCall", unresolved, fqName, usage.rawExpression, usage.line, usage.column))
+                }
+        }
+        return builder
+    }
+
+    /** Fails for every invocation of [kClass] in the selected class. */
+    fun notCall(kClass: KClass<*>): ClassesRuleBuilder = notCall(kClass.kontureQualifiedName())
+
+    /** Fails for every actual class/type use of [fqName] in the selected class; imports alone do not match. */
+    fun notReferenceClass(fqName: String): ClassesRuleBuilder {
+        builder.setShould { cls, _, violations ->
+            val fileUsages = builder.graph.getAllModules()
+                .flatMap { it.files }
+                .find { file -> file.filePath == cls.filePath || file.classes.any { it.fqName == cls.fqName } }
+                ?.usages.orEmpty()
+
+            fileUsages
+                .filter { usage ->
+                    usage.kind == UsageKind.CLASS_REFERENCE &&
+                        (usage.enclosingClass == cls.name || usage.enclosingClass == null) &&
+                        (usage.targetFqName == fqName || usage.targetFqName.endsWith(".$fqName") || fqName.endsWith("." + usage.targetFqName) || usage.rawExpression == fqName || fqName in usage.possibleTargetFqNames)
+                }.forEach { usage ->
+                    violations.add(getMessage("usage.notReferenceClass", fqName, usage.rawExpression, usage.line, usage.column))
+                }
+        }
+        return builder
+    }
+
+
+    /** Fails for every actual class/type use of [kClass] in the selected class; imports alone do not match. */
+    fun notReferenceClass(kClass: KClass<*>): ClassesRuleBuilder = notReferenceClass(kClass.kontureQualifiedName())
+
 }
+

@@ -924,5 +924,29 @@ class FunctionsRuleBuilderTest : RuleBuildersTestBase() {
         val vAnyParam3 = mutableListOf<String>()
         anyParamRule3.getShouldAssertion()!!(context, emptyList(), vAnyParam3)
         assertTrue(vAnyParam3.isEmpty())
+
+        // 6. notReferenceClass
+        val refUsage = SourceUsage(
+            kind = UsageKind.CLASS_REFERENCE,
+            targetFqName = "com.example.Context",
+            filePath = "/src/Processor.kt",
+            line = 12,
+            column = 5,
+        )
+        val contextWithRef = context.copy(usages = listOf(refUsage))
+        val refRule = FunctionsRuleBuilder(graph).should().notReferenceClass("com.example.Context")
+        val vRef = mutableListOf<String>()
+        refRule.getShouldAssertion()!!(contextWithRef, emptyList(), vRef)
+        assertEquals(1, vRef.size)
+
+        // 7. composite assertions
+        val anyOfRule = FunctionsRuleBuilder(graph).should().anyOf(
+            { resideInAPackage("com.example..") },
+            { resideInAPackage("other..") }
+        )
+        val vAnyOf = mutableListOf<String>()
+        anyOfRule.getShouldAssertion()!!(context, emptyList(), vAnyOf)
+        assertTrue(vAnyOf.isEmpty())
     }
 }
+

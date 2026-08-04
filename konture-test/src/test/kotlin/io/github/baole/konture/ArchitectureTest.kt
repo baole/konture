@@ -1,5 +1,6 @@
 /*
- * Copyright 2026 Bao Le Duc
+ * Copyright 2026 The Konture Contributors
+ * Contributors: Bao Le Duc (@baole)
  * SPDX-License-Identifier: Apache-2.0
  */
 
@@ -42,5 +43,14 @@ class ArchitectureTest {
             .should()
             .onlyDependOnModules(":core")
             .check()
+    }
+
+    @Test
+    fun `no ViewModel function should call getString`() {
+        Konture.classes {
+            that().areAssignableTo<Map<String, String>>()
+            should().notCall("android.content.Context.getString")
+            andShould().notCall("getString")
+        }
     }
 }

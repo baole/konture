@@ -1,5 +1,6 @@
 /*
- * Copyright 2026 Bao Le Duc
+ * Copyright 2026 The Konture Contributors
+ * Contributors: Bao Le Duc (@baole)
  * SPDX-License-Identifier: Apache-2.0
  */
 
@@ -391,5 +392,16 @@ class FilesRuleBuilderTest : RuleBuildersTestBase() {
 
         assertNot(fileCContext, files, vNot) // package is com.other -> fails NOT(com.other)
         assertEquals(1, vNot.size)
+
+        // Composite assertions test: anyOf
+        val ruleAnyOf = FilesRuleBuilder(projectGraph).should().anyOf(
+            { resideInAPackage("com.example") },
+            { resideInAPackage("com.other") }
+        )
+        val assertAnyOf = ruleAnyOf.getShouldAssertion()!!
+        val vAnyOf = mutableListOf<String>()
+        assertAnyOf(fileAContext, files, vAnyOf)
+        assertTrue(vAnyOf.isEmpty())
     }
 }
+

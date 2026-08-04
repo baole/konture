@@ -39,6 +39,27 @@ class FunctionsShould internal constructor(
     /** Fails when the selected function invokes [T]. */
     inline fun <reified T : Any> notCall(): FunctionsRuleBuilder = notCall(T::class)
 
+    /** Fails for every actual class/type use of [fqName] in the selected function; imports alone do not match. */
+    fun notReferenceClass(fqName: String): FunctionsRuleBuilder {
+        builder.setShould { function, _, violations ->
+            function.usages
+                .filter { usage ->
+                    usage.kind == UsageKind.CLASS_REFERENCE &&
+                        (usage.targetFqName == fqName || usage.targetFqName.endsWith(".$fqName") || fqName.endsWith("." + usage.targetFqName) || usage.rawExpression == fqName || fqName in usage.possibleTargetFqNames)
+                }.forEach { usage ->
+                    violations.add(
+                        "${getMessage("usage.notReferenceClass", fqName, usage.rawExpression, usage.line, usage.column)} " +
+                            "(at ${ViolationLocation.of(function.modulePath, function.sourceSet?.name, usage.filePath, usage.line, usage.column)})",
+                    )
+                }
+        }
+        return builder
+    }
+
+    /** Fails for every actual class/type use of [kClass] in the selected function; imports alone do not match. */
+    fun notReferenceClass(kClass: KClass<*>): FunctionsRuleBuilder = notReferenceClass(kClass.kontureQualifiedName())
+
+
     infix fun resideInAPackage(packagePattern: String): FunctionsRuleBuilder {
         builder.setShould { func, _, violations ->
             if (!PatternMatchers.matchesPackage(packagePattern, func.packageName)) {
@@ -607,4 +628,53 @@ class FunctionsShould internal constructor(
         builder.setShould { func, _, violations -> assertion(func, violations) }
         return builder
     }
+
+    infix fun resideInPackageOf(type: KClass<*>): FunctionsRuleBuilder = resideInAPackage(type.toKonturePackageReference().packageName)
+
+    fun anyOf(vararg blocks: FunctionsShould.() -> Unit): FunctionsRuleBuilder {
+        builder.setShould { func, allFuncs, violations ->
+            val anyPassed = blocks.any { block ->
+                val subBuilder = FunctionsRuleBuilder(builder.graph).allowEmpty()
+                FunctionsShould(subBuilder).apply(block)
+                val subAssertion = subBuilder.getShouldAssertion()
+                val subViolations = mutableListOf<String>()
+                subAssertion?.invoke(func, allFuncs, subViolations)
+                subViolations.isEmpty()
+            }
+            if (!anyPassed) {
+                violations.add("Function ${func.qualifiedName} does not satisfy any of the specified conditions")
+            }
+        }
+        return builder
+    }
+
+    fun allOf(vararg blocks: FunctionsShould.() -> Unit): FunctionsRuleBuilder {
+        builder.setShould { func, allFuncs, violations ->
+            blocks.forEach { block ->
+                val subBuilder = FunctionsRuleBuilder(builder.graph).allowEmpty()
+                FunctionsShould(subBuilder).apply(block)
+                val subAssertion = subBuilder.getShouldAssertion()
+                subAssertion?.invoke(func, allFuncs, violations)
+            }
+        }
+        return builder
+    }
+
+    fun noneOf(vararg blocks: FunctionsShould.() -> Unit): FunctionsRuleBuilder {
+        builder.setShould { func, allFuncs, violations ->
+            val anyPassed = blocks.any { block ->
+                val subBuilder = FunctionsRuleBuilder(builder.graph).allowEmpty()
+                FunctionsShould(subBuilder).apply(block)
+                val subAssertion = subBuilder.getShouldAssertion()
+                val subViolations = mutableListOf<String>()
+                subAssertion?.invoke(func, allFuncs, subViolations)
+                subViolations.isEmpty()
+            }
+            if (anyPassed) {
+                violations.add("Function ${func.qualifiedName} satisfies one of the forbidden conditions")
+            }
+        }
+        return builder
+    }
 }
+

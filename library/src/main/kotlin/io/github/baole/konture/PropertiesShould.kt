@@ -8,7 +8,9 @@ package io.github.baole.konture
 
 import io.github.baole.konture.i18n.getMessage
 import io.github.baole.konture.impl.PatternMatchers
+import io.github.baole.konture.impl.ViolationLocation
 import kotlin.reflect.KClass
+
 
 @KontureDsl
 class PropertiesShould internal constructor(
@@ -470,4 +472,112 @@ class PropertiesShould internal constructor(
         builder.setShould { prop, _, violations -> assertion(prop, violations) }
         return builder
     }
+
+    /** Fails when the selected property initializer or delegate invokes [fqName]. */
+    fun notCall(fqName: String): PropertiesRuleBuilder {
+        builder.setShould { prop, _, violations ->
+            val fileUsages = builder.graph.getAllModules()
+                .flatMap { it.files }
+                .find { file -> file.filePath == prop.filePath || file.classes.any { it.name == prop.className } }
+                ?.usages.orEmpty()
+
+            val propUsages = fileUsages.filter { usage ->
+                usage.enclosingProperty == prop.declaration.name &&
+                    (prop.className == null || usage.enclosingClass == prop.className)
+            }
+
+            propUsages
+                .filter { usage ->
+                    usage.kind == UsageKind.CALL &&
+                        (usage.targetFqName == fqName || usage.targetFqName.endsWith(".$fqName") || fqName in usage.possibleTargetFqNames || usage.rawExpression == fqName)
+                }.forEach { usage ->
+                    val unresolved = if (usage.unresolvedPossibleUsage) "unresolved possible " else ""
+                    violations.add(
+                        "${getMessage("usage.notCall", unresolved, fqName, usage.rawExpression, usage.line, usage.column)} " +
+                            "(at ${ViolationLocation.of(prop.modulePath, prop.sourceSet?.name, prop.filePath, usage.line, usage.column)})",
+                    )
+                }
+        }
+        return builder
+    }
+
+    /** Fails when the selected property initializer or delegate invokes [kClass]. */
+    fun notCall(kClass: KClass<*>): PropertiesRuleBuilder = notCall(kClass.kontureQualifiedName())
+
+    /** Fails for every actual class/type use of [fqName] in the selected property; imports alone do not match. */
+    fun notReferenceClass(fqName: String): PropertiesRuleBuilder {
+        builder.setShould { prop, _, violations ->
+            val fileUsages = builder.graph.getAllModules()
+                .flatMap { it.files }
+                .find { file -> file.filePath == prop.filePath || file.classes.any { it.name == prop.className } }
+                ?.usages.orEmpty()
+
+            val propUsages = fileUsages.filter { usage ->
+                usage.enclosingProperty == prop.declaration.name &&
+                    (prop.className == null || usage.enclosingClass == prop.className)
+            }
+
+            propUsages
+                .filter { usage ->
+                    usage.kind == UsageKind.CLASS_REFERENCE &&
+                        (usage.targetFqName == fqName || usage.targetFqName.endsWith(".$fqName") || fqName.endsWith("." + usage.targetFqName) || usage.rawExpression == fqName || fqName in usage.possibleTargetFqNames)
+                }.forEach { usage ->
+                    violations.add(
+                        "${getMessage("usage.notReferenceClass", fqName, usage.rawExpression, usage.line, usage.column)} " +
+                            "(at ${ViolationLocation.of(prop.modulePath, prop.sourceSet?.name, prop.filePath, usage.line, usage.column)})",
+                    )
+                }
+        }
+        return builder
+    }
+
+    /** Fails for every actual class/type use of [kClass] in the selected property; imports alone do not match. */
+    fun notReferenceClass(kClass: KClass<*>): PropertiesRuleBuilder = notReferenceClass(kClass.kontureQualifiedName())
+
+    fun anyOf(vararg blocks: PropertiesShould.() -> Unit): PropertiesRuleBuilder {
+        builder.setShould { prop, allProps, violations ->
+            val anyPassed = blocks.any { block ->
+                val subBuilder = PropertiesRuleBuilder(builder.graph).allowEmpty()
+                PropertiesShould(subBuilder).apply(block)
+                val subAssertion = subBuilder.getShouldAssertion()
+                val subViolations = mutableListOf<String>()
+                subAssertion?.invoke(prop, allProps, subViolations)
+                subViolations.isEmpty()
+            }
+            if (!anyPassed) {
+                violations.add("Property ${prop.qualifiedName} does not satisfy any of the specified conditions")
+            }
+        }
+        return builder
+    }
+
+    fun allOf(vararg blocks: PropertiesShould.() -> Unit): PropertiesRuleBuilder {
+        builder.setShould { prop, allProps, violations ->
+            blocks.forEach { block ->
+                val subBuilder = PropertiesRuleBuilder(builder.graph).allowEmpty()
+                PropertiesShould(subBuilder).apply(block)
+                val subAssertion = subBuilder.getShouldAssertion()
+                subAssertion?.invoke(prop, allProps, violations)
+            }
+        }
+        return builder
+    }
+
+    fun noneOf(vararg blocks: PropertiesShould.() -> Unit): PropertiesRuleBuilder {
+        builder.setShould { prop, allProps, violations ->
+            val anyPassed = blocks.any { block ->
+                val subBuilder = PropertiesRuleBuilder(builder.graph).allowEmpty()
+                PropertiesShould(subBuilder).apply(block)
+                val subAssertion = subBuilder.getShouldAssertion()
+                val subViolations = mutableListOf<String>()
+                subAssertion?.invoke(prop, allProps, subViolations)
+                subViolations.isEmpty()
+            }
+            if (anyPassed) {
+                violations.add("Property ${prop.qualifiedName} satisfies one of the forbidden conditions")
+            }
+        }
+        return builder
+    }
 }
+

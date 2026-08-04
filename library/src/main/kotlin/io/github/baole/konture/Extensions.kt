@@ -1,6 +1,6 @@
 /*
  * Copyright 2026 The Konture Contributors
- * Contributors: Bao Le Duc, Octavio Calleya Garcia (@octaviospain)
+ * Contributors: Bao Le Duc (@baole), Octavio Calleya Garcia (@octaviospain)
  * SPDX-License-Identifier: Apache-2.0
  */
 
@@ -119,6 +119,29 @@ fun Konture.fileScopeFromModule(path: String) = KontureFileScope.fromModule(path
  * Retrieves a file-level functional [KontureFileScope] scoped to a specific package name.
  */
 fun Konture.fileScopeFromPackage(packageName: String) = KontureFileScope.fromPackage(packageName, projectGraph)
+
+/**
+ * Retrieves a function-level functional [KontureFunctionScope] representing all functions in the project.
+ */
+val Konture.functionScope: KontureFunctionScope get() = KontureFunctionScope.fromProject(projectGraph)
+
+fun Konture.functionScope(sourceSets: SourceSetSelector) = KontureFunctionScope.fromProject(projectGraph, sourceSets)
+
+fun Konture.functionScopeFromModule(path: String) = KontureFunctionScope.fromModule(path, projectGraph)
+
+fun Konture.functionScopeFromPackage(packageName: String) = KontureFunctionScope.fromPackage(packageName, projectGraph)
+
+/**
+ * Retrieves a property-level functional [KonturePropertyScope] representing all properties in the project.
+ */
+val Konture.propertyScope: KonturePropertyScope get() = KonturePropertyScope.fromProject(projectGraph)
+
+fun Konture.propertyScope(sourceSets: SourceSetSelector) = KonturePropertyScope.fromProject(projectGraph, sourceSets)
+
+fun Konture.propertyScopeFromModule(path: String) = KonturePropertyScope.fromModule(path, projectGraph)
+
+fun Konture.propertyScopeFromPackage(packageName: String) = KonturePropertyScope.fromPackage(packageName, projectGraph)
+
 
 // --- Block-based DSL Entry Points (Auto-Checking) ---
 
