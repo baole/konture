@@ -18,7 +18,7 @@ Konture supports two distinct, highly ergonomic API paradigms for designing your
 
 ### 1. Fluent Scope (Konsist-Inspired)
 
-The **Fluent Scope** style is an imperative, lambda-driven builder. You query the global project scope, filter classes using helper properties or extensions, and run assertions directly using an `assertTrue` lambda.
+The **Fluent Scope** style is an imperative, lambda-driven builder. You query the global project scope (`classes`, `files`, `functions`, or `properties`), filter elements using helper properties or extensions, and run assertions directly using an `assertTrue` lambda.
 
 This style is highly expressive, extremely flexible, and perfect for team-wide code conventions.
 
@@ -39,8 +39,29 @@ class FluentArchitectureTest {
                 classDecl.isInterface
             }
     }
+
+    @Test
+    fun "viewmodel getters should not return Unit"() {
+        Konture.functionScope
+            .functions
+            .withNameStartingWith("get")
+            .assertTrue("Getters must return non-Unit types!") { func ->
+                func.declaration.returnType != "Unit"
+            }
+    }
+
+    @Test
+    fun "properties in domain models must be read-only"() {
+        Konture.propertyScope
+            .properties
+            .withPackage("..domain..")
+            .assertTrue("Domain model properties must be val!") { prop ->
+                prop.declaration.isVal
+            }
+    }
 }
 ```
+
 
 ---
 
@@ -101,17 +122,24 @@ Konture.classes {
 
 Konture.functions {
     that().haveReturnTypeOf<Result<*>>()
-    should().haveParameterTypes(String::class, UserId::class)
+    should().notReferenceClass<android.content.Context>()
+    andShould().haveParameterTypes(String::class, UserId::class)
 }
 
 Konture.properties {
-    should().haveTypeOf<StateFlow<*>>()
+    should().notCall("android.content.Context.getString")
+    andShould().haveTypeOf<StateFlow<*>>()
 }
 
 Konture.files {
     should().notReferenceClass<LegacyClient>()
+    andShould().anyOf(
+        { resideInAPackage("com.acme.core..") },
+        { resideInAPackage("com.acme.feature..") }
+    )
 }
 ```
+
 
 Typed function and property rules compare the resolved raw declared type. For example, `List::class` matches `List<String>`, while explicit imports and import aliases resolve to their fully qualified types. Ambiguous references, generic arguments, nullability, type aliases, and type parameters still require the existing string or custom assertion APIs.
 
