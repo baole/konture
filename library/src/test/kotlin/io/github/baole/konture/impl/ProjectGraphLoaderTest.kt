@@ -131,7 +131,6 @@ class ProjectGraphLoaderTest {
                 kind = SourceSetKind.KOTLIN_JVM,
                 production = true,
                 srcDirs = listOf(moduleDir.absolutePath),
-                kotlinFiles = listOf(testFile.absolutePath, excludedFile.absolutePath),
             )
 
         val module =
@@ -169,9 +168,11 @@ class ProjectGraphLoaderTest {
     @Test
     fun `production parsing does not resolve types from test source sets or test dependencies`() {
         val appDir = File(tempDir, "app").apply { mkdirs() }
+        val mainDir = File(appDir, "src/main").apply { mkdirs() }
+        val testDir = File(appDir, "src/test").apply { mkdirs() }
         val helperDir = File(tempDir, "helper").apply { mkdirs() }
         val mainFile =
-            File(appDir, "Consumer.kt").apply {
+            File(mainDir, "Consumer.kt").apply {
                 writeText(
                     """
                     package app
@@ -183,7 +184,7 @@ class ProjectGraphLoaderTest {
                 )
             }
         val testFile =
-            File(appDir, "TestResult.kt").apply {
+            File(testDir, "TestResult.kt").apply {
                 writeText(
                     """
                     package app
@@ -210,8 +211,8 @@ class ProjectGraphLoaderTest {
                 appliedPlugins = listOf("kotlin"),
                 sourceSets =
                     listOf(
-                        SourceSetModel("main", SourceSetKind.KOTLIN_JVM, true, listOf(appDir.absolutePath), listOf(mainFile.absolutePath)),
-                        SourceSetModel("test", SourceSetKind.KOTLIN_JVM, false, listOf(appDir.absolutePath), listOf(testFile.absolutePath)),
+                        SourceSetModel("main", SourceSetKind.KOTLIN_JVM, true, listOf(mainDir.absolutePath)),
+                        SourceSetModel("test", SourceSetKind.KOTLIN_JVM, false, listOf(testDir.absolutePath)),
                     ),
                 dependencies =
                     listOf(
@@ -226,7 +227,7 @@ class ProjectGraphLoaderTest {
                 appliedPlugins = listOf("kotlin"),
                 sourceSets =
                     listOf(
-                        SourceSetModel("main", SourceSetKind.KOTLIN_JVM, true, listOf(helperDir.absolutePath), listOf(helperFile.absolutePath)),
+                        SourceSetModel("main", SourceSetKind.KOTLIN_JVM, true, listOf(helperDir.absolutePath)),
                     ),
                 dependencies = emptyList(),
             )
@@ -374,12 +375,15 @@ class ProjectGraphLoaderTest {
     @Test
     fun `KMP platform source sets see common code but not incompatible platform code`() {
         val moduleDir = File(tempDir, "kmp").apply { mkdirs() }
-        val commonFile = File(moduleDir, "Shared.kt").apply { writeText("package sample\nclass Shared") }
+        val commonDir = File(moduleDir, "commonMain").apply { mkdirs() }
+        val jvmDir = File(moduleDir, "jvmMain").apply { mkdirs() }
+        val iosDir = File(moduleDir, "iosMain").apply { mkdirs() }
+        val commonFile = File(commonDir, "Shared.kt").apply { writeText("package sample\nclass Shared") }
         val jvmFile =
-            File(moduleDir, "JvmConsumer.kt").apply {
+            File(jvmDir, "JvmConsumer.kt").apply {
                 writeText("package sample\nclass JvmConsumer { fun load(): Shared = TODO(); fun invalid(): IosOnly = TODO() }")
             }
-        val iosFile = File(moduleDir, "IosOnly.kt").apply { writeText("package sample\nclass IosOnly") }
+        val iosFile = File(iosDir, "IosOnly.kt").apply { writeText("package sample\nclass IosOnly") }
         val module =
             ModuleModel(
                 path = ":kmp",
@@ -391,16 +395,14 @@ class ProjectGraphLoaderTest {
                             "commonMain",
                             SourceSetKind.KMP,
                             true,
-                            listOf(moduleDir.absolutePath),
-                            listOf(commonFile.absolutePath),
+                            listOf(commonDir.absolutePath),
                             platforms = listOf("jvm", "native"),
                         ),
                         SourceSetModel(
                             "jvmMain",
                             SourceSetKind.KMP,
                             true,
-                            listOf(moduleDir.absolutePath),
-                            listOf(jvmFile.absolutePath),
+                            listOf(jvmDir.absolutePath),
                             platforms = listOf("jvm"),
                             dependsOnSourceSets = listOf("commonMain"),
                         ),
@@ -408,8 +410,7 @@ class ProjectGraphLoaderTest {
                             "iosMain",
                             SourceSetKind.KMP,
                             true,
-                            listOf(moduleDir.absolutePath),
-                            listOf(iosFile.absolutePath),
+                            listOf(iosDir.absolutePath),
                             platforms = listOf("native"),
                         ),
                     ),
@@ -427,12 +428,15 @@ class ProjectGraphLoaderTest {
     @Test
     fun `KMP native targets do not resolve declarations from another native target`() {
         val moduleDir = File(tempDir, "native-kmp").apply { mkdirs() }
-        val commonFile = File(moduleDir, "Shared.kt").apply { writeText("package sample\nclass Shared") }
+        val commonDir = File(moduleDir, "commonMain").apply { mkdirs() }
+        val iosDir = File(moduleDir, "iosMain").apply { mkdirs() }
+        val linuxDir = File(moduleDir, "linuxMain").apply { mkdirs() }
+        val commonFile = File(commonDir, "Shared.kt").apply { writeText("package sample\nclass Shared") }
         val iosFile =
-            File(moduleDir, "IosConsumer.kt").apply {
+            File(iosDir, "IosConsumer.kt").apply {
                 writeText("package sample\nclass IosConsumer { fun shared(): Shared = TODO(); fun invalid(): LinuxOnly = TODO() }")
             }
-        val linuxFile = File(moduleDir, "LinuxOnly.kt").apply { writeText("package sample\nclass LinuxOnly") }
+        val linuxFile = File(linuxDir, "LinuxOnly.kt").apply { writeText("package sample\nclass LinuxOnly") }
         val module =
             ModuleModel(
                 path = ":native-kmp",
@@ -444,16 +448,14 @@ class ProjectGraphLoaderTest {
                             "commonMain",
                             SourceSetKind.KMP,
                             true,
-                            listOf(moduleDir.absolutePath),
-                            listOf(commonFile.absolutePath),
+                            listOf(commonDir.absolutePath),
                             platforms = listOf("native", "iosArm64", "linuxX64"),
                         ),
                         SourceSetModel(
                             "iosMain",
                             SourceSetKind.KMP,
                             true,
-                            listOf(moduleDir.absolutePath),
-                            listOf(iosFile.absolutePath),
+                            listOf(iosDir.absolutePath),
                             platforms = listOf("native", "iosArm64"),
                             dependsOnSourceSets = listOf("commonMain"),
                         ),
@@ -461,8 +463,7 @@ class ProjectGraphLoaderTest {
                             "linuxMain",
                             SourceSetKind.KMP,
                             true,
-                            listOf(moduleDir.absolutePath),
-                            listOf(linuxFile.absolutePath),
+                            listOf(linuxDir.absolutePath),
                             platforms = listOf("native", "linuxX64"),
                         ),
                     ),
@@ -480,11 +481,13 @@ class ProjectGraphLoaderTest {
     @Test
     fun `KMP unrelated source sets for one JVM target are isolated`() {
         val moduleDir = File(tempDir, "jvm-kmp").apply { mkdirs() }
+        val firstDir = File(moduleDir, "firstJvmMain").apply { mkdirs() }
+        val secondDir = File(moduleDir, "secondJvmMain").apply { mkdirs() }
         val consumerFile =
-            File(moduleDir, "FirstConsumer.kt").apply {
+            File(firstDir, "FirstConsumer.kt").apply {
                 writeText("package sample\nclass FirstConsumer { fun invalid(): SecondOnly = TODO() }")
             }
-        val secondFile = File(moduleDir, "SecondOnly.kt").apply { writeText("package sample\nclass SecondOnly") }
+        val secondFile = File(secondDir, "SecondOnly.kt").apply { writeText("package sample\nclass SecondOnly") }
         val module =
             ModuleModel(
                 path = ":jvm-kmp",
@@ -496,15 +499,13 @@ class ProjectGraphLoaderTest {
                             "firstJvmMain",
                             SourceSetKind.KMP,
                             true,
-                            listOf(moduleDir.absolutePath),
-                            listOf(consumerFile.absolutePath),
+                            listOf(firstDir.absolutePath),
                         ),
                         SourceSetModel(
                             "secondJvmMain",
                             SourceSetKind.KMP,
                             true,
-                            listOf(moduleDir.absolutePath),
-                            listOf(secondFile.absolutePath),
+                            listOf(secondDir.absolutePath),
                         ),
                     ),
                 dependencies = emptyList(),
@@ -538,7 +539,6 @@ class ProjectGraphLoaderTest {
                             SourceSetKind.KMP,
                             true,
                             listOf(appDir.absolutePath),
-                            listOf(consumerFile.absolutePath),
                             platforms = listOf("jvm"),
                             dependencyConfigurations = listOf("appJvmMainImplementation"),
                         ),
@@ -557,7 +557,6 @@ class ProjectGraphLoaderTest {
                             SourceSetKind.KMP,
                             true,
                             listOf(libraryDir.absolutePath),
-                            listOf(desktopFile.absolutePath),
                             platforms = listOf("jvm"),
                         ),
                     ),
@@ -592,7 +591,6 @@ class ProjectGraphLoaderTest {
                             SourceSetKind.KMP,
                             true,
                             listOf(appDir.absolutePath),
-                            listOf(consumerFile.absolutePath),
                             platforms = listOf("jvm", "native"),
                             targetNames = listOf("IOS_ARM64"),
                             dependencyConfigurations = listOf("commonMainImplementation"),
@@ -612,7 +610,6 @@ class ProjectGraphLoaderTest {
                             SourceSetKind.KMP,
                             true,
                             listOf(libraryDir.absolutePath),
-                            listOf(jvmFile.absolutePath),
                             platforms = listOf("jvm"),
                         ),
                     ),
@@ -647,7 +644,6 @@ class ProjectGraphLoaderTest {
                             SourceSetKind.KMP,
                             true,
                             listOf(appDir.absolutePath),
-                            listOf(consumerFile.absolutePath),
                             platforms = listOf("jvm", "native"),
                             targetNames = listOf("IOS_ARM64"),
                             dependencyConfigurations = listOf("commonMainImplementation"),
@@ -667,7 +663,6 @@ class ProjectGraphLoaderTest {
                             SourceSetKind.KMP,
                             true,
                             listOf(libraryDir.absolutePath),
-                            listOf(sharedFile.absolutePath),
                             platforms = listOf("jvm", "native"),
                             targetNames = listOf("IOS_ARM64"),
                         ),
@@ -685,13 +680,15 @@ class ProjectGraphLoaderTest {
     @Test
     fun `KMP source set dependency is visible only to its owning compilation`() {
         val appDir = File(tempDir, "scoped-dependency-app").apply { mkdirs() }
+        val jvmDir = File(appDir, "jvmMain").apply { mkdirs() }
+        val iosDir = File(appDir, "iosMain").apply { mkdirs() }
         val libraryDir = File(tempDir, "scoped-dependency-library").apply { mkdirs() }
         val jvmFile =
-            File(appDir, "JvmConsumer.kt").apply {
+            File(jvmDir, "JvmConsumer.kt").apply {
                 writeText("package sample\nclass JvmConsumer { fun invalid(): LibraryCommon = TODO() }")
             }
         val iosFile =
-            File(appDir, "IosConsumer.kt").apply {
+            File(iosDir, "IosConsumer.kt").apply {
                 writeText("package sample\nclass IosConsumer { fun load(): LibraryCommon = TODO() }")
             }
         val libraryFile = File(libraryDir, "LibraryCommon.kt").apply { writeText("package sample\nclass LibraryCommon") }
@@ -707,7 +704,6 @@ class ProjectGraphLoaderTest {
                             SourceSetKind.KMP,
                             true,
                             listOf(appDir.absolutePath),
-                            emptyList(),
                             platforms = listOf("jvm", "native"),
                             targetNames = listOf("IOS_ARM64"),
                             dependencyConfigurations = listOf("commonMainImplementation"),
@@ -716,8 +712,7 @@ class ProjectGraphLoaderTest {
                             "jvmMain",
                             SourceSetKind.KMP,
                             true,
-                            listOf(appDir.absolutePath),
-                            listOf(jvmFile.absolutePath),
+                            listOf(jvmDir.absolutePath),
                             platforms = listOf("jvm"),
                             dependsOnSourceSets = listOf("commonMain"),
                             dependencyConfigurations = listOf("jvmMainImplementation"),
@@ -726,8 +721,7 @@ class ProjectGraphLoaderTest {
                             "iosMain",
                             SourceSetKind.KMP,
                             true,
-                            listOf(appDir.absolutePath),
-                            listOf(iosFile.absolutePath),
+                            listOf(iosDir.absolutePath),
                             platforms = listOf("native"),
                             targetNames = listOf("IOS_ARM64"),
                             dependsOnSourceSets = listOf("commonMain"),
@@ -748,7 +742,6 @@ class ProjectGraphLoaderTest {
                             SourceSetKind.KMP,
                             true,
                             listOf(libraryDir.absolutePath),
-                            listOf(libraryFile.absolutePath),
                             platforms = listOf("jvm", "native"),
                             targetNames = listOf("IOS_ARM64"),
                         ),
@@ -774,8 +767,7 @@ class ProjectGraphLoaderTest {
                 name = "main",
                 kind = SourceSetKind.KOTLIN_JVM,
                 production = true,
-                srcDirs = listOf(moduleDir.absolutePath),
-                kotlinFiles = listOf(File(moduleDir, "NonExistentFile.kt").absolutePath),
+                srcDirs = listOf(File(moduleDir, "NonExistentDir").absolutePath),
             )
 
         val module =
@@ -888,5 +880,118 @@ class ProjectGraphLoaderTest {
         val loadedDeps = graph.externalDependencies
         assertNotNull(loadedDeps)
         assertTrue(loadedDeps.modules.isEmpty())
+    }
+
+    @Test
+    fun `legacy layout_v2 json containing deprecated kotlinFiles or unknown properties is successfully parsed`() {
+        val moduleDir = File(tempDir, "legacy-module").apply { mkdirs() }
+        val srcDir = File(moduleDir, "src/main/kotlin").apply { mkdirs() }
+        File(srcDir, "Sample.kt").writeText("package sample\nclass Sample")
+
+        val rawJsonWithUnknownKeys =
+            """
+            {
+              "schemaVersion": 2,
+              "builds": [
+                {
+                  "id": ":",
+                  "modules": [
+                    {
+                      "path": ":legacy-module",
+                      "projectDir": "${moduleDir.absolutePath.replace("\\", "\\\\")}",
+                      "appliedPlugins": ["kotlin"],
+                      "unknownModuleProperty": "should_be_ignored",
+                      "sourceSets": [
+                        {
+                          "name": "main",
+                          "kind": "KOTLIN_JVM",
+                          "production": true,
+                          "srcDirs": ["${srcDir.absolutePath.replace("\\", "\\\\")}"],
+                          "kotlinFiles": ["src/main/kotlin/Sample.kt"],
+                          "unknownSourceSetProperty": 12345
+                        }
+                      ],
+                      "dependencies": []
+                    }
+                  ]
+                }
+              ]
+            }
+            """.trimIndent()
+
+        val graph = ProjectGraphLoader.loadFromStream(ByteArrayInputStream(rawJsonWithUnknownKeys.toByteArray()))
+        val loadedModule = graph.getAllModules().single()
+        assertEquals(":legacy-module", loadedModule.path)
+        val loadedFile = loadedModule.files.single()
+        assertEquals("Sample.kt", loadedFile.name)
+    }
+
+    @Test
+    fun `dynamic file discovery traverses nested subdirectories, supports kt and kts files, and ignores non-kotlin files`() {
+        val moduleDir = File(tempDir, "discovery-module").apply { mkdirs() }
+        val mainSrcDir = File(moduleDir, "src/main/kotlin").apply { mkdirs() }
+        val testSrcDir = File(moduleDir, "src/test/kotlin").apply { mkdirs() }
+
+        // Create nested production files
+        val alphaDir = File(mainSrcDir, "com/example/a").apply { mkdirs() }
+        val betaDir = File(mainSrcDir, "com/example/b").apply { mkdirs() }
+        File(alphaDir, "Alpha.kt").writeText("package com.example.a\nclass Alpha")
+        File(betaDir, "Beta.kt").writeText("package com.example.b\nclass Beta")
+        File(mainSrcDir, "Script.kts").writeText("println(\"hello\")")
+
+        // Create non-Kotlin files that should be ignored
+        File(mainSrcDir, "README.txt").writeText("documentation")
+        val resDir = File(moduleDir, "src/main/resources").apply { mkdirs() }
+        File(resDir, "config.json").writeText("{}")
+
+        // Create nested test files
+        val testBetaDir = File(testSrcDir, "com/example/b").apply { mkdirs() }
+        File(testSrcDir, "AlphaTest.kt").writeText("package com.example\nclass AlphaTest")
+        File(testBetaDir, "BetaTest.kt").writeText("package com.example.b\nclass BetaTest")
+
+        val moduleModel =
+            ModuleModel(
+                path = ":discovery-module",
+                projectDir = moduleDir.absolutePath,
+                appliedPlugins = listOf("kotlin"),
+                sourceSets =
+                    listOf(
+                        SourceSetModel(
+                            name = "main",
+                            kind = SourceSetKind.KOTLIN_JVM,
+                            production = true,
+                            srcDirs = listOf("src/main/kotlin"),
+                        ),
+                        SourceSetModel(
+                            name = "test",
+                            kind = SourceSetKind.KOTLIN_JVM,
+                            production = false,
+                            srcDirs = listOf("src/test/kotlin"),
+                        ),
+                    ),
+                dependencies = emptyList(),
+            )
+
+        val layoutModel =
+            LayoutModel(
+                schemaVersion = LayoutModel.CURRENT_SCHEMA_VERSION,
+                builds = listOf(BuildModel(id = ":", modules = listOf(moduleModel))),
+            )
+
+        val graph = ProjectGraphLoader.loadFromStream(ByteArrayInputStream(json.encodeToString(layoutModel).toByteArray()))
+
+        // Production module main files
+        val prodModule = graph.getAllModules().single { it.path == ":discovery-module" }
+        assertNotNull(prodModule)
+        val mainFileNames = prodModule.files.filter { file -> file.sourceSets.any { it.name == "main" } }.map { it.name }.toSet()
+        assertEquals(setOf("Alpha.kt", "Beta.kt", "Script.kts"), mainFileNames)
+
+        // Test module files
+        val testFileNames = prodModule.files.filter { file -> file.sourceSets.any { it.name == "test" } }.map { it.name }.toSet()
+        assertEquals(setOf("AlphaTest.kt", "BetaTest.kt"), testFileNames)
+
+        // All module files combined
+        val allFileNames = prodModule.files.map { it.name }.toSet()
+        assertEquals(setOf("Alpha.kt", "Beta.kt", "Script.kts", "AlphaTest.kt", "BetaTest.kt"), allFileNames)
     }
 }

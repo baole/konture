@@ -1,5 +1,6 @@
 /*
- * Copyright 2026 Bao Le Duc
+ * Copyright 2026 The Konture Contributors
+ * Contributors: Bao Le Duc (@baole)
  * SPDX-License-Identifier: Apache-2.0
  */
 
@@ -23,7 +24,6 @@ data class SourceSetModel(
     val kind: SourceSetKind,
     val production: Boolean,
     val srcDirs: List<String>,
-    val kotlinFiles: List<String>,
     val platforms: List<String> = emptyList(),
     /** Concrete Kotlin/Native target identities associated with this source set (for example, `IOS_ARM64`). */
     val targetNames: List<String> = emptyList(),

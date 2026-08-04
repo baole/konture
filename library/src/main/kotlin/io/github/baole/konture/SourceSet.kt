@@ -1,5 +1,6 @@
 /*
- * Copyright 2026 Bao Le Duc
+ * Copyright 2026 The Konture Contributors
+ * Contributors: Bao Le Duc (@baole)
  * SPDX-License-Identifier: Apache-2.0
  */
 
@@ -21,6 +22,5 @@ data class SourceSet(
     val kind: String,
     val production: Boolean,
     val srcDirs: List<String>,
-    val kotlinFiles: List<String>,
     val platforms: List<String> = emptyList(),
 )

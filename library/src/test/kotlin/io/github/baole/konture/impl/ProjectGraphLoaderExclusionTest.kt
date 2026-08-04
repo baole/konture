@@ -1,5 +1,6 @@
 /*
- * Copyright 2026 Bao Le Duc
+ * Copyright 2026 The Konture Contributors
+ * Contributors: Bao Le Duc (@baole)
  * SPDX-License-Identifier: Apache-2.0
  */
 
@@ -95,12 +96,6 @@ class ProjectGraphLoaderExclusionTest {
                 kind = SourceSetKind.KOTLIN_JVM,
                 production = true,
                 srcDirs = listOf(moduleADir.absolutePath),
-                kotlinFiles =
-                    listOf(
-                        serviceFile.absolutePath,
-                        excludedPkgFile.absolutePath,
-                        excludedClassFile.absolutePath,
-                    ),
             )
 
         val sourceSetB =
@@ -109,7 +104,6 @@ class ProjectGraphLoaderExclusionTest {
                 kind = SourceSetKind.KOTLIN_JVM,
                 production = true,
                 srcDirs = listOf(moduleBDir.absolutePath),
-                kotlinFiles = listOf(classBFile.absolutePath),
             )
 
         val moduleA =
@@ -254,7 +248,6 @@ class ProjectGraphLoaderExclusionTest {
                 kind = SourceSetKind.KOTLIN_JVM,
                 production = true,
                 srcDirs = listOf(moduleDir.absolutePath),
-                kotlinFiles = listOf(controllerFile.absolutePath, helperFile.absolutePath, testFile.absolutePath),
             )
 
         val dependencies =

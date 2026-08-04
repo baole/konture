@@ -128,11 +128,7 @@ internal class ProjectGraphLoader {
                     moduleModel.sourceSets.forEach { sourceSetModel ->
                         val key = Triple(buildModel.id, moduleModel.path, sourceSetModel.name)
                         sourceSetModels[key] = sourceSetModel
-                        val files =
-                            sourceSetModel.kotlinFiles.map { filePath ->
-                                val candidate = File(filePath)
-                                if (candidate.isAbsolute) candidate else File(resolvedProjectDir, filePath)
-                            }
+                        val files = resolveSourceSetFiles(sourceSetModel, resolvedProjectDir, buildRoot)
                         declaredClassesBySourceSet[key] = PsiParser.getDeclaredClassFqNames(files)
                         declaredTypeAliasesBySourceSet[key] = PsiParser.getDeclaredTypeAliases(files)
                     }
@@ -294,10 +290,9 @@ internal class ProjectGraphLoader {
                                         kind = sourceSetModel.kind.toPublicKind(),
                                         role = if (sourceSetModel.production) SourceSetRole.PRODUCTION else SourceSetRole.TEST,
                                     )
-                                sourceSetModel.kotlinFiles.forEach { filePath ->
-                                    val candidate = File(filePath)
-                                    val resolved = if (candidate.isAbsolute) candidate else File(resolvedProjectDir, filePath)
-                                    pathsToSourceSets.getOrPut(resolved.canonicalPath) { mutableListOf() }.add(sourceSetId)
+                                val files = resolveSourceSetFiles(sourceSetModel, File(resolvedProjectDir), buildRoot)
+                                files.forEach { file ->
+                                    pathsToSourceSets.getOrPut(file.canonicalPath) { mutableListOf() }.add(sourceSetId)
                                 }
                             }
                             val files =
@@ -346,7 +341,6 @@ internal class ProjectGraphLoader {
                                             kind = ss.kind.name,
                                             production = ss.production,
                                             srcDirs = resolvedSrcDirs,
-                                            kotlinFiles = ss.kotlinFiles,
                                             platforms = ss.platforms,
                                         )
                                     },
@@ -458,6 +452,36 @@ private fun CoreSourceSetKind.toPublicKind(): SourceSetKind =
         CoreSourceSetKind.ANDROID_VARIANT -> SourceSetKind.ANDROID
         CoreSourceSetKind.KMP -> SourceSetKind.KMP
     }
+
+private fun resolveSourceSetFiles(
+    sourceSetModel: SourceSetModel,
+    resolvedProjectDir: File,
+    buildRoot: File,
+): List<File> {
+    val files = mutableListOf<File>()
+    sourceSetModel.srcDirs.forEach { dirPath ->
+        val candidate = File(dirPath)
+        val resolved =
+            when {
+                candidate.isAbsolute -> candidate
+                File(resolvedProjectDir, dirPath).exists() -> File(resolvedProjectDir, dirPath)
+                File(buildRoot, dirPath).exists() -> File(buildRoot, dirPath)
+                else -> File(resolvedProjectDir, dirPath)
+            }
+        if (resolved.exists()) {
+            if (resolved.isDirectory) {
+                resolved
+                    .walkTopDown()
+                    .filter { it.isFile && (it.extension == "kt" || it.extension == "kts") }
+                    .forEach { files.add(it) }
+            } else if (resolved.isFile && (resolved.extension == "kt" || resolved.extension == "kts")) {
+                files.add(resolved)
+            }
+        }
+    }
+
+    return files.distinctBy { it.canonicalPath }
+}
 
 /**
  * Extension on [ProjectGraph.Companion] to load the layout model from a classpath resource

@@ -139,27 +139,6 @@ abstract class GenerateArchitectureLayout : DefaultTask() {
 
                 val sourceSetModels =
                     input.sourceSets.map { ssInput ->
-                        val files = mutableListOf<String>()
-                        ssInput.srcDirs.forEach { dirPath ->
-                            val dirFile = File(dirPath).let { if (it.isAbsolute) it.canonicalFile else File(rootDir, dirPath).canonicalFile }
-                            val isGenerated =
-                                try {
-                                    val rel = dirFile.relativeTo(moduleDir).path
-                                    rel.startsWith("build/") || rel.startsWith("build\\") || rel == "build"
-                                } catch (e: IllegalArgumentException) {
-                                    false
-                                }
-                            if (!isGenerated && dirFile.exists() && dirFile.isDirectory) {
-                                dirFile
-                                    .walkTopDown()
-                                    .filter { it.isFile && it.extension == "kt" }
-                                    .forEach { file ->
-                                        val relPath = file.relativeTo(moduleDir).path
-                                        files.add(relPath)
-                                    }
-                            }
-                        }
-
                         val relSrcDirs =
                             ssInput.srcDirs.map { dirPath ->
                                 val dirFile = File(dirPath).let { if (it.isAbsolute) it.canonicalFile else File(rootDir, dirPath).canonicalFile }
@@ -175,7 +154,6 @@ abstract class GenerateArchitectureLayout : DefaultTask() {
                             kind = SourceSetKind.valueOf(ssInput.kind),
                             production = ssInput.production,
                             srcDirs = relSrcDirs,
-                            kotlinFiles = files,
                             platforms = ssInput.platforms,
                             targetNames = ssInput.targetNames,
                             dependsOnSourceSets = ssInput.dependsOnSourceSets,

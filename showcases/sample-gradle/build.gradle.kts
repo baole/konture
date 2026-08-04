@@ -1,6 +1,6 @@
 plugins {
     kotlin("jvm") version "2.4.0" apply false
-    id("io.github.baole.konture") version "0.7.4"
+    id("io.github.baole.konture") version "0.7.5"
 }
 
 allprojects {
