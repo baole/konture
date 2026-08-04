@@ -42,12 +42,15 @@ abstract class GenerateDependencyGraph : DefaultTask() {
     @get:PathSensitive(PathSensitivity.RELATIVE)
     abstract val buildFiles: ConfigurableFileCollection
 
+    /** Map of module paths to lists of declared dependency strings. */
     @get:Input
     abstract val declaredDependencies: MapProperty<String, List<String>>
 
+    /** Map of module paths to lists of resolved dependency coordinate strings. */
     @get:Input
     abstract val resolvedDependencies: MapProperty<String, List<String>>
 
+    /** Output file property for the generated `dependencies.json` artifact. */
     @get:OutputFile
     abstract val outputFile: RegularFileProperty
 

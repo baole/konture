@@ -10,11 +10,18 @@ import io.github.baole.konture.i18n.getMessage
 import io.github.baole.konture.impl.PatternMatchers
 import kotlin.reflect.KClass
 
+/**
+ * Fluent API for defining assertion rules on Kotlin source files.
+ */
 @KontureDsl
 class FilesShould internal constructor(
     private val builder: FilesRuleBuilder,
 ) {
-    /** Fails for every invocation of [fqName] in the selected source file. */
+    /**
+     * Fails for every invocation of [fqName] in the selected source file.
+     *
+     * @param fqName Fully qualified target symbol name.
+     */
     fun notCall(fqName: String): FilesRuleBuilder {
         builder.setShould { file, _, violations ->
             file.declaration.usages
@@ -29,13 +36,23 @@ class FilesShould internal constructor(
         return builder
     }
 
-    /** Fails for every invocation of [kClass] in the selected source file. */
+    /**
+     * Fails for every invocation of [kClass] in the selected source file.
+     *
+     * @param kClass Target class whose methods or constructors should not be called.
+     */
     fun notCall(kClass: KClass<*>): FilesRuleBuilder = notCall(kClass.kontureQualifiedName())
 
-    /** Fails for every invocation of [T] in the selected source file. */
+    /**
+     * Fails for every invocation of [T] in the selected source file.
+     */
     inline fun <reified T : Any> notCall(): FilesRuleBuilder = notCall(T::class)
 
-    /** Fails for every actual class/type use of [fqName]; imports alone do not match. */
+    /**
+     * Fails for every actual class/type use of [fqName]; imports alone do not match.
+     *
+     * @param fqName Fully qualified class or type name.
+     */
     fun notReferenceClass(fqName: String): FilesRuleBuilder {
         builder.setShould { file, _, violations ->
             file.declaration.usages
@@ -47,12 +64,23 @@ class FilesShould internal constructor(
         return builder
     }
 
-    /** Fails for every actual class/type use of [kClass]; imports alone do not match. */
+    /**
+     * Fails for every actual class/type use of [kClass]; imports alone do not match.
+     *
+     * @param kClass Target class that should not be referenced.
+     */
     fun notReferenceClass(kClass: KClass<*>): FilesRuleBuilder = notReferenceClass(kClass.kontureQualifiedName())
 
-    /** Fails for every actual class/type use of [T]; imports alone do not match. */
+    /**
+     * Fails for every actual class/type use of [T]; imports alone do not match.
+     */
     inline fun <reified T : Any> notReferenceClass(): FilesRuleBuilder = notReferenceClass(T::class)
 
+    /**
+     * Asserts that selected files reside in a package matching [packagePattern].
+     *
+     * @param packagePattern Package wildcard pattern.
+     */
     infix fun resideInAPackage(packagePattern: String): FilesRuleBuilder {
         builder.setShould { file, _, violations ->
             if (!PatternMatchers.matchesPackage(packagePattern, file.declaration.packageName)) {
@@ -64,6 +92,11 @@ class FilesShould internal constructor(
         return builder
     }
 
+    /**
+     * Asserts that selected files reside in a package matching any of [packagePatterns].
+     *
+     * @param packagePatterns List of package wildcard patterns.
+     */
     infix fun resideInAPackage(packagePatterns: List<String>): FilesRuleBuilder {
         builder.setShould { file, _, violations ->
             val matches = packagePatterns.any { PatternMatchers.matchesPackage(it, file.declaration.packageName) }
@@ -76,8 +109,18 @@ class FilesShould internal constructor(
         return builder
     }
 
+    /**
+     * Asserts that selected files reside in a package matching any of [packagePatterns].
+     *
+     * @param packagePatterns Package wildcard patterns.
+     */
     fun resideInAPackage(vararg packagePatterns: String): FilesRuleBuilder = resideInAPackage(packagePatterns.toList())
 
+    /**
+     * Asserts that selected files reside in a package satisfying [predicate].
+     *
+     * @param predicate Predicate checking package name.
+     */
     infix fun resideInAPackage(predicate: (String) -> Boolean): FilesRuleBuilder {
         builder.setShould { file, _, violations ->
             if (!predicate(file.declaration.packageName)) {
@@ -89,6 +132,11 @@ class FilesShould internal constructor(
         return builder
     }
 
+    /**
+     * Asserts that selected files have filenames ending with [suffix].
+     *
+     * @param suffix Filename suffix.
+     */
     infix fun haveNameEndingWith(suffix: String): FilesRuleBuilder {
         builder.setShould { file, _, violations ->
             if (!file.declaration.name.endsWith(suffix)) {
@@ -100,6 +148,11 @@ class FilesShould internal constructor(
         return builder
     }
 
+    /**
+     * Asserts that selected files have filenames ending with any of [suffixes].
+     *
+     * @param suffixes List of filename suffixes.
+     */
     infix fun haveNameEndingWith(suffixes: List<String>): FilesRuleBuilder {
         builder.setShould { file, _, violations ->
             val matches = suffixes.any { file.declaration.name.endsWith(it) }
@@ -112,8 +165,18 @@ class FilesShould internal constructor(
         return builder
     }
 
+    /**
+     * Asserts that selected files have filenames ending with any of [suffixes].
+     *
+     * @param suffixes Filename suffixes.
+     */
     fun haveNameEndingWith(vararg suffixes: String): FilesRuleBuilder = haveNameEndingWith(suffixes.toList())
 
+    /**
+     * Asserts that selected files have filenames starting with [prefix].
+     *
+     * @param prefix Filename prefix.
+     */
     infix fun haveNameStartingWith(prefix: String): FilesRuleBuilder {
         builder.setShould { file, _, violations ->
             if (!file.declaration.name.startsWith(prefix)) {
@@ -125,6 +188,11 @@ class FilesShould internal constructor(
         return builder
     }
 
+    /**
+     * Asserts that selected files have filenames starting with any of [prefixes].
+     *
+     * @param prefixes List of filename prefixes.
+     */
     infix fun haveNameStartingWith(prefixes: List<String>): FilesRuleBuilder {
         builder.setShould { file, _, violations ->
             val matches = prefixes.any { file.declaration.name.startsWith(it) }
@@ -137,8 +205,18 @@ class FilesShould internal constructor(
         return builder
     }
 
+    /**
+     * Asserts that selected files have filenames starting with any of [prefixes].
+     *
+     * @param prefixes Filename prefixes.
+     */
     fun haveNameStartingWith(vararg prefixes: String): FilesRuleBuilder = haveNameStartingWith(prefixes.toList())
 
+    /**
+     * Asserts that selected files have filenames matching [pattern].
+     *
+     * @param pattern Glob pattern.
+     */
     infix fun haveNameMatching(pattern: String): FilesRuleBuilder {
         builder.setShould { file, _, violations ->
             if (!PatternMatchers.matchesSimpleGlob(pattern, file.declaration.name)) {
@@ -150,6 +228,11 @@ class FilesShould internal constructor(
         return builder
     }
 
+    /**
+     * Asserts that selected files have filenames matching any of [patterns].
+     *
+     * @param patterns List of glob patterns.
+     */
     infix fun haveNameMatching(patterns: List<String>): FilesRuleBuilder {
         builder.setShould { file, _, violations ->
             val matches = patterns.any { PatternMatchers.matchesSimpleGlob(it, file.declaration.name) }
@@ -162,10 +245,26 @@ class FilesShould internal constructor(
         return builder
     }
 
+    /**
+     * Asserts that selected files have filenames matching any of [patterns].
+     *
+     * @param patterns Glob patterns.
+     */
     fun haveNameMatching(vararg patterns: String): FilesRuleBuilder = haveNameMatching(patterns.toList())
 
+    /**
+     * Asserts that selected files have a filename satisfying [predicate].
+     *
+     * @param predicate Predicate checking filename.
+     */
     infix fun haveName(predicate: (String) -> Boolean): FilesRuleBuilder = haveName("custom name predicate", predicate)
 
+    /**
+     * Asserts that selected files have a filename satisfying [predicate].
+     *
+     * @param description Descriptive label for failure messages.
+     * @param predicate Predicate checking filename.
+     */
     fun haveName(
         description: String,
         predicate: (String) -> Boolean,
@@ -180,6 +279,9 @@ class FilesShould internal constructor(
         return builder
     }
 
+    /**
+     * Asserts that selected files do not contain wildcard imports (e.g., `import java.util.*`).
+     */
     fun notHaveWildcardImports(): FilesRuleBuilder {
         builder.setShould { file, _, violations ->
             val wildcards = file.declaration.imports.filter { it.endsWith(".*") }
@@ -192,6 +294,9 @@ class FilesShould internal constructor(
         return builder
     }
 
+    /**
+     * Asserts that selected files contain at most one class declaration per file.
+     */
     fun haveOnlyOneClassPerFile(): FilesRuleBuilder {
         builder.setShould { file, _, violations ->
             if (file.declaration.classes.size > 1) {

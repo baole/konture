@@ -77,13 +77,20 @@ class DeclarativeArchitectureTest {
 Konture's existing source rules inspect production source sets by default. Select test or custom source sets explicitly when a rule must inspect test code:
 
 ```kotlin
-Konture.files(sourceSets = SourceSets.tests()) {
-    should().notCall("io.mockk.spyk")
-    should().notReferenceClass("io.mockk.MockK")
+Konture.classes(sourceSets = SourceSets.tests()) {
+    that().resideInAModule(":feature:*")
+        .should().notCall("io.mockk.spyk")
+        .should().notReferenceClass("io.mockk.MockK")
 }
 
 Konture.functions(sourceSets = SourceSets.named("test", "androidTest", "commonTest")) {
-    should().notCall("io.mockk.spyk")
+    that().belongToClass("UserService")
+        .should().notCall("io.mockk.spyk")
+}
+
+Konture.properties {
+    that().belongToClass("OrderService")
+        .should().notCall("io.mockk.spyk")
 }
 ```
 

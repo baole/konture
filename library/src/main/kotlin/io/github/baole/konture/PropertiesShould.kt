@@ -11,11 +11,18 @@ import io.github.baole.konture.impl.PatternMatchers
 import io.github.baole.konture.impl.ViolationLocation
 import kotlin.reflect.KClass
 
+/**
+ * Fluent API for defining assertion rules on Kotlin properties.
+ */
 @KontureDsl
 class PropertiesShould internal constructor(
     private val builder: PropertiesRuleBuilder,
 ) {
-    /** Fails when the selected property invokes [fqName]. */
+    /**
+     * Fails when the selected property initializer invokes [fqName].
+     *
+     * @param fqName Fully qualified name of the target function, property, or constructor.
+     */
     fun notCall(fqName: String): PropertiesRuleBuilder {
         builder.setShould { prop, _, violations ->
             prop.usages
@@ -33,13 +40,23 @@ class PropertiesShould internal constructor(
         return builder
     }
 
-    /** Fails when the selected property invokes [kClass]. */
+    /**
+     * Fails when the selected property initializer invokes [kClass].
+     *
+     * @param kClass Target class whose methods or constructors should not be called.
+     */
     fun notCall(kClass: KClass<*>): PropertiesRuleBuilder = notCall(kClass.kontureQualifiedName())
 
-    /** Fails when the selected property invokes [T]. */
+    /**
+     * Fails when the selected property initializer invokes [T].
+     */
     inline fun <reified T : Any> notCall(): PropertiesRuleBuilder = notCall(T::class)
 
-    /** Fails for every actual class/type use of [fqName] in the selected property. */
+    /**
+     * Fails for every actual class/type use of [fqName] in the selected property declaration or initializer.
+     *
+     * @param fqName Fully qualified class or type name.
+     */
     fun notReferenceClass(fqName: String): PropertiesRuleBuilder {
         builder.setShould { prop, _, violations ->
             prop.usages
@@ -54,14 +71,29 @@ class PropertiesShould internal constructor(
         return builder
     }
 
-    /** Fails for every actual class/type use of [kClass] in the selected property. */
+    /**
+     * Fails for every actual class/type use of [kClass] in the selected property declaration or initializer.
+     *
+     * @param kClass Target class that should not be referenced.
+     */
     fun notReferenceClass(kClass: KClass<*>): PropertiesRuleBuilder = notReferenceClass(kClass.kontureQualifiedName())
 
-    /** Fails for every actual class/type use of [T] in the selected property. */
+    /**
+     * Fails for every actual class/type use of [T] in the selected property declaration or initializer.
+     */
     inline fun <reified T : Any> notReferenceClass(): PropertiesRuleBuilder = notReferenceClass(T::class)
 
+    /**
+     * Asserts that selected properties have a simple name satisfying [predicate].
+     */
     infix fun haveName(predicate: (String) -> Boolean): PropertiesRuleBuilder = haveName("custom name predicate", predicate)
 
+    /**
+     * Asserts that selected properties have a simple name satisfying [predicate].
+     *
+     * @param description Descriptive label for failure messages.
+     * @param predicate Predicate checking property simple name.
+     */
     fun haveName(
         description: String,
         predicate: (String) -> Boolean,

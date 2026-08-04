@@ -1,5 +1,6 @@
 /*
- * Copyright 2026 Bao Le Duc
+ * Copyright 2026 The Konture Contributors
+ * Contributors: Bao Le Duc (@baole)
  * SPDX-License-Identifier: Apache-2.0
  */
 
@@ -12,6 +13,7 @@ package io.github.baole.konture
  *
  * @property declaration The underlying [FileDeclaration] AST model representing the source file.
  * @property modulePath The module subdirectory/path containing this file.
+ * @property sourceSet The source set this file was selected from, or null if unknown.
  */
 data class FileDeclarationContext(
     val declaration: FileDeclaration,

@@ -14,12 +14,24 @@ package io.github.baole.konture
  * @property packageName The package name of the class (e.g., `com.acme.domain`).
  * @property isInterface True if this declaration represents an interface.
  * @property isAbstract True if this declaration is marked with the `abstract` modifier.
- * @property isEnum True if this declaration represents an enum class.
  * @property annotations List of annotations declared on this class.
  * @property imports List of exact import directives in the file containing this class.
- * @property importAliases Map of local aliases to their fully-qualified names.
  * @property referencedTypes Set of simple types referenced/accessed in this class body (used for dependency inference).
  * @property filePath The absolute path of the file containing this class.
+ * @property visibility The declared visibility modifier of this class.
+ * @property modifiers The set of modifiers declared on this class (e.g. `SEALED`, `OPEN`, `DATA`).
+ * @property supertypes List of supertype names extended or implemented by this class.
+ * @property primaryConstructor The primary constructor declaration of this class, or null if omitted.
+ * @property secondaryConstructors List of secondary constructors declared in this class.
+ * @property functions List of member functions declared directly inside this class.
+ * @property properties List of properties declared directly inside this class.
+ * @property companionObject The companion object declaration of this class, or null if absent.
+ * @property kdocText Raw text content of the KDoc block attached to this class, or null if un-documented.
+ * @property importAliases Map of local import aliases to their fully-qualified names.
+ * @property isEnum True if this declaration represents an enum class.
+ * @property sourceLine 1-indexed source line number where this class declaration begins.
+ * @property modulePath The module path containing this class declaration.
+ * @property usages List of code usages (calls and references) originating within this class body.
  */
 data class ClassDeclaration(
     val name: String,

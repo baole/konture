@@ -317,7 +317,11 @@ interface ClassesShouldDependencyAssertions {
     infix fun notDependOnClassesInAnyPackage(packagePatterns: List<String>): ClassesRuleBuilder =
         notDependOnClassesInAnyPackage(*packagePatterns.toTypedArray())
 
-    /** Fails for every invocation of [fqName] in the selected class body. */
+    /**
+     * Fails for every invocation of [fqName] (function calls, property calls, or constructor calls) within the selected class body.
+     *
+     * @param fqName Fully qualified name of target function, property, or constructor.
+     */
     fun notCall(fqName: String): ClassesRuleBuilder {
         builder.setShould { cls, _, violations ->
             cls.usages
@@ -332,10 +336,18 @@ interface ClassesShouldDependencyAssertions {
         return builder
     }
 
-    /** Fails for every invocation of [kClass] in the selected class body. */
+    /**
+     * Fails for every invocation of [kClass] (function calls, property calls, or constructor calls) within the selected class body.
+     *
+     * @param kClass Target class whose methods or constructors should not be called.
+     */
     fun notCall(kClass: kotlin.reflect.KClass<*>): ClassesRuleBuilder = notCall(kClass.kontureQualifiedName())
 
-    /** Fails for every actual class/type use of [fqName] in the selected class body; imports alone do not match. */
+    /**
+     * Fails for every actual class/type use of [fqName] within the selected class body; imports alone do not match.
+     *
+     * @param fqName Fully qualified class or type name.
+     */
     fun notReferenceClass(fqName: String): ClassesRuleBuilder {
         builder.setShould { cls, _, violations ->
             cls.usages
@@ -347,6 +359,10 @@ interface ClassesShouldDependencyAssertions {
         return builder
     }
 
-    /** Fails for every actual class/type use of [kClass] in the selected class body; imports alone do not match. */
+    /**
+     * Fails for every actual class/type use of [kClass] within the selected class body; imports alone do not match.
+     *
+     * @param kClass Target class that should not be referenced.
+     */
     fun notReferenceClass(kClass: kotlin.reflect.KClass<*>): ClassesRuleBuilder = notReferenceClass(kClass.kontureQualifiedName())
 }

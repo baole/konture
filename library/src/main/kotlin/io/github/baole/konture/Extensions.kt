@@ -1,6 +1,6 @@
 /*
  * Copyright 2026 The Konture Contributors
- * Contributors: Bao Le Duc, Octavio Calleya Garcia (@octaviospain)
+ * Contributors: Bao Le Duc (@baole), Octavio Calleya Garcia (@octaviospain)
  * SPDX-License-Identifier: Apache-2.0
  */
 
@@ -18,6 +18,11 @@ fun Konture.modules() = ModulesRuleBuilder(projectGraph)
  */
 fun Konture.classes() = ClassesRuleBuilder(projectGraph)
 
+/**
+ * Access the class-level declarative assertion rule builder filtering by source sets.
+ *
+ * @param sourceSets Source set selector (e.g., [SourceSets.production], [SourceSets.all]).
+ */
 fun Konture.classes(sourceSets: SourceSetSelector) = ClassesRuleBuilder(projectGraph, sourceSets)
 
 /**
@@ -32,6 +37,11 @@ fun Konture.layeredArchitecture() = LayeredArchitectureBuilder(projectGraph)
  */
 fun Konture.functions() = FunctionsRuleBuilder(projectGraph)
 
+/**
+ * Access the function-level declarative assertion rule builder filtering by source sets.
+ *
+ * @param sourceSets Source set selector.
+ */
 fun Konture.functions(sourceSets: SourceSetSelector) = FunctionsRuleBuilder(projectGraph, sourceSets)
 
 /**
@@ -40,6 +50,11 @@ fun Konture.functions(sourceSets: SourceSetSelector) = FunctionsRuleBuilder(proj
  */
 fun Konture.properties() = PropertiesRuleBuilder(projectGraph)
 
+/**
+ * Access the property-level declarative assertion rule builder filtering by source sets.
+ *
+ * @param sourceSets Source set selector.
+ */
 fun Konture.properties(sourceSets: SourceSetSelector) = PropertiesRuleBuilder(projectGraph, sourceSets)
 
 /**
@@ -48,6 +63,11 @@ fun Konture.properties(sourceSets: SourceSetSelector) = PropertiesRuleBuilder(pr
  */
 fun Konture.files() = FilesRuleBuilder(projectGraph)
 
+/**
+ * Access the file-level declarative assertion rule builder filtering by source sets.
+ *
+ * @param sourceSets Source set selector.
+ */
 fun Konture.files(sourceSets: SourceSetSelector) = FilesRuleBuilder(projectGraph, sourceSets)
 
 /**
@@ -57,6 +77,11 @@ fun Konture.files(sourceSets: SourceSetSelector) = FilesRuleBuilder(projectGraph
  */
 fun Konture.slices() = SlicesRuleBuilder(projectGraph)
 
+/**
+ * Access the slice declarative assertion rule builder filtering by source sets.
+ *
+ * @param sourceSets Source set selector.
+ */
 fun Konture.slices(sourceSets: SourceSetSelector) = SlicesRuleBuilder(projectGraph, sourceSets)
 
 /**

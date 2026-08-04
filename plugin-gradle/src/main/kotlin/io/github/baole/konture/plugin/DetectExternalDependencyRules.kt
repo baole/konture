@@ -1,5 +1,6 @@
 /*
- * Copyright 2026 Bao Le Duc
+ * Copyright 2026 The Konture Contributors
+ * Contributors: Bao Le Duc (@baole)
  * SPDX-License-Identifier: Apache-2.0
  */
 
@@ -22,10 +23,12 @@ private const val TRIPLE_QUOTE_LENGTH = 3
 /** Detects direct Konture external-dependency assertions in Kotlin test sources. */
 @CacheableTask
 abstract class DetectExternalDependencyRules : DefaultTask() {
+    /** Test source files scanned for external dependency assertion calls. */
     @get:InputFiles
     @get:PathSensitive(PathSensitivity.RELATIVE)
     abstract val testSources: ConfigurableFileCollection
 
+    /** Output file containing boolean flag indicating if dependency graph generation is required. */
     @get:OutputFile
     abstract val resultFile: RegularFileProperty
 

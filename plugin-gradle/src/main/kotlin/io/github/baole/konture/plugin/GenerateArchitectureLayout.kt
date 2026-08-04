@@ -60,22 +60,27 @@ abstract class GenerateArchitectureLayout : DefaultTask() {
     @get:Input
     abstract val modules: ListProperty<ModuleData>
 
+    /** List of module paths to exclude from analysis. */
     @get:Input
     @get:Optional
     abstract val excludeModules: ListProperty<String>
 
+    /** List of package patterns to exclude from analysis. */
     @get:Input
     @get:Optional
     abstract val excludePackages: ListProperty<String>
 
+    /** List of class patterns to exclude from analysis. */
     @get:Input
     @get:Optional
     abstract val excludeClasses: ListProperty<String>
 
+    /** List of dependency configuration names to ignore during analysis. */
     @get:Input
     @get:Optional
     abstract val excludeConfigurations: ListProperty<String>
 
+    /** Target log level verbosity for the generator task. */
     @get:Input
     abstract val logLevel: Property<String>
 

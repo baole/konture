@@ -11,11 +11,18 @@ import io.github.baole.konture.impl.PatternMatchers
 import io.github.baole.konture.impl.ViolationLocation
 import kotlin.reflect.KClass
 
+/**
+ * Fluent API for defining assertion rules on Kotlin functions.
+ */
 @KontureDsl
 class FunctionsShould internal constructor(
     private val builder: FunctionsRuleBuilder,
 ) {
-    /** Fails when the selected function invokes [fqName]. */
+    /**
+     * Fails when the selected function invokes [fqName].
+     *
+     * @param fqName Fully qualified name of the target function, property, or constructor.
+     */
     fun notCall(fqName: String): FunctionsRuleBuilder {
         builder.setShould { function, _, violations ->
             function.usages
@@ -33,13 +40,23 @@ class FunctionsShould internal constructor(
         return builder
     }
 
-    /** Fails when the selected function invokes [kClass]. */
+    /**
+     * Fails when the selected function invokes [kClass].
+     *
+     * @param kClass Target class whose methods or constructors should not be called.
+     */
     fun notCall(kClass: KClass<*>): FunctionsRuleBuilder = notCall(kClass.kontureQualifiedName())
 
-    /** Fails when the selected function invokes [T]. */
+    /**
+     * Fails when the selected function invokes [T].
+     */
     inline fun <reified T : Any> notCall(): FunctionsRuleBuilder = notCall(T::class)
 
-    /** Fails for every actual class/type use of [fqName] in the selected function. */
+    /**
+     * Fails for every actual class/type use of [fqName] in the selected function.
+     *
+     * @param fqName Fully qualified class or type name.
+     */
     fun notReferenceClass(fqName: String): FunctionsRuleBuilder {
         builder.setShould { function, _, violations ->
             function.usages
@@ -54,14 +71,29 @@ class FunctionsShould internal constructor(
         return builder
     }
 
-    /** Fails for every actual class/type use of [kClass] in the selected function. */
+    /**
+     * Fails for every actual class/type use of [kClass] in the selected function.
+     *
+     * @param kClass Target class that should not be referenced.
+     */
     fun notReferenceClass(kClass: KClass<*>): FunctionsRuleBuilder = notReferenceClass(kClass.kontureQualifiedName())
 
-    /** Fails for every actual class/type use of [T] in the selected function. */
+    /**
+     * Fails for every actual class/type use of [T] in the selected function.
+     */
     inline fun <reified T : Any> notReferenceClass(): FunctionsRuleBuilder = notReferenceClass(T::class)
 
+    /**
+     * Asserts that selected functions have a simple name satisfying [predicate].
+     */
     infix fun haveName(predicate: (String) -> Boolean): FunctionsRuleBuilder = haveName("custom name predicate", predicate)
 
+    /**
+     * Asserts that selected functions have a simple name satisfying [predicate].
+     *
+     * @param description Descriptive label for failure messages.
+     * @param predicate Predicate checking function simple name.
+     */
     fun haveName(
         description: String,
         predicate: (String) -> Boolean,

@@ -6,20 +6,33 @@
 
 package io.github.baole.konture
 
-import io.github.baole.konture.core.KontureLogger
-import io.github.baole.konture.core.LogLevel
 import io.github.baole.konture.impl.PatternMatchers
 import kotlin.reflect.KClass
 
+/**
+ * Fluent API for defining filtering conditions on Kotlin functions.
+ */
 @KontureDsl
 class FunctionsThat internal constructor(
     private val builder: FunctionsRuleBuilder,
 ) {
+    /**
+     * Restricts the rules to functions residing in packages matching the specified pattern.
+     * Supports `..` segment wildcards (e.g., `io.github.baole.konture..`).
+     *
+     * @param packagePattern Package matching pattern.
+     */
     infix fun resideInAPackage(packagePattern: String): FunctionsRuleBuilder {
         builder.setThat { PatternMatchers.matchesPackage(packagePattern, it.packageName) }
         return builder
     }
 
+    /**
+     * Restricts the rules to functions residing in packages matching any of the specified patterns.
+     * Supports `..` segment wildcards.
+     *
+     * @param packagePatterns List of package matching patterns.
+     */
     infix fun resideInAPackage(packagePatterns: List<String>): FunctionsRuleBuilder {
         builder.setThat { context ->
             packagePatterns.any { PatternMatchers.matchesPackage(it, context.packageName) }
@@ -27,21 +40,42 @@ class FunctionsThat internal constructor(
         return builder
     }
 
+    /**
+     * Restricts the rules to functions residing in packages matching any of the specified patterns.
+     * Supports `..` segment wildcards.
+     *
+     * @param packagePatterns Package matching patterns.
+     */
     fun resideInAPackage(vararg packagePatterns: String): FunctionsRuleBuilder =
         resideInAPackage(
             packagePatterns.toList(),
         )
 
+    /**
+     * Restricts the rules to functions residing in packages matching the specified predicate.
+     *
+     * @param predicate Predicate checking package name.
+     */
     infix fun resideInAPackage(predicate: (String) -> Boolean): FunctionsRuleBuilder {
         builder.setThat { predicate(it.packageName) }
         return builder
     }
 
+    /**
+     * Restricts the rules to functions whose simple names end with the specified suffix.
+     *
+     * @param suffix The suffix.
+     */
     infix fun haveNameEndingWith(suffix: String): FunctionsRuleBuilder {
         builder.setThat { it.declaration.name.endsWith(suffix) }
         return builder
     }
 
+    /**
+     * Restricts the rules to functions whose simple names end with any of the specified suffixes.
+     *
+     * @param suffixes List of suffixes.
+     */
     infix fun haveNameEndingWith(suffixes: List<String>): FunctionsRuleBuilder {
         builder.setThat { context ->
             suffixes.any { context.declaration.name.endsWith(it) }
@@ -49,13 +83,28 @@ class FunctionsThat internal constructor(
         return builder
     }
 
+    /**
+     * Restricts the rules to functions whose simple names end with any of the specified suffixes.
+     *
+     * @param suffixes Suffixes.
+     */
     fun haveNameEndingWith(vararg suffixes: String): FunctionsRuleBuilder = haveNameEndingWith(suffixes.toList())
 
+    /**
+     * Restricts the rules to functions whose simple names start with the specified prefix.
+     *
+     * @param prefix The prefix.
+     */
     infix fun haveNameStartingWith(prefix: String): FunctionsRuleBuilder {
         builder.setThat { it.declaration.name.startsWith(prefix) }
         return builder
     }
 
+    /**
+     * Restricts the rules to functions whose simple names start with any of the specified prefixes.
+     *
+     * @param prefixes List of prefixes.
+     */
     infix fun haveNameStartingWith(prefixes: List<String>): FunctionsRuleBuilder {
         builder.setThat { context ->
             prefixes.any { context.declaration.name.startsWith(it) }
@@ -63,13 +112,28 @@ class FunctionsThat internal constructor(
         return builder
     }
 
+    /**
+     * Restricts the rules to functions whose simple names start with any of the specified prefixes.
+     *
+     * @param prefixes Prefixes.
+     */
     fun haveNameStartingWith(vararg prefixes: String): FunctionsRuleBuilder = haveNameStartingWith(prefixes.toList())
 
+    /**
+     * Restricts the rules to functions whose simple names match the specified glob pattern.
+     *
+     * @param pattern Glob pattern.
+     */
     infix fun haveNameMatching(pattern: String): FunctionsRuleBuilder {
         builder.setThat { PatternMatchers.matchesSimpleGlob(pattern, it.declaration.name) }
         return builder
     }
 
+    /**
+     * Restricts the rules to functions whose simple names match any of the specified glob patterns.
+     *
+     * @param patterns List of glob patterns.
+     */
     infix fun haveNameMatching(patterns: List<String>): FunctionsRuleBuilder {
         builder.setThat { context ->
             patterns.any { PatternMatchers.matchesSimpleGlob(it, context.declaration.name) }
@@ -77,13 +141,24 @@ class FunctionsThat internal constructor(
         return builder
     }
 
+    /**
+     * Restricts the rules to functions whose simple names match any of the specified glob patterns.
+     *
+     * @param patterns Glob patterns.
+     */
     fun haveNameMatching(vararg patterns: String): FunctionsRuleBuilder = haveNameMatching(patterns.toList())
 
+    /**
+     * Restricts the rules to top-level functions (not enclosed within any class).
+     */
     fun beTopLevel(): FunctionsRuleBuilder {
         builder.setThat { it.className == null }
         return builder
     }
 
+    /**
+     * Restricts the rules to member functions declared inside a class or interface.
+     */
     fun beMember(): FunctionsRuleBuilder {
         builder.setThat { it.className != null }
         return builder
@@ -320,16 +395,31 @@ class FunctionsThat internal constructor(
     /** Restricts the rules to functions with a parameter of raw type [T]. */
     inline fun <reified T : Any> haveAnyParameterTypeOf(): FunctionsRuleBuilder = haveAnyParameterType(T::class)
 
+    /**
+     * Restricts the rules to functions satisfying an arbitrary custom predicate logic.
+     *
+     * @param predicate Predicate checking [FunctionDeclarationContext].
+     */
     infix fun satisfy(predicate: (FunctionDeclarationContext) -> Boolean): FunctionsRuleBuilder {
         builder.setThat(predicate)
         return builder
     }
 
+    /**
+     * Restricts the rules to functions residing in modules matching the specified glob pattern.
+     *
+     * @param modulePath Module path glob pattern (e.g. `:core`, `:feature-*`).
+     */
     infix fun resideInAModule(modulePath: String): FunctionsRuleBuilder {
         builder.setThat { PatternMatchers.matchesModuleGlob(modulePath, it.modulePath) }
         return builder
     }
 
+    /**
+     * Restricts the rules to functions residing in modules matching any of the specified glob patterns.
+     *
+     * @param modulePaths List of module path glob patterns.
+     */
     infix fun resideInAModule(modulePaths: List<String>): FunctionsRuleBuilder {
         builder.setThat { context ->
             modulePaths.any { PatternMatchers.matchesModuleGlob(it, context.modulePath) }
@@ -337,8 +427,18 @@ class FunctionsThat internal constructor(
         return builder
     }
 
+    /**
+     * Restricts the rules to functions residing in modules matching any of the specified glob patterns.
+     *
+     * @param modulePaths Module path glob patterns.
+     */
     fun resideInAModule(vararg modulePaths: String): FunctionsRuleBuilder = resideInAModule(modulePaths.toList())
 
+    /**
+     * Restricts the rules to member functions declared inside a class matching the specified pattern.
+     *
+     * @param classNamePattern Class name wildcard or package pattern.
+     */
     infix fun belongToClass(classNamePattern: String): FunctionsRuleBuilder {
         builder.setThat { context ->
             context.className?.let {
@@ -348,20 +448,44 @@ class FunctionsThat internal constructor(
         return builder
     }
 
+    /**
+     * Restricts the rules to member functions declared inside [kClass].
+     *
+     * @param kClass The enclosing class.
+     */
     infix fun belongToClass(kClass: KClass<*>): FunctionsRuleBuilder = belongToClass(kClass.kontureQualifiedName())
 
+    /**
+     * Restricts the rules to member functions declared inside [T].
+     */
     inline fun <reified T : Any> belongToClass(): FunctionsRuleBuilder = belongToClass(T::class)
 
+    /**
+     * Restricts the rules to member functions declared inside a class matching the predicate.
+     *
+     * @param predicate Predicate checking enclosing class name.
+     */
     infix fun belongToClass(predicate: (String) -> Boolean): FunctionsRuleBuilder {
         builder.setThat { context -> context.className?.let(predicate) == true }
         return builder
     }
 
+    /**
+     * Restricts the rules to functions whose simple name satisfies the given predicate.
+     *
+     * @param predicate Predicate checking function simple name.
+     */
     infix fun haveName(predicate: (String) -> Boolean): FunctionsRuleBuilder {
         builder.setThat { predicate(it.declaration.name) }
         return builder
     }
 
+    /**
+     * Restricts the rules to functions whose simple name satisfies the given predicate.
+     *
+     * @param description Descriptive string for rule violation messages.
+     * @param predicate Predicate checking function simple name.
+     */
     @Suppress("UnusedParameter")
     fun haveName(
         description: String,

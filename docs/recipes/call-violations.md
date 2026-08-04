@@ -34,8 +34,9 @@ flowchart LR
 The existing examples below are dependency/reference based: they identify structural coupling, not a compiler-resolved call graph. Use the source-call rule when you need to ban a specific Kotlin callable.
 
 ```kotlin
-Konture.files(sourceSets = SourceSets.tests()) {
-    should().notCall("io.mockk.spyk")
+Konture.classes(sourceSets = SourceSets.tests()) {
+    that().haveNameMatching("*Test")
+        .should().notCall("io.mockk.spyk")
 }
 ```
 

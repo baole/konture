@@ -17,6 +17,7 @@ package io.github.baole.konture
  * @property modulePath The module subdirectory/path containing this property.
  * @property filePath The project relative path to the source file defining this property.
  * @property sourceSet The source set this property was selected from, or null if unknown.
+ * @property usages List of code usages (calls and references) originating within this property declaration.
  */
 data class PropertyDeclarationContext(
     val declaration: PropertyDeclaration,

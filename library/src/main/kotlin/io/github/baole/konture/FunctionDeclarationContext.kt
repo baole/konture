@@ -1,5 +1,6 @@
 /*
- * Copyright 2026 Bao Le Duc
+ * Copyright 2026 The Konture Contributors
+ * Contributors: Bao Le Duc (@baole)
  * SPDX-License-Identifier: Apache-2.0
  */
 
@@ -15,6 +16,8 @@ package io.github.baole.konture
  * @property className The name of the surrounding class if this function is a member/nested function, or null if it's top-level.
  * @property modulePath The module subdirectory/path containing this function.
  * @property filePath The project relative path to the source file defining this function.
+ * @property sourceSet The source set this function was selected from, or null if unknown.
+ * @property usages List of code usages (calls and references) originating within this function body.
  */
 data class FunctionDeclarationContext(
     val declaration: FunctionDeclaration,
