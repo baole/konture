@@ -82,17 +82,18 @@ private class SymbolResolver(
         element: KtElement,
     ): String? {
         if (receiver.firstOrNull()?.isLowerCase() != true) return null
+        val varName = receiver.substringBefore('.')
         for (parent in element.parents) {
             when (parent) {
                 is KtNamedFunction -> {
-                    parent.valueParameters.find { it.name == receiver }?.typeReference?.text?.let { return it }
+                    parent.valueParameters.find { it.name == varName }?.typeReference?.text?.let { return it }
                 }
                 is KtClassOrObject -> {
-                    parent.primaryConstructorParameters.find { it.name == receiver }?.typeReference?.text?.let { return it }
-                    parent.declarations.filterIsInstance<KtProperty>().find { it.name == receiver }?.typeReference?.text?.let { return it }
+                    parent.primaryConstructorParameters.find { it.name == varName }?.typeReference?.text?.let { return it }
+                    parent.declarations.filterIsInstance<KtProperty>().find { it.name == varName }?.typeReference?.text?.let { return it }
                 }
                 is KtFile -> {
-                    parent.declarations.filterIsInstance<KtProperty>().find { it.name == receiver }?.typeReference?.text?.let { return it }
+                    parent.declarations.filterIsInstance<KtProperty>().find { it.name == varName }?.typeReference?.text?.let { return it }
                 }
             }
         }
@@ -168,16 +169,36 @@ private class UsageVisitor(
 
         if (receiverText != null) {
             val fullRaw = "$receiverText.$callee"
+            val varName = receiverText.substringBefore('.')
+            val varType =
+                if (varName.firstOrNull()?.isLowerCase() == true) {
+                    resolver.findVariableType(varName, expression)
+                } else {
+                    null
+                }
+
             val typeOrClass =
-                if (receiverText.firstOrNull()?.isLowerCase() == true) {
-                    resolver.findVariableType(receiverText, expression) ?: receiverText
+                if (varType != null) {
+                    if (receiverText.contains('.')) {
+                        "$varType.${receiverText.substringAfter('.')}"
+                    } else {
+                        varType
+                    }
                 } else {
                     receiverText
                 }
 
             val (resolvedReceiver, _) = resolver.resolve(typeOrClass, expression)
+            val (resolvedVarType, _) = if (varType != null) resolver.resolve(varType, expression) else null to emptyList<String>()
+
             val qualifiedTarget = if (resolvedReceiver != null) "$resolvedReceiver.$callee" else fullRaw
-            val possibleTargets = listOf(callee, fullRaw, qualifiedTarget).distinct()
+            val possibleTargets =
+                listOfNotNull(
+                    callee,
+                    fullRaw,
+                    qualifiedTarget,
+                    if (resolvedVarType != null) "$resolvedVarType.$callee" else null,
+                ).distinct()
 
             collector.add(UsageKind.CALL, qualifiedTarget, expression, fullRaw, possible = possibleTargets)
         } else {

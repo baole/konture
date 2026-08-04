@@ -943,6 +943,35 @@ class PsiParserTest {
     }
 
     @Test
+    fun `test viewModel calls context detection`() {
+        val file =
+            File(tempDir, "UserViewModel.kt").apply {
+                writeText(
+                    """
+                    package com.example.ui
+
+                    import android.content.Context
+                    import androidx.lifecycle.ViewModel
+
+                    class UserViewModel(private val context: Context) : ViewModel() {
+                        fun loadData() {
+                            val msg = context.getString(101)
+                            val title = context.resources.getString(102)
+                        }
+                    }
+                    """.trimIndent(),
+                )
+            }
+
+        val declaration = PsiParser.parseFile(file)!!
+        val usages = declaration.usages.filter { it.kind == UsageKind.CALL }
+
+        val contextMatches = usages.filter { PatternMatchers.isCallUsageMatch(it, "android.content.Context") }
+        assertEquals(2, contextMatches.size)
+        assertTrue(contextMatches.all { it.enclosingClass == "com.example.ui.UserViewModel" })
+    }
+
+    @Test
     fun `test dispose cleanup`() {
         PsiParser.dispose()
         PsiParser.dispose()

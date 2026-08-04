@@ -218,4 +218,46 @@ class ClassesRuleBuilderTest : RuleBuildersTestBase() {
         assertTrue(printedAll.contains("com.example.ClassA"))
         assertTrue(printedAll.contains("com.example.ClassB"))
     }
+
+    @Test
+    fun `test classes rule builder notCall with class FQN enclosingClass in package`() {
+        val contextCall =
+            SourceUsage(
+                kind = UsageKind.CALL,
+                targetFqName = "android.content.Context.getString",
+                filePath = "/src/MyViewModel.kt",
+                line = 20,
+                column = 9,
+                enclosingClass = "com.example.MyViewModel",
+                rawExpression = "context.getString",
+            )
+        val viewModelClass =
+            ClassDeclaration(
+                name = "MyViewModel",
+                fqName = "com.example.MyViewModel",
+                packageName = "com.example",
+                isInterface = false,
+                isAbstract = false,
+                annotations = emptyList(),
+                imports = listOf("android.content.Context"),
+                referencedTypes = setOf("androidx.lifecycle.ViewModel", "android.content.Context"),
+                filePath = "/src/MyViewModel.kt",
+            )
+        val fileDecl =
+            FileDeclaration(
+                "MyViewModel.kt",
+                "com.example",
+                classes = listOf(viewModelClass),
+                usages = listOf(contextCall),
+                filePath = "/src/MyViewModel.kt",
+            )
+        val graph = ProjectGraph(builds = mapOf(":" to listOf(moduleA.copy(files = listOf(fileDecl)))))
+
+        val rule = ClassesRuleBuilder(graph).should().notCall("android.content.Context")
+        val violations = mutableListOf<String>()
+        rule.getShouldAssertion()!!(viewModelClass, emptyList(), violations)
+
+        assertEquals(1, violations.size)
+        assertTrue(violations[0].contains("context.getString"))
+    }
 }
