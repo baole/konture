@@ -1,10 +1,13 @@
 /*
- * Copyright 2026 Bao Le Duc
+ * Copyright 2026 The Konture Contributors
+ * Contributors: Bao Le Duc (@baole)
  * SPDX-License-Identifier: Apache-2.0
  */
 
 package io.github.baole.konture
 
+import io.github.baole.konture.core.KontureLogger
+import io.github.baole.konture.core.LogLevel
 import io.github.baole.konture.impl.PatternMatchers
 
 /**
@@ -517,4 +520,40 @@ class ClassesThat internal constructor(
         builder.setThat { item -> predicates.none { it(item) } }
         return builder
     }
+
+    infix fun resideInAModule(modulePath: String): ClassesRuleBuilder {
+        val normalized =
+            if (!modulePath.startsWith(":") && !modulePath.startsWith("**") && modulePath.isNotEmpty()) {
+                KontureLogger.log(
+                    LogLevel.WARNING,
+                    "Module path '$modulePath' lacks a leading colon (':'). Suggest matching with ':$modulePath' instead.",
+                )
+                ":$modulePath"
+            } else {
+                modulePath
+            }
+        builder.setThat { it.modulePath == normalized }
+        return builder
+    }
+
+    infix fun resideInAModule(modulePaths: List<String>): ClassesRuleBuilder {
+        val normalizedPaths =
+            modulePaths.map { path ->
+                if (!path.startsWith(":") && !path.startsWith("**") && path.isNotEmpty()) {
+                    KontureLogger.log(
+                        LogLevel.WARNING,
+                        "Module path '$path' lacks a leading colon (':'). Suggest matching with ':$path' instead.",
+                    )
+                    ":$path"
+                } else {
+                    path
+                }
+            }
+        builder.setThat { context ->
+            normalizedPaths.any { context.modulePath == it }
+        }
+        return builder
+    }
+
+    fun resideInAModule(vararg modulePaths: String): ClassesRuleBuilder = resideInAModule(modulePaths.toList())
 }

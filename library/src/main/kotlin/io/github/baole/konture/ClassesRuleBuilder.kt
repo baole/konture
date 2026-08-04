@@ -1,5 +1,6 @@
 /*
- * Copyright 2026 Bao Le Duc
+ * Copyright 2026 The Konture Contributors
+ * Contributors: Bao Le Duc (@baole)
  * SPDX-License-Identifier: Apache-2.0
  */
 
@@ -232,7 +233,11 @@ class ClassesRuleBuilder(
             g.getAllModules().flatMap { module ->
                 module.files.flatMap { file ->
                     file.membershipsFor(module.path).filter(sourceSets::matches).flatMap { sourceSet ->
-                        file.classes.map { cls -> ClassLocation(cls, module.path, sourceSet.name) }
+                        file.classes.map { cls ->
+                            val classUsages = file.usages.filter { it.enclosingClass == cls.fqName || it.enclosingClass == cls.name }
+                            val decoratedCls = cls.copy(modulePath = module.path, usages = classUsages)
+                            ClassLocation(decoratedCls, module.path, sourceSet.name)
+                        }
                     }
                 }
             }.distinctBy { it.cls.fqName to it.cls.filePath }

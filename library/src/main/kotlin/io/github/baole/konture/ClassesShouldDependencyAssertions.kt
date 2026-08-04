@@ -1,5 +1,6 @@
 /*
- * Copyright 2026 Bao Le Duc
+ * Copyright 2026 The Konture Contributors
+ * Contributors: Bao Le Duc (@baole)
  * SPDX-License-Identifier: Apache-2.0
  */
 
@@ -11,7 +12,7 @@ import io.github.baole.konture.impl.PatternMatchers
 /**
  * Fluent API for defining assertion rules on Kotlin classes.
  */
-internal interface ClassesShouldDependencyAssertions {
+interface ClassesShouldDependencyAssertions {
     val builder: ClassesRuleBuilder
 
     /**
@@ -272,4 +273,37 @@ internal interface ClassesShouldDependencyAssertions {
      */
     infix fun notDependOnClassesInAnyPackage(packagePatterns: List<String>): ClassesRuleBuilder =
         notDependOnClassesInAnyPackage(*packagePatterns.toTypedArray())
+
+    /** Fails for every invocation of [fqName] in the selected class body. */
+    fun notCall(fqName: String): ClassesRuleBuilder {
+        builder.setShould { cls, _, violations ->
+            cls.usages
+                .filter { usage ->
+                    usage.kind == UsageKind.CALL &&
+                        (usage.targetFqName == fqName || fqName in usage.possibleTargetFqNames)
+                }.forEach { usage ->
+                    val unresolved = if (usage.unresolvedPossibleUsage) "unresolved possible " else ""
+                    violations.add(getMessage("usage.notCall", unresolved, fqName, usage.rawExpression, usage.line, usage.column))
+                }
+        }
+        return builder
+    }
+
+    /** Fails for every invocation of [kClass] in the selected class body. */
+    fun notCall(kClass: kotlin.reflect.KClass<*>): ClassesRuleBuilder = notCall(kClass.kontureQualifiedName())
+
+    /** Fails for every actual class/type use of [fqName] in the selected class body; imports alone do not match. */
+    fun notReferenceClass(fqName: String): ClassesRuleBuilder {
+        builder.setShould { cls, _, violations ->
+            cls.usages
+                .filter { it.kind == UsageKind.CLASS_REFERENCE && it.targetFqName == fqName }
+                .forEach { usage ->
+                    violations.add(getMessage("usage.notReferenceClass", fqName, usage.rawExpression, usage.line, usage.column))
+                }
+        }
+        return builder
+    }
+
+    /** Fails for every actual class/type use of [kClass] in the selected class body; imports alone do not match. */
+    fun notReferenceClass(kClass: kotlin.reflect.KClass<*>): ClassesRuleBuilder = notReferenceClass(kClass.kontureQualifiedName())
 }

@@ -1,5 +1,6 @@
 /*
- * Copyright 2026 Bao Le Duc
+ * Copyright 2026 The Konture Contributors
+ * Contributors: Bao Le Duc (@baole)
  * SPDX-License-Identifier: Apache-2.0
  */
 
@@ -17,4 +18,5 @@ data class FileDeclaration(
     val importAliases: Map<String, String> = emptyMap(),
     val sourceSets: List<SourceSetId> = emptyList(),
     val usages: List<SourceUsage> = emptyList(),
+    val annotations: List<AnnotationDeclaration> = emptyList(),
 )

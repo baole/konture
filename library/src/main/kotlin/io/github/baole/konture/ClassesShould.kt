@@ -1,5 +1,6 @@
 /*
- * Copyright 2026 Bao Le Duc
+ * Copyright 2026 The Konture Contributors
+ * Contributors: Bao Le Duc (@baole)
  * SPDX-License-Identifier: Apache-2.0
  */
 
@@ -15,4 +16,10 @@ class ClassesShould internal constructor(
     ClassesShouldPackageAssertions,
         ClassesShouldMetadataAssertions,
         ClassesShouldDependencyAssertions,
-        ClassesShouldCompositeAssertions
+        ClassesShouldCompositeAssertions {
+        /** Fails for every invocation of [T] in the selected class body. */
+        inline fun <reified T : Any> notCall(): ClassesRuleBuilder = notCall(T::class)
+
+        /** Fails for every actual class/type use of [T] in the selected class body. */
+        inline fun <reified T : Any> notReferenceClass(): ClassesRuleBuilder = notReferenceClass(T::class)
+    }

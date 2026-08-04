@@ -164,6 +164,22 @@ class FilesShould internal constructor(
 
     fun haveNameMatching(vararg patterns: String): FilesRuleBuilder = haveNameMatching(patterns.toList())
 
+    infix fun haveName(predicate: (String) -> Boolean): FilesRuleBuilder = haveName("custom name predicate", predicate)
+
+    fun haveName(
+        description: String,
+        predicate: (String) -> Boolean,
+    ): FilesRuleBuilder {
+        builder.setShould { file, _, violations ->
+            if (!predicate(file.declaration.name)) {
+                violations.add(
+                    getMessage("file.should.haveNameMatching", file.declaration.name, description),
+                )
+            }
+        }
+        return builder
+    }
+
     fun notHaveWildcardImports(): FilesRuleBuilder {
         builder.setShould { file, _, violations ->
             val wildcards = file.declaration.imports.filter { it.endsWith(".*") }

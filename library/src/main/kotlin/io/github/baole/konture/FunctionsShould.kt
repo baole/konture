@@ -39,6 +39,43 @@ class FunctionsShould internal constructor(
     /** Fails when the selected function invokes [T]. */
     inline fun <reified T : Any> notCall(): FunctionsRuleBuilder = notCall(T::class)
 
+    /** Fails for every actual class/type use of [fqName] in the selected function. */
+    fun notReferenceClass(fqName: String): FunctionsRuleBuilder {
+        builder.setShould { function, _, violations ->
+            function.usages
+                .filter { it.kind == UsageKind.CLASS_REFERENCE && it.targetFqName == fqName }
+                .forEach { usage ->
+                    violations.add(
+                        "${getMessage("usage.notReferenceClass", fqName, usage.rawExpression, usage.line, usage.column)} " +
+                            "(at ${ViolationLocation.of(function.modulePath, function.sourceSet?.name, usage.filePath, usage.line, usage.column)})",
+                    )
+                }
+        }
+        return builder
+    }
+
+    /** Fails for every actual class/type use of [kClass] in the selected function. */
+    fun notReferenceClass(kClass: KClass<*>): FunctionsRuleBuilder = notReferenceClass(kClass.kontureQualifiedName())
+
+    /** Fails for every actual class/type use of [T] in the selected function. */
+    inline fun <reified T : Any> notReferenceClass(): FunctionsRuleBuilder = notReferenceClass(T::class)
+
+    infix fun haveName(predicate: (String) -> Boolean): FunctionsRuleBuilder = haveName("custom name predicate", predicate)
+
+    fun haveName(
+        description: String,
+        predicate: (String) -> Boolean,
+    ): FunctionsRuleBuilder {
+        builder.setShould { func, _, violations ->
+            if (!predicate(func.declaration.name)) {
+                violations.add(
+                    getMessage("function.should.haveNameMatching", func.qualifiedName, description, func.declaration.name),
+                )
+            }
+        }
+        return builder
+    }
+
     infix fun resideInAPackage(packagePattern: String): FunctionsRuleBuilder {
         builder.setShould { func, _, violations ->
             if (!PatternMatchers.matchesPackage(packagePattern, func.packageName)) {

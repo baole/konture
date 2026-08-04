@@ -1,5 +1,6 @@
 /*
- * Copyright 2026 Bao Le Duc
+ * Copyright 2026 The Konture Contributors
+ * Contributors: Bao Le Duc (@baole)
  * SPDX-License-Identifier: Apache-2.0
  */
 
@@ -24,6 +25,7 @@ data class PropertyDeclarationContext(
     val modulePath: String,
     val filePath: String,
     val sourceSet: SourceSetId? = null,
+    val usages: List<SourceUsage> = emptyList(),
 ) {
     /**
      * The fully-qualified name of the property, combining package, enclosing class (if any), and

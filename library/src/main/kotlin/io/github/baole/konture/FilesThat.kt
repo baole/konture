@@ -1,5 +1,6 @@
 /*
- * Copyright 2026 Bao Le Duc
+ * Copyright 2026 The Konture Contributors
+ * Contributors: Bao Le Duc (@baole)
  * SPDX-License-Identifier: Apache-2.0
  */
 
@@ -114,4 +115,51 @@ class FilesThat internal constructor(
         builder.setThat(predicate)
         return builder
     }
+
+    infix fun haveAnnotationOf(annotationName: String): FilesRuleBuilder {
+        builder.setThat { it.declaration.hasAnnotation(annotationName) }
+        return builder
+    }
+
+    infix fun haveAnnotationOf(annotationNames: List<String>): FilesRuleBuilder {
+        builder.setThat { file -> annotationNames.any { file.declaration.hasAnnotation(it) } }
+        return builder
+    }
+
+    fun haveAnnotationOf(vararg annotationNames: String): FilesRuleBuilder = haveAnnotationOf(annotationNames.asList())
+
+    infix fun haveAllAnnotationsOf(names: List<String>): FilesRuleBuilder {
+        builder.setThat { it.declaration.hasAllAnnotations(names) }
+        return builder
+    }
+
+    fun haveAllAnnotationsOf(vararg names: String): FilesRuleBuilder = haveAllAnnotationsOf(names.asList())
+
+    infix fun haveAnyAnnotationOf(names: List<String>): FilesRuleBuilder {
+        builder.setThat { it.declaration.hasAnyAnnotation(names) }
+        return builder
+    }
+
+    fun haveAnyAnnotationOf(vararg names: String): FilesRuleBuilder = haveAnyAnnotationOf(names.asList())
+
+    infix fun haveName(predicate: (String) -> Boolean): FilesRuleBuilder {
+        builder.setThat { predicate(it.declaration.name) }
+        return builder
+    }
+
+    @Suppress("UnusedParameter")
+    fun haveName(
+        description: String,
+        predicate: (String) -> Boolean,
+    ): FilesRuleBuilder {
+        builder.setThat { predicate(it.declaration.name) }
+        return builder
+    }
 }
+
+private fun FileDeclaration.hasAnnotation(annotationName: String): Boolean =
+    annotations.any { it.name == annotationName || it.fqName == annotationName }
+
+private fun FileDeclaration.hasAllAnnotations(names: List<String>): Boolean = names.all { name -> hasAnnotation(name) }
+
+private fun FileDeclaration.hasAnyAnnotation(names: List<String>): Boolean = names.any { name -> hasAnnotation(name) }

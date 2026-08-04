@@ -8,12 +8,74 @@ package io.github.baole.konture
 
 import io.github.baole.konture.i18n.getMessage
 import io.github.baole.konture.impl.PatternMatchers
+import io.github.baole.konture.impl.ViolationLocation
 import kotlin.reflect.KClass
 
 @KontureDsl
 class PropertiesShould internal constructor(
     private val builder: PropertiesRuleBuilder,
 ) {
+    /** Fails when the selected property invokes [fqName]. */
+    fun notCall(fqName: String): PropertiesRuleBuilder {
+        builder.setShould { prop, _, violations ->
+            prop.usages
+                .filter { usage ->
+                    usage.kind == UsageKind.CALL &&
+                        (usage.targetFqName == fqName || fqName in usage.possibleTargetFqNames)
+                }.forEach { usage ->
+                    val unresolved = if (usage.unresolvedPossibleUsage) "unresolved possible " else ""
+                    violations.add(
+                        "${getMessage("usage.notCall", unresolved, fqName, usage.rawExpression, usage.line, usage.column)} " +
+                            "(at ${ViolationLocation.of(prop.modulePath, prop.sourceSet?.name, usage.filePath, usage.line, usage.column)})",
+                    )
+                }
+        }
+        return builder
+    }
+
+    /** Fails when the selected property invokes [kClass]. */
+    fun notCall(kClass: KClass<*>): PropertiesRuleBuilder = notCall(kClass.kontureQualifiedName())
+
+    /** Fails when the selected property invokes [T]. */
+    inline fun <reified T : Any> notCall(): PropertiesRuleBuilder = notCall(T::class)
+
+    /** Fails for every actual class/type use of [fqName] in the selected property. */
+    fun notReferenceClass(fqName: String): PropertiesRuleBuilder {
+        builder.setShould { prop, _, violations ->
+            prop.usages
+                .filter { it.kind == UsageKind.CLASS_REFERENCE && it.targetFqName == fqName }
+                .forEach { usage ->
+                    violations.add(
+                        "${getMessage("usage.notReferenceClass", fqName, usage.rawExpression, usage.line, usage.column)} " +
+                            "(at ${ViolationLocation.of(prop.modulePath, prop.sourceSet?.name, usage.filePath, usage.line, usage.column)})",
+                    )
+                }
+        }
+        return builder
+    }
+
+    /** Fails for every actual class/type use of [kClass] in the selected property. */
+    fun notReferenceClass(kClass: KClass<*>): PropertiesRuleBuilder = notReferenceClass(kClass.kontureQualifiedName())
+
+    /** Fails for every actual class/type use of [T] in the selected property. */
+    inline fun <reified T : Any> notReferenceClass(): PropertiesRuleBuilder = notReferenceClass(T::class)
+
+    infix fun haveName(predicate: (String) -> Boolean): PropertiesRuleBuilder = haveName("custom name predicate", predicate)
+
+    fun haveName(
+        description: String,
+        predicate: (String) -> Boolean,
+    ): PropertiesRuleBuilder {
+        builder.setShould { prop, _, violations ->
+            if (!predicate(prop.declaration.name)) {
+                violations.add(
+                    getMessage("property.should.haveNameMatching", prop.qualifiedName, description, prop.declaration.name),
+                )
+            }
+        }
+        return builder
+    }
+
     infix fun resideInAPackage(packagePattern: String): PropertiesRuleBuilder {
         builder.setShould { prop, _, violations ->
             if (!PatternMatchers.matchesPackage(packagePattern, prop.packageName)) {

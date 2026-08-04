@@ -6,6 +6,8 @@
 
 package io.github.baole.konture
 
+import io.github.baole.konture.core.KontureLogger
+import io.github.baole.konture.core.LogLevel
 import io.github.baole.konture.impl.PatternMatchers
 import kotlin.reflect.KClass
 
@@ -241,6 +243,74 @@ class PropertiesThat internal constructor(
 
     infix fun satisfy(predicate: (PropertyDeclarationContext) -> Boolean): PropertiesRuleBuilder {
         builder.setThat(predicate)
+        return builder
+    }
+
+    infix fun resideInAModule(modulePath: String): PropertiesRuleBuilder {
+        val normalized =
+            if (!modulePath.startsWith(":") && !modulePath.startsWith("**") && modulePath.isNotEmpty()) {
+                KontureLogger.log(
+                    LogLevel.WARNING,
+                    "Module path '$modulePath' lacks a leading colon (':'). Suggest matching with ':$modulePath' instead.",
+                )
+                ":$modulePath"
+            } else {
+                modulePath
+            }
+        builder.setThat { it.modulePath == normalized }
+        return builder
+    }
+
+    infix fun resideInAModule(modulePaths: List<String>): PropertiesRuleBuilder {
+        val normalizedPaths =
+            modulePaths.map { path ->
+                if (!path.startsWith(":") && !path.startsWith("**") && path.isNotEmpty()) {
+                    KontureLogger.log(
+                        LogLevel.WARNING,
+                        "Module path '$path' lacks a leading colon (':'). Suggest matching with ':$path' instead.",
+                    )
+                    ":$path"
+                } else {
+                    path
+                }
+            }
+        builder.setThat { context ->
+            normalizedPaths.any { context.modulePath == it }
+        }
+        return builder
+    }
+
+    fun resideInAModule(vararg modulePaths: String): PropertiesRuleBuilder = resideInAModule(modulePaths.toList())
+
+    infix fun belongToClass(classNamePattern: String): PropertiesRuleBuilder {
+        builder.setThat { context ->
+            context.className?.let {
+                PatternMatchers.matchesPackage(classNamePattern, it) || PatternMatchers.matchesSimpleGlob(classNamePattern, it)
+            } == true
+        }
+        return builder
+    }
+
+    infix fun belongToClass(kClass: KClass<*>): PropertiesRuleBuilder = belongToClass(kClass.kontureQualifiedName())
+
+    inline fun <reified T : Any> belongToClass(): PropertiesRuleBuilder = belongToClass(T::class)
+
+    infix fun belongToClass(predicate: (String) -> Boolean): PropertiesRuleBuilder {
+        builder.setThat { context -> context.className?.let(predicate) == true }
+        return builder
+    }
+
+    infix fun haveName(predicate: (String) -> Boolean): PropertiesRuleBuilder {
+        builder.setThat { predicate(it.declaration.name) }
+        return builder
+    }
+
+    @Suppress("UnusedParameter")
+    fun haveName(
+        description: String,
+        predicate: (String) -> Boolean,
+    ): PropertiesRuleBuilder {
+        builder.setThat { predicate(it.declaration.name) }
         return builder
     }
 }

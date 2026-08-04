@@ -1,5 +1,6 @@
 /*
- * Copyright 2026 Bao Le Duc
+ * Copyright 2026 The Konture Contributors
+ * Contributors: Bao Le Duc (@baole)
  * SPDX-License-Identifier: Apache-2.0
  */
 
@@ -232,12 +233,31 @@ class PropertiesRuleBuilder(
                     file.membershipsFor(module.path).filter(sourceSets::matches).flatMap { sourceSet ->
                         val topLevel =
                             file.topLevelProperties.map { prop ->
-                                PropertyDeclarationContext(prop, file.packageName, null, module.path, file.filePath, sourceSet)
+                                PropertyDeclarationContext(
+                                    prop,
+                                    file.packageName,
+                                    null,
+                                    module.path,
+                                    file.filePath,
+                                    sourceSet,
+                                    file.usages.filter { it.enclosingProperty == prop.name && it.enclosingClass == null },
+                                )
                             }
                         val members =
                             file.classes.flatMap { cls ->
                                 cls.properties.map { prop ->
-                                    PropertyDeclarationContext(prop, file.packageName, cls.name, module.path, file.filePath, sourceSet)
+                                    PropertyDeclarationContext(
+                                        prop,
+                                        file.packageName,
+                                        cls.name,
+                                        module.path,
+                                        file.filePath,
+                                        sourceSet,
+                                        file.usages.filter {
+                                            it.enclosingProperty == prop.name &&
+                                                (it.enclosingClass == cls.fqName || it.enclosingClass == cls.name)
+                                        },
+                                    )
                                 }
                             }
                         topLevel + members

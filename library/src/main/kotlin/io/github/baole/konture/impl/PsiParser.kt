@@ -161,6 +161,12 @@ internal object PsiParser {
                 .firstOrNull()
                 ?.text
 
+        val fileAnnotations =
+            DeclarationParser.parseAnnotations(
+                ktFile.fileAnnotationList?.annotationEntries ?: emptyList(),
+                context,
+            )
+
         return FileDeclaration(
             name = file.name,
             packageName = packageName,
@@ -172,6 +178,7 @@ internal object PsiParser {
             filePath = file.absolutePath,
             importAliases = importAliases,
             usages = usages,
+            annotations = fileAnnotations,
         )
     }
 
