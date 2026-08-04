@@ -1,5 +1,6 @@
 /*
- * Copyright 2026 Bao Le Duc
+ * Copyright 2026 The Konture Contributors
+ * Contributors: Bao Le Duc (@baole)
  * SPDX-License-Identifier: Apache-2.0
  */
 
@@ -12,7 +13,7 @@ class ViolationLocationTest {
     @Test
     fun `formats module, source set and file with a line number`() {
         assertEquals(
-            ":app, main source set, src/Foo.kt:12",
+            ":app, main source set) (src/Foo.kt:12",
             ViolationLocation.of(":app", "main", "src/Foo.kt", 12),
         )
     }
@@ -20,7 +21,7 @@ class ViolationLocationTest {
     @Test
     fun `omits the line number when it is unknown`() {
         assertEquals(
-            ":app, main source set, src/Foo.kt",
+            ":app, main source set) (src/Foo.kt",
             ViolationLocation.of(":app", "main", "src/Foo.kt"),
         )
     }
@@ -28,8 +29,9 @@ class ViolationLocationTest {
     @Test
     fun `falls back to unknown when the source set is null`() {
         assertEquals(
-            ":app, unknown source set, src/Foo.kt",
+            ":app, unknown source set) (src/Foo.kt",
             ViolationLocation.of(":app", null, "src/Foo.kt"),
         )
     }
+
 }

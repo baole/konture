@@ -28,6 +28,7 @@ internal object ViolationLocation {
                 line > 0 -> "$filePath:$line"
                 else -> filePath
             }
-        return "$modulePath, ${sourceSetName ?: "unknown"} source set, $file"
+        return "$modulePath, ${sourceSetName ?: "unknown"} source set) ($file"
     }
 }
+

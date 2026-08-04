@@ -103,7 +103,7 @@ class ClassesRuleBuilderTest : RuleBuildersTestBase() {
                     .check()
             }
         assertTrue(
-            error.message!!.contains("(at :moduleA, main source set, /src/ClassA.kt)"),
+            error.message!!.contains("(at :moduleA, main source set) (src/ClassA.kt)"),
             "Expected uniform module + source set location, got: ${error.message}",
         )
     }

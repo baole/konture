@@ -859,7 +859,7 @@ class FunctionsRuleBuilderTest : RuleBuildersTestBase() {
         notCallRule1.getShouldAssertion()!!(context, emptyList(), vNotCall1)
         assertEquals(1, vNotCall1.size)
         assertTrue(vNotCall1[0].contains("Logger.log"))
-        assertTrue(vNotCall1[0].contains(":service, unknown source set, /src/Processor.kt:10:5"))
+        assertTrue(vNotCall1[0].contains(":service, unknown source set) (/src/Processor.kt:10:5"))
 
         val notCallRule2 = FunctionsRuleBuilder(graph).should().notCall(String::class)
         val vNotCall2 = mutableListOf<String>()
