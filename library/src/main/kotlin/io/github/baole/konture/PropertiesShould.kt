@@ -487,10 +487,8 @@ class PropertiesShould internal constructor(
             }
 
             propUsages
-                .filter { usage ->
-                    usage.kind == UsageKind.CALL &&
-                        (usage.targetFqName == fqName || usage.targetFqName.endsWith(".$fqName") || fqName in usage.possibleTargetFqNames || usage.rawExpression == fqName)
-                }.forEach { usage ->
+                .filter { usage -> PatternMatchers.isCallUsageMatch(usage, fqName) }
+                .forEach { usage ->
                     val unresolved = if (usage.unresolvedPossibleUsage) "unresolved possible " else ""
                     violations.add(
                         "${getMessage("usage.notCall", unresolved, fqName, usage.rawExpression, usage.line, usage.column)} " +

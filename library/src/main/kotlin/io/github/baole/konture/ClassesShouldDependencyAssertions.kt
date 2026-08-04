@@ -328,9 +328,8 @@ internal interface ClassesShouldDependencyAssertions {
 
             fileUsages
                 .filter { usage ->
-                    usage.kind == UsageKind.CALL &&
-                        (usage.enclosingClass == cls.name || usage.enclosingClass == null) &&
-                        (usage.targetFqName == fqName || usage.targetFqName.endsWith(".$fqName") || fqName in usage.possibleTargetFqNames || usage.rawExpression == fqName)
+                    (usage.enclosingClass == cls.name || usage.enclosingClass == null) &&
+                        PatternMatchers.isCallUsageMatch(usage, fqName)
                 }.forEach { usage ->
                     val unresolved = if (usage.unresolvedPossibleUsage) "unresolved possible " else ""
                     violations.add(getMessage("usage.notCall", unresolved, fqName, usage.rawExpression, usage.line, usage.column))

@@ -1,6 +1,6 @@
 /*
  * Copyright 2026 The Konture Contributors
- * Contributors: Bao Le Duc, Octavio Calleya Garcia (@octaviospain)
+ * Contributors: Bao Le Duc (@baole), Octavio Calleya Garcia (@octaviospain)
  * SPDX-License-Identifier: Apache-2.0
  */
 
@@ -208,5 +208,29 @@ internal object PatternMatchers {
             }
         }
         return builder.toString()
+    }
+
+    /**
+     * Checks if a [io.github.baole.konture.SourceUsage] matches a method call target or class call target pattern [fqName].
+     */
+    fun isCallUsageMatch(
+        usage: io.github.baole.konture.SourceUsage,
+        fqName: String,
+    ): Boolean {
+        if (usage.kind != io.github.baole.konture.UsageKind.CALL && usage.kind != io.github.baole.konture.UsageKind.CLASS_REFERENCE) return false
+
+        val target = usage.targetFqName
+        val raw = usage.rawExpression
+
+        if (target == fqName || raw == fqName) return true
+        if (target.endsWith(".$fqName") || raw.endsWith(".$fqName")) return true
+        if (fqName.endsWith(".$target") || fqName.endsWith(".$raw")) return true
+
+        if (target.startsWith("$fqName.") || raw.startsWith("$fqName.")) return true
+
+        if (fqName in usage.possibleTargetFqNames) return true
+        if (usage.possibleTargetFqNames.any { it == fqName || it.endsWith(".$fqName") || it.startsWith("$fqName.") }) return true
+
+        return false
     }
 }

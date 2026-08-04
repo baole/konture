@@ -1,5 +1,6 @@
 /*
- * Copyright 2026 Bao Le Duc
+ * Copyright 2026 The Konture Contributors
+ * Contributors: Bao Le Duc (@baole)
  * SPDX-License-Identifier: Apache-2.0
  */
 
@@ -113,18 +114,55 @@ internal object UsageExtractor {
             return null to emptyList()
         }
 
+        fun findVariableType(receiver: String, element: KtElement): String? {
+            if (receiver.firstOrNull()?.isLowerCase() != true) return null
+            for (parent in element.parents) {
+                when (parent) {
+                    is KtNamedFunction -> {
+                        parent.valueParameters.find { it.name == receiver }?.typeReference?.text?.let { return it }
+                    }
+                    is KtClassOrObject -> {
+                        parent.primaryConstructorParameters.find { it.name == receiver }?.typeReference?.text?.let { return it }
+                        parent.declarations.filterIsInstance<KtProperty>().find { it.name == receiver }?.typeReference?.text?.let { return it }
+                    }
+                    is KtFile -> {
+                        parent.declarations.filterIsInstance<KtProperty>().find { it.name == receiver }?.typeReference?.text?.let { return it }
+                    }
+                }
+            }
+            return null
+        }
+
         file.accept(
             object : KtTreeVisitorVoid() {
                 override fun visitCallExpression(expression: KtCallExpression) {
                     super.visitCallExpression(expression)
-                    val raw = expression.calleeExpression?.text ?: return
-                    val (target, possible) = resolve(raw, expression)
-                    if (raw.substringAfterLast('.').firstOrNull()?.isUpperCase() == true) {
-                        if (target != null) add(UsageKind.CLASS_REFERENCE, target, expression, raw)
-                    } else if (target != null) {
-                        add(UsageKind.CALL, target, expression, raw)
-                    } else if (possible.isNotEmpty()) {
-                        add(UsageKind.CALL, raw, expression, raw, possible, unresolved = true)
+                    val callee = expression.calleeExpression?.text ?: return
+                    val parentDot = expression.parent as? KtDotQualifiedExpression
+                    val receiverText = if (parentDot?.selectorExpression == expression) parentDot.receiverExpression.text else null
+
+                    if (receiverText != null) {
+                        val fullRaw = "$receiverText.$callee"
+                        val typeOrClass = if (receiverText.firstOrNull()?.isLowerCase() == true) {
+                            findVariableType(receiverText, expression) ?: receiverText
+                        } else {
+                            receiverText
+                        }
+
+                        val (resolvedReceiver, _) = resolve(typeOrClass, expression)
+                        val qualifiedTarget = if (resolvedReceiver != null) "$resolvedReceiver.$callee" else fullRaw
+                        val possibleTargets = listOf(callee, fullRaw, qualifiedTarget).distinct()
+
+                        add(UsageKind.CALL, qualifiedTarget, expression, fullRaw, possible = possibleTargets)
+                    } else {
+                        val (target, possible) = resolve(callee, expression)
+                        if (callee.substringAfterLast('.').firstOrNull()?.isUpperCase() == true) {
+                            if (target != null) add(UsageKind.CLASS_REFERENCE, target, expression, callee)
+                        } else if (target != null) {
+                            add(UsageKind.CALL, target, expression, callee, possible = possible)
+                        } else {
+                            add(UsageKind.CALL, callee, expression, callee, possible = possible.ifEmpty { listOf(callee) }, unresolved = possible.isEmpty())
+                        }
                     }
                 }
 

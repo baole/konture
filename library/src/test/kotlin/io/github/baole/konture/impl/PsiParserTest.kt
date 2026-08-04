@@ -908,6 +908,30 @@ class PsiParserTest {
     }
 
     @Test
+    fun `test qualified method call extraction for instance and static receivers`() {
+        val file =
+            File(tempDir, "QualifiedCalls.kt").apply {
+                writeText(
+                    """
+                    package app
+                    import com.example.analytics.Analytics
+
+                    class UserViewModel(private val analytics: Analytics) {
+                        fun onClick() {
+                            analytics.trackEvent("click")
+                            Analytics.trackEvent("click")
+                        }
+                    }
+                    """.trimIndent(),
+                )
+            }
+
+        val declaration = PsiParser.parseFile(file)!!
+        val usages = declaration.usages.filter { it.kind == UsageKind.CALL }
+        assertTrue(usages.any { it.targetFqName == "com.example.analytics.Analytics.trackEvent" })
+    }
+
+    @Test
     fun `test dispose cleanup`() {
         PsiParser.dispose()
         PsiParser.dispose()

@@ -19,10 +19,8 @@ class FunctionsShould internal constructor(
     fun notCall(fqName: String): FunctionsRuleBuilder {
         builder.setShould { function, _, violations ->
             function.usages
-                .filter { usage ->
-                    usage.kind == UsageKind.CALL &&
-                        (usage.targetFqName == fqName || fqName in usage.possibleTargetFqNames)
-                }.forEach { usage ->
+                .filter { usage -> PatternMatchers.isCallUsageMatch(usage, fqName) }
+                .forEach { usage ->
                     val unresolved = if (usage.unresolvedPossibleUsage) "unresolved possible " else ""
                     violations.add(
                         "${getMessage("usage.notCall", unresolved, fqName, usage.rawExpression, usage.line, usage.column)} " +

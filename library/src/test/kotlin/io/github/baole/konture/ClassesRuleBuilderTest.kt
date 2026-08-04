@@ -153,6 +153,46 @@ class ClassesRuleBuilderTest : RuleBuildersTestBase() {
         assertEquals(1, vRef.size)
         assertTrue(vRef[0].contains("com.example.Service"))
     }
+
+    @Test
+    fun `test classes rule builder notCall with class FQN and method FQN`() {
+        val analyticsCall =
+            SourceUsage(
+                kind = UsageKind.CALL,
+                targetFqName = "com.example.Analytics.trackEvent",
+                filePath = "/src/ClassA.kt",
+                line = 15,
+                column = 5,
+                enclosingClass = "ClassA",
+                rawExpression = "analytics.trackEvent",
+            )
+        val logEventCall =
+            SourceUsage(
+                kind = UsageKind.CALL,
+                targetFqName = "com.example.LogEvent.trackEvent",
+                filePath = "/src/ClassA.kt",
+                line = 16,
+                column = 5,
+                enclosingClass = "ClassA",
+                rawExpression = "logEvent.trackEvent",
+            )
+        val fileDecl = FileDeclaration("ClassA.kt", "com.example", classes = listOf(classA), usages = listOf(analyticsCall, logEventCall), filePath = "/src/ClassA.kt")
+        val graph = ProjectGraph(builds = mapOf(":" to listOf(moduleA.copy(files = listOf(fileDecl)))))
+
+        // 1. Method FQN matching
+        val rule1 = ClassesRuleBuilder(graph).should().notCall("com.example.Analytics.trackEvent")
+        val v1 = mutableListOf<String>()
+        rule1.getShouldAssertion()!!(classA, emptyList(), v1)
+        assertEquals(1, v1.size)
+        assertTrue(v1[0].contains("analytics.trackEvent"))
+
+        // 2. Class FQN matching (bans any call on com.example.Analytics)
+        val rule2 = ClassesRuleBuilder(graph).should().notCall("com.example.Analytics")
+        val v2 = mutableListOf<String>()
+        rule2.getShouldAssertion()!!(classA, emptyList(), v2)
+        assertEquals(1, v2.size)
+        assertTrue(v2[0].contains("analytics.trackEvent"))
+    }
 }
 
 
