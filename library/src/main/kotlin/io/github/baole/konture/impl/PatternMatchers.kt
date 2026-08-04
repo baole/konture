@@ -213,6 +213,7 @@ internal object PatternMatchers {
     /**
      * Checks if a [io.github.baole.konture.SourceUsage] matches a method call target or class call target pattern [fqName].
      */
+    @Suppress("ReturnCount")
     fun isCallUsageMatch(
         usage: io.github.baole.konture.SourceUsage,
         fqName: String,
@@ -221,15 +222,36 @@ internal object PatternMatchers {
 
         val target = usage.targetFqName
         val raw = usage.rawExpression
+        val candidates = (listOf(target, raw) + usage.possibleTargetFqNames).filter { it.isNotEmpty() }
 
-        if (target == fqName || raw == fqName) return true
-        if (target.endsWith(".$fqName") || raw.endsWith(".$fqName")) return true
-        if (fqName.endsWith(".$target") || fqName.endsWith(".$raw")) return true
+        if (!fqName.contains('.')) {
+            for (candidate in candidates) {
+                if (candidate == fqName || candidate.endsWith(".$fqName")) return true
+            }
+            return false
+        }
 
-        if (target.startsWith("$fqName.") || raw.startsWith("$fqName.")) return true
+        for (candidate in candidates) {
+            if (candidate == fqName) return true
+            if (candidate.endsWith(".$fqName")) return true
 
-        if (fqName in usage.possibleTargetFqNames) return true
-        if (usage.possibleTargetFqNames.any { it == fqName || it.endsWith(".$fqName") || it.startsWith("$fqName.") }) return true
+            if (candidate.startsWith("$fqName.")) return true
+
+            if (candidate.contains('.')) {
+                val candidateMethod = candidate.substringAfterLast('.')
+                val fqNameMethod = fqName.substringAfterLast('.')
+
+                if (candidateMethod == fqNameMethod) {
+                    val candidateReceiver = candidate.substringBeforeLast('.').substringAfterLast('.')
+                    val fqNameClass = fqName.substringBeforeLast('.').substringAfterLast('.')
+                    if (candidateReceiver.equals(fqNameClass, ignoreCase = true)) return true
+                }
+
+                val candidateReceiver = candidate.substringBeforeLast('.').substringAfterLast('.')
+                val fqNameClass = fqName.substringAfterLast('.')
+                if (candidateReceiver.equals(fqNameClass, ignoreCase = true)) return true
+            }
+        }
 
         return false
     }

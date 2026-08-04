@@ -201,4 +201,21 @@ class ClassesRuleBuilderTest : RuleBuildersTestBase() {
         assertEquals(1, v2.size)
         assertTrue(v2[0].contains("analytics.trackEvent"))
     }
+
+    @Test
+    fun `test printMatchedClasses and printAllClasses debugging helpers`() {
+        val printedMatched = mutableListOf<String>()
+        val printedAll = mutableListOf<String>()
+
+        ClassesRuleBuilder(projectGraph)
+            .printAllClasses { printedAll.add(it.fqName) }
+            .that { fqName == "com.example.ClassA" }
+            .printMatchedClasses { printedMatched.add(it.fqName) }
+            .should().satisfy { true }
+            .check()
+
+        assertEquals(listOf("com.example.ClassA"), printedMatched)
+        assertTrue(printedAll.contains("com.example.ClassA"))
+        assertTrue(printedAll.contains("com.example.ClassB"))
+    }
 }

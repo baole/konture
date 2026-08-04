@@ -1,6 +1,6 @@
 /*
  * Copyright 2026 The Konture Contributors
- * Contributors: Octavio Calleya Garcia (@octaviospain)
+ * Contributors: Octavio Calleya Garcia (@octaviospain), Bao Le Duc (@baole)
  * SPDX-License-Identifier: Apache-2.0
  */
 
@@ -39,6 +39,22 @@ class SlicesRuleBuilder(
         this.pattern = pattern
         return this
     }
+
+    /**
+     * Debugging helper that prints information about all slices derived from the slice pattern.
+     *
+     * @param logger Custom log consumer (defaults to printing to standard output).
+     */
+    fun printMatchedSlices(
+        logger: (Slice) -> Unit = {
+            println("[Konture Debug] Derived slice: ${it.key} (packages=${it.packages}, classes=${it.classes.size})")
+        },
+    ): SlicesRuleBuilder =
+        this.apply {
+            addShouldAssertion { sliceGraph, _ ->
+                sliceGraph.slices.forEach(logger)
+            }
+        }
 
     /**
      * Configures this builder to allow empty selections (if no packages match the slice pattern the

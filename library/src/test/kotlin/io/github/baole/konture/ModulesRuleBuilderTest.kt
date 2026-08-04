@@ -426,4 +426,21 @@ class ModulesRuleBuilderTest : RuleBuildersTestBase() {
 
         assertTrue(failure.message!!.contains("dependencies.json"))
     }
+
+    @Test
+    fun `test printMatchedModules and printAllModules debugging helpers`() {
+        val printedMatched = mutableListOf<String>()
+        val printedAll = mutableListOf<String>()
+
+        ModulesRuleBuilder(projectGraph)
+            .printAllModules { printedAll.add(it.path) }
+            .that { path == ":moduleA" }
+            .printMatchedModules { printedMatched.add(it.path) }
+            .should().satisfy { true }
+            .check()
+
+        assertEquals(listOf(":moduleA"), printedMatched)
+        assertTrue(printedAll.contains(":moduleA"))
+        assertTrue(printedAll.contains(":moduleB"))
+    }
 }

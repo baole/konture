@@ -1,5 +1,6 @@
 /*
- * Copyright 2026 Bao Le Duc
+ * Copyright 2026 The Konture Contributors
+ * Contributors: Bao Le Duc (@baole)
  * SPDX-License-Identifier: Apache-2.0
  */
 
@@ -38,6 +39,38 @@ class ClassesRuleBuilder(
     private var activeShouldOperator = LogicalOperator.AND
     private var negateNextShould = false
     private var allowEmpty = false
+
+    /**
+     * Debugging helper that prints information about all classes matched by the `that()` filter.
+     *
+     * @param logger Custom log consumer (defaults to printing to standard output).
+     */
+    fun printMatchedClasses(
+        logger: (ClassDeclaration) -> Unit = {
+            println("[Konture Debug] Matched class: ${it.fqName} (${it.filePath}, supertypes=${it.supertypes})")
+        },
+    ): ClassesRuleBuilder =
+        this.apply {
+            setShould { cls, _, _ ->
+                logger(cls)
+            }
+        }
+
+    /**
+     * Debugging helper that prints information about all discovered classes in the project graph.
+     *
+     * @param logger Custom log consumer (defaults to printing to standard output).
+     */
+    fun printAllClasses(
+        logger: (ClassDeclaration) -> Unit = {
+            println("[Konture Debug] Discovered class: ${it.fqName} (file=${it.filePath}, supertypes=${it.supertypes})")
+        },
+    ): ClassesRuleBuilder =
+        this.apply {
+            graph.getAllModules().flatMap { module ->
+                module.files.flatMap { file -> file.classes }
+            }.distinctBy { it.fqName }.forEach(logger)
+        }
 
     /**
      * Configures this builder to allow empty selections (i.e. if no classes match the `that()` filter,

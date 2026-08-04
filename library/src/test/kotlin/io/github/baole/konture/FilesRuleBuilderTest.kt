@@ -404,4 +404,21 @@ class FilesRuleBuilderTest : RuleBuildersTestBase() {
         assertAnyOf(fileAContext, files, vAnyOf)
         assertTrue(vAnyOf.isEmpty())
     }
+
+    @Test
+    fun `test printMatchedFiles and printAllFiles debugging helpers`() {
+        val printedMatched = mutableListOf<String>()
+        val printedAll = mutableListOf<String>()
+
+        FilesRuleBuilder(projectGraph)
+            .printAllFiles { printedAll.add(it.declaration.name) }
+            .that { declaration.name == "ClassA.kt" }
+            .printMatchedFiles { printedMatched.add(it.declaration.name) }
+            .should().satisfy { true }
+            .check()
+
+        assertEquals(listOf("ClassA.kt"), printedMatched)
+        assertTrue(printedAll.contains("ClassA.kt"))
+        assertTrue(printedAll.contains("ClassB.kt"))
+    }
 }

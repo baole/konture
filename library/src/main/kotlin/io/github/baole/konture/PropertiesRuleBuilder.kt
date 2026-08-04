@@ -1,5 +1,6 @@
 /*
- * Copyright 2026 Bao Le Duc
+ * Copyright 2026 The Konture Contributors
+ * Contributors: Bao Le Duc (@baole)
  * SPDX-License-Identifier: Apache-2.0
  */
 
@@ -34,6 +35,50 @@ class PropertiesRuleBuilder(
     private var activeShouldOperator = LogicalOperator.AND
     private var negateNextShould = false
     private var allowEmpty = false
+
+    /**
+     * Debugging helper that prints information about all properties matched by the `that()` filter.
+     *
+     * @param logger Custom log consumer (defaults to printing to standard output).
+     */
+    fun printMatchedProperties(
+        logger: (PropertyDeclarationContext) -> Unit = {
+            println("[Konture Debug] Matched property: ${it.qualifiedName} (${it.filePath})")
+        },
+    ): PropertiesRuleBuilder =
+        this.apply {
+            setShould { prop, _, _ ->
+                logger(prop)
+            }
+        }
+
+    /**
+     * Debugging helper that prints information about all discovered properties in the project graph.
+     *
+     * @param logger Custom log consumer (defaults to printing to standard output).
+     */
+    fun printAllProperties(
+        logger: (PropertyDeclarationContext) -> Unit = {
+            println("[Konture Debug] Discovered property: ${it.qualifiedName} (${it.filePath})")
+        },
+    ): PropertiesRuleBuilder =
+        this.apply {
+            graph.getAllModules().flatMap { module ->
+                module.files.flatMap { file ->
+                    val topLevel =
+                        file.topLevelProperties.map { prop ->
+                            PropertyDeclarationContext(prop, file.packageName, null, module.path, file.filePath, null)
+                        }
+                    val members =
+                        file.classes.flatMap { cls ->
+                            cls.properties.map { prop ->
+                                PropertyDeclarationContext(prop, file.packageName, cls.name, module.path, file.filePath, null)
+                            }
+                        }
+                    topLevel + members
+                }
+            }.distinctBy { listOf(it.modulePath, it.className, it.declaration.name) }.forEach(logger)
+        }
 
     /**
      * Configures this builder to allow empty selections (i.e. if no properties match the `that()` filter,

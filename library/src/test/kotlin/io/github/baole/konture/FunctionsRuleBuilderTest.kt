@@ -799,6 +799,49 @@ class FunctionsRuleBuilderTest : RuleBuildersTestBase() {
     }
 
     @Test
+    fun `test printMatchedFunctions and printAllFunctions debugging helpers`() {
+        val printedMatched = mutableListOf<String>()
+        val printedAll = mutableListOf<String>()
+
+        val func1 =
+            FunctionDeclaration(
+                "fetchData",
+                Visibility.PUBLIC,
+                emptySet(),
+                "String",
+                emptyList(),
+                emptyList(),
+                kdocText = null,
+                isExtension = false,
+            )
+        val func2 =
+            FunctionDeclaration(
+                "processData",
+                Visibility.PUBLIC,
+                emptySet(),
+                "Unit",
+                emptyList(),
+                emptyList(),
+                kdocText = null,
+                isExtension = false,
+            )
+        val fileDecl = FileDeclaration("Service.kt", "com.example", topLevelFunctions = listOf(func1, func2))
+        val mockModule = Module(":", ":app", "app", emptyList(), emptyList(), emptyList(), listOf(fileDecl))
+        val graph = ProjectGraph(mapOf(":" to listOf(mockModule)))
+
+        FunctionsRuleBuilder(graph)
+            .printAllFunctions { printedAll.add(it.declaration.name) }
+            .that { declaration.name == "fetchData" }
+            .printMatchedFunctions { printedMatched.add(it.declaration.name) }
+            .should().satisfy { true }
+            .check()
+
+        assertEquals(listOf("fetchData"), printedMatched)
+        assertTrue(printedAll.contains("fetchData"))
+        assertTrue(printedAll.contains("processData"))
+    }
+
+    @Test
     fun `test functions rule builder overloads`() {
         val fObj =
             FunctionDeclaration(

@@ -1,5 +1,6 @@
 /*
- * Copyright 2026 Bao Le Duc
+ * Copyright 2026 The Konture Contributors
+ * Contributors: Bao Le Duc (@baole)
  * SPDX-License-Identifier: Apache-2.0
  */
 
@@ -38,6 +39,42 @@ class FilesRuleBuilder(
     private var activeShouldOperator = LogicalOperator.AND
     private var negateNextShould = false
     private var allowEmpty = false
+
+    /**
+     * Debugging helper that prints information about all files matched by the `that()` filter.
+     *
+     * @param logger Custom log consumer (defaults to printing to standard output).
+     */
+    fun printMatchedFiles(
+        logger: (FileDeclarationContext) -> Unit = {
+            println("[Konture Debug] Matched file: ${it.declaration.name} (${it.declaration.filePath}, package=${it.declaration.packageName})")
+        },
+    ): FilesRuleBuilder =
+        this.apply {
+            setShould { file, _, _ ->
+                logger(file)
+            }
+        }
+
+    /**
+     * Debugging helper that prints information about all discovered files in the project graph.
+     *
+     * @param logger Custom log consumer (defaults to printing to standard output).
+     */
+    fun printAllFiles(
+        logger: (FileDeclarationContext) -> Unit = {
+            println("[Konture Debug] Discovered file: ${it.declaration.name} (${it.declaration.filePath}, package=${it.declaration.packageName})")
+        },
+    ): FilesRuleBuilder =
+        this.apply {
+            graph.getAllModules().flatMap { module ->
+                module.files.flatMap { file ->
+                    file.membershipsFor(module.path).filter(sourceSets::matches).map { sourceSet ->
+                        FileDeclarationContext(file, module.path, sourceSet)
+                    }
+                }
+            }.distinctBy { Pair(it.modulePath, it.declaration.filePath.ifEmpty { it.declaration.name }) }.forEach(logger)
+        }
 
     /**
      * Configures this builder to allow empty selections (i.e. if no files match the `that()` filter,

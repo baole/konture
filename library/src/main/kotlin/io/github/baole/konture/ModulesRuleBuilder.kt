@@ -1,5 +1,6 @@
 /*
- * Copyright 2026 Bao Le Duc
+ * Copyright 2026 The Konture Contributors
+ * Contributors: Bao Le Duc (@baole)
  * SPDX-License-Identifier: Apache-2.0
  */
 
@@ -30,6 +31,36 @@ class ModulesRuleBuilder(
     private var activeShouldOperator = LogicalOperator.AND
     private var negateNextShould = false
     private var allowEmpty = false
+
+    /**
+     * Debugging helper that prints information about all modules matched by the `that()` filter.
+     *
+     * @param logger Custom log consumer (defaults to printing to standard output).
+     */
+    fun printMatchedModules(
+        logger: (Module) -> Unit = {
+            println("[Konture Debug] Matched module: ${it.path} (projectDir=${it.projectDir}, plugins=${it.appliedPlugins})")
+        },
+    ): ModulesRuleBuilder =
+        this.apply {
+            setShould { module, _, _ ->
+                logger(module)
+            }
+        }
+
+    /**
+     * Debugging helper that prints information about all discovered modules in the project graph.
+     *
+     * @param logger Custom log consumer (defaults to printing to standard output).
+     */
+    fun printAllModules(
+        logger: (Module) -> Unit = {
+            println("[Konture Debug] Discovered module: ${it.path} (projectDir=${it.projectDir}, plugins=${it.appliedPlugins})")
+        },
+    ): ModulesRuleBuilder =
+        this.apply {
+            graph.getAllModules().forEach(logger)
+        }
 
     /**
      * Configures this builder to allow empty selections (i.e. if no modules match the `that()` filter,

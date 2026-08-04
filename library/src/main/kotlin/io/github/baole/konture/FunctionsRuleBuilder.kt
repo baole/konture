@@ -1,5 +1,6 @@
 /*
- * Copyright 2026 Bao Le Duc
+ * Copyright 2026 The Konture Contributors
+ * Contributors: Bao Le Duc (@baole)
  * SPDX-License-Identifier: Apache-2.0
  */
 
@@ -34,6 +35,51 @@ class FunctionsRuleBuilder(
     private var activeShouldOperator = LogicalOperator.AND
     private var negateNextShould = false
     private var allowEmpty = false
+
+    /**
+     * Debugging helper that prints information about all functions matched by the `that()` filter.
+     *
+     * @param logger Custom log consumer (defaults to printing to standard output).
+     */
+    fun printMatchedFunctions(
+        logger: (FunctionDeclarationContext) -> Unit = {
+            println("[Konture Debug] Matched function: ${it.qualifiedName} (${it.filePath})")
+        },
+    ): FunctionsRuleBuilder =
+        this.apply {
+            setShould { func, _, _ ->
+                logger(func)
+            }
+        }
+
+    /**
+     * Debugging helper that prints information about all discovered functions in the project graph.
+     *
+     * @param logger Custom log consumer (defaults to printing to standard output).
+     */
+    fun printAllFunctions(
+        logger: (FunctionDeclarationContext) -> Unit = {
+            println("[Konture Debug] Discovered function: ${it.qualifiedName} (${it.filePath})")
+        },
+    ): FunctionsRuleBuilder =
+        this.apply {
+            graph.getAllModules().flatMap { module ->
+                module.files.flatMap { file ->
+                    val topLevel =
+                        file.topLevelFunctions.map { func ->
+                            FunctionDeclarationContext(func, file.packageName, null, module.path, file.filePath, null)
+                        }
+                    val members =
+                        file.classes.flatMap { cls ->
+                            cls.functions.map { func ->
+                                FunctionDeclarationContext(func, file.packageName, cls.name, module.path, file.filePath, null)
+                            }
+                        }
+                    topLevel + members
+                }
+            }.distinctBy { listOf(it.modulePath, it.className, it.declaration.name, it.declaration.parameters.map { p -> p.type }) }
+                .forEach(logger)
+        }
 
     /**
      * Configures this builder to allow empty selections (i.e. if no functions match the `that()` filter,

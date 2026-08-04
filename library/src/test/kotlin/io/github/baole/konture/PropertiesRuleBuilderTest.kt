@@ -313,4 +313,45 @@ class PropertiesRuleBuilderTest : RuleBuildersTestBase() {
         anyOfRule.getShouldAssertion()!!(context, emptyList(), vAnyOf)
         assertTrue(vAnyOf.isEmpty())
     }
+
+    @Test
+    fun `test printMatchedProperties and printAllProperties debugging helpers`() {
+        val printedMatched = mutableListOf<String>()
+        val printedAll = mutableListOf<String>()
+
+        val prop1 =
+            PropertyDeclaration(
+                "id",
+                Visibility.PUBLIC,
+                emptySet(),
+                "String",
+                isVal = true,
+                annotations = emptyList(),
+                kdocText = null,
+            )
+        val prop2 =
+            PropertyDeclaration(
+                "title",
+                Visibility.PUBLIC,
+                emptySet(),
+                "String",
+                isVal = true,
+                annotations = emptyList(),
+                kdocText = null,
+            )
+        val fileDecl = FileDeclaration("Service.kt", "com.example", topLevelProperties = listOf(prop1, prop2))
+        val mockModule = Module(":", ":app", "app", emptyList(), emptyList(), emptyList(), listOf(fileDecl))
+        val graph = ProjectGraph(mapOf(":" to listOf(mockModule)))
+
+        PropertiesRuleBuilder(graph)
+            .printAllProperties { printedAll.add(it.declaration.name) }
+            .that { declaration.name == "id" }
+            .printMatchedProperties { printedMatched.add(it.declaration.name) }
+            .should().satisfy { true }
+            .check()
+
+        assertEquals(listOf("id"), printedMatched)
+        assertTrue(printedAll.contains("id"))
+        assertTrue(printedAll.contains("title"))
+    }
 }
