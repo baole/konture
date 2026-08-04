@@ -33,5 +33,4 @@ class ViolationLocationTest {
             ViolationLocation.of(":app", null, "src/Foo.kt"),
         )
     }
-
 }

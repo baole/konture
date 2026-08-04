@@ -285,14 +285,15 @@ class PropertiesRuleBuilderTest : RuleBuildersTestBase() {
         assertTrue(vType3.isEmpty())
 
         // 3. notCall and notReferenceClass
-        val callUsage = SourceUsage(
-            kind = UsageKind.CALL,
-            targetFqName = "android.content.Context.getString",
-            filePath = "/src/Sample.kt",
-            line = 5,
-            column = 10,
-            enclosingProperty = "myVal",
-        )
+        val callUsage =
+            SourceUsage(
+                kind = UsageKind.CALL,
+                targetFqName = "android.content.Context.getString",
+                filePath = "/src/Sample.kt",
+                line = 5,
+                column = 10,
+                enclosingProperty = "myVal",
+            )
         val fileDeclWithUsage = fileDecl.copy(usages = listOf(callUsage))
         val mockModuleWithUsage = mockModule.copy(files = listOf(fileDeclWithUsage))
         val graphWithUsage = ProjectGraph(mapOf(":" to listOf(mockModuleWithUsage)))
@@ -303,13 +304,13 @@ class PropertiesRuleBuilderTest : RuleBuildersTestBase() {
         assertEquals(1, vNotCall.size)
 
         // 4. composite assertions
-        val anyOfRule = PropertiesRuleBuilder(graph).should().anyOf(
-            { beVal() },
-            { beVar() }
-        )
+        val anyOfRule =
+            PropertiesRuleBuilder(graph).should().anyOf(
+                { beVal() },
+                { beVar() },
+            )
         val vAnyOf = mutableListOf<String>()
         anyOfRule.getShouldAssertion()!!(context, emptyList(), vAnyOf)
         assertTrue(vAnyOf.isEmpty())
     }
 }
-

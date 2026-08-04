@@ -31,4 +31,3 @@ internal object ViolationLocation {
         return "$modulePath, ${sourceSetName ?: "unknown"} source set) ($file"
     }
 }
-

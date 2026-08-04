@@ -321,10 +321,11 @@ internal interface ClassesShouldDependencyAssertions {
     /** Fails for every invocation of [fqName] in the selected class. */
     fun notCall(fqName: String): ClassesRuleBuilder {
         builder.setShould { cls, _, violations ->
-            val fileUsages = builder.graph.getAllModules()
-                .flatMap { it.files }
-                .find { file -> file.filePath == cls.filePath || file.classes.any { it.fqName == cls.fqName } }
-                ?.usages.orEmpty()
+            val fileUsages =
+                builder.graph.getAllModules()
+                    .flatMap { it.files }
+                    .find { file -> file.filePath == cls.filePath || file.classes.any { it.fqName == cls.fqName } }
+                    ?.usages.orEmpty()
 
             fileUsages
                 .filter { usage ->
@@ -344,10 +345,11 @@ internal interface ClassesShouldDependencyAssertions {
     /** Fails for every actual class/type use of [fqName] in the selected class; imports alone do not match. */
     fun notReferenceClass(fqName: String): ClassesRuleBuilder {
         builder.setShould { cls, _, violations ->
-            val fileUsages = builder.graph.getAllModules()
-                .flatMap { it.files }
-                .find { file -> file.filePath == cls.filePath || file.classes.any { it.fqName == cls.fqName } }
-                ?.usages.orEmpty()
+            val fileUsages =
+                builder.graph.getAllModules()
+                    .flatMap { it.files }
+                    .find { file -> file.filePath == cls.filePath || file.classes.any { it.fqName == cls.fqName } }
+                    ?.usages.orEmpty()
 
             fileUsages
                 .filter { usage ->
@@ -361,9 +363,6 @@ internal interface ClassesShouldDependencyAssertions {
         return builder
     }
 
-
     /** Fails for every actual class/type use of [kClass] in the selected class; imports alone do not match. */
     fun notReferenceClass(kClass: KClass<*>): ClassesRuleBuilder = notReferenceClass(kClass.kontureQualifiedName())
-
 }
-

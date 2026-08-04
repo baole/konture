@@ -57,7 +57,6 @@ class FunctionsShould internal constructor(
     /** Fails for every actual class/type use of [kClass] in the selected function; imports alone do not match. */
     fun notReferenceClass(kClass: KClass<*>): FunctionsRuleBuilder = notReferenceClass(kClass.kontureQualifiedName())
 
-
     infix fun resideInAPackage(packagePattern: String): FunctionsRuleBuilder {
         builder.setShould { func, _, violations ->
             if (!PatternMatchers.matchesPackage(packagePattern, func.packageName)) {
@@ -631,14 +630,15 @@ class FunctionsShould internal constructor(
 
     fun anyOf(vararg blocks: FunctionsShould.() -> Unit): FunctionsRuleBuilder {
         builder.setShould { func, allFuncs, violations ->
-            val anyPassed = blocks.any { block ->
-                val subBuilder = FunctionsRuleBuilder(builder.graph).allowEmpty()
-                FunctionsShould(subBuilder).apply(block)
-                val subAssertion = subBuilder.getShouldAssertion()
-                val subViolations = mutableListOf<String>()
-                subAssertion?.invoke(func, allFuncs, subViolations)
-                subViolations.isEmpty()
-            }
+            val anyPassed =
+                blocks.any { block ->
+                    val subBuilder = FunctionsRuleBuilder(builder.graph).allowEmpty()
+                    FunctionsShould(subBuilder).apply(block)
+                    val subAssertion = subBuilder.getShouldAssertion()
+                    val subViolations = mutableListOf<String>()
+                    subAssertion?.invoke(func, allFuncs, subViolations)
+                    subViolations.isEmpty()
+                }
             if (!anyPassed) {
                 violations.add("Function ${func.qualifiedName} does not satisfy any of the specified conditions")
             }
@@ -660,14 +660,15 @@ class FunctionsShould internal constructor(
 
     fun noneOf(vararg blocks: FunctionsShould.() -> Unit): FunctionsRuleBuilder {
         builder.setShould { func, allFuncs, violations ->
-            val anyPassed = blocks.any { block ->
-                val subBuilder = FunctionsRuleBuilder(builder.graph).allowEmpty()
-                FunctionsShould(subBuilder).apply(block)
-                val subAssertion = subBuilder.getShouldAssertion()
-                val subViolations = mutableListOf<String>()
-                subAssertion?.invoke(func, allFuncs, subViolations)
-                subViolations.isEmpty()
-            }
+            val anyPassed =
+                blocks.any { block ->
+                    val subBuilder = FunctionsRuleBuilder(builder.graph).allowEmpty()
+                    FunctionsShould(subBuilder).apply(block)
+                    val subAssertion = subBuilder.getShouldAssertion()
+                    val subViolations = mutableListOf<String>()
+                    subAssertion?.invoke(func, allFuncs, subViolations)
+                    subViolations.isEmpty()
+                }
             if (anyPassed) {
                 violations.add("Function ${func.qualifiedName} satisfies one of the forbidden conditions")
             }
@@ -675,4 +676,3 @@ class FunctionsShould internal constructor(
         return builder
     }
 }
-

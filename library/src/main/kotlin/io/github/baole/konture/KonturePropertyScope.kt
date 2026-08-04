@@ -31,21 +31,24 @@ class KonturePropertyScope(
             graph: ProjectGraph = Konture.projectGraph,
             sourceSets: SourceSetSelector = SourceSets.production(),
         ): KonturePropertyScope {
-            val props = graph.getAllModules().flatMap { module ->
-                module.files
-                    .filter { file -> file.membershipsFor(module.path).any(sourceSets::matches) }
-                    .flatMap { file ->
-                        val top = file.topLevelProperties.map {
-                            PropertyDeclarationContext(it, file.packageName, null, module.path, file.filePath)
+            val props =
+                graph.getAllModules().flatMap { module ->
+                    module.files
+                        .filter { file -> file.membershipsFor(module.path).any(sourceSets::matches) }
+                        .flatMap { file ->
+                            val top =
+                                file.topLevelProperties.map {
+                                    PropertyDeclarationContext(it, file.packageName, null, module.path, file.filePath)
+                                }
+                            val mem =
+                                file.classes.flatMap { cls ->
+                                    cls.properties.map {
+                                        PropertyDeclarationContext(it, file.packageName, cls.name, module.path, file.filePath)
+                                    }
+                                }
+                            top + mem
                         }
-                        val mem = file.classes.flatMap { cls ->
-                            cls.properties.map {
-                                PropertyDeclarationContext(it, file.packageName, cls.name, module.path, file.filePath)
-                            }
-                        }
-                        top + mem
-                    }
-            }
+                }
             return KonturePropertyScope(props)
         }
 
@@ -63,21 +66,25 @@ class KonturePropertyScope(
             graph: ProjectGraph = Konture.projectGraph,
             sourceSets: SourceSetSelector = SourceSets.production(),
         ): KonturePropertyScope {
-            val module = graph.getAllModules().find { it.path == path }
-                ?: throw IllegalArgumentException("Module $path not found in project graph")
-            val props = module.files
-                .filter { file -> file.membershipsFor(module.path).any(sourceSets::matches) }
-                .flatMap { file ->
-                    val top = file.topLevelProperties.map {
-                        PropertyDeclarationContext(it, file.packageName, null, module.path, file.filePath)
+            val module =
+                graph.getAllModules().find { it.path == path }
+                    ?: throw IllegalArgumentException("Module $path not found in project graph")
+            val props =
+                module.files
+                    .filter { file -> file.membershipsFor(module.path).any(sourceSets::matches) }
+                    .flatMap { file ->
+                        val top =
+                            file.topLevelProperties.map {
+                                PropertyDeclarationContext(it, file.packageName, null, module.path, file.filePath)
+                            }
+                        val mem =
+                            file.classes.flatMap { cls ->
+                                cls.properties.map {
+                                    PropertyDeclarationContext(it, file.packageName, cls.name, module.path, file.filePath)
+                                }
+                            }
+                        top + mem
                     }
-                    val mem = file.classes.flatMap { cls ->
-                        cls.properties.map {
-                            PropertyDeclarationContext(it, file.packageName, cls.name, module.path, file.filePath)
-                        }
-                    }
-                    top + mem
-                }
             return KonturePropertyScope(props)
         }
 
@@ -94,17 +101,17 @@ class KonturePropertyScope(
             graph: ProjectGraph = Konture.projectGraph,
             sourceSets: SourceSetSelector = SourceSets.production(),
         ): KonturePropertyScope {
-            val props = fromProject(graph, sourceSets).properties.filter {
-                it.packageName == packageName || it.packageName.startsWith("$packageName.")
-            }
+            val props =
+                fromProject(graph, sourceSets).properties.filter {
+                    it.packageName == packageName || it.packageName.startsWith("$packageName.")
+                }
             return KonturePropertyScope(props)
         }
     }
 }
 
 /** Combines two [KonturePropertyScope] scopes into a single unified scope. */
-operator fun KonturePropertyScope.plus(other: KonturePropertyScope): KonturePropertyScope =
-    KonturePropertyScope(this.properties + other.properties)
+operator fun KonturePropertyScope.plus(other: KonturePropertyScope): KonturePropertyScope = KonturePropertyScope(this.properties + other.properties)
 
 /** Subtracts the properties present in [other] from this [KonturePropertyScope]. */
 operator fun KonturePropertyScope.minus(other: KonturePropertyScope): KonturePropertyScope {
@@ -131,20 +138,16 @@ fun List<PropertyDeclarationContext>.withPackage(packagePattern: String): List<P
     filter { PatternMatchers.matchesPackage(packagePattern, it.packageName) }
 
 /** Filters the list of properties to include only read-only (`val`) properties. */
-fun List<PropertyDeclarationContext>.valProperties(): List<PropertyDeclarationContext> =
-    filter { it.declaration.isVal }
+fun List<PropertyDeclarationContext>.valProperties(): List<PropertyDeclarationContext> = filter { it.declaration.isVal }
 
 /** Filters the list of properties to include only mutable (`var`) properties. */
-fun List<PropertyDeclarationContext>.varProperties(): List<PropertyDeclarationContext> =
-    filter { !it.declaration.isVal }
+fun List<PropertyDeclarationContext>.varProperties(): List<PropertyDeclarationContext> = filter { !it.declaration.isVal }
 
 /** Filters the list of properties to include only member/class properties. */
-fun List<PropertyDeclarationContext>.memberProperties(): List<PropertyDeclarationContext> =
-    filter { it.className != null }
+fun List<PropertyDeclarationContext>.memberProperties(): List<PropertyDeclarationContext> = filter { it.className != null }
 
 /** Filters the list of properties to include only top-level properties. */
-fun List<PropertyDeclarationContext>.topLevelProperties(): List<PropertyDeclarationContext> =
-    filter { it.className == null }
+fun List<PropertyDeclarationContext>.topLevelProperties(): List<PropertyDeclarationContext> = filter { it.className == null }
 
 // Assertion extensions on KonturePropertyScope
 

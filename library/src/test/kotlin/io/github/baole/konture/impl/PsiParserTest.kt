@@ -915,11 +915,14 @@ class PsiParserTest {
                     """
                     package app
                     import com.example.analytics.Analytics
+                    import com.example.logging.LogEvent
 
                     class UserViewModel(private val analytics: Analytics) {
-                        fun onClick() {
+                        fun onClick(logEvent: LogEvent) {
                             analytics.trackEvent("click")
                             Analytics.trackEvent("click")
+                            logEvent.trackEvent("click")
+                            LogEvent.trackEvent("click")
                         }
                     }
                     """.trimIndent(),
@@ -928,7 +931,15 @@ class PsiParserTest {
 
         val declaration = PsiParser.parseFile(file)!!
         val usages = declaration.usages.filter { it.kind == UsageKind.CALL }
-        assertTrue(usages.any { it.targetFqName == "com.example.analytics.Analytics.trackEvent" })
+
+        val analyticsMatches = usages.filter { PatternMatchers.isCallUsageMatch(it, "com.example.analytics.Analytics.trackEvent") }
+        assertEquals(2, analyticsMatches.size)
+
+        val classFqnMatches = usages.filter { PatternMatchers.isCallUsageMatch(it, "com.example.analytics.Analytics") }
+        assertEquals(2, classFqnMatches.size)
+
+        val logEventMatches = usages.filter { PatternMatchers.isCallUsageMatch(it, "com.example.logging.LogEvent.trackEvent") }
+        assertEquals(2, logEventMatches.size)
     }
 
     @Test

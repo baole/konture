@@ -256,7 +256,3 @@ inline fun <reified T : Any> FunctionsShould.notReferenceClass(): FunctionsRuleB
 inline fun <reified T : Any> PropertiesShould.notCall(): PropertiesRuleBuilder = notCall(T::class)
 
 inline fun <reified T : Any> PropertiesShould.notReferenceClass(): PropertiesRuleBuilder = notReferenceClass(T::class)
-
-
-
-

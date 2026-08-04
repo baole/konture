@@ -11,7 +11,6 @@ import io.github.baole.konture.impl.PatternMatchers
 import io.github.baole.konture.impl.ViolationLocation
 import kotlin.reflect.KClass
 
-
 @KontureDsl
 class PropertiesShould internal constructor(
     private val builder: PropertiesRuleBuilder,
@@ -476,15 +475,17 @@ class PropertiesShould internal constructor(
     /** Fails when the selected property initializer or delegate invokes [fqName]. */
     fun notCall(fqName: String): PropertiesRuleBuilder {
         builder.setShould { prop, _, violations ->
-            val fileUsages = builder.graph.getAllModules()
-                .flatMap { it.files }
-                .find { file -> file.filePath == prop.filePath || file.classes.any { it.name == prop.className } }
-                ?.usages.orEmpty()
+            val fileUsages =
+                builder.graph.getAllModules()
+                    .flatMap { it.files }
+                    .find { file -> file.filePath == prop.filePath || file.classes.any { it.name == prop.className } }
+                    ?.usages.orEmpty()
 
-            val propUsages = fileUsages.filter { usage ->
-                usage.enclosingProperty == prop.declaration.name &&
-                    (prop.className == null || usage.enclosingClass == prop.className)
-            }
+            val propUsages =
+                fileUsages.filter { usage ->
+                    usage.enclosingProperty == prop.declaration.name &&
+                        (prop.className == null || usage.enclosingClass == prop.className)
+                }
 
             propUsages
                 .filter { usage -> PatternMatchers.isCallUsageMatch(usage, fqName) }
@@ -505,15 +506,17 @@ class PropertiesShould internal constructor(
     /** Fails for every actual class/type use of [fqName] in the selected property; imports alone do not match. */
     fun notReferenceClass(fqName: String): PropertiesRuleBuilder {
         builder.setShould { prop, _, violations ->
-            val fileUsages = builder.graph.getAllModules()
-                .flatMap { it.files }
-                .find { file -> file.filePath == prop.filePath || file.classes.any { it.name == prop.className } }
-                ?.usages.orEmpty()
+            val fileUsages =
+                builder.graph.getAllModules()
+                    .flatMap { it.files }
+                    .find { file -> file.filePath == prop.filePath || file.classes.any { it.name == prop.className } }
+                    ?.usages.orEmpty()
 
-            val propUsages = fileUsages.filter { usage ->
-                usage.enclosingProperty == prop.declaration.name &&
-                    (prop.className == null || usage.enclosingClass == prop.className)
-            }
+            val propUsages =
+                fileUsages.filter { usage ->
+                    usage.enclosingProperty == prop.declaration.name &&
+                        (prop.className == null || usage.enclosingClass == prop.className)
+                }
 
             propUsages
                 .filter { usage ->
@@ -534,14 +537,15 @@ class PropertiesShould internal constructor(
 
     fun anyOf(vararg blocks: PropertiesShould.() -> Unit): PropertiesRuleBuilder {
         builder.setShould { prop, allProps, violations ->
-            val anyPassed = blocks.any { block ->
-                val subBuilder = PropertiesRuleBuilder(builder.graph).allowEmpty()
-                PropertiesShould(subBuilder).apply(block)
-                val subAssertion = subBuilder.getShouldAssertion()
-                val subViolations = mutableListOf<String>()
-                subAssertion?.invoke(prop, allProps, subViolations)
-                subViolations.isEmpty()
-            }
+            val anyPassed =
+                blocks.any { block ->
+                    val subBuilder = PropertiesRuleBuilder(builder.graph).allowEmpty()
+                    PropertiesShould(subBuilder).apply(block)
+                    val subAssertion = subBuilder.getShouldAssertion()
+                    val subViolations = mutableListOf<String>()
+                    subAssertion?.invoke(prop, allProps, subViolations)
+                    subViolations.isEmpty()
+                }
             if (!anyPassed) {
                 violations.add("Property ${prop.qualifiedName} does not satisfy any of the specified conditions")
             }
@@ -563,14 +567,15 @@ class PropertiesShould internal constructor(
 
     fun noneOf(vararg blocks: PropertiesShould.() -> Unit): PropertiesRuleBuilder {
         builder.setShould { prop, allProps, violations ->
-            val anyPassed = blocks.any { block ->
-                val subBuilder = PropertiesRuleBuilder(builder.graph).allowEmpty()
-                PropertiesShould(subBuilder).apply(block)
-                val subAssertion = subBuilder.getShouldAssertion()
-                val subViolations = mutableListOf<String>()
-                subAssertion?.invoke(prop, allProps, subViolations)
-                subViolations.isEmpty()
-            }
+            val anyPassed =
+                blocks.any { block ->
+                    val subBuilder = PropertiesRuleBuilder(builder.graph).allowEmpty()
+                    PropertiesShould(subBuilder).apply(block)
+                    val subAssertion = subBuilder.getShouldAssertion()
+                    val subViolations = mutableListOf<String>()
+                    subAssertion?.invoke(prop, allProps, subViolations)
+                    subViolations.isEmpty()
+                }
             if (anyPassed) {
                 violations.add("Property ${prop.qualifiedName} satisfies one of the forbidden conditions")
             }
@@ -578,4 +583,3 @@ class PropertiesShould internal constructor(
         return builder
     }
 }
-

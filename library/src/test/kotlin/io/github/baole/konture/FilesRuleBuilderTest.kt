@@ -394,14 +394,14 @@ class FilesRuleBuilderTest : RuleBuildersTestBase() {
         assertEquals(1, vNot.size)
 
         // Composite assertions test: anyOf
-        val ruleAnyOf = FilesRuleBuilder(projectGraph).should().anyOf(
-            { resideInAPackage("com.example") },
-            { resideInAPackage("com.other") }
-        )
+        val ruleAnyOf =
+            FilesRuleBuilder(projectGraph).should().anyOf(
+                { resideInAPackage("com.example") },
+                { resideInAPackage("com.other") },
+            )
         val assertAnyOf = ruleAnyOf.getShouldAssertion()!!
         val vAnyOf = mutableListOf<String>()
         assertAnyOf(fileAContext, files, vAnyOf)
         assertTrue(vAnyOf.isEmpty())
     }
 }
-

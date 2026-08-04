@@ -142,7 +142,6 @@ fun Konture.propertyScopeFromModule(path: String) = KonturePropertyScope.fromMod
 
 fun Konture.propertyScopeFromPackage(packageName: String) = KonturePropertyScope.fromPackage(packageName, projectGraph)
 
-
 // --- Block-based DSL Entry Points (Auto-Checking) ---
 
 /**

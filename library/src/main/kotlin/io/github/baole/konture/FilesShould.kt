@@ -239,14 +239,15 @@ class FilesShould internal constructor(
 
     fun anyOf(vararg blocks: FilesShould.() -> Unit): FilesRuleBuilder {
         builder.setShould { file, allFiles, violations ->
-            val anyPassed = blocks.any { block ->
-                val subBuilder = FilesRuleBuilder(builder.graph).allowEmpty()
-                FilesShould(subBuilder).apply(block)
-                val subAssertion = subBuilder.getShouldAssertion()
-                val subViolations = mutableListOf<String>()
-                subAssertion?.invoke(file, allFiles, subViolations)
-                subViolations.isEmpty()
-            }
+            val anyPassed =
+                blocks.any { block ->
+                    val subBuilder = FilesRuleBuilder(builder.graph).allowEmpty()
+                    FilesShould(subBuilder).apply(block)
+                    val subAssertion = subBuilder.getShouldAssertion()
+                    val subViolations = mutableListOf<String>()
+                    subAssertion?.invoke(file, allFiles, subViolations)
+                    subViolations.isEmpty()
+                }
             if (!anyPassed) {
                 violations.add("File ${file.declaration.name} does not satisfy any of the specified conditions")
             }
@@ -268,14 +269,15 @@ class FilesShould internal constructor(
 
     fun noneOf(vararg blocks: FilesShould.() -> Unit): FilesRuleBuilder {
         builder.setShould { file, allFiles, violations ->
-            val anyPassed = blocks.any { block ->
-                val subBuilder = FilesRuleBuilder(builder.graph).allowEmpty()
-                FilesShould(subBuilder).apply(block)
-                val subAssertion = subBuilder.getShouldAssertion()
-                val subViolations = mutableListOf<String>()
-                subAssertion?.invoke(file, allFiles, subViolations)
-                subViolations.isEmpty()
-            }
+            val anyPassed =
+                blocks.any { block ->
+                    val subBuilder = FilesRuleBuilder(builder.graph).allowEmpty()
+                    FilesShould(subBuilder).apply(block)
+                    val subAssertion = subBuilder.getShouldAssertion()
+                    val subViolations = mutableListOf<String>()
+                    subAssertion?.invoke(file, allFiles, subViolations)
+                    subViolations.isEmpty()
+                }
             if (anyPassed) {
                 violations.add("File ${file.declaration.name} satisfies one of the forbidden conditions")
             }
@@ -283,4 +285,3 @@ class FilesShould internal constructor(
         return builder
     }
 }
-

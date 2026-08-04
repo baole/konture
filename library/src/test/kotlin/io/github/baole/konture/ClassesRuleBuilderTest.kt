@@ -130,7 +130,8 @@ class ClassesRuleBuilderTest : RuleBuildersTestBase() {
                 enclosingClass = "ClassA",
                 rawExpression = "Service",
             )
-        val fileDeclWithUsages = FileDeclaration("ClassA.kt", "com.example", classes = listOf(classA), usages = listOf(usageCall, usageRef), filePath = "/src/ClassA.kt")
+        val fileDeclWithUsages =
+            FileDeclaration("ClassA.kt", "com.example", classes = listOf(classA), usages = listOf(usageCall, usageRef), filePath = "/src/ClassA.kt")
 
         val moduleWithUsages = moduleA.copy(files = listOf(fileDeclWithUsages))
         val graphWithUsages = ProjectGraph(builds = mapOf(":" to listOf(moduleWithUsages)))
@@ -176,7 +177,14 @@ class ClassesRuleBuilderTest : RuleBuildersTestBase() {
                 enclosingClass = "ClassA",
                 rawExpression = "logEvent.trackEvent",
             )
-        val fileDecl = FileDeclaration("ClassA.kt", "com.example", classes = listOf(classA), usages = listOf(analyticsCall, logEventCall), filePath = "/src/ClassA.kt")
+        val fileDecl =
+            FileDeclaration(
+                "ClassA.kt",
+                "com.example",
+                classes = listOf(classA),
+                usages = listOf(analyticsCall, logEventCall),
+                filePath = "/src/ClassA.kt",
+            )
         val graph = ProjectGraph(builds = mapOf(":" to listOf(moduleA.copy(files = listOf(fileDecl)))))
 
         // 1. Method FQN matching
@@ -194,5 +202,3 @@ class ClassesRuleBuilderTest : RuleBuildersTestBase() {
         assertTrue(v2[0].contains("analytics.trackEvent"))
     }
 }
-
-
