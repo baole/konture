@@ -247,35 +247,13 @@ class PropertiesThat internal constructor(
     }
 
     infix fun resideInAModule(modulePath: String): PropertiesRuleBuilder {
-        val normalized =
-            if (!modulePath.startsWith(":") && !modulePath.startsWith("**") && modulePath.isNotEmpty()) {
-                KontureLogger.log(
-                    LogLevel.WARNING,
-                    "Module path '$modulePath' lacks a leading colon (':'). Suggest matching with ':$modulePath' instead.",
-                )
-                ":$modulePath"
-            } else {
-                modulePath
-            }
-        builder.setThat { it.modulePath == normalized }
+        builder.setThat { PatternMatchers.matchesModuleGlob(modulePath, it.modulePath) }
         return builder
     }
 
     infix fun resideInAModule(modulePaths: List<String>): PropertiesRuleBuilder {
-        val normalizedPaths =
-            modulePaths.map { path ->
-                if (!path.startsWith(":") && !path.startsWith("**") && path.isNotEmpty()) {
-                    KontureLogger.log(
-                        LogLevel.WARNING,
-                        "Module path '$path' lacks a leading colon (':'). Suggest matching with ':$path' instead.",
-                    )
-                    ":$path"
-                } else {
-                    path
-                }
-            }
         builder.setThat { context ->
-            normalizedPaths.any { context.modulePath == it }
+            modulePaths.any { PatternMatchers.matchesModuleGlob(it, context.modulePath) }
         }
         return builder
     }

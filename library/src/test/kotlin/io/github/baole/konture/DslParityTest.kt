@@ -260,4 +260,33 @@ class DslParityTest : RuleBuildersTestBase() {
         nameAssertRule.getShouldAssertion()!!(fileContext, listOf(fileContext), vName)
         assertTrue(vName.isEmpty())
     }
+
+    @Test
+    fun `test resideInAModule wildcard glob pattern matching`() {
+        val testClass =
+            ClassDeclaration(
+                name = "FeatureClass",
+                fqName = "com.feature.FeatureClass",
+                packageName = "com.feature",
+                isInterface = false,
+                isAbstract = false,
+                annotations = emptyList(),
+                imports = emptyList(),
+                referencedTypes = emptySet(),
+                filePath = "/src/FeatureClass.kt",
+                modulePath = ":feature:login",
+            )
+
+        // 1. Single wildcard segment
+        val globRule1 = ClassesRuleBuilder(projectGraph).that().resideInAModule(":feature:*")
+        assertTrue(globRule1.getThatPredicate()!!(testClass))
+
+        // 2. Double wildcard recursive
+        val globRule2 = ClassesRuleBuilder(projectGraph).that().resideInAModule("**")
+        assertTrue(globRule2.getThatPredicate()!!(testClass))
+
+        // 3. Prefix wildcard without leading colon
+        val globRule3 = ClassesRuleBuilder(projectGraph).that().resideInAModule("feature:*")
+        assertTrue(globRule3.getThatPredicate()!!(testClass))
+    }
 }
