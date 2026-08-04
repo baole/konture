@@ -1,5 +1,6 @@
 /*
- * Copyright 2026 Bao Le Duc
+ * Copyright 2026 The Konture Contributors
+ * Contributors: Bao Le Duc (@baole)
  * SPDX-License-Identifier: Apache-2.0
  */
 
@@ -227,6 +228,26 @@ class ClassDeclarationExtensionsTest {
         assertTrue(child.isAssignableTo("GrandParent", allClasses))
         assertTrue(parent.isAssignableTo("GrandParent", allClasses))
         assertFalse(grandParent.isAssignableTo("Parent", allClasses))
+    }
+
+    @Test
+    fun `test ClassDeclaration isAssignableTo with imported external supertype`() {
+        val viewModel =
+            ClassDeclaration(
+                name = "UserViewModel",
+                fqName = "com.example.ui.UserViewModel",
+                packageName = "com.example.ui",
+                isInterface = false,
+                isAbstract = false,
+                annotations = emptyList(),
+                imports = listOf("androidx.lifecycle.ViewModel"),
+                referencedTypes = emptySet(),
+                filePath = "/src/UserViewModel.kt",
+                supertypes = listOf("ViewModel"),
+            )
+
+        assertTrue(viewModel.isAssignableTo("androidx.lifecycle.ViewModel", emptyList()))
+        assertTrue(viewModel.isAssignableTo("ViewModel", emptyList()))
     }
 
     @Test
