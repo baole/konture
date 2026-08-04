@@ -483,12 +483,11 @@ class PropertiesShould internal constructor(
 
             val propUsages =
                 fileUsages.filter { usage ->
-                    usage.enclosingProperty == prop.declaration.name &&
-                        (
-                            prop.className == null ||
-                                usage.enclosingClass == prop.className ||
-                                (usage.enclosingClass != null && prop.className != null && (usage.enclosingClass == prop.qualifiedName.substringBeforeLast(".") || usage.enclosingClass.endsWith(".${prop.className}")))
-                        )
+                    usage.isEnclosedInProperty(
+                        propertyName = prop.declaration.name,
+                        classFqName = if (prop.className != null) prop.qualifiedName.substringBeforeLast(".") else null,
+                        className = prop.className,
+                    )
                 }
 
             propUsages
@@ -518,12 +517,11 @@ class PropertiesShould internal constructor(
 
             val propUsages =
                 fileUsages.filter { usage ->
-                    usage.enclosingProperty == prop.declaration.name &&
-                        (
-                            prop.className == null ||
-                                usage.enclosingClass == prop.className ||
-                                (usage.enclosingClass != null && prop.className != null && (usage.enclosingClass == prop.qualifiedName.substringBeforeLast(".") || usage.enclosingClass.endsWith(".${prop.className}")))
-                        )
+                    usage.isEnclosedInProperty(
+                        propertyName = prop.declaration.name,
+                        classFqName = if (prop.className != null) prop.qualifiedName.substringBeforeLast(".") else null,
+                        className = prop.className,
+                    )
                 }
 
             propUsages

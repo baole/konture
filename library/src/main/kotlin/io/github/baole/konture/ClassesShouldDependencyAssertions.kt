@@ -328,14 +328,8 @@ internal interface ClassesShouldDependencyAssertions {
                     ?.usages.orEmpty()
 
             fileUsages
-                .filter { usage ->
-                    (
-                        usage.enclosingClass == cls.fqName ||
-                            usage.enclosingClass == cls.name ||
-                            usage.enclosingClass == null ||
-                            (usage.enclosingClass != null && usage.enclosingClass.startsWith("${cls.fqName}."))
-                    ) && PatternMatchers.isCallUsageMatch(usage, fqName)
-                }.forEach { usage ->
+                .filter { usage -> usage.isEnclosedInClass(cls.fqName, cls.name) && PatternMatchers.isCallUsageMatch(usage, fqName) }
+                .forEach { usage ->
                     val unresolved = if (usage.unresolvedPossibleUsage) "unresolved possible " else ""
                     violations.add(getMessage("usage.notCall", unresolved, fqName, usage.rawExpression, usage.line, usage.column))
                 }
@@ -358,12 +352,7 @@ internal interface ClassesShouldDependencyAssertions {
             fileUsages
                 .filter { usage ->
                     usage.kind == UsageKind.CLASS_REFERENCE &&
-                        (
-                            usage.enclosingClass == cls.fqName ||
-                                usage.enclosingClass == cls.name ||
-                                usage.enclosingClass == null ||
-                                (usage.enclosingClass != null && usage.enclosingClass.startsWith("${cls.fqName}."))
-                        ) &&
+                        usage.isEnclosedInClass(cls.fqName, cls.name) &&
                         (usage.targetFqName == fqName || usage.targetFqName.endsWith(".$fqName") || fqName.endsWith("." + usage.targetFqName) || usage.rawExpression == fqName || fqName in usage.possibleTargetFqNames)
                 }.forEach { usage ->
                     violations.add(getMessage("usage.notReferenceClass", fqName, usage.rawExpression, usage.line, usage.column))
