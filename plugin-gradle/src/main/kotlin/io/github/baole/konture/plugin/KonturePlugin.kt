@@ -429,11 +429,12 @@ class KonturePlugin : Plugin<Project> {
         file: File,
     ): String {
         val rootDir = proj.rootDir.canonicalFile
-        val canonical = file.canonicalFile
+        val absFile = if (file.isAbsolute) file else File(proj.projectDir, file.path)
+        val canonical = absFile.canonicalFile
         return if (canonical.startsWith(rootDir)) {
             canonical.relativeTo(rootDir).path
         } else {
-            canonical.name
+            canonical.path
         }
     }
 
@@ -504,8 +505,10 @@ class KonturePlugin : Plugin<Project> {
             val androidExtension = if (sub.hasAndroidPlugin()) sub.extensions.findByType(CommonExtension::class.java) else null
             if (androidExtension != null) {
                 androidExtension.sourceSets.forEach { sourceSet ->
-                    list.addAll(sourceSet.java.directories.map(::File))
-                    list.addAll(sourceSet.kotlin.directories.map(::File))
+                    (sourceSet.java.directories + sourceSet.kotlin.directories).forEach { dir ->
+                        val f = File(dir.toString())
+                        list.add(if (f.isAbsolute) f else File(sub.projectDir, f.path))
+                    }
                 }
             }
 
@@ -513,7 +516,9 @@ class KonturePlugin : Plugin<Project> {
                 val kotlinExt = sub.extensions.findByType(KotlinProjectExtension::class.java)
                 if (kotlinExt != null) {
                     for (sourceSet in kotlinExt.sourceSets) {
-                        list.addAll(sourceSet.kotlin.srcDirs)
+                        for (dir in sourceSet.kotlin.srcDirs) {
+                            list.add(if (dir.isAbsolute) dir else File(sub.projectDir, dir.path))
+                        }
                     }
                 }
             }
@@ -521,7 +526,9 @@ class KonturePlugin : Plugin<Project> {
                 val javaSourceSets = sub.extensions.findByName(EXTENSION_SOURCE_SETS) as? SourceSetContainer
                 if (javaSourceSets != null) {
                     for (ss in javaSourceSets) {
-                        list.addAll(ss.allSource.srcDirs)
+                        for (dir in ss.allSource.srcDirs) {
+                            list.add(if (dir.isAbsolute) dir else File(sub.projectDir, dir.path))
+                        }
                     }
                 }
             }

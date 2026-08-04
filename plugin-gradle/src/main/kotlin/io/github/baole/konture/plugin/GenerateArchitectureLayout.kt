@@ -170,6 +170,13 @@ abstract class GenerateArchitectureLayout : DefaultTask() {
                                 }
                             }
 
+                        if (files.isEmpty() && ssInput.production && relSrcDirs.isNotEmpty()) {
+                            KontureLogger.log(
+                                LogLevel.WARNING,
+                                "Source set '${ssInput.name}' in module '${input.path}' has no Kotlin source files found in srcDirs: $relSrcDirs",
+                            )
+                        }
+
                         SourceSetModel(
                             name = ssInput.name,
                             kind = SourceSetKind.valueOf(ssInput.kind),
