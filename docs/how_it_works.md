@@ -56,8 +56,7 @@ The structure of `LayoutModel` (defined in `core`) is serialized using `kotlinx-
               "name": "main",
               "kind": "KOTLIN_JVM",
               "production": true,
-              "srcDirs": ["src/main/kotlin"],
-              "kotlinFiles": ["com/acme/database/Database.kt"]
+              "srcDirs": ["src/main/kotlin"]
             }
           ],
           "dependencies": [

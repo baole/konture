@@ -99,7 +99,7 @@ class KontureLayoutGenerationTest {
         // Verify child-a has Example.kt listed relative to moduleDir
         val mainSourceSet = moduleA?.sourceSets?.firstOrNull { it.name == "main" }
         assertNotNull(mainSourceSet)
-        assertTrue(mainSourceSet?.kotlinFiles?.contains("src/main/kotlin/com/example/Example.kt") == true)
+        assertTrue(mainSourceSet?.srcDirs?.any { it.endsWith("src/main/kotlin") } == true)
 
         // Verify dependency is collected
         val dep = moduleA?.dependencies?.firstOrNull { it.targetPath == ":child-b" }
@@ -470,8 +470,8 @@ class KontureLayoutGenerationTest {
         val mainSourceSet = module?.sourceSets?.firstOrNull { it.name == "main" }
         assertNotNull(mainSourceSet)
 
-        // Ensure relative srcDirs do not escape with ../.. and custom file is found
+        // Ensure relative srcDirs do not escape with ../.. and custom srcDir is present
         assertTrue(mainSourceSet?.srcDirs?.none { it.contains("..") } == true)
-        assertTrue(mainSourceSet?.kotlinFiles?.contains("src/custom/kotlin/com/example/CustomClass.kt") == true)
+        assertTrue(mainSourceSet?.srcDirs?.any { it.endsWith("src/custom/kotlin") } == true)
     }
 }

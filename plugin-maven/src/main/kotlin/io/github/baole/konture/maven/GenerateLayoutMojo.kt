@@ -147,26 +147,13 @@ class GenerateLayoutMojo : AbstractMojo() {
             srcDirs.add(kotlinSource)
         }
 
-        // List Kotlin files relative to projectDir
-        val kotlinFiles = srcDirs.flatMap { dir ->
-            if (dir.exists() && dir.isDirectory) {
-                dir.walkTopDown()
-                    .filter { it.isFile && (it.extension == "kt" || it.extension == "kts") }
-                    .map { it.relativeTo(proj.basedir).path }
-                    .toList()
-            } else {
-                emptyList()
-            }
-        }
-
         val sourceSets = if (srcDirs.isNotEmpty()) {
             listOf(
                 SourceSetModel(
                     name = "main",
                     kind = SourceSetKind.KOTLIN_JVM,
                     production = true,
-                    srcDirs = srcDirs.map { it.canonicalPath },
-                    kotlinFiles = kotlinFiles
+                    srcDirs = srcDirs.map { it.canonicalPath }
                 )
             )
         } else {
