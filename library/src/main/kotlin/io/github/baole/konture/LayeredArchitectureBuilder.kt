@@ -79,6 +79,7 @@ class LayeredArchitectureBuilder(
                                                 otherCls.fqName,
                                                 otherLayer.name,
                                                 targetCls.fqName,
+                                                ViolationLocation.format(otherCls),
                                             ),
                                         )
                                     }
@@ -127,6 +128,7 @@ class LayeredArchitectureBuilder(
                                                     otherCls.fqName,
                                                     otherLayer.name,
                                                     targetCls.fqName,
+                                                    ViolationLocation.format(otherCls),
                                                 ),
                                             )
                                         }

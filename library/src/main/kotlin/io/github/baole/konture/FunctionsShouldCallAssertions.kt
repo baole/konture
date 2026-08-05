@@ -23,7 +23,7 @@ interface FunctionsShouldCallAssertions {
                     val unresolved = if (usage.unresolvedPossibleUsage) "unresolved possible " else ""
                     violations.add(
                         "${getMessage("usage.notCall", unresolved, fqName, usage.rawExpression, usage.line, usage.column)} " +
-                            "(at ${ViolationLocation.format(usage.filePath, usage.line, usage.column, function.modulePath, function.sourceSet?.name)})",
+                            "(at ${ViolationLocation.format(usage.filePath, usage.line, usage.column, function.modulePath, function.sourceSet?.name, fqName = function.className?.let { "${function.packageName}.$it" } ?: function.packageName, packageName = function.packageName)})",
                     )
                 }
         }
@@ -43,7 +43,7 @@ interface FunctionsShouldCallAssertions {
                 }.forEach { usage ->
                     violations.add(
                         "${getMessage("usage.notReferenceClass", fqName, usage.rawExpression, usage.line, usage.column)} " +
-                            "(at ${ViolationLocation.format(usage.filePath, usage.line, usage.column, function.modulePath, function.sourceSet?.name)})",
+                            "(at ${ViolationLocation.format(usage.filePath, usage.line, usage.column, function.modulePath, function.sourceSet?.name, fqName = function.className?.let { "${function.packageName}.$it" } ?: function.packageName, packageName = function.packageName)})",
                     )
                 }
         }

@@ -26,14 +26,35 @@ internal object ViolationLocation {
         filePath: String,
         line: Int = -1,
         column: Int = -1,
+        fqName: String? = null,
+        packageName: String? = null,
     ): String {
         val fileName = if (filePath.isNotEmpty()) java.io.File(filePath).name else filePath
-        val file =
+        val fileLocation =
             when {
                 line > 0 -> "$fileName:$line"
                 else -> fileName
             }
-        return "$modulePath, ${sourceSetName ?: "unknown"} source set) ($file"
+
+        val targetClass =
+            when {
+                !fqName.isNullOrEmpty() && fqName != packageName -> fqName
+                !packageName.isNullOrEmpty() && fileName.isNotEmpty() -> {
+                    val simpleName = fileName.substringBeforeLast('.')
+                    "$packageName.$simpleName"
+                }
+                !fqName.isNullOrEmpty() -> fqName
+                else -> null
+            }
+
+        val locationSpec =
+            if (targetClass != null) {
+                "$targetClass($fileLocation)"
+            } else {
+                fileLocation
+            }
+
+        return "$modulePath, ${sourceSetName ?: "unknown"} source set) ($locationSpec"
     }
 
     fun format(
@@ -42,6 +63,8 @@ internal object ViolationLocation {
         column: Int = -1,
         modulePath: String? = null,
         sourceSetName: String? = null,
+        fqName: String? = null,
+        packageName: String? = null,
     ): String {
         val effectiveLine =
             if (line > 0) {
@@ -52,12 +75,28 @@ internal object ViolationLocation {
                 -1
             }
         return if (modulePath != null) {
-            of(modulePath, sourceSetName, filePath, effectiveLine, column)
+            of(modulePath, sourceSetName, filePath, effectiveLine, column, fqName, packageName)
         } else {
             val fileName = if (filePath.isNotEmpty()) java.io.File(filePath).name else filePath
-            when {
-                effectiveLine > 0 -> "$fileName:$effectiveLine"
-                else -> fileName
+            val fileLocation =
+                when {
+                    effectiveLine > 0 -> "$fileName:$effectiveLine"
+                    else -> fileName
+                }
+            val targetClass =
+                when {
+                    !fqName.isNullOrEmpty() && fqName != packageName -> fqName
+                    !packageName.isNullOrEmpty() && fileName.isNotEmpty() -> {
+                        val simpleName = fileName.substringBeforeLast('.')
+                        "$packageName.$simpleName"
+                    }
+                    !fqName.isNullOrEmpty() -> fqName
+                    else -> null
+                }
+            if (targetClass != null) {
+                "$targetClass($fileLocation)"
+            } else {
+                fileLocation
             }
         }
     }
@@ -66,27 +105,46 @@ internal object ViolationLocation {
         cls: ClassDeclaration,
         modulePath: String? = null,
         sourceSetName: String? = null,
-    ): String = format(cls.filePath, cls.sourceLine, modulePath = modulePath, sourceSetName = sourceSetName)
+    ): String =
+        format(
+            filePath = cls.filePath,
+            line = cls.sourceLine,
+            modulePath = modulePath,
+            sourceSetName = sourceSetName,
+            fqName = cls.fqName,
+            packageName = cls.packageName,
+        )
 
     fun format(
         file: FileDeclaration,
         modulePath: String? = null,
         sourceSetName: String? = null,
-    ): String = format(file.filePath, line = 1, modulePath = modulePath, sourceSetName = sourceSetName)
+    ): String =
+        format(
+            filePath = file.filePath,
+            line = 1,
+            modulePath = modulePath,
+            sourceSetName = sourceSetName,
+            packageName = file.packageName,
+        )
 
     fun format(func: FunctionDeclarationContext): String =
         format(
-            func.filePath,
-            func.declaration.sourceLine,
+            filePath = func.filePath,
+            line = func.declaration.sourceLine,
             modulePath = func.modulePath,
             sourceSetName = func.sourceSet?.name,
+            fqName = func.className?.let { "${func.packageName}.$it" } ?: func.packageName,
+            packageName = func.packageName,
         )
 
     fun format(prop: PropertyDeclarationContext): String =
         format(
-            prop.filePath,
-            prop.declaration.sourceLine,
+            filePath = prop.filePath,
+            line = prop.declaration.sourceLine,
             modulePath = prop.modulePath,
             sourceSetName = prop.sourceSet?.name,
+            fqName = prop.className?.let { "${prop.packageName}.$it" } ?: prop.packageName,
+            packageName = prop.packageName,
         )
 }

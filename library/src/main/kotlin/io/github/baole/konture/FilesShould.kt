@@ -32,11 +32,12 @@ class FilesShould internal constructor(
                             usage.line,
                             usage.column,
                         )} (at ${ViolationLocation.format(
-                            usage.filePath,
-                            usage.line,
-                            usage.column,
-                            file.modulePath,
-                            file.sourceSet?.name,
+                            filePath = usage.filePath,
+                            line = usage.line,
+                            column = usage.column,
+                            modulePath = file.modulePath,
+                            sourceSetName = file.sourceSet?.name,
+                            packageName = file.declaration.packageName,
                         )})",
                     )
                 }
@@ -64,11 +65,12 @@ class FilesShould internal constructor(
                             usage.line,
                             usage.column,
                         )} (at ${ViolationLocation.format(
-                            usage.filePath,
-                            usage.line,
-                            usage.column,
-                            file.modulePath,
-                            file.sourceSet?.name,
+                            filePath = usage.filePath,
+                            line = usage.line,
+                            column = usage.column,
+                            modulePath = file.modulePath,
+                            sourceSetName = file.sourceSet?.name,
+                            packageName = file.declaration.packageName,
                         )})",
                     )
                 }

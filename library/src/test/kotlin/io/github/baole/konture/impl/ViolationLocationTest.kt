@@ -33,4 +33,20 @@ class ViolationLocationTest {
             ViolationLocation.of(":app", null, "src/Foo.kt"),
         )
     }
+
+    @Test
+    fun `formats with fully qualified class name for IDE console hyperlinking`() {
+        assertEquals(
+            ":app, main source set) (com.example.MyViewModel(MyViewModel.kt:154)",
+            ViolationLocation.of(":app", "main", "src/MyViewModel.kt", 154, fqName = "com.example.MyViewModel"),
+        )
+    }
+
+    @Test
+    fun `formats with package name when fqName is absent`() {
+        assertEquals(
+            ":app, main source set) (com.example.MyViewModel(MyViewModel.kt:154)",
+            ViolationLocation.of(":app", "main", "src/MyViewModel.kt", 154, packageName = "com.example"),
+        )
+    }
 }
