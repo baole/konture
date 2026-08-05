@@ -32,6 +32,7 @@ internal object ViolationLocation {
         val fileName = if (filePath.isNotEmpty()) java.io.File(filePath).name else filePath
         val fileLocation =
             when {
+                line > 0 && column > 0 -> "$fileName:$line:$column"
                 line > 0 -> "$fileName:$line"
                 else -> fileName
             }
@@ -80,6 +81,7 @@ internal object ViolationLocation {
             val fileName = if (filePath.isNotEmpty()) java.io.File(filePath).name else filePath
             val fileLocation =
                 when {
+                    effectiveLine > 0 && column > 0 -> "$fileName:$effectiveLine:$column"
                     effectiveLine > 0 -> "$fileName:$effectiveLine"
                     else -> fileName
                 }

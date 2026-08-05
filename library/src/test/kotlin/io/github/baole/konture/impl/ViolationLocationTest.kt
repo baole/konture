@@ -49,4 +49,16 @@ class ViolationLocationTest {
             ViolationLocation.of(":app", "main", "src/MyViewModel.kt", 154, packageName = "com.example"),
         )
     }
+
+    @Test
+    fun `formats with line and column numbers`() {
+        assertEquals(
+            ":app, main source set) (Foo.kt:12:34",
+            ViolationLocation.of(":app", "main", "src/Foo.kt", 12, 34),
+        )
+        assertEquals(
+            "Foo.kt:12:34",
+            ViolationLocation.format("src/Foo.kt", 12, 34),
+        )
+    }
 }
