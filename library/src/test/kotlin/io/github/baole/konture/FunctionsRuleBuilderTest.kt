@@ -999,4 +999,49 @@ class FunctionsRuleBuilderTest : RuleBuildersTestBase() {
         anyOfRule.getShouldAssertion()!!(context, emptyList(), vAnyOf)
         assertTrue(vAnyOf.isEmpty())
     }
+
+    @Test
+    fun `test FunctionsRuleBuilder printMatchedFunctions printAllFunctions and allowEmpty`() {
+        var matchedCount = 0
+        var allCount = 0
+
+        val func =
+            FunctionDeclaration(
+                "func",
+                Visibility.PUBLIC,
+                emptySet(),
+                "Unit",
+                emptyList(),
+                emptyList(),
+                kdocText = null,
+                isExtension = false,
+            )
+        val fileDecl = FileDeclaration("Service.kt", "com.example", topLevelFunctions = listOf(func))
+        val mockModule = Module(":", ":app", "app", listOf("kotlin"), emptyList(), emptyList(), listOf(fileDecl))
+        val graph = ProjectGraph(mapOf(":" to listOf(mockModule)))
+
+        val builder =
+            FunctionsRuleBuilder(graph)
+                .printMatchedFunctions { matchedCount++ }
+                .printAllFunctions { allCount++ }
+
+        assertEquals(1, allCount)
+
+        val funcCtx = FunctionDeclarationContext(func, "com.example", null, ":app", "/src/Service.kt")
+        val violations = mutableListOf<String>()
+        builder.getShouldAssertion()!!(funcCtx, listOf(funcCtx), violations)
+        assertEquals(1, matchedCount)
+
+        // allowEmpty test
+        val emptyGraph = ProjectGraph(emptyMap())
+        assertThrows(AssertionError::class.java) {
+            FunctionsRuleBuilder(
+                emptyGraph,
+            ).that().haveNameMatching("nonexistent").should().haveNameEndingWith("Func").check()
+        }
+
+        FunctionsRuleBuilder(
+            emptyGraph,
+        ).allowEmpty().that().haveNameMatching("nonexistent").should().haveNameEndingWith("Func").check()
+    }
 }

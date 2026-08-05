@@ -13,6 +13,7 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import kotlin.experimental.ExperimentalTypeInference
 
+@Suppress("LargeClass")
 class FluentExtensionsTest {
     private lateinit var anno1: AnnotationDeclaration
     private lateinit var anno2: AnnotationDeclaration
