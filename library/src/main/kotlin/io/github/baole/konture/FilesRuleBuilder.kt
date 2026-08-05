@@ -51,7 +51,7 @@ class FilesRuleBuilder(
                 getMessage(
                     "debug.files.matched",
                     it.declaration.name,
-                    it.declaration.filePath,
+                    ViolationLocation.format(it.declaration, it.modulePath, it.sourceSet?.name),
                     it.declaration.packageName,
                 ),
             )
@@ -74,7 +74,7 @@ class FilesRuleBuilder(
                 getMessage(
                     "debug.files.discovered",
                     it.declaration.name,
-                    it.declaration.filePath,
+                    ViolationLocation.format(it.declaration, it.modulePath, it.sourceSet?.name),
                     it.declaration.packageName,
                 ),
             )

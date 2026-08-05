@@ -47,7 +47,7 @@ class ClassesRuleBuilder(
      */
     fun printMatchedClasses(
         logger: (ClassDeclaration) -> Unit = {
-            println(getMessage("debug.classes.matched", it.fqName, it.filePath, it.supertypes))
+            println(getMessage("debug.classes.matched", it.fqName, ViolationLocation.format(it), it.supertypes))
         },
     ): ClassesRuleBuilder =
         this.apply {
@@ -63,7 +63,7 @@ class ClassesRuleBuilder(
      */
     fun printAllClasses(
         logger: (ClassDeclaration) -> Unit = {
-            println(getMessage("debug.classes.discovered", it.fqName, it.filePath, it.supertypes))
+            println(getMessage("debug.classes.discovered", it.fqName, ViolationLocation.format(it), it.supertypes))
         },
     ): ClassesRuleBuilder =
         this.apply {

@@ -43,7 +43,7 @@ class PropertiesRuleBuilder(
      */
     fun printMatchedProperties(
         logger: (PropertyDeclarationContext) -> Unit = {
-            println(getMessage("debug.properties.matched", it.qualifiedName, it.filePath))
+            println(getMessage("debug.properties.matched", it.qualifiedName, ViolationLocation.format(it)))
         },
     ): PropertiesRuleBuilder =
         this.apply {
@@ -59,7 +59,7 @@ class PropertiesRuleBuilder(
      */
     fun printAllProperties(
         logger: (PropertyDeclarationContext) -> Unit = {
-            println(getMessage("debug.properties.discovered", it.qualifiedName, it.filePath))
+            println(getMessage("debug.properties.discovered", it.qualifiedName, ViolationLocation.format(it)))
         },
     ): PropertiesRuleBuilder =
         this.apply {

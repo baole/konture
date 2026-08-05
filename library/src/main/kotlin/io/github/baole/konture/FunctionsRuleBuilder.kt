@@ -43,7 +43,7 @@ class FunctionsRuleBuilder(
      */
     fun printMatchedFunctions(
         logger: (FunctionDeclarationContext) -> Unit = {
-            println(getMessage("debug.functions.matched", it.qualifiedName, it.filePath))
+            println(getMessage("debug.functions.matched", it.qualifiedName, ViolationLocation.format(it)))
         },
     ): FunctionsRuleBuilder =
         this.apply {
@@ -59,7 +59,7 @@ class FunctionsRuleBuilder(
      */
     fun printAllFunctions(
         logger: (FunctionDeclarationContext) -> Unit = {
-            println(getMessage("debug.functions.discovered", it.qualifiedName, it.filePath))
+            println(getMessage("debug.functions.discovered", it.qualifiedName, ViolationLocation.format(it)))
         },
     ): FunctionsRuleBuilder =
         this.apply {
