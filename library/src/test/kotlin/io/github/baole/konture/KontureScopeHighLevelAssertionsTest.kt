@@ -1,6 +1,6 @@
 /*
  * Copyright 2026 The Konture Contributors
- * Contributors: Bao Le Duc, Octavio Calleya Garcia (@octaviospain)
+ * Contributors: Bao Le Duc (@baole), Octavio Calleya Garcia (@octaviospain)
  * SPDX-License-Identifier: Apache-2.0
  */
 
@@ -31,6 +31,9 @@ internal class KontureScopeHighLevelAssertionsTest : KontureScopeTestFixture() {
         assertThrows<AssertionError> {
             listOf(classA, classB).assertNameEndingWith("ClassA")
         }
+        assertThrows<AssertionError> {
+            KontureScope(listOf(classA, classB)).assertNameEndingWith("ClassA")
+        }
 
         // --- assertNameStartingWith ---
         listOf(classA, classWithKdoc).assertNameStartingWith("Class")
@@ -38,6 +41,9 @@ internal class KontureScopeHighLevelAssertionsTest : KontureScopeTestFixture() {
 
         assertThrows<AssertionError> {
             listOf(classA, classB).assertNameStartingWith("ClassA")
+        }
+        assertThrows<AssertionError> {
+            KontureScope(listOf(classA, classB)).assertNameStartingWith("ClassA")
         }
 
         // --- assertNameMatching ---
@@ -47,6 +53,9 @@ internal class KontureScopeHighLevelAssertionsTest : KontureScopeTestFixture() {
         assertThrows<AssertionError> {
             listOf(classA, classB).assertNameMatching("*A")
         }
+        assertThrows<AssertionError> {
+            KontureScope(listOf(classA, classB)).assertNameMatching("*A")
+        }
 
         // --- assertHaveAnnotationOf ---
         listOf(classAnnotated).assertHaveAnnotationOf("com.example.MyAnnotation")
@@ -55,6 +64,9 @@ internal class KontureScopeHighLevelAssertionsTest : KontureScopeTestFixture() {
 
         assertThrows<AssertionError> {
             listOf(classA).assertHaveAnnotationOf("MyAnnotation")
+        }
+        assertThrows<AssertionError> {
+            KontureScope(listOf(classA)).assertHaveAnnotationOf("MyAnnotation")
         }
     }
 

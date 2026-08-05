@@ -550,6 +550,14 @@ class TypeSafeOverloadsTest {
         funcScope.assertions.forEach { it(mockFunc, funcViolations) }
         assertTrue(funcViolations.isEmpty())
 
+        // Assertion scope violations when return type doesn't match
+        val badFuncScope = FunctionAssertionScope()
+        badFuncScope.haveReturnTypeOf<String>()
+        val mockMismatchedFunc = mockFunc.copy(resolvedReturnType = "kotlin.Int")
+        val mismatchedFuncViolations = mutableListOf<String>()
+        badFuncScope.assertions.forEach { it(mockMismatchedFunc, mismatchedFuncViolations) }
+        assertTrue(mismatchedFuncViolations.isNotEmpty())
+
         val propScope = PropertyAssertionScope()
         propScope.haveType(String::class)
         propScope.haveTypeOf<String>()
@@ -570,7 +578,68 @@ class TypeSafeOverloadsTest {
         val propViolations = mutableListOf<String>()
         propScope.assertions.forEach { it(mockProp, propViolations) }
         assertTrue(propViolations.isEmpty())
+
+        // Assertion scope violations when property type doesn't match
+        val badPropScope = PropertyAssertionScope()
+        badPropScope.haveTypeOf<String>()
+        val mockMismatchedProp = mockProp.copy(resolvedType = "kotlin.Int")
+        val mismatchedPropViolations = mutableListOf<String>()
+        badPropScope.assertions.forEach { it(mockMismatchedProp, mismatchedPropViolations) }
+        assertTrue(mismatchedPropViolations.isNotEmpty())
     }
+
+    @Test
+    fun `reified functions and properties usage overloads match referenced classes`() {
+        val funcUsage = SourceUsage(UsageKind.CLASS_REFERENCE, "kotlin.String", "/src/Example.kt", 1, 1, enclosingFunction = "myFunc")
+        val propCallUsage = SourceUsage(UsageKind.CALL, "kotlin.String", "/src/Example.kt", 2, 1, enclosingProperty = "myProp")
+        val propRefUsage = SourceUsage(UsageKind.CLASS_REFERENCE, "kotlin.String", "/src/Example.kt", 3, 1, enclosingProperty = "myProp")
+
+        val func =
+            FunctionDeclaration(
+                name = "myFunc",
+                visibility = Visibility.PUBLIC,
+                modifiers = emptySet(),
+                returnType = "Unit",
+                parameters = emptyList(),
+                annotations = emptyList(),
+                kdocText = null,
+                isExtension = false,
+            )
+        val prop =
+            PropertyDeclaration(
+                name = "myProp",
+                visibility = Visibility.PUBLIC,
+                modifiers = emptySet(),
+                type = "String",
+                isVal = true,
+                annotations = emptyList(),
+                kdocText = null,
+            )
+
+        val file =
+            FileDeclaration(
+                name = "Example.kt",
+                packageName = "example",
+                topLevelFunctions = listOf(func),
+                topLevelProperties = listOf(prop),
+                filePath = "/src/Example.kt",
+                usages = listOf(funcUsage, propCallUsage, propRefUsage),
+            )
+        val graph = ProjectGraph(mapOf(":" to listOf(Module(":", ":app", "app", emptyList(), emptyList(), emptyList(), listOf(file)))))
+
+        assertThrows(AssertionError::class.java) {
+            FunctionsRuleBuilder(graph).should().notReferenceClass<String>().check()
+        }
+
+        assertThrows(AssertionError::class.java) {
+            PropertiesRuleBuilder(graph).should().notCall<String>().check()
+        }
+
+        assertThrows(AssertionError::class.java) {
+            PropertiesRuleBuilder(graph).should().notReferenceClass<String>().check()
+        }
+    }
+
 
     private fun graphWith(
         declaration: ClassDeclaration? = null,
