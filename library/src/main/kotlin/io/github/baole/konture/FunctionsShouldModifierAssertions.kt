@@ -167,6 +167,53 @@ interface FunctionsShouldModifierAssertions {
         return builder
     }
 
+    infix fun notHaveModifier(modifier: Modifier): FunctionsRuleBuilder {
+        builder.setShould { func, _, violations ->
+            if (func.declaration.modifiers.contains(modifier)) {
+                violations.add(
+                    getMessage("function.should.notHaveModifier", func.qualifiedName, modifier),
+                )
+            }
+        }
+        return builder
+    }
+
+    fun notBePublic(): FunctionsRuleBuilder {
+        builder.setShould { func, _, violations ->
+            if (func.declaration.visibility == Visibility.PUBLIC) {
+                violations.add("Function ${func.qualifiedName} should not be public")
+            }
+        }
+        return builder
+    }
+
+    fun notBeInternal(): FunctionsRuleBuilder {
+        builder.setShould { func, _, violations ->
+            if (func.declaration.visibility == Visibility.INTERNAL) {
+                violations.add("Function ${func.qualifiedName} should not be internal")
+            }
+        }
+        return builder
+    }
+
+    fun notBePrivate(): FunctionsRuleBuilder {
+        builder.setShould { func, _, violations ->
+            if (func.declaration.visibility == Visibility.PRIVATE) {
+                violations.add("Function ${func.qualifiedName} should not be private")
+            }
+        }
+        return builder
+    }
+
+    fun notBeProtected(): FunctionsRuleBuilder {
+        builder.setShould { func, _, violations ->
+            if (func.declaration.visibility == Visibility.PROTECTED) {
+                violations.add("Function ${func.qualifiedName} should not be protected")
+            }
+        }
+        return builder
+    }
+
     /**
      * Asserts that selected functions have all of the specified modifiers.
      *
@@ -278,12 +325,84 @@ interface FunctionsShouldModifierAssertions {
         return builder
     }
 
+    fun notBeExtension(): FunctionsRuleBuilder {
+        builder.setShould { func, _, violations ->
+            if (func.declaration.isExtension) {
+                violations.add("Function ${func.qualifiedName} should not be an extension function")
+            }
+        }
+        return builder
+    }
+
     fun beDocumentedWithKDoc(): FunctionsRuleBuilder {
         builder.setShould { func, _, violations ->
             if (func.declaration.kdocText.isNullOrBlank()) {
                 violations.add(
                     getMessage("function.should.beDocumented", func.qualifiedName),
                 )
+            }
+        }
+        return builder
+    }
+
+    fun notBeSuspend(): FunctionsRuleBuilder {
+        builder.setShould { func, _, violations ->
+            if (func.declaration.modifiers.contains(Modifier.SUSPEND)) {
+                violations.add("Function ${func.qualifiedName} should not be a suspend function")
+            }
+        }
+        return builder
+    }
+
+    fun notBeInline(): FunctionsRuleBuilder {
+        builder.setShould { func, _, violations ->
+            if (func.declaration.modifiers.contains(Modifier.INLINE)) {
+                violations.add("Function ${func.qualifiedName} should not be an inline function")
+            }
+        }
+        return builder
+    }
+
+    fun notBeInfix(): FunctionsRuleBuilder {
+        builder.setShould { func, _, violations ->
+            if (func.declaration.modifiers.contains(Modifier.INFIX)) {
+                violations.add("Function ${func.qualifiedName} should not be an infix function")
+            }
+        }
+        return builder
+    }
+
+    fun notBeOperator(): FunctionsRuleBuilder {
+        builder.setShould { func, _, violations ->
+            if (func.declaration.modifiers.contains(Modifier.OPERATOR)) {
+                violations.add("Function ${func.qualifiedName} should not be an operator function")
+            }
+        }
+        return builder
+    }
+
+    fun notBeOpen(): FunctionsRuleBuilder {
+        builder.setShould { func, _, violations ->
+            if (func.declaration.modifiers.contains(Modifier.OPEN)) {
+                violations.add("Function ${func.qualifiedName} should not be an open function")
+            }
+        }
+        return builder
+    }
+
+    fun notBeAbstract(): FunctionsRuleBuilder {
+        builder.setShould { func, _, violations ->
+            if (func.declaration.modifiers.contains(Modifier.ABSTRACT)) {
+                violations.add("Function ${func.qualifiedName} should not be an abstract function")
+            }
+        }
+        return builder
+    }
+
+    fun notBeOverride(): FunctionsRuleBuilder {
+        builder.setShould { func, _, violations ->
+            if (func.declaration.modifiers.contains(Modifier.OVERRIDE)) {
+                violations.add("Function ${func.qualifiedName} should not be an override function")
             }
         }
         return builder

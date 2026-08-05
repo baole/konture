@@ -82,3 +82,9 @@ class KontureModuleScope(
         }
     }
 }
+
+operator fun KontureModuleScope.plus(other: KontureModuleScope): KontureModuleScope =
+    KontureModuleScope((this.modules + other.modules).distinctBy { it.path })
+
+operator fun KontureModuleScope.minus(other: KontureModuleScope): KontureModuleScope =
+    KontureModuleScope(this.modules.filterNot { otherModule -> other.modules.any { it.path == otherModule.path } })

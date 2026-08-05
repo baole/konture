@@ -203,6 +203,43 @@ internal interface ClassesShouldMetadataAssertions {
         return builder
     }
 
+    infix fun notHaveModifier(modifier: Modifier): ClassesRuleBuilder {
+        builder.setShould { cls, _, violations ->
+            if (cls.modifiers.contains(modifier)) {
+                violations.add(getMessage("class.should.notHaveModifier", cls.fqName, modifier))
+            }
+        }
+        return builder
+    }
+
+    fun notBeAbstract(): ClassesRuleBuilder {
+        builder.setShould { cls, _, violations ->
+            if (cls.isAbstract || cls.isInterface) {
+                violations.add(getMessage("class.should.notBeAbstract", cls.fqName))
+            }
+        }
+        return builder
+    }
+
+    fun notBeSealed(): ClassesRuleBuilder = notHaveModifier(Modifier.SEALED)
+
+    fun notBeData(): ClassesRuleBuilder = notHaveModifier(Modifier.DATA)
+
+    fun notBeInline(): ClassesRuleBuilder = notHaveModifier(Modifier.INLINE)
+
+    fun notBeOpen(): ClassesRuleBuilder = notHaveModifier(Modifier.OPEN)
+
+    fun notBeInner(): ClassesRuleBuilder = notHaveModifier(Modifier.INNER)
+
+    fun notBeInterface(): ClassesRuleBuilder {
+        builder.setShould { cls, _, violations ->
+            if (cls.isInterface) {
+                violations.add(getMessage("class.should.notBeInterface", cls.fqName))
+            }
+        }
+        return builder
+    }
+
     /**
      * Asserts that selected classes are top-level classes.
      */
@@ -455,6 +492,42 @@ internal interface ClassesShouldMetadataAssertions {
                 }
             if (!isAssignable) {
                 violations.add(getMessage("class.should.beAssignableFrom", cls.fqName, subType))
+            }
+        }
+        return builder
+    }
+
+    infix fun containProperty(propertyName: String): ClassesRuleBuilder {
+        builder.setShould { cls, _, violations ->
+            if (!cls.properties.any { it.name == propertyName }) {
+                violations.add("Class ${cls.fqName} should contain property '$propertyName'")
+            }
+        }
+        return builder
+    }
+
+    infix fun notContainProperty(propertyName: String): ClassesRuleBuilder {
+        builder.setShould { cls, _, violations ->
+            if (cls.properties.any { it.name == propertyName }) {
+                violations.add("Class ${cls.fqName} should not contain property '$propertyName'")
+            }
+        }
+        return builder
+    }
+
+    infix fun containFunction(functionName: String): ClassesRuleBuilder {
+        builder.setShould { cls, _, violations ->
+            if (!cls.functions.any { it.name == functionName }) {
+                violations.add("Class ${cls.fqName} should contain function '$functionName'")
+            }
+        }
+        return builder
+    }
+
+    infix fun notContainFunction(functionName: String): ClassesRuleBuilder {
+        builder.setShould { cls, _, violations ->
+            if (cls.functions.any { it.name == functionName }) {
+                violations.add("Class ${cls.fqName} should not contain function '$functionName'")
             }
         }
         return builder

@@ -145,8 +145,19 @@ class FilesThat internal constructor(
         return builder
     }
 
+    infix fun containClass(fqNames: List<String>): FilesRuleBuilder {
+        builder.setThat { context ->
+            context.declaration.classes.any { cls -> fqNames.any { cls.fqName == it || cls.name == it } }
+        }
+        return builder
+    }
+
+    fun containClass(vararg fqNames: String): FilesRuleBuilder = containClass(fqNames.toList())
+
     infix fun containClass(type: kotlin.reflect.KClass<*>): FilesRuleBuilder =
         containClass(type.kontureQualifiedName())
+
+    inline fun <reified T : Any> containClass(): FilesRuleBuilder = containClass(T::class)
 
     infix fun containClassesWithAnnotation(annotationFqName: String): FilesRuleBuilder {
         builder.setThat { context ->
@@ -160,6 +171,9 @@ class FilesThat internal constructor(
     infix fun containClassesWithAnnotation(annotation: kotlin.reflect.KClass<out Annotation>): FilesRuleBuilder =
         containClassesWithAnnotation(annotation.kontureQualifiedName())
 
+    inline fun <reified T : Annotation> containClassesWithAnnotation(): FilesRuleBuilder =
+        containClassesWithAnnotation(T::class)
+
     infix fun haveImportOf(importPath: String): FilesRuleBuilder {
         builder.setThat { context ->
             context.declaration.imports.any { PatternMatchers.matchesPackage(importPath, it) || it == importPath }
@@ -167,11 +181,29 @@ class FilesThat internal constructor(
         return builder
     }
 
+    infix fun haveImportOf(imports: List<String>): FilesRuleBuilder {
+        builder.setThat { context ->
+            context.declaration.imports.any { imp ->
+                imports.any { PatternMatchers.matchesPackage(it, imp) || imp == it }
+            }
+        }
+        return builder
+    }
+
+    fun haveImportOf(vararg imports: String): FilesRuleBuilder = haveImportOf(imports.toList())
+
     infix fun haveImportOf(type: kotlin.reflect.KClass<*>): FilesRuleBuilder =
         haveImportOf(type.kontureQualifiedName())
 
+    inline fun <reified T : Any> haveImportOf(): FilesRuleBuilder = haveImportOf(T::class)
+
     fun containTopLevelFunctions(): FilesRuleBuilder {
         builder.setThat { it.declaration.topLevelFunctions.isNotEmpty() }
+        return builder
+    }
+
+    fun notContainTopLevelFunctions(): FilesRuleBuilder {
+        builder.setThat { it.declaration.topLevelFunctions.isEmpty() }
         return builder
     }
 
@@ -180,13 +212,94 @@ class FilesThat internal constructor(
         return builder
     }
 
+    fun notContainTopLevelProperties(): FilesRuleBuilder {
+        builder.setThat { it.declaration.topLevelProperties.isEmpty() }
+        return builder
+    }
+
     fun containClasses(): FilesRuleBuilder {
         builder.setThat { it.declaration.classes.isNotEmpty() }
         return builder
     }
 
+    fun notContainClasses(): FilesRuleBuilder {
+        builder.setThat { it.declaration.classes.isEmpty() }
+        return builder
+    }
+
     infix fun satisfy(predicate: (FileDeclarationContext) -> Boolean): FilesRuleBuilder {
         builder.setThat(predicate)
+        return builder
+    }
+
+    infix fun haveAnnotationOf(annotationName: String): FilesRuleBuilder {
+        builder.setThat { file ->
+            file.declaration.classes.any { cls ->
+                cls.annotations.any { it.name == annotationName || it.fqName == annotationName }
+            }
+        }
+        return builder
+    }
+
+    infix fun haveAnnotationOf(annotation: kotlin.reflect.KClass<out Annotation>): FilesRuleBuilder =
+        haveAnnotationOf(annotation.kontureQualifiedName())
+
+    infix fun haveAllAnnotationsOf(names: List<String>): FilesRuleBuilder {
+        builder.setThat { file ->
+            names.all { name ->
+                file.declaration.classes.any { cls ->
+                    cls.annotations.any { it.name == name || it.fqName == name }
+                }
+            }
+        }
+        return builder
+    }
+
+    fun haveAllAnnotationsOf(vararg names: String): FilesRuleBuilder = haveAllAnnotationsOf(names.asList())
+
+    infix fun haveAnyAnnotationOf(names: List<String>): FilesRuleBuilder {
+        builder.setThat { file ->
+            names.any { name ->
+                file.declaration.classes.any { cls ->
+                    cls.annotations.any { it.name == name || it.fqName == name }
+                }
+            }
+        }
+        return builder
+    }
+
+    fun haveAnyAnnotationOf(vararg names: String): FilesRuleBuilder = haveAnyAnnotationOf(names.asList())
+
+    fun anyOf(vararg blocks: FilesThat.() -> Unit): FilesRuleBuilder {
+        val predicates =
+            blocks.map { block ->
+                val tempBuilder = FilesRuleBuilder(builder.graph)
+                FilesThat(tempBuilder).block()
+                tempBuilder.getThatPredicate() ?: { true }
+            }
+        builder.setThat { item -> predicates.any { it(item) } }
+        return builder
+    }
+
+    fun allOf(vararg blocks: FilesThat.() -> Unit): FilesRuleBuilder {
+        val predicates =
+            blocks.map { block ->
+                val tempBuilder = FilesRuleBuilder(builder.graph)
+                FilesThat(tempBuilder).block()
+                tempBuilder.getThatPredicate() ?: { true }
+            }
+        builder.setThat { item -> predicates.all { it(item) } }
+        return builder
+    }
+
+    fun noneOf(vararg blocks: FilesThat.() -> Unit): FilesRuleBuilder {
+        val predicates =
+            blocks.map { block ->
+                val tempBuilder = FilesRuleBuilder(builder.graph)
+                FilesThat(tempBuilder).block()
+                tempBuilder.getThatPredicate() ?: { true }
+            }
+        builder.setThat { item -> predicates.none { it(item) } }
         return builder
     }
 }

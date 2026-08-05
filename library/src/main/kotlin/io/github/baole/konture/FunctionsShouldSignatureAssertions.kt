@@ -127,6 +127,74 @@ interface FunctionsShouldSignatureAssertions {
         return builder
     }
 
+    infix fun resideInAModule(modulePath: String): FunctionsRuleBuilder {
+        val normalized =
+            if (!modulePath.startsWith(":") && !modulePath.startsWith("**") && modulePath.isNotEmpty()) {
+                ":$modulePath"
+            } else {
+                modulePath
+            }
+        builder.setShould { func, _, violations ->
+            if (func.modulePath != normalized) {
+                violations.add(getMessage("function.should.resideInModule", func.qualifiedName, normalized, func.modulePath))
+            }
+        }
+        return builder
+    }
+
+    infix fun resideInAModule(modulePaths: List<String>): FunctionsRuleBuilder {
+        val normalizedPaths =
+            modulePaths.map { path ->
+                if (!path.startsWith(":") && !path.startsWith("**") && path.isNotEmpty()) {
+                    ":$path"
+                } else {
+                    path
+                }
+            }
+        builder.setShould { func, _, violations ->
+            if (!normalizedPaths.contains(func.modulePath)) {
+                violations.add(getMessage("function.should.resideInModule", func.qualifiedName, normalizedPaths.joinToString(), func.modulePath))
+            }
+        }
+        return builder
+    }
+
+    fun resideInAModule(vararg modulePaths: String): FunctionsRuleBuilder = resideInAModule(modulePaths.toList())
+
+    infix fun notResideInAModule(modulePath: String): FunctionsRuleBuilder {
+        val normalized =
+            if (!modulePath.startsWith(":") && !modulePath.startsWith("**") && modulePath.isNotEmpty()) {
+                ":$modulePath"
+            } else {
+                modulePath
+            }
+        builder.setShould { func, _, violations ->
+            if (func.modulePath == normalized) {
+                violations.add(getMessage("function.should.notResideInModule", func.qualifiedName, normalized))
+            }
+        }
+        return builder
+    }
+
+    infix fun notResideInAModule(modulePaths: List<String>): FunctionsRuleBuilder {
+        val normalizedPaths =
+            modulePaths.map { path ->
+                if (!path.startsWith(":") && !path.startsWith("**") && path.isNotEmpty()) {
+                    ":$path"
+                } else {
+                    path
+                }
+            }
+        builder.setShould { func, _, violations ->
+            if (normalizedPaths.contains(func.modulePath)) {
+                violations.add(getMessage("function.should.notResideInModuleAny", func.qualifiedName, normalizedPaths.joinToString()))
+            }
+        }
+        return builder
+    }
+
+    fun notResideInAModule(vararg modulePaths: String): FunctionsRuleBuilder = notResideInAModule(modulePaths.toList())
+
 
     /**
      * Asserts that selected functions are annotated with all of the specified annotations.
@@ -282,6 +350,15 @@ interface FunctionsShouldSignatureAssertions {
                         },
                     ),
                 )
+            }
+        }
+        return builder
+    }
+
+    fun haveNoParameters(): FunctionsRuleBuilder {
+        builder.setShould { func, _, violations ->
+            if (func.declaration.parameters.isNotEmpty()) {
+                violations.add(getMessage("function.should.haveNoParameters", func.qualifiedName, func.declaration.parameters.size))
             }
         }
         return builder

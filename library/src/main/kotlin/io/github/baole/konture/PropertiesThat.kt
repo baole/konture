@@ -333,6 +333,53 @@ class PropertiesThat internal constructor(
         builder.setThat(predicate)
         return builder
     }
+
+    fun beVal(): PropertiesRuleBuilder {
+        builder.setThat { !it.declaration.isVar }
+        return builder
+    }
+
+    fun beVar(): PropertiesRuleBuilder {
+        builder.setThat { it.declaration.isVar }
+        return builder
+    }
+
+    fun beConst(): PropertiesRuleBuilder = haveModifier(Modifier.CONST)
+
+    fun beLateinit(): PropertiesRuleBuilder = haveModifier(Modifier.LATEINIT)
+
+    fun anyOf(vararg blocks: PropertiesThat.() -> Unit): PropertiesRuleBuilder {
+        val predicates =
+            blocks.map { block ->
+                val tempBuilder = PropertiesRuleBuilder(builder.graph)
+                PropertiesThat(tempBuilder).block()
+                tempBuilder.getThatPredicate() ?: { true }
+            }
+        builder.setThat { item -> predicates.any { it(item) } }
+        return builder
+    }
+
+    fun allOf(vararg blocks: PropertiesThat.() -> Unit): PropertiesRuleBuilder {
+        val predicates =
+            blocks.map { block ->
+                val tempBuilder = PropertiesRuleBuilder(builder.graph)
+                PropertiesThat(tempBuilder).block()
+                tempBuilder.getThatPredicate() ?: { true }
+            }
+        builder.setThat { item -> predicates.all { it(item) } }
+        return builder
+    }
+
+    fun noneOf(vararg blocks: PropertiesThat.() -> Unit): PropertiesRuleBuilder {
+        val predicates =
+            blocks.map { block ->
+                val tempBuilder = PropertiesRuleBuilder(builder.graph)
+                PropertiesThat(tempBuilder).block()
+                tempBuilder.getThatPredicate() ?: { true }
+            }
+        builder.setThat { item -> predicates.none { it(item) } }
+        return builder
+    }
 }
 
 

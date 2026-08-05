@@ -65,6 +65,23 @@ class SlicesRuleBuilder(
         }
 
     /**
+     * Debugging helper that prints information about all derived slices in the project graph.
+     *
+     * @param logger Custom log consumer (defaults to printing to standard output).
+     */
+    fun printAllSlices(
+        logger: (Slice) -> Unit = {
+            println(getMessage("debug.slices.derived", it.key, it.packages, it.classes.size))
+        },
+    ): SlicesRuleBuilder = printMatchedSlices(logger)
+
+    internal fun getThatPredicate(): ((Slice) -> Boolean)? = thatPredicate
+
+    internal fun checkRuleAssertions(sliceGraph: SliceGraph, violations: MutableList<String>) {
+        assertions.forEach { it(sliceGraph, violations) }
+    }
+
+    /**
      * Configures this builder to allow empty selections (if no packages match the slice pattern the
      * rule passes instead of throwing an AssertionError).
      */

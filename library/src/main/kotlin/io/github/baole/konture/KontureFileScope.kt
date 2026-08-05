@@ -329,3 +329,39 @@ fun KontureFileScope.assertNameStartingWith(vararg prefixes: String) = files.ass
  * @throws AssertionError if any file name does not match any of the specified glob patterns.
  */
 fun KontureFileScope.assertNameMatching(vararg patterns: String) = files.assertNameMatching(*patterns)
+
+fun List<FileDeclaration>.assertResideInAModule(
+    modulePath: String,
+    graph: ProjectGraph = Konture.projectGraph,
+) {
+    val norm = if (!modulePath.startsWith(":") && !modulePath.startsWith("**") && modulePath.isNotEmpty()) ":$modulePath" else modulePath
+    assertTrue("Files must reside in module '$norm'") { file ->
+        val mod = graph.getAllModules().find { m ->
+            m.files.any { f -> f.filePath == file.filePath || f.name == file.name }
+        }
+        mod?.path == norm
+    }
+}
+
+fun List<FileDeclaration>.assertNotResideInAModule(
+    modulePath: String,
+    graph: ProjectGraph = Konture.projectGraph,
+) {
+    val norm = if (!modulePath.startsWith(":") && !modulePath.startsWith("**") && modulePath.isNotEmpty()) ":$modulePath" else modulePath
+    assertTrue("Files must not reside in module '$norm'") { file ->
+        val mod = graph.getAllModules().find { m ->
+            m.files.any { f -> f.filePath == file.filePath || f.name == file.name }
+        }
+        mod?.path != norm
+    }
+}
+
+fun KontureFileScope.assertResideInAModule(
+    modulePath: String,
+    graph: ProjectGraph = Konture.projectGraph,
+) = files.assertResideInAModule(modulePath, graph)
+
+fun KontureFileScope.assertNotResideInAModule(
+    modulePath: String,
+    graph: ProjectGraph = Konture.projectGraph,
+) = files.assertNotResideInAModule(modulePath, graph)

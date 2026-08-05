@@ -484,5 +484,83 @@ class ModulesShould internal constructor(
         }
         return builder
     }
+
+    infix fun applyPlugin(pluginId: String): ModulesRuleBuilder {
+        builder.setShould { module, _, violations ->
+            if (!module.appliedPlugins.contains(pluginId)) {
+                violations.add("Module ${module.path} should apply plugin $pluginId")
+            }
+        }
+        return builder
+    }
+
+    infix fun havePlugin(pluginId: String): ModulesRuleBuilder = applyPlugin(pluginId)
+
+    infix fun notApplyPlugin(pluginId: String): ModulesRuleBuilder {
+        builder.setShould { module, _, violations ->
+            if (module.appliedPlugins.contains(pluginId)) {
+                violations.add("Module ${module.path} should not apply plugin $pluginId")
+            }
+        }
+        return builder
+    }
+
+    infix fun notHavePlugin(pluginId: String): ModulesRuleBuilder = notApplyPlugin(pluginId)
+
+    fun notHavePlugins(vararg pluginIds: String): ModulesRuleBuilder {
+        builder.setShould { module, _, violations ->
+            val applied = pluginIds.filter { module.appliedPlugins.contains(it) }
+            if (applied.isNotEmpty()) {
+                violations.add("Module ${module.path} should not apply plugins ${applied.joinToString()}")
+            }
+        }
+        return builder
+    }
+
+    fun containClasses(): ModulesRuleBuilder {
+        builder.setShould { module, _, violations ->
+            if (module.classes.isEmpty()) {
+                violations.add("Module ${module.path} should contain classes")
+            }
+        }
+        return builder
+    }
+
+    fun notContainClasses(): ModulesRuleBuilder {
+        builder.setShould { module, _, violations ->
+            if (module.classes.isNotEmpty()) {
+                violations.add("Module ${module.path} should not contain classes")
+            }
+        }
+        return builder
+    }
+
+    infix fun haveSourceSet(sourceSetName: String): ModulesRuleBuilder {
+        builder.setShould { module, _, violations ->
+            val hasSourceSet = module.sourceSets.any { it.name == sourceSetName }
+            if (!hasSourceSet) {
+                violations.add("Module ${module.path} should have source set $sourceSetName")
+            }
+        }
+        return builder
+    }
+
+    fun containFiles(): ModulesRuleBuilder {
+        builder.setShould { module, _, violations ->
+            if (module.files.isEmpty()) {
+                violations.add("Module ${module.path} should contain files")
+            }
+        }
+        return builder
+    }
+
+    fun beEmpty(): ModulesRuleBuilder {
+        builder.setShould { module, _, violations ->
+            if (module.files.isNotEmpty() || module.classes.isNotEmpty()) {
+                violations.add("Module ${module.path} should be empty")
+            }
+        }
+        return builder
+    }
 }
 

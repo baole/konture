@@ -50,6 +50,12 @@ class ModulesThat internal constructor(
         return builder
     }
 
+    infix fun haveName(path: String): ModulesRuleBuilder = haveNamePath(path)
+
+    infix fun haveName(paths: List<String>): ModulesRuleBuilder = haveNamePath(paths)
+
+    fun haveName(vararg paths: String): ModulesRuleBuilder = haveNamePath(*paths)
+
     infix fun haveNameStartingWith(prefix: String): ModulesRuleBuilder {
         builder.setThat { it.path.removePrefix(":").startsWith(prefix.removePrefix(":")) }
         return builder
@@ -122,6 +128,17 @@ class ModulesThat internal constructor(
 
     fun dependOnModules(vararg modulePaths: String): ModulesRuleBuilder = dependOnModules(modulePaths.toList())
 
+    infix fun applyPlugin(pluginId: String): ModulesRuleBuilder {
+        builder.setThat { module -> module.appliedPlugins.contains(pluginId) }
+        return builder
+    }
+
+    infix fun havePlugin(pluginId: String): ModulesRuleBuilder = applyPlugin(pluginId)
+
+    fun havePlugins(vararg pluginIds: String): ModulesRuleBuilder {
+        builder.setThat { module -> pluginIds.all { module.appliedPlugins.contains(it) } }
+        return builder
+    }
 
     /**
      * Restricts the rules to modules matching the specified predicate.

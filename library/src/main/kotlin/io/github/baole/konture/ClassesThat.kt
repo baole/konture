@@ -433,6 +433,18 @@ class ClassesThat internal constructor(
     infix fun areAssignableTo(superType: kotlin.reflect.KClass<*>): ClassesRuleBuilder =
         areAssignableTo(superType.kontureQualifiedName())
 
+    inline fun <reified T : Any> areAssignableTo(): ClassesRuleBuilder =
+        areAssignableTo(T::class)
+
+    infix fun beChildOf(superType: String): ClassesRuleBuilder =
+        areAssignableTo(superType)
+
+    infix fun beChildOf(superType: kotlin.reflect.KClass<*>): ClassesRuleBuilder =
+        areAssignableTo(superType)
+
+    inline fun <reified T : Any> beChildOf(): ClassesRuleBuilder =
+        areAssignableTo(T::class)
+
     /**
      * Restricts the rules to classes extending or implementing the specified supertype.
      *
@@ -556,6 +568,16 @@ class ClassesThat internal constructor(
 
     fun areNested(): ClassesRuleBuilder {
         builder.setThat { cls -> cls.packageName != cls.fqName.substringBeforeLast('.') }
+        return builder
+    }
+
+    infix fun containProperty(propertyName: String): ClassesRuleBuilder {
+        builder.setThat { cls -> cls.properties.any { it.name == propertyName } }
+        return builder
+    }
+
+    infix fun containFunction(functionName: String): ClassesRuleBuilder {
+        builder.setThat { cls -> cls.functions.any { it.name == functionName } }
         return builder
     }
 

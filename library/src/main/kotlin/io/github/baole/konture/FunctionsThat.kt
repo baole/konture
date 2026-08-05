@@ -168,6 +168,21 @@ class FunctionsThat internal constructor(
         return builder
     }
 
+    infix fun haveParameterOf(typeFqName: String): FunctionsRuleBuilder {
+        builder.setThat { func ->
+            func.declaration.parameters.any { p ->
+                p.type == typeFqName || p.type.endsWith(".$typeFqName") || typeFqName.endsWith(".${p.type}")
+            }
+        }
+        return builder
+    }
+
+    infix fun haveParameterOf(kClass: KClass<*>): FunctionsRuleBuilder =
+        haveParameterOf(kClass.kontureQualifiedName())
+
+    inline fun <reified T : Any> haveParameterOf(): FunctionsRuleBuilder =
+        haveParameterOf(T::class)
+
     /**
      * Restricts the rules to functions annotated with the specified annotation.
      * Matches either the annotation's simple name or its FQN.
@@ -438,6 +453,69 @@ class FunctionsThat internal constructor(
 
     infix fun satisfy(predicate: (FunctionDeclarationContext) -> Boolean): FunctionsRuleBuilder {
         builder.setThat(predicate)
+        return builder
+    }
+
+    fun beSuspend(): FunctionsRuleBuilder = haveModifier(Modifier.SUSPEND)
+
+    fun beInline(): FunctionsRuleBuilder = haveModifier(Modifier.INLINE)
+
+    fun beInfix(): FunctionsRuleBuilder = haveModifier(Modifier.INFIX)
+
+    fun beOperator(): FunctionsRuleBuilder = haveModifier(Modifier.OPERATOR)
+
+    fun haveNoParameters(): FunctionsRuleBuilder {
+        builder.setThat { it.declaration.parameters.isEmpty() }
+        return builder
+    }
+
+    infix fun haveParameterCount(count: Int): FunctionsRuleBuilder {
+        builder.setThat { it.declaration.parameters.size == count }
+        return builder
+    }
+
+    infix fun haveParameterCount(predicate: (Int) -> Boolean): FunctionsRuleBuilder {
+        builder.setThat { predicate(it.declaration.parameters.size) }
+        return builder
+    }
+
+    infix fun belongToClass(className: String): FunctionsRuleBuilder {
+        builder.setThat { it.className == className || (it.className != null && it.qualifiedName.contains(className)) }
+        return builder
+    }
+
+    infix fun belongToClass(type: KClass<*>): FunctionsRuleBuilder = belongToClass(type.kontureQualifiedName())
+
+    fun anyOf(vararg blocks: FunctionsThat.() -> Unit): FunctionsRuleBuilder {
+        val predicates =
+            blocks.map { block ->
+                val tempBuilder = FunctionsRuleBuilder(builder.graph)
+                FunctionsThat(tempBuilder).block()
+                tempBuilder.getThatPredicate() ?: { true }
+            }
+        builder.setThat { item -> predicates.any { it(item) } }
+        return builder
+    }
+
+    fun allOf(vararg blocks: FunctionsThat.() -> Unit): FunctionsRuleBuilder {
+        val predicates =
+            blocks.map { block ->
+                val tempBuilder = FunctionsRuleBuilder(builder.graph)
+                FunctionsThat(tempBuilder).block()
+                tempBuilder.getThatPredicate() ?: { true }
+            }
+        builder.setThat { item -> predicates.all { it(item) } }
+        return builder
+    }
+
+    fun noneOf(vararg blocks: FunctionsThat.() -> Unit): FunctionsRuleBuilder {
+        val predicates =
+            blocks.map { block ->
+                val tempBuilder = FunctionsRuleBuilder(builder.graph)
+                FunctionsThat(tempBuilder).block()
+                tempBuilder.getThatPredicate() ?: { true }
+            }
+        builder.setThat { item -> predicates.none { it(item) } }
         return builder
     }
 }

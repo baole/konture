@@ -245,6 +245,18 @@ class FilesShould internal constructor(
 
     infix fun containClass(type: KClass<*>): FilesRuleBuilder = containClass(type.kontureQualifiedName())
 
+    infix fun notContainClass(fqName: String): FilesRuleBuilder {
+        builder.setShould { file, _, violations ->
+            val contains = file.declaration.classes.any { it.fqName == fqName || it.name == fqName }
+            if (contains) {
+                violations.add("File ${file.declaration.name} should not contain class $fqName")
+            }
+        }
+        return builder
+    }
+
+    infix fun notContainClass(type: KClass<*>): FilesRuleBuilder = notContainClass(type.kontureQualifiedName())
+
     infix fun haveImportOf(importPath: String): FilesRuleBuilder {
         builder.setShould { file, _, violations ->
             val hasImport = file.declaration.imports.any { PatternMatchers.matchesPackage(importPath, it) || it == importPath }
@@ -256,6 +268,54 @@ class FilesShould internal constructor(
     }
 
     infix fun haveImportOf(type: KClass<*>): FilesRuleBuilder = haveImportOf(type.kontureQualifiedName())
+
+    infix fun notHaveImportOf(importPath: String): FilesRuleBuilder {
+        builder.setShould { file, _, violations ->
+            val hasImport = file.declaration.imports.any { PatternMatchers.matchesPackage(importPath, it) || it == importPath }
+            if (hasImport) {
+                violations.add("File ${file.declaration.name} should not have import $importPath")
+            }
+        }
+        return builder
+    }
+
+    infix fun notHaveImportOf(type: KClass<*>): FilesRuleBuilder = notHaveImportOf(type.kontureQualifiedName())
+
+    fun containTopLevelFunctions(): FilesRuleBuilder {
+        builder.setShould { file, _, violations ->
+            if (file.declaration.topLevelFunctions.isEmpty()) {
+                violations.add("File ${file.declaration.name} should contain top-level functions")
+            }
+        }
+        return builder
+    }
+
+    fun notContainTopLevelFunctions(): FilesRuleBuilder {
+        builder.setShould { file, _, violations ->
+            if (file.declaration.topLevelFunctions.isNotEmpty()) {
+                violations.add("File ${file.declaration.name} should not contain top-level functions")
+            }
+        }
+        return builder
+    }
+
+    fun containTopLevelProperties(): FilesRuleBuilder {
+        builder.setShould { file, _, violations ->
+            if (file.declaration.topLevelProperties.isEmpty()) {
+                violations.add("File ${file.declaration.name} should contain top-level properties")
+            }
+        }
+        return builder
+    }
+
+    fun notContainTopLevelProperties(): FilesRuleBuilder {
+        builder.setShould { file, _, violations ->
+            if (file.declaration.topLevelProperties.isNotEmpty()) {
+                violations.add("File ${file.declaration.name} should not contain top-level properties")
+            }
+        }
+        return builder
+    }
 
 
     infix fun haveNameEndingWith(suffix: String): FilesRuleBuilder {
@@ -349,6 +409,8 @@ class FilesShould internal constructor(
         return builder
     }
 
+    fun haveNoWildcardImports(): FilesRuleBuilder = notHaveWildcardImports()
+
     fun haveOnlyOneClassPerFile(): FilesRuleBuilder {
         builder.setShould { file, _, violations ->
             if (file.declaration.classes.size > 1) {
@@ -387,6 +449,60 @@ class FilesShould internal constructor(
         return builder
     }
 
+    fun haveTopLevelFunctions(): FilesRuleBuilder {
+        builder.setShould { file, _, violations ->
+            if (file.declaration.topLevelFunctions.isEmpty()) {
+                violations.add(getMessage("file.should.haveTopLevelFunctions", file.declaration.name))
+            }
+        }
+        return builder
+    }
+
+    fun notHaveTopLevelFunctions(): FilesRuleBuilder {
+        builder.setShould { file, _, violations ->
+            if (file.declaration.topLevelFunctions.isNotEmpty()) {
+                violations.add(getMessage("file.should.notHaveTopLevelFunctions", file.declaration.name))
+            }
+        }
+        return builder
+    }
+
+    fun haveTopLevelProperties(): FilesRuleBuilder {
+        builder.setShould { file, _, violations ->
+            if (file.declaration.topLevelProperties.isEmpty()) {
+                violations.add(getMessage("file.should.haveTopLevelProperties", file.declaration.name))
+            }
+        }
+        return builder
+    }
+
+    fun notHaveTopLevelProperties(): FilesRuleBuilder {
+        builder.setShould { file, _, violations ->
+            if (file.declaration.topLevelProperties.isNotEmpty()) {
+                violations.add(getMessage("file.should.notHaveTopLevelProperties", file.declaration.name))
+            }
+        }
+        return builder
+    }
+
+    fun haveClasses(): FilesRuleBuilder {
+        builder.setShould { file, _, violations ->
+            if (file.declaration.classes.isEmpty()) {
+                violations.add(getMessage("file.should.haveClasses", file.declaration.name))
+            }
+        }
+        return builder
+    }
+
+    fun notHaveClasses(): FilesRuleBuilder {
+        builder.setShould { file, _, violations ->
+            if (file.declaration.classes.isNotEmpty()) {
+                violations.add(getMessage("file.should.notHaveClasses", file.declaration.name))
+            }
+        }
+        return builder
+    }
+
     fun beDocumentedWithKDoc(): FilesRuleBuilder {
         builder.setShould { file, _, violations ->
             if (file.declaration.kdocText.isNullOrBlank()) {
@@ -397,6 +513,24 @@ class FilesShould internal constructor(
         }
         return builder
     }
+
+    infix fun haveAnnotationOf(annotationName: String): FilesRuleBuilder {
+        builder.setShould { file, _, violations ->
+            val hasAnnotation = file.declaration.classes.any { cls ->
+                cls.annotations.any { it.name == annotationName || it.fqName == annotationName }
+            }
+            if (!hasAnnotation) {
+                violations.add(getMessage("file.should.haveAnnotationOf", file.declaration.name, annotationName))
+            }
+        }
+        return builder
+    }
+
+    infix fun haveAnnotationOf(annotation: KClass<out Annotation>): FilesRuleBuilder =
+        haveAnnotationOf(annotation.kontureQualifiedName())
+
+    inline fun <reified T : Annotation> haveAnnotationOf(): FilesRuleBuilder =
+        haveAnnotationOf(T::class)
 
     infix fun satisfy(assertion: (FileDeclarationContext) -> Boolean): FilesRuleBuilder =
         satisfy(

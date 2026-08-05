@@ -90,3 +90,9 @@ class KontureSliceScope(
         }
     }
 }
+
+operator fun KontureSliceScope.plus(other: KontureSliceScope): KontureSliceScope =
+    KontureSliceScope((this.slices + other.slices).distinctBy { it.key })
+
+operator fun KontureSliceScope.minus(other: KontureSliceScope): KontureSliceScope =
+    KontureSliceScope(this.slices.filterNot { otherSlice -> other.slices.any { it.key == otherSlice.key } })

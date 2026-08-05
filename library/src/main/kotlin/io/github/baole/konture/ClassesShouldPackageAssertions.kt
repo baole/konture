@@ -1,5 +1,6 @@
 /*
- * Copyright 2026 Bao Le Duc
+ * Copyright 2026 The Konture Contributors
+ * Contributors: Bao Le Duc (@baole)
  * SPDX-License-Identifier: Apache-2.0
  */
 
@@ -90,6 +91,86 @@ internal interface ClassesShouldPackageAssertions {
         }
         return builder
     }
+
+    infix fun resideInAModule(modulePath: String): ClassesRuleBuilder {
+        val normalized =
+            if (!modulePath.startsWith(":") && !modulePath.startsWith("**") && modulePath.isNotEmpty()) {
+                ":$modulePath"
+            } else {
+                modulePath
+            }
+        builder.setShould { cls, _, violations ->
+            val module = builder.graph.getAllModules().find { mod ->
+                mod.files.any { f -> f.classes.any { c -> c.fqName == cls.fqName } || f.filePath == cls.filePath }
+            }
+            if (module?.path != normalized) {
+                violations.add(getMessage("class.should.resideInModule", cls.fqName, normalized, module?.path ?: "unknown"))
+            }
+        }
+        return builder
+    }
+
+    infix fun resideInAModule(modulePaths: List<String>): ClassesRuleBuilder {
+        val normalizedPaths =
+            modulePaths.map { path ->
+                if (!path.startsWith(":") && !path.startsWith("**") && path.isNotEmpty()) {
+                    ":$path"
+                } else {
+                    path
+                }
+            }
+        builder.setShould { cls, _, violations ->
+            val module = builder.graph.getAllModules().find { mod ->
+                mod.files.any { f -> f.classes.any { c -> c.fqName == cls.fqName } || f.filePath == cls.filePath }
+            }
+            if (module == null || !normalizedPaths.contains(module.path)) {
+                violations.add(getMessage("class.should.resideInModule", cls.fqName, normalizedPaths.joinToString(), module?.path ?: "unknown"))
+            }
+        }
+        return builder
+    }
+
+    fun resideInAModule(vararg modulePaths: String): ClassesRuleBuilder = resideInAModule(modulePaths.toList())
+
+    infix fun notResideInAModule(modulePath: String): ClassesRuleBuilder {
+        val normalized =
+            if (!modulePath.startsWith(":") && !modulePath.startsWith("**") && modulePath.isNotEmpty()) {
+                ":$modulePath"
+            } else {
+                modulePath
+            }
+        builder.setShould { cls, _, violations ->
+            val module = builder.graph.getAllModules().find { mod ->
+                mod.files.any { f -> f.classes.any { c -> c.fqName == cls.fqName } || f.filePath == cls.filePath }
+            }
+            if (module?.path == normalized) {
+                violations.add(getMessage("class.should.notResideInModule", cls.fqName, normalized))
+            }
+        }
+        return builder
+    }
+
+    infix fun notResideInAModule(modulePaths: List<String>): ClassesRuleBuilder {
+        val normalizedPaths =
+            modulePaths.map { path ->
+                if (!path.startsWith(":") && !path.startsWith("**") && path.isNotEmpty()) {
+                    ":$path"
+                } else {
+                    path
+                }
+            }
+        builder.setShould { cls, _, violations ->
+            val module = builder.graph.getAllModules().find { mod ->
+                mod.files.any { f -> f.classes.any { c -> c.fqName == cls.fqName } || f.filePath == cls.filePath }
+            }
+            if (module != null && normalizedPaths.contains(module.path)) {
+                violations.add(getMessage("class.should.notResideInModuleAny", cls.fqName, normalizedPaths.joinToString()))
+            }
+        }
+        return builder
+    }
+
+    fun notResideInAModule(vararg modulePaths: String): ClassesRuleBuilder = notResideInAModule(modulePaths.toList())
 
     /**
      * Asserts that selected classes have simple names ending with the specified suffix.

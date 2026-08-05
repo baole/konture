@@ -13,7 +13,7 @@ import kotlin.reflect.KClass
 /**
  * Fluent API for defining assertion rules on Kotlin classes.
  */
-internal interface ClassesShouldDependencyAssertions {
+interface ClassesShouldDependencyAssertions {
     val builder: ClassesRuleBuilder
 
     /**
@@ -375,3 +375,9 @@ internal interface ClassesShouldDependencyAssertions {
     /** Fails for every actual class/type use of [kClass] in the selected class; imports alone do not match. */
     fun notReferenceClass(kClass: KClass<*>): ClassesRuleBuilder = notReferenceClass(kClass.kontureQualifiedName())
 }
+
+/** Fails for every invocation of type [T] in the selected class. */
+inline fun <reified T : Any> ClassesShould.notCall(): ClassesRuleBuilder = notCall(T::class)
+
+/** Fails for every actual class/type use of type [T] in the selected class; imports alone do not match. */
+inline fun <reified T : Any> ClassesShould.notReferenceClass(): ClassesRuleBuilder = notReferenceClass(T::class)

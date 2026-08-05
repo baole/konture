@@ -561,6 +561,33 @@ class PropertiesShould internal constructor(
         return builder
     }
 
+    fun notBeExtension(): PropertiesRuleBuilder {
+        builder.setShould { prop, _, violations ->
+            if (prop.declaration.isExtension) {
+                violations.add("Property ${prop.qualifiedName} should not be an extension property")
+            }
+        }
+        return builder
+    }
+
+    fun notBeConst(): PropertiesRuleBuilder {
+        builder.setShould { prop, _, violations ->
+            if (prop.declaration.modifiers.contains(Modifier.CONST)) {
+                violations.add("Property ${prop.qualifiedName} should not be a const property")
+            }
+        }
+        return builder
+    }
+
+    fun notBeLateinit(): PropertiesRuleBuilder {
+        builder.setShould { prop, _, violations ->
+            if (prop.declaration.modifiers.contains(Modifier.LATEINIT)) {
+                violations.add("Property ${prop.qualifiedName} should not be a lateinit property")
+            }
+        }
+        return builder
+    }
+
     infix fun satisfy(assertion: (PropertyDeclarationContext) -> Boolean): PropertiesRuleBuilder =
         satisfy("custom condition") { p, _ -> assertion(p) }
 
