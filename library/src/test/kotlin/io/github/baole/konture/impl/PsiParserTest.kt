@@ -110,7 +110,10 @@ class PsiParserTest {
         // Verify source line numbers are captured for navigation in violation messages
         assertEquals(9, property.sourceLine)
         assertEquals(11, function.sourceLine)
-        assertTrue(serviceClass.sourceLine in 7..8, "Expected class line near its declaration, got ${serviceClass.sourceLine}")
+        assertTrue(
+            serviceClass.sourceLine in 7..8,
+            "Expected class line near its declaration, got ${serviceClass.sourceLine}",
+        )
 
         // Verify BaseService interface
         val interfaceClass = classes.first { it.name == "BaseService" }
@@ -298,7 +301,9 @@ class PsiParserTest {
         assertEquals(3, mockkCalls.size)
         assertTrue(mockkCalls.all { it.line > 0 && it.column > 0 })
         assertTrue(mockkCalls.none { it.enclosingFunction == "local" })
-        assertTrue(declaration.usages.any { it.kind == UsageKind.CLASS_REFERENCE && it.targetFqName == "io.mockk.MockK" })
+        assertTrue(
+            declaration.usages.any { it.kind == UsageKind.CLASS_REFERENCE && it.targetFqName == "io.mockk.MockK" },
+        )
     }
 
     @Test
@@ -477,9 +482,18 @@ class PsiParserTest {
         val clazzWithLookup = declWithLookup!!.classes.first()
         val paramsWithLookup = clazzWithLookup.functions.first { it.name == "f" }.parameters
 
-        assertEquals("app.Result", paramsWithLookup[0].resolvedType) // Local package declaration takes precedence over default import
-        assertEquals("app.List", paramsWithLookup[1].resolvedType) // Local declarations take precedence over default imports
-        assertEquals("external.ExternalType", paramsWithLookup[2].resolvedType) // Resolved via wildcard because it is declared in the project!
+        assertEquals(
+            "app.Result",
+            paramsWithLookup[0].resolvedType,
+        ) // Local package declaration takes precedence over default import
+        assertEquals(
+            "app.List",
+            paramsWithLookup[1].resolvedType,
+        ) // Local declarations take precedence over default imports
+        assertEquals(
+            "external.ExternalType",
+            paramsWithLookup[2].resolvedType,
+        ) // Resolved via wildcard because it is declared in the project!
     }
 
     @Test
@@ -628,7 +642,10 @@ class PsiParserTest {
             }
 
         assertEquals("User", PsiParser.getDeclaredTypeAliases(listOf(localAliasFile))["app.PublicUser"]?.underlyingType)
-        val localFunctions = PsiParser.parseFile(localAliasFile)!!.classes.single { it.name == "LocalConsumer" }.functions
+        val localFunctions =
+            PsiParser.parseFile(
+                localAliasFile,
+            )!!.classes.single { it.name == "LocalConsumer" }.functions
         val aliases = PsiParser.getDeclaredTypeAliases(listOf(aliasFile))
         val lookup = MapSymbolLookup(setOf("domain.User"), aliases)
         val importedFunction = PsiParser.parseFile(importedAliasConsumer, lookup)!!.classes.single().functions.single()
@@ -817,7 +834,10 @@ class PsiParserTest {
                 )
             }
 
-        assertEquals("app.Api.User", PsiParser.getDeclaredTypeAliases(listOf(sameFile))["app.Api.PublicUser"]?.underlyingType)
+        assertEquals(
+            "app.Api.User",
+            PsiParser.getDeclaredTypeAliases(listOf(sameFile))["app.Api.PublicUser"]?.underlyingType,
+        )
         val api = PsiParser.parseFile(sameFile)!!.classes.single { it.name == "Api" }
         val aliases = PsiParser.getDeclaredTypeAliases(listOf(nestedAlias))
         val imported =
@@ -905,6 +925,79 @@ class PsiParserTest {
 
         assertTrue(aliases.isEmpty())
         assertEquals("app.User", consumer.functions.single().resolvedReturnType)
+    }
+
+    @Test
+    fun `test qualified method call extraction for instance and static receivers`() {
+        val file =
+            File(tempDir, "QualifiedCalls.kt").apply {
+                writeText(
+                    """
+                    package app
+                    import com.example.analytics.Analytics
+                    import com.example.logging.LogEvent
+
+                    class UserViewModel(private val analytics: Analytics) {
+                        fun onClick(logEvent: LogEvent) {
+                            analytics.trackEvent("click")
+                            Analytics.trackEvent("click")
+                            logEvent.trackEvent("click")
+                            LogEvent.trackEvent("click")
+                        }
+                    }
+                    """.trimIndent(),
+                )
+            }
+
+        val declaration = PsiParser.parseFile(file)!!
+        val usages = declaration.usages.filter { it.kind == UsageKind.CALL }
+
+        val analyticsMatches =
+            usages.filter {
+                PatternMatchers.isCallUsageMatch(it, "com.example.analytics.Analytics.trackEvent")
+            }
+        assertEquals(2, analyticsMatches.size)
+
+        val classFqnMatches = usages.filter { PatternMatchers.isCallUsageMatch(it, "com.example.analytics.Analytics") }
+        assertEquals(2, classFqnMatches.size)
+
+        val logEventMatches =
+            usages.filter {
+                PatternMatchers.isCallUsageMatch(
+                    it,
+                    "com.example.logging.LogEvent.trackEvent",
+                )
+            }
+        assertEquals(2, logEventMatches.size)
+    }
+
+    @Test
+    fun `test viewModel calls context detection`() {
+        val file =
+            File(tempDir, "UserViewModel.kt").apply {
+                writeText(
+                    """
+                    package com.example.ui
+
+                    import android.content.Context
+                    import androidx.lifecycle.ViewModel
+
+                    class UserViewModel(private val context: Context) : ViewModel() {
+                        fun loadData() {
+                            val msg = context.getString(101)
+                            val title = context.resources.getString(102)
+                        }
+                    }
+                    """.trimIndent(),
+                )
+            }
+
+        val declaration = PsiParser.parseFile(file)!!
+        val usages = declaration.usages.filter { it.kind == UsageKind.CALL }
+
+        val contextMatches = usages.filter { PatternMatchers.isCallUsageMatch(it, "android.content.Context") }
+        assertEquals(2, contextMatches.size)
+        assertTrue(contextMatches.all { it.enclosingClass == "com.example.ui.UserViewModel" })
     }
 
     @Test

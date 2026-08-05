@@ -1,5 +1,6 @@
 /*
- * Copyright 2026 Bao Le Duc
+ * Copyright 2026 The Konture Contributors
+ * Contributors: Bao Le Duc (@baole)
  * SPDX-License-Identifier: Apache-2.0
  */
 
@@ -12,7 +13,7 @@ class ViolationLocationTest {
     @Test
     fun `formats module, source set and file with a line number`() {
         assertEquals(
-            ":app, main source set, src/Foo.kt:12",
+            ":app, main source set) (Foo.kt:12",
             ViolationLocation.of(":app", "main", "src/Foo.kt", 12),
         )
     }
@@ -20,7 +21,7 @@ class ViolationLocationTest {
     @Test
     fun `omits the line number when it is unknown`() {
         assertEquals(
-            ":app, main source set, src/Foo.kt",
+            ":app, main source set) (Foo.kt",
             ViolationLocation.of(":app", "main", "src/Foo.kt"),
         )
     }
@@ -28,8 +29,36 @@ class ViolationLocationTest {
     @Test
     fun `falls back to unknown when the source set is null`() {
         assertEquals(
-            ":app, unknown source set, src/Foo.kt",
+            ":app, unknown source set) (Foo.kt",
             ViolationLocation.of(":app", null, "src/Foo.kt"),
+        )
+    }
+
+    @Test
+    fun `formats with fully qualified class name for IDE console hyperlinking`() {
+        assertEquals(
+            ":app, main source set) (com.example.MyViewModel(MyViewModel.kt:154)",
+            ViolationLocation.of(":app", "main", "src/MyViewModel.kt", 154, fqName = "com.example.MyViewModel"),
+        )
+    }
+
+    @Test
+    fun `formats with package name when fqName is absent`() {
+        assertEquals(
+            ":app, main source set) (com.example.MyViewModel(MyViewModel.kt:154)",
+            ViolationLocation.of(":app", "main", "src/MyViewModel.kt", 154, packageName = "com.example"),
+        )
+    }
+
+    @Test
+    fun `formats with line and column numbers`() {
+        assertEquals(
+            ":app, main source set) (Foo.kt:12:34",
+            ViolationLocation.of(":app", "main", "src/Foo.kt", 12, 34),
+        )
+        assertEquals(
+            "Foo.kt:12:34",
+            ViolationLocation.format("src/Foo.kt", 12, 34),
         )
     }
 }

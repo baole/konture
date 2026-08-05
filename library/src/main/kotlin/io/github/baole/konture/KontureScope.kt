@@ -7,6 +7,7 @@
 package io.github.baole.konture
 
 import io.github.baole.konture.impl.PatternMatchers
+import io.github.baole.konture.impl.ViolationLocation
 import kotlin.jvm.JvmName
 
 /**
@@ -33,7 +34,11 @@ class KontureScope(
         ): KontureScope {
             val classes =
                 graph.getAllModules().flatMap { module ->
-                    module.files.filter { it.membershipsFor(module.path).any(sourceSets::matches) }.flatMap { it.classes }
+                    module.files.filter {
+                        it.membershipsFor(
+                            module.path,
+                        ).any(sourceSets::matches)
+                    }.flatMap { it.classes }
                 }
             return KontureScope(classes)
         }
@@ -54,7 +59,11 @@ class KontureScope(
             val module =
                 graph.getAllModules().find { it.path == path }
                     ?: throw IllegalArgumentException("Module $path not found in project graph")
-            return KontureScope(module.files.filter { it.membershipsFor(module.path).any(sourceSets::matches) }.flatMap { it.classes })
+            return KontureScope(
+                module.files.filter {
+                    it.membershipsFor(module.path).any(sourceSets::matches)
+                }.flatMap { it.classes },
+            )
         }
 
         /**
@@ -72,7 +81,14 @@ class KontureScope(
             val classes =
                 graph
                     .getAllModules()
-                    .flatMap { module -> module.files.filter { it.membershipsFor(module.path).any(sourceSets::matches) }.flatMap { it.classes } }
+                    .flatMap {
+                            module ->
+                        module.files.filter {
+                            it.membershipsFor(
+                                module.path,
+                            ).any(sourceSets::matches)
+                        }.flatMap { it.classes }
+                    }
                     .filter { it.packageName == packageName || it.packageName.startsWith("$packageName.") }
             return KontureScope(classes)
         }
@@ -91,12 +107,14 @@ operator fun KontureScope.minus(other: KontureScope): KontureScope {
 /**
  * Filters the list of class declarations to include only those whose names end with the specified suffix.
  */
-fun List<ClassDeclaration>.withNameEndingWith(suffix: String): List<ClassDeclaration> = filter { it.name.endsWith(suffix) }
+fun List<ClassDeclaration>.withNameEndingWith(suffix: String): List<ClassDeclaration> =
+    filter { it.name.endsWith(suffix) }
 
 /**
  * Filters the list of class declarations to include only those whose names start with the specified prefix.
  */
-fun List<ClassDeclaration>.withNameStartingWith(prefix: String): List<ClassDeclaration> = filter { it.name.startsWith(prefix) }
+fun List<ClassDeclaration>.withNameStartingWith(prefix: String): List<ClassDeclaration> =
+    filter { it.name.startsWith(prefix) }
 
 /**
  * Filters the list of class declarations to include only those annotated with the specified annotation.
@@ -123,12 +141,14 @@ fun List<ClassDeclaration>.classes(): List<ClassDeclaration> = filter { !it.isIn
 /**
  * Filters class declarations to those extending or implementing the specified parent type.
  */
-fun List<ClassDeclaration>.withParentOf(fqName: String): List<ClassDeclaration> = filter { it.supertypes.contains(fqName) }
+fun List<ClassDeclaration>.withParentOf(fqName: String): List<ClassDeclaration> =
+    filter { it.supertypes.contains(fqName) }
 
 /**
  * Filters class declarations to those matching the specified visibility.
  */
-fun List<ClassDeclaration>.withVisibility(visibility: Visibility): List<ClassDeclaration> = filter { it.visibility == visibility }
+fun List<ClassDeclaration>.withVisibility(visibility: Visibility): List<ClassDeclaration> =
+    filter { it.visibility == visibility }
 
 fun List<ClassDeclaration>.public(): List<ClassDeclaration> = withVisibility(Visibility.PUBLIC)
 
@@ -141,7 +161,8 @@ fun List<ClassDeclaration>.protected(): List<ClassDeclaration> = withVisibility(
 /**
  * Filters class declarations to those containing the specified modifier.
  */
-fun List<ClassDeclaration>.withModifier(modifier: Modifier): List<ClassDeclaration> = filter { it.modifiers.contains(modifier) }
+fun List<ClassDeclaration>.withModifier(modifier: Modifier): List<ClassDeclaration> =
+    filter { it.modifiers.contains(modifier) }
 
 fun List<ClassDeclaration>.dataClasses(): List<ClassDeclaration> = withModifier(Modifier.DATA)
 
@@ -161,7 +182,8 @@ fun List<ClassDeclaration>.withPackage(packagePattern: String): List<ClassDeclar
  * Filters the list of class declarations to include only those whose simple names match the specified glob pattern.
  * Supports '*' wildcards.
  */
-fun List<ClassDeclaration>.withNameMatching(pattern: String): List<ClassDeclaration> = filter { PatternMatchers.matchesSimpleGlob(pattern, it.name) }
+fun List<ClassDeclaration>.withNameMatching(pattern: String): List<ClassDeclaration> =
+    filter { PatternMatchers.matchesSimpleGlob(pattern, it.name) }
 
 // Scope-level delegation for KontureScope
 
@@ -204,6 +226,22 @@ fun KontureScope.withPackage(packagePattern: String) = KontureScope(classes.with
 
 fun KontureScope.withNameMatching(pattern: String) = KontureScope(classes.withNameMatching(pattern))
 
+fun KontureScope.withModule(
+    modulePath: String,
+    graph: ProjectGraph = Konture.projectGraph,
+): KontureScope {
+    val norm = if (!modulePath.startsWith(":") && !modulePath.startsWith("**") && modulePath.isNotEmpty()) ":$modulePath" else modulePath
+    return KontureScope(
+        classes.filter { cls ->
+            val mod =
+                graph.getAllModules().find { m ->
+                    m.files.any { f -> f.classes.any { c -> c.fqName == cls.fqName } || f.filePath == cls.filePath }
+                }
+            mod?.path == norm
+        },
+    )
+}
+
 // Assertion extensions on List<ClassDeclaration>
 
 @JvmName("assertClassesTrue")
@@ -220,7 +258,7 @@ fun List<ClassDeclaration>.assertTrue(
                     appendLine(additionalMessage)
                 }
                 violations.forEach {
-                    appendLine("  - ${it.fqName} (at ${it.filePath})")
+                    appendLine("  - ${it.fqName} (at ${ViolationLocation.format(it)})")
                 }
             }
         throw AssertionError(message)
@@ -414,7 +452,9 @@ fun List<ClassDeclaration>.assertAreData() {
  * @throws AssertionError if any class is not marked with the 'inline' or 'value' modifier.
  */
 fun List<ClassDeclaration>.assertAreInline() {
-    assertTrue("Classes must be inline classes") { it.modifiers.contains(Modifier.INLINE) || it.modifiers.contains(Modifier.VALUE) }
+    assertTrue("Classes must be inline classes") {
+        it.modifiers.contains(Modifier.INLINE) || it.modifiers.contains(Modifier.VALUE)
+    }
 }
 
 /**
@@ -529,7 +569,9 @@ fun List<ClassDeclaration>.assertOnlyBeAccessedByAnyPackage(
                 }
             if (!isAllowed) {
                 violations.add(
-                    "Class ${targetCls.fqName} is accessed by ${accessor.fqName} (in package ${accessor.packageName}), which is not allowed by package pattern(s): ${packagePatterns.joinToString()}",
+                    "Class ${targetCls.fqName} is accessed by ${accessor.fqName} (in package ${accessor.packageName}), which is not allowed by package pattern(s): ${packagePatterns.joinToString()} (at ${ViolationLocation.format(
+                        accessor,
+                    )})",
                 )
             }
         }
@@ -573,7 +615,9 @@ fun List<ClassDeclaration>.assertNotBeAccessedByAnyPackage(
                 }
             if (isForbidden) {
                 violations.add(
-                    "Class ${targetCls.fqName} is accessed by ${accessor.fqName} (in package ${accessor.packageName}), which is forbidden by package pattern(s): ${packagePatterns.joinToString()}",
+                    "Class ${targetCls.fqName} is accessed by ${accessor.fqName} (in package ${accessor.packageName}), which is forbidden by package pattern(s): ${packagePatterns.joinToString()} (at ${ViolationLocation.format(
+                        accessor,
+                    )})",
                 )
             }
         }
@@ -619,7 +663,9 @@ fun List<ClassDeclaration>.assertOnlyDependOnClassesInAnyPackage(
                 }
             if (!isAllowed) {
                 violations.add(
-                    "Class ${cls.fqName} depends on package $depPkg, which is not allowed by package pattern(s): ${packagePatterns.joinToString()}",
+                    "Class ${cls.fqName} depends on package $depPkg, which is not allowed by package pattern(s): ${packagePatterns.joinToString()} (at ${ViolationLocation.format(
+                        cls,
+                    )})",
                 )
             }
         }
@@ -643,7 +689,8 @@ fun List<ClassDeclaration>.assertOnlyDependOnClassesInAnyPackage(
  * @param packagePatterns The package wildcard patterns. At least one must match.
  * @throws AssertionError if any class does not reside in a matching package.
  */
-fun KontureScope.assertResideInAPackage(vararg packagePatterns: String) = classes.assertResideInAPackage(*packagePatterns)
+fun KontureScope.assertResideInAPackage(vararg packagePatterns: String) =
+    classes.assertResideInAPackage(*packagePatterns)
 
 /**
  * Asserts that all class declarations in the scope have names ending with any of the specified suffixes.
@@ -677,7 +724,8 @@ fun KontureScope.assertNameMatching(vararg patterns: String) = classes.assertNam
  * @param annotationFqNames The annotation names or fully qualified names. At least one must match.
  * @throws AssertionError if any class is not annotated with any of the specified annotations.
  */
-fun KontureScope.assertHaveAnnotationOf(vararg annotationFqNames: String) = classes.assertHaveAnnotationOf(*annotationFqNames)
+fun KontureScope.assertHaveAnnotationOf(vararg annotationFqNames: String) =
+    classes.assertHaveAnnotationOf(*annotationFqNames)
 
 /**
  * Asserts that all class declarations in the scope represent interfaces.

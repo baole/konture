@@ -1,5 +1,6 @@
 /*
- * Copyright 2026 Bao Le Duc
+ * Copyright 2026 The Konture Contributors
+ * Contributors: Bao Le Duc (@baole)
  * SPDX-License-Identifier: Apache-2.0
  */
 
@@ -156,6 +157,19 @@ internal object BaselineNormalizer {
         path: String,
         buildRoot: File?,
     ): String {
+        if (path.contains(") (")) {
+            val prefix = path.substringBefore(") (")
+            val filePart = path.substringAfter(") (")
+            val cleanFile = normalizePathSingle(filePart, buildRoot)
+            return "$prefix) ($cleanFile"
+        }
+        return normalizePathSingle(path, buildRoot)
+    }
+
+    private fun normalizePathSingle(
+        path: String,
+        buildRoot: File?,
+    ): String {
         var normalized = path.replace("\\", "/")
         if (normalized.startsWith("<root>/")) {
             normalized = normalized.substring(ROOT_PREFIX_WITH_SEPARATOR_LENGTH)
@@ -181,7 +195,7 @@ internal object BaselineNormalizer {
         buildRoot: File?,
     ): Module? {
         val rawLocation = violation.location ?: return null
-        // Structured locations are formatted as ":module, <sourceSet> source set, <file>".
+        // Structured locations are formatted as ":module, <sourceSet> source set) (<file>)" or legacy ":module, <sourceSet> source set, <file>".
         // A bare module violation is just ":module"; a class/file violation is just the file path.
         val hasStructure = rawLocation.contains(", ")
         val modulePathToken = rawLocation.substringBefore(",").trim()
@@ -189,7 +203,13 @@ internal object BaselineNormalizer {
             graph.getAllModules().firstOrNull { it.path == modulePathToken }?.let { return it }
             if (!hasStructure) return null
         }
-        val location = if (hasStructure) rawLocation.substringAfterLast(", ").trim() else rawLocation
+        val location =
+            when {
+                rawLocation.contains(") (") -> rawLocation.substringAfter(") (").trim()
+                hasStructure -> rawLocation.substringAfterLast(", ").trim()
+                else -> rawLocation
+            }
+
         val root = buildRoot
         val resolvedLoc =
             if (root != null) {

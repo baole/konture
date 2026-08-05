@@ -1,5 +1,6 @@
 /*
- * Copyright 2026 Bao Le Duc
+ * Copyright 2026 The Konture Contributors
+ * Contributors: Bao Le Duc (@baole)
  * SPDX-License-Identifier: Apache-2.0
  */
 
@@ -9,6 +10,7 @@ import io.github.baole.konture.impl.BaselineManager
 import io.github.baole.konture.impl.LayerConstraint
 import io.github.baole.konture.impl.LayerDefinition
 import io.github.baole.konture.impl.PatternMatchers
+import io.github.baole.konture.impl.ViolationLocation
 
 /**
  * A builder class implementing the Layered Architecture DSL.
@@ -77,6 +79,7 @@ class LayeredArchitectureBuilder(
                                                 otherCls.fqName,
                                                 otherLayer.name,
                                                 targetCls.fqName,
+                                                ViolationLocation.format(otherCls),
                                             ),
                                         )
                                     }
@@ -125,6 +128,7 @@ class LayeredArchitectureBuilder(
                                                     otherCls.fqName,
                                                     otherLayer.name,
                                                     targetCls.fqName,
+                                                    ViolationLocation.format(otherCls),
                                                 ),
                                             )
                                         }
@@ -180,7 +184,7 @@ class LayeredArchitectureBuilder(
                                                     sourceCls.fqName,
                                                     otherCls.fqName,
                                                     otherLayer.name,
-                                                    sourceCls.filePath,
+                                                    ViolationLocation.format(sourceCls),
                                                 ),
                                             )
                                         }
@@ -194,9 +198,15 @@ class LayeredArchitectureBuilder(
             return builder
         }
 
-        fun mayOnlyAccessLayers(vararg allowedLayerNames: String): LayeredArchitectureBuilder = mayOnlyAccessLayers(allowedLayerNames.toList())
+        fun mayOnlyAccessLayers(vararg allowedLayerNames: String): LayeredArchitectureBuilder =
+            mayOnlyAccessLayers(
+                allowedLayerNames.toList(),
+            )
 
-        infix fun mayOnlyAccessLayers(allowedLayerName: String): LayeredArchitectureBuilder = mayOnlyAccessLayers(listOf(allowedLayerName))
+        infix fun mayOnlyAccessLayers(allowedLayerName: String): LayeredArchitectureBuilder =
+            mayOnlyAccessLayers(
+                listOf(allowedLayerName),
+            )
 
         infix fun mayNotAccessLayers(forbiddenLayerNames: List<String>): LayeredArchitectureBuilder {
             builder.constraints.add(
@@ -234,7 +244,7 @@ class LayeredArchitectureBuilder(
                                                     sourceCls.fqName,
                                                     otherCls.fqName,
                                                     otherLayer.name,
-                                                    sourceCls.filePath,
+                                                    ViolationLocation.format(sourceCls),
                                                 ),
                                             )
                                         }
@@ -248,9 +258,15 @@ class LayeredArchitectureBuilder(
             return builder
         }
 
-        fun mayNotAccessLayers(vararg forbiddenLayerNames: String): LayeredArchitectureBuilder = mayNotAccessLayers(forbiddenLayerNames.toList())
+        fun mayNotAccessLayers(vararg forbiddenLayerNames: String): LayeredArchitectureBuilder =
+            mayNotAccessLayers(
+                forbiddenLayerNames.toList(),
+            )
 
-        infix fun mayNotAccessLayers(forbiddenLayerName: String): LayeredArchitectureBuilder = mayNotAccessLayers(listOf(forbiddenLayerName))
+        infix fun mayNotAccessLayers(forbiddenLayerName: String): LayeredArchitectureBuilder =
+            mayNotAccessLayers(
+                listOf(forbiddenLayerName),
+            )
 
         infix fun mayNotBeAccessedByLayers(forbiddenLayerNames: List<String>): LayeredArchitectureBuilder {
             builder.constraints.add(
@@ -288,7 +304,7 @@ class LayeredArchitectureBuilder(
                                                     otherCls.fqName,
                                                     otherLayer.name,
                                                     targetCls.fqName,
-                                                    otherCls.filePath,
+                                                    ViolationLocation.format(otherCls),
                                                 ),
                                             )
                                         }

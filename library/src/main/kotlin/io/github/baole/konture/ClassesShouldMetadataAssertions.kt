@@ -1,5 +1,6 @@
 /*
- * Copyright 2026 Bao Le Duc
+ * Copyright 2026 The Konture Contributors
+ * Contributors: Bao Le Duc (@baole)
  * SPDX-License-Identifier: Apache-2.0
  */
 
@@ -10,6 +11,7 @@ import io.github.baole.konture.i18n.getMessage
 /**
  * Fluent API for defining assertion rules on Kotlin classes.
  */
+@Suppress("ComplexInterface")
 internal interface ClassesShouldMetadataAssertions {
     val builder: ClassesRuleBuilder
 
@@ -179,6 +181,91 @@ internal interface ClassesShouldMetadataAssertions {
     }
 
     /**
+     * Asserts that selected classes are inner classes.
+     */
+    fun beInner(): ClassesRuleBuilder {
+        builder.setShould { cls, _, violations ->
+            if (!cls.modifiers.contains(Modifier.INNER)) {
+                violations.add(getMessage("class.should.beInner", cls.fqName))
+            }
+        }
+        return builder
+    }
+
+    /**
+     * Asserts that selected classes are open classes.
+     */
+    fun beOpen(): ClassesRuleBuilder {
+        builder.setShould { cls, _, violations ->
+            if (!cls.modifiers.contains(Modifier.OPEN)) {
+                violations.add(getMessage("class.should.beOpen", cls.fqName))
+            }
+        }
+        return builder
+    }
+
+    infix fun notHaveModifier(modifier: Modifier): ClassesRuleBuilder {
+        builder.setShould { cls, _, violations ->
+            if (cls.modifiers.contains(modifier)) {
+                violations.add(getMessage("class.should.notHaveModifier", cls.fqName, modifier))
+            }
+        }
+        return builder
+    }
+
+    fun notBeAbstract(): ClassesRuleBuilder {
+        builder.setShould { cls, _, violations ->
+            if (cls.isAbstract || cls.isInterface) {
+                violations.add(getMessage("class.should.notBeAbstract", cls.fqName))
+            }
+        }
+        return builder
+    }
+
+    fun notBeSealed(): ClassesRuleBuilder = notHaveModifier(Modifier.SEALED)
+
+    fun notBeData(): ClassesRuleBuilder = notHaveModifier(Modifier.DATA)
+
+    fun notBeInline(): ClassesRuleBuilder = notHaveModifier(Modifier.INLINE)
+
+    fun notBeOpen(): ClassesRuleBuilder = notHaveModifier(Modifier.OPEN)
+
+    fun notBeInner(): ClassesRuleBuilder = notHaveModifier(Modifier.INNER)
+
+    fun notBeInterface(): ClassesRuleBuilder {
+        builder.setShould { cls, _, violations ->
+            if (cls.isInterface) {
+                violations.add(getMessage("class.should.notBeInterface", cls.fqName))
+            }
+        }
+        return builder
+    }
+
+    /**
+     * Asserts that selected classes are top-level classes.
+     */
+    fun beTopLevel(): ClassesRuleBuilder {
+        builder.setShould { cls, _, violations ->
+            if (cls.packageName != cls.fqName.substringBeforeLast('.')) {
+                violations.add(getMessage("class.should.beTopLevel", cls.fqName))
+            }
+        }
+        return builder
+    }
+
+    /**
+     * Asserts that selected classes are nested classes.
+     */
+    fun beNested(): ClassesRuleBuilder {
+        builder.setShould { cls, _, violations ->
+            if (cls.packageName == cls.fqName.substringBeforeLast('.')) {
+                violations.add(getMessage("class.should.beNested", cls.fqName))
+            }
+        }
+        return builder
+    }
+
+    /**
      * Asserts that selected classes have specified modifier.
      */
     infix fun haveModifier(modifier: Modifier): ClassesRuleBuilder {
@@ -207,7 +294,12 @@ internal interface ClassesShouldMetadataAssertions {
             val missing = modifiers.filter { !cls.modifiers.contains(it) }
             if (missing.isNotEmpty()) {
                 violations.add(
-                    getMessage("class.should.haveAllModifiers", cls.fqName, modifiers.joinToString(), missing.joinToString()),
+                    getMessage(
+                        "class.should.haveAllModifiers",
+                        cls.fqName,
+                        modifiers.joinToString(),
+                        missing.joinToString(),
+                    ),
                 )
             }
         }
@@ -277,7 +369,12 @@ internal interface ClassesShouldMetadataAssertions {
         builder.setShould { cls, _, violations ->
             if (!visibilities.contains(cls.visibility)) {
                 violations.add(
-                    getMessage("class.should.haveAnyVisibility", cls.fqName, visibilities.joinToString(), cls.visibility),
+                    getMessage(
+                        "class.should.haveAnyVisibility",
+                        cls.fqName,
+                        visibilities.joinToString(),
+                        cls.visibility,
+                    ),
                 )
             }
         }
@@ -289,7 +386,8 @@ internal interface ClassesShouldMetadataAssertions {
      *
      * @param visibilities The vararg list of acceptable visibilities.
      */
-    fun haveAnyVisibility(vararg visibilities: Visibility): ClassesRuleBuilder = haveAnyVisibility(visibilities.asList())
+    fun haveAnyVisibility(vararg visibilities: Visibility): ClassesRuleBuilder =
+        haveAnyVisibility(visibilities.asList())
 
     fun bePublic(): ClassesRuleBuilder = haveVisibility(Visibility.PUBLIC)
 
@@ -356,7 +454,12 @@ internal interface ClassesShouldMetadataAssertions {
             val missing = superTypes.filter { !cls.isAssignableTo(it, allClasses) }
             if (missing.isNotEmpty()) {
                 violations.add(
-                    getMessage("class.should.beAssignableToAll", cls.fqName, superTypes.joinToString(), missing.joinToString()),
+                    getMessage(
+                        "class.should.beAssignableToAll",
+                        cls.fqName,
+                        superTypes.joinToString(),
+                        missing.joinToString(),
+                    ),
                 )
             }
         }
@@ -392,4 +495,116 @@ internal interface ClassesShouldMetadataAssertions {
         }
         return builder
     }
+
+    infix fun containProperty(propertyName: String): ClassesRuleBuilder {
+        builder.setShould { cls, _, violations ->
+            if (!cls.properties.any { it.name == propertyName }) {
+                violations.add(getMessage("class.should.containProperty", cls.fqName, propertyName))
+            }
+        }
+        return builder
+    }
+
+    infix fun containProperty(propertyNames: List<String>): ClassesRuleBuilder {
+        builder.setShould { cls, _, violations ->
+            val missing = propertyNames.filter { prop -> !cls.properties.any { it.name == prop } }
+            if (missing.isNotEmpty()) {
+                violations.add(getMessage("class.should.containProperty", cls.fqName, missing.joinToString()))
+            }
+        }
+        return builder
+    }
+
+    fun containProperty(vararg propertyNames: String): ClassesRuleBuilder = containProperty(propertyNames.toList())
+
+    infix fun containProperties(propertyNames: List<String>): ClassesRuleBuilder = containProperty(propertyNames)
+
+    fun containProperties(vararg propertyNames: String): ClassesRuleBuilder = containProperty(propertyNames.toList())
+
+    infix fun notContainProperty(propertyName: String): ClassesRuleBuilder {
+        builder.setShould { cls, _, violations ->
+            if (cls.properties.any { it.name == propertyName }) {
+                violations.add(getMessage("class.should.notContainProperty", cls.fqName, propertyName))
+            }
+        }
+        return builder
+    }
+
+    infix fun notContainProperty(propertyNames: List<String>): ClassesRuleBuilder {
+        builder.setShould { cls, _, violations ->
+            val present = propertyNames.filter { prop -> cls.properties.any { it.name == prop } }
+            if (present.isNotEmpty()) {
+                violations.add(getMessage("class.should.notContainProperty", cls.fqName, present.joinToString()))
+            }
+        }
+        return builder
+    }
+
+    fun notContainProperty(vararg propertyNames: String): ClassesRuleBuilder =
+        notContainProperty(
+            propertyNames.toList(),
+        )
+
+    infix fun notContainProperties(propertyNames: List<String>): ClassesRuleBuilder = notContainProperty(propertyNames)
+
+    fun notContainProperties(vararg propertyNames: String): ClassesRuleBuilder =
+        notContainProperty(
+            propertyNames.toList(),
+        )
+
+    infix fun containFunction(functionName: String): ClassesRuleBuilder {
+        builder.setShould { cls, _, violations ->
+            if (!cls.functions.any { it.name == functionName }) {
+                violations.add(getMessage("class.should.containFunction", cls.fqName, functionName))
+            }
+        }
+        return builder
+    }
+
+    infix fun containFunction(functionNames: List<String>): ClassesRuleBuilder {
+        builder.setShould { cls, _, violations ->
+            val missing = functionNames.filter { func -> !cls.functions.any { it.name == func } }
+            if (missing.isNotEmpty()) {
+                violations.add(getMessage("class.should.containFunction", cls.fqName, missing.joinToString()))
+            }
+        }
+        return builder
+    }
+
+    fun containFunction(vararg functionNames: String): ClassesRuleBuilder = containFunction(functionNames.toList())
+
+    infix fun containFunctions(functionNames: List<String>): ClassesRuleBuilder = containFunction(functionNames)
+
+    fun containFunctions(vararg functionNames: String): ClassesRuleBuilder = containFunction(functionNames.toList())
+
+    infix fun notContainFunction(functionName: String): ClassesRuleBuilder {
+        builder.setShould { cls, _, violations ->
+            if (cls.functions.any { it.name == functionName }) {
+                violations.add(getMessage("class.should.notContainFunction", cls.fqName, functionName))
+            }
+        }
+        return builder
+    }
+
+    infix fun notContainFunction(functionNames: List<String>): ClassesRuleBuilder {
+        builder.setShould { cls, _, violations ->
+            val present = functionNames.filter { func -> cls.functions.any { it.name == func } }
+            if (present.isNotEmpty()) {
+                violations.add(getMessage("class.should.notContainFunction", cls.fqName, present.joinToString()))
+            }
+        }
+        return builder
+    }
+
+    fun notContainFunction(vararg functionNames: String): ClassesRuleBuilder =
+        notContainFunction(
+            functionNames.toList(),
+        )
+
+    infix fun notContainFunctions(functionNames: List<String>): ClassesRuleBuilder = notContainFunction(functionNames)
+
+    fun notContainFunctions(vararg functionNames: String): ClassesRuleBuilder =
+        notContainFunction(
+            functionNames.toList(),
+        )
 }

@@ -9,7 +9,7 @@ plugins {
 }
 
 group = "io.github.baole.konture"
-version = "0.7.5"
+version = "0.7.6"
 
 repositories {
     mavenLocal()

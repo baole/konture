@@ -6,7 +6,9 @@
 
 package io.github.baole.konture.plugin
 
+import io.github.baole.konture.core.KontureLogger
 import io.github.baole.konture.core.LayoutModel
+import io.github.baole.konture.core.LogLevel
 import org.gradle.api.GradleException
 import org.gradle.api.Plugin
 import org.gradle.api.Project
@@ -448,7 +450,10 @@ class KontureLayoutGenerationTest {
         val customFile = File(customSrcDir, "CustomClass.kt")
         customFile.writeText("package com.example\nclass CustomClass")
 
-        val kotlinExt = subProject.extensions.getByType(org.jetbrains.kotlin.gradle.dsl.KotlinProjectExtension::class.java)
+        val kotlinExt =
+            subProject.extensions.getByType(
+                org.jetbrains.kotlin.gradle.dsl.KotlinProjectExtension::class.java,
+            )
         kotlinExt.sourceSets.getByName("main").kotlin.srcDir("src/custom/kotlin")
 
         (rootProject as ProjectInternal).evaluate()
@@ -473,5 +478,120 @@ class KontureLayoutGenerationTest {
         // Ensure relative srcDirs do not escape with ../.. and custom srcDir is present
         assertTrue(mainSourceSet?.srcDirs?.none { it.contains("..") } == true)
         assertTrue(mainSourceSet?.srcDirs?.any { it.endsWith("src/custom/kotlin") } == true)
+    }
+
+    @Test
+    fun `testValidLogLevelsMappingAndLoggerConfiguration`() {
+        val rootProject = ProjectBuilder.builder().build()
+        rootProject.plugins.apply("io.github.baole.konture")
+
+        val task = rootProject.tasks.getByName("generateArchitectureLayout") as GenerateArchitectureLayout
+        task.outputFile.get().asFile.parentFile.mkdirs()
+
+        val levels =
+            mapOf(
+                "TRACE" to LogLevel.TRACE,
+                "DEBUG" to LogLevel.DEBUG,
+                "INFO" to LogLevel.INFO,
+                "WARNING" to LogLevel.WARNING,
+                "ERROR" to LogLevel.ERROR,
+            )
+
+        for ((levelStr, expectedLevel) in levels) {
+            task.logLevel.set(levelStr)
+            task.generate()
+            assertEquals(expectedLevel, KontureLogger.minLevel)
+        }
+    }
+
+    @Test
+    fun `testExcludeConfigurationsAreSerializedIntoLayoutJson`() {
+        val rootProject = ProjectBuilder.builder().withName("root").build()
+        rootProject.plugins.apply("io.github.baole.konture")
+
+        val extension = rootProject.extensions.getByName("konture") as KontureExtension
+        extension.excludeConfigurations("customTestConfig", "customBenchConfig")
+
+        val task = rootProject.tasks.getByName("generateArchitectureLayout") as GenerateArchitectureLayout
+        task.outputFile.get().asFile.parentFile.mkdirs()
+        task.generate()
+
+        val outputFile = task.outputFile.get().asFile
+        val jsonText = outputFile.readText()
+        val layoutModel = Json.decodeFromString(LayoutModel.serializer(), jsonText)
+
+        assertEquals(
+            listOf("customTestConfig", "customBenchConfig"),
+            layoutModel.exclusions.excludeConfigurations,
+        )
+    }
+
+    @Test
+    fun `testRootProjectAsModuleRelativePath`() {
+        val rootProject = ProjectBuilder.builder().withName("root").build()
+        rootProject.plugins.apply("io.github.baole.konture")
+
+        val task = rootProject.tasks.getByName("generateArchitectureLayout") as GenerateArchitectureLayout
+        val rootModule =
+            ModuleData(
+                path = ":",
+                projectDir = rootProject.projectDir.canonicalPath,
+                appliedPlugins = listOf("kotlin-jvm"),
+                sourceSets = emptyList(),
+                dependencies = emptyList(),
+            )
+        task.modules.set(listOf(rootModule))
+        task.outputFile.get().asFile.parentFile.mkdirs()
+        task.generate()
+
+        val jsonText = task.outputFile.get().asFile.readText()
+        val layoutModel = Json.decodeFromString(LayoutModel.serializer(), jsonText)
+
+        val module = layoutModel.builds.first().modules.first { it.path == ":" }
+        assertEquals(".", module.projectDir)
+    }
+
+    @Test
+    fun `testSourceDirOutsideModuleDirFallback`() {
+        val rootProject = ProjectBuilder.builder().withName("root").build()
+        rootProject.plugins.apply("io.github.baole.konture")
+
+        val task = rootProject.tasks.getByName("generateArchitectureLayout") as GenerateArchitectureLayout
+
+        // Create a module directory under root
+        val moduleDir = File(rootProject.projectDir, "sub-module")
+        moduleDir.mkdirs()
+
+        // Create an outside directory
+        val outsideDir = File(rootProject.projectDir, "outside-src")
+        outsideDir.mkdirs()
+
+        val sourceSet =
+            SourceSetData(
+                name = "main",
+                kind = "KOTLIN_JVM",
+                production = true,
+                srcDirs = listOf(outsideDir.absolutePath),
+            )
+        val module =
+            ModuleData(
+                path = ":sub-module",
+                projectDir = moduleDir.canonicalPath,
+                appliedPlugins = listOf("kotlin-jvm"),
+                sourceSets = listOf(sourceSet),
+                dependencies = emptyList(),
+            )
+
+        task.modules.set(listOf(module))
+        task.outputFile.get().asFile.parentFile.mkdirs()
+        task.generate()
+
+        val jsonText = task.outputFile.get().asFile.readText()
+        val layoutModel = Json.decodeFromString(LayoutModel.serializer(), jsonText)
+
+        val subModuleModel = layoutModel.builds.first().modules.first { it.path == ":sub-module" }
+        assertNotNull(subModuleModel)
+        val srcDirInModel = subModuleModel.sourceSets.first().srcDirs.first()
+        assertTrue(srcDirInModel.contains("outside-src"))
     }
 }

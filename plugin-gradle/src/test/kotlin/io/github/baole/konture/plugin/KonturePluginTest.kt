@@ -6,11 +6,17 @@
 
 package io.github.baole.konture.plugin
 
+import io.github.baole.konture.core.KontureConstants
+import org.gradle.api.attributes.Usage
+import org.gradle.api.internal.project.ProjectInternal
+import org.gradle.api.provider.Provider
+import org.gradle.api.tasks.testing.Test as GradleTestTask
 import org.gradle.testfixtures.ProjectBuilder
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
+import java.io.File
 
 class KonturePluginTest {
     @Test
@@ -125,5 +131,122 @@ class KonturePluginTest {
                 .get()
                 .asFile
         assertEquals(expectedFile, files.first())
+    }
+
+    @Test
+    fun `testLocaleSystemPropertyOverrideAndDefault`() {
+        val project = ProjectBuilder.builder().build()
+        project.plugins.apply("java") // Registers Test tasks
+
+        // Default locale from extension
+        project.plugins.apply("io.github.baole.konture")
+        val testTask = project.tasks.getByName("test") as GradleTestTask
+        val localeProp = testTask.systemProperties[KontureConstants.PROPERTY_LOCALE]
+        val resolvedLocale =
+            when (localeProp) {
+                is Provider<*> -> localeProp.get()
+                else -> localeProp
+            }
+        assertEquals("en", resolvedLocale)
+
+        // System property override
+        System.setProperty(KontureConstants.PROPERTY_LOCALE, "fr")
+        try {
+            val project2 = ProjectBuilder.builder().build()
+            project2.plugins.apply("java")
+            project2.plugins.apply("io.github.baole.konture")
+            val testTask2 = project2.tasks.getByName("test") as GradleTestTask
+            val localeProp2 = testTask2.systemProperties[KontureConstants.PROPERTY_LOCALE]
+            val resolvedLocale2 =
+                when (localeProp2) {
+                    is Provider<*> -> localeProp2.get()
+                    else -> localeProp2
+                }
+            assertEquals("fr", resolvedLocale2)
+        } finally {
+            System.clearProperty(KontureConstants.PROPERTY_LOCALE)
+        }
+    }
+
+    @Test
+    fun `testOutgoingConfigurationsAttributes`() {
+        val rootProject = ProjectBuilder.builder().build()
+        rootProject.plugins.apply("io.github.baole.konture")
+
+        val layoutConfig = rootProject.configurations.getByName("archLayoutElements")
+        val layoutUsage = layoutConfig.attributes.getAttribute(Usage.USAGE_ATTRIBUTE)?.name
+        assertEquals("koarch-layout", layoutUsage)
+
+        val depsConfig = rootProject.configurations.getByName("archDepsElements")
+        val depsUsage = depsConfig.attributes.getAttribute(Usage.USAGE_ATTRIBUTE)?.name
+        assertEquals("koarch-deps", depsUsage)
+    }
+
+    @Test
+    fun `testGenerateDepsTaskIncludesSettingsAndVersionCatalog`() {
+        val rootProject = ProjectBuilder.builder().withName("root").build()
+
+        val settingsFile = File(rootProject.rootDir, "settings.gradle.kts")
+        settingsFile.writeText("rootProject.name = \"root\"")
+
+        val libsDir = File(rootProject.rootDir, "gradle")
+        libsDir.mkdirs()
+        val versionCatalog = File(libsDir, "libs.versions.toml")
+        versionCatalog.writeText("[versions]\n")
+
+        rootProject.plugins.apply("io.github.baole.konture")
+        (rootProject as ProjectInternal).evaluate()
+
+        val generateDepsTask = rootProject.tasks.getByName("generateDependencyGraph") as GenerateDependencyGraph
+        val buildFiles = generateDepsTask.buildFiles.files
+
+        assertTrue(buildFiles.contains(settingsFile.canonicalFile))
+        assertTrue(buildFiles.contains(versionCatalog.canonicalFile))
+    }
+
+    @Test
+    fun `testConsumerLayoutTaskDependenciesAndProcessTestResources`() {
+        val rootProject = ProjectBuilder.builder().withName("root").build()
+        val subProject = ProjectBuilder.builder().withName("sub").withParent(rootProject).build()
+
+        subProject.plugins.apply("java")
+        subProject.plugins.apply("io.github.baole.konture")
+
+        val processTestResources = subProject.tasks.getByName("processTestResources")
+        val dependencies = processTestResources.taskDependencies.getDependencies(processTestResources)
+
+        val depTaskNames = dependencies.map { it.name }.toSet()
+        assertTrue(depTaskNames.contains("copyArchitectureLayout"))
+        assertTrue(depTaskNames.contains("cleanArchitectureDependencyResource"))
+        assertTrue(depTaskNames.contains("copyArchitectureDeps"))
+    }
+
+    @Test
+    fun `testCollectAllSourceDirsFiltersBuildDir`() {
+        val rootProject = ProjectBuilder.builder().withName("root").build()
+        val child = ProjectBuilder.builder().withName("child").withParent(rootProject).build()
+        child.plugins.apply("org.jetbrains.kotlin.jvm")
+
+        // Add a normal source dir and a build generated source dir
+        val normalSrcDir = File(child.projectDir, "src/main/kotlin")
+        normalSrcDir.mkdirs()
+
+        val buildDir = child.layout.buildDirectory.get().asFile
+        val buildSrcDir = File(buildDir, "generated/kotlin")
+        buildSrcDir.mkdirs()
+
+        val kotlinExt = child.extensions.getByType(org.jetbrains.kotlin.gradle.dsl.KotlinProjectExtension::class.java)
+        kotlinExt.sourceSets.getByName("main").kotlin.srcDir(buildSrcDir)
+
+        rootProject.plugins.apply("io.github.baole.konture")
+        (rootProject as ProjectInternal).evaluate()
+        (child as ProjectInternal).evaluate()
+
+        val task = rootProject.tasks.getByName("generateArchitectureLayout") as GenerateArchitectureLayout
+        val sourceDirs = task.sourceFiles.files
+
+        assertTrue(sourceDirs.contains(normalSrcDir.canonicalFile))
+        // Verify source dir inside buildDir was filtered out
+        assertTrue(sourceDirs.none { it.canonicalPath.startsWith(buildDir.canonicalPath) })
     }
 }

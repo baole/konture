@@ -1,5 +1,6 @@
 /*
- * Copyright 2026 Bao Le Duc
+ * Copyright 2026 The Konture Contributors
+ * Contributors: Bao Le Duc (@baole)
  * SPDX-License-Identifier: Apache-2.0
  */
 
@@ -102,8 +103,167 @@ class ClassesRuleBuilderTest : RuleBuildersTestBase() {
                     .check()
             }
         assertTrue(
-            error.message!!.contains("(at :moduleA, main source set, /src/ClassA.kt)"),
+            error.message!!.contains("(at :moduleA, main source set) (com.example.ClassA(ClassA.kt"),
             "Expected uniform module + source set location, got: ${error.message}",
         )
+    }
+
+    @Test
+    fun `test classes rule builder notCall and notReferenceClass`() {
+        val usageCall =
+            SourceUsage(
+                kind = UsageKind.CALL,
+                targetFqName = "com.example.Logger.log",
+                filePath = "/src/ClassA.kt",
+                line = 10,
+                column = 5,
+                enclosingClass = "ClassA",
+                rawExpression = "Logger.log",
+            )
+        val usageRef =
+            SourceUsage(
+                kind = UsageKind.CLASS_REFERENCE,
+                targetFqName = "com.example.Service",
+                filePath = "/src/ClassA.kt",
+                line = 12,
+                column = 5,
+                enclosingClass = "ClassA",
+                rawExpression = "Service",
+            )
+        val fileDeclWithUsages =
+            FileDeclaration(
+                "ClassA.kt",
+                "com.example",
+                classes = listOf(classA),
+                usages = listOf(usageCall, usageRef),
+                filePath = "/src/ClassA.kt",
+            )
+
+        val moduleWithUsages = moduleA.copy(files = listOf(fileDeclWithUsages))
+        val graphWithUsages = ProjectGraph(builds = mapOf(":" to listOf(moduleWithUsages)))
+
+        val ruleCall =
+            ClassesRuleBuilder(graphWithUsages)
+                .should()
+                .notCall("com.example.Logger.log")
+        val vCall = mutableListOf<String>()
+        ruleCall.getShouldAssertion()!!(classA, emptyList(), vCall)
+        assertEquals(1, vCall.size)
+        assertTrue(vCall[0].contains("Logger.log"))
+
+        val ruleRef =
+            ClassesRuleBuilder(graphWithUsages)
+                .should()
+                .notReferenceClass("com.example.Service")
+        val vRef = mutableListOf<String>()
+        ruleRef.getShouldAssertion()!!(classA, emptyList(), vRef)
+        assertEquals(1, vRef.size)
+        assertTrue(vRef[0].contains("com.example.Service"))
+    }
+
+    @Test
+    fun `test classes rule builder notCall with class FQN and method FQN`() {
+        val analyticsCall =
+            SourceUsage(
+                kind = UsageKind.CALL,
+                targetFqName = "com.example.Analytics.trackEvent",
+                filePath = "/src/ClassA.kt",
+                line = 15,
+                column = 5,
+                enclosingClass = "ClassA",
+                rawExpression = "analytics.trackEvent",
+            )
+        val logEventCall =
+            SourceUsage(
+                kind = UsageKind.CALL,
+                targetFqName = "com.example.LogEvent.trackEvent",
+                filePath = "/src/ClassA.kt",
+                line = 16,
+                column = 5,
+                enclosingClass = "ClassA",
+                rawExpression = "logEvent.trackEvent",
+            )
+        val fileDecl =
+            FileDeclaration(
+                "ClassA.kt",
+                "com.example",
+                classes = listOf(classA),
+                usages = listOf(analyticsCall, logEventCall),
+                filePath = "/src/ClassA.kt",
+            )
+        val graph = ProjectGraph(builds = mapOf(":" to listOf(moduleA.copy(files = listOf(fileDecl)))))
+
+        // 1. Method FQN matching
+        val rule1 = ClassesRuleBuilder(graph).should().notCall("com.example.Analytics.trackEvent")
+        val v1 = mutableListOf<String>()
+        rule1.getShouldAssertion()!!(classA, emptyList(), v1)
+        assertEquals(1, v1.size)
+        assertTrue(v1[0].contains("analytics.trackEvent"))
+
+        // 2. Class FQN matching (bans any call on com.example.Analytics)
+        val rule2 = ClassesRuleBuilder(graph).should().notCall("com.example.Analytics")
+        val v2 = mutableListOf<String>()
+        rule2.getShouldAssertion()!!(classA, emptyList(), v2)
+        assertEquals(1, v2.size)
+        assertTrue(v2[0].contains("analytics.trackEvent"))
+    }
+
+    @Test
+    fun `test printMatchedClasses and printAllClasses debugging helpers`() {
+        val printedMatched = mutableListOf<String>()
+        val printedAll = mutableListOf<String>()
+
+        ClassesRuleBuilder(projectGraph)
+            .printAllClasses { printedAll.add(it.fqName) }
+            .that { fqName == "com.example.ClassA" }
+            .printMatchedClasses { printedMatched.add(it.fqName) }
+            .should().satisfy { true }
+            .check()
+
+        assertEquals(listOf("com.example.ClassA"), printedMatched)
+        assertTrue(printedAll.contains("com.example.ClassA"))
+        assertTrue(printedAll.contains("com.example.ClassB"))
+    }
+
+    @Test
+    fun `test classes rule builder notCall with class FQN enclosingClass in package`() {
+        val contextCall =
+            SourceUsage(
+                kind = UsageKind.CALL,
+                targetFqName = "android.content.Context.getString",
+                filePath = "/src/MyViewModel.kt",
+                line = 20,
+                column = 9,
+                enclosingClass = "com.example.MyViewModel",
+                rawExpression = "context.getString",
+            )
+        val viewModelClass =
+            ClassDeclaration(
+                name = "MyViewModel",
+                fqName = "com.example.MyViewModel",
+                packageName = "com.example",
+                isInterface = false,
+                isAbstract = false,
+                annotations = emptyList(),
+                imports = listOf("android.content.Context"),
+                referencedTypes = setOf("androidx.lifecycle.ViewModel", "android.content.Context"),
+                filePath = "/src/MyViewModel.kt",
+            )
+        val fileDecl =
+            FileDeclaration(
+                "MyViewModel.kt",
+                "com.example",
+                classes = listOf(viewModelClass),
+                usages = listOf(contextCall),
+                filePath = "/src/MyViewModel.kt",
+            )
+        val graph = ProjectGraph(builds = mapOf(":" to listOf(moduleA.copy(files = listOf(fileDecl)))))
+
+        val rule = ClassesRuleBuilder(graph).should().notCall("android.content.Context")
+        val violations = mutableListOf<String>()
+        rule.getShouldAssertion()!!(viewModelClass, emptyList(), violations)
+
+        assertEquals(1, violations.size)
+        assertTrue(violations[0].contains("context.getString"))
     }
 }

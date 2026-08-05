@@ -89,7 +89,10 @@ internal object BaselineSerializer {
             }
 
             file.writeText(content)
-            KontureLogger.log(LogLevel.INFO, "Successfully wrote baseline file containing ${violations.size} violations to: ${file.absolutePath}")
+            KontureLogger.log(
+                LogLevel.INFO,
+                "Successfully wrote baseline file containing ${violations.size} violations to: ${file.absolutePath}",
+            )
         } catch (e: Exception) {
             KontureLogger.log(LogLevel.WARNING, "Failed to write baseline file to ${file.absolutePath}: ${e.message}")
         }

@@ -176,7 +176,14 @@ class KonturePlugin : Plugin<Project> {
 
                             ModuleData(
                                 path = sub.path,
-                                projectDir = if (sub.projectDir == project.rootDir) "." else sub.projectDir.relativeTo(project.rootDir).path,
+                                projectDir =
+                                    if (sub.projectDir == project.rootDir) {
+                                        "."
+                                    } else {
+                                        sub.projectDir.relativeTo(
+                                            project.rootDir,
+                                        ).path
+                                    },
                                 appliedPlugins = plugins,
                                 sourceSets = sourceSets,
                                 dependencies = dependencies,
@@ -278,7 +285,14 @@ class KonturePlugin : Plugin<Project> {
         val list = mutableListOf<SourceSetData>()
         // CommonExtension is supplied by AGP, which is intentionally only a compile-time
         // dependency of this plugin. Do not resolve its class in ordinary JVM/KMP builds.
-        val androidExtension = if (proj.hasAndroidPlugin()) proj.extensions.findByType(CommonExtension::class.java) else null
+        val androidExtension =
+            if (proj.hasAndroidPlugin()) {
+                proj.extensions.findByType(
+                    CommonExtension::class.java,
+                )
+            } else {
+                null
+            }
         if (androidExtension != null) {
             androidExtension.sourceSets.forEach { sourceSet ->
                 val name = sourceSet.name
@@ -502,7 +516,14 @@ class KonturePlugin : Plugin<Project> {
     private fun collectAllSourceDirs(proj: Project): List<File> =
         proj.allprojects.flatMap { sub ->
             val list = mutableListOf<File>()
-            val androidExtension = if (sub.hasAndroidPlugin()) sub.extensions.findByType(CommonExtension::class.java) else null
+            val androidExtension =
+                if (sub.hasAndroidPlugin()) {
+                    sub.extensions.findByType(
+                        CommonExtension::class.java,
+                    )
+                } else {
+                    null
+                }
             if (androidExtension != null) {
                 androidExtension.sourceSets.forEach { sourceSet ->
                     (sourceSet.java.directories + sourceSet.kotlin.directories).forEach { dir ->

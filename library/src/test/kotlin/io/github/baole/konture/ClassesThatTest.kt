@@ -1,14 +1,25 @@
 /*
- * Copyright 2026 Bao Le Duc
+ * Copyright 2026 The Konture Contributors
+ * Contributors: Bao Le Duc (@baole)
  * SPDX-License-Identifier: Apache-2.0
  */
 
 package io.github.baole.konture
 
 import org.junit.jupiter.api.Assertions.*
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 
-class ClassesThatTest : RuleBuildersTestBase() {
+internal class ClassesThatTest : KontureScopeTestFixture() {
+    private lateinit var projectGraph: ProjectGraph
+
+    @BeforeEach
+    fun initGraph() {
+        val module = Module(":", ":app", "app", listOf("kotlin"), emptyList(), emptyList(), listOf(fileA, fileB, fileC))
+        projectGraph = ProjectGraph(mapOf(":" to listOf(module)))
+        ProjectGraph.setDefault(projectGraph)
+    }
+
     @Test
     fun `test classes rule builder satisfy filtering`() {
         val rule =
@@ -44,7 +55,7 @@ class ClassesThatTest : RuleBuildersTestBase() {
                 )
         val predAll = ruleAll.getThatPredicate()!!
         assertFalse(predAll(classA))
-        assertTrue(predAll(classB))
+        assertTrue(predAll(classInterface))
         assertFalse(predAll(classC))
 
         val ruleNone =
@@ -424,5 +435,94 @@ class ClassesThatTest : RuleBuildersTestBase() {
         val predAssignableFromParent = ruleAssignableFromParent.getThatPredicate()!!
         assertTrue(predAssignableFromParent(grandParent))
         assertFalse(predAssignableFromParent(child))
+    }
+
+    @Test
+    fun `test additional ClassesThat package, name, annotation, visibility and modifier overloads`() {
+        // resideInAPackage overloads
+        val rulePkgList = ClassesRuleBuilder(projectGraph).that().resideInAPackage(listOf("com.example", "com.other"))
+        assertTrue(rulePkgList.getThatPredicate()!!(classA))
+
+        val rulePkgVararg = ClassesRuleBuilder(projectGraph).that().resideInAPackage("com.other", "com.none")
+        assertFalse(rulePkgVararg.getThatPredicate()!!(classA))
+
+        val rulePkgPred = ClassesRuleBuilder(projectGraph).that().resideInAPackage { it.startsWith("com.ex") }
+        assertTrue(rulePkgPred.getThatPredicate()!!(classA))
+
+        // name overloads
+        val ruleNameEndingList = ClassesRuleBuilder(projectGraph).that().haveNameEndingWith(listOf("ClassA", "ClassB"))
+        assertTrue(ruleNameEndingList.getThatPredicate()!!(classA))
+
+        val ruleNameEndingVararg = ClassesRuleBuilder(projectGraph).that().haveNameEndingWith("Foo", "Bar")
+        assertFalse(ruleNameEndingVararg.getThatPredicate()!!(classA))
+
+        val ruleNameStartList = ClassesRuleBuilder(projectGraph).that().haveNameStartingWith(listOf("Class", "My"))
+        assertTrue(ruleNameStartList.getThatPredicate()!!(classA))
+
+        val ruleNameStartVararg = ClassesRuleBuilder(projectGraph).that().haveNameStartingWith("Foo", "Bar")
+        assertFalse(ruleNameStartVararg.getThatPredicate()!!(classA))
+
+        val ruleNameDesc = ClassesRuleBuilder(projectGraph).that().haveName("class A name", { it == "ClassA" })
+        assertTrue(ruleNameDesc.getThatPredicate()!!(classA))
+
+        val ruleNameGlobList = ClassesRuleBuilder(projectGraph).that().haveNameMatching(listOf("Class*", "My*"))
+        assertTrue(ruleNameGlobList.getThatPredicate()!!(classA))
+
+        val ruleNameGlobVararg = ClassesRuleBuilder(projectGraph).that().haveNameMatching("Foo*", "Bar*")
+        assertFalse(ruleNameGlobVararg.getThatPredicate()!!(classA))
+
+        // annotations single/vararg/list
+        val ruleAnnoSingle = ClassesRuleBuilder(projectGraph).that().haveAnnotationOf("MyAnnotation")
+        assertTrue(ruleAnnoSingle.getThatPredicate()!!(classAnnotated))
+
+        val ruleAllAnnoVararg = ClassesRuleBuilder(projectGraph).that().haveAllAnnotationsOf("MyAnnotation")
+        assertTrue(ruleAllAnnoVararg.getThatPredicate()!!(classAnnotated))
+
+        val ruleAnyAnnoSingle = ClassesRuleBuilder(projectGraph).that().haveAnyAnnotationOf("MyAnnotation")
+        assertTrue(ruleAnyAnnoSingle.getThatPredicate()!!(classAnnotated))
+
+        val ruleAnyAnnoVararg = ClassesRuleBuilder(projectGraph).that().haveAnyAnnotationOf("MyAnnotation", "Other")
+        assertTrue(ruleAnyAnnoVararg.getThatPredicate()!!(classAnnotated))
+
+        // visibility & modifiers
+        val ruleVisPublic = ClassesRuleBuilder(projectGraph).that().bePublic()
+        assertTrue(ruleVisPublic.getThatPredicate()!!(classA))
+
+        val ruleVisInternal = ClassesRuleBuilder(projectGraph).that().beInternal()
+        assertTrue(ruleVisInternal.getThatPredicate()!!(classInternal))
+
+        val ruleVisProtected = ClassesRuleBuilder(projectGraph).that().beProtected()
+        assertTrue(ruleVisProtected.getThatPredicate()!!(classProtected))
+
+        val ruleVisAnyVararg =
+            ClassesRuleBuilder(
+                projectGraph,
+            ).that().haveAnyVisibility(Visibility.PUBLIC, Visibility.INTERNAL)
+        assertTrue(ruleVisAnyVararg.getThatPredicate()!!(classA))
+
+        val ruleModSingle = ClassesRuleBuilder(projectGraph).that().haveModifier(Modifier.DATA)
+        assertTrue(ruleModSingle.getThatPredicate()!!(classData))
+
+        val ruleModAnyVararg = ClassesRuleBuilder(projectGraph).that().haveAnyModifier(Modifier.DATA, Modifier.SEALED)
+        assertTrue(ruleModAnyVararg.getThatPredicate()!!(classData))
+
+        val ruleModAllVararg = ClassesRuleBuilder(projectGraph).that().haveAllModifiers(Modifier.DATA)
+        assertTrue(ruleModAllVararg.getThatPredicate()!!(classData))
+
+        val ruleModAllSingle = ClassesRuleBuilder(projectGraph).that().haveAllModifiers(Modifier.DATA)
+        assertTrue(ruleModAllSingle.getThatPredicate()!!(classData))
+
+        // assignable to single / vararg
+        val ruleAssignToVararg = ClassesRuleBuilder(projectGraph).that().areAssignableToAnyOf("ParentType", "OtherType")
+        assertTrue(ruleAssignToVararg.getThatPredicate()!!(classWithParent))
+
+        val ruleAssignAllSingle = ClassesRuleBuilder(projectGraph).that().areAssignableToAllOf("ParentType")
+        assertTrue(ruleAssignAllSingle.getThatPredicate()!!(classWithParent))
+
+        val ruleAssignAllVararg =
+            ClassesRuleBuilder(
+                projectGraph,
+            ).that().areAssignableToAllOf("ParentType", "OtherType")
+        assertFalse(ruleAssignAllVararg.getThatPredicate()!!(classWithParent))
     }
 }

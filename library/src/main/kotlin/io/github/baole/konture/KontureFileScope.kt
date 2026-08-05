@@ -7,7 +7,9 @@
 package io.github.baole.konture
 
 import io.github.baole.konture.impl.PatternMatchers
+import io.github.baole.konture.impl.ViolationLocation
 import kotlin.jvm.JvmName
+import kotlin.reflect.KClass
 
 /**
  * Represents a scope containing a set of Kotlin files for checking file-level rules.
@@ -27,7 +29,11 @@ class KontureFileScope(
             graph: ProjectGraph = Konture.projectGraph,
             sourceSets: SourceSetSelector = SourceSets.production(),
         ): KontureFileScope {
-            val files = graph.getAllModules().flatMap { module -> module.files.filter { it.membershipsFor(module.path).any(sourceSets::matches) } }
+            val files =
+                graph.getAllModules().flatMap {
+                        module ->
+                    module.files.filter { it.membershipsFor(module.path).any(sourceSets::matches) }
+                }
             return KontureFileScope(files)
         }
 
@@ -62,7 +68,10 @@ class KontureFileScope(
             val files =
                 graph
                     .getAllModules()
-                    .flatMap { module -> module.files.filter { it.membershipsFor(module.path).any(sourceSets::matches) } }
+                    .flatMap {
+                            module ->
+                        module.files.filter { it.membershipsFor(module.path).any(sourceSets::matches) }
+                    }
                     .filter { it.packageName == packageName || it.packageName.startsWith("$packageName.") }
             return KontureFileScope(files)
         }
@@ -85,20 +94,23 @@ operator fun KontureFileScope.minus(other: KontureFileScope): KontureFileScope {
  * Filters the list of file declarations to include only those whose names end with the specified suffix.
  */
 @JvmName("withFileNameEndingWith")
-fun List<FileDeclaration>.withNameEndingWith(suffix: String): List<FileDeclaration> = filter { it.name.endsWith(suffix) }
+fun List<FileDeclaration>.withNameEndingWith(suffix: String): List<FileDeclaration> =
+    filter { it.name.endsWith(suffix) }
 
 /**
  * Filters the list of file declarations to include only those whose names start with the specified prefix.
  */
 @JvmName("withFileNameStartingWith")
-fun List<FileDeclaration>.withNameStartingWith(prefix: String): List<FileDeclaration> = filter { it.name.startsWith(prefix) }
+fun List<FileDeclaration>.withNameStartingWith(prefix: String): List<FileDeclaration> =
+    filter { it.name.startsWith(prefix) }
 
 /**
  * Filters the list of file declarations to include only those whose names match the specified glob pattern.
  * Supports '*' wildcards.
  */
 @JvmName("withFileNameMatching")
-fun List<FileDeclaration>.withNameMatching(pattern: String): List<FileDeclaration> = filter { PatternMatchers.matchesSimpleGlob(pattern, it.name) }
+fun List<FileDeclaration>.withNameMatching(pattern: String): List<FileDeclaration> =
+    filter { PatternMatchers.matchesSimpleGlob(pattern, it.name) }
 
 /**
  * Filters the list of file declarations to include only those residing in packages matching the specified pattern.
@@ -118,6 +130,37 @@ fun KontureFileScope.withNameMatching(pattern: String) = KontureFileScope(files.
 
 fun KontureFileScope.withPackage(packagePattern: String) = KontureFileScope(files.withPackage(packagePattern))
 
+fun KontureFileScope.withModule(
+    modulePath: String,
+    graph: ProjectGraph = Konture.projectGraph,
+): KontureFileScope {
+    val norm = if (!modulePath.startsWith(":") && !modulePath.startsWith("**") && modulePath.isNotEmpty()) ":$modulePath" else modulePath
+    return KontureFileScope(
+        files.filter { file ->
+            val mod =
+                graph.getAllModules().find { m ->
+                    m.files.any { f -> f.filePath == file.filePath || f.name == file.name }
+                }
+            mod?.path == norm
+        },
+    )
+}
+
+fun KontureFileScope.withImportOf(importPath: String) =
+    KontureFileScope(
+        files.filter {
+                file ->
+            file.imports.any { PatternMatchers.matchesPackage(importPath, it) || it == importPath }
+        },
+    )
+
+fun KontureFileScope.withImportOf(type: KClass<*>) = withImportOf(type.kontureQualifiedName())
+
+fun KontureFileScope.containingClass(fqName: String) =
+    KontureFileScope(files.filter { file -> file.classes.any { it.fqName == fqName || it.name == fqName } })
+
+fun KontureFileScope.containingClass(type: KClass<*>) = containingClass(type.kontureQualifiedName())
+
 // Assertion extensions on List<FileDeclaration> and KontureFileScope
 
 @JvmName("assertFilesTrue")
@@ -134,7 +177,7 @@ fun List<FileDeclaration>.assertTrue(
                     appendLine(additionalMessage)
                 }
                 violations.forEach {
-                    appendLine("  - ${it.name} (at ${it.filePath})")
+                    appendLine("  - ${it.name} (at ${ViolationLocation.format(it)})")
                 }
             }
         throw AssertionError(message)
@@ -265,7 +308,8 @@ fun List<FileDeclaration>.assertNameMatching(vararg patterns: String) {
  * @param packagePatterns The package wildcard patterns. At least one must match.
  * @throws AssertionError if any file does not reside in a matching package.
  */
-fun KontureFileScope.assertResideInAPackage(vararg packagePatterns: String) = files.assertResideInAPackage(*packagePatterns)
+fun KontureFileScope.assertResideInAPackage(vararg packagePatterns: String) =
+    files.assertResideInAPackage(*packagePatterns)
 
 /**
  * Asserts that all file declarations in the scope have names ending with any of the specified suffixes.
@@ -290,3 +334,41 @@ fun KontureFileScope.assertNameStartingWith(vararg prefixes: String) = files.ass
  * @throws AssertionError if any file name does not match any of the specified glob patterns.
  */
 fun KontureFileScope.assertNameMatching(vararg patterns: String) = files.assertNameMatching(*patterns)
+
+fun List<FileDeclaration>.assertResideInAModule(
+    modulePath: String,
+    graph: ProjectGraph = Konture.projectGraph,
+) {
+    val norm = if (!modulePath.startsWith(":") && !modulePath.startsWith("**") && modulePath.isNotEmpty()) ":$modulePath" else modulePath
+    assertTrue("Files must reside in module '$norm'") { file ->
+        val mod =
+            graph.getAllModules().find { m ->
+                m.files.any { f -> f.filePath == file.filePath || f.name == file.name }
+            }
+        mod?.path == norm
+    }
+}
+
+fun List<FileDeclaration>.assertNotResideInAModule(
+    modulePath: String,
+    graph: ProjectGraph = Konture.projectGraph,
+) {
+    val norm = if (!modulePath.startsWith(":") && !modulePath.startsWith("**") && modulePath.isNotEmpty()) ":$modulePath" else modulePath
+    assertTrue("Files must not reside in module '$norm'") { file ->
+        val mod =
+            graph.getAllModules().find { m ->
+                m.files.any { f -> f.filePath == file.filePath || f.name == file.name }
+            }
+        mod?.path != norm
+    }
+}
+
+fun KontureFileScope.assertResideInAModule(
+    modulePath: String,
+    graph: ProjectGraph = Konture.projectGraph,
+) = files.assertResideInAModule(modulePath, graph)
+
+fun KontureFileScope.assertNotResideInAModule(
+    modulePath: String,
+    graph: ProjectGraph = Konture.projectGraph,
+) = files.assertNotResideInAModule(modulePath, graph)

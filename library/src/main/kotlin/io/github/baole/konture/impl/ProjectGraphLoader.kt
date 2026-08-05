@@ -114,7 +114,8 @@ internal class ProjectGraphLoader {
         // sources or test-only dependencies during type resolution.
         val sourceSetModels = mutableMapOf<Triple<String, String, String>, SourceSetModel>()
         val declaredClassesBySourceSet = mutableMapOf<Triple<String, String, String>, Set<String>>()
-        val declaredTypeAliasesBySourceSet = mutableMapOf<Triple<String, String, String>, Map<String, TypeAliasDefinition>>()
+        val declaredTypeAliasesBySourceSet =
+            mutableMapOf<Triple<String, String, String>, Map<String, TypeAliasDefinition>>()
         layoutModel.builds.forEach { buildModel ->
             buildModel.modules
                 .filter { !isModuleExcluded(it.path) }
@@ -300,7 +301,10 @@ internal class ProjectGraphLoader {
                                     val resolvedFile = File(path)
                                     val symbols =
                                         memberships
-                                            .map { membership -> visibleSymbolsFor(Triple(buildModel.id, moduleModel.path, membership.name)) }
+                                            .map {
+                                                    membership ->
+                                                visibleSymbolsFor(Triple(buildModel.id, moduleModel.path, membership.name))
+                                            }
                                     val symbolLookup =
                                         MapSymbolLookup(
                                             declaredClasses = symbols.flatMap { it.classes }.toSet(),
@@ -316,7 +320,11 @@ internal class ProjectGraphLoader {
                                     fileDecl.copy(
                                         classes = filteredClasses,
                                         sourceSets = memberships.toList(),
-                                        usages = fileDecl.usages.map { usage -> usage.copy(sourceSets = memberships.toList()) },
+                                        usages =
+                                            fileDecl.usages.map {
+                                                    usage ->
+                                                usage.copy(sourceSets = memberships.toList())
+                                            },
                                     )
                                 }
 
@@ -437,7 +445,10 @@ internal class ProjectGraphLoader {
             inputStream: InputStream,
             depsStreamLoader: () -> InputStream? = { null },
         ): ProjectGraph {
-            return KontureContextProvider.currentContext.projectGraphLoader.loadFromStream(inputStream, depsStreamLoader)
+            return KontureContextProvider.currentContext.projectGraphLoader.loadFromStream(
+                inputStream,
+                depsStreamLoader,
+            )
         }
 
         fun loadFromResource(resourcePath: String = "/konture/layout_v2.json"): ProjectGraph {

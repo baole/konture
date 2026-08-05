@@ -1,6 +1,6 @@
 /*
  * Copyright 2026 The Konture Contributors
- * Contributors: Bao Le Duc, Octavio Calleya Garcia (@octaviospain)
+ * Contributors: Bao Le Duc (@baole), Octavio Calleya Garcia (@octaviospain)
  * SPDX-License-Identifier: Apache-2.0
  */
 
@@ -208,5 +208,51 @@ internal object PatternMatchers {
             }
         }
         return builder.toString()
+    }
+
+    /**
+     * Checks if a [io.github.baole.konture.SourceUsage] matches a method call target or class call target pattern [fqName].
+     */
+    @Suppress("ReturnCount")
+    fun isCallUsageMatch(
+        usage: io.github.baole.konture.SourceUsage,
+        fqName: String,
+    ): Boolean {
+        if (usage.kind != io.github.baole.konture.UsageKind.CALL && usage.kind != io.github.baole.konture.UsageKind.CLASS_REFERENCE) return false
+
+        val target = usage.targetFqName
+        val raw = usage.rawExpression
+        val candidates = (listOf(target, raw) + usage.possibleTargetFqNames).filter { it.isNotEmpty() }
+
+        if (!fqName.contains('.')) {
+            for (candidate in candidates) {
+                if (candidate == fqName || candidate.endsWith(".$fqName")) return true
+            }
+            return false
+        }
+
+        for (candidate in candidates) {
+            if (candidate == fqName) return true
+            if (candidate.endsWith(".$fqName")) return true
+
+            if (candidate.startsWith("$fqName.")) return true
+
+            if (candidate.contains('.')) {
+                val candidateMethod = candidate.substringAfterLast('.')
+                val fqNameMethod = fqName.substringAfterLast('.')
+
+                if (candidateMethod == fqNameMethod) {
+                    val candidateReceiver = candidate.substringBeforeLast('.').substringAfterLast('.')
+                    val fqNameClass = fqName.substringBeforeLast('.').substringAfterLast('.')
+                    if (candidateReceiver.equals(fqNameClass, ignoreCase = true)) return true
+                }
+
+                val candidateReceiver = candidate.substringBeforeLast('.').substringAfterLast('.')
+                val fqNameClass = fqName.substringAfterLast('.')
+                if (candidateReceiver.equals(fqNameClass, ignoreCase = true)) return true
+            }
+        }
+
+        return false
     }
 }

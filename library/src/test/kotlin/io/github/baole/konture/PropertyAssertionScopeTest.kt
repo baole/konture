@@ -1,5 +1,6 @@
 /*
- * Copyright 2026 Bao Le Duc
+ * Copyright 2026 The Konture Contributors
+ * Contributors: Bao Le Duc (@baole)
  * SPDX-License-Identifier: Apache-2.0
  */
 
@@ -311,5 +312,36 @@ class PropertyAssertionScopeTest : RuleBuildersTestBase() {
             assertion(prop, failListViolations)
         }
         assertEquals(5, failListViolations.size)
+    }
+
+    @Test
+    fun `test PropertyAssertionScope vararg overloads for annotations modifiers and visibility`() {
+        val anno = AnnotationDeclaration("MyAnno", "com.example.MyAnno")
+        val prop =
+            PropertyDeclaration(
+                "data",
+                Visibility.INTERNAL,
+                setOf(Modifier.CONST),
+                "String",
+                true,
+                listOf(anno),
+                null,
+                false,
+            )
+
+        val scope =
+            PropertyAssertionScope().apply {
+                haveAllAnnotationsOf("MyAnno", "MyAnno")
+                haveAnyAnnotationOf("MyAnno", "Other")
+                haveAllModifiers(Modifier.CONST)
+                haveAnyModifier(Modifier.CONST, Modifier.OPEN)
+                haveAnyVisibility(Visibility.INTERNAL, Visibility.PRIVATE)
+            }
+
+        val violations = mutableListOf<String>()
+        for (assertion in scope.assertions) {
+            assertion(prop, violations)
+        }
+        assertTrue(violations.isEmpty(), "Expected vararg overloads to pass but got: $violations")
     }
 }

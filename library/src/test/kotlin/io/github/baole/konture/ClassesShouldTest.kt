@@ -851,12 +851,20 @@ class ClassesShouldTest : RuleBuildersTestBase() {
         assertAssTransitive(child, allHierarchy, vAssTransitive)
         assertTrue(vAssTransitive.isEmpty())
 
-        val assertAssAnyTransitive = builder().should().beAssignableToAnyOf("GrandParent", "WrongType").getShouldAssertion()!!
+        val assertAssAnyTransitive =
+            builder().should().beAssignableToAnyOf(
+                "GrandParent",
+                "WrongType",
+            ).getShouldAssertion()!!
         val vAssAnyTransitive = mutableListOf<String>()
         assertAssAnyTransitive(child, allHierarchy, vAssAnyTransitive)
         assertTrue(vAssAnyTransitive.isEmpty())
 
-        val assertAssAllTransitive = builder().should().beAssignableToAllOf("GrandParent", "Parent").getShouldAssertion()!!
+        val assertAssAllTransitive =
+            builder().should().beAssignableToAllOf(
+                "GrandParent",
+                "Parent",
+            ).getShouldAssertion()!!
         val vAssAllTransitive = mutableListOf<String>()
         assertAssAllTransitive(child, allHierarchy, vAssAllTransitive)
         assertTrue(vAssAllTransitive.isEmpty())

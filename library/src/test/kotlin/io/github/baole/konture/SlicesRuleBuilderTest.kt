@@ -1,6 +1,6 @@
 /*
  * Copyright 2026 The Konture Contributors
- * Contributors: Octavio Calleya Garcia (@octaviospain)
+ * Contributors: Octavio Calleya Garcia (@octaviospain), Bao Le Duc (@baole)
  * SPDX-License-Identifier: Apache-2.0
  */
 
@@ -181,5 +181,23 @@ class SlicesRuleBuilderTest {
         assertNull(PatternMatchers.sliceKeyFor("com.acme.(*)..", "com.other.thing"))
         assertNull(PatternMatchers.sliceKeyFor("com.acme.(*)..", "com.acme"))
         assertEquals("payment.api", PatternMatchers.sliceKeyFor("com.acme.(**)", "com.acme.payment.api"))
+    }
+
+    @Test
+    fun `test printMatchedSlices debugging helper`() {
+        val printedSlices = mutableListOf<String>()
+        val graph =
+            graphOf(
+                classIn("com.app.a", "ServiceA"),
+                classIn("com.app.b", "ServiceB"),
+            )
+
+        SlicesRuleBuilder(graph)
+            .matching("com.app.(*)..")
+            .printMatchedSlices { printedSlices.add(it.key) }
+            .should().beFreeOfCycles()
+            .check()
+
+        assertEquals(listOf("a", "b"), printedSlices.sorted())
     }
 }

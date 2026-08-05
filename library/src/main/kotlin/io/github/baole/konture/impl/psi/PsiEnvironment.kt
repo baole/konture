@@ -32,7 +32,10 @@ internal class PsiEnvironment {
     fun createKtFile(
         fileName: String,
         content: String,
-    ): KtFile = PsiFileFactory.getInstance(project).createFileFromText(fileName, KotlinFileType.INSTANCE, content) as KtFile
+    ): KtFile =
+        PsiFileFactory.getInstance(
+            project,
+        ).createFileFromText(fileName, KotlinFileType.INSTANCE, content) as KtFile
 
     fun dispose() {
         if (!isDisposed) {

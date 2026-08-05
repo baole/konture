@@ -39,7 +39,10 @@ object SourceSets {
         return SourceSetSelector { it.name in acceptedNames }
     }
 
-    fun matchingName(pattern: String): SourceSetSelector = SourceSetSelector { PatternMatchers.matchesSimpleGlob(pattern, it.name) }
+    fun matchingName(pattern: String): SourceSetSelector =
+        SourceSetSelector {
+            PatternMatchers.matchesSimpleGlob(pattern, it.name)
+        }
 
     fun of(
         role: SourceSetRole? = null,

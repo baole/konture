@@ -1,5 +1,6 @@
 /*
- * Copyright 2026 Bao Le Duc
+ * Copyright 2026 The Konture Contributors
+ * Contributors: Bao Le Duc (@baole)
  * SPDX-License-Identifier: Apache-2.0
  */
 
@@ -230,6 +231,26 @@ class ClassDeclarationExtensionsTest {
     }
 
     @Test
+    fun `test ClassDeclaration isAssignableTo with imported external supertype`() {
+        val viewModel =
+            ClassDeclaration(
+                name = "UserViewModel",
+                fqName = "com.example.ui.UserViewModel",
+                packageName = "com.example.ui",
+                isInterface = false,
+                isAbstract = false,
+                annotations = emptyList(),
+                imports = listOf("androidx.lifecycle.ViewModel"),
+                referencedTypes = emptySet(),
+                filePath = "/src/UserViewModel.kt",
+                supertypes = listOf("ViewModel"),
+            )
+
+        assertTrue(viewModel.isAssignableTo("androidx.lifecycle.ViewModel", emptyList()))
+        assertTrue(viewModel.isAssignableTo("ViewModel", emptyList()))
+    }
+
+    @Test
     fun `test ClassDeclaration collectDependencyPackages`() {
         val target =
             ClassDeclaration(
@@ -263,5 +284,61 @@ class ClassDeclarationExtensionsTest {
         assertTrue(dependencyPackages.contains("com.jackson"))
         assertTrue(dependencyPackages.contains("com.example"))
         assertTrue(dependencyPackages.contains("com.other"))
+    }
+
+    @Test
+    fun `test collectSignatureTypeNames and resolveTypeReference`() {
+        val param1 = ParameterDeclaration("p1", "List<String>", false, emptyList())
+        val func =
+            FunctionDeclaration(
+                "doWork",
+                Visibility.PUBLIC,
+                emptySet(),
+                "Boolean",
+                listOf(param1),
+                emptyList(),
+                null,
+                false,
+            )
+        val prop = PropertyDeclaration("title", Visibility.PUBLIC, emptySet(), "String", true, emptyList(), null)
+        val constrParam = ParameterDeclaration("id", "Long", false, emptyList())
+        val primConstr = ConstructorDeclaration(Visibility.PUBLIC, listOf(constrParam), emptyList())
+        val secConstrParam = ParameterDeclaration("name", "String", false, emptyList())
+        val secConstr = ConstructorDeclaration(Visibility.PUBLIC, listOf(secConstrParam), emptyList())
+
+        val clazz =
+            ClassDeclaration(
+                name = "MyClass",
+                fqName = "org.test.MyClass",
+                packageName = "org.test",
+                isInterface = false,
+                isAbstract = false,
+                properties = listOf(prop),
+                functions = listOf(func),
+                primaryConstructor = primConstr,
+                secondaryConstructors = listOf(secConstr),
+                imports = listOf("com.example.Target"),
+                annotations = emptyList(),
+                referencedTypes = emptySet(),
+                filePath = "/src/MyClass.kt",
+            )
+
+        val signatureTypes = clazz.collectSignatureTypeNames()
+        assertTrue(signatureTypes.contains("String"))
+        assertTrue(signatureTypes.contains("Boolean"))
+        assertTrue(signatureTypes.contains("List"))
+        assertTrue(signatureTypes.contains("Long"))
+
+        // resolveTypeReference
+        val target =
+            ClassDeclaration("Target", "com.example.Target", "com.example", false, false, emptyList(), emptyList(), emptySet(), "/src/Target.kt")
+        val resolved = clazz.resolveTypeReference("Target", listOf(target))
+        assertNotNull(resolved)
+        assertEquals("com.example.Target", resolved?.fqName)
+
+        // matchesName on AnnotationDeclaration
+        val ann = AnnotationDeclaration("Service", "org.springframework.stereotype.Service")
+        assertTrue(ann.matchesName("Service"))
+        assertTrue(ann.matchesName("org.springframework.stereotype.Service"))
     }
 }

@@ -1,5 +1,6 @@
 /*
- * Copyright 2026 Bao Le Duc
+ * Copyright 2026 The Konture Contributors
+ * Contributors: Bao Le Duc (@baole)
  * SPDX-License-Identifier: Apache-2.0
  */
 
@@ -142,8 +143,20 @@ internal fun ClassDeclaration.isAssignableTo(
 
     fun matchesSupertype(typeReference: String): Boolean {
         val cleanSupertype = typeReference.substringBefore("<").removeSuffix("?").trim()
-        return cleanSupertype == superType ||
-            (!superType.contains('.') && cleanSupertype.substringAfterLast('.') == superType)
+        if (cleanSupertype == superType) return true
+
+        if (!superType.contains('.')) {
+            if (cleanSupertype.substringAfterLast('.') == superType) return true
+        }
+
+        if (!cleanSupertype.contains('.')) {
+            if (imports.contains(superType)) return true
+            if ("$packageName.$cleanSupertype" == superType) return true
+            if (imports.any { it.endsWith(".*") && "${it.removeSuffix(".*")}.$cleanSupertype" == superType }) return true
+            if (superType.endsWith(".$cleanSupertype")) return true
+        }
+
+        return false
     }
 
     if (supertypes.any(::matchesSupertype)) return true

@@ -1,6 +1,6 @@
 /*
  * Copyright 2026 The Konture Contributors
- * Contributors: Bao Le Duc, Octavio Calleya Garcia (@octaviospain)
+ * Contributors: Bao Le Duc (@baole), Octavio Calleya Garcia (@octaviospain)
  * SPDX-License-Identifier: Apache-2.0
  */
 
@@ -8,11 +8,12 @@ package io.github.baole.konture
 
 import io.github.baole.konture.i18n.getMessage
 import io.github.baole.konture.impl.PatternMatchers
+import kotlin.reflect.KClass
 
 /**
  * Fluent API for defining assertion rules on Kotlin classes.
  */
-internal interface ClassesShouldDependencyAssertions {
+interface ClassesShouldDependencyAssertions {
     val builder: ClassesRuleBuilder
 
     /**
@@ -62,7 +63,8 @@ internal interface ClassesShouldDependencyAssertions {
     /**
      * Asserts that selected classes are accessed only by classes residing in packages matching the specified pattern.
      */
-    infix fun onlyBeAccessedByAnyPackage(packagePattern: String): ClassesRuleBuilder = onlyBeAccessedByAnyPackage(listOf(packagePattern))
+    infix fun onlyBeAccessedByAnyPackage(packagePattern: String): ClassesRuleBuilder =
+        onlyBeAccessedByAnyPackage(listOf(packagePattern))
 
     /**
      * Asserts that selected classes are accessed only by classes residing in packages matching the specified patterns.
@@ -105,7 +107,8 @@ internal interface ClassesShouldDependencyAssertions {
     /**
      * Asserts that selected classes are not accessed by any class residing in packages matching the specified pattern.
      */
-    infix fun notBeAccessedByAnyPackage(packagePattern: String): ClassesRuleBuilder = notBeAccessedByAnyPackage(listOf(packagePattern))
+    infix fun notBeAccessedByAnyPackage(packagePattern: String): ClassesRuleBuilder =
+        notBeAccessedByAnyPackage(listOf(packagePattern))
 
     /**
      * Asserts that selected classes are not accessed by any class residing in packages matching the specified patterns.
@@ -207,7 +210,8 @@ internal interface ClassesShouldDependencyAssertions {
     /**
      * Asserts that selected classes depend only on classes residing in packages matching the specified pattern.
      */
-    infix fun onlyDependOnClassesInAnyPackage(packagePattern: String): ClassesRuleBuilder = onlyDependOnClassesInAnyPackage(listOf(packagePattern))
+    infix fun onlyDependOnClassesInAnyPackage(packagePattern: String): ClassesRuleBuilder =
+        onlyDependOnClassesInAnyPackage(listOf(packagePattern))
 
     /**
      * Asserts that selected classes depend only on classes residing in packages matching the specified patterns.
@@ -309,11 +313,71 @@ internal interface ClassesShouldDependencyAssertions {
     /**
      * Asserts that selected classes do not depend on classes residing in packages matching the specified pattern.
      */
-    infix fun notDependOnClassesInAnyPackage(packagePattern: String): ClassesRuleBuilder = notDependOnClassesInAnyPackage(listOf(packagePattern))
+    infix fun notDependOnClassesInAnyPackage(packagePattern: String): ClassesRuleBuilder =
+        notDependOnClassesInAnyPackage(listOf(packagePattern))
 
     /**
      * Asserts that selected classes do not depend on classes residing in packages matching the specified patterns.
      */
     infix fun notDependOnClassesInAnyPackage(packagePatterns: List<String>): ClassesRuleBuilder =
         notDependOnClassesInAnyPackage(*packagePatterns.toTypedArray())
+
+    /** Fails for every invocation of [fqName] in the selected class. */
+    fun notCall(fqName: String): ClassesRuleBuilder {
+        builder.setShould { cls, _, violations ->
+            val fileUsages =
+                builder.graph.getAllModules()
+                    .flatMap { it.files }
+                    .find { file -> file.filePath == cls.filePath || file.classes.any { it.fqName == cls.fqName } }
+                    ?.usages.orEmpty()
+
+            fileUsages
+                .filter {
+                        usage ->
+                    usage.isEnclosedInClass(cls.fqName, cls.name) && PatternMatchers.isCallUsageMatch(usage, fqName)
+                }
+                .forEach { usage ->
+                    val unresolved = if (usage.unresolvedPossibleUsage) "unresolved possible " else ""
+                    violations.add(
+                        getMessage("usage.notCall", unresolved, fqName, usage.rawExpression, usage.line, usage.column),
+                    )
+                }
+        }
+        return builder
+    }
+
+    /** Fails for every invocation of [kClass] in the selected class. */
+    fun notCall(kClass: KClass<*>): ClassesRuleBuilder = notCall(kClass.kontureQualifiedName())
+
+    /** Fails for every actual class/type use of [fqName] in the selected class; imports alone do not match. */
+    fun notReferenceClass(fqName: String): ClassesRuleBuilder {
+        builder.setShould { cls, _, violations ->
+            val fileUsages =
+                builder.graph.getAllModules()
+                    .flatMap { it.files }
+                    .find { file -> file.filePath == cls.filePath || file.classes.any { it.fqName == cls.fqName } }
+                    ?.usages.orEmpty()
+
+            fileUsages
+                .filter { usage ->
+                    usage.kind == UsageKind.CLASS_REFERENCE &&
+                        usage.isEnclosedInClass(cls.fqName, cls.name) &&
+                        (usage.targetFqName == fqName || usage.targetFqName.endsWith(".$fqName") || fqName.endsWith("." + usage.targetFqName) || usage.rawExpression == fqName || fqName in usage.possibleTargetFqNames)
+                }.forEach { usage ->
+                    violations.add(
+                        getMessage("usage.notReferenceClass", fqName, usage.rawExpression, usage.line, usage.column),
+                    )
+                }
+        }
+        return builder
+    }
+
+    /** Fails for every actual class/type use of [kClass] in the selected class; imports alone do not match. */
+    fun notReferenceClass(kClass: KClass<*>): ClassesRuleBuilder = notReferenceClass(kClass.kontureQualifiedName())
 }
+
+/** Fails for every invocation of type [T] in the selected class. */
+inline fun <reified T : Any> ClassesShould.notCall(): ClassesRuleBuilder = notCall(T::class)
+
+/** Fails for every actual class/type use of type [T] in the selected class; imports alone do not match. */
+inline fun <reified T : Any> ClassesShould.notReferenceClass(): ClassesRuleBuilder = notReferenceClass(T::class)

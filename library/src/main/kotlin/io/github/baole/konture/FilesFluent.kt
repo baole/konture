@@ -1,5 +1,6 @@
 /*
- * Copyright 2026 Bao Le Duc
+ * Copyright 2026 The Konture Contributors
+ * Contributors: Bao Le Duc (@baole)
  * SPDX-License-Identifier: Apache-2.0
  */
 
@@ -34,7 +35,9 @@ fun FilesRuleBuilder.should(assertion: FileDeclarationShouldContext.() -> Any?):
             val result = context.assertion()
             validateAssertionResult(result)
             if (result is Boolean && !result) {
-                violations.add(io.github.baole.konture.i18n.getMessage("file.should.failedCustomAssertion", file.declaration.name))
+                violations.add(
+                    io.github.baole.konture.i18n.getMessage("file.should.failedCustomAssertion", file.declaration.name),
+                )
             }
         }
     }
@@ -107,7 +110,13 @@ class FileDeclarationShouldContext internal constructor(
     fun assertNoWildcardImports() {
         val wildcards = imports.filter { it.endsWith(".*") }
         if (wildcards.isNotEmpty()) {
-            addViolation(io.github.baole.konture.i18n.getMessage("file.should.notContainWildcardImports", name, wildcards.joinToString()))
+            addViolation(
+                io.github.baole.konture.i18n.getMessage(
+                    "file.should.notContainWildcardImports",
+                    name,
+                    wildcards.joinToString(),
+                ),
+            )
         }
     }
 
@@ -148,7 +157,8 @@ fun FileDeclarationContext.hasImportContaining(vararg segments: String): Boolean
 /**
  * Helper extension to check if a file contains a class matching the predicate.
  */
-fun FileDeclarationContext.containsClassWith(predicate: (ClassDeclaration) -> Boolean): Boolean = declaration.classes.any(predicate)
+fun FileDeclarationContext.containsClassWith(predicate: (ClassDeclaration) -> Boolean): Boolean =
+    declaration.classes.any(predicate)
 
 // ==========================================
 // Files Context Field Delegation Extensions
@@ -171,3 +181,13 @@ val FileDeclarationContext.topLevelFunctions: List<FunctionDeclaration> get() = 
 
 /** Delegates topLevelProperties property to the underlying [FileDeclaration]. */
 val FileDeclarationContext.topLevelProperties: List<PropertyDeclaration> get() = declaration.topLevelProperties
+
+/** Filters files residing in a package matching [packagePattern]. */
+fun List<FileDeclarationContext>.residingInPackage(packagePattern: String): List<FileDeclarationContext> =
+    filter { io.github.baole.konture.impl.PatternMatchers.matchesPackage(packagePattern, it.packageName) }
+
+/** Filters files residing in a module matching [modulePath]. */
+fun List<FileDeclarationContext>.residingInModule(modulePath: String): List<FileDeclarationContext> =
+    filter {
+        it.modulePath == modulePath || io.github.baole.konture.impl.PatternMatchers.matchesModuleGlob(modulePath, it.modulePath)
+    }

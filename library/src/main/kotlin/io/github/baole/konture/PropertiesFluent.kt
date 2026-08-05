@@ -1,5 +1,6 @@
 /*
- * Copyright 2026 Bao Le Duc
+ * Copyright 2026 The Konture Contributors
+ * Contributors: Bao Le Duc (@baole)
  * SPDX-License-Identifier: Apache-2.0
  */
 
@@ -34,7 +35,12 @@ fun PropertiesRuleBuilder.should(assertion: PropertyDeclarationShouldContext.() 
             val result = context.assertion()
             validateAssertionResult(result)
             if (result is Boolean && !result) {
-                violations.add(io.github.baole.konture.i18n.getMessage("property.should.failedCustomAssertion", prop.declaration.name))
+                violations.add(
+                    io.github.baole.konture.i18n.getMessage(
+                        "property.should.failedCustomAssertion",
+                        prop.declaration.name,
+                    ),
+                )
             }
         }
     }
@@ -117,7 +123,9 @@ class PropertyDeclarationShouldContext internal constructor(
      */
     fun assertAnnotationOf(annotationName: String) {
         if (!hasAnnotation(annotationName)) {
-            addViolation(io.github.baole.konture.i18n.getMessage("property.should.haveAnnotation", name, annotationName))
+            addViolation(
+                io.github.baole.konture.i18n.getMessage("property.should.haveAnnotation", name, annotationName),
+            )
         }
     }
 
@@ -126,7 +134,13 @@ class PropertyDeclarationShouldContext internal constructor(
      */
     fun assertAllAnnotationsOf(names: List<String>) {
         if (!hasAllAnnotations(names)) {
-            addViolation(io.github.baole.konture.i18n.getMessage("property.should.haveAllAnnotations", name, names.joinToString()))
+            addViolation(
+                io.github.baole.konture.i18n.getMessage(
+                    "property.should.haveAllAnnotations",
+                    name,
+                    names.joinToString(),
+                ),
+            )
         }
     }
 
@@ -140,7 +154,13 @@ class PropertyDeclarationShouldContext internal constructor(
      */
     fun assertAnyAnnotationOf(names: List<String>) {
         if (!hasAnyAnnotation(names)) {
-            addViolation(io.github.baole.konture.i18n.getMessage("property.should.haveAnyAnnotation", name, names.joinToString()))
+            addViolation(
+                io.github.baole.konture.i18n.getMessage(
+                    "property.should.haveAnyAnnotation",
+                    name,
+                    names.joinToString(),
+                ),
+            )
         }
     }
 
@@ -157,7 +177,8 @@ class PropertyDeclarationShouldContext internal constructor(
 /**
  * Helper extension to check if a property has the specified annotation.
  */
-fun PropertyDeclarationContext.hasAnnotation(name: String): Boolean = declaration.annotations.any { it.name == name || it.fqName == name }
+fun PropertyDeclarationContext.hasAnnotation(name: String): Boolean =
+    declaration.annotations.any { it.name == name || it.fqName == name }
 
 /**
  * Helper extension to check if a property has all of the specified annotations.
@@ -221,3 +242,17 @@ val PropertyDeclarationContext.isExtension: Boolean get() = declaration.isExtens
 
 /** Delegates kdocText property to the underlying [PropertyDeclaration]. */
 val PropertyDeclarationContext.kdocText: String? get() = declaration.kdocText
+
+/** Filters properties residing in a package matching [packagePattern]. */
+fun List<PropertyDeclarationContext>.residingInPackage(packagePattern: String): List<PropertyDeclarationContext> =
+    filter { io.github.baole.konture.impl.PatternMatchers.matchesPackage(packagePattern, it.packageName) }
+
+/** Filters properties residing in a module matching [modulePath]. */
+fun List<PropertyDeclarationContext>.residingInModule(modulePath: String): List<PropertyDeclarationContext> =
+    filter {
+        it.modulePath == modulePath || io.github.baole.konture.impl.PatternMatchers.matchesModuleGlob(modulePath, it.modulePath)
+    }
+
+/** Filters properties annotated with [annotationName]. */
+fun List<PropertyDeclarationContext>.annotatedWith(annotationName: String): List<PropertyDeclarationContext> =
+    filter { it.hasAnnotation(annotationName) }

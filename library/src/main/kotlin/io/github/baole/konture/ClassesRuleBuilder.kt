@@ -1,5 +1,6 @@
 /*
- * Copyright 2026 Bao Le Duc
+ * Copyright 2026 The Konture Contributors
+ * Contributors: Bao Le Duc (@baole)
  * SPDX-License-Identifier: Apache-2.0
  */
 
@@ -38,6 +39,38 @@ class ClassesRuleBuilder(
     private var activeShouldOperator = LogicalOperator.AND
     private var negateNextShould = false
     private var allowEmpty = false
+
+    /**
+     * Debugging helper that prints information about all classes matched by the `that()` filter.
+     *
+     * @param logger Custom log consumer (defaults to printing to standard output).
+     */
+    fun printMatchedClasses(
+        logger: (ClassDeclaration) -> Unit = {
+            println(getMessage("debug.classes.matched", it.fqName, ViolationLocation.format(it), it.supertypes))
+        },
+    ): ClassesRuleBuilder =
+        this.apply {
+            setShould { cls, _, _ ->
+                logger(cls)
+            }
+        }
+
+    /**
+     * Debugging helper that prints information about all discovered classes in the project graph.
+     *
+     * @param logger Custom log consumer (defaults to printing to standard output).
+     */
+    fun printAllClasses(
+        logger: (ClassDeclaration) -> Unit = {
+            println(getMessage("debug.classes.discovered", it.fqName, ViolationLocation.format(it), it.supertypes))
+        },
+    ): ClassesRuleBuilder =
+        this.apply {
+            graph.getAllModules().flatMap { module ->
+                module.files.flatMap { file -> file.classes }
+            }.distinctBy { it.fqName }.forEach(logger)
+        }
 
     /**
      * Configures this builder to allow empty selections (i.e. if no classes match the `that()` filter,
@@ -266,7 +299,9 @@ class ClassesRuleBuilder(
                 val startIdx = list.size
                 assertion(cls, allClasses, list)
                 for (i in startIdx until list.size) {
-                    list[i] = "${list[i]} (at ${ViolationLocation.of(modulePath, sourceSetName, cls.filePath, cls.sourceLine)})"
+                    if (!list[i].contains(" (at ")) {
+                        list[i] = "${list[i]} (at ${ViolationLocation.format(cls, modulePath, sourceSetName)})"
+                    }
                 }
             }
         }

@@ -799,6 +799,49 @@ class FunctionsRuleBuilderTest : RuleBuildersTestBase() {
     }
 
     @Test
+    fun `test printMatchedFunctions and printAllFunctions debugging helpers`() {
+        val printedMatched = mutableListOf<String>()
+        val printedAll = mutableListOf<String>()
+
+        val func1 =
+            FunctionDeclaration(
+                "fetchData",
+                Visibility.PUBLIC,
+                emptySet(),
+                "String",
+                emptyList(),
+                emptyList(),
+                kdocText = null,
+                isExtension = false,
+            )
+        val func2 =
+            FunctionDeclaration(
+                "processData",
+                Visibility.PUBLIC,
+                emptySet(),
+                "Unit",
+                emptyList(),
+                emptyList(),
+                kdocText = null,
+                isExtension = false,
+            )
+        val fileDecl = FileDeclaration("Service.kt", "com.example", topLevelFunctions = listOf(func1, func2))
+        val mockModule = Module(":", ":app", "app", emptyList(), emptyList(), emptyList(), listOf(fileDecl))
+        val graph = ProjectGraph(mapOf(":" to listOf(mockModule)))
+
+        FunctionsRuleBuilder(graph)
+            .printAllFunctions { printedAll.add(it.declaration.name) }
+            .that { declaration.name == "fetchData" }
+            .printMatchedFunctions { printedMatched.add(it.declaration.name) }
+            .should().satisfy { true }
+            .check()
+
+        assertEquals(listOf("fetchData"), printedMatched)
+        assertTrue(printedAll.contains("fetchData"))
+        assertTrue(printedAll.contains("processData"))
+    }
+
+    @Test
     fun `test functions rule builder overloads`() {
         val fObj =
             FunctionDeclaration(
@@ -808,7 +851,13 @@ class FunctionsRuleBuilderTest : RuleBuildersTestBase() {
                 returnType = "String",
                 parameters =
                     listOf(
-                        ParameterDeclaration("id", "Int", hasDefaultValue = false, annotations = emptyList(), resolvedType = "kotlin.Int"),
+                        ParameterDeclaration(
+                            "id",
+                            "Int",
+                            hasDefaultValue = false,
+                            annotations = emptyList(),
+                            resolvedType = "kotlin.Int",
+                        ),
                     ),
                 annotations = emptyList(),
                 kdocText = null,
@@ -859,7 +908,9 @@ class FunctionsRuleBuilderTest : RuleBuildersTestBase() {
         notCallRule1.getShouldAssertion()!!(context, emptyList(), vNotCall1)
         assertEquals(1, vNotCall1.size)
         assertTrue(vNotCall1[0].contains("Logger.log"))
-        assertTrue(vNotCall1[0].contains(":service, unknown source set, /src/Processor.kt:10:5"))
+        assertTrue(
+            vNotCall1[0].contains(":service, unknown source set) (com.example.service.Processor(Processor.kt:10:5)"),
+        )
 
         val notCallRule2 = FunctionsRuleBuilder(graph).should().notCall(String::class)
         val vNotCall2 = mutableListOf<String>()
@@ -924,5 +975,75 @@ class FunctionsRuleBuilderTest : RuleBuildersTestBase() {
         val vAnyParam3 = mutableListOf<String>()
         anyParamRule3.getShouldAssertion()!!(context, emptyList(), vAnyParam3)
         assertTrue(vAnyParam3.isEmpty())
+
+        // 6. notReferenceClass
+        val refUsage =
+            SourceUsage(
+                kind = UsageKind.CLASS_REFERENCE,
+                targetFqName = "com.example.Context",
+                filePath = "/src/Processor.kt",
+                line = 12,
+                column = 5,
+            )
+        val contextWithRef = context.copy(usages = listOf(refUsage))
+        val refRule = FunctionsRuleBuilder(graph).should().notReferenceClass("com.example.Context")
+        val vRef = mutableListOf<String>()
+        refRule.getShouldAssertion()!!(contextWithRef, emptyList(), vRef)
+        assertEquals(1, vRef.size)
+
+        // 7. composite assertions
+        val anyOfRule =
+            FunctionsRuleBuilder(graph).should().anyOf(
+                { resideInAPackage("com.example..") },
+                { resideInAPackage("other..") },
+            )
+        val vAnyOf = mutableListOf<String>()
+        anyOfRule.getShouldAssertion()!!(context, emptyList(), vAnyOf)
+        assertTrue(vAnyOf.isEmpty())
+    }
+
+    @Test
+    fun `test FunctionsRuleBuilder printMatchedFunctions printAllFunctions and allowEmpty`() {
+        var matchedCount = 0
+        var allCount = 0
+
+        val func =
+            FunctionDeclaration(
+                "func",
+                Visibility.PUBLIC,
+                emptySet(),
+                "Unit",
+                emptyList(),
+                emptyList(),
+                kdocText = null,
+                isExtension = false,
+            )
+        val fileDecl = FileDeclaration("Service.kt", "com.example", topLevelFunctions = listOf(func))
+        val mockModule = Module(":", ":app", "app", listOf("kotlin"), emptyList(), emptyList(), listOf(fileDecl))
+        val graph = ProjectGraph(mapOf(":" to listOf(mockModule)))
+
+        val builder =
+            FunctionsRuleBuilder(graph)
+                .printMatchedFunctions { matchedCount++ }
+                .printAllFunctions { allCount++ }
+
+        assertEquals(1, allCount)
+
+        val funcCtx = FunctionDeclarationContext(func, "com.example", null, ":app", "/src/Service.kt")
+        val violations = mutableListOf<String>()
+        builder.getShouldAssertion()!!(funcCtx, listOf(funcCtx), violations)
+        assertEquals(1, matchedCount)
+
+        // allowEmpty test
+        val emptyGraph = ProjectGraph(emptyMap())
+        assertThrows(AssertionError::class.java) {
+            FunctionsRuleBuilder(
+                emptyGraph,
+            ).that().haveNameMatching("nonexistent").should().haveNameEndingWith("Func").check()
+        }
+
+        FunctionsRuleBuilder(
+            emptyGraph,
+        ).allowEmpty().that().haveNameMatching("nonexistent").should().haveNameEndingWith("Func").check()
     }
 }

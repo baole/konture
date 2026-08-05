@@ -245,6 +245,7 @@ internal object DeclarationParser {
             function.textRange.endOffset,
             resolvedReturnType,
             sourceLine = lineOf(function),
+            receiverType = function.receiverTypeReference?.text,
         )
     }
 

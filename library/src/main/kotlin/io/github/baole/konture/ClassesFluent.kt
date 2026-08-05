@@ -38,7 +38,9 @@ fun ClassesRuleBuilder.should(assertion: ClassDeclarationShouldContext.() -> Any
             val result = context.assertion()
             validateAssertionResult(result)
             if (result is Boolean && !result) {
-                violations.add(io.github.baole.konture.i18n.getMessage("class.should.failedCustomAssertion", cls.fqName))
+                violations.add(
+                    io.github.baole.konture.i18n.getMessage("class.should.failedCustomAssertion", cls.fqName),
+                )
             }
         }
     }
@@ -134,7 +136,13 @@ class ClassDeclarationShouldContext internal constructor(
      */
     fun assertAllAnnotationsOf(names: List<String>) {
         if (!hasAllAnnotations(names)) {
-            addViolation(io.github.baole.konture.i18n.getMessage("class.should.haveAllAnnotations", fqName, names.joinToString()))
+            addViolation(
+                io.github.baole.konture.i18n.getMessage(
+                    "class.should.haveAllAnnotations",
+                    fqName,
+                    names.joinToString(),
+                ),
+            )
         }
     }
 
@@ -148,7 +156,13 @@ class ClassDeclarationShouldContext internal constructor(
      */
     fun assertAnyAnnotationOf(names: List<String>) {
         if (!hasAnyAnnotation(names)) {
-            addViolation(io.github.baole.konture.i18n.getMessage("class.should.haveAtLeastOneAnnotationOf", fqName, names.joinToString()))
+            addViolation(
+                io.github.baole.konture.i18n.getMessage(
+                    "class.should.haveAtLeastOneAnnotationOf",
+                    fqName,
+                    names.joinToString(),
+                ),
+            )
         }
     }
 

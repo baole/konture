@@ -67,7 +67,10 @@ class PropertiesShouldAssertionTest : RuleBuildersTestBase() {
             should.assertion()
             builder.getShouldAssertion()!!(context, allContexts, violations)
             assertEquals(1, violations.size)
-            assertTrue(violations[0].contains(expectedMessagePart), "Expected message part '$expectedMessagePart' but got: '${violations[0]}'")
+            assertTrue(
+                violations[0].contains(expectedMessagePart),
+                "Expected message part '$expectedMessagePart' but got: '${violations[0]}'",
+            )
         }
 
         // 2. Test resideInAPackage variants
@@ -75,10 +78,14 @@ class PropertiesShouldAssertionTest : RuleBuildersTestBase() {
         assertFailure({ resideInAPackage("com.other") }, ctxExt, "should reside in package 'com.other'")
 
         assertSuccess({ resideInAPackage(listOf("com.example", "org.example")) }, ctxExt)
-        assertFailure({ resideInAPackage(listOf("org.example")) }, ctxExt, "should reside in package in [org.example] but resides in 'com.example'")
+        assertFailure({
+            resideInAPackage(listOf("org.example"))
+        }, ctxExt, "should reside in package in [org.example] but resides in 'com.example'")
 
         assertSuccess({ resideInAPackage("com.example", "org.example") }, ctxExt)
-        assertFailure({ resideInAPackage("org.example") }, ctxExt, "should reside in package 'org.example' but resides in 'com.example'")
+        assertFailure({
+            resideInAPackage("org.example")
+        }, ctxExt, "should reside in package 'org.example' but resides in 'com.example'")
 
         assertSuccess({ resideInAPackage { it.startsWith("com.") } }, ctxExt)
         assertFailure(
@@ -92,27 +99,43 @@ class PropertiesShouldAssertionTest : RuleBuildersTestBase() {
         assertFailure({ haveNameEndingWith("Late") }, ctxExt, "should have name ending with 'Late'")
 
         assertSuccess({ haveNameEndingWith(listOf("Prop", "Other")) }, ctxExt)
-        assertFailure({ haveNameEndingWith(listOf("Late", "Other")) }, ctxExt, "should have name ending with any of [Late, Other]")
+        assertFailure({
+            haveNameEndingWith(listOf("Late", "Other"))
+        }, ctxExt, "should have name ending with any of [Late, Other]")
 
         assertSuccess({ haveNameEndingWith("Prop", "Other") }, ctxExt)
-        assertFailure({ haveNameEndingWith("Late", "Other") }, ctxExt, "should have name ending with any of [Late, Other]")
+        assertFailure(
+            { haveNameEndingWith("Late", "Other") },
+            ctxExt,
+            "should have name ending with any of [Late, Other]",
+        )
 
         // 4. Test haveNameStartingWith variants
         assertSuccess({ haveNameStartingWith("ext") }, ctxExt)
         assertFailure({ haveNameStartingWith("late") }, ctxExt, "should have name starting with 'late'")
 
         assertSuccess({ haveNameStartingWith(listOf("ext", "other")) }, ctxExt)
-        assertFailure({ haveNameStartingWith(listOf("late", "other")) }, ctxExt, "should have name starting with any of [late, other]")
+        assertFailure({
+            haveNameStartingWith(listOf("late", "other"))
+        }, ctxExt, "should have name starting with any of [late, other]")
 
         assertSuccess({ haveNameStartingWith("ext", "other") }, ctxExt)
-        assertFailure({ haveNameStartingWith("late", "other") }, ctxExt, "should have name starting with any of [late, other]")
+        assertFailure(
+            { haveNameStartingWith("late", "other") },
+            ctxExt,
+            "should have name starting with any of [late, other]",
+        )
 
         // 5. Test haveNameMatching variants
         assertSuccess({ haveNameMatching("ext*") }, ctxExt)
         assertFailure({ haveNameMatching("late*") }, ctxExt, "should have name matching 'late*'")
 
         assertSuccess({ haveNameMatching(listOf("ext*", "other")) }, ctxExt)
-        assertFailure({ haveNameMatching(listOf("late*", "other")) }, ctxExt, "should have name matching any of [late*, other]")
+        assertFailure(
+            { haveNameMatching(listOf("late*", "other")) },
+            ctxExt,
+            "should have name matching any of [late*, other]",
+        )
 
         assertSuccess({ haveNameMatching("ext*", "other") }, ctxExt)
         assertFailure({ haveNameMatching("late*", "other") }, ctxExt, "should have name matching any of [late*, other]")
@@ -152,7 +175,11 @@ class PropertiesShouldAssertionTest : RuleBuildersTestBase() {
         assertFailure({ haveTypeOf<String>() }, ctxExt, "should have type 'kotlin.String' but was 'kotlin.Int'")
 
         assertSuccess({ haveType(listOf("kotlin.Int", "kotlin.Double")) }, ctxExt)
-        assertFailure({ haveType(listOf("kotlin.String")) }, ctxExt, "should have type in [kotlin.String] but was 'kotlin.Int'")
+        assertFailure(
+            { haveType(listOf("kotlin.String")) },
+            ctxExt,
+            "should have type in [kotlin.String] but was 'kotlin.Int'",
+        )
 
         assertSuccess({ haveType("kotlin.Int", "kotlin.Double") }, ctxExt)
         assertFailure({ haveType("kotlin.String") }, ctxExt, "should have type 'kotlin.String' but was 'kotlin.Int'")
@@ -165,18 +192,30 @@ class PropertiesShouldAssertionTest : RuleBuildersTestBase() {
         assertFailure({ haveAnnotationOf(listOf("OtherAnno")) }, ctxExt, "should be annotated with any of [OtherAnno]")
 
         assertSuccess({ haveAnnotationOf("MyAnno", "OtherAnno") }, ctxExt)
-        assertFailure({ haveAnnotationOf("OtherAnno", "SomeOther") }, ctxExt, "should be annotated with any of [OtherAnno, SomeOther]")
+        assertFailure({
+            haveAnnotationOf("OtherAnno", "SomeOther")
+        }, ctxExt, "should be annotated with any of [OtherAnno, SomeOther]")
 
         // 9. Test haveAllAnnotationsOf variants
         assertSuccess({ haveAllAnnotationsOf(listOf("MyAnno")) }, ctxExt)
-        assertFailure({ haveAllAnnotationsOf(listOf("MyAnno", "OtherAnno")) }, ctxExt, "should have all annotations: MyAnno, OtherAnno")
+        assertFailure({
+            haveAllAnnotationsOf(listOf("MyAnno", "OtherAnno"))
+        }, ctxExt, "should have all annotations: MyAnno, OtherAnno")
 
         assertSuccess({ haveAllAnnotationsOf("MyAnno") }, ctxExt)
-        assertFailure({ haveAllAnnotationsOf("MyAnno", "OtherAnno") }, ctxExt, "should have all annotations: MyAnno, OtherAnno")
+        assertFailure(
+            { haveAllAnnotationsOf("MyAnno", "OtherAnno") },
+            ctxExt,
+            "should have all annotations: MyAnno, OtherAnno",
+        )
 
         // 10. Test haveAnyAnnotationOf variants
         assertSuccess({ haveAnyAnnotationOf(listOf("MyAnno", "OtherAnno")) }, ctxExt)
-        assertFailure({ haveAnyAnnotationOf(listOf("OtherAnno")) }, ctxExt, "should have at least one annotation of: OtherAnno")
+        assertFailure(
+            { haveAnyAnnotationOf(listOf("OtherAnno")) },
+            ctxExt,
+            "should have at least one annotation of: OtherAnno",
+        )
 
         assertSuccess({ haveAnyAnnotationOf("MyAnno", "OtherAnno") }, ctxExt)
         assertFailure({ haveAnyAnnotationOf("OtherAnno") }, ctxExt, "should have at least one annotation of: OtherAnno")
@@ -193,7 +232,9 @@ class PropertiesShouldAssertionTest : RuleBuildersTestBase() {
         )
 
         assertSuccess({ haveAllModifiers(Modifier.CONST) }, ctxExt)
-        assertFailure({ haveAllModifiers(Modifier.CONST, Modifier.OPEN) }, ctxExt, "should have all modifiers: CONST, OPEN, but is missing: OPEN")
+        assertFailure({
+            haveAllModifiers(Modifier.CONST, Modifier.OPEN)
+        }, ctxExt, "should have all modifiers: CONST, OPEN, but is missing: OPEN")
 
         assertSuccess({ haveAnyModifier(listOf(Modifier.CONST, Modifier.OPEN)) }, ctxExt)
         assertFailure({ haveAnyModifier(listOf(Modifier.OPEN)) }, ctxExt, "should have at least one modifier of: OPEN")
@@ -206,10 +247,14 @@ class PropertiesShouldAssertionTest : RuleBuildersTestBase() {
         assertFailure({ haveVisibility(Visibility.PRIVATE) }, ctxExt, "should have visibility: PRIVATE but was: PUBLIC")
 
         assertSuccess({ haveAnyVisibility(listOf(Visibility.PUBLIC, Visibility.INTERNAL)) }, ctxExt)
-        assertFailure({ haveAnyVisibility(listOf(Visibility.PRIVATE)) }, ctxExt, "should have any visibility of: PRIVATE but was: PUBLIC")
+        assertFailure({
+            haveAnyVisibility(listOf(Visibility.PRIVATE))
+        }, ctxExt, "should have any visibility of: PRIVATE but was: PUBLIC")
 
         assertSuccess({ haveAnyVisibility(Visibility.PUBLIC, Visibility.INTERNAL) }, ctxExt)
-        assertFailure({ haveAnyVisibility(Visibility.PRIVATE) }, ctxExt, "should have any visibility of: PRIVATE but was: PUBLIC")
+        assertFailure({
+            haveAnyVisibility(Visibility.PRIVATE)
+        }, ctxExt, "should have any visibility of: PRIVATE but was: PUBLIC")
 
         // 13. Test beExtension, beConst, beLateinit, beDocumentedWithKDoc
         assertSuccess({ beExtension() }, ctxExt)

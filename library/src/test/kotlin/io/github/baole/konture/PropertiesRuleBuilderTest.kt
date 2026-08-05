@@ -1,5 +1,6 @@
 /*
- * Copyright 2026 Bao Le Duc
+ * Copyright 2026 The Konture Contributors
+ * Contributors: Bao Le Duc (@baole)
  * SPDX-License-Identifier: Apache-2.0
  */
 
@@ -282,5 +283,75 @@ class PropertiesRuleBuilderTest : RuleBuildersTestBase() {
         val vType3 = mutableListOf<String>()
         typeRule3.getShouldAssertion()!!(context, emptyList(), vType3)
         assertTrue(vType3.isEmpty())
+
+        // 3. notCall and notReferenceClass
+        val callUsage =
+            SourceUsage(
+                kind = UsageKind.CALL,
+                targetFqName = "android.content.Context.getString",
+                filePath = "/src/Sample.kt",
+                line = 5,
+                column = 10,
+                enclosingProperty = "myVal",
+            )
+        val fileDeclWithUsage = fileDecl.copy(usages = listOf(callUsage))
+        val mockModuleWithUsage = mockModule.copy(files = listOf(fileDeclWithUsage))
+        val graphWithUsage = ProjectGraph(mapOf(":" to listOf(mockModuleWithUsage)))
+
+        val notCallRule = PropertiesRuleBuilder(graphWithUsage).should().notCall("android.content.Context.getString")
+        val vNotCall = mutableListOf<String>()
+        notCallRule.getShouldAssertion()!!(context, emptyList(), vNotCall)
+        assertEquals(1, vNotCall.size)
+
+        // 4. composite assertions
+        val anyOfRule =
+            PropertiesRuleBuilder(graph).should().anyOf(
+                { beVal() },
+                { beVar() },
+            )
+        val vAnyOf = mutableListOf<String>()
+        anyOfRule.getShouldAssertion()!!(context, emptyList(), vAnyOf)
+        assertTrue(vAnyOf.isEmpty())
+    }
+
+    @Test
+    fun `test printMatchedProperties and printAllProperties debugging helpers`() {
+        val printedMatched = mutableListOf<String>()
+        val printedAll = mutableListOf<String>()
+
+        val prop1 =
+            PropertyDeclaration(
+                "id",
+                Visibility.PUBLIC,
+                emptySet(),
+                "String",
+                isVal = true,
+                annotations = emptyList(),
+                kdocText = null,
+            )
+        val prop2 =
+            PropertyDeclaration(
+                "title",
+                Visibility.PUBLIC,
+                emptySet(),
+                "String",
+                isVal = true,
+                annotations = emptyList(),
+                kdocText = null,
+            )
+        val fileDecl = FileDeclaration("Service.kt", "com.example", topLevelProperties = listOf(prop1, prop2))
+        val mockModule = Module(":", ":app", "app", emptyList(), emptyList(), emptyList(), listOf(fileDecl))
+        val graph = ProjectGraph(mapOf(":" to listOf(mockModule)))
+
+        PropertiesRuleBuilder(graph)
+            .printAllProperties { printedAll.add(it.declaration.name) }
+            .that { declaration.name == "id" }
+            .printMatchedProperties { printedMatched.add(it.declaration.name) }
+            .should().satisfy { true }
+            .check()
+
+        assertEquals(listOf("id"), printedMatched)
+        assertTrue(printedAll.contains("id"))
+        assertTrue(printedAll.contains("title"))
     }
 }

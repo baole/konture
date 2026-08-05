@@ -45,7 +45,14 @@ FRONT_MATTER_MAP = {
         "nav_order": 54,
         "permalink": "/configuration/"
     },
+    "api-overview.md": {
+        "layout": "default",
+        "title": "API Overview",
+        "nav_order": 55,
+        "permalink": "/api-overview/"
+    },
     "baseline.md": {
+
         "layout": "default",
         "title": "Architecture Baselines",
         "nav_order": 56,
@@ -115,9 +122,15 @@ FRONT_MATTER_MAP = {
     },
     "recipes/onion-architecture.md": {
         "layout": "default",
-        "title": "Onion Architecture",
+        "title": "Onion / Clean Architecture Verification",
         "parent": "Recipes",
         "nav_order": 9
+    },
+    "recipes/slices-and-modularization.md": {
+        "layout": "default",
+        "title": "Slices & Modularization Rules",
+        "parent": "Recipes",
+        "nav_order": 10
     },
     "ai-prompts/README.md": {
         "layout": "default",

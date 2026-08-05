@@ -1,5 +1,6 @@
 /*
- * Copyright 2026 Bao Le Duc
+ * Copyright 2026 The Konture Contributors
+ * Contributors: Bao Le Duc (@baole)
  * SPDX-License-Identifier: Apache-2.0
  */
 
@@ -34,7 +35,12 @@ fun FunctionsRuleBuilder.should(assertion: FunctionDeclarationShouldContext.() -
             val result = context.assertion()
             validateAssertionResult(result)
             if (result is Boolean && !result) {
-                violations.add(io.github.baole.konture.i18n.getMessage("function.should.failedCustomAssertion", func.declaration.name))
+                violations.add(
+                    io.github.baole.konture.i18n.getMessage(
+                        "function.should.failedCustomAssertion",
+                        func.declaration.name,
+                    ),
+                )
             }
         }
     }
@@ -116,7 +122,9 @@ class FunctionDeclarationShouldContext internal constructor(
      */
     fun assertAnnotationOf(annotationName: String) {
         if (!hasAnnotation(annotationName)) {
-            addViolation(io.github.baole.konture.i18n.getMessage("function.should.haveAnnotation", name, annotationName))
+            addViolation(
+                io.github.baole.konture.i18n.getMessage("function.should.haveAnnotation", name, annotationName),
+            )
         }
     }
 
@@ -125,7 +133,13 @@ class FunctionDeclarationShouldContext internal constructor(
      */
     fun assertAllAnnotationsOf(names: List<String>) {
         if (!hasAllAnnotations(names)) {
-            addViolation(io.github.baole.konture.i18n.getMessage("function.should.haveAllAnnotations", name, names.joinToString()))
+            addViolation(
+                io.github.baole.konture.i18n.getMessage(
+                    "function.should.haveAllAnnotations",
+                    name,
+                    names.joinToString(),
+                ),
+            )
         }
     }
 
@@ -139,7 +153,13 @@ class FunctionDeclarationShouldContext internal constructor(
      */
     fun assertAnyAnnotationOf(names: List<String>) {
         if (!hasAnyAnnotation(names)) {
-            addViolation(io.github.baole.konture.i18n.getMessage("function.should.haveAnyAnnotation", name, names.joinToString()))
+            addViolation(
+                io.github.baole.konture.i18n.getMessage(
+                    "function.should.haveAnyAnnotation",
+                    name,
+                    names.joinToString(),
+                ),
+            )
         }
     }
 
@@ -172,7 +192,9 @@ class FunctionDeclarationShouldContext internal constructor(
     ) {
         val matched = parameters.any { predicate(it) }
         if (!matched) {
-            addViolation(io.github.baole.konture.i18n.getMessage("function.should.haveAnyParameterMatching", name, message))
+            addViolation(
+                io.github.baole.konture.i18n.getMessage("function.should.haveAnyParameterMatching", name, message),
+            )
         }
     }
 }
@@ -184,7 +206,8 @@ class FunctionDeclarationShouldContext internal constructor(
 /**
  * Helper extension to check if a function has the specified annotation.
  */
-fun FunctionDeclarationContext.hasAnnotation(name: String): Boolean = declaration.annotations.any { it.name == name || it.fqName == name }
+fun FunctionDeclarationContext.hasAnnotation(name: String): Boolean =
+    declaration.annotations.any { it.name == name || it.fqName == name }
 
 /**
  * Helper extension to check if a function has all of the specified annotations.
@@ -245,3 +268,17 @@ val FunctionDeclarationContext.isExtension: Boolean get() = declaration.isExtens
 
 /** Delegates kdocText property to the underlying [FunctionDeclaration]. */
 val FunctionDeclarationContext.kdocText: String? get() = declaration.kdocText
+
+/** Filters functions residing in a package matching [packagePattern]. */
+fun List<FunctionDeclarationContext>.residingInPackage(packagePattern: String): List<FunctionDeclarationContext> =
+    filter { io.github.baole.konture.impl.PatternMatchers.matchesPackage(packagePattern, it.packageName) }
+
+/** Filters functions residing in a module matching [modulePath]. */
+fun List<FunctionDeclarationContext>.residingInModule(modulePath: String): List<FunctionDeclarationContext> =
+    filter {
+        it.modulePath == modulePath || io.github.baole.konture.impl.PatternMatchers.matchesModuleGlob(modulePath, it.modulePath)
+    }
+
+/** Filters functions annotated with [annotationName]. */
+fun List<FunctionDeclarationContext>.annotatedWith(annotationName: String): List<FunctionDeclarationContext> =
+    filter { it.hasAnnotation(annotationName) }

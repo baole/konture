@@ -231,10 +231,14 @@ class ProjectGraphLoaderTest {
                     ),
                 dependencies = emptyList(),
             )
-        val layout = LayoutModel(LayoutModel.CURRENT_SCHEMA_VERSION, builds = listOf(BuildModel(":", listOf(app, helper))))
+        val layout =
+            LayoutModel(LayoutModel.CURRENT_SCHEMA_VERSION, builds = listOf(BuildModel(":", listOf(app, helper))))
 
         val graph = ProjectGraphLoader.loadFromStream(ByteArrayInputStream(json.encodeToString(layout).toByteArray()))
-        val consumer = graph.getAllModules().single { it.path == ":app" }.files.single { it.name == "Consumer.kt" }.classes.single()
+        val consumer =
+            graph.getAllModules().single {
+                it.path == ":app"
+            }.files.single { it.name == "Consumer.kt" }.classes.single()
 
         assertEquals("kotlin.Result", consumer.functions.single().resolvedReturnType)
     }
@@ -257,7 +261,11 @@ class ProjectGraphLoaderTest {
                 )
             }
         val userFile = File(libraryDir, "User.kt").apply { writeText("package api\nclass User") }
-        val aliasFile = File(libraryDir, "PublicUser.kt").apply { writeText("package api\ntypealias PublicUser = User") }
+        val aliasFile =
+            File(
+                libraryDir,
+                "PublicUser.kt",
+            ).apply { writeText("package api\ntypealias PublicUser = User") }
         val app =
             ModuleModel(
                 path = ":app",
@@ -292,7 +300,8 @@ class ProjectGraphLoaderTest {
                     ),
                 dependencies = emptyList(),
             )
-        val layout = LayoutModel(LayoutModel.CURRENT_SCHEMA_VERSION, builds = listOf(BuildModel(":", listOf(app, library))))
+        val layout =
+            LayoutModel(LayoutModel.CURRENT_SCHEMA_VERSION, builds = listOf(BuildModel(":", listOf(app, library))))
 
         val graph = ProjectGraphLoader.loadFromStream(ByteArrayInputStream(json.encodeToString(layout).toByteArray()))
         val consumer = graph.getAllModules().single { it.path == ":app" }.files.single().classes.single()
@@ -364,7 +373,8 @@ class ProjectGraphLoaderTest {
                     ),
                 dependencies = emptyList(),
             )
-        val layout = LayoutModel(LayoutModel.CURRENT_SCHEMA_VERSION, builds = listOf(BuildModel(":", listOf(app, library))))
+        val layout =
+            LayoutModel(LayoutModel.CURRENT_SCHEMA_VERSION, builds = listOf(BuildModel(":", listOf(app, library))))
 
         val graph = ProjectGraphLoader.loadFromStream(ByteArrayInputStream(json.encodeToString(layout).toByteArray()))
         val consumer = graph.getAllModules().single { it.path == ":app" }.files.single().classes.single()
@@ -381,7 +391,9 @@ class ProjectGraphLoaderTest {
         val commonFile = File(commonDir, "Shared.kt").apply { writeText("package sample\nclass Shared") }
         val jvmFile =
             File(jvmDir, "JvmConsumer.kt").apply {
-                writeText("package sample\nclass JvmConsumer { fun load(): Shared = TODO(); fun invalid(): IosOnly = TODO() }")
+                writeText(
+                    "package sample\nclass JvmConsumer { fun load(): Shared = TODO(); fun invalid(): IosOnly = TODO() }",
+                )
             }
         val iosFile = File(iosDir, "IosOnly.kt").apply { writeText("package sample\nclass IosOnly") }
         val module =
@@ -434,7 +446,9 @@ class ProjectGraphLoaderTest {
         val commonFile = File(commonDir, "Shared.kt").apply { writeText("package sample\nclass Shared") }
         val iosFile =
             File(iosDir, "IosConsumer.kt").apply {
-                writeText("package sample\nclass IosConsumer { fun shared(): Shared = TODO(); fun invalid(): LinuxOnly = TODO() }")
+                writeText(
+                    "package sample\nclass IosConsumer { fun shared(): Shared = TODO(); fun invalid(): LinuxOnly = TODO() }",
+                )
             }
         val linuxFile = File(linuxDir, "LinuxOnly.kt").apply { writeText("package sample\nclass LinuxOnly") }
         val module =
@@ -562,7 +576,8 @@ class ProjectGraphLoaderTest {
                     ),
                 dependencies = emptyList(),
             )
-        val layout = LayoutModel(LayoutModel.CURRENT_SCHEMA_VERSION, builds = listOf(BuildModel(":", listOf(app, library))))
+        val layout =
+            LayoutModel(LayoutModel.CURRENT_SCHEMA_VERSION, builds = listOf(BuildModel(":", listOf(app, library))))
 
         val graph = ProjectGraphLoader.loadFromStream(ByteArrayInputStream(json.encodeToString(layout).toByteArray()))
         val consumer = graph.getAllModules().single { it.path == ":app" }.files.single().classes.single()
@@ -615,7 +630,8 @@ class ProjectGraphLoaderTest {
                     ),
                 dependencies = emptyList(),
             )
-        val layout = LayoutModel(LayoutModel.CURRENT_SCHEMA_VERSION, builds = listOf(BuildModel(":", listOf(app, library))))
+        val layout =
+            LayoutModel(LayoutModel.CURRENT_SCHEMA_VERSION, builds = listOf(BuildModel(":", listOf(app, library))))
 
         val graph = ProjectGraphLoader.loadFromStream(ByteArrayInputStream(json.encodeToString(layout).toByteArray()))
         val consumer = graph.getAllModules().single { it.path == ":app" }.files.single().classes.single()
@@ -669,7 +685,8 @@ class ProjectGraphLoaderTest {
                     ),
                 dependencies = emptyList(),
             )
-        val layout = LayoutModel(LayoutModel.CURRENT_SCHEMA_VERSION, builds = listOf(BuildModel(":", listOf(app, library))))
+        val layout =
+            LayoutModel(LayoutModel.CURRENT_SCHEMA_VERSION, builds = listOf(BuildModel(":", listOf(app, library))))
 
         val graph = ProjectGraphLoader.loadFromStream(ByteArrayInputStream(json.encodeToString(layout).toByteArray()))
         val consumer = graph.getAllModules().single { it.path == ":app" }.files.single().classes.single()
@@ -691,7 +708,11 @@ class ProjectGraphLoaderTest {
             File(iosDir, "IosConsumer.kt").apply {
                 writeText("package sample\nclass IosConsumer { fun load(): LibraryCommon = TODO() }")
             }
-        val libraryFile = File(libraryDir, "LibraryCommon.kt").apply { writeText("package sample\nclass LibraryCommon") }
+        val libraryFile =
+            File(
+                libraryDir,
+                "LibraryCommon.kt",
+            ).apply { writeText("package sample\nclass LibraryCommon") }
         val app =
             ModuleModel(
                 path = ":app",
@@ -748,7 +769,8 @@ class ProjectGraphLoaderTest {
                     ),
                 dependencies = emptyList(),
             )
-        val layout = LayoutModel(LayoutModel.CURRENT_SCHEMA_VERSION, builds = listOf(BuildModel(":", listOf(app, library))))
+        val layout =
+            LayoutModel(LayoutModel.CURRENT_SCHEMA_VERSION, builds = listOf(BuildModel(":", listOf(app, library))))
 
         val graph = ProjectGraphLoader.loadFromStream(ByteArrayInputStream(json.encodeToString(layout).toByteArray()))
         val appModule = graph.getAllModules().single { it.path == ":app" }
@@ -978,16 +1000,27 @@ class ProjectGraphLoaderTest {
                 builds = listOf(BuildModel(id = ":", modules = listOf(moduleModel))),
             )
 
-        val graph = ProjectGraphLoader.loadFromStream(ByteArrayInputStream(json.encodeToString(layoutModel).toByteArray()))
+        val graph =
+            ProjectGraphLoader.loadFromStream(
+                ByteArrayInputStream(json.encodeToString(layoutModel).toByteArray()),
+            )
 
         // Production module main files
         val prodModule = graph.getAllModules().single { it.path == ":discovery-module" }
         assertNotNull(prodModule)
-        val mainFileNames = prodModule.files.filter { file -> file.sourceSets.any { it.name == "main" } }.map { it.name }.toSet()
+        val mainFileNames =
+            prodModule.files.filter {
+                    file ->
+                file.sourceSets.any { it.name == "main" }
+            }.map { it.name }.toSet()
         assertEquals(setOf("Alpha.kt", "Beta.kt", "Script.kts"), mainFileNames)
 
         // Test module files
-        val testFileNames = prodModule.files.filter { file -> file.sourceSets.any { it.name == "test" } }.map { it.name }.toSet()
+        val testFileNames =
+            prodModule.files.filter {
+                    file ->
+                file.sourceSets.any { it.name == "test" }
+            }.map { it.name }.toSet()
         assertEquals(setOf("AlphaTest.kt", "BetaTest.kt"), testFileNames)
 
         // All module files combined

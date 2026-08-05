@@ -1,5 +1,6 @@
 /*
- * Copyright 2026 Bao Le Duc
+ * Copyright 2026 The Konture Contributors
+ * Contributors: Bao Le Duc (@baole)
  * SPDX-License-Identifier: Apache-2.0
  */
 
@@ -38,6 +39,61 @@ class FilesRuleBuilder(
     private var activeShouldOperator = LogicalOperator.AND
     private var negateNextShould = false
     private var allowEmpty = false
+
+    /**
+     * Debugging helper that prints information about all files matched by the `that()` filter.
+     *
+     * @param logger Custom log consumer (defaults to printing to standard output).
+     */
+    fun printMatchedFiles(
+        logger: (FileDeclarationContext) -> Unit = {
+            println(
+                getMessage(
+                    "debug.files.matched",
+                    it.declaration.name,
+                    ViolationLocation.format(it.declaration, it.modulePath, it.sourceSet?.name),
+                    it.declaration.packageName,
+                ),
+            )
+        },
+    ): FilesRuleBuilder =
+        this.apply {
+            setShould { file, _, _ ->
+                logger(file)
+            }
+        }
+
+    /**
+     * Debugging helper that prints information about all discovered files in the project graph.
+     *
+     * @param logger Custom log consumer (defaults to printing to standard output).
+     */
+    fun printAllFiles(
+        logger: (FileDeclarationContext) -> Unit = {
+            println(
+                getMessage(
+                    "debug.files.discovered",
+                    it.declaration.name,
+                    ViolationLocation.format(it.declaration, it.modulePath, it.sourceSet?.name),
+                    it.declaration.packageName,
+                ),
+            )
+        },
+    ): FilesRuleBuilder =
+        this.apply {
+            graph.getAllModules().flatMap { module ->
+                module.files.flatMap { file ->
+                    file.membershipsFor(module.path).filter(sourceSets::matches).map { sourceSet ->
+                        FileDeclarationContext(file, module.path, sourceSet)
+                    }
+                }
+            }.distinctBy {
+                Pair(
+                    it.modulePath,
+                    it.declaration.filePath.ifEmpty { it.declaration.name },
+                )
+            }.forEach(logger)
+        }
 
     /**
      * Configures this builder to allow empty selections (i.e. if no files match the `that()` filter,
@@ -162,7 +218,9 @@ class FilesRuleBuilder(
         }
     }
 
-    internal fun setShould(assertion: (FileDeclarationContext, List<FileDeclarationContext>, MutableList<String>) -> Unit) {
+    internal fun setShould(
+        assertion: (FileDeclarationContext, List<FileDeclarationContext>, MutableList<String>) -> Unit,
+    ) {
         val actualAssertion =
             if (negateNextShould) {
                 negateNextShould = false
@@ -263,7 +321,9 @@ class FilesRuleBuilder(
                 val startIdx = list.size
                 assertion(file, allFiles, list)
                 for (i in startIdx until list.size) {
-                    list[i] = "${list[i]} (at ${ViolationLocation.of(file.modulePath, file.sourceSet?.name, file.declaration.filePath)})"
+                    if (!list[i].contains(" (at ")) {
+                        list[i] = "${list[i]} (at ${ViolationLocation.format(file.declaration, file.modulePath, file.sourceSet?.name)})"
+                    }
                 }
             }
         }
