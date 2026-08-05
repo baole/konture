@@ -39,10 +39,66 @@ class KontureSliceScope(
                 classesByKey.getOrPut(key) { mutableListOf() }.add(cls)
                 packagesByKey.getOrPut(key) { mutableSetOf() }.add(cls.packageName)
             }
-            val derived = classesByKey.keys.sorted().map {
-                Slice(it, packagesByKey.getValue(it), classesByKey.getValue(it))
-            }
+            val derived =
+                classesByKey.keys.sorted().map {
+                    Slice(it, packagesByKey.getValue(it), classesByKey.getValue(it))
+                }
             return KontureSliceScope(derived)
+        }
+
+        /**
+         * Derives a [KontureSliceScope] for a specific Gradle module path based on a slice pattern.
+         */
+        fun fromModule(
+            pattern: String,
+            modulePath: String,
+            graph: ProjectGraph = Konture.projectGraph,
+            sourceSets: SourceSetSelector = SourceSets.production(),
+        ): KontureSliceScope {
+            val norm = if (!modulePath.startsWith(":") && !modulePath.startsWith("**") && modulePath.isNotEmpty()) ":$modulePath" else modulePath
+            val module =
+                graph.getAllModules().find { it.path == norm }
+                    ?: throw IllegalArgumentException("Module $modulePath not found in project graph")
+            val moduleClasses =
+                module.files.flatMap { file ->
+                    if (file.membershipsFor(module.path).any(sourceSets::matches)) file.classes else emptyList()
+                }.distinctBy { it.fqName to it.filePath }
+
+            val classesByKey = linkedMapOf<String, MutableList<ClassDeclaration>>()
+            val packagesByKey = linkedMapOf<String, MutableSet<String>>()
+            for (cls in moduleClasses) {
+                val key = PatternMatchers.sliceKeyFor(pattern, cls.packageName) ?: continue
+                classesByKey.getOrPut(key) { mutableListOf() }.add(cls)
+                packagesByKey.getOrPut(key) { mutableSetOf() }.add(cls.packageName)
+            }
+            val derived =
+                classesByKey.keys.sorted().map {
+                    Slice(it, packagesByKey.getValue(it), classesByKey.getValue(it))
+                }
+            return KontureSliceScope(derived)
+        }
+
+        /**
+         * Derives a [KontureSliceScope] for a specific package prefix based on a slice pattern.
+         */
+        fun fromPackage(
+            pattern: String,
+            packageName: String,
+            graph: ProjectGraph = Konture.projectGraph,
+            sourceSets: SourceSetSelector = SourceSets.production(),
+        ): KontureSliceScope {
+            val allSlices = fromProject(pattern, graph, sourceSets)
+            val filteredSlices =
+                allSlices.slices.mapNotNull { slice ->
+                    val matchingPackages = slice.packages.filter { it == packageName || it.startsWith("$packageName.") }.toSet()
+                    if (matchingPackages.isNotEmpty()) {
+                        val matchingClasses = slice.classes.filter { it.packageName in matchingPackages }
+                        Slice(slice.key, matchingPackages, matchingClasses)
+                    } else {
+                        null
+                    }
+                }
+            return KontureSliceScope(filteredSlices)
         }
     }
 

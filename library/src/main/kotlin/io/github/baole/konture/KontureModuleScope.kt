@@ -21,21 +21,50 @@ class KontureModuleScope(
          * Creates a [KontureModuleScope] representing all modules in the project.
          *
          * @param graph The project graph to use (defaults to [Konture.projectGraph]).
+         * @param sourceSets The source set selector filter.
          */
-        fun fromProject(graph: ProjectGraph = Konture.projectGraph): KontureModuleScope =
-            KontureModuleScope(graph.getAllModules())
+        fun fromProject(
+            graph: ProjectGraph = Konture.projectGraph,
+            sourceSets: SourceSetSelector? = null,
+        ): KontureModuleScope {
+            val allModules = graph.getAllModules()
+            if (sourceSets == null) {
+                return KontureModuleScope(allModules)
+            }
+            val filteredModules =
+                allModules.map { module ->
+                    val matchingSets =
+                        module.sourceSets.filter { sourceSet ->
+                            val kindEnum =
+                                when (sourceSet.kind) {
+                                    "ANDROID_VARIANT" -> SourceSetKind.ANDROID
+                                    "KMP" -> SourceSetKind.KMP
+                                    else -> SourceSetKind.JVM
+                                }
+                            val roleEnum = if (sourceSet.production) SourceSetRole.PRODUCTION else SourceSetRole.TEST
+                            sourceSets.matches(SourceSetId(module.path, sourceSet.name, kindEnum, roleEnum))
+                        }
+                    module.copy(sourceSets = matchingSets)
+                }
+            return KontureModuleScope(filteredModules)
+        }
     }
 
     /**
      * Filters this scope to modules whose path matches the specified path pattern.
      */
     fun byPath(pathPattern: String): KontureModuleScope {
-        val normalized = if (!pathPattern.startsWith(":") && !pathPattern.startsWith("**") && pathPattern.isNotEmpty()) {
-            ":$pathPattern"
-        } else {
-            pathPattern
-        }
-        return KontureModuleScope(modules.filter { it.path == normalized || PatternMatchers.matchesSimpleGlob(normalized, it.path) })
+        val normalized =
+            if (!pathPattern.startsWith(":") && !pathPattern.startsWith("**") && pathPattern.isNotEmpty()) {
+                ":$pathPattern"
+            } else {
+                pathPattern
+            }
+        return KontureModuleScope(
+            modules.filter {
+                it.path == normalized || PatternMatchers.matchesSimpleGlob(normalized, it.path)
+            },
+        )
     }
 
     /**

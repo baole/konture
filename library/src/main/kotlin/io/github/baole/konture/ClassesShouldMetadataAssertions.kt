@@ -11,6 +11,7 @@ import io.github.baole.konture.i18n.getMessage
 /**
  * Fluent API for defining assertion rules on Kotlin classes.
  */
+@Suppress("ComplexInterface")
 internal interface ClassesShouldMetadataAssertions {
     val builder: ClassesRuleBuilder
 
@@ -264,8 +265,6 @@ internal interface ClassesShouldMetadataAssertions {
         return builder
     }
 
-
-
     /**
      * Asserts that selected classes have specified modifier.
      */
@@ -500,36 +499,112 @@ internal interface ClassesShouldMetadataAssertions {
     infix fun containProperty(propertyName: String): ClassesRuleBuilder {
         builder.setShould { cls, _, violations ->
             if (!cls.properties.any { it.name == propertyName }) {
-                violations.add("Class ${cls.fqName} should contain property '$propertyName'")
+                violations.add(getMessage("class.should.containProperty", cls.fqName, propertyName))
             }
         }
         return builder
     }
+
+    infix fun containProperty(propertyNames: List<String>): ClassesRuleBuilder {
+        builder.setShould { cls, _, violations ->
+            val missing = propertyNames.filter { prop -> !cls.properties.any { it.name == prop } }
+            if (missing.isNotEmpty()) {
+                violations.add(getMessage("class.should.containProperty", cls.fqName, missing.joinToString()))
+            }
+        }
+        return builder
+    }
+
+    fun containProperty(vararg propertyNames: String): ClassesRuleBuilder = containProperty(propertyNames.toList())
+
+    infix fun containProperties(propertyNames: List<String>): ClassesRuleBuilder = containProperty(propertyNames)
+
+    fun containProperties(vararg propertyNames: String): ClassesRuleBuilder = containProperty(propertyNames.toList())
 
     infix fun notContainProperty(propertyName: String): ClassesRuleBuilder {
         builder.setShould { cls, _, violations ->
             if (cls.properties.any { it.name == propertyName }) {
-                violations.add("Class ${cls.fqName} should not contain property '$propertyName'")
+                violations.add(getMessage("class.should.notContainProperty", cls.fqName, propertyName))
             }
         }
         return builder
     }
+
+    infix fun notContainProperty(propertyNames: List<String>): ClassesRuleBuilder {
+        builder.setShould { cls, _, violations ->
+            val present = propertyNames.filter { prop -> cls.properties.any { it.name == prop } }
+            if (present.isNotEmpty()) {
+                violations.add(getMessage("class.should.notContainProperty", cls.fqName, present.joinToString()))
+            }
+        }
+        return builder
+    }
+
+    fun notContainProperty(vararg propertyNames: String): ClassesRuleBuilder =
+        notContainProperty(
+            propertyNames.toList(),
+        )
+
+    infix fun notContainProperties(propertyNames: List<String>): ClassesRuleBuilder = notContainProperty(propertyNames)
+
+    fun notContainProperties(vararg propertyNames: String): ClassesRuleBuilder =
+        notContainProperty(
+            propertyNames.toList(),
+        )
 
     infix fun containFunction(functionName: String): ClassesRuleBuilder {
         builder.setShould { cls, _, violations ->
             if (!cls.functions.any { it.name == functionName }) {
-                violations.add("Class ${cls.fqName} should contain function '$functionName'")
+                violations.add(getMessage("class.should.containFunction", cls.fqName, functionName))
             }
         }
         return builder
     }
 
-    infix fun notContainFunction(functionName: String): ClassesRuleBuilder {
+    infix fun containFunction(functionNames: List<String>): ClassesRuleBuilder {
         builder.setShould { cls, _, violations ->
-            if (cls.functions.any { it.name == functionName }) {
-                violations.add("Class ${cls.fqName} should not contain function '$functionName'")
+            val missing = functionNames.filter { func -> !cls.functions.any { it.name == func } }
+            if (missing.isNotEmpty()) {
+                violations.add(getMessage("class.should.containFunction", cls.fqName, missing.joinToString()))
             }
         }
         return builder
     }
+
+    fun containFunction(vararg functionNames: String): ClassesRuleBuilder = containFunction(functionNames.toList())
+
+    infix fun containFunctions(functionNames: List<String>): ClassesRuleBuilder = containFunction(functionNames)
+
+    fun containFunctions(vararg functionNames: String): ClassesRuleBuilder = containFunction(functionNames.toList())
+
+    infix fun notContainFunction(functionName: String): ClassesRuleBuilder {
+        builder.setShould { cls, _, violations ->
+            if (cls.functions.any { it.name == functionName }) {
+                violations.add(getMessage("class.should.notContainFunction", cls.fqName, functionName))
+            }
+        }
+        return builder
+    }
+
+    infix fun notContainFunction(functionNames: List<String>): ClassesRuleBuilder {
+        builder.setShould { cls, _, violations ->
+            val present = functionNames.filter { func -> cls.functions.any { it.name == func } }
+            if (present.isNotEmpty()) {
+                violations.add(getMessage("class.should.notContainFunction", cls.fqName, present.joinToString()))
+            }
+        }
+        return builder
+    }
+
+    fun notContainFunction(vararg functionNames: String): ClassesRuleBuilder =
+        notContainFunction(
+            functionNames.toList(),
+        )
+
+    infix fun notContainFunctions(functionNames: List<String>): ClassesRuleBuilder = notContainFunction(functionNames)
+
+    fun notContainFunctions(vararg functionNames: String): ClassesRuleBuilder =
+        notContainFunction(
+            functionNames.toList(),
+        )
 }

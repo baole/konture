@@ -1,5 +1,6 @@
 /*
- * Copyright 2026 Bao Le Duc
+ * Copyright 2026 The Konture Contributors
+ * Contributors: Bao Le Duc (@baole)
  * SPDX-License-Identifier: Apache-2.0
  */
 
@@ -180,3 +181,13 @@ val FileDeclarationContext.topLevelFunctions: List<FunctionDeclaration> get() = 
 
 /** Delegates topLevelProperties property to the underlying [FileDeclaration]. */
 val FileDeclarationContext.topLevelProperties: List<PropertyDeclaration> get() = declaration.topLevelProperties
+
+/** Filters files residing in a package matching [packagePattern]. */
+fun List<FileDeclarationContext>.residingInPackage(packagePattern: String): List<FileDeclarationContext> =
+    filter { io.github.baole.konture.impl.PatternMatchers.matchesPackage(packagePattern, it.packageName) }
+
+/** Filters files residing in a module matching [modulePath]. */
+fun List<FileDeclarationContext>.residingInModule(modulePath: String): List<FileDeclarationContext> =
+    filter {
+        it.modulePath == modulePath || io.github.baole.konture.impl.PatternMatchers.matchesModuleGlob(modulePath, it.modulePath)
+    }

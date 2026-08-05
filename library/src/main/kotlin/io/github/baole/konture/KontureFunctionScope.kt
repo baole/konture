@@ -179,15 +179,26 @@ fun KontureFunctionScope.withModule(modulePath: String) = KontureFunctionScope(f
 fun KontureFunctionScope.extensionFunctions(): KontureFunctionScope =
     KontureFunctionScope(functions.extensionFunctions())
 
-fun KontureFunctionScope.topLevelFunctions(): KontureFunctionScope =
-    KontureFunctionScope(functions.topLevelFunctions())
+fun KontureFunctionScope.topLevelFunctions(): KontureFunctionScope = KontureFunctionScope(functions.topLevelFunctions())
 
-fun KontureFunctionScope.memberFunctions(): KontureFunctionScope =
-    KontureFunctionScope(functions.memberFunctions())
+fun KontureFunctionScope.memberFunctions(): KontureFunctionScope = KontureFunctionScope(functions.memberFunctions())
 
+fun KontureFunctionScope.withReturnType(returnType: String): KontureFunctionScope =
+    KontureFunctionScope(functions.filter { it.returnType == returnType })
 
+fun KontureFunctionScope.withParameterOf(paramType: String): KontureFunctionScope =
+    KontureFunctionScope(
+        functions.filter {
+                func ->
+            func.parameters.any { p -> p.type == paramType || p.type.endsWith(".$paramType") }
+        },
+    )
 
+fun KontureFunctionScope.withAnnotationOf(annotationName: String): KontureFunctionScope =
+    KontureFunctionScope(functions.filter { it.hasAnnotation(annotationName) })
 
+fun KontureFunctionScope.withVisibility(visibility: Visibility): KontureFunctionScope =
+    KontureFunctionScope(functions.filter { it.visibility == visibility })
 
 // Assertion extensions on KontureFunctionScope
 
@@ -208,4 +219,8 @@ fun KontureFunctionScope.assertTrue(
         val prefix = additionalMessage?.let { "$it\n" } ?: ""
         throw AssertionError("${prefix}Functions failed assertion:\n - $details")
     }
+}
+
+fun KontureFunctionScope.assertHasKDoc(additionalMessage: String? = null) {
+    assertTrue(additionalMessage) { it.kdocText?.isNotBlank() == true }
 }

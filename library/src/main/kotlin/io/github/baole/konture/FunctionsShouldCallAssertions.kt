@@ -58,4 +58,7 @@ interface FunctionsShouldCallAssertions {
 inline fun <reified T : Any> FunctionsShouldCallAssertions.notCall(): FunctionsRuleBuilder = notCall(T::class)
 
 /** Fails for every actual class/type use of [T] in the selected function. */
-inline fun <reified T : Any> FunctionsShouldCallAssertions.notReferenceClass(): FunctionsRuleBuilder = notReferenceClass(T::class)
+inline fun <reified T : Any> FunctionsShouldCallAssertions.notReferenceClass(): FunctionsRuleBuilder =
+    notReferenceClass(
+        T::class,
+    )

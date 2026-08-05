@@ -1,5 +1,6 @@
 /*
- * Copyright 2026 Bao Le Duc
+ * Copyright 2026 The Konture Contributors
+ * Contributors: Bao Le Duc (@baole)
  * SPDX-License-Identifier: Apache-2.0
  */
 
@@ -83,3 +84,11 @@ class ModuleShouldContext internal constructor(
         }
     }
 }
+
+/** Filters modules that depend on [targetModulePath]. */
+fun List<Module>.dependingOnModule(targetModulePath: String): List<Module> =
+    filter { module ->
+        module.dependencies.any { dep ->
+            dep.targetPath == targetModulePath || io.github.baole.konture.impl.PatternMatchers.matchesModuleGlob(targetModulePath, dep.targetPath)
+        }
+    }

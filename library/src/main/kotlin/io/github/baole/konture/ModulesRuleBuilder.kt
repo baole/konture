@@ -21,6 +21,7 @@ import io.github.baole.konture.impl.LogicalOperator
 @KontureDsl
 class ModulesRuleBuilder(
     internal val graph: ProjectGraph = Konture.projectGraph,
+    internal val sourceSets: SourceSetSelector? = null,
 ) {
     private var thatPredicate: ((Module) -> Boolean)? = null
     private var shouldAssertion: ((Module, ProjectGraph, MutableList<String>) -> Unit)? = null

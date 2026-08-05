@@ -1,5 +1,6 @@
 /*
- * Copyright 2026 Bao Le Duc
+ * Copyright 2026 The Konture Contributors
+ * Contributors: Bao Le Duc (@baole)
  * SPDX-License-Identifier: Apache-2.0
  */
 
@@ -267,3 +268,17 @@ val FunctionDeclarationContext.isExtension: Boolean get() = declaration.isExtens
 
 /** Delegates kdocText property to the underlying [FunctionDeclaration]. */
 val FunctionDeclarationContext.kdocText: String? get() = declaration.kdocText
+
+/** Filters functions residing in a package matching [packagePattern]. */
+fun List<FunctionDeclarationContext>.residingInPackage(packagePattern: String): List<FunctionDeclarationContext> =
+    filter { io.github.baole.konture.impl.PatternMatchers.matchesPackage(packagePattern, it.packageName) }
+
+/** Filters functions residing in a module matching [modulePath]. */
+fun List<FunctionDeclarationContext>.residingInModule(modulePath: String): List<FunctionDeclarationContext> =
+    filter {
+        it.modulePath == modulePath || io.github.baole.konture.impl.PatternMatchers.matchesModuleGlob(modulePath, it.modulePath)
+    }
+
+/** Filters functions annotated with [annotationName]. */
+fun List<FunctionDeclarationContext>.annotatedWith(annotationName: String): List<FunctionDeclarationContext> =
+    filter { it.hasAnnotation(annotationName) }

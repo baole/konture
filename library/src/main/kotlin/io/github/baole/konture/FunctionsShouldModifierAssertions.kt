@@ -110,7 +110,6 @@ interface FunctionsShouldModifierAssertions {
         return builder
     }
 
-
     fun beOperator(): FunctionsRuleBuilder {
         builder.setShould { func, _, violations ->
             if (!func.declaration.modifiers.contains(Modifier.OPERATOR)) {
@@ -133,7 +132,6 @@ interface FunctionsShouldModifierAssertions {
         return builder
     }
 
-
     fun beTopLevel(): FunctionsRuleBuilder {
         builder.setShould { func, _, violations ->
             if (func.className != null) {
@@ -151,7 +149,6 @@ interface FunctionsShouldModifierAssertions {
         }
         return builder
     }
-
 
     /**
      * Asserts that selected functions contain the specified modifier.

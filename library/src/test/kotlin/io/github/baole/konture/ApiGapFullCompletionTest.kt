@@ -17,7 +17,6 @@ import org.junit.jupiter.api.Test
 annotation class SampleTestAnnotation
 
 class ApiGapFullCompletionTest {
-
     @Test
     fun `test files that haveName overloads`() {
         val file = FileDeclaration(name = "SampleFile.kt", packageName = "com.example", filePath = "src/SampleFile.kt")
@@ -38,7 +37,12 @@ class ApiGapFullCompletionTest {
 
     @Test
     fun `test files should notResideInAPackage and notResideInAModule`() {
-        val file = FileDeclaration(name = "SampleFile.kt", packageName = "com.example.internal", filePath = "src/SampleFile.kt")
+        val file =
+            FileDeclaration(
+                name = "SampleFile.kt",
+                packageName = "com.example.internal",
+                filePath = "src/SampleFile.kt",
+            )
         val context = FileDeclarationContext(file, ":app", null)
 
         val builder = FilesRuleBuilder(ProjectGraph(emptyMap()))
@@ -53,17 +57,18 @@ class ApiGapFullCompletionTest {
     @Test
     fun `test classesThat haveAnnotationOf overloads and classScope aliases`() {
         val annot = AnnotationDeclaration("SampleTestAnnotation", "io.github.baole.konture.SampleTestAnnotation")
-        val cls = ClassDeclaration(
-            name = "SampleClass",
-            fqName = "com.example.SampleClass",
-            packageName = "com.example",
-            isInterface = false,
-            isAbstract = false,
-            annotations = listOf(annot),
-            imports = emptyList(),
-            referencedTypes = emptySet(),
-            filePath = "src/SampleClass.kt",
-        )
+        val cls =
+            ClassDeclaration(
+                name = "SampleClass",
+                fqName = "com.example.SampleClass",
+                packageName = "com.example",
+                isInterface = false,
+                isAbstract = false,
+                annotations = listOf(annot),
+                imports = emptyList(),
+                referencedTypes = emptySet(),
+                filePath = "src/SampleClass.kt",
+            )
         val mod = Module("build", ":app", "/project/app", emptyList(), emptyList(), emptyList())
         val graph = ProjectGraph(mapOf("build" to listOf(mod)))
 
@@ -81,17 +86,18 @@ class ApiGapFullCompletionTest {
 
     @Test
     fun `test functionsThat haveExtensionReceiver and reified notReferenceClass`() {
-        val funcDecl = FunctionDeclaration(
-            name = "toUpperCustom",
-            visibility = Visibility.PUBLIC,
-            modifiers = emptySet(),
-            returnType = "String",
-            parameters = emptyList(),
-            annotations = emptyList(),
-            kdocText = null,
-            isExtension = true,
-            receiverType = "kotlin.String",
-        )
+        val funcDecl =
+            FunctionDeclaration(
+                name = "toUpperCustom",
+                visibility = Visibility.PUBLIC,
+                modifiers = emptySet(),
+                returnType = "String",
+                parameters = emptyList(),
+                annotations = emptyList(),
+                kdocText = null,
+                isExtension = true,
+                receiverType = "kotlin.String",
+            )
         val funcCtx = FunctionDeclarationContext(funcDecl, "com.example", null, ":app", "src/File.kt", null)
 
         val builder = FunctionsRuleBuilder(ProjectGraph(emptyMap()))
@@ -127,39 +133,54 @@ class ApiGapFullCompletionTest {
 
     @Test
     fun `test SlicesRuleBuilder with SlicesThat, SlicesFluent, and KontureSliceScope`() {
-        val cls1 = ClassDeclaration(
-            name = "FeatureAClass",
-            fqName = "com.acme.featurea.FeatureAClass",
-            packageName = "com.acme.featurea",
-            isInterface = false,
-            isAbstract = false,
-            annotations = emptyList(),
-            imports = emptyList(),
-            referencedTypes = emptySet(),
-            filePath = "src/A.kt",
-        )
-        val cls2 = ClassDeclaration(
-            name = "FeatureBClass",
-            fqName = "com.acme.featureb.FeatureBClass",
-            packageName = "com.acme.featureb",
-            isInterface = false,
-            isAbstract = false,
-            annotations = emptyList(),
-            imports = emptyList(),
-            referencedTypes = emptySet(),
-            filePath = "src/B.kt",
-        )
-        val file1 = FileDeclaration(name = "A.kt", packageName = "com.acme.featurea", filePath = "src/A.kt", classes = listOf(cls1))
-        val file2 = FileDeclaration(name = "B.kt", packageName = "com.acme.featureb", filePath = "src/B.kt", classes = listOf(cls2))
-        val mod = Module(
-            buildId = "build",
-            path = ":app",
-            projectDir = "/project/app",
-            appliedPlugins = emptyList(),
-            sourceSets = emptyList(),
-            dependencies = emptyList(),
-            files = listOf(file1, file2),
-        )
+        val cls1 =
+            ClassDeclaration(
+                name = "FeatureAClass",
+                fqName = "com.acme.featurea.FeatureAClass",
+                packageName = "com.acme.featurea",
+                isInterface = false,
+                isAbstract = false,
+                annotations = emptyList(),
+                imports = emptyList(),
+                referencedTypes = emptySet(),
+                filePath = "src/A.kt",
+            )
+        val cls2 =
+            ClassDeclaration(
+                name = "FeatureBClass",
+                fqName = "com.acme.featureb.FeatureBClass",
+                packageName = "com.acme.featureb",
+                isInterface = false,
+                isAbstract = false,
+                annotations = emptyList(),
+                imports = emptyList(),
+                referencedTypes = emptySet(),
+                filePath = "src/B.kt",
+            )
+        val file1 =
+            FileDeclaration(
+                name = "A.kt",
+                packageName = "com.acme.featurea",
+                filePath = "src/A.kt",
+                classes = listOf(cls1),
+            )
+        val file2 =
+            FileDeclaration(
+                name = "B.kt",
+                packageName = "com.acme.featureb",
+                filePath = "src/B.kt",
+                classes = listOf(cls2),
+            )
+        val mod =
+            Module(
+                buildId = "build",
+                path = ":app",
+                projectDir = "/project/app",
+                appliedPlugins = emptyList(),
+                sourceSets = emptyList(),
+                dependencies = emptyList(),
+                files = listOf(file1, file2),
+            )
         val graph = ProjectGraph(mapOf("build" to listOf(mod)))
 
         val sliceScope = KontureSliceScope.fromProject("com.acme.(*)..", graph)

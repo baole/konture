@@ -77,7 +77,10 @@ class SlicesRuleBuilder(
 
     internal fun getThatPredicate(): ((Slice) -> Boolean)? = thatPredicate
 
-    internal fun checkRuleAssertions(sliceGraph: SliceGraph, violations: MutableList<String>) {
+    internal fun checkRuleAssertions(
+        sliceGraph: SliceGraph,
+        violations: MutableList<String>,
+    ) {
         assertions.forEach { it(sliceGraph, violations) }
     }
 
@@ -145,40 +148,54 @@ class SlicesRuleBuilder(
     }
 
     internal fun setThat(predicate: (Slice) -> Boolean) {
-        val actualPredicate = if (negateNext) {
-            negateNext = false
-            { s: Slice -> !predicate(s) }
-        } else {
-            predicate
-        }
+        val actualPredicate: (Slice) -> Boolean =
+            if (negateNext) {
+                negateNext = false
+                val fn: (Slice) -> Boolean = { s: Slice -> !predicate(s) }
+                fn
+            } else {
+                predicate
+            }
 
         val current = thatPredicate
         if (current == null) {
             thatPredicate = actualPredicate
         } else {
             val op = activeOperator
-            thatPredicate = when (op) {
-                LogicalOperator.OR -> { { current(it) || actualPredicate(it) } }
-                LogicalOperator.XOR -> { { current(it) xor actualPredicate(it) } }
-                LogicalOperator.AND -> { { current(it) && actualPredicate(it) } }
-            }
+            thatPredicate =
+                when (op) {
+                    LogicalOperator.OR -> {
+                        { current(it) || actualPredicate(it) }
+                    }
+                    LogicalOperator.XOR -> {
+                        { current(it) xor actualPredicate(it) }
+                    }
+                    LogicalOperator.AND -> {
+                        { current(it) && actualPredicate(it) }
+                    }
+                }
             activeOperator = LogicalOperator.AND
         }
     }
 
     internal fun setShould(assertion: (SliceGraph, MutableList<String>) -> Unit) {
-        val actualAssertion = if (negateNextShould) {
-            negateNextShould = false
-            { graph: SliceGraph, violations: MutableList<String> ->
-                val temp = mutableListOf<String>()
-                assertion(graph, temp)
-                if (temp.isEmpty()) {
-                    violations.add("Slice rule negated assertion was satisfied")
+        val actualAssertion: (SliceGraph, MutableList<String>) -> Unit =
+            if (negateNextShould) {
+                negateNextShould = false
+                val fn: (
+                    SliceGraph,
+                    MutableList<String>,
+                ) -> Unit = { graph: SliceGraph, violations: MutableList<String> ->
+                    val temp = mutableListOf<String>()
+                    assertion(graph, temp)
+                    if (temp.isEmpty()) {
+                        violations.add("Slice rule negated assertion was satisfied")
+                    }
                 }
+                fn
+            } else {
+                assertion
             }
-        } else {
-            assertion
-        }
         assertions.add(actualAssertion)
     }
 
@@ -209,7 +226,14 @@ class SlicesRuleBuilder(
             classesByKey.getOrPut(key) { mutableListOf() }.add(cls)
             packagesByKey.getOrPut(key) { mutableSetOf() }.add(cls.packageName)
         }
-        val allSlices = classesByKey.keys.sorted().map { Slice(it, packagesByKey.getValue(it), classesByKey.getValue(it)) }
+        val allSlices =
+            classesByKey.keys.sorted().map {
+                Slice(
+                    it,
+                    packagesByKey.getValue(it),
+                    classesByKey.getValue(it),
+                )
+            }
         val slices = allSlices.filter { thatPredicate?.invoke(it) ?: true }
 
         KontureLogger.log(

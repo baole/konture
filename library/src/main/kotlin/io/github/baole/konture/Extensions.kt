@@ -12,6 +12,8 @@ package io.github.baole.konture
  */
 fun Konture.modules() = ModulesRuleBuilder(projectGraph)
 
+fun Konture.modules(sourceSets: SourceSetSelector) = ModulesRuleBuilder(projectGraph, sourceSets)
+
 /**
  * Access the class-level declarative assertion rule builder.
  * Allows filtering and assertion of class structure, modifiers, annotations, visibility, and dependencies.
@@ -168,16 +170,46 @@ fun Konture.propertyScopeFromPackage(packageName: String) = KonturePropertyScope
  */
 val Konture.moduleScope: KontureModuleScope get() = KontureModuleScope.fromProject(projectGraph)
 
+fun Konture.moduleScope(): KontureModuleScope = KontureModuleScope.fromProject(projectGraph)
+
+fun Konture.moduleScope(sourceSets: SourceSetSelector): KontureModuleScope =
+    KontureModuleScope.fromProject(projectGraph, sourceSets)
+
+/**
+ * Retrieves a module-level functional [KontureModuleScope] scoped to a specific module path or pattern.
+ */
+fun Konture.moduleScopeFromModule(pattern: String): KontureModuleScope {
+    val modules =
+        projectGraph.getAllModules().filter {
+            it.path == pattern || io.github.baole.konture.impl.PatternMatchers.matchesModuleGlob(pattern, it.path)
+        }
+    return KontureModuleScope(modules)
+}
+
+fun Konture.moduleScopeFromModule(
+    pattern: String,
+    sourceSets: SourceSetSelector,
+): KontureModuleScope = KontureModuleScope.fromProject(projectGraph, sourceSets).byPath(pattern)
+
 /**
  * Retrieves a slice-level functional [KontureSliceScope] derived from a package pattern.
  */
-fun Konture.sliceScope(pattern: String): KontureSliceScope =
-    KontureSliceScope.fromProject(pattern, projectGraph)
+fun Konture.sliceScope(pattern: String): KontureSliceScope = KontureSliceScope.fromProject(pattern, projectGraph)
 
 fun Konture.sliceScope(
     pattern: String,
     sourceSets: SourceSetSelector,
 ): KontureSliceScope = KontureSliceScope.fromProject(pattern, projectGraph, sourceSets)
+
+fun Konture.sliceScopeFromModule(
+    pattern: String,
+    modulePath: String,
+): KontureSliceScope = KontureSliceScope.fromModule(pattern, modulePath, projectGraph)
+
+fun Konture.sliceScopeFromPackage(
+    pattern: String,
+    packageName: String,
+): KontureSliceScope = KontureSliceScope.fromPackage(pattern, packageName, projectGraph)
 
 // --- Block-based DSL Entry Points (Auto-Checking) ---
 
@@ -187,6 +219,13 @@ fun Konture.sliceScope(
  */
 fun Konture.modules(block: ModulesRuleBuilder.() -> Unit) {
     ModulesRuleBuilder(projectGraph).apply(block).check()
+}
+
+fun Konture.modules(
+    sourceSets: SourceSetSelector,
+    block: ModulesRuleBuilder.() -> Unit,
+) {
+    ModulesRuleBuilder(projectGraph, sourceSets).apply(block).check()
 }
 
 /**

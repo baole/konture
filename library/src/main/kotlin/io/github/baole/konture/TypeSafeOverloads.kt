@@ -4,6 +4,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+@file:Suppress("TooManyFunctions")
+
 package io.github.baole.konture
 
 import kotlin.reflect.KClass
@@ -69,7 +71,6 @@ fun PropertiesShould.haveAnnotationWithArgument(
     argName: String?,
     argValue: String,
 ): PropertiesRuleBuilder = haveAnnotationWithArgument(annotation.kontureQualifiedName(), argName, argValue)
-
 
 infix fun ClassesThat.areAssignableTo(superType: KClass<*>): ClassesRuleBuilder =
     areAssignableTo(
@@ -327,6 +328,20 @@ fun Konture.fileScopeFromPackageOf(type: KClass<*>) = fileScopeFromPackage(type.
 
 inline fun <reified T : Any> Konture.fileScopeFromPackageOf() = fileScopeFromPackageOf(T::class)
 
+fun Konture.functionScopeFromPackageOf(type: KClass<*>) =
+    functionScopeFromPackage(
+        type.toKonturePackageReference().packageName,
+    )
+
+inline fun <reified T : Any> Konture.functionScopeFromPackageOf() = functionScopeFromPackageOf(T::class)
+
+fun Konture.propertyScopeFromPackageOf(type: KClass<*>) =
+    propertyScopeFromPackage(
+        type.toKonturePackageReference().packageName,
+    )
+
+inline fun <reified T : Any> Konture.propertyScopeFromPackageOf() = propertyScopeFromPackageOf(T::class)
+
 fun FunctionAssertionScope.haveReturnType(type: KClass<*>) {
     val expectedType = type.toKontureTypeReference()
     assertions.add { function, violations ->
@@ -366,3 +381,65 @@ inline fun <reified T : Annotation> PropertyAssertionScope.haveAnnotationOfType(
 inline fun <reified T : Any> PropertiesShould.notCall(): PropertiesRuleBuilder = notCall(T::class)
 
 inline fun <reified T : Any> PropertiesShould.notReferenceClass(): PropertiesRuleBuilder = notReferenceClass(T::class)
+
+inline fun <reified T : Any> FilesThat.notContainClass(): FilesRuleBuilder = notContainClass(T::class)
+
+inline fun <reified T : Annotation> FilesThat.notContainClassesWithAnnotation(): FilesRuleBuilder =
+    notContainClassesWithAnnotation(
+        T::class,
+    )
+
+inline fun <reified T : Any> FilesThat.notHaveImportOf(): FilesRuleBuilder = notHaveImportOf(T::class)
+
+inline fun <reified T : Any> ClassesThat.areNotAssignableTo(): ClassesRuleBuilder = areNotAssignableTo(T::class)
+
+inline fun <reified T : Any> ClassesThat.areNotAssignableFrom(): ClassesRuleBuilder = areNotAssignableFrom(T::class)
+
+inline fun <reified T : Any> FunctionsThat.haveReturnType(): FunctionsRuleBuilder = haveReturnType(T::class)
+
+inline fun <reified T : Any> FunctionsThat.notHaveReturnType(): FunctionsRuleBuilder = notHaveReturnType(T::class)
+
+inline fun <reified T : Any> FunctionsThat.notHaveParameterOf(): FunctionsRuleBuilder = notHaveParameterOf(T::class)
+
+inline fun <reified T : Any> SlicesShould.notContainClass(): SlicesRuleBuilder = notContainClass(T::class)
+
+inline fun <reified T : Annotation> SlicesShould.notContainClassesWithAnnotation(): SlicesRuleBuilder =
+    notContainClassesWithAnnotation(
+        T::class,
+    )
+
+inline fun <reified T : Any> ModulesThat.containClass(): ModulesRuleBuilder = containClass(T::class)
+
+inline fun <reified T : Any> ModulesThat.notContainClass(): ModulesRuleBuilder = notContainClass(T::class)
+
+inline fun <reified T : Annotation> ModulesThat.containClassesWithAnnotation(): ModulesRuleBuilder =
+    containClassesWithAnnotation(
+        T::class,
+    )
+
+inline fun <reified T : Annotation> ModulesThat.notContainClassesWithAnnotation(): ModulesRuleBuilder =
+    notContainClassesWithAnnotation(
+        T::class,
+    )
+
+inline fun <reified T : Any> ModulesShould.containClass(): ModulesRuleBuilder = containClass(T::class)
+
+inline fun <reified T : Any> ModulesShould.notContainClass(): ModulesRuleBuilder = notContainClass(T::class)
+
+inline fun <reified T : Annotation> ModulesShould.containClassesWithAnnotation(): ModulesRuleBuilder =
+    containClassesWithAnnotation(
+        T::class,
+    )
+
+inline fun <reified T : Annotation> ModulesShould.notContainClassesWithAnnotation(): ModulesRuleBuilder =
+    notContainClassesWithAnnotation(
+        T::class,
+    )
+
+inline fun <reified T : Any> PropertiesThat.haveImportOf(): PropertiesRuleBuilder = haveImportOf(T::class)
+
+inline fun <reified T : Any> PropertiesThat.notHaveImportOf(): PropertiesRuleBuilder = notHaveImportOf(T::class)
+
+inline fun <reified T : Any> PropertiesShould.haveImportOf(): PropertiesRuleBuilder = haveImportOf(T::class)
+
+inline fun <reified T : Any> PropertiesShould.notHaveImportOf(): PropertiesRuleBuilder = notHaveImportOf(T::class)

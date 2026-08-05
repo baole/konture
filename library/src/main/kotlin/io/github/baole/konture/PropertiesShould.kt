@@ -11,6 +11,7 @@ import io.github.baole.konture.impl.PatternMatchers
 import io.github.baole.konture.impl.ViolationLocation
 import kotlin.reflect.KClass
 
+@Suppress("LargeClass")
 @KontureDsl
 class PropertiesShould internal constructor(
     private val builder: PropertiesRuleBuilder,
@@ -134,6 +135,220 @@ class PropertiesShould internal constructor(
 
     fun haveNameMatching(vararg patterns: String): PropertiesRuleBuilder = haveNameMatching(patterns.toList())
 
+    infix fun resideInAModule(modulePath: String): PropertiesRuleBuilder {
+        val normalized =
+            if (!modulePath.startsWith(":") && !modulePath.startsWith("**") && modulePath.isNotEmpty()) {
+                ":$modulePath"
+            } else {
+                modulePath
+            }
+        builder.setShould { prop, _, violations ->
+            if (prop.modulePath != normalized) {
+                violations.add(
+                    getMessage("property.should.resideInModule", prop.qualifiedName, normalized, prop.modulePath),
+                )
+            }
+        }
+        return builder
+    }
+
+    infix fun resideInAModule(modulePaths: List<String>): PropertiesRuleBuilder {
+        val normalizedPaths =
+            modulePaths.map { path ->
+                if (!path.startsWith(":") && !path.startsWith("**") && path.isNotEmpty()) {
+                    ":$path"
+                } else {
+                    path
+                }
+            }
+        builder.setShould { prop, _, violations ->
+            if (!normalizedPaths.contains(prop.modulePath)) {
+                violations.add(
+                    getMessage(
+                        "property.should.resideInModule",
+                        prop.qualifiedName,
+                        normalizedPaths.joinToString(),
+                        prop.modulePath,
+                    ),
+                )
+            }
+        }
+        return builder
+    }
+
+    fun resideInAModule(vararg modulePaths: String): PropertiesRuleBuilder = resideInAModule(modulePaths.toList())
+
+    infix fun resideInModule(modulePath: String): PropertiesRuleBuilder = resideInAModule(modulePath)
+
+    infix fun resideInModules(modulePaths: List<String>): PropertiesRuleBuilder = resideInAModule(modulePaths)
+
+    fun resideInModules(vararg modulePaths: String): PropertiesRuleBuilder = resideInAModule(modulePaths.toList())
+
+    infix fun notResideInAModule(modulePath: String): PropertiesRuleBuilder {
+        val normalized =
+            if (!modulePath.startsWith(":") && !modulePath.startsWith("**") && modulePath.isNotEmpty()) {
+                ":$modulePath"
+            } else {
+                modulePath
+            }
+        builder.setShould { prop, _, violations ->
+            val matches =
+                prop.modulePath == normalized || PatternMatchers.matchesModuleGlob(normalized, prop.modulePath)
+            if (matches) {
+                violations.add(getMessage("property.should.notResideInModule", prop.qualifiedName, normalized))
+            }
+        }
+        return builder
+    }
+
+    infix fun notResideInAModule(modulePaths: List<String>): PropertiesRuleBuilder {
+        val normalized =
+            modulePaths.map {
+                if (!it.startsWith(":") && !it.startsWith("**") && it.isNotEmpty()) ":$it" else it
+            }
+        builder.setShould { prop, _, violations ->
+            val matching =
+                normalized.filter { target ->
+                    prop.modulePath == target || PatternMatchers.matchesModuleGlob(target, prop.modulePath)
+                }
+            if (matching.isNotEmpty()) {
+                violations.add(
+                    getMessage("property.should.notResideInModuleAny", prop.qualifiedName, matching.joinToString()),
+                )
+            }
+        }
+        return builder
+    }
+
+    fun notResideInAModule(vararg modulePaths: String): PropertiesRuleBuilder = notResideInAModule(modulePaths.toList())
+
+    infix fun notResideInModule(modulePath: String): PropertiesRuleBuilder = notResideInAModule(modulePath)
+
+    infix fun notResideInModules(modulePaths: List<String>): PropertiesRuleBuilder = notResideInAModule(modulePaths)
+
+    fun notResideInModules(vararg modulePaths: String): PropertiesRuleBuilder = notResideInAModule(modulePaths.toList())
+
+    infix fun haveName(name: String): PropertiesRuleBuilder {
+        builder.setShould { prop, _, violations ->
+            if (prop.declaration.name != name) {
+                violations.add(getMessage("property.should.haveName", prop.qualifiedName, name))
+            }
+        }
+        return builder
+    }
+
+    infix fun haveName(names: List<String>): PropertiesRuleBuilder {
+        builder.setShould { prop, _, violations ->
+            if (!names.contains(prop.declaration.name)) {
+                violations.add(getMessage("property.should.haveNameIn", prop.qualifiedName, names.joinToString()))
+            }
+        }
+        return builder
+    }
+
+    fun haveName(vararg names: String): PropertiesRuleBuilder = haveName(names.toList())
+
+    infix fun haveName(predicate: (String) -> Boolean): PropertiesRuleBuilder {
+        builder.setShould { prop, _, violations ->
+            if (!predicate(prop.declaration.name)) {
+                violations.add(getMessage("property.should.haveNameMatchingPredicate", prop.qualifiedName))
+            }
+        }
+        return builder
+    }
+
+    infix fun notHaveName(name: String): PropertiesRuleBuilder {
+        builder.setShould { prop, _, violations ->
+            if (prop.declaration.name == name) {
+                violations.add(getMessage("property.should.notHaveName", prop.qualifiedName, name))
+            }
+        }
+        return builder
+    }
+
+    infix fun notHaveName(names: List<String>): PropertiesRuleBuilder {
+        builder.setShould { prop, _, violations ->
+            if (names.contains(prop.declaration.name)) {
+                violations.add(getMessage("property.should.notHaveNameIn", prop.qualifiedName, names.joinToString()))
+            }
+        }
+        return builder
+    }
+
+    fun notHaveName(vararg names: String): PropertiesRuleBuilder = notHaveName(names.toList())
+
+    infix fun notHaveNameMatching(pattern: String): PropertiesRuleBuilder {
+        builder.setShould { prop, _, violations ->
+            if (PatternMatchers.matchesSimpleGlob(pattern, prop.declaration.name)) {
+                violations.add(getMessage("property.should.notHaveNameMatching", prop.qualifiedName, pattern))
+            }
+        }
+        return builder
+    }
+
+    infix fun notHaveNameMatching(patterns: List<String>): PropertiesRuleBuilder {
+        builder.setShould { prop, _, violations ->
+            val matching = patterns.filter { PatternMatchers.matchesSimpleGlob(it, prop.declaration.name) }
+            if (matching.isNotEmpty()) {
+                violations.add(
+                    getMessage("property.should.notHaveNameMatching", prop.qualifiedName, matching.joinToString()),
+                )
+            }
+        }
+        return builder
+    }
+
+    fun notHaveNameMatching(vararg patterns: String): PropertiesRuleBuilder = notHaveNameMatching(patterns.toList())
+
+    infix fun notHaveNameStartingWith(prefix: String): PropertiesRuleBuilder {
+        builder.setShould { prop, _, violations ->
+            if (prop.declaration.name.startsWith(prefix)) {
+                violations.add(getMessage("property.should.notHaveNameStartingWith", prop.qualifiedName, prefix))
+            }
+        }
+        return builder
+    }
+
+    infix fun notHaveNameStartingWith(prefixes: List<String>): PropertiesRuleBuilder {
+        builder.setShould { prop, _, violations ->
+            val matching = prefixes.filter { prop.declaration.name.startsWith(it) }
+            if (matching.isNotEmpty()) {
+                violations.add(
+                    getMessage("property.should.notHaveNameStartingWith", prop.qualifiedName, matching.joinToString()),
+                )
+            }
+        }
+        return builder
+    }
+
+    fun notHaveNameStartingWith(vararg prefixes: String): PropertiesRuleBuilder =
+        notHaveNameStartingWith(
+            prefixes.toList(),
+        )
+
+    infix fun notHaveNameEndingWith(suffix: String): PropertiesRuleBuilder {
+        builder.setShould { prop, _, violations ->
+            if (prop.declaration.name.endsWith(suffix)) {
+                violations.add(getMessage("property.should.notHaveNameEndingWith", prop.qualifiedName, suffix))
+            }
+        }
+        return builder
+    }
+
+    infix fun notHaveNameEndingWith(suffixes: List<String>): PropertiesRuleBuilder {
+        builder.setShould { prop, _, violations ->
+            val matching = suffixes.filter { prop.declaration.name.endsWith(it) }
+            if (matching.isNotEmpty()) {
+                violations.add(
+                    getMessage("property.should.notHaveNameEndingWith", prop.qualifiedName, matching.joinToString()),
+                )
+            }
+        }
+        return builder
+    }
+
+    fun notHaveNameEndingWith(vararg suffixes: String): PropertiesRuleBuilder = notHaveNameEndingWith(suffixes.toList())
+
     fun bePublic(): PropertiesRuleBuilder {
         builder.setShould { prop, _, violations ->
             if (prop.declaration.visibility != Visibility.PUBLIC) {
@@ -233,8 +448,6 @@ class PropertiesShould internal constructor(
         return builder
     }
 
-
-
     fun beTopLevel(): PropertiesRuleBuilder {
         builder.setShould { prop, _, violations ->
             if (prop.className != null) {
@@ -273,12 +486,13 @@ class PropertiesShould internal constructor(
                     } else {
                         "argument value '$argValue'"
                     }
-                violations.add(getMessage("property.should.haveAnnotationWithDetail", prop.qualifiedName, annotationName, detail))
+                violations.add(
+                    getMessage("property.should.haveAnnotationWithDetail", prop.qualifiedName, annotationName, detail),
+                )
             }
         }
         return builder
     }
-
 
     infix fun haveType(typeFqName: String): PropertiesRuleBuilder {
         builder.setShould { prop, _, violations ->
@@ -722,6 +936,61 @@ class PropertiesShould internal constructor(
                 }
             if (anyPassed) {
                 violations.add("Property ${prop.qualifiedName} satisfies one of the forbidden conditions")
+            }
+        }
+        return builder
+    }
+
+    infix fun haveImportOf(importFqName: String): PropertiesRuleBuilder {
+        builder.setShould { prop, _, violations ->
+            val imports =
+                builder.graph.getAllModules().flatMap { it.files }
+                    .find {
+                            file ->
+                        file.filePath == prop.filePath || (prop.className != null && file.classes.any { it.name == prop.className })
+                    }
+                    ?.imports.orEmpty()
+            val matches = imports.any { it == importFqName || PatternMatchers.matchesSimpleGlob(importFqName, it) }
+            if (!matches) {
+                violations.add("Property ${prop.qualifiedName} file does not import '$importFqName'")
+            }
+        }
+        return builder
+    }
+
+    infix fun haveImportOf(type: KClass<*>): PropertiesRuleBuilder = haveImportOf(type.kontureQualifiedName())
+
+    infix fun notHaveImportOf(importFqName: String): PropertiesRuleBuilder {
+        builder.setShould { prop, _, violations ->
+            val imports =
+                builder.graph.getAllModules().flatMap { it.files }
+                    .find {
+                            file ->
+                        file.filePath == prop.filePath || (prop.className != null && file.classes.any { it.name == prop.className })
+                    }
+                    ?.imports.orEmpty()
+            val matches = imports.any { it == importFqName || PatternMatchers.matchesSimpleGlob(importFqName, it) }
+            if (matches) {
+                violations.add("Property ${prop.qualifiedName} file imports prohibited '$importFqName'")
+            }
+        }
+        return builder
+    }
+
+    infix fun notHaveImportOf(type: KClass<*>): PropertiesRuleBuilder = notHaveImportOf(type.kontureQualifiedName())
+
+    fun haveNoWildcardImports(): PropertiesRuleBuilder {
+        builder.setShould { prop, _, violations ->
+            val imports =
+                builder.graph.getAllModules().flatMap { it.files }
+                    .find {
+                            file ->
+                        file.filePath == prop.filePath || (prop.className != null && file.classes.any { it.name == prop.className })
+                    }
+                    ?.imports.orEmpty()
+            val wildcards = imports.filter { it.endsWith(".*") }
+            if (wildcards.isNotEmpty()) {
+                violations.add("Property ${prop.qualifiedName} file contains wildcard imports: $wildcards")
             }
         }
         return builder

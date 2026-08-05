@@ -11,7 +11,6 @@ import org.junit.jupiter.api.Assertions.assertThrows
 import org.junit.jupiter.api.Test
 
 class ApiGapResolutionTest {
-
     private fun testClass(
         pkg: String,
         name: String,
@@ -32,33 +31,39 @@ class ApiGapResolutionTest {
     )
 
     private fun testGraph(vararg classes: ClassDeclaration): ProjectGraph {
-        val files = classes.map { cls ->
-            FileDeclaration(
-                name = cls.name + ".kt",
-                packageName = cls.packageName,
-                classes = listOf(cls),
-                kdocText = "KDoc comment",
-                filePath = cls.filePath,
+        val files =
+            classes.map { cls ->
+                FileDeclaration(
+                    name = cls.name + ".kt",
+                    packageName = cls.packageName,
+                    classes = listOf(cls),
+                    kdocText = "KDoc comment",
+                    filePath = cls.filePath,
+                )
+            }
+        val coreModule =
+            Module(
+                buildId = ":",
+                path = ":core",
+                projectDir = "core",
+                appliedPlugins = listOf("kotlin"),
+                sourceSets = emptyList(),
+                dependencies =
+                    listOf(
+                        Dependency(targetPath = ":feature", configuration = "implementation", targetBuildId = ":"),
+                    ),
+                files = files,
             )
-        }
-        val coreModule = Module(
-            buildId = ":",
-            path = ":core",
-            projectDir = "core",
-            appliedPlugins = listOf("kotlin"),
-            sourceSets = emptyList(),
-            dependencies = listOf(Dependency(targetPath = ":feature", configuration = "implementation", targetBuildId = ":")),
-            files = files,
-        )
-        val featureModule = Module(
-            buildId = ":",
-            path = ":feature",
-            projectDir = "feature",
-            appliedPlugins = listOf("kotlin"),
-            sourceSets = emptyList(),
-            dependencies = emptyList(),
-            files = emptyList(),
-        )
+        val featureModule =
+            Module(
+                buildId = ":",
+                path = ":feature",
+                projectDir = "feature",
+                appliedPlugins = listOf("kotlin"),
+                sourceSets = emptyList(),
+                dependencies = emptyList(),
+                files = emptyList(),
+            )
         return ProjectGraph(mapOf(":" to listOf(coreModule, featureModule)))
     }
 
@@ -96,26 +101,34 @@ class ApiGapResolutionTest {
 
     @Test
     fun `FunctionsThat resideInAModule and haveName work correctly`() {
-        val func = FunctionDeclaration(
-            name = "processData",
-            visibility = Visibility.PUBLIC,
-            modifiers = setOf(Modifier.SUSPEND, Modifier.OPERATOR),
-            returnType = "Unit",
-            parameters = emptyList(),
-            annotations = emptyList(),
-            kdocText = "KDoc",
-            isExtension = false,
-        )
-        val file = FileDeclaration("Test.kt", "io.github.baole.konture", topLevelFunctions = listOf(func), filePath = "/src/Test.kt")
-        val module = Module(
-            buildId = ":",
-            path = ":core",
-            projectDir = "core",
-            appliedPlugins = emptyList(),
-            sourceSets = emptyList(),
-            dependencies = emptyList(),
-            files = listOf(file),
-        )
+        val func =
+            FunctionDeclaration(
+                name = "processData",
+                visibility = Visibility.PUBLIC,
+                modifiers = setOf(Modifier.SUSPEND, Modifier.OPERATOR),
+                returnType = "Unit",
+                parameters = emptyList(),
+                annotations = emptyList(),
+                kdocText = "KDoc",
+                isExtension = false,
+            )
+        val file =
+            FileDeclaration(
+                "Test.kt",
+                "io.github.baole.konture",
+                topLevelFunctions = listOf(func),
+                filePath = "/src/Test.kt",
+            )
+        val module =
+            Module(
+                buildId = ":",
+                path = ":core",
+                projectDir = "core",
+                appliedPlugins = emptyList(),
+                sourceSets = emptyList(),
+                dependencies = emptyList(),
+                files = listOf(file),
+            )
         val graph = ProjectGraph(mapOf(":" to listOf(module)))
 
         assertDoesNotThrow {
@@ -131,26 +144,34 @@ class ApiGapResolutionTest {
 
     @Test
     fun `PropertiesThat resideInPackageOf and resideInAModule work correctly`() {
-        val prop = PropertyDeclaration(
-            name = "dataStream",
-            type = "String",
-            visibility = Visibility.PUBLIC,
-            modifiers = emptySet(),
-            isVal = true,
-            annotations = emptyList(),
-            kdocText = "KDoc",
-            isExtension = false,
-        )
-        val file = FileDeclaration("Test.kt", "io.github.baole.konture", topLevelProperties = listOf(prop), filePath = "/src/Test.kt")
-        val module = Module(
-            buildId = ":",
-            path = ":core",
-            projectDir = "core",
-            appliedPlugins = emptyList(),
-            sourceSets = emptyList(),
-            dependencies = emptyList(),
-            files = listOf(file),
-        )
+        val prop =
+            PropertyDeclaration(
+                name = "dataStream",
+                type = "String",
+                visibility = Visibility.PUBLIC,
+                modifiers = emptySet(),
+                isVal = true,
+                annotations = emptyList(),
+                kdocText = "KDoc",
+                isExtension = false,
+            )
+        val file =
+            FileDeclaration(
+                "Test.kt",
+                "io.github.baole.konture",
+                topLevelProperties = listOf(prop),
+                filePath = "/src/Test.kt",
+            )
+        val module =
+            Module(
+                buildId = ":",
+                path = ":core",
+                projectDir = "core",
+                appliedPlugins = emptyList(),
+                sourceSets = emptyList(),
+                dependencies = emptyList(),
+                files = listOf(file),
+            )
         val graph = ProjectGraph(mapOf(":" to listOf(module)))
 
         assertDoesNotThrow {
@@ -166,16 +187,35 @@ class ApiGapResolutionTest {
 
     @Test
     fun `ModulesThat haveNameStartingWith and ModulesShould beFreeOfCycles work correctly`() {
-        val modA = Module(":", ":core", "core", emptyList(), emptyList(), listOf(Dependency(targetPath = ":feature", configuration = "impl", targetBuildId = ":")), emptyList())
-        val modB = Module(":", ":feature", "feature", emptyList(), emptyList(), listOf(Dependency(targetPath = ":core", configuration = "impl", targetBuildId = ":")), emptyList())
+        val modA =
+            Module(
+                ":",
+                ":core",
+                "core",
+                emptyList(),
+                emptyList(),
+                listOf(Dependency(targetPath = ":feature", configuration = "impl", targetBuildId = ":")),
+                emptyList(),
+            )
+        val modB =
+            Module(
+                ":",
+                ":feature",
+                "feature",
+                emptyList(),
+                emptyList(),
+                listOf(Dependency(targetPath = ":core", configuration = "impl", targetBuildId = ":")),
+                emptyList(),
+            )
         val cycleGraph = ProjectGraph(mapOf(":" to listOf(modA, modB)))
 
-        val error = assertThrows(AssertionError::class.java) {
-            ModulesRuleBuilder(cycleGraph)
-                .that().haveNameStartingWith("core")
-                .should().beFreeOfCycles()
-                .check()
-        }
+        val error =
+            assertThrows(AssertionError::class.java) {
+                ModulesRuleBuilder(cycleGraph)
+                    .that().haveNameStartingWith("core")
+                    .should().beFreeOfCycles()
+                    .check()
+            }
         assert(error.message?.contains("cycle") == true)
     }
 

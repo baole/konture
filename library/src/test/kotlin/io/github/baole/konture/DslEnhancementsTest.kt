@@ -8,117 +8,127 @@ package io.github.baole.konture
 
 import org.junit.jupiter.api.Test
 
-class ApiGapResolutionPhase3Test {
+class DslEnhancementsTest {
+    private val sampleClass1 =
+        ClassDeclaration(
+            name = "FooService",
+            fqName = "com.example.service.FooService",
+            packageName = "com.example.service",
+            isInterface = false,
+            isAbstract = false,
+            annotations =
+                listOf(
+                    AnnotationDeclaration(name = "JvmName", fqName = "kotlin.jvm.JvmName"),
+                ),
+            imports = emptyList(),
+            referencedTypes = emptySet(),
+            filePath = "/src/com/example/service/FooService.kt",
+            visibility = Visibility.PUBLIC,
+            properties =
+                listOf(
+                    PropertyDeclaration(
+                        name = "id",
+                        type = "kotlin.String",
+                        visibility = Visibility.PUBLIC,
+                        modifiers = emptySet(),
+                        isVal = true,
+                        annotations = emptyList(),
+                        kdocText = null,
+                        isExtension = false,
+                    ),
+                ),
+            functions =
+                listOf(
+                    FunctionDeclaration(
+                        name = "execute",
+                        visibility = Visibility.PUBLIC,
+                        modifiers = emptySet(),
+                        returnType = "kotlin.Unit",
+                        parameters = emptyList(),
+                        annotations = emptyList(),
+                        kdocText = null,
+                        isExtension = false,
+                    ),
+                ),
+        )
 
-    private val sampleClass1 = ClassDeclaration(
-        name = "FooService",
-        fqName = "com.example.service.FooService",
-        packageName = "com.example.service",
-        isInterface = false,
-        isAbstract = false,
-        annotations = listOf(
-            AnnotationDeclaration(name = "JvmName", fqName = "kotlin.jvm.JvmName"),
-        ),
-        imports = emptyList(),
-        referencedTypes = emptySet(),
-        filePath = "/src/com/example/service/FooService.kt",
-        visibility = Visibility.PUBLIC,
-        properties = listOf(
-            PropertyDeclaration(
-                name = "id",
-                type = "kotlin.String",
-                visibility = Visibility.PUBLIC,
-                modifiers = emptySet(),
-                isVal = true,
-                annotations = emptyList(),
-                kdocText = null,
-                isExtension = false,
-            ),
-        ),
-        functions = listOf(
-            FunctionDeclaration(
-                name = "execute",
-                visibility = Visibility.PUBLIC,
-                modifiers = emptySet(),
-                returnType = "kotlin.Unit",
-                parameters = emptyList(),
-                annotations = emptyList(),
-                kdocText = null,
-                isExtension = false,
-            ),
-        ),
-    )
+    private val sampleClass2 =
+        ClassDeclaration(
+            name = "BarRepository",
+            fqName = "com.example.repository.BarRepository",
+            packageName = "com.example.repository",
+            isInterface = false,
+            isAbstract = false,
+            annotations = emptyList(),
+            imports = emptyList(),
+            referencedTypes = emptySet(),
+            filePath = "/src/com/example/repository/BarRepository.kt",
+            visibility = Visibility.PUBLIC,
+        )
 
-    private val sampleClass2 = ClassDeclaration(
-        name = "BarRepository",
-        fqName = "com.example.repository.BarRepository",
-        packageName = "com.example.repository",
-        isInterface = false,
-        isAbstract = false,
-        annotations = emptyList(),
-        imports = emptyList(),
-        referencedTypes = emptySet(),
-        filePath = "/src/com/example/repository/BarRepository.kt",
-        visibility = Visibility.PUBLIC,
-    )
+    private val sampleFile1 =
+        FileDeclaration(
+            name = "FooService.kt",
+            packageName = "com.example.service",
+            filePath = "/src/com/example/service/FooService.kt",
+            imports = listOf("com.example.repository.BarRepository"),
+            classes = listOf(sampleClass1),
+            topLevelFunctions =
+                listOf(
+                    FunctionDeclaration(
+                        name = "topFunc",
+                        visibility = Visibility.PUBLIC,
+                        modifiers = emptySet(),
+                        returnType = "kotlin.Unit",
+                        parameters = emptyList(),
+                        annotations = emptyList(),
+                        kdocText = null,
+                        isExtension = false,
+                    ),
+                ),
+            topLevelProperties =
+                listOf(
+                    PropertyDeclaration(
+                        name = "topProp",
+                        type = "kotlin.String",
+                        visibility = Visibility.PUBLIC,
+                        modifiers = emptySet(),
+                        isVal = true,
+                        annotations = emptyList(),
+                        kdocText = null,
+                        isExtension = false,
+                    ),
+                ),
+        )
 
-    private val sampleFile1 = FileDeclaration(
-        name = "FooService.kt",
-        packageName = "com.example.service",
-        filePath = "/src/com/example/service/FooService.kt",
-        imports = listOf("com.example.repository.BarRepository"),
-        classes = listOf(sampleClass1),
-        topLevelFunctions = listOf(
-            FunctionDeclaration(
-                name = "topFunc",
-                visibility = Visibility.PUBLIC,
-                modifiers = emptySet(),
-                returnType = "kotlin.Unit",
-                parameters = emptyList(),
-                annotations = emptyList(),
-                kdocText = null,
-                isExtension = false,
-            ),
-        ),
-        topLevelProperties = listOf(
-            PropertyDeclaration(
-                name = "topProp",
-                type = "kotlin.String",
-                visibility = Visibility.PUBLIC,
-                modifiers = emptySet(),
-                isVal = true,
-                annotations = emptyList(),
-                kdocText = null,
-                isExtension = false,
-            ),
-        ),
-    )
+    private val sampleFile2 =
+        FileDeclaration(
+            name = "BarRepository.kt",
+            packageName = "com.example.repository",
+            filePath = "/src/com/example/repository/BarRepository.kt",
+            classes = listOf(sampleClass2),
+        )
 
-    private val sampleFile2 = FileDeclaration(
-        name = "BarRepository.kt",
-        packageName = "com.example.repository",
-        filePath = "/src/com/example/repository/BarRepository.kt",
-        classes = listOf(sampleClass2),
-    )
-
-    private val sampleModule = Module(
-        buildId = ":",
-        path = ":core",
-        projectDir = "core",
-        appliedPlugins = listOf("kotlin-android", "com.android.library"),
-        sourceSets = emptyList(),
-        dependencies = emptyList(),
-        files = listOf(sampleFile1, sampleFile2),
-    )
+    private val sampleModule =
+        Module(
+            buildId = ":",
+            path = ":core",
+            projectDir = "core",
+            appliedPlugins = listOf("kotlin-android", "com.android.library"),
+            sourceSets = emptyList(),
+            dependencies = emptyList(),
+            files = listOf(sampleFile1, sampleFile2),
+        )
 
     private val graph = ProjectGraph(mapOf(":" to listOf(sampleModule)))
 
     @Test
     fun `test slices DSL enhancements`() {
         val printed = mutableListOf<String>()
-        val builder = SlicesRuleBuilder(graph)
-            .matching("com.example.(*)..")
-            .printAllSlices { printed.add(it.key) }
+        val builder =
+            SlicesRuleBuilder(graph)
+                .matching("com.example.(*)..")
+                .printAllSlices { printed.add(it.key) }
 
         builder.that().haveKeyStartingWith("serv")
         builder.that().haveKeyEndingWith("ice")

@@ -25,4 +25,3 @@ enum class Modifier {
     INFIX,
     OVERRIDE,
 }
-

@@ -13,6 +13,7 @@ import io.github.baole.konture.impl.normalizeModulePath
 /**
  * Fluent API for defining assertion rules on Gradle modules.
  */
+@Suppress("LargeClass")
 @KontureDsl
 class ModulesShould internal constructor(
     private val builder: ModulesRuleBuilder,
@@ -73,8 +74,6 @@ class ModulesShould internal constructor(
      * @param targetPaths The vararg list of Gradle paths or glob patterns of the modules that should not be depended on.
      */
     fun notDependOnModule(vararg targetPaths: String): ModulesRuleBuilder = notDependOnModule(targetPaths.asList())
-
-
 
     /**
      * Asserts that selected modules do not depend on any module matching the predicate.
@@ -466,14 +465,102 @@ class ModulesShould internal constructor(
         return builder
     }
 
+    fun notDependOnExternalLibraries(
+        coordinates: List<String>,
+        includeTransitive: Boolean = true,
+    ): ModulesRuleBuilder =
+        notDependOnExternalLibraries(
+            *coordinates.toTypedArray(),
+            includeTransitive = includeTransitive,
+        )
+
+    fun onlyDependOnExternalLibraries(
+        coordinates: List<String>,
+        includeTransitive: Boolean = true,
+    ): ModulesRuleBuilder =
+        onlyDependOnExternalLibraries(
+            *coordinates.toTypedArray(),
+            includeTransitive = includeTransitive,
+        )
+
+    fun dependOnExternalLibrary(
+        coordinate: String,
+        includeTransitive: Boolean = true,
+    ): ModulesRuleBuilder = dependOnExternalLibraries(coordinate, includeTransitive = includeTransitive)
+
+    fun dependOnExternalLibraries(
+        vararg coordinates: String,
+        includeTransitive: Boolean = true,
+    ): ModulesRuleBuilder {
+        builder.setShould { module, graph, violations ->
+            val resolvedDeps = graph.requireExternalDependencies().modules[module.path] ?: emptyList()
+            val matched =
+                resolvedDeps.any { dep ->
+                    if (!includeTransitive && dep.isTransitive) return@any false
+                    coordinates.any { pattern ->
+                        if (pattern.contains(":")) {
+                            PatternMatchers.matchesSimpleGlob(pattern, "${dep.group}:${dep.name}")
+                        } else {
+                            PatternMatchers.matchesSimpleGlob(pattern, dep.group) ||
+                                PatternMatchers.matchesSimpleGlob(pattern, dep.name)
+                        }
+                    }
+                }
+            if (!matched) {
+                violations.add(
+                    getMessage(
+                        "module.should.dependOnExternalLibraries",
+                        module.path,
+                        coordinates.joinToString(),
+                    ),
+                )
+            }
+        }
+        return builder
+    }
+
+    fun dependOnExternalLibraries(
+        coordinates: List<String>,
+        includeTransitive: Boolean = true,
+    ): ModulesRuleBuilder =
+        dependOnExternalLibraries(
+            *coordinates.toTypedArray(),
+            includeTransitive = includeTransitive,
+        )
+
+    infix fun dependOnModule(targetPath: String): ModulesRuleBuilder {
+        val normalizedTarget = normalizeModulePath(targetPath)
+        builder.setShould { module, _, violations ->
+            val dependsOnTarget =
+                module.dependencies.any { dep ->
+                    dep.targetPath == normalizedTarget ||
+                        PatternMatchers.matchesModuleGlob(normalizedTarget, dep.targetPath)
+                }
+            if (!dependsOnTarget) {
+                violations.add(
+                    getMessage("module.should.dependOnModule", module.path, normalizedTarget),
+                )
+            }
+        }
+        return builder
+    }
+
+    infix fun dependOnModules(targetPaths: List<String>): ModulesRuleBuilder {
+        targetPaths.forEach { dependOnModule(it) }
+        return builder
+    }
+
+    fun dependOnModules(vararg targetPaths: String): ModulesRuleBuilder = dependOnModules(targetPaths.toList())
+
     /**
      * Asserts that the module graph has no cyclic dependencies between modules.
      */
     fun beFreeOfCycles(): ModulesRuleBuilder {
         builder.setShould { _, graph, violations ->
-            val adjacency = graph.getAllModules().associate { module ->
-                module.path to module.dependencies.map { it.targetPath }.toSet()
-            }
+            val adjacency =
+                graph.getAllModules().associate { module ->
+                    module.path to module.dependencies.map { it.targetPath }.toSet()
+                }
             val cycles = io.github.baole.konture.impl.SliceCycleDetector.findCycles(adjacency)
             if (cycles.isNotEmpty()) {
                 for (cycle in cycles) {
@@ -488,7 +575,7 @@ class ModulesShould internal constructor(
     infix fun applyPlugin(pluginId: String): ModulesRuleBuilder {
         builder.setShould { module, _, violations ->
             if (!module.appliedPlugins.contains(pluginId)) {
-                violations.add("Module ${module.path} should apply plugin $pluginId")
+                violations.add(getMessage("module.should.applyPlugin", module.path, pluginId))
             }
         }
         return builder
@@ -496,10 +583,22 @@ class ModulesShould internal constructor(
 
     infix fun havePlugin(pluginId: String): ModulesRuleBuilder = applyPlugin(pluginId)
 
+    infix fun havePlugins(pluginIds: List<String>): ModulesRuleBuilder {
+        builder.setShould { module, _, violations ->
+            val missing = pluginIds.filter { !module.appliedPlugins.contains(it) }
+            if (missing.isNotEmpty()) {
+                violations.add(getMessage("module.should.applyPlugin", module.path, missing.joinToString()))
+            }
+        }
+        return builder
+    }
+
+    fun havePlugins(vararg pluginIds: String): ModulesRuleBuilder = havePlugins(pluginIds.toList())
+
     infix fun notApplyPlugin(pluginId: String): ModulesRuleBuilder {
         builder.setShould { module, _, violations ->
             if (module.appliedPlugins.contains(pluginId)) {
-                violations.add("Module ${module.path} should not apply plugin $pluginId")
+                violations.add(getMessage("module.should.notApplyPlugin", module.path, pluginId))
             }
         }
         return builder
@@ -507,20 +606,22 @@ class ModulesShould internal constructor(
 
     infix fun notHavePlugin(pluginId: String): ModulesRuleBuilder = notApplyPlugin(pluginId)
 
-    fun notHavePlugins(vararg pluginIds: String): ModulesRuleBuilder {
+    infix fun notHavePlugins(pluginIds: List<String>): ModulesRuleBuilder {
         builder.setShould { module, _, violations ->
             val applied = pluginIds.filter { module.appliedPlugins.contains(it) }
             if (applied.isNotEmpty()) {
-                violations.add("Module ${module.path} should not apply plugins ${applied.joinToString()}")
+                violations.add(getMessage("module.should.notApplyPlugin", module.path, applied.joinToString()))
             }
         }
         return builder
     }
 
+    fun notHavePlugins(vararg pluginIds: String): ModulesRuleBuilder = notHavePlugins(pluginIds.toList())
+
     fun containClasses(): ModulesRuleBuilder {
         builder.setShould { module, _, violations ->
             if (module.classes.isEmpty()) {
-                violations.add("Module ${module.path} should contain classes")
+                violations.add(getMessage("module.should.containClasses", module.path))
             }
         }
         return builder
@@ -529,7 +630,7 @@ class ModulesShould internal constructor(
     fun notContainClasses(): ModulesRuleBuilder {
         builder.setShould { module, _, violations ->
             if (module.classes.isNotEmpty()) {
-                violations.add("Module ${module.path} should not contain classes")
+                violations.add(getMessage("module.should.notContainClasses", module.path))
             }
         }
         return builder
@@ -539,16 +640,28 @@ class ModulesShould internal constructor(
         builder.setShould { module, _, violations ->
             val hasSourceSet = module.sourceSets.any { it.name == sourceSetName }
             if (!hasSourceSet) {
-                violations.add("Module ${module.path} should have source set $sourceSetName")
+                violations.add(getMessage("module.should.haveSourceSet", module.path, sourceSetName))
             }
         }
         return builder
     }
 
+    infix fun haveSourceSets(sourceSetNames: List<String>): ModulesRuleBuilder {
+        builder.setShould { module, _, violations ->
+            val missing = sourceSetNames.filter { name -> module.sourceSets.none { it.name == name } }
+            if (missing.isNotEmpty()) {
+                violations.add(getMessage("module.should.haveSourceSet", module.path, missing.joinToString()))
+            }
+        }
+        return builder
+    }
+
+    fun haveSourceSets(vararg sourceSetNames: String): ModulesRuleBuilder = haveSourceSets(sourceSetNames.toList())
+
     fun containFiles(): ModulesRuleBuilder {
         builder.setShould { module, _, violations ->
             if (module.files.isEmpty()) {
-                violations.add("Module ${module.path} should contain files")
+                violations.add(getMessage("module.should.containFiles", module.path))
             }
         }
         return builder
@@ -557,10 +670,380 @@ class ModulesShould internal constructor(
     fun beEmpty(): ModulesRuleBuilder {
         builder.setShould { module, _, violations ->
             if (module.files.isNotEmpty() || module.classes.isNotEmpty()) {
-                violations.add("Module ${module.path} should be empty")
+                violations.add(getMessage("module.should.beEmpty", module.path))
             }
         }
         return builder
     }
+
+    infix fun dependOnModuleApi(targetPath: String): ModulesRuleBuilder =
+        dependOnModuleViaConfiguration(targetPath, "api")
+
+    infix fun dependOnModuleImplementation(targetPath: String): ModulesRuleBuilder =
+        dependOnModuleViaConfiguration(targetPath, "implementation")
+
+    fun dependOnModuleViaConfiguration(
+        targetPath: String,
+        configuration: String,
+    ): ModulesRuleBuilder {
+        val normalizedTarget = normalizeModulePath(targetPath)
+        builder.setShould { module, _, violations ->
+            val matches =
+                module.dependencies.any { dep ->
+                    (dep.targetPath == normalizedTarget || PatternMatchers.matchesModuleGlob(normalizedTarget, dep.targetPath)) &&
+                        dep.configuration.equals(configuration, ignoreCase = true)
+                }
+            if (!matches) {
+                violations.add(
+                    "Module '${module.path}' should depend on '$normalizedTarget' via configuration '$configuration'",
+                )
+            }
+        }
+        return builder
+    }
+
+    fun notDependOnModuleViaConfiguration(
+        targetPath: String,
+        configuration: String,
+    ): ModulesRuleBuilder {
+        val normalizedTarget = normalizeModulePath(targetPath)
+        builder.setShould { module, _, violations ->
+            val matches =
+                module.dependencies.any { dep ->
+                    (dep.targetPath == normalizedTarget || PatternMatchers.matchesModuleGlob(normalizedTarget, dep.targetPath)) &&
+                        dep.configuration.equals(configuration, ignoreCase = true)
+                }
+            if (matches) {
+                violations.add(
+                    "Module '${module.path}' should not depend on '$normalizedTarget' via configuration '$configuration'",
+                )
+            }
+        }
+        return builder
+    }
+
+    infix fun dependOnModuleTransitively(targetPath: String): ModulesRuleBuilder {
+        val normalizedTarget = normalizeModulePath(targetPath)
+        builder.setShould { module, graph, violations ->
+            val visited = mutableSetOf<String>()
+            val queue = ArrayDeque<String>()
+            queue.addAll(module.dependencies.map { it.targetPath })
+            var found = false
+            while (queue.isNotEmpty()) {
+                val current = queue.removeFirst()
+                if (current == normalizedTarget || PatternMatchers.matchesModuleGlob(normalizedTarget, current)) {
+                    found = true
+                    break
+                }
+                if (visited.add(current)) {
+                    val currentMod = graph.getAllModules().find { it.path == current }
+                    if (currentMod != null) {
+                        queue.addAll(currentMod.dependencies.map { it.targetPath })
+                    }
+                }
+            }
+            if (!found) {
+                violations.add("Module '${module.path}' does not transitively depend on '$normalizedTarget'")
+            }
+        }
+        return builder
+    }
+
+    infix fun notDependOnModuleTransitively(targetPath: String): ModulesRuleBuilder {
+        val normalizedTarget = normalizeModulePath(targetPath)
+        builder.setShould { module, graph, violations ->
+            val visited = mutableSetOf<String>()
+            val queue = ArrayDeque<String>()
+            queue.addAll(module.dependencies.map { it.targetPath })
+            var found = false
+            while (queue.isNotEmpty()) {
+                val current = queue.removeFirst()
+                if (current == normalizedTarget || PatternMatchers.matchesModuleGlob(normalizedTarget, current)) {
+                    found = true
+                    break
+                }
+                if (visited.add(current)) {
+                    val currentMod = graph.getAllModules().find { it.path == current }
+                    if (currentMod != null) {
+                        queue.addAll(currentMod.dependencies.map { it.targetPath })
+                    }
+                }
+            }
+            if (found) {
+                violations.add("Module '${module.path}' transitively depends on prohibited module '$normalizedTarget'")
+            }
+        }
+        return builder
+    }
+
+    fun beStandalone(): ModulesRuleBuilder {
+        builder.setShould { module, _, violations ->
+            if (module.dependencies.isNotEmpty()) {
+                violations.add(
+                    "Module '${module.path}' should be standalone but has dependencies: ${module.dependencies.map { it.targetPath }}",
+                )
+            }
+        }
+        return builder
+    }
+
+    fun beLeafModule(): ModulesRuleBuilder = beStandalone()
+
+    infix fun haveBuildId(buildId: String): ModulesRuleBuilder {
+        builder.setShould { module, _, violations ->
+            if (module.buildId != buildId) {
+                violations.add("Module '${module.path}' has buildId '${module.buildId}', expected '$buildId'")
+            }
+        }
+        return builder
+    }
+
+    infix fun notHaveBuildId(buildId: String): ModulesRuleBuilder {
+        builder.setShould { module, _, violations ->
+            if (module.buildId == buildId) {
+                violations.add("Module '${module.path}' has prohibited buildId '$buildId'")
+            }
+        }
+        return builder
+    }
+
+    infix fun haveProjectDir(dirPattern: String): ModulesRuleBuilder {
+        builder.setShould { module, _, violations ->
+            if (!PatternMatchers.matchesSimpleGlob(dirPattern, module.projectDir)) {
+                violations.add("Module '${module.path}' projectDir '${module.projectDir}' does not match '$dirPattern'")
+            }
+        }
+        return builder
+    }
+
+    infix fun notHaveProjectDir(dirPattern: String): ModulesRuleBuilder {
+        builder.setShould { module, _, violations ->
+            if (PatternMatchers.matchesSimpleGlob(dirPattern, module.projectDir)) {
+                violations.add(
+                    "Module '${module.path}' projectDir '${module.projectDir}' matches prohibited '$dirPattern'",
+                )
+            }
+        }
+        return builder
+    }
+
+    infix fun containClassesInPackage(packagePattern: String): ModulesRuleBuilder {
+        builder.setShould { module, _, violations ->
+            if (!module.classes.any { PatternMatchers.matchesPackage(packagePattern, it.packageName) }) {
+                violations.add("Module '${module.path}' does not contain classes in package '$packagePattern'")
+            }
+        }
+        return builder
+    }
+
+    infix fun notContainClassesInPackage(packagePattern: String): ModulesRuleBuilder {
+        builder.setShould { module, _, violations ->
+            if (module.classes.any { PatternMatchers.matchesPackage(packagePattern, it.packageName) }) {
+                violations.add("Module '${module.path}' contains classes in prohibited package '$packagePattern'")
+            }
+        }
+        return builder
+    }
+
+    infix fun containClassesWithAnnotation(annotationFqName: String): ModulesRuleBuilder {
+        builder.setShould { module, _, violations ->
+            val matches =
+                module.classes.any { cls ->
+                    cls.annotations.any { it.name == annotationFqName || it.fqName == annotationFqName }
+                }
+            if (!matches) {
+                violations.add("Module '${module.path}' does not contain classes with annotation '$annotationFqName'")
+            }
+        }
+        return builder
+    }
+
+    infix fun notContainClassesWithAnnotation(annotationFqName: String): ModulesRuleBuilder {
+        builder.setShould { module, _, violations ->
+            val matches =
+                module.classes.any { cls ->
+                    cls.annotations.any { it.name == annotationFqName || it.fqName == annotationFqName }
+                }
+            if (matches) {
+                violations.add(
+                    "Module '${module.path}' contains classes with prohibited annotation '$annotationFqName'",
+                )
+            }
+        }
+        return builder
+    }
+
+    infix fun containClass(fqName: String): ModulesRuleBuilder {
+        builder.setShould { module, _, violations ->
+            if (!module.classes.any { it.fqName == fqName || it.name == fqName }) {
+                violations.add("Module '${module.path}' does not contain class '$fqName'")
+            }
+        }
+        return builder
+    }
+
+    infix fun notContainClass(fqName: String): ModulesRuleBuilder {
+        builder.setShould { module, _, violations ->
+            if (module.classes.any { it.fqName == fqName || it.name == fqName }) {
+                violations.add("Module '${module.path}' contains prohibited class '$fqName'")
+            }
+        }
+        return builder
+    }
+
+    infix fun containClass(type: kotlin.reflect.KClass<*>): ModulesRuleBuilder =
+        containClass(type.kontureQualifiedName())
+
+    infix fun notContainClass(type: kotlin.reflect.KClass<*>): ModulesRuleBuilder =
+        notContainClass(type.kontureQualifiedName())
+
+    infix fun containClassesWithAnnotation(annotation: kotlin.reflect.KClass<out Annotation>): ModulesRuleBuilder =
+        containClassesWithAnnotation(annotation.kontureQualifiedName())
+
+    infix fun notContainClassesWithAnnotation(annotation: kotlin.reflect.KClass<out Annotation>): ModulesRuleBuilder =
+        notContainClassesWithAnnotation(annotation.kontureQualifiedName())
+
+    infix fun notHaveName(path: String): ModulesRuleBuilder {
+        val normalized = normalizeModulePath(path)
+        builder.setShould { module, _, violations ->
+            val simpleName = module.path.substringAfterLast(":")
+            if (module.path == normalized || simpleName == path) {
+                violations.add(getMessage("module.should.notHaveName", module.path, path))
+            }
+        }
+        return builder
+    }
+
+    infix fun notHaveName(paths: List<String>): ModulesRuleBuilder {
+        val normalized = paths.map { normalizeModulePath(it) }
+        builder.setShould { module, _, violations ->
+            val simpleName = module.path.substringAfterLast(":")
+            if (normalized.contains(module.path) || paths.contains(simpleName)) {
+                violations.add(getMessage("module.should.notHaveNameAny", module.path, paths.joinToString()))
+            }
+        }
+        return builder
+    }
+
+    fun notHaveName(vararg paths: String): ModulesRuleBuilder = notHaveName(paths.toList())
+
+    infix fun notHaveNameStartingWith(prefix: String): ModulesRuleBuilder {
+        builder.setShould { module, _, violations ->
+            val simpleName = module.path.substringAfterLast(":")
+            if (simpleName.startsWith(prefix) || module.path.startsWith(prefix)) {
+                violations.add(getMessage("module.should.notHaveNameStartingWith", module.path, prefix))
+            }
+        }
+        return builder
+    }
+
+    infix fun notHaveNameStartingWith(prefixes: List<String>): ModulesRuleBuilder {
+        builder.setShould { module, _, violations ->
+            val simpleName = module.path.substringAfterLast(":")
+            val matching = prefixes.filter { simpleName.startsWith(it) || module.path.startsWith(it) }
+            if (matching.isNotEmpty()) {
+                violations.add(
+                    getMessage("module.should.notHaveNameStartingWithAny", module.path, matching.joinToString()),
+                )
+            }
+        }
+        return builder
+    }
+
+    fun notHaveNameStartingWith(vararg prefixes: String): ModulesRuleBuilder =
+        notHaveNameStartingWith(
+            prefixes.toList(),
+        )
+
+    infix fun notHaveNameEndingWith(suffix: String): ModulesRuleBuilder {
+        builder.setShould { module, _, violations ->
+            val simpleName = module.path.substringAfterLast(":")
+            if (simpleName.endsWith(suffix) || module.path.endsWith(suffix)) {
+                violations.add(getMessage("module.should.notHaveNameEndingWith", module.path, suffix))
+            }
+        }
+        return builder
+    }
+
+    infix fun notHaveNameEndingWith(suffixes: List<String>): ModulesRuleBuilder {
+        builder.setShould { module, _, violations ->
+            val simpleName = module.path.substringAfterLast(":")
+            val matching = suffixes.filter { simpleName.endsWith(it) || module.path.endsWith(it) }
+            if (matching.isNotEmpty()) {
+                violations.add(
+                    getMessage("module.should.notHaveNameEndingWithAny", module.path, matching.joinToString()),
+                )
+            }
+        }
+        return builder
+    }
+
+    fun notHaveNameEndingWith(vararg suffixes: String): ModulesRuleBuilder = notHaveNameEndingWith(suffixes.toList())
+
+    infix fun notHaveNameMatching(pattern: String): ModulesRuleBuilder {
+        builder.setShould { module, _, violations ->
+            val simpleName = module.path.substringAfterLast(":")
+            if (PatternMatchers.matchesModuleGlob(pattern, module.path) || PatternMatchers.matchesSimpleGlob(pattern, simpleName)) {
+                violations.add(getMessage("module.should.notHaveNameMatching", module.path, pattern))
+            }
+        }
+        return builder
+    }
+
+    infix fun notHaveNameMatching(patterns: List<String>): ModulesRuleBuilder {
+        builder.setShould { module, _, violations ->
+            val simpleName = module.path.substringAfterLast(":")
+            val matching =
+                patterns.filter {
+                    PatternMatchers.matchesModuleGlob(it, module.path) || PatternMatchers.matchesSimpleGlob(it, simpleName)
+                }
+            if (matching.isNotEmpty()) {
+                violations.add(getMessage("module.should.notHaveNameMatchingAny", module.path, matching.joinToString()))
+            }
+        }
+        return builder
+    }
+
+    fun notHaveNameMatching(vararg patterns: String): ModulesRuleBuilder = notHaveNameMatching(patterns.toList())
+
+    /** Fails for every call usage matching [fqName] in any file in selected modules. */
+    fun notCall(fqName: String): ModulesRuleBuilder {
+        builder.setShould { module, _, violations ->
+            for (file in module.files) {
+                val calls = file.usages.filter { PatternMatchers.isCallUsageMatch(it, fqName) }
+                for (usage in calls) {
+                    violations.add(
+                        "Module '${module.path}' file '${file.name}' calls prohibited target '$fqName' (expression: '${usage.rawExpression}')",
+                    )
+                }
+            }
+        }
+        return builder
+    }
+
+    fun notCall(kClass: kotlin.reflect.KClass<*>): ModulesRuleBuilder = notCall(kClass.kontureQualifiedName())
+
+    /** Fails for every class reference usage matching [fqName] in any file in selected modules. */
+    fun notReferenceClass(fqName: String): ModulesRuleBuilder {
+        builder.setShould { module, _, violations ->
+            for (file in module.files) {
+                val refs = file.usages.filter { it.kind == UsageKind.CLASS_REFERENCE && it.targetFqName == fqName }
+                for (usage in refs) {
+                    violations.add(
+                        "Module '${module.path}' file '${file.name}' references prohibited class '$fqName'",
+                    )
+                }
+            }
+        }
+        return builder
+    }
+
+    fun notReferenceClass(kClass: kotlin.reflect.KClass<*>): ModulesRuleBuilder =
+        notReferenceClass(
+            kClass.kontureQualifiedName(),
+        )
 }
 
+inline fun <reified T : Any> ModulesShould.notCall(): ModulesRuleBuilder = notCall(T::class)
+
+inline fun <reified T : Any> ModulesShould.notReferenceClass(): ModulesRuleBuilder = notReferenceClass(T::class)

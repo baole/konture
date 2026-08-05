@@ -48,8 +48,7 @@ class FilesThat internal constructor(
 
     fun haveName(vararg names: String): FilesRuleBuilder = haveName(names.toList())
 
-    infix fun haveName(predicate: (String) -> Boolean): FilesRuleBuilder =
-        haveName("custom name predicate", predicate)
+    infix fun haveName(predicate: (String) -> Boolean): FilesRuleBuilder = haveName("custom name predicate", predicate)
 
     @Suppress("UnusedParameter")
     fun haveName(
@@ -138,6 +137,109 @@ class FilesThat internal constructor(
 
     fun resideInAModule(vararg modulePaths: String): FilesRuleBuilder = resideInAModule(modulePaths.toList())
 
+    infix fun resideInModule(modulePath: String): FilesRuleBuilder = resideInAModule(modulePath)
+
+    infix fun resideInModules(modulePaths: List<String>): FilesRuleBuilder = resideInAModule(modulePaths)
+
+    fun resideInModules(vararg modulePaths: String): FilesRuleBuilder = resideInAModule(modulePaths.toList())
+
+    infix fun notResideInAModule(modulePath: String): FilesRuleBuilder {
+        val normalized =
+            if (!modulePath.startsWith(":") && !modulePath.startsWith("**") && modulePath.isNotEmpty()) {
+                ":$modulePath"
+            } else {
+                modulePath
+            }
+        builder.setThat { context ->
+            val match =
+                context.modulePath == normalized || PatternMatchers.matchesModuleGlob(normalized, context.modulePath)
+            !match
+        }
+        return builder
+    }
+
+    infix fun notResideInAModule(modulePaths: List<String>): FilesRuleBuilder {
+        val normalized =
+            modulePaths.map {
+                if (!it.startsWith(":") && !it.startsWith("**") && it.isNotEmpty()) ":$it" else it
+            }
+        builder.setThat { context ->
+            val match =
+                normalized.any { target ->
+                    context.modulePath == target || PatternMatchers.matchesModuleGlob(target, context.modulePath)
+                }
+            !match
+        }
+        return builder
+    }
+
+    fun notResideInAModule(vararg modulePaths: String): FilesRuleBuilder = notResideInAModule(modulePaths.toList())
+
+    infix fun notResideInModule(modulePath: String): FilesRuleBuilder = notResideInAModule(modulePath)
+
+    infix fun notResideInModules(modulePaths: List<String>): FilesRuleBuilder = notResideInAModule(modulePaths)
+
+    fun notResideInModules(vararg modulePaths: String): FilesRuleBuilder = notResideInAModule(modulePaths.toList())
+
+    infix fun notHaveName(name: String): FilesRuleBuilder {
+        builder.setThat { it.declaration.name != name }
+        return builder
+    }
+
+    infix fun notHaveName(names: List<String>): FilesRuleBuilder {
+        builder.setThat { !names.contains(it.declaration.name) }
+        return builder
+    }
+
+    fun notHaveName(vararg names: String): FilesRuleBuilder = notHaveName(names.toList())
+
+    infix fun notHaveName(predicate: (String) -> Boolean): FilesRuleBuilder {
+        builder.setThat { !predicate(it.declaration.name) }
+        return builder
+    }
+
+    infix fun notHaveNameStartingWith(prefix: String): FilesRuleBuilder {
+        builder.setThat { !it.declaration.name.startsWith(prefix) }
+        return builder
+    }
+
+    infix fun notHaveNameStartingWith(prefixes: List<String>): FilesRuleBuilder {
+        builder.setThat { context ->
+            !prefixes.any { context.declaration.name.startsWith(it) }
+        }
+        return builder
+    }
+
+    fun notHaveNameStartingWith(vararg prefixes: String): FilesRuleBuilder = notHaveNameStartingWith(prefixes.toList())
+
+    infix fun notHaveNameEndingWith(suffix: String): FilesRuleBuilder {
+        builder.setThat { !it.declaration.name.endsWith(suffix) }
+        return builder
+    }
+
+    infix fun notHaveNameEndingWith(suffixes: List<String>): FilesRuleBuilder {
+        builder.setThat { context ->
+            !suffixes.any { context.declaration.name.endsWith(it) }
+        }
+        return builder
+    }
+
+    fun notHaveNameEndingWith(vararg suffixes: String): FilesRuleBuilder = notHaveNameEndingWith(suffixes.toList())
+
+    infix fun notHaveNameMatching(pattern: String): FilesRuleBuilder {
+        builder.setThat { !PatternMatchers.matchesSimpleGlob(pattern, it.declaration.name) }
+        return builder
+    }
+
+    infix fun notHaveNameMatching(patterns: List<String>): FilesRuleBuilder {
+        builder.setThat { context ->
+            !patterns.any { PatternMatchers.matchesSimpleGlob(it, context.declaration.name) }
+        }
+        return builder
+    }
+
+    fun notHaveNameMatching(vararg patterns: String): FilesRuleBuilder = notHaveNameMatching(patterns.toList())
+
     infix fun containClass(fqName: String): FilesRuleBuilder {
         builder.setThat { context ->
             context.declaration.classes.any { it.fqName == fqName || it.name == fqName }
@@ -154,8 +256,10 @@ class FilesThat internal constructor(
 
     fun containClass(vararg fqNames: String): FilesRuleBuilder = containClass(fqNames.toList())
 
-    infix fun containClass(type: kotlin.reflect.KClass<*>): FilesRuleBuilder =
-        containClass(type.kontureQualifiedName())
+    infix fun containClass(type: kotlin.reflect.KClass<*>): FilesRuleBuilder = containClass(type.kontureQualifiedName())
+
+    fun containClass(vararg types: kotlin.reflect.KClass<*>): FilesRuleBuilder =
+        containClass(types.map { it.kontureQualifiedName() })
 
     inline fun <reified T : Any> containClass(): FilesRuleBuilder = containClass(T::class)
 
@@ -192,8 +296,10 @@ class FilesThat internal constructor(
 
     fun haveImportOf(vararg imports: String): FilesRuleBuilder = haveImportOf(imports.toList())
 
-    infix fun haveImportOf(type: kotlin.reflect.KClass<*>): FilesRuleBuilder =
-        haveImportOf(type.kontureQualifiedName())
+    infix fun haveImportOf(type: kotlin.reflect.KClass<*>): FilesRuleBuilder = haveImportOf(type.kontureQualifiedName())
+
+    fun haveImportOf(vararg types: kotlin.reflect.KClass<*>): FilesRuleBuilder =
+        haveImportOf(types.map { it.kontureQualifiedName() })
 
     inline fun <reified T : Any> haveImportOf(): FilesRuleBuilder = haveImportOf(T::class)
 
@@ -302,7 +408,62 @@ class FilesThat internal constructor(
         builder.setThat { item -> predicates.none { it(item) } }
         return builder
     }
+
+    infix fun notResideInAPackage(packagePattern: String): FilesRuleBuilder {
+        builder.setThat { !PatternMatchers.matchesPackage(packagePattern, it.declaration.packageName) }
+        return builder
+    }
+
+    infix fun notResideInAPackage(packagePatterns: List<String>): FilesRuleBuilder {
+        builder.setThat { context ->
+            packagePatterns.none { PatternMatchers.matchesPackage(it, context.declaration.packageName) }
+        }
+        return builder
+    }
+
+    fun notResideInAPackage(vararg packagePatterns: String): FilesRuleBuilder =
+        notResideInAPackage(
+            packagePatterns.toList(),
+        )
+
+    infix fun notContainClass(fqName: String): FilesRuleBuilder {
+        builder.setThat { file ->
+            file.declaration.classes.none { it.fqName == fqName || it.name == fqName }
+        }
+        return builder
+    }
+
+    infix fun notContainClass(type: kotlin.reflect.KClass<*>): FilesRuleBuilder =
+        notContainClass(type.kontureQualifiedName())
+
+    infix fun notContainClassesWithAnnotation(annotationFqName: String): FilesRuleBuilder {
+        builder.setThat { file ->
+            file.declaration.classes.none { cls ->
+                cls.annotations.any { it.name == annotationFqName || it.fqName == annotationFqName }
+            }
+        }
+        return builder
+    }
+
+    infix fun notContainClassesWithAnnotation(annotation: kotlin.reflect.KClass<out Annotation>): FilesRuleBuilder =
+        notContainClassesWithAnnotation(annotation.kontureQualifiedName())
+
+    infix fun notHaveImportOf(importPath: String): FilesRuleBuilder {
+        builder.setThat { file ->
+            file.declaration.imports.none { it == importPath || it.endsWith(".$importPath") }
+        }
+        return builder
+    }
+
+    infix fun notHaveImportOf(imports: List<String>): FilesRuleBuilder {
+        builder.setThat { file ->
+            file.declaration.imports.none { imp -> imports.any { it == imp || imp.endsWith(".$it") } }
+        }
+        return builder
+    }
+
+    fun notHaveImportOf(vararg imports: String): FilesRuleBuilder = notHaveImportOf(imports.toList())
+
+    infix fun notHaveImportOf(type: kotlin.reflect.KClass<*>): FilesRuleBuilder =
+        notHaveImportOf(type.kontureQualifiedName())
 }
-
-
-

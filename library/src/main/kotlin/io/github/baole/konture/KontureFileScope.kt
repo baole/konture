@@ -135,16 +135,24 @@ fun KontureFileScope.withModule(
     graph: ProjectGraph = Konture.projectGraph,
 ): KontureFileScope {
     val norm = if (!modulePath.startsWith(":") && !modulePath.startsWith("**") && modulePath.isNotEmpty()) ":$modulePath" else modulePath
-    return KontureFileScope(files.filter { file ->
-        val mod = graph.getAllModules().find { m ->
-            m.files.any { f -> f.filePath == file.filePath || f.name == file.name }
-        }
-        mod?.path == norm
-    })
+    return KontureFileScope(
+        files.filter { file ->
+            val mod =
+                graph.getAllModules().find { m ->
+                    m.files.any { f -> f.filePath == file.filePath || f.name == file.name }
+                }
+            mod?.path == norm
+        },
+    )
 }
 
 fun KontureFileScope.withImportOf(importPath: String) =
-    KontureFileScope(files.filter { file -> file.imports.any { PatternMatchers.matchesPackage(importPath, it) || it == importPath } })
+    KontureFileScope(
+        files.filter {
+                file ->
+            file.imports.any { PatternMatchers.matchesPackage(importPath, it) || it == importPath }
+        },
+    )
 
 fun KontureFileScope.withImportOf(type: KClass<*>) = withImportOf(type.kontureQualifiedName())
 
@@ -152,9 +160,6 @@ fun KontureFileScope.containingClass(fqName: String) =
     KontureFileScope(files.filter { file -> file.classes.any { it.fqName == fqName || it.name == fqName } })
 
 fun KontureFileScope.containingClass(type: KClass<*>) = containingClass(type.kontureQualifiedName())
-
-
-
 
 // Assertion extensions on List<FileDeclaration> and KontureFileScope
 
@@ -336,9 +341,10 @@ fun List<FileDeclaration>.assertResideInAModule(
 ) {
     val norm = if (!modulePath.startsWith(":") && !modulePath.startsWith("**") && modulePath.isNotEmpty()) ":$modulePath" else modulePath
     assertTrue("Files must reside in module '$norm'") { file ->
-        val mod = graph.getAllModules().find { m ->
-            m.files.any { f -> f.filePath == file.filePath || f.name == file.name }
-        }
+        val mod =
+            graph.getAllModules().find { m ->
+                m.files.any { f -> f.filePath == file.filePath || f.name == file.name }
+            }
         mod?.path == norm
     }
 }
@@ -349,9 +355,10 @@ fun List<FileDeclaration>.assertNotResideInAModule(
 ) {
     val norm = if (!modulePath.startsWith(":") && !modulePath.startsWith("**") && modulePath.isNotEmpty()) ":$modulePath" else modulePath
     assertTrue("Files must not reside in module '$norm'") { file ->
-        val mod = graph.getAllModules().find { m ->
-            m.files.any { f -> f.filePath == file.filePath || f.name == file.name }
-        }
+        val mod =
+            graph.getAllModules().find { m ->
+                m.files.any { f -> f.filePath == file.filePath || f.name == file.name }
+            }
         mod?.path != norm
     }
 }

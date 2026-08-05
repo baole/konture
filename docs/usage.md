@@ -9,7 +9,27 @@ Once Konture is installed and integrated into your project, you can begin defini
 
 ---
 
+## 🗺️ API Overview
+
+Konture provides a expressive DSL across six core scopes: `files {}`, `classes {}`, `functions {}`, `modules {}`, `slices {}`, and `properties {}`. See the full [API Overview Guide](api-overview.md) for detailed documentation and snippets.
+
+| Feature Dimension | `files {}` | `classes {}` | `functions {}` | `modules {}` | `slices {}` | `properties {}` |
+| :--- | :---: | :---: | :---: | :---: | :---: | :---: |
+| **Builder Entry Point** | ✅ `files()` | ✅ `classes()` | ✅ `functions()` | ✅ `modules()` | ✅ `slices()` | ✅ `properties()` |
+| **Auto-Checking Block DSL** | ✅ `files { ... }` | ✅ `classes { ... }` | ✅ `functions { ... }` | ✅ `modules { ... }` | ✅ `slices { ... }` | ✅ `properties { ... }` |
+| **Batch Context Integration** | ✅ `architecture { ... }` | ✅ `architecture { ... }` | ✅ `architecture { ... }` | ✅ `architecture { ... }` | ✅ `architecture { ... }` | ✅ `architecture { ... }` |
+| **Functional Inspection Scope** | ✅ `fileScope` | ✅ `classScope` | ✅ `functionScope` | ✅ `moduleScope` | ✅ `sliceScope(...)` | ✅ `propertyScope` |
+| **Module-Scoped Entry** | ✅ `fileScopeFromModule` | ✅ `classScopeFromModule` | ✅ `functionScopeFromModule` | ✅ `moduleScopeFromModule` | ✅ `sliceScopeFromModule` | ✅ `propertyScopeFromModule` |
+| **Package Filtering** | ✅ `resideInAPackage` | ✅ `resideInAPackage` | ✅ `resideInAPackage` | ✅ `containPackage` | ✅ `resideInAPackage` | ✅ `resideInAPackage` |
+| **Annotation Filtering** | ✅ `haveAnnotationOf` | ✅ `beAnnotatedWith` | ✅ `beAnnotatedWith` | ✅ `containClassesWithAnnotation` | ✅ `containClassesWithAnnotation` | ✅ `beAnnotatedWith` |
+| **Call & Reference Prohibitions** | ✅ `notCall` / `notReferenceClass` | ✅ `notCall` / `notReferenceClass` | ✅ `notCall` / `notReferenceClass` | ✅ `notCall` / `notReferenceClass` | ✅ `notCall` / `notReferenceClass` | ✅ `notCall` / `notReferenceClass` |
+| **Dependency Assertions** | ✅ `onlyDependOn*` / `notDependOn*` | ✅ `onlyDependOn*` / `notDependOn*` | ➖ | ✅ `onlyDependOnModules` | ✅ `onlyDependOnSlices` | ➖ |
+| **Cycle Detection** | ➖ | ✅ `beFreeOfCycles()` | ➖ | ✅ `beFreeOfCycles()` | ✅ `beFreeOfCycles()` | ➖ |
+
+---
+
 ## 📐 Writing Your First Test
+
 
 Create a new Kotlin test class inside your dedicated architecture test module:
 `konture-test/src/test/kotlin/com/acme/konture/ArchitectureTest.kt`
@@ -140,6 +160,7 @@ Konture.properties {
 Konture.files {
     that().resideInPackageOf<MarkerClass>()
     should().notReferenceClass<LegacyClient>()
+    andShould().onlyDependOnPackages("com.acme..", "kotlin..")
     andShould().anyOf(
         { resideInAPackage("com.acme.core..") },
         { resideInAPackage("com.acme.feature..") }
@@ -150,12 +171,16 @@ Konture.slices {
     matching("com.acme.(*)..")
         .should().onlyDependOnSlices("core", "common")
         .andShould().notDependOnSlice("internal")
+        .andShould().notCall<LegacyClient>()
 }
 
 Konture.modules {
-    that().haveNameStartingWith(":feature")
+    that().resideInAModule(":feature-*")
+        .and().containPackage("com.acme.feature..")
         .should().beFreeOfCycles()
+        .andShould().notCall("java.lang.System.exit")
 }
+
 
 ```
 

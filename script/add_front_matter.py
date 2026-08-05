@@ -45,7 +45,14 @@ FRONT_MATTER_MAP = {
         "nav_order": 54,
         "permalink": "/configuration/"
     },
+    "api-overview.md": {
+        "layout": "default",
+        "title": "API Overview",
+        "nav_order": 55,
+        "permalink": "/api-overview/"
+    },
     "baseline.md": {
+
         "layout": "default",
         "title": "Architecture Baselines",
         "nav_order": 56,

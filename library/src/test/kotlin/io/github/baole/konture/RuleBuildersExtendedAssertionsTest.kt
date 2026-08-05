@@ -9,8 +9,7 @@ package io.github.baole.konture
 import org.junit.jupiter.api.Assertions.assertDoesNotThrow
 import org.junit.jupiter.api.Test
 
-class ApiGapResolutionPhase2Test {
-
+class RuleBuildersExtendedAssertionsTest {
     private fun testClass(
         pkg: String,
         name: String,
@@ -27,32 +26,71 @@ class ApiGapResolutionPhase2Test {
         imports = emptyList<String>(),
         referencedTypes = emptySet<String>(),
         filePath = "/src/$name.kt",
-        companionObject = if (hasCompanion) ClassDeclaration(
-            name = "Companion",
-            fqName = "$pkg.$name.Companion",
-            packageName = pkg,
-            isInterface = false,
-            isAbstract = false,
-            annotations = emptyList<AnnotationDeclaration>(),
-            imports = emptyList<String>(),
-            referencedTypes = emptySet<String>(),
-            filePath = "/src/$name.kt",
-        ) else null,
-        primaryConstructor = ConstructorDeclaration(
-            visibility = if (primaryPrivate) Visibility.PRIVATE else Visibility.PUBLIC,
-            parameters = if (noArgConst) emptyList<ParameterDeclaration>() else listOf(ParameterDeclaration("id", "String", false, emptyList<AnnotationDeclaration>())),
-            annotations = emptyList<AnnotationDeclaration>(),
-        ),
+        companionObject =
+            if (hasCompanion) {
+                ClassDeclaration(
+                    name = "Companion",
+                    fqName = "$pkg.$name.Companion",
+                    packageName = pkg,
+                    isInterface = false,
+                    isAbstract = false,
+                    annotations = emptyList<AnnotationDeclaration>(),
+                    imports = emptyList<String>(),
+                    referencedTypes = emptySet<String>(),
+                    filePath = "/src/$name.kt",
+                )
+            } else {
+                null
+            },
+        primaryConstructor =
+            ConstructorDeclaration(
+                visibility = if (primaryPrivate) Visibility.PRIVATE else Visibility.PUBLIC,
+                parameters =
+                    if (noArgConst) {
+                        emptyList<ParameterDeclaration>()
+                    } else {
+                        listOf(
+                            ParameterDeclaration("id", "String", false, emptyList<AnnotationDeclaration>()),
+                        )
+                    },
+                annotations = emptyList<AnnotationDeclaration>(),
+            ),
     )
 
     private fun testGraph(): ProjectGraph {
         val cls1 = testClass("io.github.baole.konture", "ServiceA", hasCompanion = true, primaryPrivate = true)
         val cls2 = testClass("io.github.baole.konture", "ModelB", noArgConst = true)
-        val file1 = FileDeclaration("ServiceA.kt", "io.github.baole.konture", classes = listOf(cls1), imports = listOf("io.github.baole.konture.ModelB"), filePath = "/src/ServiceA.kt")
-        val file2 = FileDeclaration("ModelB.kt", "io.github.baole.konture", classes = listOf(cls2), filePath = "/src/ModelB.kt")
+        val file1 =
+            FileDeclaration(
+                "ServiceA.kt",
+                "io.github.baole.konture",
+                classes = listOf(cls1),
+                imports = listOf("io.github.baole.konture.ModelB"),
+                filePath = "/src/ServiceA.kt",
+            )
+        val file2 =
+            FileDeclaration("ModelB.kt", "io.github.baole.konture", classes = listOf(cls2), filePath = "/src/ModelB.kt")
 
-        val modA = Module(":", ":core", "core", emptyList(), emptyList(), listOf(Dependency(":feature", "impl", ":")), listOf(file1))
-        val modB = Module(":", ":feature", "feature", emptyList(), emptyList(), listOf(Dependency(":core", "impl", ":")), listOf(file2))
+        val modA =
+            Module(
+                ":",
+                ":core",
+                "core",
+                emptyList(),
+                emptyList(),
+                listOf(Dependency(":feature", "impl", ":")),
+                listOf(file1),
+            )
+        val modB =
+            Module(
+                ":",
+                ":feature",
+                "feature",
+                emptyList(),
+                emptyList(),
+                listOf(Dependency(":core", "impl", ":")),
+                listOf(file2),
+            )
         return ProjectGraph(mapOf(":" to listOf(modA, modB)))
     }
 
@@ -92,17 +130,24 @@ class ApiGapResolutionPhase2Test {
 
     @Test
     fun `FunctionsThat and FunctionsShould extension topLevel member work`() {
-        val extFunc = FunctionDeclaration(
-            name = "toDto",
-            visibility = Visibility.PUBLIC,
-            modifiers = emptySet(),
-            returnType = "String",
-            parameters = emptyList(),
-            annotations = emptyList(),
-            kdocText = null,
-            isExtension = true,
-        )
-        val file = FileDeclaration("Utils.kt", "io.github.baole.konture", topLevelFunctions = listOf(extFunc), filePath = "/src/Utils.kt")
+        val extFunc =
+            FunctionDeclaration(
+                name = "toDto",
+                visibility = Visibility.PUBLIC,
+                modifiers = emptySet(),
+                returnType = "String",
+                parameters = emptyList(),
+                annotations = emptyList(),
+                kdocText = null,
+                isExtension = true,
+            )
+        val file =
+            FileDeclaration(
+                "Utils.kt",
+                "io.github.baole.konture",
+                topLevelFunctions = listOf(extFunc),
+                filePath = "/src/Utils.kt",
+            )
         val mod = Module(":", ":core", "core", emptyList(), emptyList(), emptyList(), listOf(file))
         val graph = ProjectGraph(mapOf(":" to listOf(mod)))
 
@@ -119,18 +164,30 @@ class ApiGapResolutionPhase2Test {
 
     @Test
     fun `PropertiesThat and PropertiesShould extension topLevel member and annotationWithArgument work`() {
-        val ann = AnnotationDeclaration("Column", "javax.persistence.Column", listOf(AnnotationArgumentDeclaration("name", "user_id")))
-        val prop = PropertyDeclaration(
-            name = "userId",
-            type = "String",
-            visibility = Visibility.PUBLIC,
-            modifiers = emptySet(),
-            isVal = true,
-            annotations = listOf(ann),
-            kdocText = null,
-            isExtension = false,
-        )
-        val file = FileDeclaration("User.kt", "io.github.baole.konture", topLevelProperties = listOf(prop), filePath = "/src/User.kt")
+        val ann =
+            AnnotationDeclaration(
+                "Column",
+                "javax.persistence.Column",
+                listOf(AnnotationArgumentDeclaration("name", "user_id")),
+            )
+        val prop =
+            PropertyDeclaration(
+                name = "userId",
+                type = "String",
+                visibility = Visibility.PUBLIC,
+                modifiers = emptySet(),
+                isVal = true,
+                annotations = listOf(ann),
+                kdocText = null,
+                isExtension = false,
+            )
+        val file =
+            FileDeclaration(
+                "User.kt",
+                "io.github.baole.konture",
+                topLevelProperties = listOf(prop),
+                filePath = "/src/User.kt",
+            )
         val mod = Module(":", ":core", "core", emptyList(), emptyList(), emptyList(), listOf(file))
         val graph = ProjectGraph(mapOf(":" to listOf(mod)))
 

@@ -185,24 +185,17 @@ fun List<PropertyDeclarationContext>.withModule(modulePath: String): List<Proper
 
 fun KonturePropertyScope.withModule(modulePath: String) = KonturePropertyScope(properties.withModule(modulePath))
 
-fun KonturePropertyScope.valProperties(): KonturePropertyScope =
-    KonturePropertyScope(properties.valProperties())
+fun KonturePropertyScope.valProperties(): KonturePropertyScope = KonturePropertyScope(properties.valProperties())
 
-fun KonturePropertyScope.varProperties(): KonturePropertyScope =
-    KonturePropertyScope(properties.varProperties())
+fun KonturePropertyScope.varProperties(): KonturePropertyScope = KonturePropertyScope(properties.varProperties())
 
-fun KonturePropertyScope.memberProperties(): KonturePropertyScope =
-    KonturePropertyScope(properties.memberProperties())
+fun KonturePropertyScope.memberProperties(): KonturePropertyScope = KonturePropertyScope(properties.memberProperties())
 
 fun KonturePropertyScope.topLevelProperties(): KonturePropertyScope =
     KonturePropertyScope(properties.topLevelProperties())
 
 fun KonturePropertyScope.extensionProperties(): KonturePropertyScope =
     KonturePropertyScope(properties.extensionProperties())
-
-
-
-
 
 // Assertion extensions on KonturePropertyScope
 

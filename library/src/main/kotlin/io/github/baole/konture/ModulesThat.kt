@@ -82,7 +82,6 @@ class ModulesThat internal constructor(
 
     fun haveNameEndingWith(vararg suffixes: String): ModulesRuleBuilder = haveNameEndingWith(suffixes.toList())
 
-
     /**
      * Restricts the rules to modules whose Gradle path matches the specified glob pattern.
      *
@@ -186,6 +185,18 @@ class ModulesThat internal constructor(
         return builder
     }
 
+    infix fun haveSourceSet(sourceSetName: String): ModulesRuleBuilder {
+        builder.setThat { module -> module.sourceSets.any { it.name == sourceSetName } }
+        return builder
+    }
+
+    infix fun haveSourceSet(sourceSetNames: List<String>): ModulesRuleBuilder {
+        builder.setThat { module -> sourceSetNames.all { name -> module.sourceSets.any { it.name == name } } }
+        return builder
+    }
+
+    fun haveSourceSet(vararg sourceSetNames: String): ModulesRuleBuilder = haveSourceSet(sourceSetNames.toList())
+
     /**
      * Matches if none of the nested condition blocks are satisfied.
      */
@@ -199,4 +210,236 @@ class ModulesThat internal constructor(
         builder.setThat { item -> predicates.none { it(item) } }
         return builder
     }
+
+    infix fun applyPlugin(pluginIds: List<String>): ModulesRuleBuilder {
+        builder.setThat { module -> pluginIds.all { module.appliedPlugins.contains(it) } }
+        return builder
+    }
+
+    infix fun havePlugins(pluginIds: List<String>): ModulesRuleBuilder = applyPlugin(pluginIds)
+
+    infix fun notDependOnModule(modulePath: String): ModulesRuleBuilder {
+        val normalized = normalizeModulePath(modulePath)
+        builder.setThat { module ->
+            module.dependencies.none { normalizeModulePath(it.targetPath) == normalized }
+        }
+        return builder
+    }
+
+    infix fun notDependOnModules(modulePaths: List<String>): ModulesRuleBuilder {
+        val normalized = modulePaths.map { normalizeModulePath(it) }
+        builder.setThat { module ->
+            module.dependencies.none { normalized.contains(normalizeModulePath(it.targetPath)) }
+        }
+        return builder
+    }
+
+    fun notDependOnModules(vararg modulePaths: String): ModulesRuleBuilder = notDependOnModules(modulePaths.toList())
+
+    infix fun notApplyPlugin(pluginId: String): ModulesRuleBuilder {
+        builder.setThat { module -> !module.appliedPlugins.contains(pluginId) }
+        return builder
+    }
+
+    infix fun notHavePlugin(pluginId: String): ModulesRuleBuilder = notApplyPlugin(pluginId)
+
+    infix fun notHavePlugins(pluginIds: List<String>): ModulesRuleBuilder {
+        builder.setThat { module -> pluginIds.none { module.appliedPlugins.contains(it) } }
+        return builder
+    }
+
+    fun notHavePlugins(vararg pluginIds: String): ModulesRuleBuilder = notHavePlugins(pluginIds.toList())
+
+    infix fun notHaveSourceSet(sourceSetName: String): ModulesRuleBuilder {
+        builder.setThat { module -> module.sourceSets.none { it.name == sourceSetName } }
+        return builder
+    }
+
+    infix fun notHaveName(path: String): ModulesRuleBuilder {
+        val normalized = normalizeModulePath(path)
+        builder.setThat { it.path != normalized }
+        return builder
+    }
+
+    infix fun notHaveNameMatching(pattern: String): ModulesRuleBuilder {
+        builder.setThat { !PatternMatchers.matchesModuleGlob(pattern, it.path) }
+        return builder
+    }
+
+    infix fun notHaveNameStartingWith(prefix: String): ModulesRuleBuilder {
+        builder.setThat { !it.path.removePrefix(":").startsWith(prefix.removePrefix(":")) }
+        return builder
+    }
+
+    infix fun notHaveNameEndingWith(suffix: String): ModulesRuleBuilder {
+        builder.setThat { !it.path.endsWith(suffix) }
+        return builder
+    }
+
+    infix fun haveBuildId(buildId: String): ModulesRuleBuilder {
+        builder.setThat { it.buildId == buildId }
+        return builder
+    }
+
+    infix fun notHaveBuildId(buildId: String): ModulesRuleBuilder {
+        builder.setThat { it.buildId != buildId }
+        return builder
+    }
+
+    infix fun haveProjectDir(dirPattern: String): ModulesRuleBuilder {
+        builder.setThat { PatternMatchers.matchesSimpleGlob(dirPattern, it.projectDir) }
+        return builder
+    }
+
+    infix fun notHaveProjectDir(dirPattern: String): ModulesRuleBuilder {
+        builder.setThat { !PatternMatchers.matchesSimpleGlob(dirPattern, it.projectDir) }
+        return builder
+    }
+
+    infix fun containClassesInPackage(packagePattern: String): ModulesRuleBuilder {
+        builder.setThat { module ->
+            module.classes.any { PatternMatchers.matchesPackage(packagePattern, it.packageName) }
+        }
+        return builder
+    }
+
+    infix fun notContainClassesInPackage(packagePattern: String): ModulesRuleBuilder {
+        builder.setThat { module ->
+            module.classes.none { PatternMatchers.matchesPackage(packagePattern, it.packageName) }
+        }
+        return builder
+    }
+
+    infix fun containClassesWithAnnotation(annotationFqName: String): ModulesRuleBuilder {
+        builder.setThat { module ->
+            module.classes.any { cls ->
+                cls.annotations.any { it.name == annotationFqName || it.fqName == annotationFqName }
+            }
+        }
+        return builder
+    }
+
+    infix fun notContainClassesWithAnnotation(annotationFqName: String): ModulesRuleBuilder {
+        builder.setThat { module ->
+            module.classes.none { cls ->
+                cls.annotations.any { it.name == annotationFqName || it.fqName == annotationFqName }
+            }
+        }
+        return builder
+    }
+
+    infix fun containClass(fqName: String): ModulesRuleBuilder {
+        builder.setThat { module ->
+            module.classes.any { it.fqName == fqName || it.name == fqName }
+        }
+        return builder
+    }
+
+    infix fun notContainClass(fqName: String): ModulesRuleBuilder {
+        builder.setThat { module ->
+            module.classes.none { it.fqName == fqName || it.name == fqName }
+        }
+        return builder
+    }
+
+    infix fun containClassesWithAnnotation(annotation: kotlin.reflect.KClass<out Annotation>): ModulesRuleBuilder =
+        containClassesWithAnnotation(annotation.kontureQualifiedName())
+
+    infix fun notContainClassesWithAnnotation(annotation: kotlin.reflect.KClass<out Annotation>): ModulesRuleBuilder =
+        notContainClassesWithAnnotation(annotation.kontureQualifiedName())
+
+    infix fun containClass(type: kotlin.reflect.KClass<*>): ModulesRuleBuilder =
+        containClass(type.kontureQualifiedName())
+
+    infix fun notContainClass(type: kotlin.reflect.KClass<*>): ModulesRuleBuilder =
+        notContainClass(type.kontureQualifiedName())
+
+    infix fun dependOnExternalLibrary(coordinate: String): ModulesRuleBuilder = dependOnExternalLibraries(coordinate)
+
+    fun dependOnExternalLibraries(vararg coordinates: String): ModulesRuleBuilder {
+        builder.setThat { module ->
+            val resolvedDeps = builder.graph.requireExternalDependencies().modules[module.path] ?: emptyList()
+            resolvedDeps.any { dep ->
+                coordinates.any { pattern ->
+                    if (pattern.contains(":")) {
+                        PatternMatchers.matchesSimpleGlob(pattern, "${dep.group}:${dep.name}")
+                    } else {
+                        PatternMatchers.matchesSimpleGlob(pattern, dep.group) ||
+                            PatternMatchers.matchesSimpleGlob(pattern, dep.name)
+                    }
+                }
+            }
+        }
+        return builder
+    }
+
+    /**
+     * Restricts the rules to modules with a Gradle path matching the specified module path pattern.
+     */
+    infix fun resideInAModule(modulePath: String): ModulesRuleBuilder = haveNameMatching(modulePath)
+
+    /**
+     * Restricts the rules to modules with a Gradle path matching any of the specified module path patterns.
+     */
+    infix fun resideInAModule(modulePaths: List<String>): ModulesRuleBuilder = haveNameMatching(modulePaths)
+
+    /**
+     * Restricts the rules to modules with a Gradle path matching any of the specified module path patterns.
+     */
+    fun resideInAModule(vararg modulePaths: String): ModulesRuleBuilder = haveNameMatching(modulePaths.toList())
+
+    /**
+     * Alias for [resideInAModule].
+     */
+    infix fun resideInModule(modulePath: String): ModulesRuleBuilder = resideInAModule(modulePath)
+
+    /**
+     * Alias for [resideInAModule].
+     */
+    infix fun resideInModules(modulePaths: List<String>): ModulesRuleBuilder = resideInAModule(modulePaths)
+
+    /**
+     * Alias for [resideInAModule].
+     */
+    fun resideInModules(vararg modulePaths: String): ModulesRuleBuilder = resideInAModule(modulePaths.toList())
+
+    /**
+     * Restricts the rules to modules containing files in a package matching the specified package pattern.
+     */
+    infix fun containPackage(packagePattern: String): ModulesRuleBuilder {
+        builder.setThat { module ->
+            module.files.any { file -> PatternMatchers.matchesPackage(packagePattern, file.packageName) }
+        }
+        return builder
+    }
+
+    /**
+     * Restricts the rules to modules containing files in a package matching any of the specified package patterns.
+     */
+    infix fun containPackage(packagePatterns: List<String>): ModulesRuleBuilder {
+        builder.setThat { module ->
+            module.files.any { file -> packagePatterns.any { PatternMatchers.matchesPackage(it, file.packageName) } }
+        }
+        return builder
+    }
+
+    /**
+     * Restricts the rules to modules containing files in a package matching any of the specified package patterns.
+     */
+    fun containPackage(vararg packagePatterns: String): ModulesRuleBuilder = containPackage(packagePatterns.toList())
+
+    /**
+     * Alias for [containPackage].
+     */
+    infix fun resideInAPackage(packagePattern: String): ModulesRuleBuilder = containPackage(packagePattern)
+
+    /**
+     * Alias for [containPackage].
+     */
+    infix fun resideInAPackage(packagePatterns: List<String>): ModulesRuleBuilder = containPackage(packagePatterns)
+
+    /**
+     * Alias for [containPackage].
+     */
+    fun resideInAPackage(vararg packagePatterns: String): ModulesRuleBuilder = containPackage(packagePatterns.toList())
 }
