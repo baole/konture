@@ -27,11 +27,12 @@ internal object ViolationLocation {
         line: Int = -1,
         column: Int = -1,
     ): String {
+        val fileName = if (filePath.isNotEmpty()) java.io.File(filePath).name else filePath
         val file =
             when {
-                line > 0 && column > 0 -> "$filePath:$line:$column"
-                line > 0 -> "$filePath:$line"
-                else -> filePath
+                line > 0 && column > 0 -> "$fileName:$line:$column"
+                line > 0 -> "$fileName:$line"
+                else -> fileName
             }
         return "$modulePath, ${sourceSetName ?: "unknown"} source set) ($file"
     }
@@ -54,10 +55,11 @@ internal object ViolationLocation {
         return if (modulePath != null) {
             of(modulePath, sourceSetName, filePath, effectiveLine, column)
         } else {
+            val fileName = if (filePath.isNotEmpty()) java.io.File(filePath).name else filePath
             when {
-                effectiveLine > 0 && column > 0 -> "$filePath:$effectiveLine:$column"
-                effectiveLine > 0 -> "$filePath:$effectiveLine"
-                else -> filePath
+                effectiveLine > 0 && column > 0 -> "$fileName:$effectiveLine:$column"
+                effectiveLine > 0 -> "$fileName:$effectiveLine"
+                else -> fileName
             }
         }
     }
