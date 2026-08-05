@@ -496,7 +496,7 @@ class PropertiesShould internal constructor(
                     val unresolved = if (usage.unresolvedPossibleUsage) "unresolved possible " else ""
                     violations.add(
                         "${getMessage("usage.notCall", unresolved, fqName, usage.rawExpression, usage.line, usage.column)} " +
-                            "(at ${ViolationLocation.of(prop.modulePath, prop.sourceSet?.name, prop.filePath, usage.line, usage.column)})",
+                            "(at ${ViolationLocation.format(prop.filePath, usage.line, usage.column, prop.modulePath, prop.sourceSet?.name)})",
                     )
                 }
         }
@@ -531,7 +531,7 @@ class PropertiesShould internal constructor(
                 }.forEach { usage ->
                     violations.add(
                         "${getMessage("usage.notReferenceClass", fqName, usage.rawExpression, usage.line, usage.column)} " +
-                            "(at ${ViolationLocation.of(prop.modulePath, prop.sourceSet?.name, prop.filePath, usage.line, usage.column)})",
+                            "(at ${ViolationLocation.format(prop.filePath, usage.line, usage.column, prop.modulePath, prop.sourceSet?.name)})",
                     )
                 }
         }

@@ -1,5 +1,6 @@
 /*
- * Copyright 2026 Bao Le Duc
+ * Copyright 2026 The Konture Contributors
+ * Contributors: Bao Le Duc (@baole)
  * SPDX-License-Identifier: Apache-2.0
  */
 
@@ -9,6 +10,7 @@ import io.github.baole.konture.impl.BaselineManager
 import io.github.baole.konture.impl.LayerConstraint
 import io.github.baole.konture.impl.LayerDefinition
 import io.github.baole.konture.impl.PatternMatchers
+import io.github.baole.konture.impl.ViolationLocation
 
 /**
  * A builder class implementing the Layered Architecture DSL.
@@ -180,7 +182,7 @@ class LayeredArchitectureBuilder(
                                                     sourceCls.fqName,
                                                     otherCls.fqName,
                                                     otherLayer.name,
-                                                    sourceCls.filePath,
+                                                    ViolationLocation.format(sourceCls),
                                                 ),
                                             )
                                         }
@@ -234,7 +236,7 @@ class LayeredArchitectureBuilder(
                                                     sourceCls.fqName,
                                                     otherCls.fqName,
                                                     otherLayer.name,
-                                                    sourceCls.filePath,
+                                                    ViolationLocation.format(sourceCls),
                                                 ),
                                             )
                                         }
@@ -288,7 +290,7 @@ class LayeredArchitectureBuilder(
                                                     otherCls.fqName,
                                                     otherLayer.name,
                                                     targetCls.fqName,
-                                                    otherCls.filePath,
+                                                    ViolationLocation.format(otherCls),
                                                 ),
                                             )
                                         }

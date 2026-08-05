@@ -6,6 +6,11 @@
 
 package io.github.baole.konture.impl
 
+import io.github.baole.konture.ClassDeclaration
+import io.github.baole.konture.FileDeclaration
+import io.github.baole.konture.FunctionDeclarationContext
+import io.github.baole.konture.PropertyDeclarationContext
+
 /**
  * Builds the uniform location string appended to violation messages for file-backed subjects
  * (classes, files, functions, properties).
@@ -30,4 +35,48 @@ internal object ViolationLocation {
             }
         return "$modulePath, ${sourceSetName ?: "unknown"} source set) ($file"
     }
+
+    fun format(
+        filePath: String,
+        line: Int = -1,
+        column: Int = -1,
+        modulePath: String? = null,
+        sourceSetName: String? = null,
+    ): String {
+        val effectiveLine =
+            if (line > 0) {
+                line
+            } else if (filePath.isNotEmpty()) {
+                1
+            } else {
+                -1
+            }
+        return if (modulePath != null) {
+            of(modulePath, sourceSetName, filePath, effectiveLine, column)
+        } else {
+            when {
+                effectiveLine > 0 && column > 0 -> "$filePath:$effectiveLine:$column"
+                effectiveLine > 0 -> "$filePath:$effectiveLine"
+                else -> filePath
+            }
+        }
+    }
+
+    fun format(
+        cls: ClassDeclaration,
+        modulePath: String? = null,
+        sourceSetName: String? = null,
+    ): String = format(cls.filePath, cls.sourceLine, modulePath = modulePath, sourceSetName = sourceSetName)
+
+    fun format(
+        file: FileDeclaration,
+        modulePath: String? = null,
+        sourceSetName: String? = null,
+    ): String = format(file.filePath, line = 1, modulePath = modulePath, sourceSetName = sourceSetName)
+
+    fun format(func: FunctionDeclarationContext): String =
+        format(func.filePath, func.declaration.sourceLine, modulePath = func.modulePath, sourceSetName = func.sourceSet?.name)
+
+    fun format(prop: PropertyDeclarationContext): String =
+        format(prop.filePath, prop.declaration.sourceLine, modulePath = prop.modulePath, sourceSetName = prop.sourceSet?.name)
 }

@@ -7,6 +7,7 @@
 package io.github.baole.konture
 
 import io.github.baole.konture.impl.PatternMatchers
+import io.github.baole.konture.impl.ViolationLocation
 import kotlin.jvm.JvmName
 
 /**
@@ -220,7 +221,7 @@ fun List<ClassDeclaration>.assertTrue(
                     appendLine(additionalMessage)
                 }
                 violations.forEach {
-                    appendLine("  - ${it.fqName} (at ${it.filePath})")
+                    appendLine("  - ${it.fqName} (at ${ViolationLocation.format(it)})")
                 }
             }
         throw AssertionError(message)
@@ -529,7 +530,9 @@ fun List<ClassDeclaration>.assertOnlyBeAccessedByAnyPackage(
                 }
             if (!isAllowed) {
                 violations.add(
-                    "Class ${targetCls.fqName} is accessed by ${accessor.fqName} (in package ${accessor.packageName}), which is not allowed by package pattern(s): ${packagePatterns.joinToString()}",
+                    "Class ${targetCls.fqName} is accessed by ${accessor.fqName} (in package ${accessor.packageName}), which is not allowed by package pattern(s): ${packagePatterns.joinToString()} (at ${ViolationLocation.format(
+                        accessor,
+                    )})",
                 )
             }
         }
@@ -573,7 +576,9 @@ fun List<ClassDeclaration>.assertNotBeAccessedByAnyPackage(
                 }
             if (isForbidden) {
                 violations.add(
-                    "Class ${targetCls.fqName} is accessed by ${accessor.fqName} (in package ${accessor.packageName}), which is forbidden by package pattern(s): ${packagePatterns.joinToString()}",
+                    "Class ${targetCls.fqName} is accessed by ${accessor.fqName} (in package ${accessor.packageName}), which is forbidden by package pattern(s): ${packagePatterns.joinToString()} (at ${ViolationLocation.format(
+                        accessor,
+                    )})",
                 )
             }
         }
@@ -619,7 +624,9 @@ fun List<ClassDeclaration>.assertOnlyDependOnClassesInAnyPackage(
                 }
             if (!isAllowed) {
                 violations.add(
-                    "Class ${cls.fqName} depends on package $depPkg, which is not allowed by package pattern(s): ${packagePatterns.joinToString()}",
+                    "Class ${cls.fqName} depends on package $depPkg, which is not allowed by package pattern(s): ${packagePatterns.joinToString()} (at ${ViolationLocation.format(
+                        cls,
+                    )})",
                 )
             }
         }

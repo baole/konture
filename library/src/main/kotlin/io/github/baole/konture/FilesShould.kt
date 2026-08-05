@@ -8,6 +8,7 @@ package io.github.baole.konture
 
 import io.github.baole.konture.i18n.getMessage
 import io.github.baole.konture.impl.PatternMatchers
+import io.github.baole.konture.impl.ViolationLocation
 import kotlin.reflect.KClass
 
 @KontureDsl
@@ -21,7 +22,16 @@ class FilesShould internal constructor(
                 .filter { usage -> PatternMatchers.isCallUsageMatch(usage, fqName) }
                 .forEach { usage ->
                     val unresolved = if (usage.unresolvedPossibleUsage) "unresolved possible " else ""
-                    violations.add(getMessage("usage.notCall", unresolved, fqName, usage.rawExpression, usage.line, usage.column))
+                    violations.add(
+                        "${getMessage(
+                            "usage.notCall",
+                            unresolved,
+                            fqName,
+                            usage.rawExpression,
+                            usage.line,
+                            usage.column,
+                        )} (at ${ViolationLocation.format(usage.filePath, usage.line, usage.column, file.modulePath, file.sourceSet?.name)})",
+                    )
                 }
         }
         return builder
@@ -39,7 +49,15 @@ class FilesShould internal constructor(
             file.declaration.usages
                 .filter { it.kind == UsageKind.CLASS_REFERENCE && it.targetFqName == fqName }
                 .forEach { usage ->
-                    violations.add(getMessage("usage.notReferenceClass", fqName, usage.rawExpression, usage.line, usage.column))
+                    violations.add(
+                        "${getMessage(
+                            "usage.notReferenceClass",
+                            fqName,
+                            usage.rawExpression,
+                            usage.line,
+                            usage.column,
+                        )} (at ${ViolationLocation.format(usage.filePath, usage.line, usage.column, file.modulePath, file.sourceSet?.name)})",
+                    )
                 }
         }
         return builder
@@ -198,7 +216,10 @@ class FilesShould internal constructor(
             val matched = file.declaration.classes.isEmpty() || file.declaration.classes.any { it.name == expectedName }
             if (!matched) {
                 violations.add(
-                    getMessage("file.should.matchClassName", "${file.declaration.name} (at ${file.declaration.filePath})"),
+                    getMessage(
+                        "file.should.matchClassName",
+                        "${file.declaration.name} (at ${ViolationLocation.format(file.declaration, file.modulePath, file.sourceSet?.name)})",
+                    ),
                 )
             }
         }

@@ -7,6 +7,7 @@
 package io.github.baole.konture
 
 import io.github.baole.konture.impl.PatternMatchers
+import io.github.baole.konture.impl.ViolationLocation
 import kotlin.jvm.JvmName
 
 /**
@@ -134,7 +135,7 @@ fun List<FileDeclaration>.assertTrue(
                     appendLine(additionalMessage)
                 }
                 violations.forEach {
-                    appendLine("  - ${it.name} (at ${it.filePath})")
+                    appendLine("  - ${it.name} (at ${ViolationLocation.format(it)})")
                 }
             }
         throw AssertionError(message)

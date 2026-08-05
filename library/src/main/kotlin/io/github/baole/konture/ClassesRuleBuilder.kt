@@ -299,7 +299,9 @@ class ClassesRuleBuilder(
                 val startIdx = list.size
                 assertion(cls, allClasses, list)
                 for (i in startIdx until list.size) {
-                    list[i] = "${list[i]} (at ${ViolationLocation.of(modulePath, sourceSetName, cls.filePath, cls.sourceLine)})"
+                    if (!list[i].contains(" (at ")) {
+                        list[i] = "${list[i]} (at ${ViolationLocation.format(cls, modulePath, sourceSetName)})"
+                    }
                 }
             }
         }

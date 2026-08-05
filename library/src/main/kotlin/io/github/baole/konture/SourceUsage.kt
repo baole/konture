@@ -24,7 +24,12 @@ data class SourceUsage(
     val sourceSets: List<SourceSetId> = emptyList(),
     val possibleTargetFqNames: List<String> = emptyList(),
     val unresolvedPossibleUsage: Boolean = false,
-    val confidence: ResolutionConfidence = if (unresolvedPossibleUsage) ResolutionConfidence.POSSIBLE else ResolutionConfidence.RESOLVED,
+    val confidence: ResolutionConfidence =
+        if (unresolvedPossibleUsage) {
+            ResolutionConfidence.POSSIBLE
+        } else {
+            ResolutionConfidence.RESOLVED
+        },
     val sourceStartOffset: Int = -1,
     val sourceEndOffset: Int = -1,
     val enclosingFunctionStartOffset: Int = -1,
@@ -32,11 +37,14 @@ data class SourceUsage(
 )
 
 /** Returns true if this usage is enclosed in the class specified by [classFqName] and optional [className]. */
-fun SourceUsage.isEnclosedInClass(classFqName: String, className: String? = null): Boolean =
+fun SourceUsage.isEnclosedInClass(
+    classFqName: String,
+    className: String? = null,
+): Boolean =
     enclosingClass == classFqName ||
         (className != null && enclosingClass == className) ||
         enclosingClass == null ||
-        (enclosingClass != null && enclosingClass.startsWith("$classFqName."))
+        (enclosingClass.startsWith("$classFqName."))
 
 /** Returns true if this usage is enclosed in the property specified by [propertyName] and optional class contexts. */
 fun SourceUsage.isEnclosedInProperty(
@@ -49,5 +57,5 @@ fun SourceUsage.isEnclosedInProperty(
             className == null ||
                 enclosingClass == className ||
                 (enclosingClass != null && classFqName != null && enclosingClass == classFqName) ||
-                (enclosingClass != null && className != null && enclosingClass.endsWith(".$className"))
-        )
+                (enclosingClass != null && enclosingClass.endsWith(".$className"))
+            )

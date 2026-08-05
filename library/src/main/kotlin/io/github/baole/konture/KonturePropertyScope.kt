@@ -7,6 +7,7 @@
 package io.github.baole.konture
 
 import io.github.baole.konture.impl.PatternMatchers
+import io.github.baole.konture.impl.ViolationLocation
 
 /**
  * Represents a scope containing a set of property declaration contexts for checking property-level rules in a Konsist-inspired fluent DSL.
@@ -164,7 +165,7 @@ fun KonturePropertyScope.assertTrue(
 ) {
     val failing = properties.filterNot(predicate)
     if (failing.isNotEmpty()) {
-        val details = failing.joinToString("\n - ") { it.qualifiedName }
+        val details = failing.joinToString("\n - ") { "${it.qualifiedName} (at ${ViolationLocation.format(it)})" }
         val prefix = additionalMessage?.let { "$it\n" } ?: ""
         throw AssertionError("${prefix}Properties failed assertion:\n - $details")
     }

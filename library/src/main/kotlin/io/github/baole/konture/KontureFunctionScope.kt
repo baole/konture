@@ -7,6 +7,7 @@
 package io.github.baole.konture
 
 import io.github.baole.konture.impl.PatternMatchers
+import io.github.baole.konture.impl.ViolationLocation
 
 /**
  * Represents a scope containing a set of function declaration contexts for checking function-level rules in a Konsist-inspired fluent DSL.
@@ -158,7 +159,7 @@ fun KontureFunctionScope.assertTrue(
 ) {
     val failing = functions.filterNot(predicate)
     if (failing.isNotEmpty()) {
-        val details = failing.joinToString("\n - ") { it.qualifiedName }
+        val details = failing.joinToString("\n - ") { "${it.qualifiedName} (at ${ViolationLocation.format(it)})" }
         val prefix = additionalMessage?.let { "$it\n" } ?: ""
         throw AssertionError("${prefix}Functions failed assertion:\n - $details")
     }

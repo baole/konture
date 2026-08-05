@@ -300,7 +300,9 @@ class FilesRuleBuilder(
                 val startIdx = list.size
                 assertion(file, allFiles, list)
                 for (i in startIdx until list.size) {
-                    list[i] = "${list[i]} (at ${ViolationLocation.of(file.modulePath, file.sourceSet?.name, file.declaration.filePath)})"
+                    if (!list[i].contains(" (at ")) {
+                        list[i] = "${list[i]} (at ${ViolationLocation.format(file.declaration, file.modulePath, file.sourceSet?.name)})"
+                    }
                 }
             }
         }

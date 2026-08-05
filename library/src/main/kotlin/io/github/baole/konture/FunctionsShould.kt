@@ -24,7 +24,7 @@ class FunctionsShould internal constructor(
                     val unresolved = if (usage.unresolvedPossibleUsage) "unresolved possible " else ""
                     violations.add(
                         "${getMessage("usage.notCall", unresolved, fqName, usage.rawExpression, usage.line, usage.column)} " +
-                            "(at ${ViolationLocation.of(function.modulePath, function.sourceSet?.name, usage.filePath, usage.line, usage.column)})",
+                            "(at ${ViolationLocation.format(usage.filePath, usage.line, usage.column, function.modulePath, function.sourceSet?.name)})",
                     )
                 }
         }
@@ -47,7 +47,7 @@ class FunctionsShould internal constructor(
                 }.forEach { usage ->
                     violations.add(
                         "${getMessage("usage.notReferenceClass", fqName, usage.rawExpression, usage.line, usage.column)} " +
-                            "(at ${ViolationLocation.of(function.modulePath, function.sourceSet?.name, usage.filePath, usage.line, usage.column)})",
+                            "(at ${ViolationLocation.format(usage.filePath, usage.line, usage.column, function.modulePath, function.sourceSet?.name)})",
                     )
                 }
         }

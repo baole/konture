@@ -316,7 +316,9 @@ class PropertiesRuleBuilder(
                 val startIdx = list.size
                 assertion(prop, allProperties, list)
                 for (i in startIdx until list.size) {
-                    list[i] = "${list[i]} (at ${ViolationLocation.of(prop.modulePath, prop.sourceSet?.name, prop.filePath, prop.declaration.sourceLine)})"
+                    if (!list[i].contains(" (at ")) {
+                        list[i] = "${list[i]} (at ${ViolationLocation.format(prop)})"
+                    }
                 }
             }
         }
