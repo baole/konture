@@ -68,6 +68,7 @@ configure<KtlintExtension> {
     outputToConsole.set(true)
     coloredOutput.set(true)
     ignoreFailures.set(false)
+    enableExperimentalRules.set(true)
     reporters {
         reporter(ReporterType.PLAIN)
     }

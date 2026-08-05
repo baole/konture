@@ -47,7 +47,14 @@ class FilesRuleBuilder(
      */
     fun printMatchedFiles(
         logger: (FileDeclarationContext) -> Unit = {
-            println("[Konture Debug] ${getMessage("debug.files.matched", it.declaration.name, it.declaration.filePath, it.declaration.packageName)}")
+            println(
+                getMessage(
+                    "debug.files.matched",
+                    it.declaration.name,
+                    it.declaration.filePath,
+                    it.declaration.packageName,
+                ),
+            )
         },
     ): FilesRuleBuilder =
         this.apply {
@@ -63,7 +70,14 @@ class FilesRuleBuilder(
      */
     fun printAllFiles(
         logger: (FileDeclarationContext) -> Unit = {
-            println("[Konture Debug] ${getMessage("debug.files.discovered", it.declaration.name, it.declaration.filePath, it.declaration.packageName)}")
+            println(
+                getMessage(
+                    "debug.files.discovered",
+                    it.declaration.name,
+                    it.declaration.filePath,
+                    it.declaration.packageName,
+                ),
+            )
         },
     ): FilesRuleBuilder =
         this.apply {
@@ -73,7 +87,12 @@ class FilesRuleBuilder(
                         FileDeclarationContext(file, module.path, sourceSet)
                     }
                 }
-            }.distinctBy { Pair(it.modulePath, it.declaration.filePath.ifEmpty { it.declaration.name }) }.forEach(logger)
+            }.distinctBy {
+                Pair(
+                    it.modulePath,
+                    it.declaration.filePath.ifEmpty { it.declaration.name },
+                )
+            }.forEach(logger)
         }
 
     /**
@@ -199,7 +218,9 @@ class FilesRuleBuilder(
         }
     }
 
-    internal fun setShould(assertion: (FileDeclarationContext, List<FileDeclarationContext>, MutableList<String>) -> Unit) {
+    internal fun setShould(
+        assertion: (FileDeclarationContext, List<FileDeclarationContext>, MutableList<String>) -> Unit,
+    ) {
         val actualAssertion =
             if (negateNextShould) {
                 negateNextShould = false

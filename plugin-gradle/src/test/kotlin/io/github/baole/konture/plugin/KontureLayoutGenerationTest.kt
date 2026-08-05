@@ -448,7 +448,10 @@ class KontureLayoutGenerationTest {
         val customFile = File(customSrcDir, "CustomClass.kt")
         customFile.writeText("package com.example\nclass CustomClass")
 
-        val kotlinExt = subProject.extensions.getByType(org.jetbrains.kotlin.gradle.dsl.KotlinProjectExtension::class.java)
+        val kotlinExt =
+            subProject.extensions.getByType(
+                org.jetbrains.kotlin.gradle.dsl.KotlinProjectExtension::class.java,
+            )
         kotlinExt.sourceSets.getByName("main").kotlin.srcDir("src/custom/kotlin")
 
         (rootProject as ProjectInternal).evaluate()

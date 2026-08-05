@@ -851,7 +851,13 @@ class FunctionsRuleBuilderTest : RuleBuildersTestBase() {
                 returnType = "String",
                 parameters =
                     listOf(
-                        ParameterDeclaration("id", "Int", hasDefaultValue = false, annotations = emptyList(), resolvedType = "kotlin.Int"),
+                        ParameterDeclaration(
+                            "id",
+                            "Int",
+                            hasDefaultValue = false,
+                            annotations = emptyList(),
+                            resolvedType = "kotlin.Int",
+                        ),
                     ),
                 annotations = emptyList(),
                 kdocText = null,

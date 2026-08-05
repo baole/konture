@@ -34,7 +34,9 @@ fun ModulesRuleBuilder.should(assertion: ModuleShouldContext.() -> Any?): Module
             val result = context.assertion()
             validateAssertionResult(result)
             if (result is Boolean && !result) {
-                violations.add(io.github.baole.konture.i18n.getMessage("module.should.failedCustomAssertion", module.path))
+                violations.add(
+                    io.github.baole.konture.i18n.getMessage("module.should.failedCustomAssertion", module.path),
+                )
             }
         }
     }

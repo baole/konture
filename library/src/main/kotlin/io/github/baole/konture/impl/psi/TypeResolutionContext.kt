@@ -50,7 +50,10 @@ internal fun enclosingClassScopes(
     val classNames = classFqName.removePrefix(prefix).split('.').filter(String::isNotEmpty)
     return classNames.indices
         .reversed()
-        .map { index -> (listOf(packageName).filter(String::isNotEmpty) + classNames.take(index + 1)).joinToString(".") }
+        .map {
+                index ->
+            (listOf(packageName).filter(String::isNotEmpty) + classNames.take(index + 1)).joinToString(".")
+        }
 }
 
 internal fun classScopedCandidates(

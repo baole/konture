@@ -58,4 +58,4 @@ fun SourceUsage.isEnclosedInProperty(
                 enclosingClass == className ||
                 (enclosingClass != null && classFqName != null && enclosingClass == classFqName) ||
                 (enclosingClass != null && enclosingClass.endsWith(".$className"))
-            )
+        )

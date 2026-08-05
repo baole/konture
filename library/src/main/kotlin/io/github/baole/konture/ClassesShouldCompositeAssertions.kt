@@ -30,7 +30,12 @@ internal interface ClassesShouldCompositeAssertions {
                     }
                 if (forbiddenAnnotation != null) {
                     violations.add(
-                        getMessage("class.should.notExposeForbiddenSignature", cls.fqName, resolved.fqName, forbiddenAnnotation.name),
+                        getMessage(
+                            "class.should.notExposeForbiddenSignature",
+                            cls.fqName,
+                            resolved.fqName,
+                            forbiddenAnnotation.name,
+                        ),
                     )
                 }
             }
@@ -57,7 +62,8 @@ internal interface ClassesShouldCompositeAssertions {
      *
      * @param assertion Custom assertion checking the class.
      */
-    infix fun satisfy(assertion: (ClassDeclaration) -> Boolean): ClassesRuleBuilder = satisfy("custom condition") { cls, _ -> assertion(cls) }
+    infix fun satisfy(assertion: (ClassDeclaration) -> Boolean): ClassesRuleBuilder =
+        satisfy("custom condition") { cls, _ -> assertion(cls) }
 
     /**
      * Asserts that selected classes satisfy a custom condition.

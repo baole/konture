@@ -306,7 +306,9 @@ internal class KontureScopeHighLevelAssertionsTest : KontureScopeTestFixture() {
                 filePath = "/src/ClassWithStdLib.kt",
             )
         // This should pass because java, kotlin, and javax are standard exclusions
-        listOf(classWithStdLib).assertOnlyDependOnClassesInAnyPackage("..example..", allClasses = listOf(classWithStdLib))
+        listOf(
+            classWithStdLib,
+        ).assertOnlyDependOnClassesInAnyPackage("..example..", allClasses = listOf(classWithStdLib))
 
         // This should fail because "org.json" package is not allowed by pattern "..example.." and is not a standard exclusion
         val classWithExternalLib =
@@ -322,7 +324,9 @@ internal class KontureScopeHighLevelAssertionsTest : KontureScopeTestFixture() {
                 filePath = "/src/ClassWithExternalLib.kt",
             )
         assertThrows<AssertionError> {
-            listOf(classWithExternalLib).assertOnlyDependOnClassesInAnyPackage("..example..", allClasses = listOf(classWithExternalLib))
+            listOf(
+                classWithExternalLib,
+            ).assertOnlyDependOnClassesInAnyPackage("..example..", allClasses = listOf(classWithExternalLib))
         }
     }
 
@@ -367,14 +371,20 @@ internal class KontureScopeHighLevelAssertionsTest : KontureScopeTestFixture() {
 
         // Accessed only by a same-layer service: passes on both receivers
         listOf(domainModel).assertNotBeAccessedByAnyPackage("..web..", allClasses = listOf(domainModel, domainService))
-        KontureScope(listOf(domainModel)).assertNotBeAccessedByAnyPackage("..web..", allClasses = listOf(domainModel, domainService))
+        KontureScope(
+            listOf(domainModel),
+        ).assertNotBeAccessedByAnyPackage("..web..", allClasses = listOf(domainModel, domainService))
 
         // Accessed by a forbidden layer: fails on both receivers
         assertThrows<AssertionError> {
-            listOf(domainModel).assertNotBeAccessedByAnyPackage("..web..", allClasses = listOf(domainModel, webController))
+            listOf(
+                domainModel,
+            ).assertNotBeAccessedByAnyPackage("..web..", allClasses = listOf(domainModel, webController))
         }
         assertThrows<AssertionError> {
-            KontureScope(listOf(domainModel)).assertNotBeAccessedByAnyPackage("..web..", allClasses = listOf(domainModel, webController))
+            KontureScope(
+                listOf(domainModel),
+            ).assertNotBeAccessedByAnyPackage("..web..", allClasses = listOf(domainModel, webController))
         }
     }
 }

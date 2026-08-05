@@ -31,7 +31,12 @@ class PropertiesShould internal constructor(
             val matches = packagePatterns.any { PatternMatchers.matchesPackage(it, prop.packageName) }
             if (!matches) {
                 violations.add(
-                    getMessage("property.should.resideInPackageAny", prop.qualifiedName, packagePatterns.joinToString(), prop.packageName),
+                    getMessage(
+                        "property.should.resideInPackageAny",
+                        prop.qualifiedName,
+                        packagePatterns.joinToString(),
+                        prop.packageName,
+                    ),
                 )
             }
         }
@@ -212,7 +217,12 @@ class PropertiesShould internal constructor(
         builder.setShould { property, _, violations ->
             if (property.declaration.resolvedType?.let { matchesKotlinType(it, expectedType) } != true) {
                 violations.add(
-                    getMessage("property.should.haveType", property.declaration.name, type.kontureQualifiedName(), property.declaration.type),
+                    getMessage(
+                        "property.should.haveType",
+                        property.declaration.name,
+                        type.kontureQualifiedName(),
+                        property.declaration.type,
+                    ),
                 )
             }
         }
@@ -226,7 +236,12 @@ class PropertiesShould internal constructor(
         builder.setShould { prop, _, violations ->
             if (!typeFqNames.contains(prop.declaration.type)) {
                 violations.add(
-                    getMessage("property.should.haveTypeAny", prop.qualifiedName, typeFqNames.joinToString(), prop.declaration.type),
+                    getMessage(
+                        "property.should.haveTypeAny",
+                        prop.qualifiedName,
+                        typeFqNames.joinToString(),
+                        prop.declaration.type,
+                    ),
                 )
             }
         }
@@ -332,7 +347,12 @@ class PropertiesShould internal constructor(
             val missing = modifiers.filter { !prop.declaration.modifiers.contains(it) }
             if (missing.isNotEmpty()) {
                 violations.add(
-                    getMessage("property.should.haveAllModifiers", prop.qualifiedName, modifiers.joinToString(), missing.joinToString()),
+                    getMessage(
+                        "property.should.haveAllModifiers",
+                        prop.qualifiedName,
+                        modifiers.joinToString(),
+                        missing.joinToString(),
+                    ),
                 )
             }
         }
@@ -376,7 +396,12 @@ class PropertiesShould internal constructor(
         builder.setShould { prop, _, violations ->
             if (prop.declaration.visibility != visibility) {
                 violations.add(
-                    getMessage("property.should.haveVisibility", prop.qualifiedName, visibility, prop.declaration.visibility),
+                    getMessage(
+                        "property.should.haveVisibility",
+                        prop.qualifiedName,
+                        visibility,
+                        prop.declaration.visibility,
+                    ),
                 )
             }
         }
@@ -392,7 +417,12 @@ class PropertiesShould internal constructor(
         builder.setShould { prop, _, violations ->
             if (!visibilities.contains(prop.declaration.visibility)) {
                 violations.add(
-                    getMessage("property.should.haveAnyVisibility", prop.qualifiedName, visibilities.joinToString(), prop.declaration.visibility),
+                    getMessage(
+                        "property.should.haveAnyVisibility",
+                        prop.qualifiedName,
+                        visibilities.joinToString(),
+                        prop.declaration.visibility,
+                    ),
                 )
             }
         }
@@ -404,7 +434,8 @@ class PropertiesShould internal constructor(
      *
      * @param visibilities The vararg list of acceptable visibilities.
      */
-    fun haveAnyVisibility(vararg visibilities: Visibility): PropertiesRuleBuilder = haveAnyVisibility(visibilities.asList())
+    fun haveAnyVisibility(vararg visibilities: Visibility): PropertiesRuleBuilder =
+        haveAnyVisibility(visibilities.asList())
 
     fun beExtension(): PropertiesRuleBuilder {
         builder.setShould { prop, _, violations ->

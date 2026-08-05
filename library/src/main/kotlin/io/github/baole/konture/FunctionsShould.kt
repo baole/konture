@@ -73,7 +73,12 @@ class FunctionsShould internal constructor(
             val matches = packagePatterns.any { PatternMatchers.matchesPackage(it, func.packageName) }
             if (!matches) {
                 violations.add(
-                    getMessage("function.should.resideInPackageAny", func.qualifiedName, packagePatterns.joinToString(), func.packageName),
+                    getMessage(
+                        "function.should.resideInPackageAny",
+                        func.qualifiedName,
+                        packagePatterns.joinToString(),
+                        func.packageName,
+                    ),
                 )
             }
         }
@@ -263,7 +268,12 @@ class FunctionsShould internal constructor(
         builder.setShould { func, _, violations ->
             if (func.declaration.returnType != typeFqName) {
                 violations.add(
-                    getMessage("function.should.haveReturnType", func.qualifiedName, typeFqName, func.declaration.returnType),
+                    getMessage(
+                        "function.should.haveReturnType",
+                        func.qualifiedName,
+                        typeFqName,
+                        func.declaration.returnType,
+                    ),
                 )
             }
         }
@@ -295,7 +305,12 @@ class FunctionsShould internal constructor(
         builder.setShould { func, _, violations ->
             if (!typeFqNames.contains(func.declaration.returnType)) {
                 violations.add(
-                    getMessage("function.should.haveReturnTypeAny", func.qualifiedName, typeFqNames.joinToString(), func.declaration.returnType),
+                    getMessage(
+                        "function.should.haveReturnTypeAny",
+                        func.qualifiedName,
+                        typeFqNames.joinToString(),
+                        func.declaration.returnType,
+                    ),
                 )
             }
         }
@@ -401,7 +416,12 @@ class FunctionsShould internal constructor(
             val missing = modifiers.filter { !func.declaration.modifiers.contains(it) }
             if (missing.isNotEmpty()) {
                 violations.add(
-                    getMessage("function.should.haveAllModifiers", func.qualifiedName, modifiers.joinToString(), missing.joinToString()),
+                    getMessage(
+                        "function.should.haveAllModifiers",
+                        func.qualifiedName,
+                        modifiers.joinToString(),
+                        missing.joinToString(),
+                    ),
                 )
             }
         }
@@ -445,7 +465,12 @@ class FunctionsShould internal constructor(
         builder.setShould { func, _, violations ->
             if (func.declaration.visibility != visibility) {
                 violations.add(
-                    getMessage("function.should.haveVisibility", func.qualifiedName, visibility, func.declaration.visibility),
+                    getMessage(
+                        "function.should.haveVisibility",
+                        func.qualifiedName,
+                        visibility,
+                        func.declaration.visibility,
+                    ),
                 )
             }
         }
@@ -461,7 +486,12 @@ class FunctionsShould internal constructor(
         builder.setShould { func, _, violations ->
             if (!visibilities.contains(func.declaration.visibility)) {
                 violations.add(
-                    getMessage("function.should.haveAnyVisibility", func.qualifiedName, visibilities.joinToString(), func.declaration.visibility),
+                    getMessage(
+                        "function.should.haveAnyVisibility",
+                        func.qualifiedName,
+                        visibilities.joinToString(),
+                        func.declaration.visibility,
+                    ),
                 )
             }
         }
@@ -473,7 +503,8 @@ class FunctionsShould internal constructor(
      *
      * @param visibilities The vararg list of acceptable visibilities.
      */
-    fun haveAnyVisibility(vararg visibilities: Visibility): FunctionsRuleBuilder = haveAnyVisibility(visibilities.asList())
+    fun haveAnyVisibility(vararg visibilities: Visibility): FunctionsRuleBuilder =
+        haveAnyVisibility(visibilities.asList())
 
     /**
      * Asserts that selected functions take exactly these parameter types in order (simple or fully qualified).
@@ -490,7 +521,12 @@ class FunctionsShould internal constructor(
             if (!match) {
                 val currentTypes = func.declaration.parameters.map { it.type }
                 violations.add(
-                    getMessage("function.should.haveParameterTypes", func.qualifiedName, types.joinToString(), currentTypes.joinToString()),
+                    getMessage(
+                        "function.should.haveParameterTypes",
+                        func.qualifiedName,
+                        types.joinToString(),
+                        currentTypes.joinToString(),
+                    ),
                 )
             }
         }
@@ -571,10 +607,21 @@ class FunctionsShould internal constructor(
         builder.setShould { function, _, violations ->
             if (function.declaration.parameters.none {
                         parameter ->
-                    parameter.resolvedType?.let { resolvedType -> types.any { matchesKotlinType(resolvedType, it) } } == true
+                    parameter.resolvedType?.let {
+                            resolvedType ->
+                        types.any { matchesKotlinType(resolvedType, it) }
+                    } == true
                 }
             ) {
-                violations.add(getMessage("function.should.haveAnyParameterType", function.declaration.name, types.joinToString { it.qualifiedName }))
+                violations.add(
+                    getMessage(
+                        "function.should.haveAnyParameterType",
+                        function.declaration.name,
+                        types.joinToString {
+                            it.qualifiedName
+                        },
+                    ),
+                )
             }
         }
         return builder
@@ -605,7 +652,10 @@ class FunctionsShould internal constructor(
         return builder
     }
 
-    infix fun satisfy(assertion: (FunctionDeclarationContext) -> Boolean): FunctionsRuleBuilder = satisfy("custom condition") { f, _ -> assertion(f) }
+    infix fun satisfy(assertion: (FunctionDeclarationContext) -> Boolean): FunctionsRuleBuilder =
+        satisfy(
+            "custom condition",
+        ) { f, _ -> assertion(f) }
 
     private fun satisfy(
         description: String,
@@ -626,7 +676,10 @@ class FunctionsShould internal constructor(
         return builder
     }
 
-    infix fun resideInPackageOf(type: KClass<*>): FunctionsRuleBuilder = resideInAPackage(type.toKonturePackageReference().packageName)
+    infix fun resideInPackageOf(type: KClass<*>): FunctionsRuleBuilder =
+        resideInAPackage(
+            type.toKonturePackageReference().packageName,
+        )
 
     fun anyOf(vararg blocks: FunctionsShould.() -> Unit): FunctionsRuleBuilder {
         builder.setShould { func, allFuncs, violations ->

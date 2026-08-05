@@ -72,12 +72,29 @@ class FunctionsRuleBuilder(
                     val members =
                         file.classes.flatMap { cls ->
                             cls.functions.map { func ->
-                                FunctionDeclarationContext(func, file.packageName, cls.name, module.path, file.filePath, null)
+                                FunctionDeclarationContext(
+                                    func,
+                                    file.packageName,
+                                    cls.name,
+                                    module.path,
+                                    file.filePath,
+                                    null,
+                                )
                             }
                         }
                     topLevel + members
                 }
-            }.distinctBy { listOf(it.modulePath, it.className, it.declaration.name, it.declaration.parameters.map { p -> p.type }) }
+            }.distinctBy {
+                listOf(
+                    it.modulePath,
+                    it.className,
+                    it.declaration.name,
+                    it.declaration.parameters.map {
+                            p ->
+                        p.type
+                    },
+                )
+            }
                 .forEach(logger)
         }
 
@@ -204,7 +221,9 @@ class FunctionsRuleBuilder(
         }
     }
 
-    internal fun setShould(assertion: (FunctionDeclarationContext, List<FunctionDeclarationContext>, MutableList<String>) -> Unit) {
+    internal fun setShould(
+        assertion: (FunctionDeclarationContext, List<FunctionDeclarationContext>, MutableList<String>) -> Unit,
+    ) {
         val actualAssertion =
             if (negateNextShould) {
                 negateNextShould = false

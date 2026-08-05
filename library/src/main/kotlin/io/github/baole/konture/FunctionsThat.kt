@@ -35,7 +35,10 @@ class FunctionsThat internal constructor(
         return builder
     }
 
-    infix fun resideInPackageOf(type: KClass<*>): FunctionsRuleBuilder = resideInAPackage(type.toKonturePackageReference().packageName)
+    infix fun resideInPackageOf(type: KClass<*>): FunctionsRuleBuilder =
+        resideInAPackage(
+            type.toKonturePackageReference().packageName,
+        )
 
     infix fun haveNameEndingWith(suffix: String): FunctionsRuleBuilder {
         builder.setThat { it.declaration.name.endsWith(suffix) }
@@ -111,7 +114,8 @@ class FunctionsThat internal constructor(
     /**
      * Restricts the rules to functions annotated with any of the specified annotations.
      */
-    fun haveAnnotationOf(vararg annotationNames: String): FunctionsRuleBuilder = haveAnnotationOf(annotationNames.asList())
+    fun haveAnnotationOf(vararg annotationNames: String): FunctionsRuleBuilder =
+        haveAnnotationOf(annotationNames.asList())
 
     /**
      * Restricts the rules to functions annotated with all of the specified annotations.
@@ -208,7 +212,8 @@ class FunctionsThat internal constructor(
      *
      * @param visibilities The vararg list of acceptable visibilities.
      */
-    fun haveAnyVisibility(vararg visibilities: Visibility): FunctionsRuleBuilder = haveAnyVisibility(visibilities.asList())
+    fun haveAnyVisibility(vararg visibilities: Visibility): FunctionsRuleBuilder =
+        haveAnyVisibility(visibilities.asList())
 
     /**
      * Restricts the rules to functions with the specified return type (simple or fully qualified).
@@ -221,7 +226,10 @@ class FunctionsThat internal constructor(
     /** Restricts the rules to functions with the specified raw return type. */
     infix fun haveReturnType(type: KClass<*>): FunctionsRuleBuilder {
         val expectedType = type.toKontureTypeReference()
-        builder.setThat { function -> function.declaration.resolvedReturnType?.let { matchesKotlinType(it, expectedType) } == true }
+        builder.setThat {
+                function ->
+            function.declaration.resolvedReturnType?.let { matchesKotlinType(it, expectedType) } == true
+        }
         return builder
     }
 
@@ -311,7 +319,10 @@ class FunctionsThat internal constructor(
         builder.setThat { function ->
             function.declaration.parameters.any {
                     parameter ->
-                parameter.resolvedType?.let { resolvedType -> types.any { matchesKotlinType(resolvedType, it) } } == true
+                parameter.resolvedType?.let {
+                        resolvedType ->
+                    types.any { matchesKotlinType(resolvedType, it) }
+                } == true
             }
         }
         return builder

@@ -72,7 +72,14 @@ class PropertiesRuleBuilder(
                     val members =
                         file.classes.flatMap { cls ->
                             cls.properties.map { prop ->
-                                PropertyDeclarationContext(prop, file.packageName, cls.name, module.path, file.filePath, null)
+                                PropertyDeclarationContext(
+                                    prop,
+                                    file.packageName,
+                                    cls.name,
+                                    module.path,
+                                    file.filePath,
+                                    null,
+                                )
                             }
                         }
                     topLevel + members
@@ -203,7 +210,9 @@ class PropertiesRuleBuilder(
         }
     }
 
-    internal fun setShould(assertion: (PropertyDeclarationContext, List<PropertyDeclarationContext>, MutableList<String>) -> Unit) {
+    internal fun setShould(
+        assertion: (PropertyDeclarationContext, List<PropertyDeclarationContext>, MutableList<String>) -> Unit,
+    ) {
         val actualAssertion =
             if (negateNextShould) {
                 negateNextShould = false
@@ -277,12 +286,26 @@ class PropertiesRuleBuilder(
                     file.membershipsFor(module.path).filter(sourceSets::matches).flatMap { sourceSet ->
                         val topLevel =
                             file.topLevelProperties.map { prop ->
-                                PropertyDeclarationContext(prop, file.packageName, null, module.path, file.filePath, sourceSet)
+                                PropertyDeclarationContext(
+                                    prop,
+                                    file.packageName,
+                                    null,
+                                    module.path,
+                                    file.filePath,
+                                    sourceSet,
+                                )
                             }
                         val members =
                             file.classes.flatMap { cls ->
                                 cls.properties.map { prop ->
-                                    PropertyDeclarationContext(prop, file.packageName, cls.name, module.path, file.filePath, sourceSet)
+                                    PropertyDeclarationContext(
+                                        prop,
+                                        file.packageName,
+                                        cls.name,
+                                        module.path,
+                                        file.filePath,
+                                        sourceSet,
+                                    )
                                 }
                             }
                         topLevel + members

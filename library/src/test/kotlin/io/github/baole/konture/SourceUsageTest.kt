@@ -89,13 +89,21 @@ class SourceUsageTest {
         assertTrue(simpleClassUsage.isEnclosedInProperty("myProperty", className = "MyClass"))
 
         // 3. Matching property, enclosingClass == classFqName
-        assertTrue(baseUsage.isEnclosedInProperty("myProperty", classFqName = "com.example.MyClass", className = "MyClass"))
+        assertTrue(
+            baseUsage.isEnclosedInProperty("myProperty", classFqName = "com.example.MyClass", className = "MyClass"),
+        )
 
         // 4. Matching property, enclosingClass ends with ".$className"
         assertTrue(baseUsage.isEnclosedInProperty("myProperty", classFqName = "other.FqName", className = "MyClass"))
 
         // 5. Matching property, but class doesn't match
-        assertFalse(baseUsage.isEnclosedInProperty("myProperty", classFqName = "com.example.OtherClass", className = "OtherClass"))
+        assertFalse(
+            baseUsage.isEnclosedInProperty(
+                "myProperty",
+                classFqName = "com.example.OtherClass",
+                className = "OtherClass",
+            ),
+        )
 
         // 6. Mismatched property name
         assertFalse(baseUsage.isEnclosedInProperty("otherProperty"))

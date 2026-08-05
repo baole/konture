@@ -54,7 +54,13 @@ class TypeSafeOverloadsTest {
                 returnType = "List<String>",
                 parameters =
                     listOf(
-                        ParameterDeclaration("id", "String", hasDefaultValue = false, annotations = emptyList(), resolvedType = "kotlin.String"),
+                        ParameterDeclaration(
+                            "id",
+                            "String",
+                            hasDefaultValue = false,
+                            annotations = emptyList(),
+                            resolvedType = "kotlin.String",
+                        ),
                     ),
                 annotations = emptyList(),
                 kdocText = null,
@@ -120,7 +126,10 @@ class TypeSafeOverloadsTest {
     fun `typed scoped usage overloads match class references`() {
         val usage = SourceUsage(UsageKind.CLASS_REFERENCE, "kotlin.String", "/src/Example.kt", 1, 1)
         val file = FileDeclaration("Example.kt", "example", filePath = "/src/Example.kt", usages = listOf(usage))
-        val graph = ProjectGraph(mapOf(":" to listOf(Module(":", ":app", "app", emptyList(), emptyList(), emptyList(), listOf(file)))))
+        val graph =
+            ProjectGraph(
+                mapOf(":" to listOf(Module(":", ":app", "app", emptyList(), emptyList(), emptyList(), listOf(file)))),
+            )
 
         val error =
             assertThrows(AssertionError::class.java) {
@@ -253,70 +262,144 @@ class TypeSafeOverloadsTest {
         val graphWithBoth = graphWith(packageName = packageName, declarations = listOf(parentDecl, childDecl))
 
         // ClassesThat overloads
-        assertTrue(ClassesRuleBuilder(graph).that().haveAnnotationOf(TypeSafeMarker::class).getThatPredicate()!!(declaration))
-        assertTrue(ClassesRuleBuilder(graph).that().haveAllAnnotationsOf(TypeSafeMarker::class).getThatPredicate()!!(declaration))
-        assertTrue(ClassesRuleBuilder(graph).that().haveAnyAnnotationOf(TypeSafeMarker::class).getThatPredicate()!!(declaration))
         assertTrue(
-            ClassesRuleBuilder(graph).that().haveAnnotationWithArgument(TypeSafeMarker::class, "name", "value").getThatPredicate()!!(declaration),
+            ClassesRuleBuilder(graph).that().haveAnnotationOf(TypeSafeMarker::class).getThatPredicate()!!(declaration),
         )
-        assertTrue(ClassesRuleBuilder(graph).that().areAssignableTo(CharSequence::class).getThatPredicate()!!(declaration))
-        assertTrue(ClassesRuleBuilder(graph).that().areAssignableToAnyOf(CharSequence::class, Number::class).getThatPredicate()!!(declaration))
-        assertTrue(ClassesRuleBuilder(graph).that().areAssignableToAllOf(CharSequence::class, Cloneable::class).getThatPredicate()!!(declaration))
-        assertTrue(ClassesRuleBuilder(graphWithBoth).that().areAssignableFrom(TypeSafeChild::class).getThatPredicate()!!(parentDecl))
-        assertTrue(ClassesRuleBuilder(graphWithBoth).that().areAssignableFrom<TypeSafeChild>().getThatPredicate()!!(parentDecl))
-        assertTrue(ClassesRuleBuilder(graph).that().resideInPackageOf(TypeSafeMarker::class).getThatPredicate()!!(declaration))
-        assertTrue(ClassesRuleBuilder(graph).that().resideInPackageOf<TypeSafeMarker>().getThatPredicate()!!(declaration))
+        assertTrue(
+            ClassesRuleBuilder(
+                graph,
+            ).that().haveAllAnnotationsOf(TypeSafeMarker::class).getThatPredicate()!!(declaration),
+        )
+        assertTrue(
+            ClassesRuleBuilder(
+                graph,
+            ).that().haveAnyAnnotationOf(TypeSafeMarker::class).getThatPredicate()!!(declaration),
+        )
+        assertTrue(
+            ClassesRuleBuilder(
+                graph,
+            ).that().haveAnnotationWithArgument(
+                TypeSafeMarker::class,
+                "name",
+                "value",
+            ).getThatPredicate()!!(declaration),
+        )
+        assertTrue(
+            ClassesRuleBuilder(graph).that().areAssignableTo(CharSequence::class).getThatPredicate()!!(declaration),
+        )
+        assertTrue(
+            ClassesRuleBuilder(
+                graph,
+            ).that().areAssignableToAnyOf(CharSequence::class, Number::class).getThatPredicate()!!(declaration),
+        )
+        assertTrue(
+            ClassesRuleBuilder(
+                graph,
+            ).that().areAssignableToAllOf(CharSequence::class, Cloneable::class).getThatPredicate()!!(declaration),
+        )
+        assertTrue(
+            ClassesRuleBuilder(
+                graphWithBoth,
+            ).that().areAssignableFrom(TypeSafeChild::class).getThatPredicate()!!(parentDecl),
+        )
+        assertTrue(
+            ClassesRuleBuilder(
+                graphWithBoth,
+            ).that().areAssignableFrom<TypeSafeChild>().getThatPredicate()!!(parentDecl),
+        )
+        assertTrue(
+            ClassesRuleBuilder(graph).that().resideInPackageOf(TypeSafeMarker::class).getThatPredicate()!!(declaration),
+        )
+        assertTrue(
+            ClassesRuleBuilder(graph).that().resideInPackageOf<TypeSafeMarker>().getThatPredicate()!!(declaration),
+        )
 
         // ClassesShould overloads
         val violations = mutableListOf<String>()
 
-        ClassesRuleBuilder(graph).should().haveAnnotationOf(TypeSafeMarker::class).getShouldAssertion()!!(declaration, emptyList(), violations)
-        assertTrue(violations.isEmpty())
-
-        ClassesRuleBuilder(graph).should().haveAnnotationOf<TypeSafeMarker>().getShouldAssertion()!!(declaration, emptyList(), violations)
-        assertTrue(violations.isEmpty())
-
-        ClassesRuleBuilder(graph).should().haveAllAnnotationsOf(TypeSafeMarker::class).getShouldAssertion()!!(declaration, emptyList(), violations)
-        assertTrue(violations.isEmpty())
-
-        ClassesRuleBuilder(graph).should().haveAnyAnnotationOf(TypeSafeMarker::class).getShouldAssertion()!!(declaration, emptyList(), violations)
+        ClassesRuleBuilder(
+            graph,
+        ).should().haveAnnotationOf(TypeSafeMarker::class).getShouldAssertion()!!(declaration, emptyList(), violations)
         assertTrue(violations.isEmpty())
 
         ClassesRuleBuilder(
             graph,
-        ).should().haveAnnotationWithArgument(TypeSafeMarker::class, "name", "value").getShouldAssertion()!!(declaration, emptyList(), violations)
+        ).should().haveAnnotationOf<TypeSafeMarker>().getShouldAssertion()!!(declaration, emptyList(), violations)
         assertTrue(violations.isEmpty())
 
-        ClassesRuleBuilder(graph).should().beAssignableTo(CharSequence::class).getShouldAssertion()!!(declaration, emptyList(), violations)
+        ClassesRuleBuilder(
+            graph,
+        ).should().haveAllAnnotationsOf(
+            TypeSafeMarker::class,
+        ).getShouldAssertion()!!(declaration, emptyList(), violations)
         assertTrue(violations.isEmpty())
 
-        ClassesRuleBuilder(graph).should().beAssignableTo<CharSequence>().getShouldAssertion()!!(declaration, emptyList(), violations)
+        ClassesRuleBuilder(
+            graph,
+        ).should().haveAnyAnnotationOf(
+            TypeSafeMarker::class,
+        ).getShouldAssertion()!!(declaration, emptyList(), violations)
+        assertTrue(violations.isEmpty())
+
+        ClassesRuleBuilder(
+            graph,
+        ).should().haveAnnotationWithArgument(
+            TypeSafeMarker::class,
+            "name",
+            "value",
+        ).getShouldAssertion()!!(declaration, emptyList(), violations)
+        assertTrue(violations.isEmpty())
+
+        ClassesRuleBuilder(
+            graph,
+        ).should().beAssignableTo(CharSequence::class).getShouldAssertion()!!(declaration, emptyList(), violations)
+        assertTrue(violations.isEmpty())
+
+        ClassesRuleBuilder(
+            graph,
+        ).should().beAssignableTo<CharSequence>().getShouldAssertion()!!(declaration, emptyList(), violations)
         assertTrue(violations.isEmpty())
 
         ClassesRuleBuilder(
             graphWithBoth,
-        ).should().beAssignableFrom(TypeSafeChild::class).getShouldAssertion()!!(parentDecl, listOf(parentDecl, childDecl), violations)
+        ).should().beAssignableFrom(
+            TypeSafeChild::class,
+        ).getShouldAssertion()!!(parentDecl, listOf(parentDecl, childDecl), violations)
         assertTrue(violations.isEmpty())
 
         ClassesRuleBuilder(
             graphWithBoth,
-        ).should().beAssignableFrom<TypeSafeChild>().getShouldAssertion()!!(parentDecl, listOf(parentDecl, childDecl), violations)
+        ).should().beAssignableFrom<TypeSafeChild>().getShouldAssertion()!!(
+            parentDecl,
+            listOf(parentDecl, childDecl),
+            violations,
+        )
         assertTrue(violations.isEmpty())
 
         ClassesRuleBuilder(
             graph,
-        ).should().beAssignableToAnyOf(CharSequence::class, Number::class).getShouldAssertion()!!(declaration, emptyList(), violations)
+        ).should().beAssignableToAnyOf(
+            CharSequence::class,
+            Number::class,
+        ).getShouldAssertion()!!(declaration, emptyList(), violations)
         assertTrue(violations.isEmpty())
 
         ClassesRuleBuilder(
             graph,
-        ).should().beAssignableToAllOf(CharSequence::class, Cloneable::class).getShouldAssertion()!!(declaration, emptyList(), violations)
+        ).should().beAssignableToAllOf(
+            CharSequence::class,
+            Cloneable::class,
+        ).getShouldAssertion()!!(declaration, emptyList(), violations)
         assertTrue(violations.isEmpty())
 
-        ClassesRuleBuilder(graph).should().resideInPackageOf(TypeSafeMarker::class).getShouldAssertion()!!(declaration, emptyList(), violations)
+        ClassesRuleBuilder(
+            graph,
+        ).should().resideInPackageOf(TypeSafeMarker::class).getShouldAssertion()!!(declaration, emptyList(), violations)
         assertTrue(violations.isEmpty())
 
-        ClassesRuleBuilder(graph).should().resideInPackageOf<TypeSafeMarker>().getShouldAssertion()!!(declaration, emptyList(), violations)
+        ClassesRuleBuilder(
+            graph,
+        ).should().resideInPackageOf<TypeSafeMarker>().getShouldAssertion()!!(declaration, emptyList(), violations)
         assertTrue(violations.isEmpty())
     }
 
@@ -339,32 +422,56 @@ class TypeSafeOverloadsTest {
         val context = FunctionDeclarationContext(function, packageName, null, ":app", "/src/Example.kt")
 
         // FunctionsThat
-        assertTrue(FunctionsRuleBuilder(graph).that().haveAnnotationOf(TypeSafeMarker::class).getThatPredicate()!!(context))
-        assertTrue(FunctionsRuleBuilder(graph).that().haveAnnotationOfType<TypeSafeMarker>().getThatPredicate()!!(context))
-        assertTrue(FunctionsRuleBuilder(graph).that().haveAllAnnotationsOf(TypeSafeMarker::class).getThatPredicate()!!(context))
-        assertTrue(FunctionsRuleBuilder(graph).that().haveAnyAnnotationOf(TypeSafeMarker::class).getThatPredicate()!!(context))
-        assertTrue(FunctionsRuleBuilder(graph).that().resideInPackageOf(TypeSafeMarker::class).getThatPredicate()!!(context))
+        assertTrue(
+            FunctionsRuleBuilder(graph).that().haveAnnotationOf(TypeSafeMarker::class).getThatPredicate()!!(context),
+        )
+        assertTrue(
+            FunctionsRuleBuilder(graph).that().haveAnnotationOfType<TypeSafeMarker>().getThatPredicate()!!(context),
+        )
+        assertTrue(
+            FunctionsRuleBuilder(
+                graph,
+            ).that().haveAllAnnotationsOf(TypeSafeMarker::class).getThatPredicate()!!(context),
+        )
+        assertTrue(
+            FunctionsRuleBuilder(graph).that().haveAnyAnnotationOf(TypeSafeMarker::class).getThatPredicate()!!(context),
+        )
+        assertTrue(
+            FunctionsRuleBuilder(graph).that().resideInPackageOf(TypeSafeMarker::class).getThatPredicate()!!(context),
+        )
         assertTrue(FunctionsRuleBuilder(graph).that().resideInPackageOf<TypeSafeMarker>().getThatPredicate()!!(context))
 
         // FunctionsShould
         val violations = mutableListOf<String>()
 
-        FunctionsRuleBuilder(graph).should().haveAnnotationOf(TypeSafeMarker::class).getShouldAssertion()!!(context, emptyList(), violations)
+        FunctionsRuleBuilder(
+            graph,
+        ).should().haveAnnotationOf(TypeSafeMarker::class).getShouldAssertion()!!(context, emptyList(), violations)
         assertTrue(violations.isEmpty())
 
-        FunctionsRuleBuilder(graph).should().haveAnnotationOfType<TypeSafeMarker>().getShouldAssertion()!!(context, emptyList(), violations)
+        FunctionsRuleBuilder(
+            graph,
+        ).should().haveAnnotationOfType<TypeSafeMarker>().getShouldAssertion()!!(context, emptyList(), violations)
         assertTrue(violations.isEmpty())
 
-        FunctionsRuleBuilder(graph).should().haveAllAnnotationsOf(TypeSafeMarker::class).getShouldAssertion()!!(context, emptyList(), violations)
+        FunctionsRuleBuilder(
+            graph,
+        ).should().haveAllAnnotationsOf(TypeSafeMarker::class).getShouldAssertion()!!(context, emptyList(), violations)
         assertTrue(violations.isEmpty())
 
-        FunctionsRuleBuilder(graph).should().haveAnyAnnotationOf(TypeSafeMarker::class).getShouldAssertion()!!(context, emptyList(), violations)
+        FunctionsRuleBuilder(
+            graph,
+        ).should().haveAnyAnnotationOf(TypeSafeMarker::class).getShouldAssertion()!!(context, emptyList(), violations)
         assertTrue(violations.isEmpty())
 
-        FunctionsRuleBuilder(graph).should().resideInPackageOf(TypeSafeMarker::class).getShouldAssertion()!!(context, emptyList(), violations)
+        FunctionsRuleBuilder(
+            graph,
+        ).should().resideInPackageOf(TypeSafeMarker::class).getShouldAssertion()!!(context, emptyList(), violations)
         assertTrue(violations.isEmpty())
 
-        FunctionsRuleBuilder(graph).should().resideInPackageOf<TypeSafeMarker>().getShouldAssertion()!!(context, emptyList(), violations)
+        FunctionsRuleBuilder(
+            graph,
+        ).should().resideInPackageOf<TypeSafeMarker>().getShouldAssertion()!!(context, emptyList(), violations)
         assertTrue(violations.isEmpty())
     }
 
@@ -386,32 +493,60 @@ class TypeSafeOverloadsTest {
         val context = PropertyDeclarationContext(property, packageName, null, ":app", "/src/Example.kt")
 
         // PropertiesThat
-        assertTrue(PropertiesRuleBuilder(graph).that().haveAnnotationOf(TypeSafeMarker::class).getThatPredicate()!!(context))
-        assertTrue(PropertiesRuleBuilder(graph).that().haveAnnotationOfType<TypeSafeMarker>().getThatPredicate()!!(context))
-        assertTrue(PropertiesRuleBuilder(graph).that().haveAllAnnotationsOf(TypeSafeMarker::class).getThatPredicate()!!(context))
-        assertTrue(PropertiesRuleBuilder(graph).that().haveAnyAnnotationOf(TypeSafeMarker::class).getThatPredicate()!!(context))
-        assertTrue(PropertiesRuleBuilder(graph).that().resideInPackageOf(TypeSafeMarker::class).getThatPredicate()!!(context))
-        assertTrue(PropertiesRuleBuilder(graph).that().resideInPackageOf<TypeSafeMarker>().getThatPredicate()!!(context))
+        assertTrue(
+            PropertiesRuleBuilder(graph).that().haveAnnotationOf(TypeSafeMarker::class).getThatPredicate()!!(context),
+        )
+        assertTrue(
+            PropertiesRuleBuilder(graph).that().haveAnnotationOfType<TypeSafeMarker>().getThatPredicate()!!(context),
+        )
+        assertTrue(
+            PropertiesRuleBuilder(
+                graph,
+            ).that().haveAllAnnotationsOf(TypeSafeMarker::class).getThatPredicate()!!(context),
+        )
+        assertTrue(
+            PropertiesRuleBuilder(
+                graph,
+            ).that().haveAnyAnnotationOf(TypeSafeMarker::class).getThatPredicate()!!(context),
+        )
+        assertTrue(
+            PropertiesRuleBuilder(graph).that().resideInPackageOf(TypeSafeMarker::class).getThatPredicate()!!(context),
+        )
+        assertTrue(
+            PropertiesRuleBuilder(graph).that().resideInPackageOf<TypeSafeMarker>().getThatPredicate()!!(context),
+        )
 
         // PropertiesShould
         val violations = mutableListOf<String>()
 
-        PropertiesRuleBuilder(graph).should().haveAnnotationOf(TypeSafeMarker::class).getShouldAssertion()!!(context, emptyList(), violations)
+        PropertiesRuleBuilder(
+            graph,
+        ).should().haveAnnotationOf(TypeSafeMarker::class).getShouldAssertion()!!(context, emptyList(), violations)
         assertTrue(violations.isEmpty())
 
-        PropertiesRuleBuilder(graph).should().haveAnnotationOfType<TypeSafeMarker>().getShouldAssertion()!!(context, emptyList(), violations)
+        PropertiesRuleBuilder(
+            graph,
+        ).should().haveAnnotationOfType<TypeSafeMarker>().getShouldAssertion()!!(context, emptyList(), violations)
         assertTrue(violations.isEmpty())
 
-        PropertiesRuleBuilder(graph).should().haveAllAnnotationsOf(TypeSafeMarker::class).getShouldAssertion()!!(context, emptyList(), violations)
+        PropertiesRuleBuilder(
+            graph,
+        ).should().haveAllAnnotationsOf(TypeSafeMarker::class).getShouldAssertion()!!(context, emptyList(), violations)
         assertTrue(violations.isEmpty())
 
-        PropertiesRuleBuilder(graph).should().haveAnyAnnotationOf(TypeSafeMarker::class).getShouldAssertion()!!(context, emptyList(), violations)
+        PropertiesRuleBuilder(
+            graph,
+        ).should().haveAnyAnnotationOf(TypeSafeMarker::class).getShouldAssertion()!!(context, emptyList(), violations)
         assertTrue(violations.isEmpty())
 
-        PropertiesRuleBuilder(graph).should().resideInPackageOf(TypeSafeMarker::class).getShouldAssertion()!!(context, emptyList(), violations)
+        PropertiesRuleBuilder(
+            graph,
+        ).should().resideInPackageOf(TypeSafeMarker::class).getShouldAssertion()!!(context, emptyList(), violations)
         assertTrue(violations.isEmpty())
 
-        PropertiesRuleBuilder(graph).should().resideInPackageOf<TypeSafeMarker>().getShouldAssertion()!!(context, emptyList(), violations)
+        PropertiesRuleBuilder(
+            graph,
+        ).should().resideInPackageOf<TypeSafeMarker>().getShouldAssertion()!!(context, emptyList(), violations)
         assertTrue(violations.isEmpty())
     }
 
@@ -425,17 +560,26 @@ class TypeSafeOverloadsTest {
                 classes = emptyList(),
                 filePath = "/src/Example.kt",
             )
-        val graph = ProjectGraph(mapOf(":" to listOf(Module(":", ":app", "app", emptyList(), emptyList(), emptyList(), listOf(file)))))
+        val graph =
+            ProjectGraph(
+                mapOf(":" to listOf(Module(":", ":app", "app", emptyList(), emptyList(), emptyList(), listOf(file)))),
+            )
         val context = FileDeclarationContext(file, ":app")
 
-        assertTrue(FilesRuleBuilder(graph).that().resideInPackageOf(TypeSafeMarker::class).getThatPredicate()!!(context))
+        assertTrue(
+            FilesRuleBuilder(graph).that().resideInPackageOf(TypeSafeMarker::class).getThatPredicate()!!(context),
+        )
         assertTrue(FilesRuleBuilder(graph).that().resideInPackageOf<TypeSafeMarker>().getThatPredicate()!!(context))
 
         val violations = mutableListOf<String>()
-        FilesRuleBuilder(graph).should().resideInPackageOf(TypeSafeMarker::class).getShouldAssertion()!!(context, emptyList(), violations)
+        FilesRuleBuilder(
+            graph,
+        ).should().resideInPackageOf(TypeSafeMarker::class).getShouldAssertion()!!(context, emptyList(), violations)
         assertTrue(violations.isEmpty())
 
-        FilesRuleBuilder(graph).should().resideInPackageOf<TypeSafeMarker>().getShouldAssertion()!!(context, emptyList(), violations)
+        FilesRuleBuilder(
+            graph,
+        ).should().resideInPackageOf<TypeSafeMarker>().getShouldAssertion()!!(context, emptyList(), violations)
         assertTrue(violations.isEmpty())
     }
 
@@ -590,9 +734,26 @@ class TypeSafeOverloadsTest {
 
     @Test
     fun `reified functions and properties usage overloads match referenced classes`() {
-        val funcUsage = SourceUsage(UsageKind.CLASS_REFERENCE, "kotlin.String", "/src/Example.kt", 1, 1, enclosingFunction = "myFunc")
-        val propCallUsage = SourceUsage(UsageKind.CALL, "kotlin.String", "/src/Example.kt", 2, 1, enclosingProperty = "myProp")
-        val propRefUsage = SourceUsage(UsageKind.CLASS_REFERENCE, "kotlin.String", "/src/Example.kt", 3, 1, enclosingProperty = "myProp")
+        val funcUsage =
+            SourceUsage(
+                UsageKind.CLASS_REFERENCE,
+                "kotlin.String",
+                "/src/Example.kt",
+                1,
+                1,
+                enclosingFunction = "myFunc",
+            )
+        val propCallUsage =
+            SourceUsage(UsageKind.CALL, "kotlin.String", "/src/Example.kt", 2, 1, enclosingProperty = "myProp")
+        val propRefUsage =
+            SourceUsage(
+                UsageKind.CLASS_REFERENCE,
+                "kotlin.String",
+                "/src/Example.kt",
+                3,
+                1,
+                enclosingProperty = "myProp",
+            )
 
         val func =
             FunctionDeclaration(
@@ -625,7 +786,10 @@ class TypeSafeOverloadsTest {
                 filePath = "/src/Example.kt",
                 usages = listOf(funcUsage, propCallUsage, propRefUsage),
             )
-        val graph = ProjectGraph(mapOf(":" to listOf(Module(":", ":app", "app", emptyList(), emptyList(), emptyList(), listOf(file)))))
+        val graph =
+            ProjectGraph(
+                mapOf(":" to listOf(Module(":", ":app", "app", emptyList(), emptyList(), emptyList(), listOf(file)))),
+            )
 
         assertThrows(AssertionError::class.java) {
             FunctionsRuleBuilder(graph).should().notReferenceClass<String>().check()
@@ -639,7 +803,6 @@ class TypeSafeOverloadsTest {
             PropertiesRuleBuilder(graph).should().notReferenceClass<String>().check()
         }
     }
-
 
     private fun graphWith(
         declaration: ClassDeclaration? = null,

@@ -109,7 +109,8 @@ class PropertiesThat internal constructor(
     /**
      * Restricts the rules to properties annotated with any of the specified annotations.
      */
-    fun haveAnnotationOf(vararg annotationNames: String): PropertiesRuleBuilder = haveAnnotationOf(annotationNames.asList())
+    fun haveAnnotationOf(vararg annotationNames: String): PropertiesRuleBuilder =
+        haveAnnotationOf(annotationNames.asList())
 
     /**
      * Restricts the rules to properties annotated with all of the specified annotations.
@@ -206,7 +207,8 @@ class PropertiesThat internal constructor(
      *
      * @param visibilities The vararg list of acceptable visibilities.
      */
-    fun haveAnyVisibility(vararg visibilities: Visibility): PropertiesRuleBuilder = haveAnyVisibility(visibilities.asList())
+    fun haveAnyVisibility(vararg visibilities: Visibility): PropertiesRuleBuilder =
+        haveAnyVisibility(visibilities.asList())
 
     /**
      * Restricts the rules to properties with the specified type (simple or fully qualified).
@@ -219,7 +221,10 @@ class PropertiesThat internal constructor(
     /** Restricts the rules to properties with the specified raw type. */
     infix fun haveType(type: KClass<*>): PropertiesRuleBuilder {
         val expectedType = type.toKontureTypeReference()
-        builder.setThat { property -> property.declaration.resolvedType?.let { matchesKotlinType(it, expectedType) } == true }
+        builder.setThat {
+                property ->
+            property.declaration.resolvedType?.let { matchesKotlinType(it, expectedType) } == true
+        }
         return builder
     }
 

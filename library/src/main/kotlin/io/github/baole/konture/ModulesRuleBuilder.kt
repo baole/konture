@@ -55,7 +55,9 @@ class ModulesRuleBuilder(
      */
     fun printAllModules(
         logger: (Module) -> Unit = {
-            println("[Konture Debug] ${getMessage("debug.modules.discovered", it.path, it.projectDir, it.appliedPlugins)}")
+            println(
+                "[Konture Debug] ${getMessage("debug.modules.discovered", it.path, it.projectDir, it.appliedPlugins)}",
+            )
         },
     ): ModulesRuleBuilder =
         this.apply {

@@ -44,7 +44,13 @@ class KonturePropertyScope(
                             val mem =
                                 file.classes.flatMap { cls ->
                                     cls.properties.map {
-                                        PropertyDeclarationContext(it, file.packageName, cls.name, module.path, file.filePath)
+                                        PropertyDeclarationContext(
+                                            it,
+                                            file.packageName,
+                                            cls.name,
+                                            module.path,
+                                            file.filePath,
+                                        )
                                     }
                                 }
                             top + mem
@@ -81,7 +87,13 @@ class KonturePropertyScope(
                         val mem =
                             file.classes.flatMap { cls ->
                                 cls.properties.map {
-                                    PropertyDeclarationContext(it, file.packageName, cls.name, module.path, file.filePath)
+                                    PropertyDeclarationContext(
+                                        it,
+                                        file.packageName,
+                                        cls.name,
+                                        module.path,
+                                        file.filePath,
+                                    )
                                 }
                             }
                         top + mem
@@ -112,7 +124,8 @@ class KonturePropertyScope(
 }
 
 /** Combines two [KonturePropertyScope] scopes into a single unified scope. */
-operator fun KonturePropertyScope.plus(other: KonturePropertyScope): KonturePropertyScope = KonturePropertyScope(this.properties + other.properties)
+operator fun KonturePropertyScope.plus(other: KonturePropertyScope): KonturePropertyScope =
+    KonturePropertyScope(this.properties + other.properties)
 
 /** Subtracts the properties present in [other] from this [KonturePropertyScope]. */
 operator fun KonturePropertyScope.minus(other: KonturePropertyScope): KonturePropertyScope {
@@ -142,13 +155,22 @@ fun List<PropertyDeclarationContext>.withPackage(packagePattern: String): List<P
 fun List<PropertyDeclarationContext>.valProperties(): List<PropertyDeclarationContext> = filter { it.declaration.isVal }
 
 /** Filters the list of properties to include only mutable (`var`) properties. */
-fun List<PropertyDeclarationContext>.varProperties(): List<PropertyDeclarationContext> = filter { !it.declaration.isVal }
+fun List<PropertyDeclarationContext>.varProperties(): List<PropertyDeclarationContext> =
+    filter {
+        !it.declaration.isVal
+    }
 
 /** Filters the list of properties to include only member/class properties. */
-fun List<PropertyDeclarationContext>.memberProperties(): List<PropertyDeclarationContext> = filter { it.className != null }
+fun List<PropertyDeclarationContext>.memberProperties(): List<PropertyDeclarationContext> =
+    filter {
+        it.className != null
+    }
 
 /** Filters the list of properties to include only top-level properties. */
-fun List<PropertyDeclarationContext>.topLevelProperties(): List<PropertyDeclarationContext> = filter { it.className == null }
+fun List<PropertyDeclarationContext>.topLevelProperties(): List<PropertyDeclarationContext> =
+    filter {
+        it.className == null
+    }
 
 // Assertion extensions on KonturePropertyScope
 

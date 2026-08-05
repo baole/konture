@@ -30,7 +30,13 @@ class FilesShould internal constructor(
                             usage.rawExpression,
                             usage.line,
                             usage.column,
-                        )} (at ${ViolationLocation.format(usage.filePath, usage.line, usage.column, file.modulePath, file.sourceSet?.name)})",
+                        )} (at ${ViolationLocation.format(
+                            usage.filePath,
+                            usage.line,
+                            usage.column,
+                            file.modulePath,
+                            file.sourceSet?.name,
+                        )})",
                     )
                 }
         }
@@ -56,7 +62,13 @@ class FilesShould internal constructor(
                             usage.rawExpression,
                             usage.line,
                             usage.column,
-                        )} (at ${ViolationLocation.format(usage.filePath, usage.line, usage.column, file.modulePath, file.sourceSet?.name)})",
+                        )} (at ${ViolationLocation.format(
+                            usage.filePath,
+                            usage.line,
+                            usage.column,
+                            file.modulePath,
+                            file.sourceSet?.name,
+                        )})",
                     )
                 }
         }
@@ -73,7 +85,12 @@ class FilesShould internal constructor(
         builder.setShould { file, _, violations ->
             if (!PatternMatchers.matchesPackage(packagePattern, file.declaration.packageName)) {
                 violations.add(
-                    getMessage("file.should.resideInPackage", file.declaration.name, packagePattern, file.declaration.packageName),
+                    getMessage(
+                        "file.should.resideInPackage",
+                        file.declaration.name,
+                        packagePattern,
+                        file.declaration.packageName,
+                    ),
                 )
             }
         }
@@ -85,7 +102,12 @@ class FilesShould internal constructor(
             val matches = packagePatterns.any { PatternMatchers.matchesPackage(it, file.declaration.packageName) }
             if (!matches) {
                 violations.add(
-                    getMessage("file.should.resideInPackageAny", file.declaration.name, packagePatterns.joinToString(), file.declaration.packageName),
+                    getMessage(
+                        "file.should.resideInPackageAny",
+                        file.declaration.name,
+                        packagePatterns.joinToString(),
+                        file.declaration.packageName,
+                    ),
                 )
             }
         }
@@ -98,7 +120,12 @@ class FilesShould internal constructor(
         builder.setShould { file, _, violations ->
             if (!predicate(file.declaration.packageName)) {
                 violations.add(
-                    getMessage("file.should.resideInPackageMatching", file.declaration.name, "predicate", file.declaration.packageName),
+                    getMessage(
+                        "file.should.resideInPackageMatching",
+                        file.declaration.name,
+                        "predicate",
+                        file.declaration.packageName,
+                    ),
                 )
             }
         }
@@ -185,7 +212,11 @@ class FilesShould internal constructor(
             val wildcards = file.declaration.imports.filter { it.endsWith(".*") }
             if (wildcards.isNotEmpty()) {
                 violations.add(
-                    getMessage("file.should.notContainWildcardImports", file.declaration.name, wildcards.joinToString()),
+                    getMessage(
+                        "file.should.notContainWildcardImports",
+                        file.declaration.name,
+                        wildcards.joinToString(),
+                    ),
                 )
             }
         }
@@ -218,7 +249,11 @@ class FilesShould internal constructor(
                 violations.add(
                     getMessage(
                         "file.should.matchClassName",
-                        "${file.declaration.name} (at ${ViolationLocation.format(file.declaration, file.modulePath, file.sourceSet?.name)})",
+                        "${file.declaration.name} (at ${ViolationLocation.format(
+                            file.declaration,
+                            file.modulePath,
+                            file.sourceSet?.name,
+                        )})",
                     ),
                 )
             }
@@ -237,7 +272,10 @@ class FilesShould internal constructor(
         return builder
     }
 
-    infix fun satisfy(assertion: (FileDeclarationContext) -> Boolean): FilesRuleBuilder = satisfy("custom condition") { f, _ -> assertion(f) }
+    infix fun satisfy(assertion: (FileDeclarationContext) -> Boolean): FilesRuleBuilder =
+        satisfy(
+            "custom condition",
+        ) { f, _ -> assertion(f) }
 
     private fun satisfy(
         description: String,

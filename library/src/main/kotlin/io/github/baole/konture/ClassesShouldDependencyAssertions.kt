@@ -63,7 +63,8 @@ internal interface ClassesShouldDependencyAssertions {
     /**
      * Asserts that selected classes are accessed only by classes residing in packages matching the specified pattern.
      */
-    infix fun onlyBeAccessedByAnyPackage(packagePattern: String): ClassesRuleBuilder = onlyBeAccessedByAnyPackage(listOf(packagePattern))
+    infix fun onlyBeAccessedByAnyPackage(packagePattern: String): ClassesRuleBuilder =
+        onlyBeAccessedByAnyPackage(listOf(packagePattern))
 
     /**
      * Asserts that selected classes are accessed only by classes residing in packages matching the specified patterns.
@@ -106,7 +107,8 @@ internal interface ClassesShouldDependencyAssertions {
     /**
      * Asserts that selected classes are not accessed by any class residing in packages matching the specified pattern.
      */
-    infix fun notBeAccessedByAnyPackage(packagePattern: String): ClassesRuleBuilder = notBeAccessedByAnyPackage(listOf(packagePattern))
+    infix fun notBeAccessedByAnyPackage(packagePattern: String): ClassesRuleBuilder =
+        notBeAccessedByAnyPackage(listOf(packagePattern))
 
     /**
      * Asserts that selected classes are not accessed by any class residing in packages matching the specified patterns.
@@ -208,7 +210,8 @@ internal interface ClassesShouldDependencyAssertions {
     /**
      * Asserts that selected classes depend only on classes residing in packages matching the specified pattern.
      */
-    infix fun onlyDependOnClassesInAnyPackage(packagePattern: String): ClassesRuleBuilder = onlyDependOnClassesInAnyPackage(listOf(packagePattern))
+    infix fun onlyDependOnClassesInAnyPackage(packagePattern: String): ClassesRuleBuilder =
+        onlyDependOnClassesInAnyPackage(listOf(packagePattern))
 
     /**
      * Asserts that selected classes depend only on classes residing in packages matching the specified patterns.
@@ -310,7 +313,8 @@ internal interface ClassesShouldDependencyAssertions {
     /**
      * Asserts that selected classes do not depend on classes residing in packages matching the specified pattern.
      */
-    infix fun notDependOnClassesInAnyPackage(packagePattern: String): ClassesRuleBuilder = notDependOnClassesInAnyPackage(listOf(packagePattern))
+    infix fun notDependOnClassesInAnyPackage(packagePattern: String): ClassesRuleBuilder =
+        notDependOnClassesInAnyPackage(listOf(packagePattern))
 
     /**
      * Asserts that selected classes do not depend on classes residing in packages matching the specified patterns.
@@ -328,10 +332,15 @@ internal interface ClassesShouldDependencyAssertions {
                     ?.usages.orEmpty()
 
             fileUsages
-                .filter { usage -> usage.isEnclosedInClass(cls.fqName, cls.name) && PatternMatchers.isCallUsageMatch(usage, fqName) }
+                .filter {
+                        usage ->
+                    usage.isEnclosedInClass(cls.fqName, cls.name) && PatternMatchers.isCallUsageMatch(usage, fqName)
+                }
                 .forEach { usage ->
                     val unresolved = if (usage.unresolvedPossibleUsage) "unresolved possible " else ""
-                    violations.add(getMessage("usage.notCall", unresolved, fqName, usage.rawExpression, usage.line, usage.column))
+                    violations.add(
+                        getMessage("usage.notCall", unresolved, fqName, usage.rawExpression, usage.line, usage.column),
+                    )
                 }
         }
         return builder
@@ -355,7 +364,9 @@ internal interface ClassesShouldDependencyAssertions {
                         usage.isEnclosedInClass(cls.fqName, cls.name) &&
                         (usage.targetFqName == fqName || usage.targetFqName.endsWith(".$fqName") || fqName.endsWith("." + usage.targetFqName) || usage.rawExpression == fqName || fqName in usage.possibleTargetFqNames)
                 }.forEach { usage ->
-                    violations.add(getMessage("usage.notReferenceClass", fqName, usage.rawExpression, usage.line, usage.column))
+                    violations.add(
+                        getMessage("usage.notReferenceClass", fqName, usage.rawExpression, usage.line, usage.column),
+                    )
                 }
         }
         return builder

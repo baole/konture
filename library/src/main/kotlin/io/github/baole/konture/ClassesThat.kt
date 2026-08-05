@@ -44,7 +44,8 @@ class ClassesThat internal constructor(
      *
      * @param packagePatterns Package matching patterns.
      */
-    fun resideInAPackage(vararg packagePatterns: String): ClassesRuleBuilder = resideInAPackage(packagePatterns.toList())
+    fun resideInAPackage(vararg packagePatterns: String): ClassesRuleBuilder =
+        resideInAPackage(packagePatterns.toList())
 
     /**
      * Restricts the rules to classes residing in packages matching the specified predicate.
@@ -119,7 +120,8 @@ class ClassesThat internal constructor(
      *
      * @param predicate Predicate checking class simple name.
      */
-    infix fun haveName(predicate: (String) -> Boolean): ClassesRuleBuilder = haveName("custom name predicate", predicate)
+    infix fun haveName(predicate: (String) -> Boolean): ClassesRuleBuilder =
+        haveName("custom name predicate", predicate)
 
     /**
      * Restricts the rules to classes whose simple names match the specified predicate.
@@ -296,7 +298,8 @@ class ClassesThat internal constructor(
      *
      * @param visibilities The vararg list of acceptable visibilities.
      */
-    fun haveAnyVisibility(vararg visibilities: Visibility): ClassesRuleBuilder = haveAnyVisibility(visibilities.asList())
+    fun haveAnyVisibility(vararg visibilities: Visibility): ClassesRuleBuilder =
+        haveAnyVisibility(visibilities.asList())
 
     fun bePublic(): ClassesRuleBuilder = haveVisibility(Visibility.PUBLIC)
 

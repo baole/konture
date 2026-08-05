@@ -78,7 +78,8 @@ class ModulesShould internal constructor(
      *
      * @param predicate Predicate checking target module path.
      */
-    infix fun notDependOnModule(predicate: (String) -> Boolean): ModulesRuleBuilder = notDependOnModule("custom predicate", predicate)
+    infix fun notDependOnModule(predicate: (String) -> Boolean): ModulesRuleBuilder =
+        notDependOnModule("custom predicate", predicate)
 
     /**
      * Asserts that selected modules do not depend on any module matching the predicate.
@@ -107,7 +108,8 @@ class ModulesShould internal constructor(
      *
      * @param allowedPattern Glob pattern representing a module that is permitted to be a dependency.
      */
-    infix fun onlyDependOnModules(allowedPattern: String): ModulesRuleBuilder = onlyDependOnModules(listOf(allowedPattern))
+    infix fun onlyDependOnModules(allowedPattern: String): ModulesRuleBuilder =
+        onlyDependOnModules(listOf(allowedPattern))
 
     /**
      * Asserts that selected modules depend only on modules matching the specified allowed patterns.
@@ -124,7 +126,12 @@ class ModulesShould internal constructor(
                     }
                 if (!isAllowed) {
                     violations.add(
-                        getMessage("module.should.onlyDependOnModulesPattern", module.path, dep.targetPath, normalizedPatterns.joinToString()),
+                        getMessage(
+                            "module.should.onlyDependOnModulesPattern",
+                            module.path,
+                            dep.targetPath,
+                            normalizedPatterns.joinToString(),
+                        ),
                     )
                 }
             }
@@ -137,14 +144,16 @@ class ModulesShould internal constructor(
      *
      * @param allowedPatterns Glob patterns representing modules that are permitted to be dependencies.
      */
-    fun onlyDependOnModules(vararg allowedPatterns: String): ModulesRuleBuilder = onlyDependOnModules(allowedPatterns.asList())
+    fun onlyDependOnModules(vararg allowedPatterns: String): ModulesRuleBuilder =
+        onlyDependOnModules(allowedPatterns.asList())
 
     /**
      * Asserts that selected modules depend only on modules matching the predicate.
      *
      * @param predicate Predicate checking target module path.
      */
-    infix fun onlyDependOnModules(predicate: (String) -> Boolean): ModulesRuleBuilder = onlyDependOnModules("custom predicate", predicate)
+    infix fun onlyDependOnModules(predicate: (String) -> Boolean): ModulesRuleBuilder =
+        onlyDependOnModules("custom predicate", predicate)
 
     /**
      * Asserts that selected modules depend only on modules matching the predicate.
@@ -160,7 +169,12 @@ class ModulesShould internal constructor(
             for (dep in module.dependencies) {
                 if (!predicate(dep.targetPath)) {
                     violations.add(
-                        getMessage("module.should.onlyDependOnModulesPredicate", module.path, dep.targetPath, description),
+                        getMessage(
+                            "module.should.onlyDependOnModulesPredicate",
+                            module.path,
+                            dep.targetPath,
+                            description,
+                        ),
                     )
                 }
             }
@@ -173,7 +187,8 @@ class ModulesShould internal constructor(
      *
      * @param allowedPattern Glob pattern of a module allowed to depend on the selected modules.
      */
-    infix fun onlyBeDependedOnBy(allowedPattern: String): ModulesRuleBuilder = onlyBeDependedOnBy(listOf(allowedPattern))
+    infix fun onlyBeDependedOnBy(allowedPattern: String): ModulesRuleBuilder =
+        onlyBeDependedOnBy(listOf(allowedPattern))
 
     /**
      * Asserts that selected modules are depended on only by modules matching the specified allowed patterns.
@@ -207,14 +222,16 @@ class ModulesShould internal constructor(
      *
      * @param allowedPatterns Glob patterns of modules allowed to depend on the selected modules.
      */
-    fun onlyBeDependedOnBy(vararg allowedPatterns: String): ModulesRuleBuilder = onlyBeDependedOnBy(allowedPatterns.asList())
+    fun onlyBeDependedOnBy(vararg allowedPatterns: String): ModulesRuleBuilder =
+        onlyBeDependedOnBy(allowedPatterns.asList())
 
     /**
      * Asserts that selected modules are depended on only by modules matching the predicate.
      *
      * @param predicate Predicate checking dependent module path.
      */
-    infix fun onlyBeDependedOnBy(predicate: (String) -> Boolean): ModulesRuleBuilder = onlyBeDependedOnBy("custom predicate", predicate)
+    infix fun onlyBeDependedOnBy(predicate: (String) -> Boolean): ModulesRuleBuilder =
+        onlyBeDependedOnBy("custom predicate", predicate)
 
     /**
      * Asserts that selected modules are depended on only by modules matching the predicate.
@@ -234,7 +251,12 @@ class ModulesShould internal constructor(
             for (dep in dependents) {
                 if (!predicate(dep.path)) {
                     violations.add(
-                        getMessage("module.should.notBeDependedOnByModulesPredicate", module.path, dep.path, description),
+                        getMessage(
+                            "module.should.notBeDependedOnByModulesPredicate",
+                            module.path,
+                            dep.path,
+                            description,
+                        ),
                     )
                 }
             }
@@ -247,7 +269,8 @@ class ModulesShould internal constructor(
      *
      * @param assertion Custom assertion checking the module.
      */
-    infix fun satisfy(assertion: (Module) -> Boolean): ModulesRuleBuilder = satisfy("custom condition") { module, _ -> assertion(module) }
+    infix fun satisfy(assertion: (Module) -> Boolean): ModulesRuleBuilder =
+        satisfy("custom condition") { module, _ -> assertion(module) }
 
     /**
      * Asserts that selected modules satisfy a custom condition.
@@ -380,7 +403,12 @@ class ModulesShould internal constructor(
                         "${it.group}:${it.name}:${it.version}${if (it.isTransitive) " (transitive)" else ""}"
                     }
                 violations.add(
-                    getMessage("module.should.notDependOnExternalLibraries", module.path, coordinates.joinToString(), coords),
+                    getMessage(
+                        "module.should.notDependOnExternalLibraries",
+                        module.path,
+                        coordinates.joinToString(),
+                        coords,
+                    ),
                 )
             }
         }
@@ -423,7 +451,12 @@ class ModulesShould internal constructor(
                         "${it.group}:${it.name}:${it.version}${if (it.isTransitive) " (transitive)" else ""}"
                     }
                 violations.add(
-                    getMessage("module.should.onlyDependOnExternalLibraries", module.path, coordinates.joinToString(), coords),
+                    getMessage(
+                        "module.should.onlyDependOnExternalLibraries",
+                        module.path,
+                        coordinates.joinToString(),
+                        coords,
+                    ),
                 )
             }
         }

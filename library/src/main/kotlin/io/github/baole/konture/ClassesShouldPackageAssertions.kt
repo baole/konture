@@ -42,7 +42,12 @@ internal interface ClassesShouldPackageAssertions {
             val matches = packagePatterns.any { PatternMatchers.matchesPackage(it, cls.packageName) }
             if (!matches) {
                 violations.add(
-                    getMessage("class.should.resideInPackageAny", cls.fqName, packagePatterns.joinToString(), cls.packageName),
+                    getMessage(
+                        "class.should.resideInPackageAny",
+                        cls.fqName,
+                        packagePatterns.joinToString(),
+                        cls.packageName,
+                    ),
                 )
             }
         }
@@ -55,14 +60,16 @@ internal interface ClassesShouldPackageAssertions {
      *
      * @param packagePatterns Package matching patterns.
      */
-    fun resideInAPackage(vararg packagePatterns: String): ClassesRuleBuilder = resideInAPackage(packagePatterns.toList())
+    fun resideInAPackage(vararg packagePatterns: String): ClassesRuleBuilder =
+        resideInAPackage(packagePatterns.toList())
 
     /**
      * Asserts that selected classes reside in packages matching the specified predicate.
      *
      * @param predicate Predicate checking package name.
      */
-    infix fun resideInAPackage(predicate: (String) -> Boolean): ClassesRuleBuilder = resideInAPackage("custom package predicate", predicate)
+    infix fun resideInAPackage(predicate: (String) -> Boolean): ClassesRuleBuilder =
+        resideInAPackage("custom package predicate", predicate)
 
     /**
      * Asserts that selected classes reside in packages matching the specified predicate.
@@ -161,7 +168,8 @@ internal interface ClassesShouldPackageAssertions {
      *
      * @param predicate Predicate checking class simple name.
      */
-    infix fun haveName(predicate: (String) -> Boolean): ClassesRuleBuilder = haveName("custom name predicate", predicate)
+    infix fun haveName(predicate: (String) -> Boolean): ClassesRuleBuilder =
+        haveName("custom name predicate", predicate)
 
     /**
      * Asserts that selected classes have simple names matching the specified predicate.
@@ -206,7 +214,9 @@ internal interface ClassesShouldPackageAssertions {
         builder.setShould { cls, _, violations ->
             val matches = patterns.any { PatternMatchers.matchesSimpleGlob(it, cls.name) }
             if (!matches) {
-                violations.add(getMessage("class.should.haveNameMatchingPatternAny", cls.fqName, patterns.joinToString()))
+                violations.add(
+                    getMessage("class.should.haveNameMatchingPatternAny", cls.fqName, patterns.joinToString()),
+                )
             }
         }
         return builder

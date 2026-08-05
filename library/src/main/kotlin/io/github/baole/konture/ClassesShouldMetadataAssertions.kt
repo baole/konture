@@ -207,7 +207,12 @@ internal interface ClassesShouldMetadataAssertions {
             val missing = modifiers.filter { !cls.modifiers.contains(it) }
             if (missing.isNotEmpty()) {
                 violations.add(
-                    getMessage("class.should.haveAllModifiers", cls.fqName, modifiers.joinToString(), missing.joinToString()),
+                    getMessage(
+                        "class.should.haveAllModifiers",
+                        cls.fqName,
+                        modifiers.joinToString(),
+                        missing.joinToString(),
+                    ),
                 )
             }
         }
@@ -277,7 +282,12 @@ internal interface ClassesShouldMetadataAssertions {
         builder.setShould { cls, _, violations ->
             if (!visibilities.contains(cls.visibility)) {
                 violations.add(
-                    getMessage("class.should.haveAnyVisibility", cls.fqName, visibilities.joinToString(), cls.visibility),
+                    getMessage(
+                        "class.should.haveAnyVisibility",
+                        cls.fqName,
+                        visibilities.joinToString(),
+                        cls.visibility,
+                    ),
                 )
             }
         }
@@ -289,7 +299,8 @@ internal interface ClassesShouldMetadataAssertions {
      *
      * @param visibilities The vararg list of acceptable visibilities.
      */
-    fun haveAnyVisibility(vararg visibilities: Visibility): ClassesRuleBuilder = haveAnyVisibility(visibilities.asList())
+    fun haveAnyVisibility(vararg visibilities: Visibility): ClassesRuleBuilder =
+        haveAnyVisibility(visibilities.asList())
 
     fun bePublic(): ClassesRuleBuilder = haveVisibility(Visibility.PUBLIC)
 
@@ -356,7 +367,12 @@ internal interface ClassesShouldMetadataAssertions {
             val missing = superTypes.filter { !cls.isAssignableTo(it, allClasses) }
             if (missing.isNotEmpty()) {
                 violations.add(
-                    getMessage("class.should.beAssignableToAll", cls.fqName, superTypes.joinToString(), missing.joinToString()),
+                    getMessage(
+                        "class.should.beAssignableToAll",
+                        cls.fqName,
+                        superTypes.joinToString(),
+                        missing.joinToString(),
+                    ),
                 )
             }
         }

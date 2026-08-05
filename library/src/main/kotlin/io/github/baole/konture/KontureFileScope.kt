@@ -28,7 +28,11 @@ class KontureFileScope(
             graph: ProjectGraph = Konture.projectGraph,
             sourceSets: SourceSetSelector = SourceSets.production(),
         ): KontureFileScope {
-            val files = graph.getAllModules().flatMap { module -> module.files.filter { it.membershipsFor(module.path).any(sourceSets::matches) } }
+            val files =
+                graph.getAllModules().flatMap {
+                        module ->
+                    module.files.filter { it.membershipsFor(module.path).any(sourceSets::matches) }
+                }
             return KontureFileScope(files)
         }
 
@@ -63,7 +67,10 @@ class KontureFileScope(
             val files =
                 graph
                     .getAllModules()
-                    .flatMap { module -> module.files.filter { it.membershipsFor(module.path).any(sourceSets::matches) } }
+                    .flatMap {
+                            module ->
+                        module.files.filter { it.membershipsFor(module.path).any(sourceSets::matches) }
+                    }
                     .filter { it.packageName == packageName || it.packageName.startsWith("$packageName.") }
             return KontureFileScope(files)
         }
@@ -86,20 +93,23 @@ operator fun KontureFileScope.minus(other: KontureFileScope): KontureFileScope {
  * Filters the list of file declarations to include only those whose names end with the specified suffix.
  */
 @JvmName("withFileNameEndingWith")
-fun List<FileDeclaration>.withNameEndingWith(suffix: String): List<FileDeclaration> = filter { it.name.endsWith(suffix) }
+fun List<FileDeclaration>.withNameEndingWith(suffix: String): List<FileDeclaration> =
+    filter { it.name.endsWith(suffix) }
 
 /**
  * Filters the list of file declarations to include only those whose names start with the specified prefix.
  */
 @JvmName("withFileNameStartingWith")
-fun List<FileDeclaration>.withNameStartingWith(prefix: String): List<FileDeclaration> = filter { it.name.startsWith(prefix) }
+fun List<FileDeclaration>.withNameStartingWith(prefix: String): List<FileDeclaration> =
+    filter { it.name.startsWith(prefix) }
 
 /**
  * Filters the list of file declarations to include only those whose names match the specified glob pattern.
  * Supports '*' wildcards.
  */
 @JvmName("withFileNameMatching")
-fun List<FileDeclaration>.withNameMatching(pattern: String): List<FileDeclaration> = filter { PatternMatchers.matchesSimpleGlob(pattern, it.name) }
+fun List<FileDeclaration>.withNameMatching(pattern: String): List<FileDeclaration> =
+    filter { PatternMatchers.matchesSimpleGlob(pattern, it.name) }
 
 /**
  * Filters the list of file declarations to include only those residing in packages matching the specified pattern.
@@ -266,7 +276,8 @@ fun List<FileDeclaration>.assertNameMatching(vararg patterns: String) {
  * @param packagePatterns The package wildcard patterns. At least one must match.
  * @throws AssertionError if any file does not reside in a matching package.
  */
-fun KontureFileScope.assertResideInAPackage(vararg packagePatterns: String) = files.assertResideInAPackage(*packagePatterns)
+fun KontureFileScope.assertResideInAPackage(vararg packagePatterns: String) =
+    files.assertResideInAPackage(*packagePatterns)
 
 /**
  * Asserts that all file declarations in the scope have names ending with any of the specified suffixes.

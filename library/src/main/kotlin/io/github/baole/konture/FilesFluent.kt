@@ -34,7 +34,9 @@ fun FilesRuleBuilder.should(assertion: FileDeclarationShouldContext.() -> Any?):
             val result = context.assertion()
             validateAssertionResult(result)
             if (result is Boolean && !result) {
-                violations.add(io.github.baole.konture.i18n.getMessage("file.should.failedCustomAssertion", file.declaration.name))
+                violations.add(
+                    io.github.baole.konture.i18n.getMessage("file.should.failedCustomAssertion", file.declaration.name),
+                )
             }
         }
     }
@@ -107,7 +109,13 @@ class FileDeclarationShouldContext internal constructor(
     fun assertNoWildcardImports() {
         val wildcards = imports.filter { it.endsWith(".*") }
         if (wildcards.isNotEmpty()) {
-            addViolation(io.github.baole.konture.i18n.getMessage("file.should.notContainWildcardImports", name, wildcards.joinToString()))
+            addViolation(
+                io.github.baole.konture.i18n.getMessage(
+                    "file.should.notContainWildcardImports",
+                    name,
+                    wildcards.joinToString(),
+                ),
+            )
         }
     }
 
@@ -148,7 +156,8 @@ fun FileDeclarationContext.hasImportContaining(vararg segments: String): Boolean
 /**
  * Helper extension to check if a file contains a class matching the predicate.
  */
-fun FileDeclarationContext.containsClassWith(predicate: (ClassDeclaration) -> Boolean): Boolean = declaration.classes.any(predicate)
+fun FileDeclarationContext.containsClassWith(predicate: (ClassDeclaration) -> Boolean): Boolean =
+    declaration.classes.any(predicate)
 
 // ==========================================
 // Files Context Field Delegation Extensions

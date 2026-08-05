@@ -53,8 +53,14 @@ class BaselineForkedJvmTest {
         assertTrue(expectedFile.exists(), "Expected baseline file was not created. Process output:\n$output")
 
         val content = expectedFile.readText()
-        assertTrue(content.contains("com.example.ForkedClass"), "Baseline content is missing recorded violation. Content:\n$content")
-        assertTrue(content.contains("violates forked rule"), "Baseline content is missing recorded violation message. Content:\n$content")
+        assertTrue(
+            content.contains("com.example.ForkedClass"),
+            "Baseline content is missing recorded violation. Content:\n$content",
+        )
+        assertTrue(
+            content.contains("violates forked rule"),
+            "Baseline content is missing recorded violation message. Content:\n$content",
+        )
     }
 
     @Test
@@ -80,11 +86,20 @@ class BaselineForkedJvmTest {
         assertTrue(exited, "Forked JVM process timed out. Output:\n$output")
         assertEquals(0, process.exitValue(), "Forked JVM exited with an error. Output:\n$output")
 
-        assertTrue(expectedFile.exists(), "Expected programmatic baseline file was not created. Process output:\n$output")
+        assertTrue(
+            expectedFile.exists(),
+            "Expected programmatic baseline file was not created. Process output:\n$output",
+        )
 
         val content = expectedFile.readText()
-        assertTrue(content.contains("com.example.ForkedProgrammaticClass"), "Content is missing recorded violation. Content:\n$content")
-        assertTrue(content.contains("violates programmatic rule"), "Content is missing recorded violation message. Content:\n$content")
+        assertTrue(
+            content.contains("com.example.ForkedProgrammaticClass"),
+            "Content is missing recorded violation. Content:\n$content",
+        )
+        assertTrue(
+            content.contains("violates programmatic rule"),
+            "Content is missing recorded violation message. Content:\n$content",
+        )
     }
 
     @Test

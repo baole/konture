@@ -9,7 +9,7 @@ indent_style = space
 indent_size = 4
 
 [*.{kt,kts}]
-max_line_length = 150
+max_line_length = 120
 ktlint_standard_max-line-length = disabled
 
 # Disable wildcard imports except for standard packages

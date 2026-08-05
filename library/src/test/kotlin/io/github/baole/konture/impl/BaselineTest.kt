@@ -66,7 +66,10 @@ class BaselineTest : RuleBuildersTestBase() {
         val violation = "Class com.example.ClassA in file /Users/baole/workspace/konture/library/src/ClassA.kt violates architecture rules"
 
         val normalized = BaselineManager.normalize(violation, buildRoot)
-        assertEquals("Class com.example.ClassA in file <root>/library/src/ClassA.kt violates architecture rules", normalized)
+        assertEquals(
+            "Class com.example.ClassA in file <root>/library/src/ClassA.kt violates architecture rules",
+            normalized,
+        )
     }
 
     @Test
@@ -94,7 +97,9 @@ class BaselineTest : RuleBuildersTestBase() {
         println("DEBUG_JSON:\n$content")
         assertTrue(content.contains("\"version\": 1"))
         assertTrue(content.contains("\"name\": \"io.github.baole.konture.impl.BaselineTest\""))
-        assertTrue(content.contains("\"name\": \"test recording mode captures and writes violations with structured data\""))
+        assertTrue(
+            content.contains("\"name\": \"test recording mode captures and writes violations with structured data\""),
+        )
         assertTrue(content.contains("\"message\": \"depends on com.example.ClassB\""))
     }
 

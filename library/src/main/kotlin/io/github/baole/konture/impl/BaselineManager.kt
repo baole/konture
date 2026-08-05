@@ -494,7 +494,10 @@ internal class BaselineManager {
                             file.delete()
                             KontureLogger.log(LogLevel.INFO, "Deleted empty baseline file: ${file.absolutePath}")
                         } catch (e: Exception) {
-                            KontureLogger.log(LogLevel.WARNING, "Failed to delete empty baseline file ${file.absolutePath}: ${e.message}")
+                            KontureLogger.log(
+                                LogLevel.WARNING,
+                                "Failed to delete empty baseline file ${file.absolutePath}: ${e.message}",
+                            )
                         }
                     }
                 }

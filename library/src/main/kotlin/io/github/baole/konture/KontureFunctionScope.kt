@@ -44,7 +44,13 @@ class KontureFunctionScope(
                             val mem =
                                 file.classes.flatMap { cls ->
                                     cls.functions.map {
-                                        FunctionDeclarationContext(it, file.packageName, cls.name, module.path, file.filePath)
+                                        FunctionDeclarationContext(
+                                            it,
+                                            file.packageName,
+                                            cls.name,
+                                            module.path,
+                                            file.filePath,
+                                        )
                                     }
                                 }
                             top + mem
@@ -81,7 +87,13 @@ class KontureFunctionScope(
                         val mem =
                             file.classes.flatMap { cls ->
                                 cls.functions.map {
-                                    FunctionDeclarationContext(it, file.packageName, cls.name, module.path, file.filePath)
+                                    FunctionDeclarationContext(
+                                        it,
+                                        file.packageName,
+                                        cls.name,
+                                        module.path,
+                                        file.filePath,
+                                    )
                                 }
                             }
                         top + mem
@@ -112,7 +124,8 @@ class KontureFunctionScope(
 }
 
 /** Combines two [KontureFunctionScope] scopes into a single unified scope. */
-operator fun KontureFunctionScope.plus(other: KontureFunctionScope): KontureFunctionScope = KontureFunctionScope(this.functions + other.functions)
+operator fun KontureFunctionScope.plus(other: KontureFunctionScope): KontureFunctionScope =
+    KontureFunctionScope(this.functions + other.functions)
 
 /** Subtracts the functions present in [other] from this [KontureFunctionScope]. */
 operator fun KontureFunctionScope.minus(other: KontureFunctionScope): KontureFunctionScope {
@@ -139,10 +152,16 @@ fun List<FunctionDeclarationContext>.withPackage(packagePattern: String): List<F
     filter { PatternMatchers.matchesPackage(packagePattern, it.packageName) }
 
 /** Filters the list of functions to include only member/class functions. */
-fun List<FunctionDeclarationContext>.memberFunctions(): List<FunctionDeclarationContext> = filter { it.className != null }
+fun List<FunctionDeclarationContext>.memberFunctions(): List<FunctionDeclarationContext> =
+    filter {
+        it.className != null
+    }
 
 /** Filters the list of functions to include only top-level functions. */
-fun List<FunctionDeclarationContext>.topLevelFunctions(): List<FunctionDeclarationContext> = filter { it.className == null }
+fun List<FunctionDeclarationContext>.topLevelFunctions(): List<FunctionDeclarationContext> =
+    filter {
+        it.className == null
+    }
 
 // Assertion extensions on KontureFunctionScope
 

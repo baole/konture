@@ -75,8 +75,18 @@ internal object ViolationLocation {
     ): String = format(file.filePath, line = 1, modulePath = modulePath, sourceSetName = sourceSetName)
 
     fun format(func: FunctionDeclarationContext): String =
-        format(func.filePath, func.declaration.sourceLine, modulePath = func.modulePath, sourceSetName = func.sourceSet?.name)
+        format(
+            func.filePath,
+            func.declaration.sourceLine,
+            modulePath = func.modulePath,
+            sourceSetName = func.sourceSet?.name,
+        )
 
     fun format(prop: PropertyDeclarationContext): String =
-        format(prop.filePath, prop.declaration.sourceLine, modulePath = prop.modulePath, sourceSetName = prop.sourceSet?.name)
+        format(
+            prop.filePath,
+            prop.declaration.sourceLine,
+            modulePath = prop.modulePath,
+            sourceSetName = prop.sourceSet?.name,
+        )
 }

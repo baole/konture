@@ -34,7 +34,12 @@ fun PropertiesRuleBuilder.should(assertion: PropertyDeclarationShouldContext.() 
             val result = context.assertion()
             validateAssertionResult(result)
             if (result is Boolean && !result) {
-                violations.add(io.github.baole.konture.i18n.getMessage("property.should.failedCustomAssertion", prop.declaration.name))
+                violations.add(
+                    io.github.baole.konture.i18n.getMessage(
+                        "property.should.failedCustomAssertion",
+                        prop.declaration.name,
+                    ),
+                )
             }
         }
     }
@@ -117,7 +122,9 @@ class PropertyDeclarationShouldContext internal constructor(
      */
     fun assertAnnotationOf(annotationName: String) {
         if (!hasAnnotation(annotationName)) {
-            addViolation(io.github.baole.konture.i18n.getMessage("property.should.haveAnnotation", name, annotationName))
+            addViolation(
+                io.github.baole.konture.i18n.getMessage("property.should.haveAnnotation", name, annotationName),
+            )
         }
     }
 
@@ -126,7 +133,13 @@ class PropertyDeclarationShouldContext internal constructor(
      */
     fun assertAllAnnotationsOf(names: List<String>) {
         if (!hasAllAnnotations(names)) {
-            addViolation(io.github.baole.konture.i18n.getMessage("property.should.haveAllAnnotations", name, names.joinToString()))
+            addViolation(
+                io.github.baole.konture.i18n.getMessage(
+                    "property.should.haveAllAnnotations",
+                    name,
+                    names.joinToString(),
+                ),
+            )
         }
     }
 
@@ -140,7 +153,13 @@ class PropertyDeclarationShouldContext internal constructor(
      */
     fun assertAnyAnnotationOf(names: List<String>) {
         if (!hasAnyAnnotation(names)) {
-            addViolation(io.github.baole.konture.i18n.getMessage("property.should.haveAnyAnnotation", name, names.joinToString()))
+            addViolation(
+                io.github.baole.konture.i18n.getMessage(
+                    "property.should.haveAnyAnnotation",
+                    name,
+                    names.joinToString(),
+                ),
+            )
         }
     }
 
@@ -157,7 +176,8 @@ class PropertyDeclarationShouldContext internal constructor(
 /**
  * Helper extension to check if a property has the specified annotation.
  */
-fun PropertyDeclarationContext.hasAnnotation(name: String): Boolean = declaration.annotations.any { it.name == name || it.fqName == name }
+fun PropertyDeclarationContext.hasAnnotation(name: String): Boolean =
+    declaration.annotations.any { it.name == name || it.fqName == name }
 
 /**
  * Helper extension to check if a property has all of the specified annotations.

@@ -196,9 +196,15 @@ class LayeredArchitectureBuilder(
             return builder
         }
 
-        fun mayOnlyAccessLayers(vararg allowedLayerNames: String): LayeredArchitectureBuilder = mayOnlyAccessLayers(allowedLayerNames.toList())
+        fun mayOnlyAccessLayers(vararg allowedLayerNames: String): LayeredArchitectureBuilder =
+            mayOnlyAccessLayers(
+                allowedLayerNames.toList(),
+            )
 
-        infix fun mayOnlyAccessLayers(allowedLayerName: String): LayeredArchitectureBuilder = mayOnlyAccessLayers(listOf(allowedLayerName))
+        infix fun mayOnlyAccessLayers(allowedLayerName: String): LayeredArchitectureBuilder =
+            mayOnlyAccessLayers(
+                listOf(allowedLayerName),
+            )
 
         infix fun mayNotAccessLayers(forbiddenLayerNames: List<String>): LayeredArchitectureBuilder {
             builder.constraints.add(
@@ -250,9 +256,15 @@ class LayeredArchitectureBuilder(
             return builder
         }
 
-        fun mayNotAccessLayers(vararg forbiddenLayerNames: String): LayeredArchitectureBuilder = mayNotAccessLayers(forbiddenLayerNames.toList())
+        fun mayNotAccessLayers(vararg forbiddenLayerNames: String): LayeredArchitectureBuilder =
+            mayNotAccessLayers(
+                forbiddenLayerNames.toList(),
+            )
 
-        infix fun mayNotAccessLayers(forbiddenLayerName: String): LayeredArchitectureBuilder = mayNotAccessLayers(listOf(forbiddenLayerName))
+        infix fun mayNotAccessLayers(forbiddenLayerName: String): LayeredArchitectureBuilder =
+            mayNotAccessLayers(
+                listOf(forbiddenLayerName),
+            )
 
         infix fun mayNotBeAccessedByLayers(forbiddenLayerNames: List<String>): LayeredArchitectureBuilder {
             builder.constraints.add(

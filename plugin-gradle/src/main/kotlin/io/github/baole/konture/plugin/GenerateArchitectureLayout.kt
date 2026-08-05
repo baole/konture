@@ -134,14 +134,23 @@ abstract class GenerateArchitectureLayout : DefaultTask() {
 
         val moduleModels =
             modules.get().map { input ->
-                val moduleDir = File(input.projectDir).let { if (it.isAbsolute) it.canonicalFile else File(rootDir, input.projectDir).canonicalFile }
+                val moduleDir =
+                    File(input.projectDir).let {
+                        if (it.isAbsolute) it.canonicalFile else File(rootDir, input.projectDir).canonicalFile
+                    }
                 val relProjectDir = if (moduleDir == rootDir) "." else moduleDir.relativeTo(rootDir).path
 
                 val sourceSetModels =
                     input.sourceSets.map { ssInput ->
                         val relSrcDirs =
                             ssInput.srcDirs.map { dirPath ->
-                                val dirFile = File(dirPath).let { if (it.isAbsolute) it.canonicalFile else File(rootDir, dirPath).canonicalFile }
+                                val dirFile =
+                                    File(
+                                        dirPath,
+                                    ).let { if (it.isAbsolute) it.canonicalFile else File(
+                                        rootDir,
+                                        dirPath,
+                                    ).canonicalFile }
                                 try {
                                     dirFile.relativeTo(moduleDir).path
                                 } catch (e: IllegalArgumentException) {

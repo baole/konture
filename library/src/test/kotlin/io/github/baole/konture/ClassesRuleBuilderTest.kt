@@ -131,7 +131,13 @@ class ClassesRuleBuilderTest : RuleBuildersTestBase() {
                 rawExpression = "Service",
             )
         val fileDeclWithUsages =
-            FileDeclaration("ClassA.kt", "com.example", classes = listOf(classA), usages = listOf(usageCall, usageRef), filePath = "/src/ClassA.kt")
+            FileDeclaration(
+                "ClassA.kt",
+                "com.example",
+                classes = listOf(classA),
+                usages = listOf(usageCall, usageRef),
+                filePath = "/src/ClassA.kt",
+            )
 
         val moduleWithUsages = moduleA.copy(files = listOf(fileDeclWithUsages))
         val graphWithUsages = ProjectGraph(builds = mapOf(":" to listOf(moduleWithUsages)))

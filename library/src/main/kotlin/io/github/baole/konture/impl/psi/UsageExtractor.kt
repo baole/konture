@@ -189,7 +189,15 @@ private class UsageVisitor(
                 }
 
             val (resolvedReceiver, _) = resolver.resolve(typeOrClass, expression)
-            val (resolvedVarType, _) = if (varType != null) resolver.resolve(varType, expression) else null to emptyList<String>()
+            val (resolvedVarType, _) =
+                if (varType != null) {
+                    resolver.resolve(
+                        varType,
+                        expression,
+                    )
+                } else {
+                    null to emptyList<String>()
+                }
 
             val qualifiedTarget = if (resolvedReceiver != null) "$resolvedReceiver.$callee" else fullRaw
             val possibleTargets =
@@ -250,7 +258,10 @@ private class UsageVisitor(
         super.visitDotQualifiedExpression(expression)
         val raw = expression.receiverExpression.text
         if (raw.substringAfterLast('.').firstOrNull()?.isUpperCase() == true) {
-            resolver.resolve(raw, expression).first?.let { collector.add(UsageKind.CLASS_REFERENCE, it, expression, raw) }
+            resolver.resolve(
+                raw,
+                expression,
+            ).first?.let { collector.add(UsageKind.CLASS_REFERENCE, it, expression, raw) }
         }
     }
 }

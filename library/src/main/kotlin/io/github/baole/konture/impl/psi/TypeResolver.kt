@@ -28,7 +28,9 @@ internal object TypeResolver {
             if (aliasFqName in resolvingAliases) return null
             if (definition.typeParameters.size != typeArguments.size) return null
             val expandedType =
-                definition.typeParameters.zip(typeArguments).fold(definition.underlyingType) { type, (parameter, argument) ->
+                definition.typeParameters.zip(
+                    typeArguments,
+                ).fold(definition.underlyingType) { type, (parameter, argument) ->
                     type.replace(Regex("\\b${Regex.escape(parameter)}\\b"), argument)
                 }
             val aliasContext =
@@ -102,9 +104,17 @@ internal object TypeResolver {
         if (firstSegment.isNotEmpty() && firstSegment.first().isLowerCase()) return rawType
 
         // 6. Wildcard Imports Matching Declared Classes
-        val wildcardImports = context.imports.filter { it.endsWith(".*") }.map { "${it.removeSuffix(".*")}.$firstSegment" }
+        val wildcardImports =
+            context.imports.filter {
+                it.endsWith(
+                    ".*",
+                )
+            }.map { "${it.removeSuffix(".*")}.$firstSegment" }
         if (wildcardImports.isNotEmpty()) {
-            val declaredWildcardMatches = wildcardImports.filter { context.isClassDeclared(it) || context.resolveTypeAlias(it) != null }
+            val declaredWildcardMatches =
+                wildcardImports.filter {
+                    context.isClassDeclared(it) || context.resolveTypeAlias(it) != null
+                }
             if (declaredWildcardMatches.size == 1) {
                 val wildcardType = declaredWildcardMatches.single()
                 return resolveCandidate(wildcardType)
