@@ -47,7 +47,7 @@ class SlicesRuleBuilder(
      */
     fun printMatchedSlices(
         logger: (Slice) -> Unit = {
-            println("[Konture Debug] ${getMessage("debug.slices.derived", it.key, it.packages, it.classes.size)}")
+            println(getMessage("debug.slices.derived", it.key, it.packages, it.classes.size))
         },
     ): SlicesRuleBuilder =
         this.apply {

@@ -147,10 +147,16 @@ abstract class GenerateArchitectureLayout : DefaultTask() {
                                 val dirFile =
                                     File(
                                         dirPath,
-                                    ).let { if (it.isAbsolute) it.canonicalFile else File(
-                                        rootDir,
-                                        dirPath,
-                                    ).canonicalFile }
+                                    ).let {
+                                        if (it.isAbsolute) {
+                                            it.canonicalFile
+                                        } else {
+                                            File(
+                                                rootDir,
+                                                dirPath,
+                                            ).canonicalFile
+                                        }
+                                    }
                                 try {
                                     dirFile.relativeTo(moduleDir).path
                                 } catch (e: IllegalArgumentException) {
