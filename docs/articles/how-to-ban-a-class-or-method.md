@@ -4,6 +4,8 @@
 
 ---
 
+![Banning Dangerous APIs: Passive vs Automated Guardrails](../assets/images/banning-apis-guardrail.svg)
+
 Every growing codebase accumulates "dangerous" APIs: methods that are easy to misuse, cause flaky tests, or break architecture boundaries.
 
 Initially, teams rely on PR reviews or wiki pages: *"Don't use `spyk` in tests,"* or *"Use custom scopes instead of `GlobalScope`."*

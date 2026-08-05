@@ -1,0 +1,108 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="720" viewBox="0 0 1280 720" role="img" aria-labelledby="title desc">
+  <title id="title">Banning Dangerous APIs: Passive vs Automated Guardrails</title>
+  <desc id="desc">A comparison diagram showing how passive manual reviews let dangerous APIs slip into production versus how automated guardrails catch them instantly during local development.</desc>
+  <defs>
+    <style>
+      .bg { fill: #f8fafc; }
+      .card-red { fill: #fef2f2; stroke: #f87171; stroke-width: 2; rx: 16; }
+      .card-darkred { fill: #fee2e2; stroke: #ef4444; stroke-width: 2.5; rx: 16; }
+      .card-amber { fill: #fffbeb; stroke: #f59e0b; stroke-width: 2; rx: 16; }
+      .card-blue { fill: #eff6ff; stroke: #3b82f6; stroke-width: 2.5; rx: 16; }
+      .card-green { fill: #f0fdf4; stroke: #22c55e; stroke-width: 2.5; rx: 16; }
+      .title { font-family: Inter, system-ui, -apple-system, sans-serif; font-size: 32px; font-weight: 800; fill: #0f172a; }
+      .subtitle { font-family: Inter, system-ui, -apple-system, sans-serif; font-size: 18px; font-weight: 500; fill: #475569; }
+      .section-title-red { font-family: Inter, system-ui, -apple-system, sans-serif; font-size: 20px; font-weight: 700; fill: #991b1b; }
+      .section-title-green { font-family: Inter, system-ui, -apple-system, sans-serif; font-size: 20px; font-weight: 700; fill: #166534; }
+      .node-title { font-family: Inter, system-ui, -apple-system, sans-serif; font-size: 18px; font-weight: 700; fill: #1e293b; }
+      .node-desc { font-family: Inter, system-ui, -apple-system, sans-serif; font-size: 14px; font-weight: 500; fill: #475569; }
+      .arrow { stroke: #475569; stroke-width: 2.5; fill: none; marker-end: url(#arrowhead); }
+      .arrow-red { stroke: #dc2626; stroke-width: 2.5; fill: none; marker-end: url(#arrowhead-red); }
+      .arrow-green { stroke: #16a34a; stroke-width: 2.5; fill: none; marker-end: url(#arrowhead-green); }
+    </style>
+    <marker id="arrowhead" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto">
+      <path d="M0,2 L8,5 L0,8 Z" fill="#475569"/>
+    </marker>
+    <marker id="arrowhead-red" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto">
+      <path d="M0,2 L8,5 L0,8 Z" fill="#dc2626"/>
+    </marker>
+    <marker id="arrowhead-green" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto">
+      <path d="M0,2 L8,5 L0,8 Z" fill="#16a34a"/>
+    </marker>
+  </defs>
+
+  <!-- Background -->
+  <rect width="1280" height="720" class="bg"/>
+
+  <!-- Header -->
+  <text x="640" y="55" class="title" text-anchor="middle">Banning Dangerous APIs: Passive vs Automated Guardrails</text>
+  <text x="640" y="88" class="subtitle" text-anchor="middle">Shrinking the feedback loop from code review failures to millisecond IDE build errors</text>
+
+  <!-- TOP CONTAINER: Passive Enforcement -->
+  <rect x="40" y="125" width="1200" height="250" rx="20" fill="#fff5f5" stroke="#fca5a5" stroke-width="2"/>
+  <text x="65" y="160" class="section-title-red">❌ Passive Enforcement (Manual PR Reviews)</text>
+
+  <!-- Node 1: Dev uses API -->
+  <rect x="70" y="185" width="230" height="110" rx="14" class="card-red"/>
+  <text x="185" y="222" class="node-title" text-anchor="middle">Uses Forbidden API</text>
+  <text x="185" y="250" class="node-desc" text-anchor="middle">spyk(), GlobalScope,</text>
+  <text x="185" y="272" class="node-desc" text-anchor="middle">Thread.sleep()</text>
+
+  <path d="M 300 240 L 370 240" class="arrow"/>
+
+  <!-- Node 2: Human Review -->
+  <rect x="370" y="185" width="230" height="110" rx="14" class="card-amber"/>
+  <text x="485" y="222" class="node-title" text-anchor="middle">Human PR Review</text>
+  <text x="485" y="250" class="node-desc" text-anchor="middle">Vigilance decays;</text>
+  <text x="485" y="272" class="node-desc" text-anchor="middle">reviewers miss details</text>
+
+  <path d="M 600 240 L 670 240" class="arrow-red"/>
+
+  <!-- Node 3: Merged to Main -->
+  <rect x="670" y="185" width="230" height="110" rx="14" class="card-darkred"/>
+  <text x="785" y="222" class="node-title" text-anchor="middle">Merged to Main</text>
+  <text x="785" y="250" class="node-desc" text-anchor="middle">Bad pattern spreads</text>
+  <text x="785" y="272" class="node-desc" text-anchor="middle">across codebase</text>
+
+  <path d="M 900 240 L 970 240" class="arrow-red"/>
+
+  <!-- Node 4: Production Outage / Flaky CI -->
+  <rect x="970" y="185" width="230" height="110" rx="14" class="card-darkred"/>
+  <text x="1085" y="215" class="node-title" text-anchor="middle" fill="#991b1b">💥 Production Debt</text>
+  <text x="1085" y="245" class="node-desc" text-anchor="middle">Flaky CI builds, leaks,</text>
+  <text x="1085" y="267" class="node-desc" text-anchor="middle">thread starvation, ANRs</text>
+
+  <!-- BOTTOM CONTAINER: Automated Guardrails -->
+  <rect x="40" y="410" width="1200" height="260" rx="20" fill="#f0fdf4" stroke="#86efac" stroke-width="2"/>
+  <text x="65" y="445" class="section-title-green">✅ Automated Guardrails (Detekt / Konture)</text>
+
+  <!-- Node 1: Dev uses API -->
+  <rect x="70" y="470" width="230" height="110" rx="14" class="card-red"/>
+  <text x="185" y="507" class="node-title" text-anchor="middle">Uses Forbidden API</text>
+  <text x="185" y="535" class="node-desc" text-anchor="middle">spyk(), GlobalScope,</text>
+  <text x="185" y="557" class="node-desc" text-anchor="middle">Thread.sleep()</text>
+
+  <path d="M 300 525 L 370 525" class="arrow"/>
+
+  <!-- Node 2: Automated Quality Gate -->
+  <rect x="370" y="470" width="230" height="110" rx="14" class="card-blue"/>
+  <text x="485" y="507" class="node-title" text-anchor="middle" fill="#1e40af">Automated Gate</text>
+  <text x="485" y="535" class="node-desc" text-anchor="middle">Detekt / Konture Test</text>
+  <text x="485" y="557" class="node-desc" text-anchor="middle">Runs in IDE / Local Build</text>
+
+  <path d="M 600 525 L 670 525" class="arrow-red"/>
+
+  <!-- Node 3: Immediate Build Error -->
+  <rect x="670" y="470" width="230" height="110" rx="14" class="card-darkred"/>
+  <text x="785" y="507" class="node-title" text-anchor="middle" fill="#991b1b">❌ Build Error</text>
+  <text x="785" y="535" class="node-desc" text-anchor="middle">Fails in milliseconds;</text>
+  <text x="785" y="557" class="node-desc" text-anchor="middle">suggests replacement</text>
+
+  <path d="M 900 525 L 970 525" class="arrow-green"/>
+
+  <!-- Node 4: Clean Code Merged -->
+  <rect x="970" y="470" width="230" height="110" rx="14" class="card-green"/>
+  <text x="1085" y="507" class="node-title" text-anchor="middle" fill="#166534">✨ Clean Code</text>
+  <text x="1085" y="535" class="node-desc" text-anchor="middle">Developer fixes locally;</text>
+  <text x="1085" y="557" class="node-desc" text-anchor="middle">0 debt hits main</text>
+
+</svg>
