@@ -1,5 +1,6 @@
 /*
- * Copyright 2026 Bao Le Duc
+ * Copyright 2026 The Konture Contributors
+ * Contributors: Bao Le Duc (@baole)
  * SPDX-License-Identifier: Apache-2.0
  */
 
@@ -29,6 +30,33 @@ class FilesThat internal constructor(
 
     infix fun resideInAPackage(predicate: (String) -> Boolean): FilesRuleBuilder {
         builder.setThat { predicate(it.declaration.packageName) }
+        return builder
+    }
+
+    infix fun resideInPackageOf(type: kotlin.reflect.KClass<*>): FilesRuleBuilder =
+        resideInAPackage(type.toKonturePackageReference().packageName)
+
+    infix fun haveName(name: String): FilesRuleBuilder {
+        builder.setThat { it.declaration.name == name }
+        return builder
+    }
+
+    infix fun haveName(names: List<String>): FilesRuleBuilder {
+        builder.setThat { context -> names.contains(context.declaration.name) }
+        return builder
+    }
+
+    fun haveName(vararg names: String): FilesRuleBuilder = haveName(names.toList())
+
+    infix fun haveName(predicate: (String) -> Boolean): FilesRuleBuilder =
+        haveName("custom name predicate", predicate)
+
+    @Suppress("UnusedParameter")
+    fun haveName(
+        description: String,
+        predicate: (String) -> Boolean,
+    ): FilesRuleBuilder {
+        builder.setThat { predicate(it.declaration.name) }
         return builder
     }
 
@@ -110,8 +138,58 @@ class FilesThat internal constructor(
 
     fun resideInAModule(vararg modulePaths: String): FilesRuleBuilder = resideInAModule(modulePaths.toList())
 
+    infix fun containClass(fqName: String): FilesRuleBuilder {
+        builder.setThat { context ->
+            context.declaration.classes.any { it.fqName == fqName || it.name == fqName }
+        }
+        return builder
+    }
+
+    infix fun containClass(type: kotlin.reflect.KClass<*>): FilesRuleBuilder =
+        containClass(type.kontureQualifiedName())
+
+    infix fun containClassesWithAnnotation(annotationFqName: String): FilesRuleBuilder {
+        builder.setThat { context ->
+            context.declaration.classes.any { cls ->
+                cls.annotations.any { it.name == annotationFqName || it.fqName == annotationFqName }
+            }
+        }
+        return builder
+    }
+
+    infix fun containClassesWithAnnotation(annotation: kotlin.reflect.KClass<out Annotation>): FilesRuleBuilder =
+        containClassesWithAnnotation(annotation.kontureQualifiedName())
+
+    infix fun haveImportOf(importPath: String): FilesRuleBuilder {
+        builder.setThat { context ->
+            context.declaration.imports.any { PatternMatchers.matchesPackage(importPath, it) || it == importPath }
+        }
+        return builder
+    }
+
+    infix fun haveImportOf(type: kotlin.reflect.KClass<*>): FilesRuleBuilder =
+        haveImportOf(type.kontureQualifiedName())
+
+    fun containTopLevelFunctions(): FilesRuleBuilder {
+        builder.setThat { it.declaration.topLevelFunctions.isNotEmpty() }
+        return builder
+    }
+
+    fun containTopLevelProperties(): FilesRuleBuilder {
+        builder.setThat { it.declaration.topLevelProperties.isNotEmpty() }
+        return builder
+    }
+
+    fun containClasses(): FilesRuleBuilder {
+        builder.setThat { it.declaration.classes.isNotEmpty() }
+        return builder
+    }
+
     infix fun satisfy(predicate: (FileDeclarationContext) -> Boolean): FilesRuleBuilder {
         builder.setThat(predicate)
         return builder
     }
 }
+
+
+

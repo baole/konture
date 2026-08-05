@@ -226,6 +226,21 @@ fun KontureScope.withPackage(packagePattern: String) = KontureScope(classes.with
 
 fun KontureScope.withNameMatching(pattern: String) = KontureScope(classes.withNameMatching(pattern))
 
+fun KontureScope.withModule(
+    modulePath: String,
+    graph: ProjectGraph = Konture.projectGraph,
+): KontureScope {
+    val norm = if (!modulePath.startsWith(":") && !modulePath.startsWith("**") && modulePath.isNotEmpty()) ":$modulePath" else modulePath
+    return KontureScope(classes.filter { cls ->
+        val mod = graph.getAllModules().find { m ->
+            m.files.any { f -> f.classes.any { c -> c.fqName == cls.fqName } || f.filePath == cls.filePath }
+        }
+        mod?.path == norm
+    })
+}
+
+
+
 // Assertion extensions on List<ClassDeclaration>
 
 @JvmName("assertClassesTrue")

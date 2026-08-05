@@ -46,6 +46,31 @@ fun ClassesShould.haveAnnotationWithArgument(
     argValue: String,
 ): ClassesRuleBuilder = haveAnnotationWithArgument(annotation.kontureQualifiedName(), argName, argValue)
 
+fun FunctionsThat.haveAnnotationWithArgument(
+    annotation: KClass<out Annotation>,
+    argName: String?,
+    argValue: String,
+): FunctionsRuleBuilder = haveAnnotationWithArgument(annotation.kontureQualifiedName(), argName, argValue)
+
+fun FunctionsShould.haveAnnotationWithArgument(
+    annotation: KClass<out Annotation>,
+    argName: String?,
+    argValue: String,
+): FunctionsRuleBuilder = haveAnnotationWithArgument(annotation.kontureQualifiedName(), argName, argValue)
+
+fun PropertiesThat.haveAnnotationWithArgument(
+    annotation: KClass<out Annotation>,
+    argName: String?,
+    argValue: String,
+): PropertiesRuleBuilder = haveAnnotationWithArgument(annotation.kontureQualifiedName(), argName, argValue)
+
+fun PropertiesShould.haveAnnotationWithArgument(
+    annotation: KClass<out Annotation>,
+    argName: String?,
+    argValue: String,
+): PropertiesRuleBuilder = haveAnnotationWithArgument(annotation.kontureQualifiedName(), argName, argValue)
+
+
 infix fun ClassesThat.areAssignableTo(superType: KClass<*>): ClassesRuleBuilder =
     areAssignableTo(
         superType.kontureQualifiedName(),
@@ -337,8 +362,6 @@ fun PropertyAssertionScope.haveAnnotationOf(annotation: KClass<out Annotation>) 
     )
 
 inline fun <reified T : Annotation> PropertyAssertionScope.haveAnnotationOfType() = haveAnnotationOf(T::class)
-
-inline fun <reified T : Any> FunctionsShould.notReferenceClass(): FunctionsRuleBuilder = notReferenceClass(T::class)
 
 inline fun <reified T : Any> PropertiesShould.notCall(): PropertiesRuleBuilder = notCall(T::class)
 

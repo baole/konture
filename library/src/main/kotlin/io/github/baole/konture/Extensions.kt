@@ -84,6 +84,13 @@ val Konture.scope: KontureScope get() = KontureScope.fromProject(projectGraph)
 fun Konture.scope(sourceSets: SourceSetSelector) = KontureScope.fromProject(projectGraph, sourceSets)
 
 /**
+ * Synonym for [scope] representing class-level functional scope for the entire project.
+ */
+val Konture.classScope: KontureScope get() = scope
+
+fun Konture.classScope(sourceSets: SourceSetSelector) = scope(sourceSets)
+
+/**
  * Retrieves a class-level functional [KontureScope] scoped to a specific module path.
  */
 fun Konture.scopeFromModule(path: String) = KontureScope.fromModule(path, projectGraph)
@@ -92,6 +99,13 @@ fun Konture.scopeFromModule(
     path: String,
     sourceSets: SourceSetSelector,
 ) = KontureScope.fromModule(path, projectGraph, sourceSets)
+
+fun Konture.classScopeFromModule(path: String) = scopeFromModule(path)
+
+fun Konture.classScopeFromModule(
+    path: String,
+    sourceSets: SourceSetSelector,
+) = scopeFromModule(path, sourceSets)
 
 /**
  * Retrieves a class-level functional [KontureScope] scoped to a specific package name.
@@ -102,6 +116,13 @@ fun Konture.scopeFromPackage(
     packageName: String,
     sourceSets: SourceSetSelector,
 ) = KontureScope.fromPackage(packageName, projectGraph, sourceSets)
+
+fun Konture.classScopeFromPackage(packageName: String) = scopeFromPackage(packageName)
+
+fun Konture.classScopeFromPackage(
+    packageName: String,
+    sourceSets: SourceSetSelector,
+) = scopeFromPackage(packageName, sourceSets)
 
 /**
  * Retrieves a file-level functional [KontureFileScope] representing all files in the project.
@@ -141,6 +162,22 @@ fun Konture.propertyScope(sourceSets: SourceSetSelector) = KonturePropertyScope.
 fun Konture.propertyScopeFromModule(path: String) = KonturePropertyScope.fromModule(path, projectGraph)
 
 fun Konture.propertyScopeFromPackage(packageName: String) = KonturePropertyScope.fromPackage(packageName, projectGraph)
+
+/**
+ * Retrieves a module-level functional [KontureModuleScope] representing all modules in the project.
+ */
+val Konture.moduleScope: KontureModuleScope get() = KontureModuleScope.fromProject(projectGraph)
+
+/**
+ * Retrieves a slice-level functional [KontureSliceScope] derived from a package pattern.
+ */
+fun Konture.sliceScope(pattern: String): KontureSliceScope =
+    KontureSliceScope.fromProject(pattern, projectGraph)
+
+fun Konture.sliceScope(
+    pattern: String,
+    sourceSets: SourceSetSelector,
+): KontureSliceScope = KontureSliceScope.fromProject(pattern, projectGraph, sourceSets)
 
 // --- Block-based DSL Entry Points (Auto-Checking) ---
 

@@ -115,9 +115,15 @@ FRONT_MATTER_MAP = {
     },
     "recipes/onion-architecture.md": {
         "layout": "default",
-        "title": "Onion Architecture",
+        "title": "Onion / Clean Architecture Verification",
         "parent": "Recipes",
         "nav_order": 9
+    },
+    "recipes/slices-and-modularization.md": {
+        "layout": "default",
+        "title": "Slices & Modularization Rules",
+        "parent": "Recipes",
+        "nav_order": 10
     },
     "ai-prompts/README.md": {
         "layout": "default",

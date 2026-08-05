@@ -1,5 +1,6 @@
 /*
- * Copyright 2026 Bao Le Duc
+ * Copyright 2026 The Konture Contributors
+ * Contributors: Bao Le Duc (@baole)
  * SPDX-License-Identifier: Apache-2.0
  */
 
@@ -72,6 +73,8 @@ class ModulesShould internal constructor(
      * @param targetPaths The vararg list of Gradle paths or glob patterns of the modules that should not be depended on.
      */
     fun notDependOnModule(vararg targetPaths: String): ModulesRuleBuilder = notDependOnModule(targetPaths.asList())
+
+
 
     /**
      * Asserts that selected modules do not depend on any module matching the predicate.
@@ -462,4 +465,24 @@ class ModulesShould internal constructor(
         }
         return builder
     }
+
+    /**
+     * Asserts that the module graph has no cyclic dependencies between modules.
+     */
+    fun beFreeOfCycles(): ModulesRuleBuilder {
+        builder.setShould { _, graph, violations ->
+            val adjacency = graph.getAllModules().associate { module ->
+                module.path to module.dependencies.map { it.targetPath }.toSet()
+            }
+            val cycles = io.github.baole.konture.impl.SliceCycleDetector.findCycles(adjacency)
+            if (cycles.isNotEmpty()) {
+                for (cycle in cycles) {
+                    val rendered = (cycle + cycle.first()).joinToString(" -> ")
+                    violations.add(getMessage("module.should.beFreeOfCycles", rendered))
+                }
+            }
+        }
+        return builder
+    }
 }
+

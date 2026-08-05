@@ -1,5 +1,6 @@
 /*
- * Copyright 2026 Bao Le Duc
+ * Copyright 2026 The Konture Contributors
+ * Contributors: Bao Le Duc (@baole)
  * SPDX-License-Identifier: Apache-2.0
  */
 
@@ -49,6 +50,33 @@ class ModulesThat internal constructor(
         return builder
     }
 
+    infix fun haveNameStartingWith(prefix: String): ModulesRuleBuilder {
+        builder.setThat { it.path.removePrefix(":").startsWith(prefix.removePrefix(":")) }
+        return builder
+    }
+
+    infix fun haveNameStartingWith(prefixes: List<String>): ModulesRuleBuilder {
+        builder.setThat { module ->
+            prefixes.any { module.path.removePrefix(":").startsWith(it.removePrefix(":")) }
+        }
+        return builder
+    }
+
+    fun haveNameStartingWith(vararg prefixes: String): ModulesRuleBuilder = haveNameStartingWith(prefixes.toList())
+
+    infix fun haveNameEndingWith(suffix: String): ModulesRuleBuilder {
+        builder.setThat { it.path.endsWith(suffix) }
+        return builder
+    }
+
+    infix fun haveNameEndingWith(suffixes: List<String>): ModulesRuleBuilder {
+        builder.setThat { module -> suffixes.any { module.path.endsWith(it) } }
+        return builder
+    }
+
+    fun haveNameEndingWith(vararg suffixes: String): ModulesRuleBuilder = haveNameEndingWith(suffixes.toList())
+
+
     /**
      * Restricts the rules to modules whose Gradle path matches the specified glob pattern.
      *
@@ -75,6 +103,25 @@ class ModulesThat internal constructor(
      * @param patterns Glob patterns (e.g., ":feature-*", ":core-**").
      */
     fun haveNameMatching(vararg patterns: String): ModulesRuleBuilder = haveNameMatching(patterns.toList())
+
+    infix fun dependOnModule(modulePath: String): ModulesRuleBuilder {
+        val normalized = normalizeModulePath(modulePath)
+        builder.setThat { module ->
+            module.dependencies.any { normalizeModulePath(it.targetPath) == normalized }
+        }
+        return builder
+    }
+
+    infix fun dependOnModules(modulePaths: List<String>): ModulesRuleBuilder {
+        val normalized = modulePaths.map { normalizeModulePath(it) }
+        builder.setThat { module ->
+            module.dependencies.any { normalized.contains(normalizeModulePath(it.targetPath)) }
+        }
+        return builder
+    }
+
+    fun dependOnModules(vararg modulePaths: String): ModulesRuleBuilder = dependOnModules(modulePaths.toList())
+
 
     /**
      * Restricts the rules to modules matching the specified predicate.

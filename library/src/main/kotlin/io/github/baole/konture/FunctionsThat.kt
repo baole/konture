@@ -40,6 +40,44 @@ class FunctionsThat internal constructor(
             type.toKonturePackageReference().packageName,
         )
 
+    infix fun resideInAModule(modulePath: String): FunctionsRuleBuilder {
+        val normalized =
+            if (!modulePath.startsWith(":") && !modulePath.startsWith("**") && modulePath.isNotEmpty()) {
+                ":$modulePath"
+            } else {
+                modulePath
+            }
+        builder.setThat { it.modulePath == normalized }
+        return builder
+    }
+
+    infix fun resideInAModule(modulePaths: List<String>): FunctionsRuleBuilder {
+        val normalizedPaths =
+            modulePaths.map { path ->
+                if (!path.startsWith(":") && !path.startsWith("**") && path.isNotEmpty()) {
+                    ":$path"
+                } else {
+                    path
+                }
+            }
+        builder.setThat { context -> normalizedPaths.contains(context.modulePath) }
+        return builder
+    }
+
+    fun resideInAModule(vararg modulePaths: String): FunctionsRuleBuilder = resideInAModule(modulePaths.toList())
+
+    infix fun haveName(predicate: (String) -> Boolean): FunctionsRuleBuilder =
+        haveName("custom name predicate", predicate)
+
+    @Suppress("UnusedParameter")
+    fun haveName(
+        description: String,
+        predicate: (String) -> Boolean,
+    ): FunctionsRuleBuilder {
+        builder.setThat { predicate(it.declaration.name) }
+        return builder
+    }
+
     infix fun haveNameEndingWith(suffix: String): FunctionsRuleBuilder {
         builder.setThat { it.declaration.name.endsWith(suffix) }
         return builder
@@ -81,6 +119,44 @@ class FunctionsThat internal constructor(
     }
 
     fun haveNameMatching(vararg patterns: String): FunctionsRuleBuilder = haveNameMatching(patterns.toList())
+
+    fun arePublic(): FunctionsRuleBuilder = haveVisibility(Visibility.PUBLIC)
+
+    fun areInternal(): FunctionsRuleBuilder = haveVisibility(Visibility.INTERNAL)
+
+    fun arePrivate(): FunctionsRuleBuilder = haveVisibility(Visibility.PRIVATE)
+
+    fun areProtected(): FunctionsRuleBuilder = haveVisibility(Visibility.PROTECTED)
+
+    fun areExtension(): FunctionsRuleBuilder {
+        builder.setThat { it.declaration.isExtension }
+        return builder
+    }
+
+    infix fun haveExtensionReceiver(receiverTypeFqName: String): FunctionsRuleBuilder {
+        builder.setThat { func ->
+            func.declaration.receiverType?.let { receiver ->
+                receiver == receiverTypeFqName || receiver.endsWith(".$receiverTypeFqName") || receiverTypeFqName.endsWith(".$receiver")
+            } ?: false
+        }
+        return builder
+    }
+
+    infix fun haveExtensionReceiver(kClass: kotlin.reflect.KClass<*>): FunctionsRuleBuilder =
+        haveExtensionReceiver(kClass.kontureQualifiedName())
+
+    inline fun <reified T : Any> haveExtensionReceiver(): FunctionsRuleBuilder =
+        haveExtensionReceiver(T::class)
+
+    fun areTopLevel(): FunctionsRuleBuilder {
+        builder.setThat { it.className == null }
+        return builder
+    }
+
+    fun areMember(): FunctionsRuleBuilder {
+        builder.setThat { it.className != null }
+        return builder
+    }
 
     fun beTopLevel(): FunctionsRuleBuilder {
         builder.setThat { it.className == null }
@@ -147,13 +223,26 @@ class FunctionsThat internal constructor(
      */
     fun haveAnyAnnotationOf(vararg names: String): FunctionsRuleBuilder = haveAnyAnnotationOf(names.asList())
 
-    /**
-     * Restricts the rules to functions containing the specified modifier.
-     */
+    fun areOpen(): FunctionsRuleBuilder {
+        builder.setThat { it.declaration.modifiers.contains(Modifier.OPEN) }
+        return builder
+    }
+
+    fun areAbstract(): FunctionsRuleBuilder {
+        builder.setThat { it.declaration.modifiers.contains(Modifier.ABSTRACT) }
+        return builder
+    }
+
+    fun areOverride(): FunctionsRuleBuilder {
+        builder.setThat { it.declaration.modifiers.contains(Modifier.OVERRIDE) }
+        return builder
+    }
+
     infix fun haveModifier(modifier: Modifier): FunctionsRuleBuilder {
         builder.setThat { it.declaration.modifiers.contains(modifier) }
         return builder
     }
+
 
     /**
      * Restricts the rules to functions containing all of the specified modifiers.
@@ -331,8 +420,26 @@ class FunctionsThat internal constructor(
     /** Restricts the rules to functions with a parameter of raw type [T]. */
     inline fun <reified T : Any> haveAnyParameterTypeOf(): FunctionsRuleBuilder = haveAnyParameterType(T::class)
 
+    fun haveAnnotationWithArgument(
+        annotationName: String,
+        argName: String?,
+        argValue: String,
+    ): FunctionsRuleBuilder {
+        builder.setThat { func ->
+            func.declaration.annotations.any { ann ->
+                (ann.name == annotationName || ann.fqName == annotationName) &&
+                    ann.arguments.any { arg ->
+                        (argName == null || arg.name == argName) && arg.value == argValue
+                    }
+            }
+        }
+        return builder
+    }
+
     infix fun satisfy(predicate: (FunctionDeclarationContext) -> Boolean): FunctionsRuleBuilder {
         builder.setThat(predicate)
         return builder
     }
 }
+
+

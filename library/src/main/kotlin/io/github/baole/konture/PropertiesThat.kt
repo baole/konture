@@ -35,6 +35,47 @@ class PropertiesThat internal constructor(
         return builder
     }
 
+    infix fun resideInPackageOf(type: KClass<*>): PropertiesRuleBuilder =
+        resideInAPackage(type.toKonturePackageReference().packageName)
+
+    infix fun resideInAModule(modulePath: String): PropertiesRuleBuilder {
+        val normalized =
+            if (!modulePath.startsWith(":") && !modulePath.startsWith("**") && modulePath.isNotEmpty()) {
+                ":$modulePath"
+            } else {
+                modulePath
+            }
+        builder.setThat { it.modulePath == normalized }
+        return builder
+    }
+
+    infix fun resideInAModule(modulePaths: List<String>): PropertiesRuleBuilder {
+        val normalizedPaths =
+            modulePaths.map { path ->
+                if (!path.startsWith(":") && !path.startsWith("**") && path.isNotEmpty()) {
+                    ":$path"
+                } else {
+                    path
+                }
+            }
+        builder.setThat { context -> normalizedPaths.contains(context.modulePath) }
+        return builder
+    }
+
+    fun resideInAModule(vararg modulePaths: String): PropertiesRuleBuilder = resideInAModule(modulePaths.toList())
+
+    infix fun haveName(predicate: (String) -> Boolean): PropertiesRuleBuilder =
+        haveName("custom name predicate", predicate)
+
+    @Suppress("UnusedParameter")
+    fun haveName(
+        description: String,
+        predicate: (String) -> Boolean,
+    ): PropertiesRuleBuilder {
+        builder.setThat { predicate(it.declaration.name) }
+        return builder
+    }
+
     infix fun haveNameEndingWith(suffix: String): PropertiesRuleBuilder {
         builder.setThat { it.declaration.name.endsWith(suffix) }
         return builder
@@ -142,13 +183,26 @@ class PropertiesThat internal constructor(
      */
     fun haveAnyAnnotationOf(vararg names: String): PropertiesRuleBuilder = haveAnyAnnotationOf(names.asList())
 
-    /**
-     * Restricts the rules to properties containing the specified modifier.
-     */
+    fun areOpen(): PropertiesRuleBuilder {
+        builder.setThat { it.declaration.modifiers.contains(Modifier.OPEN) }
+        return builder
+    }
+
+    fun areAbstract(): PropertiesRuleBuilder {
+        builder.setThat { it.declaration.modifiers.contains(Modifier.ABSTRACT) }
+        return builder
+    }
+
+    fun areOverride(): PropertiesRuleBuilder {
+        builder.setThat { it.declaration.modifiers.contains(Modifier.OVERRIDE) }
+        return builder
+    }
+
     infix fun haveModifier(modifier: Modifier): PropertiesRuleBuilder {
         builder.setThat { it.declaration.modifiers.contains(modifier) }
         return builder
     }
+
 
     /**
      * Restricts the rules to properties containing all of the specified modifiers.
@@ -244,8 +298,42 @@ class PropertiesThat internal constructor(
      */
     fun haveType(vararg typeFqNames: String): PropertiesRuleBuilder = haveType(typeFqNames.asList())
 
+    fun areExtension(): PropertiesRuleBuilder {
+        builder.setThat { it.declaration.isExtension }
+        return builder
+    }
+
+    fun areTopLevel(): PropertiesRuleBuilder {
+        builder.setThat { it.className == null }
+        return builder
+    }
+
+    fun areMember(): PropertiesRuleBuilder {
+        builder.setThat { it.className != null }
+        return builder
+    }
+
+    fun haveAnnotationWithArgument(
+        annotationName: String,
+        argName: String?,
+        argValue: String,
+    ): PropertiesRuleBuilder {
+        builder.setThat { prop ->
+            prop.declaration.annotations.any { ann ->
+                (ann.name == annotationName || ann.fqName == annotationName) &&
+                    ann.arguments.any { arg ->
+                        (argName == null || arg.name == argName) && arg.value == argValue
+                    }
+            }
+        }
+        return builder
+    }
+
     infix fun satisfy(predicate: (PropertyDeclarationContext) -> Boolean): PropertiesRuleBuilder {
         builder.setThat(predicate)
         return builder
     }
 }
+
+
+

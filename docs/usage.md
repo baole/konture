@@ -117,27 +117,46 @@ Where a rule identifies a concrete Kotlin type or annotation, Konture also accep
 ```kotlin
 Konture.classes {
     that().haveAnnotationOf<Inject>()
+    and().resideInPackageOf<MarkerClass>()
+    and().resideInAModule(":core")
     should().beAssignableTo(Repository::class)
 }
 
 Konture.functions {
     that().haveReturnTypeOf<Result<*>>()
+    and().resideInPackageOf<MarkerClass>()
     should().notReferenceClass<android.content.Context>()
+    andShould().beSuspend()
+    andShould().beOperator()
     andShould().haveParameterTypes(String::class, UserId::class)
 }
 
 Konture.properties {
+    that().resideInPackageOf<MarkerClass>()
     should().notCall("android.content.Context.getString")
     andShould().haveTypeOf<StateFlow<*>>()
 }
 
 Konture.files {
+    that().resideInPackageOf<MarkerClass>()
     should().notReferenceClass<LegacyClient>()
     andShould().anyOf(
         { resideInAPackage("com.acme.core..") },
         { resideInAPackage("com.acme.feature..") }
     )
 }
+
+Konture.slices {
+    matching("com.acme.(*)..")
+        .should().onlyDependOnSlices("core", "common")
+        .andShould().notDependOnSlice("internal")
+}
+
+Konture.modules {
+    that().haveNameStartingWith(":feature")
+        .should().beFreeOfCycles()
+}
+
 ```
 
 

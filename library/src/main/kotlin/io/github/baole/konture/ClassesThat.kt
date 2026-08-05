@@ -1,5 +1,6 @@
 /*
- * Copyright 2026 Bao Le Duc
+ * Copyright 2026 The Konture Contributors
+ * Contributors: Bao Le Duc (@baole)
  * SPDX-License-Identifier: Apache-2.0
  */
 
@@ -56,6 +57,46 @@ class ClassesThat internal constructor(
         builder.setThat { predicate(it.packageName) }
         return builder
     }
+
+    infix fun resideInPackageOf(type: kotlin.reflect.KClass<*>): ClassesRuleBuilder =
+        resideInAPackage(type.toKonturePackageReference().packageName)
+
+    infix fun resideInAModule(modulePath: String): ClassesRuleBuilder {
+        val normalized =
+            if (!modulePath.startsWith(":") && !modulePath.startsWith("**") && modulePath.isNotEmpty()) {
+                ":$modulePath"
+            } else {
+                modulePath
+            }
+        builder.setThat { cls ->
+            val module = builder.graph.getAllModules().find { mod ->
+                mod.files.any { f -> f.classes.any { c -> c.fqName == cls.fqName } || f.filePath == cls.filePath }
+            }
+            module?.path == normalized
+        }
+        return builder
+    }
+
+    infix fun resideInAModule(modulePaths: List<String>): ClassesRuleBuilder {
+        val normalizedPaths =
+            modulePaths.map { path ->
+                if (!path.startsWith(":") && !path.startsWith("**") && path.isNotEmpty()) {
+                    ":$path"
+                } else {
+                    path
+                }
+            }
+        builder.setThat { cls ->
+            val module = builder.graph.getAllModules().find { mod ->
+                mod.files.any { f -> f.classes.any { c -> c.fqName == cls.fqName } || f.filePath == cls.filePath }
+            }
+            module != null && normalizedPaths.contains(module.path)
+        }
+        return builder
+    }
+
+    fun resideInAModule(vararg modulePaths: String): ClassesRuleBuilder = resideInAModule(modulePaths.toList())
+
 
     /**
      * Restricts the rules to classes whose simple names end with the specified suffix.
@@ -182,6 +223,12 @@ class ClassesThat internal constructor(
         }
         return builder
     }
+
+    infix fun haveAnnotationOf(annotation: kotlin.reflect.KClass<out Annotation>): ClassesRuleBuilder =
+        haveAnnotationOf(annotation.kontureQualifiedName())
+
+    inline fun <reified T : Annotation> haveAnnotationOf(): ClassesRuleBuilder =
+        haveAnnotationOf(T::class)
 
     /**
      * Restricts the rules to classes annotated with the specified annotation.
@@ -383,6 +430,9 @@ class ClassesThat internal constructor(
         return builder
     }
 
+    infix fun areAssignableTo(superType: kotlin.reflect.KClass<*>): ClassesRuleBuilder =
+        areAssignableTo(superType.kontureQualifiedName())
+
     /**
      * Restricts the rules to classes extending or implementing the specified supertype.
      *
@@ -407,6 +457,9 @@ class ClassesThat internal constructor(
      * @param superTypes The vararg list of supertypes, at least one of which must be matched.
      */
     fun areAssignableToAnyOf(vararg superTypes: String): ClassesRuleBuilder = areAssignableToAnyOf(superTypes.asList())
+
+    fun areAssignableToAnyOf(first: kotlin.reflect.KClass<*>, vararg additional: kotlin.reflect.KClass<*>): ClassesRuleBuilder =
+        areAssignableToAnyOf((arrayOf(first, *additional)).map { it.kontureQualifiedName() })
 
     /**
      * Restricts the rules to classes extending or implementing the specified supertype.
@@ -433,6 +486,9 @@ class ClassesThat internal constructor(
      */
     fun areAssignableToAllOf(vararg superTypes: String): ClassesRuleBuilder = areAssignableToAllOf(superTypes.asList())
 
+    fun areAssignableToAllOf(first: kotlin.reflect.KClass<*>, vararg additional: kotlin.reflect.KClass<*>): ClassesRuleBuilder =
+        areAssignableToAllOf((arrayOf(first, *additional)).map { it.kontureQualifiedName() })
+
     /**
      * Restricts the rules to classes that are assignable from the specified subtype.
      *
@@ -452,6 +508,60 @@ class ClassesThat internal constructor(
         }
         return builder
     }
+
+    infix fun areAssignableFrom(subType: kotlin.reflect.KClass<*>): ClassesRuleBuilder =
+        areAssignableFrom(subType.kontureQualifiedName())
+
+    fun haveCompanionObject(): ClassesRuleBuilder {
+        builder.setThat { it.companionObject != null }
+        return builder
+    }
+
+    fun haveNoArgConstructor(): ClassesRuleBuilder {
+        builder.setThat { cls ->
+            cls.primaryConstructor?.parameters?.isEmpty() == true ||
+                cls.secondaryConstructors.any { it.parameters.isEmpty() }
+        }
+        return builder
+    }
+
+    fun havePrivatePrimaryConstructor(): ClassesRuleBuilder {
+        builder.setThat { cls ->
+            cls.primaryConstructor?.visibility == Visibility.PRIVATE
+        }
+        return builder
+    }
+
+    fun areOpen(): ClassesRuleBuilder {
+        builder.setThat { cls -> cls.modifiers.contains(Modifier.OPEN) }
+        return builder
+    }
+
+    fun areOverride(): ClassesRuleBuilder {
+        builder.setThat { cls -> cls.modifiers.contains(Modifier.OVERRIDE) }
+        return builder
+    }
+
+
+    fun areInner(): ClassesRuleBuilder {
+        builder.setThat { cls -> cls.modifiers.contains(Modifier.INNER) }
+        return builder
+    }
+
+
+    fun areTopLevel(): ClassesRuleBuilder {
+        builder.setThat { cls -> !cls.fqName.substringBeforeLast('.').contains('.') || cls.packageName == cls.fqName.substringBeforeLast('.') }
+        return builder
+    }
+
+    fun areNested(): ClassesRuleBuilder {
+        builder.setThat { cls -> cls.packageName != cls.fqName.substringBeforeLast('.') }
+        return builder
+    }
+
+
+
+
 
     /**
      * Restricts the rules to classes matching the specified predicate.
@@ -521,3 +631,5 @@ class ClassesThat internal constructor(
         return builder
     }
 }
+
+

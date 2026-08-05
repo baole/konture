@@ -1,5 +1,6 @@
 /*
- * Copyright 2026 Bao Le Duc
+ * Copyright 2026 The Konture Contributors
+ * Contributors: Bao Le Duc (@baole)
  * SPDX-License-Identifier: Apache-2.0
  */
 
@@ -177,6 +178,56 @@ internal interface ClassesShouldMetadataAssertions {
         }
         return builder
     }
+
+    /**
+     * Asserts that selected classes are inner classes.
+     */
+    fun beInner(): ClassesRuleBuilder {
+        builder.setShould { cls, _, violations ->
+            if (!cls.modifiers.contains(Modifier.INNER)) {
+                violations.add(getMessage("class.should.beInner", cls.fqName))
+            }
+        }
+        return builder
+    }
+
+    /**
+     * Asserts that selected classes are open classes.
+     */
+    fun beOpen(): ClassesRuleBuilder {
+        builder.setShould { cls, _, violations ->
+            if (!cls.modifiers.contains(Modifier.OPEN)) {
+                violations.add(getMessage("class.should.beOpen", cls.fqName))
+            }
+        }
+        return builder
+    }
+
+    /**
+     * Asserts that selected classes are top-level classes.
+     */
+    fun beTopLevel(): ClassesRuleBuilder {
+        builder.setShould { cls, _, violations ->
+            if (cls.packageName != cls.fqName.substringBeforeLast('.')) {
+                violations.add(getMessage("class.should.beTopLevel", cls.fqName))
+            }
+        }
+        return builder
+    }
+
+    /**
+     * Asserts that selected classes are nested classes.
+     */
+    fun beNested(): ClassesRuleBuilder {
+        builder.setShould { cls, _, violations ->
+            if (cls.packageName == cls.fqName.substringBeforeLast('.')) {
+                violations.add(getMessage("class.should.beNested", cls.fqName))
+            }
+        }
+        return builder
+    }
+
+
 
     /**
      * Asserts that selected classes have specified modifier.

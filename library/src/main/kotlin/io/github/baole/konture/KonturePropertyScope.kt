@@ -172,6 +172,38 @@ fun List<PropertyDeclarationContext>.topLevelProperties(): List<PropertyDeclarat
         it.className == null
     }
 
+/** Filters the list of properties to include only extension properties. */
+fun List<PropertyDeclarationContext>.extensionProperties(): List<PropertyDeclarationContext> =
+    filter {
+        it.declaration.isExtension
+    }
+
+fun List<PropertyDeclarationContext>.withModule(modulePath: String): List<PropertyDeclarationContext> {
+    val norm = if (!modulePath.startsWith(":") && !modulePath.startsWith("**") && modulePath.isNotEmpty()) ":$modulePath" else modulePath
+    return filter { it.modulePath == norm }
+}
+
+fun KonturePropertyScope.withModule(modulePath: String) = KonturePropertyScope(properties.withModule(modulePath))
+
+fun KonturePropertyScope.valProperties(): KonturePropertyScope =
+    KonturePropertyScope(properties.valProperties())
+
+fun KonturePropertyScope.varProperties(): KonturePropertyScope =
+    KonturePropertyScope(properties.varProperties())
+
+fun KonturePropertyScope.memberProperties(): KonturePropertyScope =
+    KonturePropertyScope(properties.memberProperties())
+
+fun KonturePropertyScope.topLevelProperties(): KonturePropertyScope =
+    KonturePropertyScope(properties.topLevelProperties())
+
+fun KonturePropertyScope.extensionProperties(): KonturePropertyScope =
+    KonturePropertyScope(properties.extensionProperties())
+
+
+
+
+
 // Assertion extensions on KonturePropertyScope
 
 /**

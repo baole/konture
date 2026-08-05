@@ -200,6 +200,86 @@ class PropertiesShould internal constructor(
         return builder
     }
 
+    fun beOpen(): PropertiesRuleBuilder {
+        builder.setShould { prop, _, violations ->
+            if (!prop.declaration.modifiers.contains(Modifier.OPEN)) {
+                violations.add(
+                    getMessage("property.should.beOpen", prop.qualifiedName),
+                )
+            }
+        }
+        return builder
+    }
+
+    fun beAbstract(): PropertiesRuleBuilder {
+        builder.setShould { prop, _, violations ->
+            if (!prop.declaration.modifiers.contains(Modifier.ABSTRACT)) {
+                violations.add(
+                    getMessage("property.should.beAbstract", prop.qualifiedName),
+                )
+            }
+        }
+        return builder
+    }
+
+    fun beOverride(): PropertiesRuleBuilder {
+        builder.setShould { prop, _, violations ->
+            if (!prop.declaration.modifiers.contains(Modifier.OVERRIDE)) {
+                violations.add(
+                    getMessage("property.should.beOverride", prop.qualifiedName),
+                )
+            }
+        }
+        return builder
+    }
+
+
+
+    fun beTopLevel(): PropertiesRuleBuilder {
+        builder.setShould { prop, _, violations ->
+            if (prop.className != null) {
+                violations.add(getMessage("property.should.beTopLevel", prop.qualifiedName))
+            }
+        }
+        return builder
+    }
+
+    fun beMember(): PropertiesRuleBuilder {
+        builder.setShould { prop, _, violations ->
+            if (prop.className == null) {
+                violations.add(getMessage("property.should.beMember", prop.qualifiedName))
+            }
+        }
+        return builder
+    }
+
+    fun haveAnnotationWithArgument(
+        annotationName: String,
+        argName: String?,
+        argValue: String,
+    ): PropertiesRuleBuilder {
+        builder.setShould { prop, _, violations ->
+            val matches =
+                prop.declaration.annotations.any { ann ->
+                    (ann.name == annotationName || ann.fqName == annotationName) &&
+                        ann.arguments.any { arg ->
+                            (argName == null || arg.name == argName) && arg.value == argValue
+                        }
+                }
+            if (!matches) {
+                val detail =
+                    if (argName != null) {
+                        "argument '$argName' with value '$argValue'"
+                    } else {
+                        "argument value '$argValue'"
+                    }
+                violations.add(getMessage("property.should.haveAnnotationWithDetail", prop.qualifiedName, annotationName, detail))
+            }
+        }
+        return builder
+    }
+
+
     infix fun haveType(typeFqName: String): PropertiesRuleBuilder {
         builder.setShould { prop, _, violations ->
             if (prop.declaration.type != typeFqName) {

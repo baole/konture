@@ -1,6 +1,6 @@
 /*
  * Copyright 2026 The Konture Contributors
- * Contributors: Octavio Calleya Garcia (@octaviospain)
+ * Contributors: Octavio Calleya Garcia (@octaviospain), Bao Le Duc (@baole)
  * SPDX-License-Identifier: Apache-2.0
  */
 
@@ -42,4 +42,59 @@ class SlicesShould(private val builder: SlicesRuleBuilder) {
         }
         return builder
     }
+
+    /**
+     * Asserts that slices depend only on the specified allowed slices.
+     */
+    fun onlyDependOnSlices(vararg allowedSliceKeys: String): SlicesRuleBuilder {
+        val allowed = allowedSliceKeys.toSet()
+        builder.addShouldAssertion { sliceGraph, violations ->
+            for ((from, targets) in sliceGraph.adjacency.toSortedMap()) {
+                for (to in targets.sorted()) {
+                    if (to !in allowed) {
+                        violations.add(getMessage("slice.should.onlyDependOnSlices", from, to, allowed.joinToString()))
+                    }
+                }
+            }
+        }
+        return builder
+    }
+
+    /**
+     * Asserts that slices do not depend on the specified forbidden slice.
+     */
+    fun notDependOnSlice(forbiddenSliceKey: String): SlicesRuleBuilder {
+        builder.addShouldAssertion { sliceGraph, violations ->
+            for ((from, targets) in sliceGraph.adjacency.toSortedMap()) {
+                if (forbiddenSliceKey in targets) {
+                    violations.add(getMessage("slice.should.notDependOnSlice", from, forbiddenSliceKey))
+                }
+            }
+        }
+        return builder
+    }
+
+    /**
+     * Asserts that slices depend on the specified required slice.
+     */
+    fun dependOnSlice(requiredSliceKey: String): SlicesRuleBuilder {
+        builder.addShouldAssertion { sliceGraph, violations ->
+            for ((from, targets) in sliceGraph.adjacency.toSortedMap()) {
+                if (from != requiredSliceKey && requiredSliceKey !in targets) {
+                    violations.add(getMessage("slice.should.dependOnSlice", from, requiredSliceKey))
+                }
+            }
+        }
+        return builder
+    }
+
+    /**
+     * Asserts that slices depend on all specified required slices.
+     */
+    fun dependOnSlices(vararg requiredSliceKeys: String): SlicesRuleBuilder {
+        requiredSliceKeys.forEach { dependOnSlice(it) }
+        return builder
+    }
 }
+
+

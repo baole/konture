@@ -1,5 +1,6 @@
 /*
- * Copyright 2026 Bao Le Duc
+ * Copyright 2026 The Konture Contributors
+ * Contributors: Bao Le Duc (@baole)
  * SPDX-License-Identifier: Apache-2.0
  */
 
@@ -18,4 +19,5 @@ data class FunctionDeclaration(
     val sourceEndOffset: Int = -1,
     val resolvedReturnType: String? = null,
     val sourceLine: Int = -1,
+    val receiverType: String? = null,
 )

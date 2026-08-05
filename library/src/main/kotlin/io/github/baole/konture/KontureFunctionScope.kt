@@ -163,6 +163,32 @@ fun List<FunctionDeclarationContext>.topLevelFunctions(): List<FunctionDeclarati
         it.className == null
     }
 
+/** Filters the list of functions to include only extension functions. */
+fun List<FunctionDeclarationContext>.extensionFunctions(): List<FunctionDeclarationContext> =
+    filter {
+        it.declaration.isExtension
+    }
+
+fun List<FunctionDeclarationContext>.withModule(modulePath: String): List<FunctionDeclarationContext> {
+    val norm = if (!modulePath.startsWith(":") && !modulePath.startsWith("**") && modulePath.isNotEmpty()) ":$modulePath" else modulePath
+    return filter { it.modulePath == norm }
+}
+
+fun KontureFunctionScope.withModule(modulePath: String) = KontureFunctionScope(functions.withModule(modulePath))
+
+fun KontureFunctionScope.extensionFunctions(): KontureFunctionScope =
+    KontureFunctionScope(functions.extensionFunctions())
+
+fun KontureFunctionScope.topLevelFunctions(): KontureFunctionScope =
+    KontureFunctionScope(functions.topLevelFunctions())
+
+fun KontureFunctionScope.memberFunctions(): KontureFunctionScope =
+    KontureFunctionScope(functions.memberFunctions())
+
+
+
+
+
 // Assertion extensions on KontureFunctionScope
 
 /**

@@ -99,6 +99,35 @@ interface FunctionsShouldSignatureAssertions {
             annotationNames.asList(),
         )
 
+    fun haveAnnotationWithArgument(
+        annotationName: String,
+        argName: String? = null,
+        argValue: String,
+    ): FunctionsRuleBuilder {
+        builder.setShould { func, _, violations ->
+            val matches =
+                func.declaration.annotations.any { ann ->
+                    (ann.name == annotationName || ann.fqName == annotationName) &&
+                        ann.arguments.any { arg ->
+                            (argName == null || arg.name == argName) && arg.value == argValue
+                        }
+                }
+            if (!matches) {
+                violations.add(
+                    getMessage(
+                        "function.should.haveAnnotationWithArgument",
+                        func.qualifiedName,
+                        annotationName,
+                        argName ?: "any",
+                        argValue,
+                    ),
+                )
+            }
+        }
+        return builder
+    }
+
+
     /**
      * Asserts that selected functions are annotated with all of the specified annotations.
      */

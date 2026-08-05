@@ -99,6 +99,60 @@ interface FunctionsShouldModifierAssertions {
         return builder
     }
 
+    fun beOverride(): FunctionsRuleBuilder {
+        builder.setShould { func, _, violations ->
+            if (!func.declaration.modifiers.contains(Modifier.OVERRIDE)) {
+                violations.add(
+                    getMessage("function.should.beOverride", func.qualifiedName),
+                )
+            }
+        }
+        return builder
+    }
+
+
+    fun beOperator(): FunctionsRuleBuilder {
+        builder.setShould { func, _, violations ->
+            if (!func.declaration.modifiers.contains(Modifier.OPERATOR)) {
+                violations.add(
+                    getMessage("function.should.haveModifier", func.qualifiedName, Modifier.OPERATOR),
+                )
+            }
+        }
+        return builder
+    }
+
+    fun beInfix(): FunctionsRuleBuilder {
+        builder.setShould { func, _, violations ->
+            if (!func.declaration.modifiers.contains(Modifier.INFIX)) {
+                violations.add(
+                    getMessage("function.should.haveModifier", func.qualifiedName, Modifier.INFIX),
+                )
+            }
+        }
+        return builder
+    }
+
+
+    fun beTopLevel(): FunctionsRuleBuilder {
+        builder.setShould { func, _, violations ->
+            if (func.className != null) {
+                violations.add(getMessage("function.should.beTopLevel", func.qualifiedName))
+            }
+        }
+        return builder
+    }
+
+    fun beMember(): FunctionsRuleBuilder {
+        builder.setShould { func, _, violations ->
+            if (func.className == null) {
+                violations.add(getMessage("function.should.beMember", func.qualifiedName))
+            }
+        }
+        return builder
+    }
+
+
     /**
      * Asserts that selected functions contain the specified modifier.
      */

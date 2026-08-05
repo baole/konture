@@ -116,6 +116,39 @@ class FilesShould internal constructor(
 
     fun resideInAPackage(vararg packagePatterns: String): FilesRuleBuilder = resideInAPackage(packagePatterns.toList())
 
+    infix fun notResideInAPackage(packagePattern: String): FilesRuleBuilder {
+        builder.setShould { file, _, violations ->
+            if (PatternMatchers.matchesPackage(packagePattern, file.declaration.packageName)) {
+                violations.add(
+                    getMessage(
+                        "file.should.notResideInPackage",
+                        file.declaration.name,
+                        packagePattern,
+                    ),
+                )
+            }
+        }
+        return builder
+    }
+
+    infix fun notResideInAPackage(packagePatterns: List<String>): FilesRuleBuilder {
+        builder.setShould { file, _, violations ->
+            val matches = packagePatterns.any { PatternMatchers.matchesPackage(it, file.declaration.packageName) }
+            if (matches) {
+                violations.add(
+                    getMessage(
+                        "file.should.notResideInPackageAny",
+                        file.declaration.name,
+                        packagePatterns.joinToString(),
+                    ),
+                )
+            }
+        }
+        return builder
+    }
+
+    fun notResideInAPackage(vararg packagePatterns: String): FilesRuleBuilder = notResideInAPackage(packagePatterns.toList())
+
     infix fun resideInAPackage(predicate: (String) -> Boolean): FilesRuleBuilder {
         builder.setShould { file, _, violations ->
             if (!predicate(file.declaration.packageName)) {
@@ -131,6 +164,99 @@ class FilesShould internal constructor(
         }
         return builder
     }
+
+    infix fun resideInAModule(modulePath: String): FilesRuleBuilder {
+        val normalized =
+            if (!modulePath.startsWith(":") && !modulePath.startsWith("**") && modulePath.isNotEmpty()) {
+                ":$modulePath"
+            } else {
+                modulePath
+            }
+        builder.setShould { file, _, violations ->
+            if (file.modulePath != normalized) {
+                violations.add(getMessage("file.should.resideInModule", file.declaration.name, normalized, file.modulePath))
+            }
+        }
+        return builder
+    }
+
+    infix fun resideInAModule(modulePaths: List<String>): FilesRuleBuilder {
+        val normalizedPaths =
+            modulePaths.map { path ->
+                if (!path.startsWith(":") && !path.startsWith("**") && path.isNotEmpty()) {
+                    ":$path"
+                } else {
+                    path
+                }
+            }
+        builder.setShould { file, _, violations ->
+            if (!normalizedPaths.contains(file.modulePath)) {
+                violations.add(getMessage("file.should.resideInModule", file.declaration.name, normalizedPaths.joinToString(), file.modulePath))
+            }
+        }
+        return builder
+    }
+
+    fun resideInAModule(vararg modulePaths: String): FilesRuleBuilder = resideInAModule(modulePaths.toList())
+
+    infix fun notResideInAModule(modulePath: String): FilesRuleBuilder {
+        val normalized =
+            if (!modulePath.startsWith(":") && !modulePath.startsWith("**") && modulePath.isNotEmpty()) {
+                ":$modulePath"
+            } else {
+                modulePath
+            }
+        builder.setShould { file, _, violations ->
+            if (file.modulePath == normalized) {
+                violations.add(getMessage("file.should.notResideInModule", file.declaration.name, normalized))
+            }
+        }
+        return builder
+    }
+
+    infix fun notResideInAModule(modulePaths: List<String>): FilesRuleBuilder {
+        val normalizedPaths =
+            modulePaths.map { path ->
+                if (!path.startsWith(":") && !path.startsWith("**") && path.isNotEmpty()) {
+                    ":$path"
+                } else {
+                    path
+                }
+            }
+        builder.setShould { file, _, violations ->
+            if (normalizedPaths.contains(file.modulePath)) {
+                violations.add(getMessage("file.should.notResideInModuleAny", file.declaration.name, normalizedPaths.joinToString()))
+            }
+        }
+        return builder
+    }
+
+    fun notResideInAModule(vararg modulePaths: String): FilesRuleBuilder = notResideInAModule(modulePaths.toList())
+
+    infix fun containClass(fqName: String): FilesRuleBuilder {
+        builder.setShould { file, _, violations ->
+            val contains = file.declaration.classes.any { it.fqName == fqName || it.name == fqName }
+            if (!contains) {
+                violations.add(getMessage("file.should.containClass", file.declaration.name, fqName))
+            }
+        }
+        return builder
+    }
+
+    infix fun containClass(type: KClass<*>): FilesRuleBuilder = containClass(type.kontureQualifiedName())
+
+    infix fun haveImportOf(importPath: String): FilesRuleBuilder {
+        builder.setShould { file, _, violations ->
+            val hasImport = file.declaration.imports.any { PatternMatchers.matchesPackage(importPath, it) || it == importPath }
+            if (!hasImport) {
+                violations.add(getMessage("file.should.haveImportOf", file.declaration.name, importPath))
+            }
+        }
+        return builder
+    }
+
+    infix fun haveImportOf(type: KClass<*>): FilesRuleBuilder = haveImportOf(type.kontureQualifiedName())
+
 
     infix fun haveNameEndingWith(suffix: String): FilesRuleBuilder {
         builder.setShould { file, _, violations ->
