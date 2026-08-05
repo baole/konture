@@ -43,7 +43,7 @@ class PropertiesRuleBuilder(
      */
     fun printMatchedProperties(
         logger: (PropertyDeclarationContext) -> Unit = {
-            println("[Konture Debug] Matched property: ${it.qualifiedName} (${it.filePath})")
+            println("[Konture Debug] ${getMessage("debug.properties.matched", it.qualifiedName, it.filePath)}")
         },
     ): PropertiesRuleBuilder =
         this.apply {
@@ -59,7 +59,7 @@ class PropertiesRuleBuilder(
      */
     fun printAllProperties(
         logger: (PropertyDeclarationContext) -> Unit = {
-            println("[Konture Debug] Discovered property: ${it.qualifiedName} (${it.filePath})")
+            println("[Konture Debug] ${getMessage("debug.properties.discovered", it.qualifiedName, it.filePath)}")
         },
     ): PropertiesRuleBuilder =
         this.apply {

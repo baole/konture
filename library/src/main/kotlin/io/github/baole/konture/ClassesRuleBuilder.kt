@@ -47,7 +47,7 @@ class ClassesRuleBuilder(
      */
     fun printMatchedClasses(
         logger: (ClassDeclaration) -> Unit = {
-            println("[Konture Debug] Matched class: ${it.fqName} (${it.filePath}, supertypes=${it.supertypes})")
+            println("[Konture Debug] ${getMessage("debug.classes.matched", it.fqName, it.filePath, it.supertypes)}")
         },
     ): ClassesRuleBuilder =
         this.apply {
@@ -63,7 +63,7 @@ class ClassesRuleBuilder(
      */
     fun printAllClasses(
         logger: (ClassDeclaration) -> Unit = {
-            println("[Konture Debug] Discovered class: ${it.fqName} (file=${it.filePath}, supertypes=${it.supertypes})")
+            println("[Konture Debug] ${getMessage("debug.classes.discovered", it.fqName, it.filePath, it.supertypes)}")
         },
     ): ClassesRuleBuilder =
         this.apply {

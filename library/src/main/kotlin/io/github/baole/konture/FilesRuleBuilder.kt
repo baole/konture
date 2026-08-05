@@ -47,7 +47,7 @@ class FilesRuleBuilder(
      */
     fun printMatchedFiles(
         logger: (FileDeclarationContext) -> Unit = {
-            println("[Konture Debug] Matched file: ${it.declaration.name} (${it.declaration.filePath}, package=${it.declaration.packageName})")
+            println("[Konture Debug] ${getMessage("debug.files.matched", it.declaration.name, it.declaration.filePath, it.declaration.packageName)}")
         },
     ): FilesRuleBuilder =
         this.apply {
@@ -63,7 +63,7 @@ class FilesRuleBuilder(
      */
     fun printAllFiles(
         logger: (FileDeclarationContext) -> Unit = {
-            println("[Konture Debug] Discovered file: ${it.declaration.name} (${it.declaration.filePath}, package=${it.declaration.packageName})")
+            println("[Konture Debug] ${getMessage("debug.files.discovered", it.declaration.name, it.declaration.filePath, it.declaration.packageName)}")
         },
     ): FilesRuleBuilder =
         this.apply {

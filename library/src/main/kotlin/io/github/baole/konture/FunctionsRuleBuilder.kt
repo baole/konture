@@ -43,7 +43,7 @@ class FunctionsRuleBuilder(
      */
     fun printMatchedFunctions(
         logger: (FunctionDeclarationContext) -> Unit = {
-            println("[Konture Debug] Matched function: ${it.qualifiedName} (${it.filePath})")
+            println("[Konture Debug] ${getMessage("debug.functions.matched", it.qualifiedName, it.filePath)}")
         },
     ): FunctionsRuleBuilder =
         this.apply {
@@ -59,7 +59,7 @@ class FunctionsRuleBuilder(
      */
     fun printAllFunctions(
         logger: (FunctionDeclarationContext) -> Unit = {
-            println("[Konture Debug] Discovered function: ${it.qualifiedName} (${it.filePath})")
+            println("[Konture Debug] ${getMessage("debug.functions.discovered", it.qualifiedName, it.filePath)}")
         },
     ): FunctionsRuleBuilder =
         this.apply {
