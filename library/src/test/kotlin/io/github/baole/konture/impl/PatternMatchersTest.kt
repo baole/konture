@@ -72,7 +72,12 @@ class PatternMatchersTest {
                 kind = io.github.baole.konture.UsageKind.CALL,
                 targetFqName = "io.github.baole.konture.tests.BannedApi.legacyLog",
                 rawExpression = "BannedApi.legacyLog",
-                possibleTargetFqNames = listOf("legacyLog", "BannedApi.legacyLog", "io.github.baole.konture.tests.BannedApi.legacyLog"),
+                possibleTargetFqNames =
+                    listOf(
+                        "legacyLog",
+                        "BannedApi.legacyLog",
+                        "io.github.baole.konture.tests.BannedApi.legacyLog",
+                    ),
                 filePath = "/src/BannedApi.kt",
                 line = 10,
                 column = 5,
