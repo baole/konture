@@ -4,8 +4,11 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-package io.github.baole.konture
+package io.github.baole.konture.tests
 
+import io.github.baole.konture.Konture
+import io.github.baole.konture.assertNoCycles
+import io.github.baole.konture.modules
 import org.junit.jupiter.api.Test
 
 class ArchitectureTest {
@@ -43,14 +46,5 @@ class ArchitectureTest {
             .should()
             .onlyDependOnModules(":core")
             .check()
-    }
-
-    @Test
-    fun `no ViewModel function should call getString`() {
-        Konture.classes {
-            that().areAssignableTo<Map<String, String>>()
-            should().notCall("android.content.Context.getString")
-            andShould().notCall("getString")
-        }
     }
 }

@@ -139,9 +139,9 @@ internal object PsiParser {
         ktFile.declarations.forEach { declaration ->
             when (declaration) {
                 is KtClassOrObject -> {
-                    DeclarationParser.parseClassOrObject(declaration, file.absolutePath, context)?.let {
-                        classes.add(it)
-                    }
+                    classes.addAll(
+                        DeclarationParser.parseClassOrObjectWithNested(declaration, file.absolutePath, context),
+                    )
                 }
 
                 is KtFunction -> {
