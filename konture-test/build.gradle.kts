@@ -8,9 +8,7 @@ plugins {
     id("konture.kotlin")
 }
 
-if (System.getProperty("archTest") != null) {
-    pluginManager.apply("io.github.baole.konture")
-}
+pluginManager.apply("io.github.baole.konture")
 
 dependencies {
     // Local project dependency ensures compiles always succeed without requiring publishToMavenLocal first
@@ -22,7 +20,5 @@ dependencies {
 
 tasks.test {
     useJUnitPlatform()
-    onlyIf {
-        System.getProperty("archTest") != null
-    }
+    dependsOn(":core:publishToMavenLocal", ":plugin-gradle:publishToMavenLocal")
 }

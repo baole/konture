@@ -32,6 +32,24 @@ import org.jetbrains.kotlin.psi.KtTreeVisitorVoid
 import org.jetbrains.kotlin.psi.KtTypeReference
 
 internal object DeclarationParser {
+    fun parseClassOrObjectWithNested(
+        classOrObject: KtClassOrObject,
+        filePath: String,
+        context: TypeResolutionContext,
+    ): List<ClassDeclaration> {
+        val parsed = parseClassOrObject(classOrObject, filePath, context) ?: return emptyList()
+        val result = mutableListOf<ClassDeclaration>()
+        result.add(parsed)
+
+        val classContext = context.withClassScope(parsed.fqName)
+
+        classOrObject.declarations.filterIsInstance<KtClassOrObject>().forEach { nested ->
+            result.addAll(parseClassOrObjectWithNested(nested, filePath, classContext))
+        }
+
+        return result
+    }
+
     fun parseClassOrObject(
         classOrObject: KtClassOrObject,
         filePath: String,
@@ -298,8 +316,14 @@ internal object DeclarationParser {
     }
 
     private fun KtModifierListOwner.extractModifiers(): Set<Modifier> {
-        val modifierList = this.modifierList ?: return emptySet()
         val modifiers = mutableSetOf<Modifier>()
+        if (this is KtObjectDeclaration) {
+            if (this.isCompanion()) {
+                modifiers.add(Modifier.COMPANION)
+            }
+            modifiers.add(Modifier.OBJECT)
+        }
+        val modifierList = this.modifierList ?: return modifiers
         if (modifierList.hasModifier(KtTokens.SEALED_KEYWORD)) modifiers.add(Modifier.SEALED)
         if (modifierList.hasModifier(KtTokens.OPEN_KEYWORD)) modifiers.add(Modifier.OPEN)
         if (modifierList.hasModifier(
@@ -326,12 +350,6 @@ internal object DeclarationParser {
             )
         ) {
             modifiers.add(Modifier.LATEINIT)
-        }
-        if (this is KtObjectDeclaration) {
-            if (this.isCompanion()) {
-                modifiers.add(Modifier.COMPANION)
-            }
-            modifiers.add(Modifier.OBJECT)
         }
         return modifiers
     }

@@ -159,6 +159,7 @@ internal fun ClassDeclaration.isAssignableTo(
         return false
     }
 
+    if (matchesSupertype(this.fqName) || matchesSupertype(this.name)) return true
     if (supertypes.any(::matchesSupertype)) return true
 
     for (directSuper in supertypes) {

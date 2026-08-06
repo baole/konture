@@ -1,5 +1,6 @@
 /*
- * Copyright 2026 Bao Le Duc
+ * Copyright 2026 The Konture Contributors
+ * Contributors: Bao Le Duc (@baole)
  * SPDX-License-Identifier: Apache-2.0
  */
 
@@ -62,5 +63,30 @@ class PatternMatchersTest {
         assertTrue(PatternMatchers.matchesSimpleGlob("GetUserUseCase", "GetUserUseCase"))
         assertFalse(PatternMatchers.matchesSimpleGlob("*UseCase", "GetUserUseCaseImpl"))
         assertTrue(PatternMatchers.matchesSimpleGlob("*", "Anything"))
+    }
+
+    @Test
+    fun testIsCallUsageMatchPackageMismatch() {
+        val usage =
+            io.github.baole.konture.SourceUsage(
+                kind = io.github.baole.konture.UsageKind.CALL,
+                targetFqName = "io.github.baole.konture.tests.BannedApi.legacyLog",
+                rawExpression = "BannedApi.legacyLog",
+                possibleTargetFqNames =
+                    listOf(
+                        "legacyLog",
+                        "BannedApi.legacyLog",
+                        "io.github.baole.konture.tests.BannedApi.legacyLog",
+                    ),
+                filePath = "/src/BannedApi.kt",
+                line = 10,
+                column = 5,
+            )
+
+        // Matching package should return true
+        assertTrue(PatternMatchers.isCallUsageMatch(usage, "io.github.baole.konture.tests.BannedApi.legacyLog"))
+
+        // Mismatched package should return false
+        assertFalse(PatternMatchers.isCallUsageMatch(usage, "io.github.baole.konture.testsx.BannedApi.legacyLog"))
     }
 }

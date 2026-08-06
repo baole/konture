@@ -220,39 +220,51 @@ internal object PatternMatchers {
     ): Boolean {
         if (usage.kind != io.github.baole.konture.UsageKind.CALL && usage.kind != io.github.baole.konture.UsageKind.CLASS_REFERENCE) return false
 
+        val fqPkg = extractPackage(fqName)
+        val usagePkg = extractPackage(usage.targetFqName)
+        if (usagePkg != null && fqPkg != null && usagePkg != fqPkg) {
+            return false
+        }
+
         val target = usage.targetFqName
         val raw = usage.rawExpression
-        val candidates = (listOf(target, raw) + usage.possibleTargetFqNames).filter { it.isNotEmpty() }
+        val candidates = (listOf(target, raw) + usage.possibleTargetFqNames).filter { it.isNotEmpty() }.distinct()
 
         if (!fqName.contains('.')) {
             for (candidate in candidates) {
-                if (candidate == fqName || candidate.endsWith(".$fqName")) return true
+                if (candidate == fqName || candidate.endsWith(".$fqName") || candidate.contains(".$fqName.")) return true
             }
             return false
         }
 
         for (candidate in candidates) {
+            val candPkg = extractPackage(candidate)
+            if (candPkg != null && fqPkg != null && candPkg != fqPkg) {
+                continue
+            }
+
             if (candidate == fqName) return true
             if (candidate.endsWith(".$fqName")) return true
-
             if (candidate.startsWith("$fqName.")) return true
-
-            if (candidate.contains('.')) {
-                val candidateMethod = candidate.substringAfterLast('.')
-                val fqNameMethod = fqName.substringAfterLast('.')
-
-                if (candidateMethod == fqNameMethod) {
-                    val candidateReceiver = candidate.substringBeforeLast('.').substringAfterLast('.')
-                    val fqNameClass = fqName.substringBeforeLast('.').substringAfterLast('.')
-                    if (candidateReceiver.equals(fqNameClass, ignoreCase = true)) return true
-                }
-
-                val candidateReceiver = candidate.substringBeforeLast('.').substringAfterLast('.')
-                val fqNameClass = fqName.substringAfterLast('.')
-                if (candidateReceiver.equals(fqNameClass, ignoreCase = true)) return true
-            }
+            if (fqName.endsWith(".$candidate")) return true
+            if (candidate.contains(".$fqName.")) return true
         }
 
         return false
+    }
+
+    private fun extractPackage(fqName: String): String? {
+        val clean = fqName.substringBefore("<").trim()
+        if (!clean.contains('.')) return null
+
+        val segments = clean.split('.')
+        val classIndex = segments.indexOfFirst { it.isNotEmpty() && it[0].isUpperCase() }
+        return if (classIndex > 0) {
+            segments.take(classIndex).joinToString(".")
+        } else if (classIndex == 0) {
+            null
+        } else {
+            segments.dropLast(1).joinToString(".")
+        }
     }
 }

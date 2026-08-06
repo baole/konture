@@ -1,20 +1,11 @@
 buildscript {
-    val isKonturePluginRequested =
-        System.getProperty("archTest") != null ||
-            gradle.startParameter.taskNames.any { taskName ->
-                taskName.contains("generateArchitectureLayout") ||
-                    taskName.contains("generateDependencyGraph")
-            }
-
     repositories {
         mavenLocal()
         google()
         mavenCentral()
     }
     dependencies {
-        if (isKonturePluginRequested) {
-            classpath("io.github.baole.konture:plugin-gradle:0.7.6")
-        }
+        classpath("io.github.baole.konture:plugin-gradle:0.7.6")
     }
 }
 
@@ -30,16 +21,7 @@ plugins {
     `maven-publish`
 }
 
-val isKonturePluginRequested =
-    System.getProperty("archTest") != null ||
-        gradle.startParameter.taskNames.any { taskName ->
-            taskName.contains("generateArchitectureLayout") ||
-                taskName.contains("generateDependencyGraph")
-        }
-
-if (isKonturePluginRequested) {
-    pluginManager.apply("io.github.baole.konture")
-}
+pluginManager.apply("io.github.baole.konture")
 
 allprojects {
     repositories {
