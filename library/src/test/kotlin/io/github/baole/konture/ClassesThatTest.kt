@@ -415,14 +415,15 @@ internal class ClassesThatTest : KontureScopeTestFixture() {
         val predAssign = ruleAssign.getThatPredicate()!!
         assertTrue(predAssign(child))
         assertTrue(predAssign(parent))
-        assertFalse(predAssign(grandParent))
+        assertTrue(predAssign(grandParent))
 
         val ruleAssignAny = ClassesRuleBuilder(hierarchyGraph).that().areAssignableToAnyOf("GrandParent", "NonExistent")
         assertTrue(ruleAssignAny.getThatPredicate()!!(child))
 
         val ruleAssignAll = ClassesRuleBuilder(hierarchyGraph).that().areAssignableToAllOf("Parent", "GrandParent")
         assertTrue(ruleAssignAll.getThatPredicate()!!(child))
-        assertFalse(ruleAssignAll.getThatPredicate()!!(parent))
+        assertTrue(ruleAssignAll.getThatPredicate()!!(parent))
+        assertFalse(ruleAssignAll.getThatPredicate()!!(grandParent))
 
         // areAssignableFrom checks
         val ruleAssignableFromChild = ClassesRuleBuilder(hierarchyGraph).that().areAssignableFrom("Child")
