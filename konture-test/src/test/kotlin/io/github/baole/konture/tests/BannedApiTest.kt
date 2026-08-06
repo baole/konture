@@ -14,12 +14,19 @@ import org.junit.jupiter.api.assertThrows
 
 class BannedApiTest {
     @Test
-    fun `BannedViewModel calling banned API fails architecture check`() {
+    fun `BannedViewModel no call banned API`() {
+        Konture.classes()
+            .that().areAssignableTo<BannedViewModel>()
+            .should().notCall("io.github.baole.konture.testsx.BannedApi.legacyLog")
+            .check()
+    }
+    @Test
+    fun `BannedViewModel calling banned API violation`() {
         val error =
             assertThrows<AssertionError> {
                 Konture.classes()
                     .that().areAssignableTo<BannedViewModel>()
-                    .should().notCall("io.github.baole.konture.sample.BannedApi.legacyLog")
+                    .should().notCall("io.github.baole.konture.tests.BannedApi.legacyLog")
                     .check()
             }
         error.printStackTrace()
