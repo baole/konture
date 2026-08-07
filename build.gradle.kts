@@ -5,7 +5,7 @@ buildscript {
         mavenCentral()
     }
     dependencies {
-        classpath("io.github.baole.konture:plugin-gradle:0.7.6")
+        classpath("io.github.baole.konture:plugin-gradle:0.7.7")
     }
 }
 

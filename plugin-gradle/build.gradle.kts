@@ -23,7 +23,7 @@ private val groupId = "io.github.baole.konture"
 
 description = descriptionText
 group = groupId
-version = "0.7.6"
+version = "0.7.7"
 
 gradlePlugin {
     website.set("https://baole.github.io/konture")
