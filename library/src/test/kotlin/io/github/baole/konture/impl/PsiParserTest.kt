@@ -541,6 +541,33 @@ class PsiParserTest {
     }
 
     @Test
+    fun `resolves implicit default java lang and kotlin types`() {
+        val file =
+            File(tempDir, "ImplicitDefaultImports.kt").apply {
+                writeText(
+                    """
+                    package app
+
+                    class ProcessRunner {
+                        fun createProcess(): ProcessBuilder = ProcessBuilder(listOf("echo"))
+                        fun runThread(): Thread = Thread()
+                        fun formatText(): StringBuilder = StringBuilder()
+                    }
+                    """.trimIndent(),
+                )
+            }
+
+        val runner = PsiParser.parseFile(file)!!.classes.single { it.name == "ProcessRunner" }
+        val createProcess = runner.functions.single { it.name == "createProcess" }
+        val runThread = runner.functions.single { it.name == "runThread" }
+        val formatText = runner.functions.single { it.name == "formatText" }
+
+        assertEquals("java.lang.ProcessBuilder", createProcess.resolvedReturnType)
+        assertEquals("java.lang.Thread", runThread.resolvedReturnType)
+        assertEquals("kotlin.text.StringBuilder", formatText.resolvedReturnType)
+    }
+
+    @Test
     fun `resolves Kotlin default imported annotations`() {
         val file =
             File(tempDir, "DefaultAnnotations.kt").apply {
