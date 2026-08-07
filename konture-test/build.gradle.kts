@@ -5,14 +5,15 @@
  */
 
 plugins {
-    id("konture.kotlin")
+    alias(libs.plugins.kotlin.jvm)
+    alias(libs.plugins.konture)
 }
 
-pluginManager.apply("io.github.baole.konture")
+
 
 dependencies {
-    // Local project dependency ensures compiles always succeed without requiring publishToMavenLocal first
-    testImplementation(project(":library"))
+    // Reference published Maven coordinates from mavenLocal()
+    testImplementation("io.github.baole:konture:${libs.versions.konture.get()}")
 
     testImplementation(libs.junit.jupiter)
     testRuntimeOnly(libs.junit.platform.launcher)
@@ -20,5 +21,4 @@ dependencies {
 
 tasks.test {
     useJUnitPlatform()
-    dependsOn(":core:publishToMavenLocal", ":plugin-gradle:publishToMavenLocal")
 }

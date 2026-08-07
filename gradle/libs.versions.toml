@@ -39,4 +39,6 @@ ktlint = { id = "org.jlleitschuh.gradle.ktlint", version.ref = "ktlint" }
 gradle-publish = { id = "com.gradle.plugin-publish", version.ref = "gradle-publish" }
 spotless = { id = "com.diffplug.spotless", version.ref = "spotless" }
 nmcp = { id = "com.gradleup.nmcp", version.ref = "nmcp" }
+konture = { id = "io.github.baole.konture", version.ref = "konture" }
+
 

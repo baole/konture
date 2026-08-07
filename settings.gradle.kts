@@ -22,4 +22,7 @@ rootProject.name = "konture"
 include("core")
 include("library")
 include("plugin-gradle")
-include("konture-test")
+
+includeBuild("konture-test")
+
+
