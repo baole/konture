@@ -73,12 +73,25 @@ private class SymbolResolver(
         }
 
         val explicit = imports.filter { !it.endsWith(".*") && it.substringAfterLast('.') == raw }
-        if (explicit.size == 1) return explicit.single() to emptyList()
+        if (explicit.size == 1) {
+            val fqName = explicit.single()
+            resolveTypeAlias(fqName)?.let { aliasDef ->
+                val context =
+                    TypeResolutionContext(
+                        packageName = aliasDef.packageName,
+                        imports = aliasDef.imports,
+                        importAliases = aliasDef.importAliases,
+                        isClassDeclared = isClassDeclared,
+                        resolveTypeAlias = resolveTypeAlias,
+                    )
+                val resolvedTarget = TypeResolver.resolveRawType(aliasDef.underlyingType, context)
+                if (resolvedTarget != null) return resolvedTarget to emptyList()
+            }
+            return fqName to emptyList()
+        }
         if (explicit.size > 1) return null to explicit
 
         if (isClassDeclared(samePackageFqName)) return samePackageFqName to emptyList()
-
-        KotlinDefaultTypes.bySimpleName[raw]?.let { return it to emptyList() }
 
         val wildcard = imports.filter { it.endsWith(".*") }.map { "${it.removeSuffix(".*")}.$raw" }
         val declaredWildcardMatches = wildcard.filter(isClassDeclared)
@@ -86,6 +99,8 @@ private class SymbolResolver(
             if (declaredWildcardMatches.size == 1) return declaredWildcardMatches.single() to emptyList()
             return null to declaredWildcardMatches
         }
+
+        KotlinDefaultTypes.bySimpleName[raw]?.let { return it to emptyList() }
 
         if (wildcard.size == 1) return wildcard.single() to emptyList()
         if (wildcard.size > 1) return null to wildcard
@@ -96,9 +111,6 @@ private class SymbolResolver(
             val declaredDefaultMatches = defaultWildcards.filter(isClassDeclared)
             if (declaredDefaultMatches.size == 1) return declaredDefaultMatches.single() to emptyList()
             if (declaredDefaultMatches.size > 1) return null to declaredDefaultMatches
-            if ("java.lang" in KotlinDefaultTypes.defaultPackages) {
-                return "java.lang.$raw" to emptyList()
-            }
         }
 
         return null to emptyList()

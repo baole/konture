@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-package io.github.baole.konture.tests
+package io.github.baole.konture.tests.nestedTypes
 
 import io.github.baole.konture.Konture
 import io.github.baole.konture.Modifier
@@ -63,7 +63,7 @@ class NestedTypesTest {
             .that().haveName("Level3Interface")
             .should().beInterfaces()
             .andShould().beAssignableTo(NestedType::class)
-            .andShould().resideInAPackage("io.github.baole.konture.tests")
+            .andShould().resideInAPackage("io.github.baole.konture.tests.nestedTypes")
             .check()
     }
 }

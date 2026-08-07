@@ -57,6 +57,28 @@ internal object KotlinDefaultTypes {
             "Suppress" to "kotlin.Suppress",
             "SinceKotlin" to "kotlin.SinceKotlin",
             "Annotation" to "kotlin.Annotation",
+            // Primitive Arrays
+            "IntArray" to "kotlin.IntArray",
+            "LongArray" to "kotlin.LongArray",
+            "ShortArray" to "kotlin.ShortArray",
+            "ByteArray" to "kotlin.ByteArray",
+            "DoubleArray" to "kotlin.DoubleArray",
+            "FloatArray" to "kotlin.FloatArray",
+            "CharArray" to "kotlin.CharArray",
+            "BooleanArray" to "kotlin.BooleanArray",
+            "UByteArray" to "kotlin.UByteArray",
+            "UShortArray" to "kotlin.UShortArray",
+            "UIntArray" to "kotlin.UIntArray",
+            "ULongArray" to "kotlin.ULongArray",
+            // Common Exceptions
+            "RuntimeException" to "kotlin.RuntimeException",
+            "Error" to "kotlin.Error",
+            "AssertionError" to "kotlin.AssertionError",
+            "NoSuchElementException" to "kotlin.NoSuchElementException",
+            "ConcurrentModificationException" to "kotlin.ConcurrentModificationException",
+            "NumberFormatException" to "kotlin.NumberFormatException",
+            "ArithmeticException" to "kotlin.ArithmeticException",
+            "ClassCastException" to "kotlin.ClassCastException",
         )
 
     private val annotationTypes: Map<String, String> =
