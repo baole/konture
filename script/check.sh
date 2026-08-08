@@ -19,7 +19,7 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 cd "$SCRIPT_DIR/.."
 
 # Step 1: Run unified Gradle checks (KtLint, Detekt, Tests, Coverage Thresholds)
-echo -e "\n${BLUE}[1/3] Running unified Gradle checks (lint, detekt, tests, coverage)...${NC}"
+echo -e "\n${BLUE}[1/4] Running unified Gradle checks (lint, detekt, tests, coverage)...${NC}"
 if ./gradlew -q check --continue; then
     echo -e "${GREEN}[SUCCESS] All Gradle quality and coverage verification checks passed!${NC}"
 else
@@ -27,8 +27,17 @@ else
     exit 1
 fi
 
-# Step 4: Build Gradle Subprojects
-echo -e "\n${BLUE}[4/5] Building Gradle subprojects...${NC}"
+# Step 2: Run standalone konture-test module tests
+echo -e "\n${BLUE}[2/4] Running standalone konture-test module tests...${NC}"
+if ./gradlew -q :runKontureTest; then
+    echo -e "${GREEN}[SUCCESS] Standalone konture-test module tests passed!${NC}"
+else
+    echo -e "${RED}[ERROR] Standalone konture-test module tests failed.${NC}"
+    exit 1
+fi
+
+# Step 3: Build Gradle Subprojects
+echo -e "\n${BLUE}[3/4] Building Gradle subprojects...${NC}"
 if ./gradlew build -x test; then
     echo -e "${GREEN}[SUCCESS] Gradle build completed successfully!${NC}"
 else
@@ -36,8 +45,8 @@ else
     exit 1
 fi
 
-# Step 3: Build Maven Plugin
-echo -e "\n${BLUE}[3/3] Building Maven plugin...${NC}"
+# Step 4: Build Maven Plugin
+echo -e "\n${BLUE}[4/4] Building Maven plugin...${NC}"
 if ./gradlew -q :core:publishToMavenLocal && mvn clean compile -f plugin-maven/pom.xml; then
     echo -e "${GREEN}[SUCCESS] Maven plugin compilation passed!${NC}"
 else
