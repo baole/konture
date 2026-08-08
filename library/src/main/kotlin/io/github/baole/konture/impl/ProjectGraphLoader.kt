@@ -403,36 +403,18 @@ internal class ProjectGraphLoader {
      */
     fun loadFromResource(resourcePath: String = "/konture/layout_v2.json"): ProjectGraph {
         val stream = javaClass.getResourceAsStream(resourcePath)
-        if (stream != null) {
-            KontureLogger.log(LogLevel.DEBUG, "Loading layout_v2.json from classpath resources: $resourcePath")
-            val depsPath = resourcePath.replace("layout_v2.json", "dependencies.json")
-            return loadFromStream(
-                inputStream = stream,
-                depsStreamLoader = { javaClass.getResourceAsStream(depsPath) },
+        if (stream == null) {
+            throw IllegalArgumentException(
+                "Konture layout_v2.json was not found at $resourcePath. " +
+                    "Ensure that the Konture Gradle plugin is applied and that your project is built before running the architecture tests.",
             )
         }
 
-        // Fallback: search for layout_v2.json in the build directory of the build root
-        val buildRoot = findBuildRoot()
-        val fallbackFile = File(buildRoot, "build/konture/layout_v2.json")
-        KontureLogger.log(
-            LogLevel.WARNING,
-            "layout_v2.json not found in classpath resources. Searching at fallback location: ${fallbackFile.absolutePath}",
-        )
-        if (fallbackFile.exists()) {
-            KontureLogger.log(LogLevel.INFO, "Loaded layout_v2.json from fallback file: ${fallbackFile.absolutePath}")
-            val fallbackDepsFile = File(buildRoot, "build/konture/dependencies.json")
-            return loadFromStream(
-                inputStream = fallbackFile.inputStream(),
-                depsStreamLoader = {
-                    if (fallbackDepsFile.exists()) fallbackDepsFile.inputStream() else null
-                },
-            )
-        }
-
-        throw IllegalArgumentException(
-            "Konture layout_v2.json was not found at $resourcePath or ${fallbackFile.absolutePath}. " +
-                "Run ./gradlew generateArchitectureLayout, then rerun the architecture tests.",
+        KontureLogger.log(LogLevel.DEBUG, "Loading layout_v2.json from classpath resources: $resourcePath")
+        val depsPath = resourcePath.replace("layout_v2.json", "dependencies.json")
+        return loadFromStream(
+            inputStream = stream,
+            depsStreamLoader = { javaClass.getResourceAsStream(depsPath) },
         )
     }
 

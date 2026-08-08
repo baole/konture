@@ -62,25 +62,10 @@ allprojects {
     }
 }
 
-val copyLayoutToTest by tasks.registering(Copy::class) {
-    if (applyPlugin) {
-        dependsOn("generateArchitectureLayout")
-    }
-    from(layout.buildDirectory.dir("konture"))
-    into(file("konture-test/build/konture"))
-}
-
-tasks.register<GradleBuild>("runKontureTest") {
+tasks.register("runKontureTest") {
     group = "Verification"
     description = "Runs tests in the independent konture-test module."
-    dir = file("konture-test")
-    tasks = listOf("test")
-    dependsOn(
-        ":core:publishToMavenLocal",
-        ":library:publishToMavenLocal",
-        ":plugin-gradle:publishToMavenLocal",
-        copyLayoutToTest
-    )
+    dependsOn(":konture-test:test")
 }
 
 tasks.named("check") {

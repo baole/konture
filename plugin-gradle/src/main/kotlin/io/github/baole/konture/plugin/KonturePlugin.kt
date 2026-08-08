@@ -35,13 +35,17 @@ import java.io.File
  * 2. **Consumer Role (Subprojects)**: Exposes the `konture` DSL block via [KontureExtension] to
  *    allow dedicated test modules to consume the generated layout schema safely in isolated projects.
  */
+@Suppress("LargeClass")
 class KonturePlugin : Plugin<Project> {
     @Suppress("CyclomaticComplexMethod")
     override fun apply(project: Project) {
         val extension = project.extensions.create(EXTENSION_NAME, KontureExtension::class.java, project)
 
-        // Automatically configure consumer layout sharing on subprojects
-        if (project != project.rootProject) {
+        val isConsumer = project != project.rootProject
+        val isProducer = project == project.rootProject
+
+        // Automatically configure consumer layout sharing on subprojects or included builds
+        if (isConsumer) {
             setupConsumerLayout(project)
         }
 
@@ -49,7 +53,7 @@ class KonturePlugin : Plugin<Project> {
             task.group = TASK_GROUP_VERIFICATION
             task.description = TASK_DESC_BASELINE
             task.dependsOn(project.tasks.withType(Test::class.java))
-            if (project == project.rootProject) {
+            if (isProducer) {
                 project.subprojects.forEach { subproject ->
                     task.dependsOn(subproject.tasks.matching { t -> t.name == TASK_GENERATE_BASELINE })
                 }
@@ -110,7 +114,7 @@ class KonturePlugin : Plugin<Project> {
         }
 
         // Root/Producer logic
-        if (project == project.rootProject) {
+        if (isProducer) {
             val generateTask =
                 project.tasks.register(TASK_GENERATE_LAYOUT, GenerateArchitectureLayout::class.java) { task ->
                     task.outputFile.convention(project.layout.buildDirectory.file(PATH_LAYOUT_V2))
@@ -476,9 +480,13 @@ class KonturePlugin : Plugin<Project> {
                 .filter { it.isNotEmpty() }
                 .toSet()
         val includedBuildGroups =
-            proj.gradle.includedBuilds
-                .map { it.name }
-                .toSet()
+            try {
+                proj.gradle.includedBuilds
+                    .map { it.name }
+                    .toSet()
+            } catch (e: Exception) {
+                emptySet()
+            }
 
         proj.configurations.forEach { config ->
             config.dependencies.forEach { dep ->
@@ -610,8 +618,20 @@ class KonturePlugin : Plugin<Project> {
             }
 
         // Add dependencies on the root project
-        project.dependencies.add(CONFIG_LAYOUT_INCOMING, project.dependencies.project(mapOf("path" to ":")))
-        project.dependencies.add(CONFIG_DEPS_INCOMING, project.dependencies.project(mapOf("path" to ":")))
+        val layoutProj =
+            project.dependencies.project(
+                mapOf(
+                    "path" to ":",
+                ),
+            )
+        val depsProj =
+            project.dependencies.project(
+                mapOf(
+                    "path" to ":",
+                ),
+            )
+        project.dependencies.add(CONFIG_LAYOUT_INCOMING, layoutProj)
+        project.dependencies.add(CONFIG_DEPS_INCOMING, depsProj)
 
         // Copy only the matching v2 layout and clear layouts from previously checked-out branches.
         val cleanLayoutResources =
@@ -640,8 +660,7 @@ class KonturePlugin : Plugin<Project> {
             project.tasks.register(TASK_CLEAN_DEPS_RESOURCE, Delete::class.java) { delete ->
                 delete.delete(project.layout.buildDirectory.file("$PATH_RESOURCES_TEST_KONTURE/$FILE_DEPENDENCIES"))
             }
-        val rootDetector =
-            project.rootProject.tasks.findByName(TASK_DETECT_RULES) as? DetectExternalDependencyRules
+        val rootDetector = project.rootProject.tasks.findByName(TASK_DETECT_RULES) as? DetectExternalDependencyRules
         rootDetector?.testSources?.from(project.fileTree(DIR_SRC) { pattern -> pattern.include(GLOB_KT) })
         copyDepsTask.configure { task ->
             task.dependsOn(cleanDependencyResource)
