@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-package io.github.baole.konture.tests
+package io.github.baole.konture.tests.nestedTypes
 
 interface NestedType
 

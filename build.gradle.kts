@@ -1,3 +1,11 @@
+/*
+ * Copyright 2026 The Konture Contributors
+ * Contributors: Bao Le Duc (@baole)
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+val applyPlugin = System.getProperty("konture.applyPluginInternal") == "true"
+
 buildscript {
     repositories {
         mavenLocal()
@@ -5,7 +13,23 @@ buildscript {
         mavenCentral()
     }
     dependencies {
-        classpath("io.github.baole.konture:plugin-gradle:0.7.6")
+
+        val applyPlugin = System.getProperty("konture.applyPluginInternal") == "true"
+
+        if (applyPlugin) {
+            val versionFile = file("gradle/libs.versions.toml")
+            if (versionFile.exists()) {
+                val kontureVersion = versionFile.readLines()
+                    .firstOrNull { it.trim().startsWith("konture =") }
+                    ?.substringAfter("=")
+                    ?.replace("\"", "")
+                    ?.trim()
+
+                if (kontureVersion != null) {
+                    classpath("io.github.baole.konture:plugin-gradle:$kontureVersion")
+                }
+            }
+        }
     }
 }
 
@@ -21,7 +45,9 @@ plugins {
     `maven-publish`
 }
 
-pluginManager.apply("io.github.baole.konture")
+if (applyPlugin) {
+    pluginManager.apply("io.github.baole.konture")
+}
 
 allprojects {
     repositories {
@@ -31,3 +57,14 @@ allprojects {
     }
 }
 
+tasks.register("runKontureTest") {
+    group = "Verification"
+    description = "Runs tests in the independent konture-test module."
+    dependsOn(":konture-test:test")
+}
+
+tasks.named("check") {
+    if (applyPlugin) {
+        dependsOn("runKontureTest")
+    }
+}

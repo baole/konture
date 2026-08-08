@@ -5,13 +5,11 @@
  */
 
 plugins {
-    id("konture.kotlin")
+    alias(libs.plugins.kotlin.jvm)
 }
 
-pluginManager.apply("io.github.baole.konture")
-
 dependencies {
-    // Local project dependency ensures compiles always succeed without requiring publishToMavenLocal first
+    // Direct, standard subproject dependency ensures compiles and execution always succeed natively
     testImplementation(project(":library"))
 
     testImplementation(libs.junit.jupiter)
@@ -20,5 +18,27 @@ dependencies {
 
 tasks.test {
     useJUnitPlatform()
-    dependsOn(":core:publishToMavenLocal", ":plugin-gradle:publishToMavenLocal")
+    onlyIf { System.getProperty("konture.applyPluginInternal") == "true" }
+}
+
+
+
+
+tasks.processTestResources {
+    val parentLayout = file("../build/konture/layout_v2.json")
+    val parentDeps = file("../build/konture/dependencies.json")
+
+    if (rootProject.pluginManager.hasPlugin("io.github.baole.konture")) {
+        dependsOn(":generateArchitectureLayout")
+        if (rootProject.tasks.findByName("generateDependencyGraph") != null) {
+            dependsOn(":generateDependencyGraph")
+        }
+
+        from(parentLayout) {
+            into("konture")
+        }
+        from(files(parentDeps)) {
+            into("konture")
+        }
+    }
 }

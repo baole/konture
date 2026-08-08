@@ -32,9 +32,10 @@ internal object UsageExtractor {
         importAliases: Map<String, String>,
         filePath: String,
         isClassDeclared: (String) -> Boolean,
+        resolveTypeAlias: (String) -> TypeAliasDefinition? = { null },
     ): List<SourceUsage> {
         val collector = UsageCollector(content, filePath)
-        val resolver = SymbolResolver(packageName, imports, importAliases, isClassDeclared)
+        val resolver = SymbolResolver(packageName, imports, importAliases, isClassDeclared, resolveTypeAlias)
 
         file.accept(UsageVisitor(collector, resolver))
         return collector.usages
@@ -46,6 +47,7 @@ private class SymbolResolver(
     private val imports: List<String>,
     private val importAliases: Map<String, String>,
     private val isClassDeclared: (String) -> Boolean,
+    private val resolveTypeAlias: (String) -> TypeAliasDefinition? = { null },
 ) {
     @Suppress("ReturnCount")
     fun resolve(
@@ -56,14 +58,40 @@ private class SymbolResolver(
         if (element.parents.filterIsInstance<KtNamedFunction>().any { it.name == raw }) return null to emptyList()
         importAliases[raw]?.let { return it to emptyList() }
 
+        val samePackageFqName = if (packageName.isNotEmpty()) "$packageName.$raw" else raw
+        resolveTypeAlias(samePackageFqName)?.let { aliasDef ->
+            val context =
+                TypeResolutionContext(
+                    packageName = aliasDef.packageName,
+                    imports = aliasDef.imports,
+                    importAliases = aliasDef.importAliases,
+                    isClassDeclared = isClassDeclared,
+                    resolveTypeAlias = resolveTypeAlias,
+                )
+            val resolvedTarget = TypeResolver.resolveRawType(aliasDef.underlyingType, context)
+            if (resolvedTarget != null) return resolvedTarget to emptyList()
+        }
+
         val explicit = imports.filter { !it.endsWith(".*") && it.substringAfterLast('.') == raw }
-        if (explicit.size == 1) return explicit.single() to emptyList()
+        if (explicit.size == 1) {
+            val fqName = explicit.single()
+            resolveTypeAlias(fqName)?.let { aliasDef ->
+                val context =
+                    TypeResolutionContext(
+                        packageName = aliasDef.packageName,
+                        imports = aliasDef.imports,
+                        importAliases = aliasDef.importAliases,
+                        isClassDeclared = isClassDeclared,
+                        resolveTypeAlias = resolveTypeAlias,
+                    )
+                val resolvedTarget = TypeResolver.resolveRawType(aliasDef.underlyingType, context)
+                if (resolvedTarget != null) return resolvedTarget to emptyList()
+            }
+            return fqName to emptyList()
+        }
         if (explicit.size > 1) return null to explicit
 
-        val samePackageFqName = if (packageName.isNotEmpty()) "$packageName.$raw" else raw
         if (isClassDeclared(samePackageFqName)) return samePackageFqName to emptyList()
-
-        KotlinDefaultTypes.bySimpleName[raw]?.let { return it to emptyList() }
 
         val wildcard = imports.filter { it.endsWith(".*") }.map { "${it.removeSuffix(".*")}.$raw" }
         val declaredWildcardMatches = wildcard.filter(isClassDeclared)
@@ -72,8 +100,19 @@ private class SymbolResolver(
             return null to declaredWildcardMatches
         }
 
+        KotlinDefaultTypes.bySimpleName[raw]?.let { return it to emptyList() }
+
         if (wildcard.size == 1) return wildcard.single() to emptyList()
         if (wildcard.size > 1) return null to wildcard
+
+        // Fallback to default imported packages (e.g., java.lang.*)
+        if (raw.firstOrNull()?.isUpperCase() == true) {
+            val defaultWildcards = KotlinDefaultTypes.defaultPackages.map { "$it.$raw" }
+            val declaredDefaultMatches = defaultWildcards.filter(isClassDeclared)
+            if (declaredDefaultMatches.size == 1) return declaredDefaultMatches.single() to emptyList()
+            if (declaredDefaultMatches.size > 1) return null to declaredDefaultMatches
+        }
+
         return null to emptyList()
     }
 

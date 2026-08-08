@@ -1,3 +1,10 @@
+val applyPlugin = System.getProperty("idea.active") == "true" ||
+    System.getProperty("idea.sync.active") == "true" ||
+    System.getProperty("konture.applyPlugin") == "true" ||
+    System.getenv("KONTURE_APPLY_PLUGIN") == "true"
+
+System.setProperty("konture.applyPluginInternal", applyPlugin.toString())
+
 pluginManagement {
     includeBuild("build-logic")
     repositories {
@@ -22,4 +29,5 @@ rootProject.name = "konture"
 include("core")
 include("library")
 include("plugin-gradle")
+
 include("konture-test")

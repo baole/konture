@@ -134,6 +134,7 @@ internal object PsiParser {
                 importAliases,
                 file.absolutePath,
                 isClassDeclared,
+                resolveTypeAlias,
             )
 
         ktFile.declarations.forEach { declaration ->

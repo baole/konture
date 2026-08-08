@@ -1,5 +1,6 @@
 /*
- * Copyright 2026 Bao Le Duc
+ * Copyright 2026 The Konture Contributors
+ * Contributors: Bao Le Duc (@baole)
  * SPDX-License-Identifier: Apache-2.0
  */
 
@@ -97,32 +98,30 @@ internal object TypeResolver {
             return samePackageFqName + remainingSegments
         }
 
-        // 4. Default Imports Check
-        KotlinDefaultTypes.bySimpleName[firstSegment]?.let { return it + remainingSegments }
-
-        // 5. Lowercase check (variable or primitive/generic)
-        if (firstSegment.isNotEmpty() && firstSegment.first().isLowerCase()) return rawType
-
-        // 6. Wildcard Imports Matching Declared Classes
+        // 4. Wildcard Imports Matching Declared Classes
         val wildcardImports =
             context.imports.filter {
                 it.endsWith(
                     ".*",
                 )
             }.map { "${it.removeSuffix(".*")}.$firstSegment" }
-        if (wildcardImports.isNotEmpty()) {
-            val declaredWildcardMatches =
-                wildcardImports.filter {
-                    context.isClassDeclared(it) || context.resolveTypeAlias(it) != null
-                }
-            if (declaredWildcardMatches.size == 1) {
-                val wildcardType = declaredWildcardMatches.single()
-                return resolveCandidate(wildcardType)
+        val declaredWildcardMatches =
+            wildcardImports.filter {
+                context.isClassDeclared(it) || context.resolveTypeAlias(it) != null
             }
-            if (declaredWildcardMatches.size > 1) return null
-            if (wildcardImports.size == 1) return wildcardImports.single() + remainingSegments
-            return null
+        if (declaredWildcardMatches.size == 1) {
+            val wildcardType = declaredWildcardMatches.single()
+            return resolveCandidate(wildcardType)
         }
+        if (declaredWildcardMatches.size > 1) return null
+
+        // 5. Default Imports Check
+        KotlinDefaultTypes.bySimpleName[firstSegment]?.let { return it + remainingSegments }
+
+        // 6. Lowercase check (variable or primitive/generic)
+        if (firstSegment.isNotEmpty() && firstSegment.first().isLowerCase()) return rawType
+
+        if (wildcardImports.size == 1) return wildcardImports.single() + remainingSegments
 
         // 7. Identity cannot be established without a visible declaration.
         return null
