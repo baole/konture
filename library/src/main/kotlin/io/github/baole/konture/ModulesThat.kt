@@ -321,7 +321,7 @@ class ModulesThat internal constructor(
 
     infix fun notContainClassesWithAnnotation(annotationFqName: String): ModulesRuleBuilder {
         builder.setThat { module ->
-            module.classes.none { cls ->
+            module.classesFor(builder.sourceSets).none { cls ->
                 cls.annotations.any { it.name == annotationFqName || it.fqName == annotationFqName }
             }
         }
@@ -330,14 +330,14 @@ class ModulesThat internal constructor(
 
     infix fun containClass(fqName: String): ModulesRuleBuilder {
         builder.setThat { module ->
-            module.classes.any { it.fqName == fqName || it.name == fqName }
+            module.classesFor(builder.sourceSets).any { it.fqName == fqName || it.name == fqName }
         }
         return builder
     }
 
     infix fun notContainClass(fqName: String): ModulesRuleBuilder {
         builder.setThat { module ->
-            module.classes.none { it.fqName == fqName || it.name == fqName }
+            module.classesFor(builder.sourceSets).none { it.fqName == fqName || it.name == fqName }
         }
         return builder
     }
@@ -443,3 +443,11 @@ class ModulesThat internal constructor(
      */
     fun resideInAPackage(vararg packagePatterns: String): ModulesRuleBuilder = containPackage(packagePatterns.toList())
 }
+
+internal fun Module.classesFor(sourceSets: SourceSetSelector?): List<ClassDeclaration> {
+    if (sourceSets == null) return classes
+    return files.filter { file ->
+        file.membershipsFor(path).any(sourceSets::matches)
+    }.flatMap { it.classes }
+}
+
