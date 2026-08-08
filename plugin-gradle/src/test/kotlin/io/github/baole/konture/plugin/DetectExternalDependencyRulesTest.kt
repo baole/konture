@@ -52,6 +52,47 @@ class DetectExternalDependencyRulesTest {
     }
 
     @Test
+    fun `testDetectExternalDependencyRulesStripping`() {
+        val project = ProjectBuilder.builder().build()
+        val source = project.file("src/test/kotlin/CommentsAndStringsTest.kt")
+        source.parentFile.mkdirs()
+        val result = project.layout.buildDirectory.file("konture/requires-dependencies.txt").get().asFile
+        val task = project.tasks.create("detectExternalRulesComments", DetectExternalDependencyRules::class.java)
+        task.testSources.from(source)
+        task.resultFile.set(result)
+
+        // Block comment containing rule call should return false
+        source.writeText("/* notDependOnExternalLibraries(\"a:b\") */ class CommentsTest")
+        task.detect()
+        assertEquals("false", result.readText())
+
+        // Nested block comment containing rule call should return false
+        source.writeText("/* outer /* inner */ notDependOnExternalLibraries(\"a:b\") */ class CommentsTest")
+        task.detect()
+        assertEquals("false", result.readText())
+
+        // Triple-quoted string containing rule call should return false
+        source.writeText("val str = \"\"\"notDependOnExternalLibraries(\"a:b\")\"\"\"")
+        task.detect()
+        assertEquals("false", result.readText())
+
+        // Single-quoted char literal and double-quoted string containing rule call should return false
+        source.writeText("val c = 'a'; val s = \"onlyDependOnExternalLibraries(\\\"a:b\\\")\"")
+        task.detect()
+        assertEquals("false", result.readText())
+
+        // Line comment without newline at EOF
+        source.writeText("// notDependOnExternalLibraries(\"a:b\")")
+        task.detect()
+        assertEquals("false", result.readText())
+
+        // Valid onlyDependOnExternalLibraries call
+        source.writeText("fun test() = should().onlyDependOnExternalLibraries(\"a:b\")")
+        task.detect()
+        assertEquals("true", result.readText())
+    }
+
+    @Test
     fun `testGenerateDependencyGraphTask`() {
         val rootProject = ProjectBuilder.builder().withName("root").build()
         val child =

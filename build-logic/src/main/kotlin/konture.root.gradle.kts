@@ -17,7 +17,7 @@ tasks.register<UpdateKotlinContributors>("updateKotlinContributors") {
     repositoryDirectory.set(layout.projectDirectory)
     contributorPropertiesFile.set(layout.projectDirectory.file("local.properties"))
     contributorSourceDirectories.set(
-        subprojects.map { it.projectDir.absolutePath } +
+        subprojects.map { it.isolated.projectDirectory.asFile.absolutePath } +
             layout.projectDirectory
                 .dir("build-logic")
                 .asFile.absolutePath,
@@ -29,9 +29,8 @@ tasks.register<TestReport>("testReport") {
     group = "Verification"
     destinationDirectory.set(layout.buildDirectory.dir("reports/all-tests"))
 
-    val testTasks = subprojects.flatMap { sub -> sub.tasks.withType<Test>() }
-    dependsOn(testTasks)
-    testResults.from(testTasks.map { it.binaryResultsDirectory })
+    dependsOn(subprojects.map { "${it.path}:test" })
+    testResults.from(subprojects.map { it.layout.buildDirectory.dir("test-results/test/binary") })
 }
 
 tasks.register<JacocoReport>("jacocoRootReport") {
@@ -40,34 +39,24 @@ tasks.register<JacocoReport>("jacocoRootReport") {
 
     val coverageProjects = subprojects.filter { it.name != "konture-test" }
 
-    val testTasks = coverageProjects.map { sub -> sub.tasks.withType<Test>() }
-    dependsOn(testTasks)
+    dependsOn(coverageProjects.map { "${it.path}:classes" })
+    dependsOn(coverageProjects.map { "${it.path}:test" })
 
     val classDirs =
         coverageProjects.map { sub ->
-            sub.providers.provider {
-                val sourceSets = sub.extensions.findByType<SourceSetContainer>()
-                val mainSourceSet = sourceSets?.findByName("main")
-                mainSourceSet?.output?.classesDirs ?: sub.files()
-            }
+            sub.layout.buildDirectory.dir("classes/kotlin/main")
         }
     classDirectories.setFrom(files(classDirs))
 
     val srcDirs =
         coverageProjects.map { sub ->
-            sub.providers.provider {
-                val sourceSets = sub.extensions.findByType<SourceSetContainer>()
-                val mainSourceSet = sourceSets?.findByName("main")
-                mainSourceSet?.allSource?.srcDirs ?: sub.files()
-            }
+            sub.isolated.projectDirectory.dir("src/main/kotlin")
         }
     sourceDirectories.setFrom(files(srcDirs))
 
     val execFiles =
         coverageProjects.map { sub ->
-            sub.fileTree(sub.layout.buildDirectory) {
-                include("jacoco/*.exec")
-            }
+            sub.layout.buildDirectory.file("jacoco/test.exec")
         }
     executionData.setFrom(files(execFiles))
 
@@ -92,29 +81,19 @@ tasks.register<JacocoCoverageVerification>("jacocoRootCoverageVerification") {
 
     val classDirs =
         coverageProjects.map { sub ->
-            sub.providers.provider {
-                val sourceSets = sub.extensions.findByType<SourceSetContainer>()
-                val mainSourceSet = sourceSets?.findByName("main")
-                mainSourceSet?.output?.classesDirs ?: sub.files()
-            }
+            sub.layout.buildDirectory.dir("classes/kotlin/main")
         }
     classDirectories.setFrom(files(classDirs))
 
     val srcDirs =
         coverageProjects.map { sub ->
-            sub.providers.provider {
-                val sourceSets = sub.extensions.findByType<SourceSetContainer>()
-                val mainSourceSet = sourceSets?.findByName("main")
-                mainSourceSet?.allSource?.srcDirs ?: sub.files()
-            }
+            sub.isolated.projectDirectory.dir("src/main/kotlin")
         }
     sourceDirectories.setFrom(files(srcDirs))
 
     val execFiles =
         coverageProjects.map { sub ->
-            sub.fileTree(sub.layout.buildDirectory) {
-                include("jacoco/*.exec")
-            }
+            sub.layout.buildDirectory.file("jacoco/test.exec")
         }
     executionData.setFrom(files(execFiles))
 

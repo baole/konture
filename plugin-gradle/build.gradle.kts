@@ -37,6 +37,13 @@ gradlePlugin {
             description = descriptionText
             tags.set(listOf("kotlin", "architecture", "testing", "archunit", "konture"))
         }
+        create("kontureSettings") {
+            id = "$groupId.settings"
+            implementationClass = "io.github.baole.konture.plugin.KontureSettingsPlugin"
+            displayName = "Konture Settings Plugin"
+            description = "Applies Konture to all projects via settings lifecycle hooks"
+            tags.set(listOf("kotlin", "architecture", "testing", "archunit", "konture"))
+        }
     }
 }
 

@@ -5,6 +5,8 @@ val applyPlugin = System.getProperty("idea.active") == "true" ||
 
 System.setProperty("konture.applyPluginInternal", applyPlugin.toString())
 
+enableFeaturePreview("NO_IMPLICIT_LOOKUP_IN_PARENT_PROJECTS")
+
 pluginManagement {
     includeBuild("build-logic")
     repositories {

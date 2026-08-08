@@ -49,14 +49,6 @@ if (applyPlugin) {
     pluginManager.apply("io.github.baole.konture")
 }
 
-allprojects {
-    repositories {
-        mavenLocal()
-        google()
-        mavenCentral()
-    }
-}
-
 tasks.register("runKontureTest") {
     group = "Verification"
     description = "Runs tests in the independent konture-test module."
