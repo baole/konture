@@ -443,3 +443,59 @@ inline fun <reified T : Any> PropertiesThat.notHaveImportOf(): PropertiesRuleBui
 inline fun <reified T : Any> PropertiesShould.haveImportOf(): PropertiesRuleBuilder = haveImportOf(T::class)
 
 inline fun <reified T : Any> PropertiesShould.notHaveImportOf(): PropertiesRuleBuilder = notHaveImportOf(T::class)
+
+// Annotation aliases for Files
+infix fun FilesThat.areAnnotatedWith(annotation: KClass<out Annotation>): FilesRuleBuilder =
+    haveAnnotationOf(annotation)
+
+inline fun <reified T : Annotation> FilesThat.haveAnnotationOf(): FilesRuleBuilder = haveAnnotationOf(T::class)
+
+inline fun <reified T : Annotation> FilesThat.areAnnotatedWith(): FilesRuleBuilder = haveAnnotationOf(T::class)
+
+infix fun FilesShould.beAnnotatedWith(annotation: KClass<out Annotation>): FilesRuleBuilder =
+    haveAnnotationOf(
+        annotation,
+    )
+
+inline fun <reified T : Annotation> FilesShould.beAnnotatedWith(): FilesRuleBuilder = haveAnnotationOf(T::class)
+
+// Annotation aliases for Classes
+infix fun ClassesShould.beAnnotatedWith(annotation: KClass<out Annotation>): ClassesRuleBuilder =
+    haveAnnotationOf(annotation)
+
+inline fun <reified T : Annotation> ClassesShould.beAnnotatedWith(): ClassesRuleBuilder = haveAnnotationOf(T::class)
+
+// Annotation aliases for Functions
+inline fun <reified T : Annotation> FunctionsThat.haveAnnotationOf(): FunctionsRuleBuilder = haveAnnotationOf(T::class)
+
+infix fun FunctionsThat.areAnnotatedWith(annotation: KClass<out Annotation>): FunctionsRuleBuilder =
+    haveAnnotationOf(annotation)
+
+inline fun <reified T : Annotation> FunctionsThat.areAnnotatedWith(): FunctionsRuleBuilder = haveAnnotationOf(T::class)
+
+infix fun FunctionsShould.beAnnotatedWith(annotation: KClass<out Annotation>): FunctionsRuleBuilder =
+    haveAnnotationOf(annotation.kontureQualifiedName())
+
+inline fun <reified T : Annotation> FunctionsShould.beAnnotatedWith(): FunctionsRuleBuilder = haveAnnotationOf(T::class)
+
+// Annotation aliases for Properties
+inline fun <reified T : Annotation> PropertiesThat.haveAnnotationOf(): PropertiesRuleBuilder =
+    haveAnnotationOf(
+        T::class,
+    )
+
+infix fun PropertiesThat.areAnnotatedWith(annotation: KClass<out Annotation>): PropertiesRuleBuilder =
+    haveAnnotationOf(annotation)
+
+inline fun <reified T : Annotation> PropertiesThat.areAnnotatedWith(): PropertiesRuleBuilder =
+    haveAnnotationOf(
+        T::class,
+    )
+
+infix fun PropertiesShould.beAnnotatedWith(annotation: KClass<out Annotation>): PropertiesRuleBuilder =
+    haveAnnotationOf(annotation.kontureQualifiedName())
+
+inline fun <reified T : Annotation> PropertiesShould.beAnnotatedWith(): PropertiesRuleBuilder =
+    haveAnnotationOf(T::class)
+
+inline fun <reified T : Any> ClassesShould.notDependOnClass(): ClassesRuleBuilder = notReferenceClass(T::class)

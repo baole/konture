@@ -14,6 +14,9 @@ import kotlin.reflect.KClass
 class FunctionsThat internal constructor(
     private val builder: FunctionsRuleBuilder,
 ) {
+    /** Logical NOT operator for negating the next filter condition. */
+    fun not(): FunctionsThat = builder.not()
+
     infix fun resideInAPackage(packagePattern: String): FunctionsRuleBuilder {
         builder.setThat { PatternMatchers.matchesPackage(packagePattern, it.packageName) }
         return builder

@@ -98,12 +98,34 @@ class FunctionsRuleBuilder(
                 .forEach(logger)
         }
 
+    private val ignoredPredicates = mutableListOf<(FunctionDeclarationContext) -> Boolean>()
+
     /**
      * Configures this builder to allow empty selections (i.e. if no functions match the `that()` filter,
      * the rule will pass instead of throwing an AssertionError).
      */
     fun allowEmpty(): FunctionsRuleBuilder {
         allowEmpty = true
+        return this
+    }
+
+    /**
+     * Configures this builder to ignore failures for functions satisfying the given predicate.
+     */
+    fun ignoreFailuresIn(predicate: (FunctionDeclarationContext) -> Boolean): FunctionsRuleBuilder {
+        ignoredPredicates.add(predicate)
+        return this
+    }
+
+    /**
+     * Configures this builder to ignore failures for functions matching any of the specified names or patterns.
+     */
+    fun ignoreFailuresIn(vararg functionNames: String): FunctionsRuleBuilder {
+        ignoredPredicates.add { ctx ->
+            functionNames.any { name ->
+                ctx.declaration.name == name || ctx.qualifiedName == name || io.github.baole.konture.impl.PatternMatchers.matchesSimpleGlob(name, ctx.declaration.name)
+            }
+        }
         return this
     }
 
@@ -355,6 +377,7 @@ class FunctionsRuleBuilder(
 
         val runCheck = { list: MutableList<String> ->
             for (func in functionsToCheck) {
+                if (ignoredPredicates.any { it(func) }) continue
                 val startIdx = list.size
                 assertion(func, allFunctions, list)
                 for (i in startIdx until list.size) {

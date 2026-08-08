@@ -16,6 +16,16 @@ import kotlin.reflect.KClass
 class FilesShould internal constructor(
     private val builder: FilesRuleBuilder,
 ) {
+    /** Asserts that the selected files contain at least one class declaration. */
+    fun containClasses(): FilesRuleBuilder {
+        builder.setShould { file, _, violations ->
+            if (file.declaration.classes.isEmpty()) {
+                violations.add(getMessage("files.rule.containClasses", file.declaration.name))
+            }
+        }
+        return builder
+    }
+
     /** Fails for every invocation of [fqName] in the selected source file. */
     fun notCall(fqName: String): FilesRuleBuilder {
         builder.setShould { file, _, violations ->

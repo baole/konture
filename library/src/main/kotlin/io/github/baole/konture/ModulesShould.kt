@@ -75,6 +75,12 @@ class ModulesShould internal constructor(
      */
     fun notDependOnModule(vararg targetPaths: String): ModulesRuleBuilder = notDependOnModule(targetPaths.asList())
 
+    infix fun notDependOnModules(targetPath: String): ModulesRuleBuilder = notDependOnModule(targetPath)
+
+    infix fun notDependOnModules(targetPaths: List<String>): ModulesRuleBuilder = notDependOnModule(targetPaths)
+
+    fun notDependOnModules(vararg targetPaths: String): ModulesRuleBuilder = notDependOnModule(*targetPaths)
+
     /**
      * Asserts that selected modules do not depend on any module matching the predicate.
      *
@@ -487,6 +493,26 @@ class ModulesShould internal constructor(
         coordinate: String,
         includeTransitive: Boolean = true,
     ): ModulesRuleBuilder = dependOnExternalLibraries(coordinate, includeTransitive = includeTransitive)
+
+    fun haveDependency(
+        coordinate: String,
+        includeTransitive: Boolean = true,
+    ): ModulesRuleBuilder = dependOnExternalLibrary(coordinate, includeTransitive = includeTransitive)
+
+    fun haveDependencies(
+        vararg coordinates: String,
+        includeTransitive: Boolean = true,
+    ): ModulesRuleBuilder = dependOnExternalLibraries(*coordinates, includeTransitive = includeTransitive)
+
+    fun notHaveDependency(
+        coordinate: String,
+        includeTransitive: Boolean = true,
+    ): ModulesRuleBuilder = notDependOnExternalLibraries(coordinate, includeTransitive = includeTransitive)
+
+    fun notHaveDependencies(
+        vararg coordinates: String,
+        includeTransitive: Boolean = true,
+    ): ModulesRuleBuilder = notDependOnExternalLibraries(*coordinates, includeTransitive = includeTransitive)
 
     fun dependOnExternalLibraries(
         vararg coordinates: String,

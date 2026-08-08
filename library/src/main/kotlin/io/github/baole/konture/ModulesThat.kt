@@ -16,6 +16,9 @@ import io.github.baole.konture.impl.normalizeModulePath
 class ModulesThat internal constructor(
     private val builder: ModulesRuleBuilder,
 ) {
+    /** Logical NOT operator for negating the next filter condition. */
+    fun not(): ModulesThat = builder.not()
+
     infix fun haveNamePath(path: String): ModulesRuleBuilder {
         val normalized = normalizeModulePath(path)
         builder.setThat { it.path == normalized }
@@ -321,7 +324,7 @@ class ModulesThat internal constructor(
 
     infix fun notContainClassesWithAnnotation(annotationFqName: String): ModulesRuleBuilder {
         builder.setThat { module ->
-            module.classes.none { cls ->
+            module.classesFor(builder.sourceSets).none { cls ->
                 cls.annotations.any { it.name == annotationFqName || it.fqName == annotationFqName }
             }
         }
@@ -330,14 +333,14 @@ class ModulesThat internal constructor(
 
     infix fun containClass(fqName: String): ModulesRuleBuilder {
         builder.setThat { module ->
-            module.classes.any { it.fqName == fqName || it.name == fqName }
+            module.classesFor(builder.sourceSets).any { it.fqName == fqName || it.name == fqName }
         }
         return builder
     }
 
     infix fun notContainClass(fqName: String): ModulesRuleBuilder {
         builder.setThat { module ->
-            module.classes.none { it.fqName == fqName || it.name == fqName }
+            module.classesFor(builder.sourceSets).none { it.fqName == fqName || it.name == fqName }
         }
         return builder
     }
@@ -442,4 +445,11 @@ class ModulesThat internal constructor(
      * Alias for [containPackage].
      */
     fun resideInAPackage(vararg packagePatterns: String): ModulesRuleBuilder = containPackage(packagePatterns.toList())
+}
+
+internal fun Module.classesFor(sourceSets: SourceSetSelector?): List<ClassDeclaration> {
+    if (sourceSets == null) return classes
+    return files.filter { file ->
+        file.membershipsFor(path).any(sourceSets::matches)
+    }.flatMap { it.classes }
 }

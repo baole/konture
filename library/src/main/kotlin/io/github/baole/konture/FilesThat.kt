@@ -14,6 +14,11 @@ import io.github.baole.konture.impl.PatternMatchers
 class FilesThat internal constructor(
     private val builder: FilesRuleBuilder,
 ) {
+    /**
+     * Logical NOT operator for negating the next filter condition.
+     */
+    fun not(): FilesThat = builder.not()
+
     infix fun resideInAPackage(packagePattern: String): FilesRuleBuilder {
         builder.setThat { PatternMatchers.matchesPackage(packagePattern, it.declaration.packageName) }
         return builder

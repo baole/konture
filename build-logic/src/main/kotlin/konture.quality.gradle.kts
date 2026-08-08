@@ -5,6 +5,7 @@
  */
 
 import com.diffplug.gradle.spotless.SpotlessExtension
+import com.diffplug.spotless.LineEnding
 import dev.detekt.gradle.extensions.DetektExtension
 import org.jetbrains.dokka.gradle.DokkaTaskPartial
 import org.jlleitschuh.gradle.ktlint.KtlintExtension
@@ -75,6 +76,7 @@ configure<KtlintExtension> {
 }
 
 configure<SpotlessExtension> {
+    lineEndings = LineEnding.UNIX
     kotlin {
         target("**/*.kt", "**/*.kts")
         custom("validate contributor header") { source ->

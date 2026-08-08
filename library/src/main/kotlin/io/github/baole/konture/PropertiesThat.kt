@@ -13,6 +13,9 @@ import kotlin.reflect.KClass
 class PropertiesThat internal constructor(
     private val builder: PropertiesRuleBuilder,
 ) {
+    /** Logical NOT operator for negating the next filter condition. */
+    fun not(): PropertiesThat = builder.not()
+
     infix fun resideInAPackage(packagePattern: String): PropertiesRuleBuilder {
         builder.setThat { PatternMatchers.matchesPackage(packagePattern, it.packageName) }
         return builder

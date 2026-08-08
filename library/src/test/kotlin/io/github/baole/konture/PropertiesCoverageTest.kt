@@ -1159,4 +1159,138 @@ internal class PropertiesCoverageTest : KontureScopeTestFixture() {
         ).getShouldAssertion()!!(propCtx, listOf(propCtx), v47)
         assertEquals(1, v47.size)
     }
+
+    @Test
+    fun `test PropertiesThat module and modifier filters`() {
+        val graph =
+            ProjectGraph(
+                mapOf(":" to listOf(Module(":", ":app", "app", emptyList(), emptyList(), emptyList(), listOf(fileA)))),
+            )
+        val valProp =
+            createPropCtx(
+                name = "myVal",
+                visibility = Visibility.PUBLIC,
+                modifiers = setOf(Modifier.ABSTRACT),
+                type = "String",
+                isVal = true,
+                isExtension = true,
+                modulePath = ":app",
+            )
+        val varProp =
+            createPropCtx(
+                name = "myVar",
+                visibility = Visibility.PRIVATE,
+                type = "Int",
+                isVal = false,
+                isExtension = false,
+                modulePath = ":lib",
+            )
+
+        var b = PropertiesRuleBuilder(graph)
+        b.that().notResideInAModule(":app")
+        assertFalse(b.getThatPredicate()!!(valProp))
+        assertTrue(b.getThatPredicate()!!(varProp))
+
+        b = PropertiesRuleBuilder(graph)
+        b.that().notResideInAModule(listOf(":app"))
+        assertFalse(b.getThatPredicate()!!(valProp))
+
+        b = PropertiesRuleBuilder(graph)
+        b.that().areAbstract()
+        assertTrue(b.getThatPredicate()!!(valProp))
+        assertFalse(b.getThatPredicate()!!(varProp))
+
+        b = PropertiesRuleBuilder(graph)
+        b.that().haveTypeOf<String>()
+        assertFalse(b.getThatPredicate()!!(valProp))
+
+        b = PropertiesRuleBuilder(graph)
+        b.that().areExtension()
+        assertTrue(b.getThatPredicate()!!(valProp))
+        assertFalse(b.getThatPredicate()!!(varProp))
+
+        b = PropertiesRuleBuilder(graph)
+        b.that().beLateinit()
+        assertFalse(b.getThatPredicate()!!(valProp))
+    }
+
+    @Test
+    fun `test PropertiesThat logical combinators`() {
+        val graph =
+            ProjectGraph(
+                mapOf(":" to listOf(Module(":", ":app", "app", emptyList(), emptyList(), emptyList(), listOf(fileA)))),
+            )
+        val valProp = createPropCtx(isVal = true)
+
+        var b = PropertiesRuleBuilder(graph)
+        b.that().anyOf({ beVal() }, { beVar() })
+        assertTrue(b.getThatPredicate()!!(valProp))
+
+        b = PropertiesRuleBuilder(graph)
+        b.that().allOf({ beVal() }, { beTopLevel() })
+        assertFalse(b.getThatPredicate()!!(valProp))
+
+        b = PropertiesRuleBuilder(graph)
+        b.that().noneOf({ beVar() })
+        assertTrue(b.getThatPredicate()!!(valProp))
+
+        b = PropertiesRuleBuilder(graph)
+        b.that().haveImportOf(listOf("com.example.Type"))
+        assertFalse(b.getThatPredicate()!!(valProp))
+
+        b = PropertiesRuleBuilder(graph)
+        b.that().haveImportOf("com.example.Type", "com.other.Type")
+        assertFalse(b.getThatPredicate()!!(valProp))
+
+        b = PropertiesRuleBuilder(graph)
+        b.that().not()
+        assertTrue(b.getThatPredicate() == null)
+    }
+
+    @Test
+    fun `test PropertiesShould import and reference assertions`() {
+        val graph =
+            ProjectGraph(
+                mapOf(":" to listOf(Module(":", ":app", "app", emptyList(), emptyList(), emptyList(), listOf(fileA)))),
+            )
+        val propCtx = createPropCtx(name = "myVal", isVal = true)
+
+        val v1 = mutableListOf<String>()
+        PropertiesRuleBuilder(graph).should().notCall<String>().getShouldAssertion()!!(propCtx, listOf(propCtx), v1)
+
+        val v2 = mutableListOf<String>()
+        PropertiesRuleBuilder(
+            graph,
+        ).should().notReferenceClass<String>().getShouldAssertion()!!(propCtx, listOf(propCtx), v2)
+
+        val v3 = mutableListOf<String>()
+        PropertiesRuleBuilder(
+            graph,
+        ).should().haveImportOf("com.example.Type").getShouldAssertion()!!(propCtx, listOf(propCtx), v3)
+        assertEquals(1, v3.size)
+
+        val v4 = mutableListOf<String>()
+        PropertiesRuleBuilder(
+            graph,
+        ).should().notHaveImportOf("com.example.Type").getShouldAssertion()!!(propCtx, listOf(propCtx), v4)
+        assertEquals(0, v4.size)
+
+        val v5 = mutableListOf<String>()
+        PropertiesRuleBuilder(
+            graph,
+        ).should().haveNoWildcardImports().getShouldAssertion()!!(propCtx, listOf(propCtx), v5)
+        assertEquals(0, v5.size)
+
+        val v6 = mutableListOf<String>()
+        PropertiesRuleBuilder(graph).should().anyOf({ beVal() }).getShouldAssertion()!!(propCtx, listOf(propCtx), v6)
+        assertEquals(0, v6.size)
+
+        val v7 = mutableListOf<String>()
+        PropertiesRuleBuilder(graph).should().allOf({ beVal() }).getShouldAssertion()!!(propCtx, listOf(propCtx), v7)
+        assertEquals(0, v7.size)
+
+        val v8 = mutableListOf<String>()
+        PropertiesRuleBuilder(graph).should().noneOf({ beVar() }).getShouldAssertion()!!(propCtx, listOf(propCtx), v8)
+        assertEquals(0, v8.size)
+    }
 }

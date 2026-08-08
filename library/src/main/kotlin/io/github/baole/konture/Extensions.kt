@@ -138,10 +138,20 @@ fun Konture.fileScope(sourceSets: SourceSetSelector) = KontureFileScope.fromProj
  */
 fun Konture.fileScopeFromModule(path: String) = KontureFileScope.fromModule(path, projectGraph)
 
+fun Konture.fileScopeFromModule(
+    path: String,
+    sourceSets: SourceSetSelector,
+) = KontureFileScope.fromModule(path, projectGraph, sourceSets)
+
 /**
  * Retrieves a file-level functional [KontureFileScope] scoped to a specific package name.
  */
 fun Konture.fileScopeFromPackage(packageName: String) = KontureFileScope.fromPackage(packageName, projectGraph)
+
+fun Konture.fileScopeFromPackage(
+    packageName: String,
+    sourceSets: SourceSetSelector,
+) = KontureFileScope.fromPackage(packageName, projectGraph, sourceSets)
 
 /**
  * Retrieves a function-level functional [KontureFunctionScope] representing all functions in the project.
@@ -152,7 +162,17 @@ fun Konture.functionScope(sourceSets: SourceSetSelector) = KontureFunctionScope.
 
 fun Konture.functionScopeFromModule(path: String) = KontureFunctionScope.fromModule(path, projectGraph)
 
+fun Konture.functionScopeFromModule(
+    path: String,
+    sourceSets: SourceSetSelector,
+) = KontureFunctionScope.fromModule(path, projectGraph, sourceSets)
+
 fun Konture.functionScopeFromPackage(packageName: String) = KontureFunctionScope.fromPackage(packageName, projectGraph)
+
+fun Konture.functionScopeFromPackage(
+    packageName: String,
+    sourceSets: SourceSetSelector,
+) = KontureFunctionScope.fromPackage(packageName, projectGraph, sourceSets)
 
 /**
  * Retrieves a property-level functional [KonturePropertyScope] representing all properties in the project.
@@ -163,7 +183,17 @@ fun Konture.propertyScope(sourceSets: SourceSetSelector) = KonturePropertyScope.
 
 fun Konture.propertyScopeFromModule(path: String) = KonturePropertyScope.fromModule(path, projectGraph)
 
+fun Konture.propertyScopeFromModule(
+    path: String,
+    sourceSets: SourceSetSelector,
+) = KonturePropertyScope.fromModule(path, projectGraph, sourceSets)
+
 fun Konture.propertyScopeFromPackage(packageName: String) = KonturePropertyScope.fromPackage(packageName, projectGraph)
+
+fun Konture.propertyScopeFromPackage(
+    packageName: String,
+    sourceSets: SourceSetSelector,
+) = KonturePropertyScope.fromPackage(packageName, projectGraph, sourceSets)
 
 /**
  * Retrieves a module-level functional [KontureModuleScope] representing all modules in the project.
@@ -206,10 +236,22 @@ fun Konture.sliceScopeFromModule(
     modulePath: String,
 ): KontureSliceScope = KontureSliceScope.fromModule(pattern, modulePath, projectGraph)
 
+fun Konture.sliceScopeFromModule(
+    pattern: String,
+    modulePath: String,
+    sourceSets: SourceSetSelector,
+): KontureSliceScope = KontureSliceScope.fromModule(pattern, modulePath, projectGraph, sourceSets)
+
 fun Konture.sliceScopeFromPackage(
     pattern: String,
     packageName: String,
 ): KontureSliceScope = KontureSliceScope.fromPackage(pattern, packageName, projectGraph)
+
+fun Konture.sliceScopeFromPackage(
+    pattern: String,
+    packageName: String,
+    sourceSets: SourceSetSelector,
+): KontureSliceScope = KontureSliceScope.fromPackage(pattern, packageName, projectGraph, sourceSets)
 
 // --- Block-based DSL Entry Points (Auto-Checking) ---
 

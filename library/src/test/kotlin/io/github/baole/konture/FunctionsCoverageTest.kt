@@ -927,4 +927,270 @@ internal class FunctionsCoverageTest : KontureScopeTestFixture() {
         ).getShouldAssertion()!!(funcCtx, listOf(funcCtx), v46)
         assertEquals(1, v46.size)
     }
+
+    @Test
+    fun `test FunctionsThat module exclusions`() {
+        val graph =
+            ProjectGraph(
+                mapOf(":" to listOf(Module(":", ":app", "app", emptyList(), emptyList(), emptyList(), listOf(fileA)))),
+            )
+        val publicCtx =
+            createFuncCtx(
+                name = "publicFunc",
+                visibility = Visibility.PUBLIC,
+                modulePath = ":app",
+            )
+        val privateCtx =
+            createFuncCtx(
+                name = "privateFunc",
+                visibility = Visibility.PRIVATE,
+                modulePath = ":lib",
+            )
+
+        var b = FunctionsRuleBuilder(graph)
+        b.that().notResideInAModule(":app")
+        assertFalse(b.getThatPredicate()!!(publicCtx))
+        assertTrue(b.getThatPredicate()!!(privateCtx))
+
+        b = FunctionsRuleBuilder(graph)
+        b.that().notResideInAModule(listOf(":app"))
+        assertFalse(b.getThatPredicate()!!(publicCtx))
+
+        b = FunctionsRuleBuilder(graph)
+        b.that().notResideInAModule(":app", ":core")
+        assertFalse(b.getThatPredicate()!!(publicCtx))
+        assertTrue(b.getThatPredicate()!!(privateCtx))
+
+        b = FunctionsRuleBuilder(graph)
+        b.that().notResideInModule(":app")
+        assertFalse(b.getThatPredicate()!!(publicCtx))
+
+        b = FunctionsRuleBuilder(graph)
+        b.that().notResideInModules(listOf(":app"))
+        assertFalse(b.getThatPredicate()!!(publicCtx))
+
+        b = FunctionsRuleBuilder(graph)
+        b.that().notResideInModules(":app", ":core")
+        assertFalse(b.getThatPredicate()!!(publicCtx))
+    }
+
+    @Test
+    fun `test FunctionsThat name patterns and globs`() {
+        val graph =
+            ProjectGraph(
+                mapOf(":" to listOf(Module(":", ":app", "app", emptyList(), emptyList(), emptyList(), listOf(fileA)))),
+            )
+        val publicCtx = createFuncCtx(name = "publicFunc")
+        val privateCtx = createFuncCtx(name = "privateFuncSuffix")
+
+        var b = FunctionsRuleBuilder(graph)
+        b.that().notHaveNameEndingWith("Suffix")
+        assertTrue(b.getThatPredicate()!!(publicCtx))
+        assertFalse(b.getThatPredicate()!!(privateCtx))
+
+        b = FunctionsRuleBuilder(graph)
+        b.that().notHaveNameEndingWith(listOf("Suffix"))
+        assertFalse(b.getThatPredicate()!!(privateCtx))
+
+        b = FunctionsRuleBuilder(graph)
+        b.that().notHaveNameEndingWith("Suffix", "Other")
+        assertFalse(b.getThatPredicate()!!(privateCtx))
+
+        b = FunctionsRuleBuilder(graph)
+        b.that().notHaveNameStartingWith("public")
+        assertFalse(b.getThatPredicate()!!(publicCtx))
+
+        b = FunctionsRuleBuilder(graph)
+        b.that().notHaveNameStartingWith(listOf("public"))
+        assertFalse(b.getThatPredicate()!!(publicCtx))
+
+        b = FunctionsRuleBuilder(graph)
+        b.that().notHaveNameStartingWith("public", "private")
+        assertFalse(b.getThatPredicate()!!(publicCtx))
+
+        b = FunctionsRuleBuilder(graph)
+        b.that().notHaveNameMatching("*Func*")
+        assertFalse(b.getThatPredicate()!!(publicCtx))
+
+        b = FunctionsRuleBuilder(graph)
+        b.that().notHaveNameMatching(listOf("*Func*"))
+        assertFalse(b.getThatPredicate()!!(publicCtx))
+
+        b = FunctionsRuleBuilder(graph)
+        b.that().notHaveNameMatching("*Func*", "*Other*")
+        assertFalse(b.getThatPredicate()!!(publicCtx))
+    }
+
+    @Test
+    fun `test FunctionsThat visibilities`() {
+        val graph =
+            ProjectGraph(
+                mapOf(":" to listOf(Module(":", ":app", "app", emptyList(), emptyList(), emptyList(), listOf(fileA)))),
+            )
+        val publicCtx = createFuncCtx(visibility = Visibility.PUBLIC)
+        val privateCtx = createFuncCtx(visibility = Visibility.PRIVATE)
+        val internalCtx = createFuncCtx(visibility = Visibility.INTERNAL)
+        val protectedCtx = createFuncCtx(visibility = Visibility.PROTECTED)
+
+        var b = FunctionsRuleBuilder(graph)
+        b.that().bePublic()
+        assertTrue(b.getThatPredicate()!!(publicCtx))
+
+        b = FunctionsRuleBuilder(graph)
+        b.that().areInternal()
+        assertTrue(b.getThatPredicate()!!(internalCtx))
+
+        b = FunctionsRuleBuilder(graph)
+        b.that().beInternal()
+        assertTrue(b.getThatPredicate()!!(internalCtx))
+
+        b = FunctionsRuleBuilder(graph)
+        b.that().arePrivate()
+        assertTrue(b.getThatPredicate()!!(privateCtx))
+
+        b = FunctionsRuleBuilder(graph)
+        b.that().bePrivate()
+        assertTrue(b.getThatPredicate()!!(privateCtx))
+
+        b = FunctionsRuleBuilder(graph)
+        b.that().areProtected()
+        assertTrue(b.getThatPredicate()!!(protectedCtx))
+
+        b = FunctionsRuleBuilder(graph)
+        b.that().beProtected()
+        assertTrue(b.getThatPredicate()!!(protectedCtx))
+
+        b = FunctionsRuleBuilder(graph)
+        b.that().notBePublic()
+        assertFalse(b.getThatPredicate()!!(publicCtx))
+        assertTrue(b.getThatPredicate()!!(privateCtx))
+
+        b = FunctionsRuleBuilder(graph)
+        b.that().notBeInternal()
+        assertTrue(b.getThatPredicate()!!(publicCtx))
+        assertFalse(b.getThatPredicate()!!(internalCtx))
+
+        b = FunctionsRuleBuilder(graph)
+        b.that().notBePrivate()
+        assertTrue(b.getThatPredicate()!!(publicCtx))
+        assertFalse(b.getThatPredicate()!!(privateCtx))
+
+        b = FunctionsRuleBuilder(graph)
+        b.that().notBeProtected()
+        assertTrue(b.getThatPredicate()!!(publicCtx))
+        assertFalse(b.getThatPredicate()!!(protectedCtx))
+    }
+
+    @Test
+    fun `test FunctionsThat parameters and receiver types`() {
+        val graph =
+            ProjectGraph(
+                mapOf(":" to listOf(Module(":", ":app", "app", emptyList(), emptyList(), emptyList(), listOf(fileA)))),
+            )
+        val publicCtx = createFuncCtx(returnType = "Unit", parameters = emptyList())
+        val privateCtx =
+            createFuncCtx(
+                modifiers = setOf(Modifier.ABSTRACT, Modifier.INFIX, Modifier.OPERATOR),
+                returnType = "String",
+                receiverType = "String",
+                isExtension = true,
+                parameters = listOf(ParameterDeclaration("param", "Int", false, emptyList(), "kotlin.Int")),
+            )
+
+        var b = FunctionsRuleBuilder(graph)
+        b.that().haveExtensionReceiver(String::class)
+        assertFalse(b.getThatPredicate()!!(publicCtx))
+        assertTrue(b.getThatPredicate()!!(privateCtx))
+
+        b = FunctionsRuleBuilder(graph)
+        b.that().haveParameterOf(Int::class)
+        assertFalse(b.getThatPredicate()!!(publicCtx))
+        assertTrue(b.getThatPredicate()!!(privateCtx))
+
+        b = FunctionsRuleBuilder(graph)
+        b.that().areAbstract()
+        assertFalse(b.getThatPredicate()!!(publicCtx))
+        assertTrue(b.getThatPredicate()!!(privateCtx))
+
+        b = FunctionsRuleBuilder(graph)
+        b.that().haveReturnType(String::class)
+        assertFalse(b.getThatPredicate()!!(publicCtx))
+
+        b = FunctionsRuleBuilder(graph)
+        b.that().haveAnyParameterType(Int::class)
+        assertFalse(b.getThatPredicate()!!(publicCtx))
+        assertTrue(b.getThatPredicate()!!(privateCtx))
+
+        b = FunctionsRuleBuilder(graph)
+        b.that().haveAnyParameterTypeOf<Int>()
+        assertFalse(b.getThatPredicate()!!(publicCtx))
+        assertTrue(b.getThatPredicate()!!(privateCtx))
+
+        b = FunctionsRuleBuilder(graph)
+        b.that().beInfix()
+        assertFalse(b.getThatPredicate()!!(publicCtx))
+        assertTrue(b.getThatPredicate()!!(privateCtx))
+
+        b = FunctionsRuleBuilder(graph)
+        b.that().beOperator()
+        assertFalse(b.getThatPredicate()!!(publicCtx))
+        assertTrue(b.getThatPredicate()!!(privateCtx))
+
+        b = FunctionsRuleBuilder(graph)
+        b.that().belongToClass(String::class)
+        assertFalse(b.getThatPredicate()!!(publicCtx))
+    }
+
+    @Test
+    fun `test FunctionsThat logical combinators`() {
+        val graph =
+            ProjectGraph(
+                mapOf(":" to listOf(Module(":", ":app", "app", emptyList(), emptyList(), emptyList(), listOf(fileA)))),
+            )
+        val publicCtx = createFuncCtx(visibility = Visibility.PUBLIC, packageName = "com.example.app")
+        val privateCtx =
+            createFuncCtx(
+                visibility = Visibility.PRIVATE,
+                returnType = "String",
+                parameters = listOf(ParameterDeclaration("param", "Int", false, emptyList())),
+            )
+
+        var b = FunctionsRuleBuilder(graph)
+        b.that().anyOf({ bePublic() }, { bePrivate() })
+        assertTrue(b.getThatPredicate()!!(publicCtx))
+
+        b = FunctionsRuleBuilder(graph)
+        b.that().allOf({ bePublic() }, { beTopLevel() })
+        assertFalse(b.getThatPredicate()!!(publicCtx))
+
+        b = FunctionsRuleBuilder(graph)
+        b.that().noneOf({ bePrivate() })
+        assertTrue(b.getThatPredicate()!!(publicCtx))
+
+        b = FunctionsRuleBuilder(graph)
+        b.that().notResideInAPackage(listOf("com.example.app"))
+        assertFalse(b.getThatPredicate()!!(publicCtx))
+
+        b = FunctionsRuleBuilder(graph)
+        b.that().notResideInAPackage("com.example.app", "com.other")
+        assertFalse(b.getThatPredicate()!!(publicCtx))
+
+        b = FunctionsRuleBuilder(graph)
+        b.that().notBeAnnotatedWith("Missing")
+        assertTrue(b.getThatPredicate()!!(publicCtx))
+
+        b = FunctionsRuleBuilder(graph)
+        b.that().notHaveAnnotationOf("Missing")
+        assertTrue(b.getThatPredicate()!!(publicCtx))
+
+        b = FunctionsRuleBuilder(graph)
+        b.that().notHaveReturnType("String")
+        assertTrue(b.getThatPredicate()!!(publicCtx))
+        assertFalse(b.getThatPredicate()!!(privateCtx))
+
+        b = FunctionsRuleBuilder(graph)
+        b.that().notHaveParameterOf("Int")
+        assertTrue(b.getThatPredicate()!!(publicCtx))
+        assertFalse(b.getThatPredicate()!!(privateCtx))
+    }
 }
