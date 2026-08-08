@@ -4,8 +4,41 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+val applyPlugin = System.getProperty("idea.active") == "true" ||
+    System.getProperty("idea.sync.active") == "true" ||
+    System.getProperty("konture.applyPlugin") == "true" ||
+    System.getenv("KONTURE_APPLY_PLUGIN") == "true"
+
+buildscript {
+    repositories {
+        mavenLocal()
+        google()
+        mavenCentral()
+    }
+    dependencies {
+        val applyPlugin = System.getProperty("idea.active") == "true" ||
+            System.getProperty("idea.sync.active") == "true" ||
+            System.getProperty("konture.applyPlugin") == "true" ||
+            System.getenv("KONTURE_APPLY_PLUGIN") == "true"
+
+        if (applyPlugin) {
+            val versionFile = file("gradle/libs.versions.toml")
+            if (versionFile.exists()) {
+                val kontureVersion = versionFile.readLines()
+                    .firstOrNull { it.trim().startsWith("konture =") }
+                    ?.substringAfter("=")
+                    ?.replace("\"", "")
+                    ?.trim()
+
+                if (kontureVersion != null) {
+                    classpath("io.github.baole.konture:plugin-gradle:$kontureVersion")
+                }
+            }
+        }
+    }
+}
+
 plugins {
-    alias(libs.plugins.konture)
     id("konture.root")
     alias(libs.plugins.kotlin.jvm) apply false
     alias(libs.plugins.kotlin.serialization) apply false
@@ -17,6 +50,10 @@ plugins {
     `maven-publish`
 }
 
+if (applyPlugin) {
+    pluginManager.apply("io.github.baole.konture")
+}
+
 allprojects {
     repositories {
         mavenLocal()
@@ -26,7 +63,9 @@ allprojects {
 }
 
 val copyLayoutToTest by tasks.registering(Copy::class) {
-    dependsOn("generateArchitectureLayout")
+    if (applyPlugin) {
+        dependsOn("generateArchitectureLayout")
+    }
     from(layout.buildDirectory.dir("konture"))
     into(file("konture-test/build/konture"))
 }
@@ -45,5 +84,7 @@ tasks.register<GradleBuild>("runKontureTest") {
 }
 
 tasks.named("check") {
-    dependsOn("runKontureTest")
+    if (applyPlugin) {
+        dependsOn("runKontureTest")
+    }
 }

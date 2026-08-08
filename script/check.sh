@@ -29,7 +29,7 @@ fi
 
 # Step 2: Run standalone konture-test module tests
 echo -e "\n${BLUE}[2/4] Running standalone konture-test module tests...${NC}"
-if ./gradlew -q :runKontureTest; then
+if ./gradlew -q :runKontureTest -Dkonture.applyPlugin=true; then
     echo -e "${GREEN}[SUCCESS] Standalone konture-test module tests passed!${NC}"
 else
     echo -e "${RED}[ERROR] Standalone konture-test module tests failed.${NC}"

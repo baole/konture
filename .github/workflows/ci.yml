@@ -48,6 +48,9 @@ jobs:
       - name: Publish Core to Maven Local
         run: ./gradlew publishToMavenLocal
 
+      - name: Run Standalone Konture Tests
+        run: ./gradlew runKontureTest -Dkonture.applyPlugin=true
+
 
       - name: Build and Install Maven Plugin
         run: mvn clean install -f plugin-maven/pom.xml

@@ -32,5 +32,3 @@ val isIdeSync = System.getProperty("idea.active") == "true" ||
 if (isIdeSync) {
     includeBuild("konture-test")
 }
-
-
