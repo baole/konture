@@ -84,12 +84,34 @@ class SlicesRuleBuilder(
         assertions.forEach { it(sliceGraph, violations) }
     }
 
+    private val ignoredPredicates = mutableListOf<(Slice) -> Boolean>()
+
     /**
      * Configures this builder to allow empty selections (if no packages match the slice pattern the
      * rule passes instead of throwing an AssertionError).
      */
     fun allowEmpty(): SlicesRuleBuilder {
         allowEmpty = true
+        return this
+    }
+
+    /**
+     * Configures this builder to ignore failures for slices satisfying the given predicate.
+     */
+    fun ignoreFailuresIn(predicate: (Slice) -> Boolean): SlicesRuleBuilder {
+        ignoredPredicates.add(predicate)
+        return this
+    }
+
+    /**
+     * Configures this builder to ignore failures for slices matching any of the specified slice keys or patterns.
+     */
+    fun ignoreFailuresIn(vararg sliceKeys: String): SlicesRuleBuilder {
+        ignoredPredicates.add { slice ->
+            sliceKeys.any { key ->
+                slice.key == key || io.github.baole.konture.impl.PatternMatchers.matchesSimpleGlob(key, slice.key)
+            }
+        }
         return this
     }
 
@@ -253,7 +275,8 @@ class SlicesRuleBuilder(
         }
 
         if (assertions.isEmpty()) throw AssertionError(getMessage("slices.rule.noAssertion"))
-        val sliceGraph = SliceCycleDetector.buildGraph(slices, packageToSlice, allClasses, slicePattern)
+        val activeSlices = slices.filterNot { slice -> ignoredPredicates.any { it(slice) } }
+        val sliceGraph = SliceCycleDetector.buildGraph(activeSlices, packageToSlice, allClasses, slicePattern)
 
         val runCheck = { list: MutableList<String> -> assertions.forEach { it(sliceGraph, list) } }
         BaselineManager.checkRule(getMessage("slices.rule.violationHeader"), runCheck)

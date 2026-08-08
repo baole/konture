@@ -63,12 +63,34 @@ class ModulesRuleBuilder(
             graph.getAllModules().forEach(logger)
         }
 
+    private val ignoredPredicates = mutableListOf<(Module) -> Boolean>()
+
     /**
      * Configures this builder to allow empty selections (i.e. if no modules match the `that()` filter,
      * the rule will pass instead of throwing an AssertionError).
      */
     fun allowEmpty(): ModulesRuleBuilder {
         allowEmpty = true
+        return this
+    }
+
+    /**
+     * Configures this builder to ignore failures for modules satisfying the given predicate.
+     */
+    fun ignoreFailuresIn(predicate: (Module) -> Boolean): ModulesRuleBuilder {
+        ignoredPredicates.add(predicate)
+        return this
+    }
+
+    /**
+     * Configures this builder to ignore failures for modules matching any of the specified paths or patterns.
+     */
+    fun ignoreFailuresIn(vararg modulePaths: String): ModulesRuleBuilder {
+        ignoredPredicates.add { module ->
+            modulePaths.any { path ->
+                module.path == path || io.github.baole.konture.impl.PatternMatchers.matchesModuleGlob(path, module.path)
+            }
+        }
         return this
     }
 
@@ -275,6 +297,7 @@ class ModulesRuleBuilder(
 
         val runCheck = { list: MutableList<String> ->
             for (module in modulesToCheck) {
+                if (ignoredPredicates.any { it(module) }) continue
                 assertion(module, g, list)
             }
         }

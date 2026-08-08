@@ -95,12 +95,34 @@ class FilesRuleBuilder(
             }.forEach(logger)
         }
 
+    private val ignoredPredicates = mutableListOf<(FileDeclarationContext) -> Boolean>()
+
     /**
      * Configures this builder to allow empty selections (i.e. if no files match the `that()` filter,
      * the rule will pass instead of throwing an AssertionError).
      */
     fun allowEmpty(): FilesRuleBuilder {
         allowEmpty = true
+        return this
+    }
+
+    /**
+     * Configures this builder to ignore failures for files satisfying the given predicate.
+     */
+    fun ignoreFailuresIn(predicate: (FileDeclarationContext) -> Boolean): FilesRuleBuilder {
+        ignoredPredicates.add(predicate)
+        return this
+    }
+
+    /**
+     * Configures this builder to ignore failures for files matching any of the specified names or patterns.
+     */
+    fun ignoreFailuresIn(vararg fileNames: String): FilesRuleBuilder {
+        ignoredPredicates.add { ctx ->
+            fileNames.any { name ->
+                ctx.declaration.name == name || ctx.declaration.filePath == name || io.github.baole.konture.impl.PatternMatchers.matchesSimpleGlob(name, ctx.declaration.name)
+            }
+        }
         return this
     }
 
@@ -318,6 +340,7 @@ class FilesRuleBuilder(
 
         val runCheck = { list: MutableList<String> ->
             for (file in filesToCheck) {
+                if (ignoredPredicates.any { it(file) }) continue
                 val startIdx = list.size
                 assertion(file, allFiles, list)
                 for (i in startIdx until list.size) {

@@ -151,9 +151,26 @@ class ClassesThat internal constructor(
     fun notResideInModules(vararg modulePaths: String): ClassesRuleBuilder = notResideInAModule(modulePaths.toList())
 
     /**
-     * Restricts the rules to classes with the specified simple name.
+     * Logical NOT operator for negating the next filter condition.
+     */
+    fun not(): ClassesThat = builder.not()
+
+    /**
+     * Restricts the rules to classes with the specified name or fully-qualified name.
+     *
+     * @param name The simple or fully-qualified class name.
      */
     infix fun haveName(name: String): ClassesRuleBuilder {
+        builder.setThat { it.fqName == name || it.name == name }
+        return builder
+    }
+
+    /**
+     * Restricts the rules to classes with the specified simple name.
+     *
+     * @param name The simple class name.
+     */
+    infix fun haveSimpleName(name: String): ClassesRuleBuilder {
         builder.setThat { it.name == name }
         return builder
     }

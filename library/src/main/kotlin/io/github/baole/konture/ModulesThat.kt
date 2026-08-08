@@ -16,6 +16,9 @@ import io.github.baole.konture.impl.normalizeModulePath
 class ModulesThat internal constructor(
     private val builder: ModulesRuleBuilder,
 ) {
+    /** Logical NOT operator for negating the next filter condition. */
+    fun not(): ModulesThat = builder.not()
+
     infix fun haveNamePath(path: String): ModulesRuleBuilder {
         val normalized = normalizeModulePath(path)
         builder.setThat { it.path == normalized }

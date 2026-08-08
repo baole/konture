@@ -87,12 +87,34 @@ class PropertiesRuleBuilder(
             }.distinctBy { listOf(it.modulePath, it.className, it.declaration.name) }.forEach(logger)
         }
 
+    private val ignoredPredicates = mutableListOf<(PropertyDeclarationContext) -> Boolean>()
+
     /**
      * Configures this builder to allow empty selections (i.e. if no properties match the `that()` filter,
      * the rule will pass instead of throwing an AssertionError).
      */
     fun allowEmpty(): PropertiesRuleBuilder {
         allowEmpty = true
+        return this
+    }
+
+    /**
+     * Configures this builder to ignore failures for properties satisfying the given predicate.
+     */
+    fun ignoreFailuresIn(predicate: (PropertyDeclarationContext) -> Boolean): PropertiesRuleBuilder {
+        ignoredPredicates.add(predicate)
+        return this
+    }
+
+    /**
+     * Configures this builder to ignore failures for properties matching any of the specified names or patterns.
+     */
+    fun ignoreFailuresIn(vararg propertyNames: String): PropertiesRuleBuilder {
+        ignoredPredicates.add { ctx ->
+            propertyNames.any { name ->
+                ctx.declaration.name == name || ctx.qualifiedName == name || io.github.baole.konture.impl.PatternMatchers.matchesSimpleGlob(name, ctx.declaration.name)
+            }
+        }
         return this
     }
 
@@ -336,6 +358,7 @@ class PropertiesRuleBuilder(
 
         val runCheck = { list: MutableList<String> ->
             for (prop in propertiesToCheck) {
+                if (ignoredPredicates.any { it(prop) }) continue
                 val startIdx = list.size
                 assertion(prop, allProperties, list)
                 for (i in startIdx until list.size) {

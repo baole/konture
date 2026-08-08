@@ -13,6 +13,9 @@ import kotlin.reflect.KClass
 class SlicesThat internal constructor(
     private val builder: SlicesRuleBuilder,
 ) {
+    /** Logical NOT operator for negating the next filter condition. */
+    fun not(): SlicesThat = builder.not()
+
     /**
      * Restricts the slice rule to slices whose key matches the specified key pattern.
      */

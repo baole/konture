@@ -72,12 +72,34 @@ class ClassesRuleBuilder(
             }.distinctBy { it.fqName }.forEach(logger)
         }
 
+    private val ignoredPredicates = mutableListOf<(ClassDeclaration) -> Boolean>()
+
     /**
      * Configures this builder to allow empty selections (i.e. if no classes match the `that()` filter,
      * the rule will pass instead of throwing an AssertionError).
      */
     fun allowEmpty(): ClassesRuleBuilder {
         allowEmpty = true
+        return this
+    }
+
+    /**
+     * Configures this builder to ignore failures for classes satisfying the given predicate.
+     */
+    fun ignoreFailuresIn(predicate: (ClassDeclaration) -> Boolean): ClassesRuleBuilder {
+        ignoredPredicates.add(predicate)
+        return this
+    }
+
+    /**
+     * Configures this builder to ignore failures for classes matching any of the specified names or patterns.
+     */
+    fun ignoreFailuresIn(vararg classNames: String): ClassesRuleBuilder {
+        ignoredPredicates.add { cls ->
+            classNames.any { name ->
+                cls.fqName == name || cls.name == name || io.github.baole.konture.impl.PatternMatchers.matchesSimpleGlob(name, cls.fqName)
+            }
+        }
         return this
     }
 
@@ -296,6 +318,7 @@ class ClassesRuleBuilder(
 
         val runCheck = { list: MutableList<String> ->
             for ((cls, modulePath, sourceSetName) in classesToCheck) {
+                if (ignoredPredicates.any { it(cls) }) continue
                 val startIdx = list.size
                 assertion(cls, allClasses, list)
                 for (i in startIdx until list.size) {
