@@ -18,12 +18,7 @@ dependencies {
 
 tasks.test {
     useJUnitPlatform()
-    onlyIf {
-        System.getProperty("idea.active") == "true" ||
-            System.getProperty("idea.sync.active") == "true" ||
-            System.getProperty("konture.applyPlugin") == "true" ||
-            System.getenv("KONTURE_APPLY_PLUGIN") == "true"
-    }
+    onlyIf { System.getProperty("konture.applyPluginInternal") == "true" }
 }
 
 
@@ -47,5 +42,3 @@ tasks.processTestResources {
         }
     }
 }
-
-

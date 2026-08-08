@@ -4,10 +4,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-val applyPlugin = System.getProperty("idea.active") == "true" ||
-    System.getProperty("idea.sync.active") == "true" ||
-    System.getProperty("konture.applyPlugin") == "true" ||
-    System.getenv("KONTURE_APPLY_PLUGIN") == "true"
+val applyPlugin = System.getProperty("konture.applyPluginInternal") == "true"
 
 buildscript {
     repositories {
@@ -16,10 +13,8 @@ buildscript {
         mavenCentral()
     }
     dependencies {
-        val applyPlugin = System.getProperty("idea.active") == "true" ||
-            System.getProperty("idea.sync.active") == "true" ||
-            System.getProperty("konture.applyPlugin") == "true" ||
-            System.getenv("KONTURE_APPLY_PLUGIN") == "true"
+
+        val applyPlugin = System.getProperty("konture.applyPluginInternal") == "true"
 
         if (applyPlugin) {
             val versionFile = file("gradle/libs.versions.toml")
