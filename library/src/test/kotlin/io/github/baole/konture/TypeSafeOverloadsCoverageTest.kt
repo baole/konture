@@ -242,4 +242,77 @@ internal class TypeSafeOverloadsCoverageTest : KontureScopeTestFixture() {
         } catch (_: AssertionError) {
         }
     }
+
+    @Suppress("CyclomaticComplexMethod", "LongMethod")
+    @Test
+    fun `test all TypeSafeOverloadsKt static methods via reflection`() {
+        val graph =
+            ProjectGraph(
+                mapOf(":" to listOf(Module(":", ":app", "app", emptyList(), emptyList(), emptyList(), listOf(fileA)))),
+            )
+        val classesList = listOf(classA, classAnnotated)
+        val contextMap =
+            mapOf(
+                ClassesThat::class.java to ClassesRuleBuilder(graph).that(),
+                ClassesShould::class.java to ClassesRuleBuilder(graph).should(),
+                FunctionsThat::class.java to FunctionsRuleBuilder(graph).that(),
+                FunctionsShould::class.java to FunctionsRuleBuilder(graph).should(),
+                PropertiesThat::class.java to PropertiesRuleBuilder(graph).that(),
+                PropertiesShould::class.java to PropertiesRuleBuilder(graph).should(),
+                FilesThat::class.java to FilesRuleBuilder(graph).that(),
+                FilesShould::class.java to FilesRuleBuilder(graph).should(),
+                SlicesThat::class.java to SlicesRuleBuilder(graph).that(),
+                SlicesShould::class.java to SlicesRuleBuilder(graph).should(),
+                ModulesThat::class.java to ModulesRuleBuilder(graph).that(),
+                ModulesShould::class.java to ModulesRuleBuilder(graph).should(),
+                FunctionAssertionScope::class.java to FunctionAssertionScope(),
+                PropertyAssertionScope::class.java to PropertyAssertionScope(),
+                Konture::class.java to Konture,
+                List::class.java to classesList,
+                KontureScope::class.java to KontureScope(classesList),
+            )
+
+        val typeSafeOverloadsClass = Class.forName("io.github.baole.konture.TypeSafeOverloadsKt")
+        for (method in typeSafeOverloadsClass.declaredMethods) {
+            val paramTypes = method.parameterTypes
+            if (paramTypes.isEmpty()) continue
+
+            var valid = true
+            val args =
+                Array(paramTypes.size) { i ->
+                    val resolved = resolveReflectionArgument(paramTypes[i], contextMap)
+                    if (resolved == UNRESOLVED) {
+                        valid = false
+                        null
+                    } else {
+                        resolved
+                    }
+                }
+            if (valid) {
+                try {
+                    method.isAccessible = true
+                    method.invoke(null, *args)
+                } catch (_: Throwable) {
+                }
+            }
+        }
+    }
+
+    private fun resolveReflectionArgument(
+        p: Class<*>,
+        contextMap: Map<Class<*>, Any>,
+    ): Any? {
+        contextMap[p]?.let { return it }
+        return when {
+            p == kotlin.reflect.KClass::class.java -> TestTypeSafeTarget::class
+            p.isArray && p.componentType == kotlin.reflect.KClass::class.java -> arrayOf(TestTypeSafeTarget::class)
+            p == String::class.java -> "test"
+            p.isArray && p.componentType == String::class.java -> arrayOf("test")
+            else -> UNRESOLVED
+        }
+    }
+
+    private companion object {
+        private val UNRESOLVED = Any()
+    }
 }

@@ -81,7 +81,6 @@ class ModulesShould internal constructor(
 
     fun notDependOnModules(vararg targetPaths: String): ModulesRuleBuilder = notDependOnModule(*targetPaths)
 
-
     /**
      * Asserts that selected modules do not depend on any module matching the predicate.
      *
@@ -514,7 +513,6 @@ class ModulesShould internal constructor(
         vararg coordinates: String,
         includeTransitive: Boolean = true,
     ): ModulesRuleBuilder = notDependOnExternalLibraries(*coordinates, includeTransitive = includeTransitive)
-
 
     fun dependOnExternalLibraries(
         vararg coordinates: String,

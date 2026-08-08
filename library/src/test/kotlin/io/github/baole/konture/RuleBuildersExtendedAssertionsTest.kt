@@ -237,4 +237,63 @@ class RuleBuildersExtendedAssertionsTest {
         assert(coreScope.classes.isNotEmpty())
         assert(coreFileScope.files.isNotEmpty())
     }
+
+    @Test
+    fun `RuleBuilders printMatched, printAll, and ignoreFailuresIn work`() {
+        val graph = testGraph()
+
+        val cb = ClassesRuleBuilder(graph)
+        cb.printMatchedClasses { }
+        cb.printAllClasses { }
+        cb.ignoreFailuresIn("ClassA")
+        cb.ignoreFailuresIn { it.name == "ClassA" }
+        cb.orShould()
+        cb.xorShould()
+
+        val fb = FunctionsRuleBuilder(graph)
+        fb.printMatchedFunctions { }
+        fb.printAllFunctions { }
+        fb.ignoreFailuresIn("myFunc")
+        fb.ignoreFailuresIn { it.declaration.name == "myFunc" }
+        fb.orShould()
+        fb.xorShould()
+        fb.andShould()
+
+        val pb = PropertiesRuleBuilder(graph)
+        pb.printMatchedProperties { }
+        pb.printAllProperties { }
+        pb.ignoreFailuresIn("myVal")
+        pb.ignoreFailuresIn { it.declaration.name == "myVal" }
+        pb.orShould()
+        pb.xorShould()
+        pb.andShould()
+
+        val fileb = FilesRuleBuilder(graph)
+        fileb.printMatchedFiles { }
+        fileb.printAllFiles { }
+        fileb.ignoreFailuresIn("FileA.kt")
+        fileb.ignoreFailuresIn { it.declaration.filePath.endsWith("FileA.kt") }
+        fileb.or()
+        fileb.xor()
+
+        val sb = SlicesRuleBuilder(graph)
+        sb.printMatchedSlices { }
+        sb.printAllSlices { }
+        sb.ignoreFailuresIn("sliceA")
+        sb.ignoreFailuresIn { it.key == "sliceA" }
+        sb.or()
+        sb.xor()
+        sb.orShould()
+        sb.xorShould()
+
+        val mb = ModulesRuleBuilder(graph)
+        mb.printMatchedModules { }
+        mb.printAllModules { }
+        mb.ignoreFailuresIn(":app")
+        mb.ignoreFailuresIn { it.path == ":app" }
+        mb.or()
+        mb.xor()
+        mb.orShould()
+        mb.xorShould()
+    }
 }

@@ -453,4 +453,3 @@ internal fun Module.classesFor(sourceSets: SourceSetSelector?): List<ClassDeclar
         file.membershipsFor(path).any(sourceSets::matches)
     }.flatMap { it.classes }
 }
-

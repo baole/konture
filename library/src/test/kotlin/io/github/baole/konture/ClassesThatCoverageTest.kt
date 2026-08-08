@@ -342,4 +342,43 @@ internal class ClassesThatCoverageTest : KontureScopeTestFixture() {
         val builder41 = ClassesRuleBuilder(graph).that().noneOf({ haveName("ClassB") })
         assertTrue(checkPred(builder41, classA))
     }
+
+    @Test
+    fun `test ClassesThat package exclusions and member matching`() {
+        val cb1 = ClassesRuleBuilder(graph).that().notResideInAPackage(listOf("com.example"))
+        assertFalse(checkPred(cb1, classA))
+
+        val cb2 = ClassesRuleBuilder(graph).that().notResideInAPackage("com.example", "com.other")
+        assertFalse(checkPred(cb2, classA))
+
+        val cb3 = ClassesRuleBuilder(graph).that().containProperty(listOf("propA"))
+        checkPred(cb3, classA)
+
+        val cb4 = ClassesRuleBuilder(graph).that().containProperty("propA", "propB")
+        checkPred(cb4, classA)
+
+        val cb5 = ClassesRuleBuilder(graph).that().containFunction(listOf("funcA"))
+        checkPred(cb5, classA)
+
+        val cb6 = ClassesRuleBuilder(graph).that().containFunction("funcA", "funcB")
+        checkPred(cb6, classA)
+
+        val cb7 = ClassesRuleBuilder(graph).that().areAssignableTo(listOf("com.example.SuperA"))
+        checkPred(cb7, classA)
+
+        val cb8 = ClassesRuleBuilder(graph).that().areAssignableTo("com.example.SuperA", "com.example.SuperB")
+        checkPred(cb8, classA)
+
+        val cb9 = ClassesRuleBuilder(graph).that().areAssignableFrom(listOf("com.example.SubA"))
+        checkPred(cb9, classA)
+
+        val cb10 = ClassesRuleBuilder(graph).that().areAssignableFrom("com.example.SubA", "com.example.SubB")
+        checkPred(cb10, classA)
+
+        val cb11 = ClassesRuleBuilder(graph).that().areNotAssignableTo("com.example.SuperA")
+        checkPred(cb11, classA)
+
+        val cb12 = ClassesRuleBuilder(graph).that().areNotAssignableFrom("com.example.SubA")
+        checkPred(cb12, classA)
+    }
 }

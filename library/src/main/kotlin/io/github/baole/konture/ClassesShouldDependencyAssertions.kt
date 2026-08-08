@@ -21,9 +21,10 @@ interface ClassesShouldDependencyAssertions {
      */
     fun beFreeOfCycles(): ClassesRuleBuilder {
         builder.setShould { _, allClasses, violations ->
-            val adjacency = allClasses.associate { cls ->
-                cls.fqName to cls.referencedTypes.toSet()
-            }
+            val adjacency =
+                allClasses.associate { cls ->
+                    cls.fqName to cls.referencedTypes.toSet()
+                }
             val cycles = io.github.baole.konture.impl.SliceCycleDetector.findCycles(adjacency)
             if (cycles.isNotEmpty()) {
                 for (cycle in cycles) {
@@ -34,7 +35,6 @@ interface ClassesShouldDependencyAssertions {
         }
         return builder
     }
-
 
     fun notDependOnClasses(vararg classes: KClass<*>): ClassesRuleBuilder {
         classes.forEach { notReferenceClass(it) }
@@ -58,7 +58,6 @@ interface ClassesShouldDependencyAssertions {
 
     infix fun onlyDependOnPackages(packagePatterns: List<String>): ClassesRuleBuilder =
         onlyDependOnClassesInAnyPackage(packagePatterns)
-
 
     /**
      * Asserts that selected classes have KDoc documentation.

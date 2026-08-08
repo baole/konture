@@ -369,7 +369,6 @@ class SlicesThat internal constructor(
 
     fun notResideInModules(vararg modulePaths: String): SlicesRuleBuilder = notResideInModules(modulePaths.toList())
 
-
     // Package location aliases
     infix fun resideInAPackage(packagePattern: String): SlicesRuleBuilder = containClassesInPackage(packagePattern)
 
