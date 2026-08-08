@@ -17,6 +17,50 @@ interface ClassesShouldDependencyAssertions {
     val builder: ClassesRuleBuilder
 
     /**
+     * Asserts that selected classes are free of dependency cycles.
+     */
+    fun beFreeOfCycles(): ClassesRuleBuilder {
+        builder.setShould { _, allClasses, violations ->
+            val adjacency = allClasses.associate { cls ->
+                cls.fqName to cls.referencedTypes.toSet()
+            }
+            val cycles = io.github.baole.konture.impl.SliceCycleDetector.findCycles(adjacency)
+            if (cycles.isNotEmpty()) {
+                for (cycle in cycles) {
+                    val rendered = (cycle + cycle.first()).joinToString(" -> ")
+                    violations.add(getMessage("class.should.beFreeOfCycles", rendered))
+                }
+            }
+        }
+        return builder
+    }
+
+
+    fun notDependOnClasses(vararg classes: KClass<*>): ClassesRuleBuilder {
+        classes.forEach { notReferenceClass(it) }
+        return builder
+    }
+
+    infix fun notDependOnPackages(packagePattern: String): ClassesRuleBuilder =
+        notDependOnClassesInAnyPackage(packagePattern)
+
+    fun notDependOnPackages(vararg packagePatterns: String): ClassesRuleBuilder =
+        notDependOnClassesInAnyPackage(*packagePatterns)
+
+    infix fun notDependOnPackages(packagePatterns: List<String>): ClassesRuleBuilder =
+        notDependOnClassesInAnyPackage(packagePatterns)
+
+    infix fun onlyDependOnPackages(packagePattern: String): ClassesRuleBuilder =
+        onlyDependOnClassesInAnyPackage(packagePattern)
+
+    fun onlyDependOnPackages(vararg packagePatterns: String): ClassesRuleBuilder =
+        onlyDependOnClassesInAnyPackage(*packagePatterns)
+
+    infix fun onlyDependOnPackages(packagePatterns: List<String>): ClassesRuleBuilder =
+        onlyDependOnClassesInAnyPackage(packagePatterns)
+
+
+    /**
      * Asserts that selected classes have KDoc documentation.
      */
     fun beDocumentedWithKDoc(): ClassesRuleBuilder {

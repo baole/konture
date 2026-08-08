@@ -284,7 +284,12 @@ class SlicesShould(private val builder: SlicesRuleBuilder) {
         return builder
     }
 
+    fun satisfy(description: String): SlicesRuleBuilder =
+        satisfy(description) { true }
+
+
     fun anyOf(vararg blocks: SlicesShould.() -> Unit): SlicesRuleBuilder {
+
         builder.addShouldAssertion { sliceGraph, violations ->
             val anyPassed =
                 blocks.any { block ->

@@ -488,6 +488,11 @@ infix fun PropertiesShould.beAnnotatedWith(annotation: KClass<out Annotation>): 
 inline fun <reified T : Annotation> PropertiesShould.beAnnotatedWith(): PropertiesRuleBuilder =
     haveAnnotationOf(T::class)
 
+inline fun <reified T : Any> ClassesShould.notDependOnClass(): ClassesRuleBuilder =
+    notReferenceClass(T::class)
+
+
+
 
 
 
