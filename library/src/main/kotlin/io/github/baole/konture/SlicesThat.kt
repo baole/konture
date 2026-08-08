@@ -309,29 +309,66 @@ class SlicesThat internal constructor(
     infix fun notHaveNameEndingWith(suffix: String): SlicesRuleBuilder = notHaveKeyEndingWith(suffix)
 
     // Module location filters
+    infix fun resideInAModule(modulePath: String): SlicesRuleBuilder = resideInModule(modulePath)
+
+    infix fun resideInAModule(modulePaths: List<String>): SlicesRuleBuilder = resideInModules(modulePaths)
+
+    fun resideInAModule(vararg modulePaths: String): SlicesRuleBuilder = resideInModules(modulePaths.toList())
+
     infix fun resideInModule(modulePath: String): SlicesRuleBuilder {
-        builder.setThat { slice -> slice.classes.any { it.filePath.contains(modulePath) } }
+        val cleanName = modulePath.removePrefix(":").removePrefix("/")
+        builder.setThat { slice ->
+            slice.classes.any { cls ->
+                cls.filePath.contains("/$cleanName/") || cls.filePath.contains("$cleanName/")
+            }
+        }
         return builder
     }
 
     infix fun resideInModules(modulePaths: List<String>): SlicesRuleBuilder {
-        builder.setThat { slice -> slice.classes.any { cls -> modulePaths.any { cls.filePath.contains(it) } } }
+        val cleanNames = modulePaths.map { it.removePrefix(":").removePrefix("/") }
+        builder.setThat { slice ->
+            slice.classes.any { cls ->
+                cleanNames.any { cleanName ->
+                    cls.filePath.contains("/$cleanName/") || cls.filePath.contains("$cleanName/")
+                }
+            }
+        }
         return builder
     }
 
     fun resideInModules(vararg modulePaths: String): SlicesRuleBuilder = resideInModules(modulePaths.toList())
 
+    infix fun notResideInAModule(modulePath: String): SlicesRuleBuilder = notResideInModule(modulePath)
+
+    infix fun notResideInAModule(modulePaths: List<String>): SlicesRuleBuilder = notResideInModules(modulePaths)
+
+    fun notResideInAModule(vararg modulePaths: String): SlicesRuleBuilder = notResideInModules(modulePaths.toList())
+
     infix fun notResideInModule(modulePath: String): SlicesRuleBuilder {
-        builder.setThat { slice -> slice.classes.none { it.filePath.contains(modulePath) } }
+        val cleanName = modulePath.removePrefix(":").removePrefix("/")
+        builder.setThat { slice ->
+            slice.classes.none { cls ->
+                cls.filePath.contains("/$cleanName/") || cls.filePath.contains("$cleanName/")
+            }
+        }
         return builder
     }
 
     infix fun notResideInModules(modulePaths: List<String>): SlicesRuleBuilder {
-        builder.setThat { slice -> slice.classes.none { cls -> modulePaths.any { cls.filePath.contains(it) } } }
+        val cleanNames = modulePaths.map { it.removePrefix(":").removePrefix("/") }
+        builder.setThat { slice ->
+            slice.classes.none { cls ->
+                cleanNames.any { cleanName ->
+                    cls.filePath.contains("/$cleanName/") || cls.filePath.contains("$cleanName/")
+                }
+            }
+        }
         return builder
     }
 
     fun notResideInModules(vararg modulePaths: String): SlicesRuleBuilder = notResideInModules(modulePaths.toList())
+
 
     // Package location aliases
     infix fun resideInAPackage(packagePattern: String): SlicesRuleBuilder = containClassesInPackage(packagePattern)
