@@ -48,7 +48,7 @@ class KontureLayoutGenerationTest {
         childB.plugins.apply("java")
 
         // Apply konture to root
-        rootProject.plugins.apply("io.github.baole.konture")
+        rootProject.plugins.apply("io.github.baole.konture.internal")
 
         // Create some source files in child-a source dirs to test file walking
         val childADir = childA.projectDir
@@ -112,7 +112,7 @@ class KontureLayoutGenerationTest {
     @Test
     fun `testAbsoluteAndExternalSourceDirs`() {
         val rootProject = ProjectBuilder.builder().build()
-        rootProject.plugins.apply("io.github.baole.konture")
+        rootProject.plugins.apply("io.github.baole.konture.internal")
 
         val task = rootProject.tasks.getByName("generateArchitectureLayout") as GenerateArchitectureLayout
 
@@ -151,7 +151,7 @@ class KontureLayoutGenerationTest {
     @Test
     fun `testExclusionsAreSerializedIntoLayoutJson`() {
         val rootProject = ProjectBuilder.builder().withName("root").build()
-        rootProject.plugins.apply("io.github.baole.konture")
+        rootProject.plugins.apply("io.github.baole.konture.internal")
 
         val extension = rootProject.extensions.getByName("konture") as KontureExtension
         extension.excludeModules(":module-b")
@@ -192,7 +192,7 @@ class KontureLayoutGenerationTest {
                 .build()
         child.plugins.apply("java")
 
-        rootProject.plugins.apply("io.github.baole.konture")
+        rootProject.plugins.apply("io.github.baole.konture.internal")
 
         // Run afterEvaluate hooks to eagerly configure tasks
         (rootProject as ProjectInternal).evaluate()
@@ -360,7 +360,7 @@ class KontureLayoutGenerationTest {
         dynamicFeature.plugins.apply(DummyDynamicFeaturePlugin::class.java)
         testModule.plugins.apply(DummyAndroidTestPlugin::class.java)
 
-        rootProject.plugins.apply("io.github.baole.konture")
+        rootProject.plugins.apply("io.github.baole.konture.internal")
 
         val modulesList =
             rootProject.allprojects.map { sub ->
@@ -418,7 +418,7 @@ class KontureLayoutGenerationTest {
     @Test
     fun `testInvalidLogLevelThrowsGradleException`() {
         val rootProject = ProjectBuilder.builder().build()
-        rootProject.plugins.apply("io.github.baole.konture")
+        rootProject.plugins.apply("io.github.baole.konture.internal")
 
         val task = rootProject.tasks.getByName("generateArchitectureLayout") as GenerateArchitectureLayout
         task.logLevel.set("INVALID_LOG_LEVEL")
@@ -441,7 +441,7 @@ class KontureLayoutGenerationTest {
                 .build()
 
         subProject.plugins.apply("org.jetbrains.kotlin.jvm")
-        rootProject.plugins.apply("io.github.baole.konture")
+        rootProject.plugins.apply("io.github.baole.konture.internal")
 
         // Add standard and custom relative source directories to subproject
         val subDir = subProject.projectDir
@@ -483,7 +483,7 @@ class KontureLayoutGenerationTest {
     @Test
     fun `testValidLogLevelsMappingAndLoggerConfiguration`() {
         val rootProject = ProjectBuilder.builder().build()
-        rootProject.plugins.apply("io.github.baole.konture")
+        rootProject.plugins.apply("io.github.baole.konture.internal")
 
         val task = rootProject.tasks.getByName("generateArchitectureLayout") as GenerateArchitectureLayout
         task.outputFile.get().asFile.parentFile.mkdirs()
@@ -507,7 +507,7 @@ class KontureLayoutGenerationTest {
     @Test
     fun `testExcludeConfigurationsAreSerializedIntoLayoutJson`() {
         val rootProject = ProjectBuilder.builder().withName("root").build()
-        rootProject.plugins.apply("io.github.baole.konture")
+        rootProject.plugins.apply("io.github.baole.konture.internal")
 
         val extension = rootProject.extensions.getByName("konture") as KontureExtension
         extension.excludeConfigurations("customTestConfig", "customBenchConfig")
@@ -529,7 +529,7 @@ class KontureLayoutGenerationTest {
     @Test
     fun `testRootProjectAsModuleRelativePath`() {
         val rootProject = ProjectBuilder.builder().withName("root").build()
-        rootProject.plugins.apply("io.github.baole.konture")
+        rootProject.plugins.apply("io.github.baole.konture.internal")
 
         val task = rootProject.tasks.getByName("generateArchitectureLayout") as GenerateArchitectureLayout
         val rootModule =
@@ -554,7 +554,7 @@ class KontureLayoutGenerationTest {
     @Test
     fun `testSourceDirOutsideModuleDirFallback`() {
         val rootProject = ProjectBuilder.builder().withName("root").build()
-        rootProject.plugins.apply("io.github.baole.konture")
+        rootProject.plugins.apply("io.github.baole.konture.internal")
 
         val task = rootProject.tasks.getByName("generateArchitectureLayout") as GenerateArchitectureLayout
 

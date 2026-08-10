@@ -19,12 +19,12 @@ class KontureSettingsPlugin : Plugin<Settings> {
     override fun apply(settings: Settings) {
         try {
             settings.gradle.lifecycle.beforeProject { project ->
-                project.pluginManager.apply("io.github.baole.konture")
+                project.pluginManager.apply("io.github.baole.konture.internal")
             }
         } catch (_: NoSuchMethodError) {
             @Suppress("DEPRECATION")
             settings.gradle.beforeProject { project ->
-                project.pluginManager.apply("io.github.baole.konture")
+                project.pluginManager.apply("io.github.baole.konture.internal")
             }
         }
     }

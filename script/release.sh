@@ -96,22 +96,27 @@ fi
 FILES_TO_BUMP=(
     "gradle/libs.versions.toml"
     "build.gradle.kts"
+    "settings.gradle.kts"
     "build-logic/src/main/kotlin/konture.kotlin.gradle.kts"
     "plugin-gradle/build.gradle.kts"
-    "docs/scripts.js"
+    "showcases/sample-gradle/settings.gradle.kts"
     "showcases/sample-gradle/build.gradle.kts"
     "showcases/sample-gradle/konture-test/build.gradle.kts"
+    "showcases/nowinandroid/settings.gradle.kts"
     "showcases/nowinandroid/build.gradle.kts"
     "showcases/nowinandroid/konture-test/build.gradle.kts"
+    "showcases/kotlinconf-app/settings.gradle.kts"
     "showcases/kotlinconf-app/build.gradle.kts"
     "showcases/kotlinconf-app/konture-test/build.gradle.kts"
+    "showcases/ktor-arrow-example/gradle/libs.versions.toml"
     "README.md"
-    "CONTRIBUTING.md"
     "docs/contributing.md"
     "docs/installation.md"
     "docs/usage.md"
     "docs/configuration.md"
     "docs/baseline.md"
+    "docs/ai-prompts/integration-prompt.md"
+    "docs/articles/kotlin-architecture-tests-with-konture.md"
     "plugin-maven/pom.xml"
     "showcases/sample-maven/pom.xml"
 )
@@ -131,42 +136,50 @@ done
 # Perform in-place search-and-replace using cross-platform perl
 echo -e "${BLUE}[2/3] Bumping version coordinates in source and documentation files...${NC}"
 
-# 1. Update Version Catalog
+# 1. Update Version Catalogs
 perl -pi -e "s/konture = \"\Q$OLD_VERSION\E\"/konture = \"$NEW_VERSION\"/g" gradle/libs.versions.toml
+if [[ -f "showcases/ktor-arrow-example/gradle/libs.versions.toml" ]]; then
+    perl -pi -e "s/konture = \"\Q$OLD_VERSION\E\"/konture = \"$NEW_VERSION\"/g" showcases/ktor-arrow-example/gradle/libs.versions.toml
+fi
 
-# 2. Update Docsify dynamic script
-perl -pi -e "s/const latestVersion = '\Q$OLD_VERSION\E'/const latestVersion = '$NEW_VERSION'/g" docs/scripts.js
+# 2. Update Settings and Showcase Root plugins (both settings and project level)
+if [[ -f "settings.gradle.kts" ]]; then
+    perl -pi -e "s/id\(\"io.github.baole.konture\"\)\s+version\s+\"\Q$OLD_VERSION\E\"/id(\"io.github.baole.konture\") version \"$NEW_VERSION\"/g" settings.gradle.kts
+fi
+perl -pi -e "s/id\(\"io.github.baole.konture\"\)\s+version\s+\"\Q$OLD_VERSION\E\"/id(\"io.github.baole.konture\") version \"$NEW_VERSION\"/g" showcases/sample-gradle/settings.gradle.kts
+perl -pi -e "s/id\(\"io.github.baole.konture\"\)\s+version\s+\"\Q$OLD_VERSION\E\"/id(\"io.github.baole.konture\") version \"$NEW_VERSION\"/g" showcases/nowinandroid/settings.gradle.kts
+perl -pi -e "s/id\(\"io.github.baole.konture\"\)\s+version\s+\"\Q$OLD_VERSION\E\"/id(\"io.github.baole.konture\") version \"$NEW_VERSION\"/g" showcases/kotlinconf-app/settings.gradle.kts
+if [[ -f "showcases/ktor-arrow-example/settings.gradle.kts" ]]; then
+    perl -pi -e "s/id\(\"io.github.baole.konture\"\)\s+version\s+\"\Q$OLD_VERSION\E\"/id(\"io.github.baole.konture\") version \"$NEW_VERSION\"/g" showcases/ktor-arrow-example/settings.gradle.kts
+fi
 
-# 3. Update Showcase Root build plugins
 perl -pi -e "s/id\(\"io.github.baole.konture\"\)\s+version\s+\"\Q$OLD_VERSION\E\"/id(\"io.github.baole.konture\") version \"$NEW_VERSION\"/g" showcases/sample-gradle/build.gradle.kts
 perl -pi -e "s/id\(\"io.github.baole.konture\"\)\s+version\s+\"\Q$OLD_VERSION\E\"/id(\"io.github.baole.konture\") version \"$NEW_VERSION\"/g" showcases/nowinandroid/build.gradle.kts
 perl -pi -e "s/id\(\"io.github.baole.konture\"\)\s+version\s+\"\Q$OLD_VERSION\E\"/id(\"io.github.baole.konture\") version \"$NEW_VERSION\"/g" showcases/kotlinconf-app/build.gradle.kts
 
-# 4. Update Showcase konture-test module dependencies
+# 3. Update Showcase konture-test module dependencies
 perl -pi -e "s/testImplementation\(\"io.github.baole:konture:\Q$OLD_VERSION\E\"\)/testImplementation(\"io.github.baole:konture:$NEW_VERSION\")/g" showcases/sample-gradle/konture-test/build.gradle.kts
 perl -pi -e "s/testImplementation\(\"io.github.baole:konture:\Q$OLD_VERSION\E\"\)/testImplementation(\"io.github.baole:konture:$NEW_VERSION\")/g" showcases/nowinandroid/konture-test/build.gradle.kts
 perl -pi -e "s/testImplementation\(\"io.github.baole:konture:\Q$OLD_VERSION\E\"\)/testImplementation(\"io.github.baole:konture:$NEW_VERSION\")/g" showcases/kotlinconf-app/konture-test/build.gradle.kts
+perl -pi -e "s/io.github.baole.konture:library:\Q$OLD_VERSION\E/io.github.baole.konture:library:$NEW_VERSION/g" showcases/sample-gradle/konture-test/build.gradle.kts
+perl -pi -e "s/io.github.baole.konture:library:\Q$OLD_VERSION\E/io.github.baole.konture:library:$NEW_VERSION/g" showcases/nowinandroid/konture-test/build.gradle.kts
+perl -pi -e "s/io.github.baole.konture:library:\Q$OLD_VERSION\E/io.github.baole.konture:library:$NEW_VERSION/g" showcases/kotlinconf-app/konture-test/build.gradle.kts
 
-# 5. Update GitHub README.md references
+# 4. Update GitHub README.md references
 perl -pi -e "s/\Q$OLD_VERSION\E/$NEW_VERSION/g" README.md
 
-# 6. Update GitHub CONTRIBUTING.md references
-perl -pi -e "s/\Q$OLD_VERSION\E/$NEW_VERSION/g" CONTRIBUTING.md
-
-# 6b. Update docs/contributing.md references
+# 5. Update docs markdown references
 perl -pi -e "s/\Q$OLD_VERSION\E/$NEW_VERSION/g" docs/contributing.md
-
-# 6c. Update docs/installation.md references
 perl -pi -e "s/\Q$OLD_VERSION\E/$NEW_VERSION/g" docs/installation.md
-
-# 6d. Update docs/usage.md references
 perl -pi -e "s/\Q$OLD_VERSION\E/$NEW_VERSION/g" docs/usage.md
-
-# 6e. Update docs/configuration.md references
 perl -pi -e "s/\Q$OLD_VERSION\E/$NEW_VERSION/g" docs/configuration.md
-
-# 6f. Update docs/baseline.md references
 perl -pi -e "s/\Q$OLD_VERSION\E/$NEW_VERSION/g" docs/baseline.md
+if [[ -f "docs/ai-prompts/integration-prompt.md" ]]; then
+    perl -pi -e "s/\Q$OLD_VERSION\E/$NEW_VERSION/g" docs/ai-prompts/integration-prompt.md
+fi
+if [[ -f "docs/articles/kotlin-architecture-tests-with-konture.md" ]]; then
+    perl -pi -e "s/\Q$OLD_VERSION\E/$NEW_VERSION/g" docs/articles/kotlin-architecture-tests-with-konture.md
+fi
 
 # 7. Update Root buildscript classpath and project version
 perl -pi -e "s/plugin-gradle:\Q$OLD_VERSION\E/plugin-gradle:$NEW_VERSION/g" build.gradle.kts

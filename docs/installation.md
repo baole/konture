@@ -26,7 +26,7 @@ You can set up Konture using either **Gradle** or **Maven**. Choose your preferr
 
 #### Step 1: Apply the Gradle Plugin
 
-Apply the Konture plugin to your **root project's `build.gradle.kts`**:
+Apply the Konture plugin to your **root `settings.gradle.kts`**:
 
 ```kotlin
 plugins {
@@ -34,7 +34,7 @@ plugins {
 }
 ```
 
-When applied to the root project, the plugin automatically registers a task named `generateArchitectureLayout`. This task serializes all subprojects in the build, gathering their source sets and declared dependency paths into a consolidated, relocatable `layout.json` metadata file.
+When applied in `settings.gradle.kts`, the plugin automatically configures all subprojects and registers the layout generation tasks.
 
 ---
 
@@ -68,7 +68,6 @@ Create a subfolder named `konture-test/` with a `build.gradle.kts` file:
 ```kotlin
 plugins {
     kotlin("jvm")
-    id("io.github.baole.konture") // this is important!
 }
 
 repositories {
@@ -82,7 +81,7 @@ dependencies {
     // Plus your standard test runner of choice (JUnit 5, Kotest, TestBalloon, etc.)
 }
 
-tasks.test {
+tasks.withType<Test> {
     useJUnitPlatform()
 }
 ```

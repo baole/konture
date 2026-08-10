@@ -38,9 +38,9 @@ class DetectExternalDependencyRulesTest {
     @Test
     fun `root detector includes custom test source sets of Konture consumers`() {
         val root = ProjectBuilder.builder().withName("root").build()
-        root.plugins.apply("io.github.baole.konture")
+        root.plugins.apply("io.github.baole.konture.internal")
         val consumer = ProjectBuilder.builder().withName("architecture").withParent(root).build()
-        consumer.plugins.apply("io.github.baole.konture")
+        consumer.plugins.apply("io.github.baole.konture.internal")
         val source = consumer.file("src/commonTest/kotlin/ArchitectureTest.kt")
         source.parentFile.mkdirs()
         source.writeText("fun rule() = should().onlyDependOnExternalLibraries(\"a:b\")")
@@ -104,7 +104,7 @@ class DetectExternalDependencyRulesTest {
         child.plugins.apply("org.jetbrains.kotlin.jvm")
 
         // Apply our plugin
-        rootProject.plugins.apply("io.github.baole.konture")
+        rootProject.plugins.apply("io.github.baole.konture.internal")
 
         // Evaluate to configure task properties
         (rootProject as ProjectInternal).evaluate()

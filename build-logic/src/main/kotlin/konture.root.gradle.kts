@@ -4,6 +4,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import io.github.baole.konture.buildlogic.UpdateKotlinContributors
 import org.jetbrains.dokka.gradle.DokkaMultiModuleTask
 
 plugins {

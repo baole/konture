@@ -16,19 +16,23 @@ dependencies {
     testRuntimeOnly(libs.junit.platform.launcher)
 }
 
-tasks.test {
+val isKonturePluginApplied = System.getProperty("idea.active") == "true" ||
+    System.getProperty("idea.sync.active") == "true" ||
+    System.getProperty("konture.applyPlugin") == "true" ||
+    System.getProperty("konture.applyPluginInternal") == "true" ||
+    System.getenv("KONTURE_APPLY_PLUGIN") == "true" ||
+    rootProject.pluginManager.hasPlugin("io.github.baole.konture.internal")
+
+tasks.withType<Test> {
     useJUnitPlatform()
-    onlyIf { System.getProperty("konture.applyPluginInternal") == "true" }
+    enabled = isKonturePluginApplied
 }
-
-
-
 
 tasks.processTestResources {
     val parentLayout = file("../build/konture/layout_v2.json")
     val parentDeps = file("../build/konture/dependencies.json")
 
-    if (rootProject.pluginManager.hasPlugin("io.github.baole.konture")) {
+    if (isKonturePluginApplied) {
         dependsOn(":generateArchitectureLayout")
         if (rootProject.tasks.findByName("generateDependencyGraph") != null) {
             dependsOn(":generateDependencyGraph")

@@ -8,6 +8,22 @@
                     "name": "intentional architectural violations with multiple different location types",
                     "violations": [
                         {
+                            "location": ":domain, main source set) (io.github.baole.konture.sample.domain.GetUserUseCase(GetUserUseCase.kt:1)",
+                            "message": "File GetUserUseCase.kt should have name ending with 'Action.kt'"
+                        },
+                        {
+                            "location": ":domain, main source set) (io.github.baole.konture.sample.domain.User(User.kt:3)",
+                            "message": "Class io.github.baole.konture.sample.domain.User should have name ending with 'Dto'"
+                        },
+                        {
+                            "location": ":domain, main source set) (io.github.baole.konture.sample.domain.User(User.kt:4)",
+                            "message": "Property io.github.baole.konture.sample.domain.User.testid should have type 'kotlin.Int' but was 'String'"
+                        },
+                        {
+                            "location": ":domain, main source set) (io.github.baole.konture.sample.domain.UserRepository(UserRepository.kt:4)",
+                            "message": "Function io.github.baole.konture.sample.domain.UserRepository.getUser should have name ending with 'fetchUser'"
+                        },
+                        {
                             "location": "domain/src/main/kotlin/io/github/baole/konture/sample/domain/GetUserUseCase.kt",
                             "message": "File GetUserUseCase.kt should have name ending with 'Action.kt'"
                         },

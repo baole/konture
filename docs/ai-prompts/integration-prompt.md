@@ -30,13 +30,13 @@ If the project uses a version catalog (`gradle/libs.versions.toml`), add:
     [libraries]
     konture = { group = "io.github.baole", name = "konture", version.ref = "konture" }
 
-Then apply the plugin in the root `build.gradle.kts`:
+Then apply the plugin in `settings.gradle.kts`:
     plugins {
-        alias(libs.plugins.konture) apply true
+        alias(libs.plugins.konture)
     }
 
 If no version catalog exists, use the traditional DSL form instead (plugin id
-+ version directly in root `build.gradle.kts`, dependency coordinate directly
++ version directly in `settings.gradle.kts`, dependency coordinate directly
 in the test module). Ask before introducing a version catalog if the project
 doesn't already use one — that's a build-system decision beyond this task's scope.
 
@@ -48,17 +48,16 @@ production modules. Instead:
    patterns first).
 2. Register it in `settings.gradle.kts` (e.g. `include(":konture-test")`).
 3. Configure its `build.gradle.kts`:
-   - Apply BOTH `kotlin("jvm")` and the Konture plugin (`alias(libs.plugins.konture)` or `id("io.github.baole.konture")`).
+   - Apply `kotlin("jvm")`.
    - Add `testImplementation` on the Konture library (`libs.konture` or `"io.github.baole:konture:<version>"`).
    - **Reuse existing test libraries**: Check which test framework the target project already uses in its build files/catalog (e.g. `libs.junit.jupiter`, `libs.kotest`, `libs.kotlin.test`, `libs.junit`) and reuse those existing test library dependencies in `konture-test/build.gradle.kts`. Do **NOT** force-add a new test framework (like JUnit 5) if the project uses Kotest, JUnit 4, or another framework.
    - **CRITICAL**: Do **NOT** add `testImplementation(project(":..."))` dependencies for production modules in `konture-test/build.gradle.kts`. Konture automatically extracts multi-module topology across the entire project via root plugin artifact sharing. Adding project dependencies on app/feature/core modules is unnecessary and causes build classpath bloat and Android variant attribute resolution errors.
-   - Configure `tasks.test` to match the project's test runner (e.g. `useJUnitPlatform()` for JUnit 5/Kotest, or appropriate test runner config).
+   - Configure `tasks.withType<Test>` to match the project's test runner (e.g. `useJUnitPlatform()` for JUnit 5/Kotest, or appropriate test runner config).
 
 Example `konture-test/build.gradle.kts`:
 ```kotlin
 plugins {
     kotlin("jvm")
-    alias(libs.plugins.konture) // Or id("io.github.baole.konture")
 }
 
 dependencies {
@@ -70,7 +69,7 @@ dependencies {
     testRuntimeOnly(libs.junit.jupiter.engine) // Match existing project test dependencies
 }
 
-tasks.test {
+tasks.withType<Test> {
     useJUnitPlatform() // Match existing project test runner
 }
 ```

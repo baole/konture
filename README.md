@@ -51,18 +51,17 @@ Konture helps developers analyze project structure and enforce architectural rul
 
 #### Gradle
 
-1. Apply the plugin to your root `build.gradle.kts`:
+1. Apply the plugin in your root `settings.gradle.kts`:
 ```kotlin
 plugins {
-    id("io.github.baole.konture") version "0.7.7" apply true
+    id("io.github.baole.konture") version "0.7.7"
 }
 ```
 
-2. Apply the plugin and add the dependency in your test module's `build.gradle.kts` (e.g. `konture-test/build.gradle.kts`):
+2. Add the dependency in your test module's `build.gradle.kts` (e.g. `konture-test/build.gradle.kts`):
 ```kotlin
 plugins {
     kotlin("jvm")
-    id("io.github.baole.konture")
 }
 
 dependencies {
