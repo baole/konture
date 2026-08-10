@@ -9,6 +9,8 @@ package io.github.baole.konture.plugin
 import org.gradle.api.initialization.Settings
 import org.gradle.testfixtures.ProjectBuilder
 import org.junit.jupiter.api.Assertions.assertNotNull
+import org.junit.jupiter.api.Assertions.assertThrows
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import java.lang.reflect.Proxy
 
@@ -38,5 +40,24 @@ class KontureSettingsPluginTest {
         // Verify rootProject evaluates with konture plugin applied via beforeProject lifecycle
         val child = ProjectBuilder.builder().withParent(rootProject).build()
         assertNotNull(child)
+    }
+
+    @Test
+    fun `settings plugin applies directly when target is project`() {
+        val project = ProjectBuilder.builder().build()
+        val plugin = KontureSettingsPlugin()
+
+        plugin.apply(project)
+
+        assertTrue(project.pluginManager.hasPlugin("io.github.baole.konture.internal"))
+    }
+
+    @Test
+    fun `settings plugin throws when applied to invalid target`() {
+        val plugin = KontureSettingsPlugin()
+
+        assertThrows(IllegalArgumentException::class.java) {
+            plugin.apply("InvalidTarget")
+        }
     }
 }

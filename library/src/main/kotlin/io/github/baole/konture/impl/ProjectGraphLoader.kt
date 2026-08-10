@@ -78,7 +78,7 @@ internal class ProjectGraphLoader {
         inputStream: InputStream,
         depsStreamLoader: () -> InputStream? = { null },
     ): ProjectGraph {
-        val layoutContent = inputStream.bufferedReader().use { it.readText() }
+        val layoutContent = inputStream.use { stream -> stream.bufferedReader().readText() }
         val layoutModel = json.decodeFromString<LayoutModel>(layoutContent)
         require(layoutModel.schemaVersion == LayoutModel.CURRENT_SCHEMA_VERSION) {
             "Konture requires layout schema v2. Regenerate the layout with the matching Konture Gradle plugin."

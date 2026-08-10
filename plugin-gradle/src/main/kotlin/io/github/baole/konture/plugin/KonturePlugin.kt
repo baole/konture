@@ -57,7 +57,16 @@ class KonturePlugin : Plugin<Project> {
         }
 
         project.tasks.withType(Test::class.java).configureEach { testTask ->
-            val rootExtension = project.rootProject.extensions.findByType(KontureExtension::class.java)
+            val rootExtension =
+                if (project == project.rootProject) {
+                    extension
+                } else {
+                    try {
+                        project.rootProject.extensions.findByType(KontureExtension::class.java)
+                    } catch (_: Exception) {
+                        null
+                    }
+                }
             val effectiveBaselinePath =
                 if (rootExtension != null) {
                     extension.baselinePath.orElse(

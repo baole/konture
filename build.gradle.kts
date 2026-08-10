@@ -4,10 +4,12 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-val applyPlugin = System.getProperty("idea.active") == "true" ||
-    System.getProperty("idea.sync.active") == "true" ||
-    System.getProperty("konture.applyPlugin") == "true" ||
-    System.getProperty("konture.applyPluginInternal") == "true" ||
+fun isPropertyTrue(key: String): Boolean = System.getProperty(key).toBoolean()
+
+val applyPlugin = isPropertyTrue("idea.active") ||
+    isPropertyTrue("idea.sync.active") ||
+    isPropertyTrue("konture.applyPlugin") ||
+    isPropertyTrue("konture.applyPluginInternal") ||
     System.getenv("KONTURE_APPLY_PLUGIN") == "true"
 
 buildscript {
@@ -18,10 +20,10 @@ buildscript {
     }
     dependencies {
 
-        val applyPlugin = System.getProperty("idea.active") == "true" ||
-            System.getProperty("idea.sync.active") == "true" ||
-            System.getProperty("konture.applyPlugin") == "true" ||
-            System.getProperty("konture.applyPluginInternal") == "true" ||
+        val applyPlugin = System.getProperty("idea.active").toBoolean() ||
+            System.getProperty("idea.sync.active").toBoolean() ||
+            System.getProperty("konture.applyPlugin").toBoolean() ||
+            System.getProperty("konture.applyPluginInternal").toBoolean() ||
             System.getenv("KONTURE_APPLY_PLUGIN") == "true"
 
         if (applyPlugin) {

@@ -9,9 +9,9 @@ pluginManagement {
 }
 
 buildscript {
-    val applyPlugin = System.getProperty("idea.active") == "true" ||
-        System.getProperty("idea.sync.active") == "true" ||
-        System.getProperty("konture.applyPlugin") == "true" ||
+    val applyPlugin = System.getProperty("idea.active").toBoolean() ||
+        System.getProperty("idea.sync.active").toBoolean() ||
+        System.getProperty("konture.applyPlugin").toBoolean() ||
         System.getenv("KONTURE_APPLY_PLUGIN") == "true"
     if (applyPlugin) {
         repositories {
@@ -24,9 +24,11 @@ buildscript {
     }
 }
 
-val applyPlugin = System.getProperty("idea.active") == "true" ||
-    System.getProperty("idea.sync.active") == "true" ||
-    System.getProperty("konture.applyPlugin") == "true" ||
+fun isPropertyTrue(key: String): Boolean = System.getProperty(key).toBoolean()
+
+val applyPlugin = isPropertyTrue("idea.active") ||
+    isPropertyTrue("idea.sync.active") ||
+    isPropertyTrue("konture.applyPlugin") ||
     System.getenv("KONTURE_APPLY_PLUGIN") == "true"
 
 enableFeaturePreview("NO_IMPLICIT_LOOKUP_IN_PARENT_PROJECTS")

@@ -22,11 +22,11 @@ konture = { id = "io.github.baole.konture", version.ref = "konture" }
 konture = { group = "io.github.baole", name = "konture", version.ref = "konture" }
 ```
 
-Apply the plugin in the root `build.gradle.kts`:
+Apply the plugin in `settings.gradle.kts`:
 
 ```kotlin
 plugins {
-    alias(libs.plugins.konture) apply true
+    alias(libs.plugins.konture)
 }
 ```
 
@@ -35,7 +35,6 @@ Configure the dedicated test module (`konture-test/build.gradle.kts`):
 ```kotlin
 plugins {
     kotlin("jvm")
-    alias(libs.plugins.konture)
 }
 
 dependencies {
@@ -53,11 +52,11 @@ that affects the whole project and is out of scope for a Konture integration tas
 Ask the user first if you think a catalog would help; otherwise use the
 literal form:
 
-Root `build.gradle.kts`:
+`settings.gradle.kts`:
 
 ```kotlin
 plugins {
-    id("io.github.baole.konture") version "<latest-version>" apply true
+    id("io.github.baole.konture") version "<latest-version>"
 }
 ```
 
@@ -66,7 +65,6 @@ Dedicated test module `build.gradle.kts`:
 ```kotlin
 plugins {
     kotlin("jvm")
-    id("io.github.baole.konture")
 }
 
 dependencies {

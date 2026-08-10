@@ -60,7 +60,7 @@ project's intended architecture is unclear.
    `:konture-test` or `:architecture-tests`.
 2. If no dedicated module exists, report that the setup is missing and recommend
    creating one rather than placing architecture tests inside production modules.
-3. Confirm the test module applies the Konture Gradle plugin (`alias(libs.plugins.konture)` or `id("io.github.baole.konture")`) and has `testImplementation(libs.konture)`. Confirm it reuses the project's existing test framework dependencies (e.g. `libs.junit.jupiter`, `libs.kotest`, `libs.kotlin.test`). Note: `konture-test` does **not** need `testImplementation(project(":..."))` dependencies on production modules, as Konture discovers multi-module layout and source files automatically via its Gradle plugin.
+3. Confirm `settings.gradle.kts` applies the Konture Gradle plugin (`alias(libs.plugins.konture)` or `id("io.github.baole.konture")`) and the test module has `testImplementation(libs.konture)`. Confirm it reuses the project's existing test framework dependencies (e.g. `libs.junit.jupiter`, `libs.kotest`, `libs.kotlin.test`). Note: `konture-test` does **not** need `testImplementation(project(":..."))` dependencies on production modules, as Konture discovers multi-module layout and source files automatically via its Gradle plugin.
 
 ## Phase 5 — Write compile-safe Konture tests
 Use the Konture DSL APIs that are present in the installed project version.
