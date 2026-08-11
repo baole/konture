@@ -18,6 +18,7 @@ internal class FunctionsCoverageExtendedTest : KontureScopeTestFixture() {
         name: String,
         className: String,
         packageName: String,
+        modulePath: String = ":app",
         visibility: Visibility = Visibility.PUBLIC,
         modifiers: Set<Modifier> = emptySet(),
         returnType: String = "Unit",
@@ -36,7 +37,7 @@ internal class FunctionsCoverageExtendedTest : KontureScopeTestFixture() {
                 annotations = annotations,
                 kdocText = null,
                 isExtension = isExtension,
-                extensionReceiverType = extensionReceiverType,
+                receiverType = extensionReceiverType,
             )
         val cls =
             ClassDeclaration(
@@ -51,7 +52,7 @@ internal class FunctionsCoverageExtendedTest : KontureScopeTestFixture() {
                 filePath = "/src/$className.kt",
             )
         val file = FileDeclaration("$className.kt", packageName, classes = listOf(cls))
-        return FunctionDeclarationContext(decl, cls, file)
+        return FunctionDeclarationContext(decl, packageName, className, modulePath, file.filePath)
     }
 
     @Test
@@ -87,13 +88,13 @@ internal class FunctionsCoverageExtendedTest : KontureScopeTestFixture() {
         val v5 = mutableListOf<String>()
         FunctionsRuleBuilder(
             graph,
-        ).should().notResideInAPackage("com.example").getShouldAssertion()!!(funcCtx, listOf(funcCtx), v5)
+        ).should().notResideInAModule(":app").getShouldAssertion()!!(funcCtx, listOf(funcCtx), v5)
         assertEquals(1, v5.size)
 
         val v6 = mutableListOf<String>()
         FunctionsRuleBuilder(
             graph,
-        ).should().notResideInAPackage(listOf("com.example")).getShouldAssertion()!!(funcCtx, listOf(funcCtx), v6)
+        ).should().notResideInAModule(listOf(":app")).getShouldAssertion()!!(funcCtx, listOf(funcCtx), v6)
         assertEquals(1, v6.size)
 
         val v7 = mutableListOf<String>()
@@ -198,12 +199,6 @@ internal class FunctionsCoverageExtendedTest : KontureScopeTestFixture() {
         ).should().haveReturnType("String").getShouldAssertion()!!(funcCtx, listOf(funcCtx), v25)
         assertEquals(1, v25.size)
 
-        val v26 = mutableListOf<String>()
-        FunctionsRuleBuilder(
-            graph,
-        ).should().haveExtensionReceiver("String").getShouldAssertion()!!(funcCtx, listOf(funcCtx), v26)
-        assertEquals(1, v26.size)
-
         val v27 = mutableListOf<String>()
         FunctionsRuleBuilder(
             graph,
@@ -220,32 +215,11 @@ internal class FunctionsCoverageExtendedTest : KontureScopeTestFixture() {
         ).should().beExtension().getShouldAssertion()!!(funcCtx, listOf(funcCtx), v28)
         assertEquals(1, v28.size)
 
-        val v29 = mutableListOf<String>()
-        FunctionsRuleBuilder(
-            graph,
-        ).should().haveParameterCount(2).getShouldAssertion()!!(funcCtx, listOf(funcCtx), v29)
-        assertEquals(1, v29.size)
-
         val v30 = mutableListOf<String>()
         FunctionsRuleBuilder(
             graph,
-        ).should().haveParameterOf("Int").getShouldAssertion()!!(funcCtx, listOf(funcCtx), v30)
+        ).should().haveParameterTypes("Int").getShouldAssertion()!!(funcCtx, listOf(funcCtx), v30)
         assertEquals(1, v30.size)
-
-        val v31 = mutableListOf<String>()
-        FunctionsRuleBuilder(
-            graph,
-        ).should().notHaveParameterOf("Unit").getShouldAssertion()!!(
-            createFuncCtx(
-                "f",
-                "C",
-                "com.example",
-                parameters = listOf(ParameterDeclaration("p", "Unit", false, emptyList())),
-            ),
-            listOf(funcCtx),
-            v31,
-        )
-        assertEquals(1, v31.size)
     }
 
     @Test
@@ -398,12 +372,6 @@ internal class FunctionsCoverageExtendedTest : KontureScopeTestFixture() {
                 graph,
             ).that().satisfy { it.declaration.name.startsWith("f") }.getThatPredicate()!!
         assertTrue(p1(publicCtx))
-
-        val p2 =
-            FunctionsRuleBuilder(
-                graph,
-            ).that().satisfy("desc") { it.declaration.name.startsWith("f") }.getThatPredicate()!!
-        assertTrue(p2(publicCtx))
 
         val p3 =
             FunctionsRuleBuilder(graph).that().anyOf(

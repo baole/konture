@@ -1,8 +1,8 @@
-# Architecture Drift in Android & KMP Monorepos: How Big Codebases Rot (and How to Stop It)
+# Architecture Drift in Android & KMP Monorepos: How Big Codebases Rot and How to Stop It
 
 _A 40-module Android or Kotlin Multiplatform repository rarely becomes hard to change because somebody chose the wrong top-level architecture. It becomes hard to change because one reasonable shortcut at a time turns boundaries into suggestions._
 
-![Healthy and drifting feature dependency graphs](../assets/images/android-kmp-architecture-drift.svg)
+![Healthy and drifting feature dependency graphs](../assets/images/android-kmp-architecture-drift.svg.png)
 
 Imagine a checkout team needs a profile capability: perhaps the customer’s delivery preferences. The fastest implementation is tempting:
 
@@ -33,7 +33,7 @@ In an Android or KMP monorepo, it commonly appears in three forms.
 | --- | --- | --- |
 | **Sideways feature coupling** | `:feature:checkout:impl` depends on `:feature:profile:impl` | Feature work and refactors require more cross-team coordination; a change in one feature can constrain another. |
 | **Shared-core inflation** | A feature-specific concern moves into `:shared` because it is convenient to import everywhere | The shared module becomes an unowned integration layer; platform and feature changes gain a larger blast radius. |
-| **KMP portability leakage** | Common code reaches a platform-specific module or API | The repository discovers its platform boundary at compile or integration time instead of at the design boundary. |
+| **KMP contract distortion** | An `expect`/`actual` façade copies an Android-first lifecycle, storage, navigation, or purchase-flow assumption into a broadly shared contract | Every target must now model a policy it may not own; the shared API becomes harder to evolve even though every source set compiles. |
 
 The key point is that drift has a direction. A deliberate module graph lets code depend through stable APIs and shared foundations. A drifting graph lets implementation detail travel sideways and upward until the original shape is no longer meaningful.
 
@@ -71,9 +71,11 @@ If the answer is routinely no, the graph is carrying hidden organizational coupl
 
 ### KMP raises the stakes
 
-KMP makes the distinction between a logical boundary and a platform boundary more visible. `commonMain` is a promise that code can be shared across targets. If shared code can freely depend on Android, JVM, iOS, or feature implementation detail, that promise becomes conditional.
+KMP raises a more subtle problem than a direct Android import in `commonMain`. The compiler should reject that import when the symbol is unavailable to every target. That is useful, but it is not the architectural decision teams struggle with at scale.
 
-The fix is not to make all shared code generic. It is to make the dependency direction intentional. Platform adapters belong at platform edges; feature-specific behavior belongs behind a feature contract; genuinely reusable policy belongs in a deliberately owned core. When those decisions are untested, a platform-specific or feature-specific import can quietly redefine what “shared” means.
+The harder failure is a shared contract that compiles on every target while carrying the semantics of one platform or application. For example, an Android-first notion of foreground lifecycle, task back-stack, encrypted preferences, or purchase flow can be placed behind an `expect`/`actual` API and injected into broadly shared business code. Each platform supplies an `actual`, so the build is green. Yet desktop, iOS, or a backend target may now have to imitate an Android product policy it does not own.
+
+The compiler can prove that every target has an implementation. It cannot decide whether the abstraction belongs in shared policy, whether it has a clear owner, or whether its semantics are stable across targets. Those are architecture questions. Platform adapters belong at platform edges; feature-specific behavior belongs behind a feature contract; genuinely reusable policy belongs in a deliberately owned core. Do not equate “compiles for every target” with “is a healthy shared boundary.”
 
 ## A clear example: the Checkout-to-Profile leak
 
@@ -225,7 +227,7 @@ Most established monorepos already have violations. Failing every existing depen
 
 Use a progressive rollout instead:
 
-1. **Map the current graph.** Identify the highest-cost edges: sibling implementation dependencies, cycles, platform leakage into shared code, and modules that have no clear owner.
+1. **Map the current graph.** Identify the highest-cost edges: sibling implementation dependencies, cycles, Android-first contracts pushed into shared code, and modules that have no clear owner.
 2. **Choose one policy per boundary.** Start with a rule that answers a real recurring review comment, such as “feature implementations never depend on sibling implementations.”
 3. **Freeze the boundary.** Make the rule blocking for new violations. If existing debt must remain temporarily, baseline it or scope the first rule so the team can prevent regression while planning repairs.
 4. **Repair by contract, not by relocation.** Moving a class to `:shared` only improves the design if it has a shared owner, stable semantics, and a reason to be portable. Otherwise, expose the narrow API that the consumer actually needs.
@@ -241,7 +243,7 @@ Architecture drift is often visible before it becomes a large refactor:
 - Teams ask who owns a type that is imported across multiple features.
 - A “shared” module collects feature-specific behavior because it is easy to depend on.
 - A change request expands from one feature to several simply because implementation details are connected.
-- KMP code becomes difficult to reuse because platform or application dependencies have crept into the shared path.
+- Shared KMP APIs accumulate `expect`/`actual` contracts that force other targets to simulate Android-first product behavior.
 
 These are not reasons to centralize all design decisions in one architecture group. They are signals that the repository lacks a shared, executable answer to a recurring question.
 

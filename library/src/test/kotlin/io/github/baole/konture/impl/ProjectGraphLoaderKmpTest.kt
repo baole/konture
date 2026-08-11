@@ -6,21 +6,24 @@
 
 package io.github.baole.konture.impl
 
-import io.github.baole.konture.BuildModel
-import io.github.baole.konture.DependencyEdge
 import io.github.baole.konture.KontureScopeTestFixture
-import io.github.baole.konture.LayoutModel
-import io.github.baole.konture.ModuleModel
-import io.github.baole.konture.SourceSetKind
-import io.github.baole.konture.SourceSetModel
+import io.github.baole.konture.core.BuildModel
+import io.github.baole.konture.core.DependencyEdge
+import io.github.baole.konture.core.LayoutModel
+import io.github.baole.konture.core.ModuleModel
+import io.github.baole.konture.core.SourceSetKind
+import io.github.baole.konture.core.SourceSetModel
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.io.TempDir
 import java.io.ByteArrayInputStream
 import java.io.File
 
 internal class ProjectGraphLoaderKmpTest : KontureScopeTestFixture() {
+    @TempDir
+    lateinit var tempDir: File
     private val json = Json { ignoreUnknownKeys = true }
 
     @Test

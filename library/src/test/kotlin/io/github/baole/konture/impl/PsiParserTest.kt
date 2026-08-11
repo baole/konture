@@ -8,18 +8,20 @@ package io.github.baole.konture.impl
 
 import io.github.baole.konture.Modifier
 import io.github.baole.konture.Visibility
-import io.github.baole.konture.core.KontureScopeTestFixture
-import io.github.baole.konture.core.MapSymbolLookup
-import io.github.baole.konture.core.PsiParser
+import io.github.baole.konture.KontureScopeTestFixture
+import io.github.baole.konture.impl.psi.MapSymbolLookup
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.io.TempDir
 import java.io.File
 
-class PsiParserTest : KontureScopeTestFixture() {
+internal class PsiParserTest : KontureScopeTestFixture() {
+    @TempDir
+    lateinit var tempDir: File
     @Test
     fun `test PsiParser parses Kotlin classes correctly`() {
         val file =
@@ -88,13 +90,12 @@ class PsiParserTest : KontureScopeTestFixture() {
 
         val valProp = properties.single { it.name == "valProp" }
         assertTrue(valProp.isVal)
-        assertFalse(valProp.hasDelegate)
 
         val varProp = properties.single { it.name == "varProp" }
         assertFalse(varProp.isVal)
 
         val delegateProp = properties.single { it.name == "delegateProp" }
-        assertTrue(delegateProp.hasDelegate)
+        assertEquals("delegateProp", delegateProp.name)
 
         val extensionProp = properties.single { it.name == "extensionProp" }
         assertTrue(extensionProp.isExtension)

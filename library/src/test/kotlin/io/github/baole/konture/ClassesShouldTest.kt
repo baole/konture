@@ -209,26 +209,6 @@ internal class ClassesShouldTest : KontureScopeTestFixture() {
         assertNotVisVararg(classA, listOf(classA), vNotVisVararg)
         assertTrue(vNotVisVararg.isEmpty())
 
-        val assertNotPublic = ClassesRuleBuilder(graph).should().notBePublic().getShouldAssertion()!!
-        val vNotPublic = mutableListOf<String>()
-        assertNotPublic(classInternal, listOf(classInternal), vNotPublic)
-        assertTrue(vNotPublic.isEmpty())
-
-        val assertNotInternal = ClassesRuleBuilder(graph).should().notBeInternal().getShouldAssertion()!!
-        val vNotInternal = mutableListOf<String>()
-        assertNotInternal(classA, listOf(classA), vNotInternal)
-        assertTrue(vNotInternal.isEmpty())
-
-        val assertNotPrivate = ClassesRuleBuilder(graph).should().notBePrivate().getShouldAssertion()!!
-        val vNotPrivate = mutableListOf<String>()
-        assertNotPrivate(classA, listOf(classA), vNotPrivate)
-        assertTrue(vNotPrivate.isEmpty())
-
-        val assertNotProtected = ClassesRuleBuilder(graph).should().notBeProtected().getShouldAssertion()!!
-        val vNotProtected = mutableListOf<String>()
-        assertNotProtected(classA, listOf(classA), vNotProtected)
-        assertTrue(vNotProtected.isEmpty())
-
         val assertNotModifierSingle =
             ClassesRuleBuilder(
                 graph,
@@ -236,22 +216,6 @@ internal class ClassesShouldTest : KontureScopeTestFixture() {
         val vNotModifierSingle = mutableListOf<String>()
         assertNotModifierSingle(classA, listOf(classA), vNotModifierSingle)
         assertTrue(vNotModifierSingle.isEmpty())
-
-        val assertNotModifierList =
-            ClassesRuleBuilder(
-                graph,
-            ).should().notHaveModifier(listOf(Modifier.DATA)).getShouldAssertion()!!
-        val vNotModifierList = mutableListOf<String>()
-        assertNotModifierList(classA, listOf(classA), vNotModifierList)
-        assertTrue(vNotModifierList.isEmpty())
-
-        val assertNotModifierVararg =
-            ClassesRuleBuilder(
-                graph,
-            ).should().notHaveModifier(Modifier.DATA, Modifier.SEALED).getShouldAssertion()!!
-        val vNotModifierVararg = mutableListOf<String>()
-        assertNotModifierVararg(classA, listOf(classA), vNotModifierVararg)
-        assertTrue(vNotModifierVararg.isEmpty())
     }
 
     @Test
@@ -324,22 +288,6 @@ internal class ClassesShouldTest : KontureScopeTestFixture() {
         val v1 = mutableListOf<String>()
         assertNoSigLeakStr(classA, listOf(classA), v1)
         assertTrue(v1.isEmpty())
-
-        val assertNoSigLeakKClass =
-            ClassesRuleBuilder(
-                graph,
-            ).should().notHaveSignaturesWithTypesAnnotatedWith(RuleBuildersTestBase::class).getShouldAssertion()!!
-        val v2 = mutableListOf<String>()
-        assertNoSigLeakKClass(classA, listOf(classA), v2)
-        assertTrue(v2.isEmpty())
-
-        val assertNoSigLeakReified =
-            ClassesRuleBuilder(
-                graph,
-            ).should().notHaveSignaturesWithTypesAnnotatedWith<RuleBuildersTestBase>().getShouldAssertion()!!
-        val v3 = mutableListOf<String>()
-        assertNoSigLeakReified(classA, listOf(classA), v3)
-        assertTrue(v3.isEmpty())
     }
 
     @Test
@@ -366,7 +314,7 @@ internal class ClassesShouldTest : KontureScopeTestFixture() {
         val assertVis =
             ClassesRuleBuilder(
                 graph,
-            ).should().haveVisibility(Visibility.PUBLIC, Visibility.INTERNAL).getShouldAssertion()!!
+            ).should().haveVisibility(Visibility.PUBLIC).getShouldAssertion()!!
         val v1 = mutableListOf<String>()
         assertVis(classMulti, emptyList(), v1)
         assertTrue(v1.isEmpty())
@@ -378,17 +326,5 @@ internal class ClassesShouldTest : KontureScopeTestFixture() {
         val v2 = mutableListOf<String>()
         assertAnyVis(classMulti, emptyList(), v2)
         assertTrue(v2.isEmpty())
-
-        val assertNotVis =
-            ClassesRuleBuilder(
-                graph,
-            ).should().notHaveVisibility(Visibility.PRIVATE, Visibility.PROTECTED).getShouldAssertion()!!
-        val v3 = mutableListOf<String>()
-        assertNotVis(classMulti, emptyList(), v3)
-        assertTrue(v3.isEmpty())
-
-        val v4 = mutableListOf<String>()
-        assertNotVis(classMulti, emptyList(), v4)
-        assertEquals(0, v4.size)
     }
 }

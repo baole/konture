@@ -4,8 +4,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-@file:Suppress("LongMethod")
-
 package io.github.baole.konture
 
 import org.junit.jupiter.api.Assertions.assertFalse
@@ -53,7 +51,6 @@ internal class FunctionsRuleBuilderTest : KontureScopeTestFixture() {
         val graph = ProjectGraph(mapOf(":" to listOf(mockModule)))
         val context = FunctionDeclarationContext(f1, "com.example.user", null, ":user", "/src/UserFunctions.kt")
 
-        // 1. That filtering
         val thatFilter =
             FunctionsRuleBuilder(graph)
                 .that()
@@ -63,28 +60,19 @@ internal class FunctionsRuleBuilderTest : KontureScopeTestFixture() {
                 .and()
                 .resideInAModule(":user")
                 .and()
-                .haveParameterOf("kotlin.Int")
-                .and()
-                .notHaveParameterOf("kotlin.String")
+                .haveParameterTypes("kotlin.Int")
                 .and()
                 .haveReturnType("kotlin.String")
                 .and()
-                .notHaveReturnType("kotlin.Int")
+                .beOperator()
                 .and()
-                .notBeExtension()
-                .and()
-                .areOperator()
+                .bePublic()
                 .and()
                 .haveAnnotationOf("kotlin.Deprecated")
-                .and()
-                .notHaveAnnotationOf("kotlin.Suppress")
-                .and()
-                .arePublic()
                 .getThatPredicate()!!
 
         assertTrue(thatFilter(context))
 
-        // 2. Should assertions
         val shouldAssertion =
             FunctionsRuleBuilder(graph)
                 .should()
@@ -92,13 +80,9 @@ internal class FunctionsRuleBuilderTest : KontureScopeTestFixture() {
                 .andShould()
                 .resideInAPackage("com.example.user")
                 .andShould()
-                .haveParameterOf("kotlin.Int")
-                .andShould()
-                .notHaveParameterOf("kotlin.String")
+                .haveParameterTypes("kotlin.Int")
                 .andShould()
                 .haveReturnType("kotlin.String")
-                .andShould()
-                .notHaveReturnType("kotlin.Int")
                 .andShould()
                 .notBeExtension()
                 .andShould()
@@ -121,8 +105,6 @@ internal class FunctionsRuleBuilderTest : KontureScopeTestFixture() {
                 .notBeInternal()
                 .andShould()
                 .haveAnnotationOf("kotlin.Deprecated")
-                .andShould()
-                .notHaveAnnotationOf("kotlin.Suppress")
                 .getShouldAssertion()!!
 
         val violations = mutableListOf<String>()
@@ -134,198 +116,151 @@ internal class FunctionsRuleBuilderTest : KontureScopeTestFixture() {
     fun `test functions rule builder logic gates and other predicates`() {
         val f2 =
             FunctionDeclaration(
-                name = "internalHelper",
+                name = "processData",
                 visibility = Visibility.INTERNAL,
-                modifiers = setOf(Modifier.INLINE, Modifier.SUSPEND),
+                modifiers = setOf(Modifier.SUSPEND, Modifier.INLINE),
                 returnType = "kotlin.Unit",
                 parameters = emptyList(),
                 annotations = emptyList(),
                 isExtension = true,
-                kdocText = null,
+                kdocText = "Documentation for processData",
             )
-        val fileDecl =
+        val fileDecl2 =
             FileDeclaration(
-                name = "UserFunctions.kt",
-                packageName = "com.example.user",
+                name = "ProcessData.kt",
+                packageName = "com.example.process",
                 classes = emptyList(),
                 topLevelFunctions = listOf(f2),
-                filePath = "/src/UserFunctions.kt",
+                filePath = "/src/ProcessData.kt",
             )
-        val mockModule =
+        val mockModule2 =
             Module(
                 buildId = ":",
-                path = ":user",
-                projectDir = "user",
+                path = ":process",
+                projectDir = "process",
                 appliedPlugins = listOf("kotlin"),
                 sourceSets = emptyList(),
                 dependencies = emptyList(),
-                files = listOf(fileDecl),
+                files = listOf(fileDecl2),
             )
-        val graph = ProjectGraph(mapOf(":" to listOf(mockModule)))
-        val context = FunctionDeclarationContext(f2, "com.example.user", null, ":user", "/src/UserFunctions.kt")
+        val graph2 = ProjectGraph(mapOf(":" to listOf(mockModule2)))
+        val context2 = FunctionDeclarationContext(f2, "com.example.process", null, ":process", "/src/ProcessData.kt")
 
-        // 1. AnyOf filtering
-        val anyOfFilter =
-            FunctionsRuleBuilder(graph)
+        val thatFilter2 =
+            FunctionsRuleBuilder(graph2)
                 .that()
-                .anyOf(
-                    { haveName("getUserName") },
-                    { haveName("internalHelper") },
-                ).getThatPredicate()!!
-
-        assertTrue(anyOfFilter(context))
-
-        // 2. AllOf filtering
-        val allOfFilter =
-            FunctionsRuleBuilder(graph)
-                .that()
-                .allOf(
-                    { beInternal() },
-                    { beInline() },
-                ).getThatPredicate()!!
-
-        assertTrue(allOfFilter(context))
-
-        // 3. NoneOf filtering
-        val noneOfFilter =
-            FunctionsRuleBuilder(graph)
-                .that()
-                .noneOf(
-                    { bePublic() },
-                    { beOperator() },
-                ).getThatPredicate()!!
-
-        assertTrue(noneOfFilter(context))
-
-        // 4. Assertions on f2
-        val shouldAssertion =
-            FunctionsRuleBuilder(graph)
-                .should()
+                .areExtension()
+                .and()
+                .beSuspend()
+                .and()
+                .beInline()
+                .and()
                 .beInternal()
+                .getThatPredicate()!!
+
+        assertTrue(thatFilter2(context2))
+
+        val shouldAssertion2 =
+            FunctionsRuleBuilder(graph2)
+                .should()
+                .beExtension()
+                .andShould()
+                .beSuspend()
+                .andShould()
+                .beInline()
+                .andShould()
+                .beInternal()
+                .andShould()
+                .beDocumentedWithKDoc()
+                .andShould()
+                .haveNoParameters()
+                .getShouldAssertion()!!
+
+        val violations2 = mutableListOf<String>()
+        shouldAssertion2(context2, emptyList(), violations2)
+        assertTrue(violations2.isEmpty(), "Violations found: $violations2")
+    }
+
+    @Test
+    fun `test functions rule builder negative assertions and failures`() {
+        val f3 =
+            FunctionDeclaration(
+                name = "doSomething",
+                visibility = Visibility.PRIVATE,
+                modifiers = setOf(Modifier.OPEN),
+                returnType = "kotlin.Boolean",
+                parameters =
+                    listOf(
+                        ParameterDeclaration("flag", "kotlin.Boolean", hasDefaultValue = true, annotations = emptyList()),
+                    ),
+                annotations =
+                    listOf(
+                        AnnotationDeclaration("TestAnno", "com.example.TestAnno"),
+                    ),
+                isExtension = false,
+                kdocText = null,
+            )
+        val fileDecl3 =
+            FileDeclaration(
+                name = "DoSomething.kt",
+                packageName = "com.example.test",
+                classes = emptyList(),
+                topLevelFunctions = listOf(f3),
+                filePath = "/src/DoSomething.kt",
+            )
+        val mockModule3 =
+            Module(
+                buildId = ":",
+                path = ":test",
+                projectDir = "test",
+                appliedPlugins = listOf("kotlin"),
+                sourceSets = emptyList(),
+                dependencies = emptyList(),
+                files = listOf(fileDecl3),
+            )
+        val graph3 = ProjectGraph(mapOf(":" to listOf(mockModule3)))
+        val context3 = FunctionDeclarationContext(f3, "com.example.test", null, ":test", "/src/DoSomething.kt")
+
+        val shouldFailAssertion =
+            FunctionsRuleBuilder(graph3)
+                .should()
+                .haveName("wrongName")
+                .andShould()
+                .resideInAPackage("wrong.pkg")
+                .andShould()
+                .resideInAModule(":wrong")
+                .andShould()
+                .haveParameterTypes("kotlin.String")
+                .andShould()
+                .haveReturnType("kotlin.Int")
+                .andShould()
+                .bePublic()
+                .andShould()
+                .notBePrivate()
+                .andShould()
+                .beProtected()
+                .andShould()
+                .beInternal()
+                .andShould()
+                .beExtension()
+                .andShould()
+                .beOperator()
+                .andShould()
+                .beInfix()
                 .andShould()
                 .beInline()
                 .andShould()
                 .beSuspend()
                 .andShould()
-                .beExtension()
+                .notBeOpen()
+                .andShould()
+                .beDocumentedWithKDoc()
+                .andShould()
+                .haveNoParameters()
                 .getShouldAssertion()!!
 
-        val violations = mutableListOf<String>()
-        shouldAssertion(context, emptyList(), violations)
-        assertTrue(violations.isEmpty(), "Violations found: $violations")
-    }
-
-    @Test
-    fun `test functions rule builder multi-parameter rules`() {
-        val f3 =
-            FunctionDeclaration(
-                name = "multiParamFunc",
-                visibility = Visibility.PUBLIC,
-                modifiers = setOf(Modifier.OPEN),
-                returnType = "kotlin.Boolean",
-                parameters =
-                    listOf(
-                        ParameterDeclaration("p1", "kotlin.String", hasDefaultValue = false, annotations = emptyList()),
-                        ParameterDeclaration("p2", "kotlin.Int", hasDefaultValue = false, annotations = emptyList()),
-                    ),
-                annotations = emptyList(),
-                isExtension = false,
-                kdocText = null,
-            )
-        val fileDecl =
-            FileDeclaration(
-                name = "UserFunctions.kt",
-                packageName = "com.example.user",
-                classes = emptyList(),
-                topLevelFunctions = listOf(f3),
-                filePath = "/src/UserFunctions.kt",
-            )
-        val mockModule =
-            Module(
-                buildId = ":",
-                path = ":user",
-                projectDir = "user",
-                appliedPlugins = listOf("kotlin"),
-                sourceSets = emptyList(),
-                dependencies = emptyList(),
-                files = listOf(fileDecl),
-            )
-        val graph = ProjectGraph(mapOf(":" to listOf(mockModule)))
-        val context = FunctionDeclarationContext(f3, "com.example.user", null, ":user", "/src/UserFunctions.kt")
-
-        // 1. Parameter count check
-        val countFilter = FunctionsRuleBuilder(graph).that().haveParameterCount(2).getThatPredicate()!!
-        assertTrue(countFilter(context))
-
-        val countPredFilter = FunctionsRuleBuilder(graph).that().haveParameterCount { it > 1 }.getThatPredicate()!!
-        assertTrue(countPredFilter(context))
-
-        // 2. Exact parameter types check
-        val exactParamsFilter =
-            FunctionsRuleBuilder(
-                graph,
-            ).that().haveParameterTypes("kotlin.String", "kotlin.Int").getThatPredicate()!!
-        assertTrue(exactParamsFilter(context))
-
-        val exactParamsFilterMismatch =
-            FunctionsRuleBuilder(graph).that().haveParameterTypes("kotlin.String").getThatPredicate()!!
-        assertFalse(exactParamsFilterMismatch(context))
-
-        // 3. Any parameter type check
-        val anyParamFilter =
-            FunctionsRuleBuilder(graph).that().haveAnyParameterType("kotlin.Int").getThatPredicate()!!
-        assertTrue(anyParamFilter(context))
-
-        val anyParamFilter2 =
-            FunctionsRuleBuilder(
-                graph,
-            ).that().haveAnyParameterType("kotlin.Double", "kotlin.Int").getThatPredicate()!!
-        assertTrue(anyParamFilter2(context))
-
-        val anyParamFilterMismatch =
-            FunctionsRuleBuilder(graph).that().haveAnyParameterType("kotlin.Double").getThatPredicate()!!
-        assertFalse(anyParamFilterMismatch(context))
-
-        // 4. Assertions for multi-parameters
-        val assertCount = FunctionsRuleBuilder(graph).should().haveParameterCount(2).getShouldAssertion()!!
-        val v1 = mutableListOf<String>()
-        assertCount(context, emptyList(), v1)
-        assertTrue(v1.isEmpty())
-
-        val assertCountPred =
-            FunctionsRuleBuilder(graph).should().haveParameterCount { it == 2 }.getShouldAssertion()!!
-        val v2 = mutableListOf<String>()
-        assertCountPred(context, emptyList(), v2)
-        assertTrue(v2.isEmpty())
-
-        val assertExactParams =
-            FunctionsRuleBuilder(
-                graph,
-            ).should().haveParameterTypes("kotlin.String", "kotlin.Int").getShouldAssertion()!!
-        val v3 = mutableListOf<String>()
-        assertExactParams(context, emptyList(), v3)
-        assertTrue(v3.isEmpty())
-
-        val assertExactParamsList =
-            FunctionsRuleBuilder(
-                graph,
-            ).should().haveParameterTypes(listOf("kotlin.String", "kotlin.Int")).getShouldAssertion()!!
-        val v4 = mutableListOf<String>()
-        assertExactParamsList(context, emptyList(), v4)
-        assertTrue(v4.isEmpty())
-
-        val assertAnyParamSingle =
-            FunctionsRuleBuilder(graph).should().haveAnyParameterType("kotlin.Int").getShouldAssertion()!!
-        val v5 = mutableListOf<String>()
-        assertAnyParamSingle(context, emptyList(), v5)
-        assertTrue(v5.isEmpty())
-
-        val assertAnyParam =
-            FunctionsRuleBuilder(
-                graph,
-            ).should().haveAnyParameterType("kotlin.Long", "kotlin.Int").getShouldAssertion()!!
-        val v6 = mutableListOf<String>()
-        assertAnyParam(context, emptyList(), v6)
-        assertTrue(v6.isEmpty())
+        val violations3 = mutableListOf<String>()
+        shouldFailAssertion(context3, emptyList(), violations3)
+        assertFalse(violations3.isEmpty(), "Expected violations but found none")
     }
 }

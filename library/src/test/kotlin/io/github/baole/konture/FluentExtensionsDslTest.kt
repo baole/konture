@@ -14,6 +14,114 @@ import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 
 internal class FluentExtensionsDslTest : KontureScopeTestFixture() {
+    private lateinit var graph: ProjectGraph
+    private lateinit var module: Module
+    private lateinit var file1: FileDeclaration
+    private lateinit var file2: FileDeclaration
+    private lateinit var myClassA: ClassDeclaration
+    private lateinit var myClassB: ClassDeclaration
+    private lateinit var param1: ParameterDeclaration
+    private lateinit var anno1: AnnotationDeclaration
+    private lateinit var anno2: AnnotationDeclaration
+    private lateinit var func1: FunctionDeclaration
+    private lateinit var prop1: PropertyDeclaration
+    private lateinit var fileCtx1: FileDeclarationContext
+    private lateinit var funcCtx1: FunctionDeclarationContext
+    private lateinit var propCtx1: PropertyDeclarationContext
+
+    @org.junit.jupiter.api.BeforeEach
+    fun initLocalFixture() {
+        anno1 = AnnotationDeclaration("MyAnnotation", "com.example.MyAnnotation")
+        anno2 = AnnotationDeclaration("OtherAnnotation", "com.example.OtherAnnotation")
+        param1 = ParameterDeclaration("param1", "String", hasDefaultValue = false, annotations = emptyList())
+
+        myClassA =
+            ClassDeclaration(
+                name = "ClassA",
+                fqName = "com.example.ClassA",
+                packageName = "com.example",
+                isInterface = false,
+                isAbstract = false,
+                annotations = listOf(anno1),
+                imports = emptyList(),
+                referencedTypes = emptySet(),
+                filePath = "/src/ClassA.kt",
+            )
+        myClassB =
+            ClassDeclaration(
+                name = "ClassB",
+                fqName = "com.example.ClassB",
+                packageName = "com.example",
+                isInterface = false,
+                isAbstract = false,
+                annotations = emptyList(),
+                imports = emptyList(),
+                referencedTypes = emptySet(),
+                filePath = "/src/ClassB.kt",
+            )
+
+        func1 =
+            FunctionDeclaration(
+                name = "funcNormal",
+                visibility = Visibility.PUBLIC,
+                modifiers = emptySet(),
+                returnType = "Unit",
+                parameters = listOf(param1),
+                annotations = listOf(anno1, anno2),
+                kdocText = "some function kdoc",
+                isExtension = false,
+            )
+        prop1 =
+            PropertyDeclaration(
+                name = "propVal",
+                visibility = Visibility.PUBLIC,
+                modifiers = emptySet(),
+                type = "String",
+                isVal = true,
+                annotations = listOf(anno1),
+                kdocText = "some property kdoc",
+                isExtension = false,
+            )
+
+        file1 =
+            FileDeclaration(
+                name = "ClassA.kt",
+                packageName = "com.example",
+                imports = listOf("com.example.other.*", "java.util.List"),
+                classes = listOf(myClassA),
+                topLevelFunctions = emptyList(),
+                topLevelProperties = emptyList(),
+                filePath = "/src/ClassA.kt",
+            )
+        file2 =
+            FileDeclaration(
+                name = "ClassB.kt",
+                packageName = "com.example",
+                imports = emptyList(),
+                classes = listOf(myClassB),
+                topLevelFunctions = emptyList(),
+                topLevelProperties = emptyList(),
+                filePath = "/src/ClassB.kt",
+            )
+
+        module =
+            Module(
+                buildId = "myBuild",
+                path = ":submodule",
+                projectDir = "/src/submodule",
+                appliedPlugins = listOf("kotlin"),
+                sourceSets = emptyList(),
+                dependencies = emptyList(),
+                files = listOf(file1, file2),
+            )
+
+        graph = ProjectGraph(mapOf("myBuild" to listOf(module)))
+
+        fileCtx1 = FileDeclarationContext(file1, ":submodule")
+        funcCtx1 = FunctionDeclarationContext(func1, "com.example", "ClassA", ":submodule", "/src/ClassA.kt")
+        propCtx1 = PropertyDeclarationContext(prop1, "com.example", "ClassA", ":submodule", "/src/ClassA.kt")
+    }
+
     @Test
     fun `test ModuleShouldContext`() {
         val violations = mutableListOf<String>()
@@ -26,7 +134,7 @@ internal class FluentExtensionsDslTest : KontureScopeTestFixture() {
         assertTrue(context.sourceSets.isEmpty())
         assertTrue(context.dependencies.isEmpty())
         assertEquals(listOf(file1, file2), context.files)
-        assertEquals(listOf(classA, classB), context.classes)
+        assertEquals(listOf(myClassA, myClassB), context.classes)
 
         context.addViolation("Module error")
         assertEquals(1, violations.size)
@@ -35,9 +143,9 @@ internal class FluentExtensionsDslTest : KontureScopeTestFixture() {
 
     @Test
     fun `test extra semantic extensions on models`() {
-        assertTrue(classA.hasAnnotation("MyAnnotation"))
-        assertTrue(classA.hasAllAnnotations("MyAnnotation"))
-        assertTrue(classA.hasAnyAnnotation("MyAnnotation", "OtherAnnotation"))
+        assertTrue(myClassA.hasAnnotation("MyAnnotation"))
+        assertTrue(myClassA.hasAllAnnotations("MyAnnotation"))
+        assertTrue(myClassA.hasAnyAnnotation("MyAnnotation", "OtherAnnotation"))
 
         assertTrue(fileCtx1.hasImport { it.contains("java.util") })
         assertTrue(fileCtx1.hasImportContaining("other", "List"))
@@ -57,7 +165,7 @@ internal class FluentExtensionsDslTest : KontureScopeTestFixture() {
         assertEquals("ClassA.kt", fileCtx1.name)
         assertEquals("com.example", fileCtx1.packageName)
         assertEquals(listOf("com.example.other.*", "java.util.List"), fileCtx1.imports)
-        assertEquals(listOf(classA), fileCtx1.classes)
+        assertEquals(listOf(myClassA), fileCtx1.classes)
         assertTrue(fileCtx1.topLevelFunctions.isEmpty())
         assertTrue(fileCtx1.topLevelProperties.isEmpty())
 
