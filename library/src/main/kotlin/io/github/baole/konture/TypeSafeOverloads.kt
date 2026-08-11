@@ -314,7 +314,7 @@ infix fun FilesThat.resideInPackageOf(type: KClass<*>): FilesRuleBuilder =
 inline fun <reified T : Any> FilesThat.resideInPackageOf(): FilesRuleBuilder = resideInPackageOf(T::class)
 
 infix fun FilesShould.resideInPackageOf(type: KClass<*>): FilesRuleBuilder =
-    resideInAPackage(
+    resideInPackage(
         type.toKonturePackageReference().packageName,
     )
 
@@ -346,7 +346,13 @@ fun FunctionAssertionScope.haveReturnType(type: KClass<*>) {
     val expectedType = type.toKontureTypeReference()
     assertions.add { function, violations ->
         if (function.resolvedReturnType?.let { matchesKotlinType(it, expectedType) } != true) {
-            violations.add("should have return type '${type.kontureQualifiedName()}' (was '${function.returnType}')")
+            violations.add(
+                io.github.baole.konture.i18n.getMessage(
+                    "function.scope.haveReturnType",
+                    "'${type.kontureQualifiedName()}'",
+                    function.returnType,
+                ),
+            )
         }
     }
 }
@@ -364,7 +370,13 @@ fun PropertyAssertionScope.haveType(type: KClass<*>) {
     val expectedType = type.toKontureTypeReference()
     assertions.add { property, violations ->
         if (property.resolvedType?.let { matchesKotlinType(it, expectedType) } != true) {
-            violations.add("should have type '${type.kontureQualifiedName()}' (was '${property.type}')")
+            violations.add(
+                io.github.baole.konture.i18n.getMessage(
+                    "property.scope.haveType",
+                    "'${type.kontureQualifiedName()}'",
+                    property.type,
+                ),
+            )
         }
     }
 }

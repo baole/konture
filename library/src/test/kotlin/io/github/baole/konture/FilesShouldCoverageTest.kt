@@ -646,4 +646,77 @@ internal class FilesShouldCoverageTest : KontureScopeTestFixture() {
         ).getShouldAssertion()!!(fileCtxOtherUsage, listOf(fileCtxOtherUsage), vNotMod)
         assertEquals(1, vNotMod.size)
     }
+
+    @Test
+    fun `test FilesShould path and content alias assertions`() {
+        val fileCtx = FileDeclarationContext(fileA, ":app")
+        val graph =
+            ProjectGraph(
+                mapOf(":" to listOf(Module(":", ":app", "app", emptyList(), emptyList(), emptyList(), listOf(fileA)))),
+            )
+
+        fun assertPass(builder: FilesRuleBuilder) {
+            val v = mutableListOf<String>()
+            builder.getShouldAssertion()!!(fileCtx, listOf(fileCtx), v)
+            assertTrue(v.isEmpty())
+        }
+
+        assertPass(FilesRuleBuilder(graph).should().resideInAPackage("com.example"))
+        assertPass(FilesRuleBuilder(graph).should().resideInAPackage(listOf("com.example")))
+        assertPass(FilesRuleBuilder(graph).should().resideInAPackage("com.example", "com.other"))
+        assertPass(FilesRuleBuilder(graph).should().resideInAPackage { it.startsWith("com") })
+
+        assertPass(FilesRuleBuilder(graph).should().notResideInAPackage("com.other"))
+        assertPass(FilesRuleBuilder(graph).should().notResideInAPackage(listOf("com.other")))
+        assertPass(FilesRuleBuilder(graph).should().notResideInAPackage("com.other", "com.forbidden"))
+
+        assertPass(FilesRuleBuilder(graph).should().resideInAModule(":app"))
+        assertPass(FilesRuleBuilder(graph).should().resideInAModule(listOf(":app")))
+        assertPass(FilesRuleBuilder(graph).should().resideInAModule(":app", ":core"))
+
+        assertPass(FilesRuleBuilder(graph).should().notResideInAModule(":forbidden"))
+        assertPass(FilesRuleBuilder(graph).should().notResideInAModule(listOf(":forbidden")))
+        assertPass(FilesRuleBuilder(graph).should().notResideInAModule(":forbidden", ":other"))
+
+        assertPass(FilesRuleBuilder(graph).should().haveName(listOf("ClassA.kt")))
+        assertPass(FilesRuleBuilder(graph).should().haveName("ClassA.kt", "FileB.kt"))
+        assertPass(FilesRuleBuilder(graph).should().haveName { it.startsWith("ClassA") })
+
+        assertPass(FilesRuleBuilder(graph).should().notHaveName(listOf("Forbidden.kt")))
+        assertPass(FilesRuleBuilder(graph).should().notHaveName("Forbidden.kt", "Other.kt"))
+
+        assertPass(FilesRuleBuilder(graph).should().notHaveNameMatching("Forbidden*"))
+        assertPass(FilesRuleBuilder(graph).should().notHaveNameMatching(listOf("Forbidden*")))
+        assertPass(FilesRuleBuilder(graph).should().notHaveNameMatching("Forbidden*", "Other*"))
+
+        assertPass(FilesRuleBuilder(graph).should().notHaveNameStartingWith("Forbidden"))
+        assertPass(FilesRuleBuilder(graph).should().notHaveNameStartingWith(listOf("Forbidden")))
+        assertPass(FilesRuleBuilder(graph).should().notHaveNameStartingWith("Forbidden", "Other"))
+
+        assertPass(FilesRuleBuilder(graph).should().notHaveNameEndingWith("Forbidden.kt"))
+        assertPass(FilesRuleBuilder(graph).should().notHaveNameEndingWith(listOf("Forbidden.kt")))
+        assertPass(FilesRuleBuilder(graph).should().notHaveNameEndingWith("Forbidden.kt", "Other.kt"))
+
+        assertPass(FilesRuleBuilder(graph).should().haveOnlyOneClassPerFile())
+        assertPass(FilesRuleBuilder(graph).should().haveNameMatchingClassName())
+        assertPass(FilesRuleBuilder(graph).should().haveNoWildcardImports())
+
+        FilesRuleBuilder(graph).should().haveTopLevelFunctions()
+            .getShouldAssertion()!!(fileCtx, listOf(fileCtx), mutableListOf())
+
+        FilesRuleBuilder(graph).should().notHaveTopLevelFunctions()
+            .getShouldAssertion()!!(fileCtx, listOf(fileCtx), mutableListOf())
+
+        FilesRuleBuilder(graph).should().haveTopLevelProperties()
+            .getShouldAssertion()!!(fileCtx, listOf(fileCtx), mutableListOf())
+
+        FilesRuleBuilder(graph).should().notHaveTopLevelProperties()
+            .getShouldAssertion()!!(fileCtx, listOf(fileCtx), mutableListOf())
+
+        FilesRuleBuilder(graph).should().haveClasses()
+            .getShouldAssertion()!!(fileCtx, listOf(fileCtx), mutableListOf())
+
+        FilesRuleBuilder(graph).should().notHaveClasses()
+            .getShouldAssertion()!!(fileCtx, listOf(fileCtx), mutableListOf())
+    }
 }

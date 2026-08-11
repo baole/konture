@@ -1293,4 +1293,49 @@ internal class PropertiesCoverageTest : KontureScopeTestFixture() {
         PropertiesRuleBuilder(graph).should().noneOf({ beVar() }).getShouldAssertion()!!(propCtx, listOf(propCtx), v8)
         assertEquals(0, v8.size)
     }
+
+    @Test
+    fun `test PropertiesShould type and modifier alias assertions`() {
+        val propCtx = createPropCtx(name = "myProp", className = "ClassA", packageName = "com.example")
+        val graph =
+            ProjectGraph(
+                mapOf(":" to listOf(Module(":", ":app", "app", emptyList(), emptyList(), emptyList(), listOf(fileA)))),
+            )
+
+        fun assertPass(builder: PropertiesRuleBuilder) {
+            val v = mutableListOf<String>()
+            builder.getShouldAssertion()!!(propCtx, listOf(propCtx), v)
+            assertTrue(v.isEmpty())
+        }
+
+        assertPass(PropertiesRuleBuilder(graph).should().resideInAPackage("com.example"))
+        assertPass(PropertiesRuleBuilder(graph).should().notResideInAPackage("com.other"))
+        assertPass(PropertiesRuleBuilder(graph).should().resideInAModule(":app"))
+        assertPass(PropertiesRuleBuilder(graph).should().notResideInAModule(":forbidden"))
+
+        assertPass(PropertiesRuleBuilder(graph).should().haveName(listOf("myProp")))
+        assertPass(PropertiesRuleBuilder(graph).should().haveName("myProp", "otherProp"))
+        assertPass(PropertiesRuleBuilder(graph).should().haveName { it.startsWith("my") })
+
+        assertPass(PropertiesRuleBuilder(graph).should().notHaveName(listOf("forbiddenProp")))
+        assertPass(PropertiesRuleBuilder(graph).should().notHaveName("forbiddenProp", "otherProp"))
+
+        assertPass(PropertiesRuleBuilder(graph).should().notHaveNameMatching("forbidden*"))
+        assertPass(PropertiesRuleBuilder(graph).should().notHaveNameMatching(listOf("forbidden*")))
+        assertPass(PropertiesRuleBuilder(graph).should().notHaveNameMatching("forbidden*", "other*"))
+
+        assertPass(PropertiesRuleBuilder(graph).should().notHaveNameStartingWith("forbidden"))
+        assertPass(PropertiesRuleBuilder(graph).should().notHaveNameStartingWith(listOf("forbidden")))
+        assertPass(PropertiesRuleBuilder(graph).should().notHaveNameStartingWith("forbidden", "other"))
+
+        assertPass(PropertiesRuleBuilder(graph).should().notHaveNameEndingWith("Forbidden"))
+        assertPass(PropertiesRuleBuilder(graph).should().notHaveNameEndingWith(listOf("Forbidden")))
+        assertPass(PropertiesRuleBuilder(graph).should().notHaveNameEndingWith("Forbidden", "Other"))
+
+        assertPass(PropertiesRuleBuilder(graph).should().haveType(String::class))
+        assertPass(PropertiesRuleBuilder(graph).should().haveType(listOf("String")))
+        assertPass(PropertiesRuleBuilder(graph).should().haveType("String", "Int"))
+        assertPass(PropertiesRuleBuilder(graph).should().haveTypeIn(listOf("String")))
+        assertPass(PropertiesRuleBuilder(graph).should().haveTypeIn("String", "Int"))
+    }
 }

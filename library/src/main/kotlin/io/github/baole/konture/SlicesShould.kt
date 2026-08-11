@@ -142,7 +142,7 @@ class SlicesShould(private val builder: SlicesRuleBuilder) {
         builder.addShouldAssertion { sliceGraph, violations ->
             for (slice in sliceGraph.slices) {
                 if (slice.classes.any { it.fqName == fqName || it.name == fqName }) {
-                    violations.add("Slice '${slice.key}' contains prohibited class '$fqName'")
+                    violations.add(getMessage("slice.should.notContainClass", slice.key, fqName))
                 }
             }
         }
@@ -278,7 +278,7 @@ class SlicesShould(private val builder: SlicesRuleBuilder) {
     ): SlicesRuleBuilder {
         builder.addShouldAssertion { sliceGraph, violations ->
             if (!predicate(sliceGraph)) {
-                violations.add("Slice graph does not satisfy custom condition: $description")
+                violations.add(getMessage("slice.should.satisfyCustomCondition", description))
             }
         }
         return builder
@@ -297,7 +297,7 @@ class SlicesShould(private val builder: SlicesRuleBuilder) {
                     tempViolations.isEmpty()
                 }
             if (!anyPassed) {
-                violations.add("Slice graph does not satisfy any of the specified conditions")
+                violations.add(getMessage("slice.should.satisfyAnyOf"))
             }
         }
         return builder
@@ -325,7 +325,7 @@ class SlicesShould(private val builder: SlicesRuleBuilder) {
                     tempViolations.isEmpty()
                 }
             if (anyPassed) {
-                violations.add("Slice graph satisfies one of the forbidden conditions")
+                violations.add(getMessage("slice.should.satisfyNoneOf"))
             }
         }
         return builder
@@ -335,7 +335,7 @@ class SlicesShould(private val builder: SlicesRuleBuilder) {
         builder.addShouldAssertion { sliceGraph, violations ->
             for (slice in sliceGraph.slices) {
                 if (slice.classes.isEmpty()) {
-                    violations.add("Slice '${slice.key}' does not contain any files/classes")
+                    violations.add(getMessage("slice.should.notBeEmpty", slice.key))
                 }
             }
         }
@@ -346,7 +346,7 @@ class SlicesShould(private val builder: SlicesRuleBuilder) {
         builder.addShouldAssertion { sliceGraph, violations ->
             for (slice in sliceGraph.slices) {
                 if (slice.classes.isNotEmpty()) {
-                    violations.add("Slice '${slice.key}' should not contain any files/classes")
+                    violations.add(getMessage("slice.should.beEmpty", slice.key))
                 }
             }
         }
@@ -363,7 +363,7 @@ class SlicesShould(private val builder: SlicesRuleBuilder) {
         builder.addShouldAssertion { sliceGraph, violations ->
             for (slice in sliceGraph.slices) {
                 if (!slice.classes.any { it.filePath.contains(modulePath) }) {
-                    violations.add("Slice '${slice.key}' does not reside in module $modulePath")
+                    violations.add(getMessage("slice.should.resideInModulePath", slice.key, modulePath))
                 }
             }
         }
@@ -374,7 +374,7 @@ class SlicesShould(private val builder: SlicesRuleBuilder) {
         builder.addShouldAssertion { sliceGraph, violations ->
             for (slice in sliceGraph.slices) {
                 if (!slice.classes.any { cls -> modulePaths.any { cls.filePath.contains(it) } }) {
-                    violations.add("Slice '${slice.key}' does not reside in modules $modulePaths")
+                    violations.add(getMessage("slice.should.resideInModulePaths", slice.key, modulePaths.toString()))
                 }
             }
         }
@@ -387,7 +387,7 @@ class SlicesShould(private val builder: SlicesRuleBuilder) {
         builder.addShouldAssertion { sliceGraph, violations ->
             for (slice in sliceGraph.slices) {
                 if (slice.classes.any { it.filePath.contains(modulePath) }) {
-                    violations.add("Slice '${slice.key}' resides in prohibited module $modulePath")
+                    violations.add(getMessage("slice.should.notResideInModulePath", slice.key, modulePath))
                 }
             }
         }
@@ -398,7 +398,7 @@ class SlicesShould(private val builder: SlicesRuleBuilder) {
         builder.addShouldAssertion { sliceGraph, violations ->
             for (slice in sliceGraph.slices) {
                 if (slice.classes.any { cls -> modulePaths.any { cls.filePath.contains(it) } }) {
-                    violations.add("Slice '${slice.key}' resides in prohibited modules $modulePaths")
+                    violations.add(getMessage("slice.should.notResideInModulePaths", slice.key, modulePaths.toString()))
                 }
             }
         }

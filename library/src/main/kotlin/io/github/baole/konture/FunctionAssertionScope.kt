@@ -1,10 +1,12 @@
 /*
- * Copyright 2026 Bao Le Duc
+ * Copyright 2026 The Konture Contributors
+ * Contributors: Bao Le Duc (@baole)
  * SPDX-License-Identifier: Apache-2.0
  */
 
 package io.github.baole.konture
 
+import io.github.baole.konture.i18n.getMessage
 import io.github.baole.konture.impl.PatternMatchers
 
 @KontureDsl
@@ -19,7 +21,11 @@ class FunctionAssertionScope internal constructor() {
         assertions.add { func, violations ->
             if (patterns.none { PatternMatchers.matchesSimpleGlob(it, func.name) }) {
                 violations.add(
-                    "should have name matching any of: ${patterns.joinToString { "'$it'" }} (was '${func.name}')",
+                    getMessage(
+                        "function.scope.haveNameMatching",
+                        patterns.joinToString { "'$it'" },
+                        func.name,
+                    ),
                 )
             }
         }
@@ -37,7 +43,11 @@ class FunctionAssertionScope internal constructor() {
         assertions.add { func, violations ->
             if (prefixes.none { func.name.startsWith(it) }) {
                 violations.add(
-                    "should have name starting with any of: ${prefixes.joinToString { "'$it'" }} (was '${func.name}')",
+                    getMessage(
+                        "function.scope.haveNameStartingWith",
+                        prefixes.joinToString { "'$it'" },
+                        func.name,
+                    ),
                 )
             }
         }
@@ -55,7 +65,11 @@ class FunctionAssertionScope internal constructor() {
         assertions.add { func, violations ->
             if (suffixes.none { func.name.endsWith(it) }) {
                 violations.add(
-                    "should have name ending with any of: ${suffixes.joinToString { "'$it'" }} (was '${func.name}')",
+                    getMessage(
+                        "function.scope.haveNameEndingWith",
+                        suffixes.joinToString { "'$it'" },
+                        func.name,
+                    ),
                 )
             }
         }
@@ -68,7 +82,7 @@ class FunctionAssertionScope internal constructor() {
     fun bePublic() {
         assertions.add { func, violations ->
             if (func.visibility != Visibility.PUBLIC) {
-                violations.add("should be public (was '${func.visibility.name.lowercase()}')")
+                violations.add(getMessage("function.scope.bePublic", func.visibility.name.lowercase()))
             }
         }
     }
@@ -76,7 +90,7 @@ class FunctionAssertionScope internal constructor() {
     fun beInternal() {
         assertions.add { func, violations ->
             if (func.visibility != Visibility.INTERNAL) {
-                violations.add("should be internal (was '${func.visibility.name.lowercase()}')")
+                violations.add(getMessage("function.scope.beInternal", func.visibility.name.lowercase()))
             }
         }
     }
@@ -84,7 +98,7 @@ class FunctionAssertionScope internal constructor() {
     fun bePrivate() {
         assertions.add { func, violations ->
             if (func.visibility != Visibility.PRIVATE) {
-                violations.add("should be private (was '${func.visibility.name.lowercase()}')")
+                violations.add(getMessage("function.scope.bePrivate", func.visibility.name.lowercase()))
             }
         }
     }
@@ -92,7 +106,7 @@ class FunctionAssertionScope internal constructor() {
     fun beProtected() {
         assertions.add { func, violations ->
             if (func.visibility != Visibility.PROTECTED) {
-                violations.add("should be protected (was '${func.visibility.name.lowercase()}')")
+                violations.add(getMessage("function.scope.beProtected", func.visibility.name.lowercase()))
             }
         }
     }
@@ -100,7 +114,7 @@ class FunctionAssertionScope internal constructor() {
     fun beSuspend() {
         assertions.add { func, violations ->
             if (!func.modifiers.contains(Modifier.SUSPEND)) {
-                violations.add("should be suspend")
+                violations.add(getMessage("function.scope.beSuspend"))
             }
         }
     }
@@ -108,7 +122,7 @@ class FunctionAssertionScope internal constructor() {
     fun beInline() {
         assertions.add { func, violations ->
             if (!func.modifiers.contains(Modifier.INLINE)) {
-                violations.add("should be inline")
+                violations.add(getMessage("function.scope.beInline"))
             }
         }
     }
@@ -116,7 +130,7 @@ class FunctionAssertionScope internal constructor() {
     fun beOpen() {
         assertions.add { func, violations ->
             if (!func.modifiers.contains(Modifier.OPEN)) {
-                violations.add("should be open")
+                violations.add(getMessage("function.scope.beOpen"))
             }
         }
     }
@@ -124,7 +138,7 @@ class FunctionAssertionScope internal constructor() {
     fun beAbstract() {
         assertions.add { func, violations ->
             if (!func.modifiers.contains(Modifier.ABSTRACT)) {
-                violations.add("should be abstract")
+                violations.add(getMessage("function.scope.beAbstract"))
             }
         }
     }
@@ -132,7 +146,7 @@ class FunctionAssertionScope internal constructor() {
     fun haveModifier(modifier: Modifier) {
         assertions.add { func, violations ->
             if (!func.modifiers.contains(modifier)) {
-                violations.add("should have modifier ${modifier.name.lowercase()}")
+                violations.add(getMessage("function.scope.haveModifier", modifier.name.lowercase()))
             }
         }
     }
@@ -145,7 +159,11 @@ class FunctionAssertionScope internal constructor() {
         assertions.add { func, violations ->
             if (typeFqNames.none { func.returnType == it }) {
                 violations.add(
-                    "should have return type of any of: ${typeFqNames.joinToString { "'$it'" }} (was '${func.returnType}')",
+                    getMessage(
+                        "function.scope.haveReturnType",
+                        typeFqNames.joinToString { "'$it'" },
+                        func.returnType,
+                    ),
                 )
             }
         }
@@ -163,7 +181,9 @@ class FunctionAssertionScope internal constructor() {
         assertions.add { func, violations ->
             val present = func.annotations.map { it.name }.toSet() + func.annotations.map { it.fqName }.toSet()
             if (annotationNames.none { it in present }) {
-                violations.add("should be annotated with any of: ${annotationNames.joinToString { "@$it" }}")
+                violations.add(
+                    getMessage("function.scope.beAnnotatedWithAny", annotationNames.joinToString { "@$it" }),
+                )
             }
         }
     }
@@ -175,7 +195,7 @@ class FunctionAssertionScope internal constructor() {
     fun beExtension() {
         assertions.add { func, violations ->
             if (!func.isExtension) {
-                violations.add("should be an extension function")
+                violations.add(getMessage("function.scope.beExtension"))
             }
         }
     }
@@ -183,7 +203,7 @@ class FunctionAssertionScope internal constructor() {
     fun beDocumentedWithKDoc() {
         assertions.add { func, violations ->
             if (func.kdocText.isNullOrBlank()) {
-                violations.add("should be documented with KDoc")
+                violations.add(getMessage("function.scope.beDocumented"))
             }
         }
     }
@@ -195,7 +215,7 @@ class FunctionAssertionScope internal constructor() {
         assertions.add { func, violations ->
             val present = func.annotations.map { it.name }.toSet() + func.annotations.map { it.fqName }.toSet()
             if (!names.all { it in present }) {
-                violations.add("should have all annotations: ${names.joinToString()}")
+                violations.add(getMessage("function.scope.haveAllAnnotations", names.joinToString()))
             }
         }
     }
@@ -214,7 +234,7 @@ class FunctionAssertionScope internal constructor() {
         assertions.add { func, violations ->
             val present = func.annotations.map { it.name }.toSet() + func.annotations.map { it.fqName }.toSet()
             if (names.none { it in present }) {
-                violations.add("should have at least one annotation of: ${names.joinToString()}")
+                violations.add(getMessage("function.scope.haveAtLeastOneAnnotationOf", names.joinToString()))
             }
         }
     }
@@ -232,7 +252,12 @@ class FunctionAssertionScope internal constructor() {
     fun haveAllModifiers(modifiers: List<Modifier>) {
         assertions.add { func, violations ->
             if (!modifiers.all { func.modifiers.contains(it) }) {
-                violations.add("should have all modifiers: ${modifiers.joinToString { it.name.lowercase() }}")
+                violations.add(
+                    getMessage(
+                        "function.scope.haveAllModifiers",
+                        modifiers.joinToString { it.name.lowercase() },
+                    ),
+                )
             }
         }
     }
@@ -251,7 +276,10 @@ class FunctionAssertionScope internal constructor() {
         assertions.add { func, violations ->
             if (modifiers.none { func.modifiers.contains(it) }) {
                 violations.add(
-                    "should have at least one modifier of: ${modifiers.joinToString { it.name.lowercase() }}",
+                    getMessage(
+                        "function.scope.haveAnyModifier",
+                        modifiers.joinToString { it.name.lowercase() },
+                    ),
                 )
             }
         }
@@ -270,7 +298,12 @@ class FunctionAssertionScope internal constructor() {
     fun haveAnyVisibility(visibilities: List<Visibility>) {
         assertions.add { func, violations ->
             if (!visibilities.contains(func.visibility)) {
-                violations.add("should have visibility of: ${visibilities.joinToString { it.name.lowercase() }}")
+                violations.add(
+                    getMessage(
+                        "function.scope.haveVisibility",
+                        visibilities.joinToString { it.name.lowercase() },
+                    ),
+                )
             }
         }
     }

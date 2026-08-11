@@ -1,3 +1,8 @@
+/*
+ * Copyright 2026 Bao Le Duc
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 package io.github.baole.konture.maven
 
 import io.github.baole.konture.core.BuildModel
@@ -66,11 +71,13 @@ class GenerateLayoutMojo : AbstractMojo() {
         log.info("Generating Konture layout and dependencies metadata for: ${project.artifactId}")
 
         try {
+            val rootProj = reactorProjects.firstOrNull { it.isExecutionRoot } ?: project
+
             // 1. Build the global LayoutModel for the reactor projects
             val modules = reactorProjects
                 .filter { it.packaging != "pom" }
                 .map { reactorProj ->
-                    buildModuleModel(reactorProj)
+                    buildModuleModel(reactorProj, rootProj)
                 }
 
             val exclusions = ExclusionsModel(
@@ -91,7 +98,7 @@ class GenerateLayoutMojo : AbstractMojo() {
             val dependencyModulesMap = reactorProjects
                 .filter { it.packaging != "pom" }
                 .associate { reactorProj ->
-                    val path = ":${reactorProj.artifactId}"
+                    val path = computeModulePath(reactorProj, rootProj)
                     val resolvedDeps = reactorProj.artifacts.map { artifact ->
                         val isTransitive = !reactorProj.dependencies.any { dep ->
                             dep.groupId == artifact.groupId && dep.artifactId == artifact.artifactId
@@ -132,9 +139,22 @@ class GenerateLayoutMojo : AbstractMojo() {
         }
     }
 
-    private fun buildModuleModel(proj: MavenProject): ModuleModel {
+    private fun computeModulePath(proj: MavenProject, rootProj: MavenProject): String {
+        val rootDir = rootProj.basedir?.canonicalFile ?: return ":${proj.artifactId}"
+        val projDir = proj.basedir?.canonicalFile ?: return ":${proj.artifactId}"
+        if (rootDir == projDir) return ":"
+        return try {
+            val relPath = rootDir.toPath().relativize(projDir.toPath()).toString().replace('\\', '/')
+            val segments = relPath.split('/').filter { it.isNotEmpty() }
+            if (segments.isEmpty()) ":" else ":" + segments.joinToString(":")
+        } catch (_: Exception) {
+            ":${proj.artifactId}"
+        }
+    }
+
+    private fun buildModuleModel(proj: MavenProject, rootProj: MavenProject): ModuleModel {
         val projectDir = proj.basedir.canonicalPath
-        val path = ":${proj.artifactId}"
+        val path = computeModulePath(proj, rootProj)
 
         // Build list of source directories
         val srcDirs = mutableListOf<File>()
@@ -160,18 +180,22 @@ class GenerateLayoutMojo : AbstractMojo() {
             emptyList()
         }
 
-        // Identify internal project-to-project dependencies within the reactor
-        val reactorProjectCoords = reactorProjects.map { "${it.groupId}:${it.artifactId}" }.toSet()
+        // Map reactor project coordinates to computed module paths
+        val reactorProjectMap = reactorProjects.associate {
+            "${it.groupId}:${it.artifactId}" to computeModulePath(it, rootProj)
+        }
+
         val dependencies = proj.dependencies
             .filter { dep ->
                 val depCoord = "${dep.groupId}:${dep.artifactId}"
-                reactorProjectCoords.contains(depCoord)
+                reactorProjectMap.containsKey(depCoord)
             }
             .map { dep ->
+                val depCoord = "${dep.groupId}:${dep.artifactId}"
                 DependencyEdge(
                     configuration = dep.scope ?: "compile",
                     targetBuildId = ":",
-                    targetPath = ":${dep.artifactId}"
+                    targetPath = reactorProjectMap[depCoord] ?: ":${dep.artifactId}"
                 )
             }
 

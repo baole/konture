@@ -47,7 +47,7 @@ interface FunctionsShouldCompositeAssertions {
                     subViolations.isEmpty()
                 }
             if (!anyPassed) {
-                violations.add("Function ${func.qualifiedName} does not satisfy any of the specified conditions")
+                violations.add(getMessage("function.should.satisfyAnyOf", func.qualifiedName))
             }
         }
         return builder
@@ -77,7 +77,7 @@ interface FunctionsShouldCompositeAssertions {
                     subViolations.isEmpty()
                 }
             if (anyPassed) {
-                violations.add("Function ${func.qualifiedName} satisfies one of the forbidden conditions")
+                violations.add(getMessage("function.should.satisfyNoneOf", func.qualifiedName))
             }
         }
         return builder

@@ -1,10 +1,12 @@
 /*
- * Copyright 2026 Bao Le Duc
+ * Copyright 2026 The Konture Contributors
+ * Contributors: Bao Le Duc (@baole)
  * SPDX-License-Identifier: Apache-2.0
  */
 
 package io.github.baole.konture
 
+import io.github.baole.konture.i18n.getMessage
 import io.github.baole.konture.impl.PatternMatchers
 
 @KontureDsl
@@ -19,7 +21,11 @@ class PropertyAssertionScope internal constructor() {
         assertions.add { prop, violations ->
             if (patterns.none { PatternMatchers.matchesSimpleGlob(it, prop.name) }) {
                 violations.add(
-                    "should have name matching any of: ${patterns.joinToString { "'$it'" }} (was '${prop.name}')",
+                    getMessage(
+                        "property.scope.haveNameMatching",
+                        patterns.joinToString { "'$it'" },
+                        prop.name,
+                    ),
                 )
             }
         }
@@ -37,7 +43,11 @@ class PropertyAssertionScope internal constructor() {
         assertions.add { prop, violations ->
             if (prefixes.none { prop.name.startsWith(it) }) {
                 violations.add(
-                    "should have name starting with any of: ${prefixes.joinToString { "'$it'" }} (was '${prop.name}')",
+                    getMessage(
+                        "property.scope.haveNameStartingWith",
+                        prefixes.joinToString { "'$it'" },
+                        prop.name,
+                    ),
                 )
             }
         }
@@ -55,7 +65,11 @@ class PropertyAssertionScope internal constructor() {
         assertions.add { prop, violations ->
             if (suffixes.none { prop.name.endsWith(it) }) {
                 violations.add(
-                    "should have name ending with any of: ${suffixes.joinToString { "'$it'" }} (was '${prop.name}')",
+                    getMessage(
+                        "property.scope.haveNameEndingWith",
+                        suffixes.joinToString { "'$it'" },
+                        prop.name,
+                    ),
                 )
             }
         }
@@ -68,7 +82,7 @@ class PropertyAssertionScope internal constructor() {
     fun bePublic() {
         assertions.add { prop, violations ->
             if (prop.visibility != Visibility.PUBLIC) {
-                violations.add("should be public (was '${prop.visibility.name.lowercase()}')")
+                violations.add(getMessage("property.scope.bePublic", prop.visibility.name.lowercase()))
             }
         }
     }
@@ -76,7 +90,7 @@ class PropertyAssertionScope internal constructor() {
     fun beInternal() {
         assertions.add { prop, violations ->
             if (prop.visibility != Visibility.INTERNAL) {
-                violations.add("should be internal (was '${prop.visibility.name.lowercase()}')")
+                violations.add(getMessage("property.scope.beInternal", prop.visibility.name.lowercase()))
             }
         }
     }
@@ -84,7 +98,7 @@ class PropertyAssertionScope internal constructor() {
     fun bePrivate() {
         assertions.add { prop, violations ->
             if (prop.visibility != Visibility.PRIVATE) {
-                violations.add("should be private (was '${prop.visibility.name.lowercase()}')")
+                violations.add(getMessage("property.scope.bePrivate", prop.visibility.name.lowercase()))
             }
         }
     }
@@ -92,7 +106,7 @@ class PropertyAssertionScope internal constructor() {
     fun beProtected() {
         assertions.add { prop, violations ->
             if (prop.visibility != Visibility.PROTECTED) {
-                violations.add("should be protected (was '${prop.visibility.name.lowercase()}')")
+                violations.add(getMessage("property.scope.beProtected", prop.visibility.name.lowercase()))
             }
         }
     }
@@ -100,7 +114,7 @@ class PropertyAssertionScope internal constructor() {
     fun beVal() {
         assertions.add { prop, violations ->
             if (!prop.isVal) {
-                violations.add("should be declared as val")
+                violations.add(getMessage("property.scope.beVal"))
             }
         }
     }
@@ -108,7 +122,7 @@ class PropertyAssertionScope internal constructor() {
     fun beVar() {
         assertions.add { prop, violations ->
             if (prop.isVal) {
-                violations.add("should be declared as var")
+                violations.add(getMessage("property.scope.beVar"))
             }
         }
     }
@@ -121,7 +135,11 @@ class PropertyAssertionScope internal constructor() {
         assertions.add { prop, violations ->
             if (typeFqNames.none { prop.type == it }) {
                 violations.add(
-                    "should have type of any of: ${typeFqNames.joinToString { "'$it'" }} (was '${prop.type}')",
+                    getMessage(
+                        "property.scope.haveType",
+                        typeFqNames.joinToString { "'$it'" },
+                        prop.type,
+                    ),
                 )
             }
         }
@@ -139,7 +157,9 @@ class PropertyAssertionScope internal constructor() {
         assertions.add { prop, violations ->
             val present = prop.annotations.map { it.name }.toSet() + prop.annotations.map { it.fqName }.toSet()
             if (annotationNames.none { it in present }) {
-                violations.add("should be annotated with any of: ${annotationNames.joinToString { "@$it" }}")
+                violations.add(
+                    getMessage("property.scope.beAnnotatedWithAny", annotationNames.joinToString { "@$it" }),
+                )
             }
         }
     }
@@ -151,7 +171,7 @@ class PropertyAssertionScope internal constructor() {
     fun beDocumentedWithKDoc() {
         assertions.add { prop, violations ->
             if (prop.kdocText.isNullOrBlank()) {
-                violations.add("should be documented with KDoc")
+                violations.add(getMessage("property.scope.beDocumented"))
             }
         }
     }
@@ -163,7 +183,7 @@ class PropertyAssertionScope internal constructor() {
         assertions.add { prop, violations ->
             val present = prop.annotations.map { it.name }.toSet() + prop.annotations.map { it.fqName }.toSet()
             if (!names.all { it in present }) {
-                violations.add("should have all annotations: ${names.joinToString()}")
+                violations.add(getMessage("property.scope.haveAllAnnotations", names.joinToString()))
             }
         }
     }
@@ -182,7 +202,7 @@ class PropertyAssertionScope internal constructor() {
         assertions.add { prop, violations ->
             val present = prop.annotations.map { it.name }.toSet() + prop.annotations.map { it.fqName }.toSet()
             if (names.none { it in present }) {
-                violations.add("should have at least one annotation of: ${names.joinToString()}")
+                violations.add(getMessage("property.scope.haveAtLeastOneAnnotationOf", names.joinToString()))
             }
         }
     }
@@ -200,7 +220,12 @@ class PropertyAssertionScope internal constructor() {
     fun haveAllModifiers(modifiers: List<Modifier>) {
         assertions.add { prop, violations ->
             if (!modifiers.all { prop.modifiers.contains(it) }) {
-                violations.add("should have all modifiers: ${modifiers.joinToString { it.name.lowercase() }}")
+                violations.add(
+                    getMessage(
+                        "property.scope.haveAllModifiers",
+                        modifiers.joinToString { it.name.lowercase() },
+                    ),
+                )
             }
         }
     }
@@ -219,7 +244,10 @@ class PropertyAssertionScope internal constructor() {
         assertions.add { prop, violations ->
             if (modifiers.none { prop.modifiers.contains(it) }) {
                 violations.add(
-                    "should have at least one modifier of: ${modifiers.joinToString { it.name.lowercase() }}",
+                    getMessage(
+                        "property.scope.haveAnyModifier",
+                        modifiers.joinToString { it.name.lowercase() },
+                    ),
                 )
             }
         }
@@ -238,7 +266,12 @@ class PropertyAssertionScope internal constructor() {
     fun haveAnyVisibility(visibilities: List<Visibility>) {
         assertions.add { prop, violations ->
             if (!visibilities.contains(prop.visibility)) {
-                violations.add("should have visibility of: ${visibilities.joinToString { it.name.lowercase() }}")
+                violations.add(
+                    getMessage(
+                        "property.scope.haveVisibility",
+                        visibilities.joinToString { it.name.lowercase() },
+                    ),
+                )
             }
         }
     }

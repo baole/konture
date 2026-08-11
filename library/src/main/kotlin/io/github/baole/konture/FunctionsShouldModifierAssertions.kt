@@ -178,7 +178,7 @@ interface FunctionsShouldModifierAssertions {
     fun notBePublic(): FunctionsRuleBuilder {
         builder.setShould { func, _, violations ->
             if (func.declaration.visibility == Visibility.PUBLIC) {
-                violations.add("Function ${func.qualifiedName} should not be public")
+                violations.add(getMessage("function.should.notBePublic", func.qualifiedName))
             }
         }
         return builder
@@ -187,7 +187,7 @@ interface FunctionsShouldModifierAssertions {
     fun notBeInternal(): FunctionsRuleBuilder {
         builder.setShould { func, _, violations ->
             if (func.declaration.visibility == Visibility.INTERNAL) {
-                violations.add("Function ${func.qualifiedName} should not be internal")
+                violations.add(getMessage("function.should.notBeInternal", func.qualifiedName))
             }
         }
         return builder
@@ -196,7 +196,7 @@ interface FunctionsShouldModifierAssertions {
     fun notBePrivate(): FunctionsRuleBuilder {
         builder.setShould { func, _, violations ->
             if (func.declaration.visibility == Visibility.PRIVATE) {
-                violations.add("Function ${func.qualifiedName} should not be private")
+                violations.add(getMessage("function.should.notBePrivate", func.qualifiedName))
             }
         }
         return builder
@@ -205,7 +205,7 @@ interface FunctionsShouldModifierAssertions {
     fun notBeProtected(): FunctionsRuleBuilder {
         builder.setShould { func, _, violations ->
             if (func.declaration.visibility == Visibility.PROTECTED) {
-                violations.add("Function ${func.qualifiedName} should not be protected")
+                violations.add(getMessage("function.should.notBeProtected", func.qualifiedName))
             }
         }
         return builder
@@ -325,7 +325,7 @@ interface FunctionsShouldModifierAssertions {
     fun notBeExtension(): FunctionsRuleBuilder {
         builder.setShould { func, _, violations ->
             if (func.declaration.isExtension) {
-                violations.add("Function ${func.qualifiedName} should not be an extension function")
+                violations.add(getMessage("function.should.notBeExtension", func.qualifiedName))
             }
         }
         return builder
@@ -345,7 +345,7 @@ interface FunctionsShouldModifierAssertions {
     fun notBeSuspend(): FunctionsRuleBuilder {
         builder.setShould { func, _, violations ->
             if (func.declaration.modifiers.contains(Modifier.SUSPEND)) {
-                violations.add("Function ${func.qualifiedName} should not be a suspend function")
+                violations.add(getMessage("function.should.notBeSuspend", func.qualifiedName))
             }
         }
         return builder
@@ -354,7 +354,7 @@ interface FunctionsShouldModifierAssertions {
     fun notBeInline(): FunctionsRuleBuilder {
         builder.setShould { func, _, violations ->
             if (func.declaration.modifiers.contains(Modifier.INLINE)) {
-                violations.add("Function ${func.qualifiedName} should not be an inline function")
+                violations.add(getMessage("function.should.notBeInline", func.qualifiedName))
             }
         }
         return builder
@@ -363,7 +363,7 @@ interface FunctionsShouldModifierAssertions {
     fun notBeInfix(): FunctionsRuleBuilder {
         builder.setShould { func, _, violations ->
             if (func.declaration.modifiers.contains(Modifier.INFIX)) {
-                violations.add("Function ${func.qualifiedName} should not be an infix function")
+                violations.add(getMessage("function.should.notBeInfix", func.qualifiedName))
             }
         }
         return builder
@@ -372,7 +372,7 @@ interface FunctionsShouldModifierAssertions {
     fun notBeOperator(): FunctionsRuleBuilder {
         builder.setShould { func, _, violations ->
             if (func.declaration.modifiers.contains(Modifier.OPERATOR)) {
-                violations.add("Function ${func.qualifiedName} should not be an operator function")
+                violations.add(getMessage("function.should.notBeOperator", func.qualifiedName))
             }
         }
         return builder
@@ -381,7 +381,7 @@ interface FunctionsShouldModifierAssertions {
     fun notBeOpen(): FunctionsRuleBuilder {
         builder.setShould { func, _, violations ->
             if (func.declaration.modifiers.contains(Modifier.OPEN)) {
-                violations.add("Function ${func.qualifiedName} should not be an open function")
+                violations.add(getMessage("function.should.notBeOpen", func.qualifiedName))
             }
         }
         return builder
@@ -390,7 +390,7 @@ interface FunctionsShouldModifierAssertions {
     fun notBeAbstract(): FunctionsRuleBuilder {
         builder.setShould { func, _, violations ->
             if (func.declaration.modifiers.contains(Modifier.ABSTRACT)) {
-                violations.add("Function ${func.qualifiedName} should not be an abstract function")
+                violations.add(getMessage("function.should.notBeAbstract", func.qualifiedName))
             }
         }
         return builder
@@ -399,7 +399,7 @@ interface FunctionsShouldModifierAssertions {
     fun notBeOverride(): FunctionsRuleBuilder {
         builder.setShould { func, _, violations ->
             if (func.declaration.modifiers.contains(Modifier.OVERRIDE)) {
-                violations.add("Function ${func.qualifiedName} should not be an override function")
+                violations.add(getMessage("function.should.notBeOverride", func.qualifiedName))
             }
         }
         return builder
