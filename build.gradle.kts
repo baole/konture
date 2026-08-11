@@ -12,36 +12,7 @@ val applyPlugin = isPropertyTrue("idea.active") ||
     isPropertyTrue("konture.applyPluginInternal") ||
     System.getenv("KONTURE_APPLY_PLUGIN") == "true"
 
-buildscript {
-    repositories {
-        mavenLocal()
-        google()
-        mavenCentral()
-    }
-    dependencies {
 
-        val applyPlugin = System.getProperty("idea.active").toBoolean() ||
-            System.getProperty("idea.sync.active").toBoolean() ||
-            System.getProperty("konture.applyPlugin").toBoolean() ||
-            System.getProperty("konture.applyPluginInternal").toBoolean() ||
-            System.getenv("KONTURE_APPLY_PLUGIN") == "true"
-
-        if (applyPlugin) {
-            val versionFile = file("gradle/libs.versions.toml")
-            if (versionFile.exists()) {
-                val kontureVersion = versionFile.readLines()
-                    .firstOrNull { it.trim().startsWith("konture =") }
-                    ?.substringAfter("=")
-                    ?.replace("\"", "")
-                    ?.trim()
-
-                if (kontureVersion != null) {
-                    classpath("io.github.baole.konture:plugin-gradle:$kontureVersion")
-                }
-            }
-        }
-    }
-}
 
 plugins {
     id("konture.root")
