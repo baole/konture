@@ -17,10 +17,12 @@ import io.github.baole.konture.impl.ViolationLocation
  *
  * @property properties The list of [PropertyDeclarationContext] structures included in this scope.
  */
-class KonturePropertyScope(
-    val properties: List<PropertyDeclarationContext>,
+public class KonturePropertyScope(
+    /** Filter or assertion criteria for properties. */
+    public val properties: List<PropertyDeclarationContext>,
 ) {
-    companion object {
+    /** Factory methods for constructing property scopes. */
+    public companion object {
         /**
          * Creates a [KonturePropertyScope] representing all properties across the project.
          *
@@ -28,19 +30,23 @@ class KonturePropertyScope(
          * @param sourceSets The source set selector (defaults to [SourceSets.production]).
          * @return A [KonturePropertyScope] containing property contexts from matching files.
          */
-        fun fromProject(
+        public fun fromProject(
             graph: ProjectGraph = Konture.projectGraph,
             sourceSets: SourceSetSelector = SourceSets.production(),
         ): KonturePropertyScope {
+            /** Filter or assertion criteria for props. */
             val props =
                 graph.getAllModules().flatMap { module ->
                     module.files
                         .filter { file -> file.membershipsFor(module.path).any(sourceSets::matches) }
                         .flatMap { file ->
+                            /** Filter or assertion criteria for top. */
                             val top =
                                 file.topLevelProperties.map {
                                     PropertyDeclarationContext(it, file.packageName, null, module.path, file.filePath)
                                 }
+
+                            /** Filter or assertion criteria for mem. */
                             val mem =
                                 file.classes.flatMap { cls ->
                                     cls.properties.map {
@@ -68,22 +74,28 @@ class KonturePropertyScope(
          * @return A [KonturePropertyScope] containing properties defined in the specified module.
          * @throws IllegalArgumentException If the specified module path is not found in the project graph.
          */
-        fun fromModule(
+        public fun fromModule(
             path: String,
             graph: ProjectGraph = Konture.projectGraph,
             sourceSets: SourceSetSelector = SourceSets.production(),
         ): KonturePropertyScope {
+            /** Filter or assertion criteria for module. */
             val module =
                 graph.getAllModules().find { it.path == path }
                     ?: throw IllegalArgumentException("Module $path not found in project graph")
+
+            /** Filter or assertion criteria for props. */
             val props =
                 module.files
                     .filter { file -> file.membershipsFor(module.path).any(sourceSets::matches) }
                     .flatMap { file ->
+                        /** Filter or assertion criteria for top. */
                         val top =
                             file.topLevelProperties.map {
                                 PropertyDeclarationContext(it, file.packageName, null, module.path, file.filePath)
                             }
+
+                        /** Filter or assertion criteria for mem. */
                         val mem =
                             file.classes.flatMap { cls ->
                                 cls.properties.map {
@@ -109,11 +121,12 @@ class KonturePropertyScope(
          * @param sourceSets The source set selector (defaults to [SourceSets.production]).
          * @return A [KonturePropertyScope] containing properties matching the package or nested packages.
          */
-        fun fromPackage(
+        public fun fromPackage(
             packageName: String,
             graph: ProjectGraph = Konture.projectGraph,
             sourceSets: SourceSetSelector = SourceSets.production(),
         ): KonturePropertyScope {
+            /** Filter or assertion criteria for props. */
             val props =
                 fromProject(graph, sourceSets).properties.filter {
                     it.packageName == packageName || it.packageName.startsWith("$packageName.")
@@ -124,11 +137,12 @@ class KonturePropertyScope(
 }
 
 /** Combines two [KonturePropertyScope] scopes into a single unified scope. */
-operator fun KonturePropertyScope.plus(other: KonturePropertyScope): KonturePropertyScope =
+public operator fun KonturePropertyScope.plus(other: KonturePropertyScope): KonturePropertyScope =
     KonturePropertyScope(this.properties + other.properties)
 
 /** Subtracts the properties present in [other] from this [KonturePropertyScope]. */
-operator fun KonturePropertyScope.minus(other: KonturePropertyScope): KonturePropertyScope {
+public operator fun KonturePropertyScope.minus(other: KonturePropertyScope): KonturePropertyScope {
+    /** Filter or assertion criteria for other names. */
     val otherNames = other.properties.map { it.qualifiedName }.toSet()
     return KonturePropertyScope(this.properties.filterNot { it.qualifiedName in otherNames })
 }
@@ -136,65 +150,80 @@ operator fun KonturePropertyScope.minus(other: KonturePropertyScope): KonturePro
 // Filtering extensions
 
 /** Filters the list of properties to include only those whose names end with [suffix]. */
-fun List<PropertyDeclarationContext>.withNameEndingWith(suffix: String): List<PropertyDeclarationContext> =
+public fun List<PropertyDeclarationContext>.withNameEndingWith(suffix: String): List<PropertyDeclarationContext> =
     filter { it.declaration.name.endsWith(suffix) }
 
 /** Filters the list of properties to include only those whose names start with [prefix]. */
-fun List<PropertyDeclarationContext>.withNameStartingWith(prefix: String): List<PropertyDeclarationContext> =
+public fun List<PropertyDeclarationContext>.withNameStartingWith(prefix: String): List<PropertyDeclarationContext> =
     filter { it.declaration.name.startsWith(prefix) }
 
 /** Filters the list of properties to include only those matching the glob pattern [pattern]. */
-fun List<PropertyDeclarationContext>.withNameMatching(pattern: String): List<PropertyDeclarationContext> =
+public fun List<PropertyDeclarationContext>.withNameMatching(pattern: String): List<PropertyDeclarationContext> =
     filter { PatternMatchers.matchesSimpleGlob(pattern, it.declaration.name) }
 
 /** Filters the list of properties to include only those residing in packages matching [packagePattern]. */
-fun List<PropertyDeclarationContext>.withPackage(packagePattern: String): List<PropertyDeclarationContext> =
+public fun List<PropertyDeclarationContext>.withPackage(packagePattern: String): List<PropertyDeclarationContext> =
     filter { PatternMatchers.matchesPackage(packagePattern, it.packageName) }
 
 /** Filters the list of properties to include only read-only (`val`) properties. */
-fun List<PropertyDeclarationContext>.valProperties(): List<PropertyDeclarationContext> = filter { it.declaration.isVal }
+public fun List<PropertyDeclarationContext>.valProperties(): List<PropertyDeclarationContext> =
+    filter {
+        it.declaration.isVal
+    }
 
 /** Filters the list of properties to include only mutable (`var`) properties. */
-fun List<PropertyDeclarationContext>.varProperties(): List<PropertyDeclarationContext> =
+public fun List<PropertyDeclarationContext>.varProperties(): List<PropertyDeclarationContext> =
     filter {
         !it.declaration.isVal
     }
 
 /** Filters the list of properties to include only member/class properties. */
-fun List<PropertyDeclarationContext>.memberProperties(): List<PropertyDeclarationContext> =
+public fun List<PropertyDeclarationContext>.memberProperties(): List<PropertyDeclarationContext> =
     filter {
         it.className != null
     }
 
 /** Filters the list of properties to include only top-level properties. */
-fun List<PropertyDeclarationContext>.topLevelProperties(): List<PropertyDeclarationContext> =
+public fun List<PropertyDeclarationContext>.topLevelProperties(): List<PropertyDeclarationContext> =
     filter {
         it.className == null
     }
 
 /** Filters the list of properties to include only extension properties. */
-fun List<PropertyDeclarationContext>.extensionProperties(): List<PropertyDeclarationContext> =
+public fun List<PropertyDeclarationContext>.extensionProperties(): List<PropertyDeclarationContext> =
     filter {
         it.declaration.isExtension
     }
 
-fun List<PropertyDeclarationContext>.withModule(modulePath: String): List<PropertyDeclarationContext> {
+/** Filters the list of properties to include only those residing in module [modulePath]. */
+public fun List<PropertyDeclarationContext>.withModule(modulePath: String): List<PropertyDeclarationContext> {
+    /** Filter or assertion criteria for norm. */
     val norm = if (!modulePath.startsWith(":") && !modulePath.startsWith("**") && modulePath.isNotEmpty()) ":$modulePath" else modulePath
     return filter { it.modulePath == norm }
 }
 
-fun KonturePropertyScope.withModule(modulePath: String) = KonturePropertyScope(properties.withModule(modulePath))
+/** Filters properties in this scope to include only those residing in module [modulePath]. */
+public fun KonturePropertyScope.withModule(modulePath: String): KonturePropertyScope =
+    KonturePropertyScope(properties.withModule(modulePath))
 
-fun KonturePropertyScope.valProperties(): KonturePropertyScope = KonturePropertyScope(properties.valProperties())
+/** Filters properties in this scope to include only read-only (`val`) properties. */
+public fun KonturePropertyScope.valProperties(): KonturePropertyScope = KonturePropertyScope(properties.valProperties())
 
-fun KonturePropertyScope.varProperties(): KonturePropertyScope = KonturePropertyScope(properties.varProperties())
+/** Filters properties in this scope to include only mutable (`var`) properties. */
+public fun KonturePropertyScope.varProperties(): KonturePropertyScope = KonturePropertyScope(properties.varProperties())
 
-fun KonturePropertyScope.memberProperties(): KonturePropertyScope = KonturePropertyScope(properties.memberProperties())
+/** Filters properties in this scope to include only member/class properties. */
+public fun KonturePropertyScope.memberProperties(): KonturePropertyScope =
+    KonturePropertyScope(
+        properties.memberProperties(),
+    )
 
-fun KonturePropertyScope.topLevelProperties(): KonturePropertyScope =
+/** Filters properties in this scope to include only top-level properties. */
+public fun KonturePropertyScope.topLevelProperties(): KonturePropertyScope =
     KonturePropertyScope(properties.topLevelProperties())
 
-fun KonturePropertyScope.extensionProperties(): KonturePropertyScope =
+/** Filters properties in this scope to include only extension properties. */
+public fun KonturePropertyScope.extensionProperties(): KonturePropertyScope =
     KonturePropertyScope(properties.extensionProperties())
 
 // Assertion extensions on KonturePropertyScope
@@ -210,9 +239,13 @@ fun KonturePropertyScope.assertTrue(
     additionalMessage: String? = null,
     predicate: (PropertyDeclarationContext) -> Boolean,
 ) {
+    /** Filter or assertion criteria for failing. */
     val failing = properties.filterNot(predicate)
     if (failing.isNotEmpty()) {
+        /** Filter or assertion criteria for details. */
         val details = failing.joinToString("\n - ") { "${it.qualifiedName} (at ${ViolationLocation.format(it)})" }
+
+        /** Filter or assertion criteria for prefix. */
         val prefix = additionalMessage?.let { "$it\n" } ?: ""
         throw AssertionError("${prefix}Properties failed assertion:\n - $details")
     }

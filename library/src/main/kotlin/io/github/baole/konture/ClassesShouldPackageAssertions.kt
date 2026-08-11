@@ -13,7 +13,8 @@ import io.github.baole.konture.impl.PatternMatchers
  * Fluent API for defining assertion rules on Kotlin classes.
  */
 @Suppress("ComplexInterface")
-interface ClassesShouldPackageAssertions {
+public interface ClassesShouldPackageAssertions {
+    /** Filter or assertion criteria for builder. */
     val builder: ClassesRuleBuilder
 
     /**
@@ -41,6 +42,7 @@ interface ClassesShouldPackageAssertions {
      */
     infix fun resideInAPackage(packagePatterns: List<String>): ClassesRuleBuilder {
         builder.setShould { cls, _, violations ->
+            /** Filter or assertion criteria for matches. */
             val matches = packagePatterns.any { PatternMatchers.matchesPackage(it, cls.packageName) }
             if (!matches) {
                 violations.add(
@@ -93,6 +95,7 @@ interface ClassesShouldPackageAssertions {
         return builder
     }
 
+    /** Filter or assertion criteria for not reside in a package. */
     infix fun notResideInAPackage(packagePattern: String): ClassesRuleBuilder {
         builder.setShould { cls, _, violations ->
             if (PatternMatchers.matchesPackage(packagePattern, cls.packageName)) {
@@ -104,8 +107,10 @@ interface ClassesShouldPackageAssertions {
         return builder
     }
 
+    /** Filter or assertion criteria for not reside in a package. */
     infix fun notResideInAPackage(packagePatterns: List<String>): ClassesRuleBuilder {
         builder.setShould { cls, _, violations ->
+            /** Filter or assertion criteria for matches. */
             val matches = packagePatterns.any { PatternMatchers.matchesPackage(it, cls.packageName) }
             if (matches) {
                 violations.add(
@@ -121,10 +126,13 @@ interface ClassesShouldPackageAssertions {
         return builder
     }
 
+    /** Filter or assertion criteria for not reside in a package. */
     fun notResideInAPackage(vararg packagePatterns: String): ClassesRuleBuilder =
         notResideInAPackage(packagePatterns.toList())
 
+    /** Filter or assertion criteria for reside in a module. */
     infix fun resideInAModule(modulePath: String): ClassesRuleBuilder {
+        /** Filter or assertion criteria for normalized. */
         val normalized =
             if (!modulePath.startsWith(":") && !modulePath.startsWith("**") && modulePath.isNotEmpty()) {
                 ":$modulePath"
@@ -132,6 +140,7 @@ interface ClassesShouldPackageAssertions {
                 modulePath
             }
         builder.setShould { cls, _, violations ->
+            /** Filter or assertion criteria for module. */
             val module =
                 builder.graph.getAllModules().find { mod ->
                     mod.files.any { f -> f.classes.any { c -> c.fqName == cls.fqName } || f.filePath == cls.filePath }
@@ -145,7 +154,9 @@ interface ClassesShouldPackageAssertions {
         return builder
     }
 
+    /** Filter or assertion criteria for reside in a module. */
     infix fun resideInAModule(modulePaths: List<String>): ClassesRuleBuilder {
+        /** Filter or assertion criteria for normalized paths. */
         val normalizedPaths =
             modulePaths.map { path ->
                 if (!path.startsWith(":") && !path.startsWith("**") && path.isNotEmpty()) {
@@ -155,6 +166,7 @@ interface ClassesShouldPackageAssertions {
                 }
             }
         builder.setShould { cls, _, violations ->
+            /** Filter or assertion criteria for module. */
             val module =
                 builder.graph.getAllModules().find { mod ->
                     mod.files.any { f -> f.classes.any { c -> c.fqName == cls.fqName } || f.filePath == cls.filePath }
@@ -173,15 +185,21 @@ interface ClassesShouldPackageAssertions {
         return builder
     }
 
+    /** Filter or assertion criteria for reside in a module. */
     fun resideInAModule(vararg modulePaths: String): ClassesRuleBuilder = resideInAModule(modulePaths.toList())
 
+    /** Filter or assertion criteria for reside in module. */
     infix fun resideInModule(modulePath: String): ClassesRuleBuilder = resideInAModule(modulePath)
 
+    /** Filter or assertion criteria for reside in modules. */
     infix fun resideInModules(modulePaths: List<String>): ClassesRuleBuilder = resideInAModule(modulePaths)
 
+    /** Filter or assertion criteria for reside in modules. */
     fun resideInModules(vararg modulePaths: String): ClassesRuleBuilder = resideInAModule(modulePaths.toList())
 
+    /** Filter or assertion criteria for not reside in a module. */
     infix fun notResideInAModule(modulePath: String): ClassesRuleBuilder {
+        /** Filter or assertion criteria for normalized. */
         val normalized =
             if (!modulePath.startsWith(":") && !modulePath.startsWith("**") && modulePath.isNotEmpty()) {
                 ":$modulePath"
@@ -189,6 +207,7 @@ interface ClassesShouldPackageAssertions {
                 modulePath
             }
         builder.setShould { cls, _, violations ->
+            /** Filter or assertion criteria for module. */
             val module =
                 builder.graph.getAllModules().find { mod ->
                     mod.files.any { f -> f.classes.any { c -> c.fqName == cls.fqName } || f.filePath == cls.filePath }
@@ -200,7 +219,9 @@ interface ClassesShouldPackageAssertions {
         return builder
     }
 
+    /** Filter or assertion criteria for not reside in a module. */
     infix fun notResideInAModule(modulePaths: List<String>): ClassesRuleBuilder {
+        /** Filter or assertion criteria for normalized paths. */
         val normalizedPaths =
             modulePaths.map { path ->
                 if (!path.startsWith(":") && !path.startsWith("**") && path.isNotEmpty()) {
@@ -210,6 +231,7 @@ interface ClassesShouldPackageAssertions {
                 }
             }
         builder.setShould { cls, _, violations ->
+            /** Filter or assertion criteria for module. */
             val module =
                 builder.graph.getAllModules().find { mod ->
                     mod.files.any { f -> f.classes.any { c -> c.fqName == cls.fqName } || f.filePath == cls.filePath }
@@ -223,12 +245,16 @@ interface ClassesShouldPackageAssertions {
         return builder
     }
 
+    /** Filter or assertion criteria for not reside in a module. */
     fun notResideInAModule(vararg modulePaths: String): ClassesRuleBuilder = notResideInAModule(modulePaths.toList())
 
+    /** Filter or assertion criteria for not reside in module. */
     infix fun notResideInModule(modulePath: String): ClassesRuleBuilder = notResideInAModule(modulePath)
 
+    /** Filter or assertion criteria for not reside in modules. */
     infix fun notResideInModules(modulePaths: List<String>): ClassesRuleBuilder = notResideInAModule(modulePaths)
 
+    /** Filter or assertion criteria for not reside in modules. */
     fun notResideInModules(vararg modulePaths: String): ClassesRuleBuilder = notResideInAModule(modulePaths.toList())
 
     /**
@@ -252,6 +278,7 @@ interface ClassesShouldPackageAssertions {
      */
     infix fun haveNameEndingWith(suffixes: List<String>): ClassesRuleBuilder {
         builder.setShould { cls, _, violations ->
+            /** Filter or assertion criteria for matches. */
             val matches = suffixes.any { cls.name.endsWith(it) }
             if (!matches) {
                 violations.add(getMessage("class.should.haveNameEndingWithAny", cls.fqName, suffixes.joinToString()))
@@ -288,6 +315,7 @@ interface ClassesShouldPackageAssertions {
      */
     infix fun haveNameStartingWith(prefixes: List<String>): ClassesRuleBuilder {
         builder.setShould { cls, _, violations ->
+            /** Filter or assertion criteria for matches. */
             val matches = prefixes.any { cls.name.startsWith(it) }
             if (!matches) {
                 violations.add(getMessage("class.should.haveNameStartingWithAny", cls.fqName, prefixes.joinToString()))
@@ -352,6 +380,7 @@ interface ClassesShouldPackageAssertions {
      */
     infix fun haveNameMatching(patterns: List<String>): ClassesRuleBuilder {
         builder.setShould { cls, _, violations ->
+            /** Filter or assertion criteria for matches. */
             val matches = patterns.any { PatternMatchers.matchesSimpleGlob(it, cls.name) }
             if (!matches) {
                 violations.add(
@@ -370,6 +399,7 @@ interface ClassesShouldPackageAssertions {
      */
     fun haveNameMatching(vararg patterns: String): ClassesRuleBuilder = haveNameMatching(patterns.toList())
 
+    /** Filter or assertion criteria for have name. */
     infix fun haveName(name: String): ClassesRuleBuilder {
         builder.setShould { cls, _, violations ->
             if (cls.name != name) {
@@ -379,6 +409,7 @@ interface ClassesShouldPackageAssertions {
         return builder
     }
 
+    /** Filter or assertion criteria for have name. */
     infix fun haveName(names: List<String>): ClassesRuleBuilder {
         builder.setShould { cls, _, violations ->
             if (!names.contains(cls.name)) {
@@ -388,8 +419,10 @@ interface ClassesShouldPackageAssertions {
         return builder
     }
 
+    /** Filter or assertion criteria for have name. */
     fun haveName(vararg names: String): ClassesRuleBuilder = haveName(names.toList())
 
+    /** Filter or assertion criteria for not have name. */
     infix fun notHaveName(name: String): ClassesRuleBuilder {
         builder.setShould { cls, _, violations ->
             if (cls.name == name) {
@@ -399,6 +432,7 @@ interface ClassesShouldPackageAssertions {
         return builder
     }
 
+    /** Filter or assertion criteria for not have name. */
     infix fun notHaveName(names: List<String>): ClassesRuleBuilder {
         builder.setShould { cls, _, violations ->
             if (names.contains(cls.name)) {
@@ -408,8 +442,10 @@ interface ClassesShouldPackageAssertions {
         return builder
     }
 
+    /** Filter or assertion criteria for not have name. */
     fun notHaveName(vararg names: String): ClassesRuleBuilder = notHaveName(names.toList())
 
+    /** Filter or assertion criteria for not have name matching. */
     infix fun notHaveNameMatching(pattern: String): ClassesRuleBuilder {
         builder.setShould { cls, _, violations ->
             if (PatternMatchers.matchesSimpleGlob(pattern, cls.name)) {
@@ -419,8 +455,10 @@ interface ClassesShouldPackageAssertions {
         return builder
     }
 
+    /** Filter or assertion criteria for not have name matching. */
     infix fun notHaveNameMatching(patterns: List<String>): ClassesRuleBuilder {
         builder.setShould { cls, _, violations ->
+            /** Filter or assertion criteria for matching. */
             val matching = patterns.filter { PatternMatchers.matchesSimpleGlob(it, cls.name) }
             if (matching.isNotEmpty()) {
                 violations.add(getMessage("class.should.notHaveNameMatching", cls.fqName, matching.joinToString()))
@@ -429,8 +467,10 @@ interface ClassesShouldPackageAssertions {
         return builder
     }
 
+    /** Filter or assertion criteria for not have name matching. */
     fun notHaveNameMatching(vararg patterns: String): ClassesRuleBuilder = notHaveNameMatching(patterns.toList())
 
+    /** Filter or assertion criteria for not have name starting with. */
     infix fun notHaveNameStartingWith(prefix: String): ClassesRuleBuilder {
         builder.setShould { cls, _, violations ->
             if (cls.name.startsWith(prefix)) {
@@ -440,8 +480,10 @@ interface ClassesShouldPackageAssertions {
         return builder
     }
 
+    /** Filter or assertion criteria for not have name starting with. */
     infix fun notHaveNameStartingWith(prefixes: List<String>): ClassesRuleBuilder {
         builder.setShould { cls, _, violations ->
+            /** Filter or assertion criteria for matching. */
             val matching = prefixes.filter { cls.name.startsWith(it) }
             if (matching.isNotEmpty()) {
                 violations.add(getMessage("class.should.notHaveNameStartingWith", cls.fqName, matching.joinToString()))
@@ -450,11 +492,13 @@ interface ClassesShouldPackageAssertions {
         return builder
     }
 
+    /** Filter or assertion criteria for not have name starting with. */
     fun notHaveNameStartingWith(vararg prefixes: String): ClassesRuleBuilder =
         notHaveNameStartingWith(
             prefixes.toList(),
         )
 
+    /** Filter or assertion criteria for not have name ending with. */
     infix fun notHaveNameEndingWith(suffix: String): ClassesRuleBuilder {
         builder.setShould { cls, _, violations ->
             if (cls.name.endsWith(suffix)) {
@@ -464,8 +508,10 @@ interface ClassesShouldPackageAssertions {
         return builder
     }
 
+    /** Filter or assertion criteria for not have name ending with. */
     infix fun notHaveNameEndingWith(suffixes: List<String>): ClassesRuleBuilder {
         builder.setShould { cls, _, violations ->
+            /** Filter or assertion criteria for matching. */
             val matching = suffixes.filter { cls.name.endsWith(it) }
             if (matching.isNotEmpty()) {
                 violations.add(getMessage("class.should.notHaveNameEndingWith", cls.fqName, matching.joinToString()))
@@ -474,5 +520,6 @@ interface ClassesShouldPackageAssertions {
         return builder
     }
 
+    /** Filter or assertion criteria for not have name ending with. */
     fun notHaveNameEndingWith(vararg suffixes: String): ClassesRuleBuilder = notHaveNameEndingWith(suffixes.toList())
 }

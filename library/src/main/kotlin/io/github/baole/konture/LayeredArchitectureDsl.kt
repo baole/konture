@@ -1,5 +1,6 @@
 /*
- * Copyright 2026 Bao Le Duc
+ * Copyright 2026 The Konture Contributors
+ * Contributors: Bao Le Duc (@baole)
  * SPDX-License-Identifier: Apache-2.0
  */
 
@@ -36,6 +37,7 @@ class LayeredArchitectureDsl(
      * @property name The human-readable name of the layer.
      */
     class Layer(
+        /** Filter or assertion criteria for name. */
         val name: String,
     )
 
@@ -48,6 +50,7 @@ class LayeredArchitectureDsl(
      * Specification helper for associating a layer definition with a package/module pattern.
      */
     inner class LayerSpec(
+        /** Filter or assertion criteria for name. */
         val name: String,
     ) {
         /**
@@ -76,6 +79,7 @@ class LayeredArchitectureDsl(
      * DSL helper for specifying directional accessibility constraints on a layer.
      */
     inner class ConstraintSpec(
+        /** Filter or assertion criteria for layer name. */
         val layerName: String,
     ) {
         /**
@@ -89,6 +93,7 @@ class LayeredArchitectureDsl(
          * Asserts that this layer can only be accessed by the specified subset of layers.
          */
         fun mayOnlyBeAccessedByLayers(allowedLayers: List<Layer>) {
+            /** Filter or assertion criteria for names. */
             val names = allowedLayers.map { it.name }
             builder.whereLayer(layerName).mayOnlyBeAccessedByLayers(names)
         }
@@ -104,6 +109,7 @@ class LayeredArchitectureDsl(
          * Asserts that this layer is only allowed to access the specified subset of layers.
          */
         fun mayOnlyAccessLayers(allowedLayers: List<Layer>) {
+            /** Filter or assertion criteria for names. */
             val names = allowedLayers.map { it.name }
             builder.whereLayer(layerName).mayOnlyAccessLayers(names)
         }

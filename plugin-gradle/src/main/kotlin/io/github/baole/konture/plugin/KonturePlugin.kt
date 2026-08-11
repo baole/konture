@@ -288,7 +288,8 @@ public class KonturePlugin : Plugin<Project> {
         sourceSetName: String,
     ): List<String> = KonturePluginConfigurer.compilationClasspath(project, sourceSetName)
 
-    companion object {
+    /** Companion object containing internal plugin constants and task names. */
+    public companion object {
         private const val EXTENSION_NAME = "konture"
 
         private const val TASK_GENERATE_BASELINE = "generateKontureBaseline"

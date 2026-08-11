@@ -65,10 +65,13 @@ class FunctionsRuleBuilder(
         this.apply {
             graph.getAllModules().flatMap { module ->
                 module.files.flatMap { file ->
+                    /** Filter or assertion criteria for top level. */
                     val topLevel =
                         file.topLevelFunctions.map { func ->
                             FunctionDeclarationContext(func, file.packageName, null, module.path, file.filePath, null)
                         }
+
+                    /** Filter or assertion criteria for members. */
                     val members =
                         file.classes.flatMap { cls ->
                             cls.functions.map { func ->
@@ -211,19 +214,23 @@ class FunctionsRuleBuilder(
     }
 
     internal fun setThat(predicate: (FunctionDeclarationContext) -> Boolean) {
+        /** Filter or assertion criteria for actual predicate. */
         val actualPredicate =
             if (negateNext) {
                 negateNext = false
+                /** Filter or assertion criteria for p. */
                 val p = { f: FunctionDeclarationContext -> !predicate(f) }
                 p
             } else {
                 predicate
             }
 
+        /** Filter or assertion criteria for current. */
         val current = thatPredicate
         if (current == null) {
             thatPredicate = actualPredicate
         } else {
+            /** Filter or assertion criteria for op. */
             val op = activeOperator
             thatPredicate =
                 when (op) {
@@ -246,14 +253,17 @@ class FunctionsRuleBuilder(
     internal fun setShould(
         assertion: (FunctionDeclarationContext, List<FunctionDeclarationContext>, MutableList<String>) -> Unit,
     ) {
+        /** Filter or assertion criteria for actual assertion. */
         val actualAssertion =
             if (negateNextShould) {
                 negateNextShould = false
+                /** Filter or assertion criteria for a. */
                 val a = {
                         func: FunctionDeclarationContext,
                         allFuncs: List<FunctionDeclarationContext>,
                         violations: MutableList<String>,
                     ->
+                    /** Filter or assertion criteria for temp violations. */
                     val tempViolations = mutableListOf<String>()
                     assertion(func, allFuncs, tempViolations)
                     if (tempViolations.isEmpty()) {
@@ -267,14 +277,19 @@ class FunctionsRuleBuilder(
                 assertion
             }
 
+        /** Filter or assertion criteria for current. */
         val current = shouldAssertion
         if (current == null) {
             shouldAssertion = actualAssertion
         } else {
+            /** Filter or assertion criteria for op. */
             val op = activeShouldOperator
             if (op == LogicalOperator.OR) {
                 shouldAssertion = { func, allFuncs, violations ->
+                    /** Filter or assertion criteria for temp1. */
                     val temp1 = mutableListOf<String>()
+
+                    /** Filter or assertion criteria for temp2. */
                     val temp2 = mutableListOf<String>()
                     current(func, allFuncs, temp1)
                     actualAssertion(func, allFuncs, temp2)
@@ -286,11 +301,17 @@ class FunctionsRuleBuilder(
                 }
             } else if (op == LogicalOperator.XOR) {
                 shouldAssertion = { func, allFuncs, violations ->
+                    /** Filter or assertion criteria for temp1. */
                     val temp1 = mutableListOf<String>()
+
+                    /** Filter or assertion criteria for temp2. */
                     val temp2 = mutableListOf<String>()
                     current(func, allFuncs, temp1)
                     actualAssertion(func, allFuncs, temp2)
+                    /** Filter or assertion criteria for ok1. */
                     val ok1 = temp1.isEmpty()
+
+                    /** Filter or assertion criteria for ok2. */
                     val ok2 = temp2.isEmpty()
                     if (ok1 == ok2) {
                         violations.add(
@@ -313,10 +334,12 @@ class FunctionsRuleBuilder(
      * Throws an [AssertionError] if any rule violations are detected.
      */
     fun check(g: ProjectGraph = graph) {
+        /** Filter or assertion criteria for all functions. */
         val allFunctions =
             g.getAllModules().flatMap { module ->
                 module.files.flatMap { file ->
                     file.membershipsFor(module.path).filter(sourceSets::matches).flatMap { sourceSet ->
+                        /** Filter or assertion criteria for top level. */
                         val topLevel =
                             file.topLevelFunctions.map { func ->
                                 FunctionDeclarationContext(
@@ -332,6 +355,8 @@ class FunctionsRuleBuilder(
                                     },
                                 )
                             }
+
+                        /** Filter or assertion criteria for members. */
                         val members =
                             file.classes.flatMap { cls ->
                                 cls.functions.map { func ->
@@ -353,6 +378,8 @@ class FunctionsRuleBuilder(
                     }
                 }
             }
+
+        /** Filter or assertion criteria for functions to check. */
         val functionsToCheck = allFunctions.filter { thatPredicate?.invoke(it) ?: true }
         KontureLogger.log(
             LogLevel.DEBUG,
@@ -370,14 +397,17 @@ class FunctionsRuleBuilder(
                 )
             }
         }
+        /** Filter or assertion criteria for assertion. */
         val assertion =
             shouldAssertion ?: throw AssertionError(
                 getMessage("functions.rule.noAssertion"),
             )
 
+        /** Filter or assertion criteria for run check. */
         val runCheck = { list: MutableList<String> ->
             for (func in functionsToCheck) {
                 if (ignoredPredicates.any { it(func) }) continue
+                /** Filter or assertion criteria for start idx. */
                 val startIdx = list.size
                 assertion(func, allFunctions, list)
                 for (i in startIdx until list.size) {

@@ -11,10 +11,13 @@ import io.github.baole.konture.impl.PatternMatchers
 import io.github.baole.konture.impl.ViolationLocation
 import kotlin.reflect.KClass
 
-@Suppress("ComplexInterface")
-interface PropertiesShouldTypeAssertions {
+/** Type and package assertions for property rules. */
+@Suppress("ComplexInterface", "LargeClass")
+public interface PropertiesShouldTypeAssertions {
+    /** Filter or assertion criteria for builder. */
     val builder: PropertiesRuleBuilder
 
+    /** Filter or assertion criteria for reside in a package. */
     infix fun resideInAPackage(packagePattern: String): PropertiesRuleBuilder {
         builder.setShould { prop, _, violations ->
             if (!PatternMatchers.matchesPackage(packagePattern, prop.packageName)) {
@@ -26,8 +29,10 @@ interface PropertiesShouldTypeAssertions {
         return builder
     }
 
+    /** Filter or assertion criteria for reside in a package. */
     infix fun resideInAPackage(packagePatterns: List<String>): PropertiesRuleBuilder {
         builder.setShould { prop, _, violations ->
+            /** Filter or assertion criteria for matches. */
             val matches = packagePatterns.any { PatternMatchers.matchesPackage(it, prop.packageName) }
             if (!matches) {
                 violations.add(
@@ -43,11 +48,13 @@ interface PropertiesShouldTypeAssertions {
         return builder
     }
 
+    /** Filter or assertion criteria for reside in a package. */
     fun resideInAPackage(vararg packagePatterns: String): PropertiesRuleBuilder =
         resideInAPackage(
             packagePatterns.toList(),
         )
 
+    /** Filter or assertion criteria for reside in a package. */
     infix fun resideInAPackage(predicate: (String) -> Boolean): PropertiesRuleBuilder {
         builder.setShould { prop, _, violations ->
             if (!predicate(prop.packageName)) {
@@ -59,14 +66,19 @@ interface PropertiesShouldTypeAssertions {
         return builder
     }
 
+    /** Filter or assertion criteria for reside in package. */
     infix fun resideInPackage(packagePattern: String): PropertiesRuleBuilder = resideInAPackage(packagePattern)
 
+    /** Filter or assertion criteria for reside in package. */
     infix fun resideInPackage(packagePatterns: List<String>): PropertiesRuleBuilder = resideInAPackage(packagePatterns)
 
+    /** Filter or assertion criteria for reside in package. */
     fun resideInPackage(vararg packagePatterns: String): PropertiesRuleBuilder = resideInAPackage(*packagePatterns)
 
+    /** Filter or assertion criteria for reside in package. */
     infix fun resideInPackage(predicate: (String) -> Boolean): PropertiesRuleBuilder = resideInAPackage(predicate)
 
+    /** Filter or assertion criteria for not reside in package. */
     infix fun notResideInPackage(packagePattern: String): PropertiesRuleBuilder {
         builder.setShould { prop, _, violations ->
             if (PatternMatchers.matchesPackage(packagePattern, prop.packageName)) {
@@ -78,6 +90,7 @@ interface PropertiesShouldTypeAssertions {
         return builder
     }
 
+    /** Filter or assertion criteria for not reside in package. */
     infix fun notResideInPackage(packagePatterns: List<String>): PropertiesRuleBuilder {
         builder.setShould { prop, _, violations ->
             if (packagePatterns.any { PatternMatchers.matchesPackage(it, prop.packageName) }) {
@@ -93,23 +106,28 @@ interface PropertiesShouldTypeAssertions {
         return builder
     }
 
+    /** Filter or assertion criteria for not reside in package. */
     fun notResideInPackage(vararg packagePatterns: String): PropertiesRuleBuilder =
         notResideInPackage(
             packagePatterns.toList(),
         )
 
+    /** Filter or assertion criteria for not reside in a package. */
     infix fun notResideInAPackage(packagePattern: String): PropertiesRuleBuilder = notResideInPackage(packagePattern)
 
+    /** Filter or assertion criteria for not reside in a package. */
     infix fun notResideInAPackage(packagePatterns: List<String>): PropertiesRuleBuilder =
         notResideInPackage(
             packagePatterns,
         )
 
+    /** Filter or assertion criteria for not reside in a package. */
     fun notResideInAPackage(vararg packagePatterns: String): PropertiesRuleBuilder =
         notResideInPackage(
             *packagePatterns,
         )
 
+    /** Filter or assertion criteria for reside in module. */
     infix fun resideInModule(modulePath: String): PropertiesRuleBuilder {
         builder.setShould { prop, _, violations ->
             if (prop.modulePath != modulePath && !PatternMatchers.matchesModuleGlob(modulePath, prop.modulePath)) {
@@ -121,6 +139,7 @@ interface PropertiesShouldTypeAssertions {
         return builder
     }
 
+    /** Filter or assertion criteria for reside in module. */
     infix fun resideInModule(modulePaths: List<String>): PropertiesRuleBuilder {
         builder.setShould { prop, _, violations ->
             if (modulePaths.none { prop.modulePath == it || PatternMatchers.matchesModuleGlob(it, prop.modulePath) }) {
@@ -132,18 +151,25 @@ interface PropertiesShouldTypeAssertions {
         return builder
     }
 
+    /** Filter or assertion criteria for reside in module. */
     fun resideInModule(vararg modulePaths: String): PropertiesRuleBuilder = resideInModule(modulePaths.toList())
 
+    /** Filter or assertion criteria for reside in modules. */
     infix fun resideInModules(modulePaths: List<String>): PropertiesRuleBuilder = resideInModule(modulePaths)
 
+    /** Filter or assertion criteria for reside in modules. */
     fun resideInModules(vararg modulePaths: String): PropertiesRuleBuilder = resideInModule(*modulePaths)
 
+    /** Filter or assertion criteria for reside in a module. */
     infix fun resideInAModule(modulePath: String): PropertiesRuleBuilder = resideInModule(modulePath)
 
+    /** Filter or assertion criteria for reside in a module. */
     infix fun resideInAModule(modulePaths: List<String>): PropertiesRuleBuilder = resideInModule(modulePaths)
 
+    /** Filter or assertion criteria for reside in a module. */
     fun resideInAModule(vararg modulePaths: String): PropertiesRuleBuilder = resideInModule(*modulePaths)
 
+    /** Filter or assertion criteria for not reside in module. */
     infix fun notResideInModule(modulePath: String): PropertiesRuleBuilder {
         builder.setShould { prop, _, violations ->
             if (prop.modulePath == modulePath || PatternMatchers.matchesModuleGlob(modulePath, prop.modulePath)) {
@@ -155,6 +181,7 @@ interface PropertiesShouldTypeAssertions {
         return builder
     }
 
+    /** Filter or assertion criteria for not reside in module. */
     infix fun notResideInModule(modulePaths: List<String>): PropertiesRuleBuilder {
         builder.setShould { prop, _, violations ->
             if (modulePaths.any { prop.modulePath == it || PatternMatchers.matchesModuleGlob(it, prop.modulePath) }) {
@@ -166,18 +193,25 @@ interface PropertiesShouldTypeAssertions {
         return builder
     }
 
+    /** Filter or assertion criteria for not reside in module. */
     fun notResideInModule(vararg modulePaths: String): PropertiesRuleBuilder = notResideInModule(modulePaths.toList())
 
+    /** Filter or assertion criteria for not reside in modules. */
     infix fun notResideInModules(modulePaths: List<String>): PropertiesRuleBuilder = notResideInModule(modulePaths)
 
+    /** Filter or assertion criteria for not reside in modules. */
     fun notResideInModules(vararg modulePaths: String): PropertiesRuleBuilder = notResideInModule(*modulePaths)
 
+    /** Filter or assertion criteria for not reside in a module. */
     infix fun notResideInAModule(modulePath: String): PropertiesRuleBuilder = notResideInModule(modulePath)
 
+    /** Filter or assertion criteria for not reside in a module. */
     infix fun notResideInAModule(modulePaths: List<String>): PropertiesRuleBuilder = notResideInModule(modulePaths)
 
+    /** Filter or assertion criteria for not reside in a module. */
     fun notResideInAModule(vararg modulePaths: String): PropertiesRuleBuilder = notResideInModule(*modulePaths)
 
+    /** Filter or assertion criteria for have name. */
     infix fun haveName(name: String): PropertiesRuleBuilder {
         builder.setShould { prop, _, violations ->
             if (prop.declaration.name != name) {
@@ -189,6 +223,7 @@ interface PropertiesShouldTypeAssertions {
         return builder
     }
 
+    /** Filter or assertion criteria for have name. */
     infix fun haveName(names: List<String>): PropertiesRuleBuilder {
         builder.setShould { prop, _, violations ->
             if (!names.contains(prop.declaration.name)) {
@@ -200,8 +235,10 @@ interface PropertiesShouldTypeAssertions {
         return builder
     }
 
+    /** Filter or assertion criteria for have name. */
     fun haveName(vararg names: String): PropertiesRuleBuilder = haveName(names.toList())
 
+    /** Filter or assertion criteria for have name. */
     infix fun haveName(predicate: (String) -> Boolean): PropertiesRuleBuilder {
         builder.setShould { prop, _, violations ->
             if (!predicate(prop.declaration.name)) {
@@ -213,6 +250,7 @@ interface PropertiesShouldTypeAssertions {
         return builder
     }
 
+    /** Filter or assertion criteria for have name ending with. */
     infix fun haveNameEndingWith(suffix: String): PropertiesRuleBuilder {
         builder.setShould { prop, _, violations ->
             if (!prop.declaration.name.endsWith(suffix)) {
@@ -224,8 +262,10 @@ interface PropertiesShouldTypeAssertions {
         return builder
     }
 
+    /** Filter or assertion criteria for have name ending with. */
     infix fun haveNameEndingWith(suffixes: List<String>): PropertiesRuleBuilder {
         builder.setShould { prop, _, violations ->
+            /** Filter or assertion criteria for matches. */
             val matches = suffixes.any { prop.declaration.name.endsWith(it) }
             if (!matches) {
                 violations.add(
@@ -236,8 +276,10 @@ interface PropertiesShouldTypeAssertions {
         return builder
     }
 
+    /** Filter or assertion criteria for have name ending with. */
     fun haveNameEndingWith(vararg suffixes: String): PropertiesRuleBuilder = haveNameEndingWith(suffixes.toList())
 
+    /** Filter or assertion criteria for have name starting with. */
     infix fun haveNameStartingWith(prefix: String): PropertiesRuleBuilder {
         builder.setShould { prop, _, violations ->
             if (!prop.declaration.name.startsWith(prefix)) {
@@ -249,8 +291,10 @@ interface PropertiesShouldTypeAssertions {
         return builder
     }
 
+    /** Filter or assertion criteria for have name starting with. */
     infix fun haveNameStartingWith(prefixes: List<String>): PropertiesRuleBuilder {
         builder.setShould { prop, _, violations ->
+            /** Filter or assertion criteria for matches. */
             val matches = prefixes.any { prop.declaration.name.startsWith(it) }
             if (!matches) {
                 violations.add(
@@ -261,8 +305,10 @@ interface PropertiesShouldTypeAssertions {
         return builder
     }
 
+    /** Filter or assertion criteria for have name starting with. */
     fun haveNameStartingWith(vararg prefixes: String): PropertiesRuleBuilder = haveNameStartingWith(prefixes.toList())
 
+    /** Filter or assertion criteria for have name matching. */
     infix fun haveNameMatching(pattern: String): PropertiesRuleBuilder {
         builder.setShould { prop, _, violations ->
             if (!PatternMatchers.matchesSimpleGlob(pattern, prop.declaration.name)) {
@@ -274,8 +320,10 @@ interface PropertiesShouldTypeAssertions {
         return builder
     }
 
+    /** Filter or assertion criteria for have name matching. */
     infix fun haveNameMatching(patterns: List<String>): PropertiesRuleBuilder {
         builder.setShould { prop, _, violations ->
+            /** Filter or assertion criteria for matches. */
             val matches = patterns.any { PatternMatchers.matchesSimpleGlob(it, prop.declaration.name) }
             if (!matches) {
                 violations.add(
@@ -286,8 +334,10 @@ interface PropertiesShouldTypeAssertions {
         return builder
     }
 
+    /** Filter or assertion criteria for have name matching. */
     fun haveNameMatching(vararg patterns: String): PropertiesRuleBuilder = haveNameMatching(patterns.toList())
 
+    /** Filter or assertion criteria for not have name. */
     infix fun notHaveName(name: String): PropertiesRuleBuilder {
         builder.setShould { prop, _, violations ->
             if (prop.declaration.name == name) {
@@ -297,6 +347,7 @@ interface PropertiesShouldTypeAssertions {
         return builder
     }
 
+    /** Filter or assertion criteria for not have name. */
     infix fun notHaveName(names: List<String>): PropertiesRuleBuilder {
         builder.setShould { prop, _, violations ->
             if (names.contains(prop.declaration.name)) {
@@ -306,12 +357,16 @@ interface PropertiesShouldTypeAssertions {
         return builder
     }
 
+    /** Filter or assertion criteria for not have name. */
     fun notHaveName(vararg names: String): PropertiesRuleBuilder = notHaveName(names.toList())
 
+    /** Filter or assertion criteria for not have name in. */
     infix fun notHaveNameIn(names: List<String>): PropertiesRuleBuilder = notHaveName(names)
 
+    /** Filter or assertion criteria for not have name in. */
     fun notHaveNameIn(vararg names: String): PropertiesRuleBuilder = notHaveName(names.toList())
 
+    /** Filter or assertion criteria for not have name matching. */
     infix fun notHaveNameMatching(pattern: String): PropertiesRuleBuilder {
         builder.setShould { prop, _, violations ->
             if (PatternMatchers.matchesSimpleGlob(pattern, prop.declaration.name)) {
@@ -321,8 +376,10 @@ interface PropertiesShouldTypeAssertions {
         return builder
     }
 
+    /** Filter or assertion criteria for not have name matching. */
     infix fun notHaveNameMatching(patterns: List<String>): PropertiesRuleBuilder {
         builder.setShould { prop, _, violations ->
+            /** Filter or assertion criteria for matches. */
             val matches = patterns.any { PatternMatchers.matchesSimpleGlob(it, prop.declaration.name) }
             if (matches) {
                 violations.add(
@@ -333,8 +390,10 @@ interface PropertiesShouldTypeAssertions {
         return builder
     }
 
+    /** Filter or assertion criteria for not have name matching. */
     fun notHaveNameMatching(vararg patterns: String): PropertiesRuleBuilder = notHaveNameMatching(patterns.toList())
 
+    /** Filter or assertion criteria for not have name starting with. */
     infix fun notHaveNameStartingWith(prefix: String): PropertiesRuleBuilder {
         builder.setShould { prop, _, violations ->
             if (prop.declaration.name.startsWith(prefix)) {
@@ -344,8 +403,10 @@ interface PropertiesShouldTypeAssertions {
         return builder
     }
 
+    /** Filter or assertion criteria for not have name starting with. */
     infix fun notHaveNameStartingWith(prefixes: List<String>): PropertiesRuleBuilder {
         builder.setShould { prop, _, violations ->
+            /** Filter or assertion criteria for matches. */
             val matches = prefixes.any { prop.declaration.name.startsWith(it) }
             if (matches) {
                 violations.add(
@@ -360,11 +421,13 @@ interface PropertiesShouldTypeAssertions {
         return builder
     }
 
+    /** Filter or assertion criteria for not have name starting with. */
     fun notHaveNameStartingWith(vararg prefixes: String): PropertiesRuleBuilder =
         notHaveNameStartingWith(
             prefixes.toList(),
         )
 
+    /** Filter or assertion criteria for not have name ending with. */
     infix fun notHaveNameEndingWith(suffix: String): PropertiesRuleBuilder {
         builder.setShould { prop, _, violations ->
             if (prop.declaration.name.endsWith(suffix)) {
@@ -374,8 +437,10 @@ interface PropertiesShouldTypeAssertions {
         return builder
     }
 
+    /** Filter or assertion criteria for not have name ending with. */
     infix fun notHaveNameEndingWith(suffixes: List<String>): PropertiesRuleBuilder {
         builder.setShould { prop, _, violations ->
+            /** Filter or assertion criteria for matches. */
             val matches = suffixes.any { prop.declaration.name.endsWith(it) }
             if (matches) {
                 violations.add(
@@ -386,11 +451,16 @@ interface PropertiesShouldTypeAssertions {
         return builder
     }
 
+    /** Filter or assertion criteria for not have name ending with. */
     fun notHaveNameEndingWith(vararg suffixes: String): PropertiesRuleBuilder = notHaveNameEndingWith(suffixes.toList())
 
+    /** Filter or assertion criteria for have type. */
     infix fun haveType(typeFqName: String): PropertiesRuleBuilder {
         builder.setShould { prop, _, violations ->
+            /** Filter or assertion criteria for actual type. */
             val actualType = prop.declaration.type
+
+            /** Filter or assertion criteria for matches. */
             val matches = actualType == typeFqName || actualType.endsWith(".$typeFqName") || typeFqName.endsWith(".$actualType")
             if (!matches) {
                 violations.add(
@@ -401,15 +471,22 @@ interface PropertiesShouldTypeAssertions {
         return builder
     }
 
+    /** Filter or assertion criteria for have type. */
     infix fun haveType(type: KClass<*>): PropertiesRuleBuilder = haveType(type.kontureQualifiedName())
 
+    /** Filter or assertion criteria for have type. */
     infix fun haveType(typeFqNames: List<String>): PropertiesRuleBuilder = haveTypeIn(typeFqNames)
 
+    /** Filter or assertion criteria for have type. */
     fun haveType(vararg typeFqNames: String): PropertiesRuleBuilder = haveTypeIn(typeFqNames.toList())
 
+    /** Filter or assertion criteria for have type in. */
     infix fun haveTypeIn(typeFqNames: List<String>): PropertiesRuleBuilder {
         builder.setShould { prop, _, violations ->
+            /** Filter or assertion criteria for actual type. */
             val actualType = prop.declaration.type
+
+            /** Filter or assertion criteria for matches. */
             val matches =
                 typeFqNames.any {
                         fq ->
@@ -429,10 +506,13 @@ interface PropertiesShouldTypeAssertions {
         return builder
     }
 
+    /** Filter or assertion criteria for have type in. */
     fun haveTypeIn(vararg typeFqNames: String): PropertiesRuleBuilder = haveTypeIn(typeFqNames.toList())
 
+    /** Filter or assertion criteria for have annotation of. */
     infix fun haveAnnotationOf(annotationFqName: String): PropertiesRuleBuilder {
         builder.setShould { prop, _, violations ->
+            /** Filter or assertion criteria for is annotated. */
             val isAnnotated =
                 prop.declaration.annotations.any {
                     it.name == annotationFqName || it.fqName == annotationFqName
@@ -446,11 +526,14 @@ interface PropertiesShouldTypeAssertions {
         return builder
     }
 
+    /** Filter or assertion criteria for have annotation of. */
     infix fun haveAnnotationOf(annotation: KClass<out Annotation>): PropertiesRuleBuilder =
         haveAnnotationOf(annotation.kontureQualifiedName())
 
+    /** Filter or assertion criteria for have annotation of. */
     infix fun haveAnnotationOf(annotationNames: List<String>): PropertiesRuleBuilder {
         builder.setShould { prop, _, violations ->
+            /** Filter or assertion criteria for present. */
             val present =
                 prop.declaration.annotations.map { it.name }.toSet() +
                     prop.declaration.annotations.map { it.fqName }.toSet()
@@ -463,17 +546,20 @@ interface PropertiesShouldTypeAssertions {
         return builder
     }
 
+    /** Filter or assertion criteria for have annotation of. */
     fun haveAnnotationOf(vararg annotationNames: String): PropertiesRuleBuilder =
         haveAnnotationOf(
             annotationNames.toList(),
         )
 
+    /** Filter or assertion criteria for have annotation with argument. */
     fun haveAnnotationWithArgument(
         annotationName: String,
         argName: String? = null,
         argValue: String,
     ): PropertiesRuleBuilder {
         builder.setShould { prop, _, violations ->
+            /** Filter or assertion criteria for matches. */
             val matches =
                 prop.declaration.annotations.any { ann ->
                     (ann.name == annotationName || ann.fqName == annotationName) &&
@@ -497,8 +583,10 @@ interface PropertiesShouldTypeAssertions {
         return builder
     }
 
+    /** Filter or assertion criteria for have all annotations of. */
     infix fun haveAllAnnotationsOf(names: List<String>): PropertiesRuleBuilder {
         builder.setShould { prop, _, violations ->
+            /** Filter or assertion criteria for present. */
             val present =
                 prop.declaration.annotations.map { it.name }.toSet() +
                     prop.declaration.annotations.map { it.fqName }.toSet()
@@ -511,10 +599,13 @@ interface PropertiesShouldTypeAssertions {
         return builder
     }
 
+    /** Filter or assertion criteria for have all annotations of. */
     fun haveAllAnnotationsOf(vararg names: String): PropertiesRuleBuilder = haveAllAnnotationsOf(names.asList())
 
+    /** Filter or assertion criteria for have any annotation of. */
     infix fun haveAnyAnnotationOf(names: List<String>): PropertiesRuleBuilder {
         builder.setShould { prop, _, violations ->
+            /** Filter or assertion criteria for present. */
             val present =
                 prop.declaration.annotations.map { it.name }.toSet() +
                     prop.declaration.annotations.map { it.fqName }.toSet()
@@ -527,8 +618,10 @@ interface PropertiesShouldTypeAssertions {
         return builder
     }
 
+    /** Filter or assertion criteria for have any annotation of. */
     fun haveAnyAnnotationOf(vararg names: String): PropertiesRuleBuilder = haveAnyAnnotationOf(names.asList())
 
+    /** Filter or assertion criteria for be top level. */
     fun beTopLevel(): PropertiesRuleBuilder {
         builder.setShould { prop, _, violations ->
             if (prop.className != null) {
@@ -540,6 +633,7 @@ interface PropertiesShouldTypeAssertions {
         return builder
     }
 
+    /** Filter or assertion criteria for be member. */
     fun beMember(): PropertiesRuleBuilder {
         builder.setShould { prop, _, violations ->
             if (prop.className == null) {
@@ -551,6 +645,7 @@ interface PropertiesShouldTypeAssertions {
         return builder
     }
 
+    /** Filter or assertion criteria for be documented with k doc. */
     fun beDocumentedWithKDoc(): PropertiesRuleBuilder {
         builder.setShould { prop, _, violations ->
             if (prop.declaration.kdocText.isNullOrBlank()) {
@@ -562,14 +657,17 @@ interface PropertiesShouldTypeAssertions {
         return builder
     }
 
+    /** Filter or assertion criteria for not call. */
     fun notCall(fqName: String): PropertiesRuleBuilder {
         builder.setShould { prop, _, violations ->
+            /** Filter or assertion criteria for file usages. */
             val fileUsages =
                 builder.graph.getAllModules()
                     .flatMap { it.files }
                     .find { file -> file.filePath == prop.filePath || file.classes.any { it.name == prop.className } }
                     ?.usages.orEmpty()
 
+            /** Filter or assertion criteria for prop usages. */
             val propUsages =
                 fileUsages.filter { usage ->
                     usage.isEnclosedInProperty(
@@ -582,6 +680,7 @@ interface PropertiesShouldTypeAssertions {
             propUsages
                 .filter { usage -> PatternMatchers.isCallUsageMatch(usage, fqName) }
                 .forEach { usage ->
+                    /** Filter or assertion criteria for unresolved. */
                     val unresolved = if (usage.unresolvedPossibleUsage) "unresolved possible " else ""
                     violations.add(
                         "${getMessage("usage.notCall", unresolved, fqName, usage.rawExpression, usage.line, usage.column)} " +
@@ -592,16 +691,20 @@ interface PropertiesShouldTypeAssertions {
         return builder
     }
 
+    /** Filter or assertion criteria for not call. */
     fun notCall(kClass: KClass<*>): PropertiesRuleBuilder = notCall(kClass.kontureQualifiedName())
 
+    /** Filter or assertion criteria for not reference class. */
     fun notReferenceClass(fqName: String): PropertiesRuleBuilder {
         builder.setShould { prop, _, violations ->
+            /** Filter or assertion criteria for file usages. */
             val fileUsages =
                 builder.graph.getAllModules()
                     .flatMap { it.files }
                     .find { file -> file.filePath == prop.filePath || file.classes.any { it.name == prop.className } }
                     ?.usages.orEmpty()
 
+            /** Filter or assertion criteria for prop usages. */
             val propUsages =
                 fileUsages.filter { usage ->
                     usage.isEnclosedInProperty(
@@ -625,16 +728,21 @@ interface PropertiesShouldTypeAssertions {
         return builder
     }
 
+    /** Filter or assertion criteria for not reference class. */
     fun notReferenceClass(kClass: KClass<*>): PropertiesRuleBuilder = notReferenceClass(kClass.kontureQualifiedName())
 
+    /** Filter or assertion criteria for have import of. */
     infix fun haveImportOf(importFqName: String): PropertiesRuleBuilder {
         builder.setShould { prop, _, violations ->
+            /** Filter or assertion criteria for imports. */
             val imports =
                 builder.graph.getAllModules().flatMap { it.files }
                     .find { file ->
                         file.filePath == prop.filePath || (prop.className != null && file.classes.any { it.name == prop.className })
                     }
                     ?.imports.orEmpty()
+
+            /** Filter or assertion criteria for matches. */
             val matches = imports.any { it == importFqName || PatternMatchers.matchesSimpleGlob(importFqName, it) }
             if (!matches) {
                 violations.add(getMessage("property.should.importFile", prop.qualifiedName, importFqName))
@@ -643,16 +751,21 @@ interface PropertiesShouldTypeAssertions {
         return builder
     }
 
+    /** Filter or assertion criteria for have import of. */
     infix fun haveImportOf(type: KClass<*>): PropertiesRuleBuilder = haveImportOf(type.kontureQualifiedName())
 
+    /** Filter or assertion criteria for not have import of. */
     infix fun notHaveImportOf(importFqName: String): PropertiesRuleBuilder {
         builder.setShould { prop, _, violations ->
+            /** Filter or assertion criteria for imports. */
             val imports =
                 builder.graph.getAllModules().flatMap { it.files }
                     .find { file ->
                         file.filePath == prop.filePath || (prop.className != null && file.classes.any { it.name == prop.className })
                     }
                     ?.imports.orEmpty()
+
+            /** Filter or assertion criteria for matches. */
             val matches = imports.any { it == importFqName || PatternMatchers.matchesSimpleGlob(importFqName, it) }
             if (matches) {
                 violations.add(getMessage("property.should.notImportFile", prop.qualifiedName, importFqName))
@@ -661,16 +774,21 @@ interface PropertiesShouldTypeAssertions {
         return builder
     }
 
+    /** Filter or assertion criteria for not have import of. */
     infix fun notHaveImportOf(type: KClass<*>): PropertiesRuleBuilder = notHaveImportOf(type.kontureQualifiedName())
 
+    /** Filter or assertion criteria for have no wildcard imports. */
     fun haveNoWildcardImports(): PropertiesRuleBuilder {
         builder.setShould { prop, _, violations ->
+            /** Filter or assertion criteria for imports. */
             val imports =
                 builder.graph.getAllModules().flatMap { it.files }
                     .find { file ->
                         file.filePath == prop.filePath || (prop.className != null && file.classes.any { it.name == prop.className })
                     }
                     ?.imports.orEmpty()
+
+            /** Filter or assertion criteria for wildcards. */
             val wildcards = imports.filter { it.endsWith(".*") }
             if (wildcards.isNotEmpty()) {
                 violations.add(

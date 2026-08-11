@@ -1,5 +1,6 @@
 /*
- * Copyright 2026 Bao Le Duc
+ * Copyright 2026 The Konture Contributors
+ * Contributors: Bao Le Duc (@baole)
  * SPDX-License-Identifier: Apache-2.0
  */
 
@@ -29,8 +30,9 @@ abstract class DetectExternalDependencyRules : DefaultTask() {
     @get:OutputFile
     abstract val resultFile: RegularFileProperty
 
+    /** Scans configured test source files to detect whether external dependency rules are referenced. */
     @TaskAction
-    fun detect() {
+    public fun detect() {
         val requiresGraph =
             testSources.files.any { file ->
                 file.extension == "kt" && externalDependencyRuleCall.containsMatchIn(stripCommentsAndStrings(file.readText()))

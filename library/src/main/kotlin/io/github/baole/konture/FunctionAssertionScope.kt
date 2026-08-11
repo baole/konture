@@ -9,14 +9,18 @@ package io.github.baole.konture
 import io.github.baole.konture.i18n.getMessage
 import io.github.baole.konture.impl.PatternMatchers
 
+/** Assertion scope DSL for configuring rule expectations on Kotlin functions. */
 @KontureDsl
-class FunctionAssertionScope internal constructor() {
+public class FunctionAssertionScope internal constructor() {
+    /** Filter or assertion criteria for assertions. */
     val assertions = mutableListOf<(FunctionDeclaration, MutableList<String>) -> Unit>()
 
+    /** Filter or assertion criteria for have name matching. */
     fun haveNameMatching(pattern: String) {
         haveNameMatching(listOf(pattern))
     }
 
+    /** Filter or assertion criteria for have name matching. */
     fun haveNameMatching(patterns: List<String>) {
         assertions.add { func, violations ->
             if (patterns.none { PatternMatchers.matchesSimpleGlob(it, func.name) }) {
@@ -31,14 +35,17 @@ class FunctionAssertionScope internal constructor() {
         }
     }
 
+    /** Filter or assertion criteria for have name matching. */
     fun haveNameMatching(vararg patterns: String) {
         haveNameMatching(patterns.asList())
     }
 
+    /** Filter or assertion criteria for have name starting with. */
     fun haveNameStartingWith(prefix: String) {
         haveNameStartingWith(listOf(prefix))
     }
 
+    /** Filter or assertion criteria for have name starting with. */
     fun haveNameStartingWith(prefixes: List<String>) {
         assertions.add { func, violations ->
             if (prefixes.none { func.name.startsWith(it) }) {
@@ -53,14 +60,17 @@ class FunctionAssertionScope internal constructor() {
         }
     }
 
+    /** Filter or assertion criteria for have name starting with. */
     fun haveNameStartingWith(vararg prefixes: String) {
         haveNameStartingWith(prefixes.asList())
     }
 
+    /** Filter or assertion criteria for have name ending with. */
     fun haveNameEndingWith(suffix: String) {
         haveNameEndingWith(listOf(suffix))
     }
 
+    /** Filter or assertion criteria for have name ending with. */
     fun haveNameEndingWith(suffixes: List<String>) {
         assertions.add { func, violations ->
             if (suffixes.none { func.name.endsWith(it) }) {
@@ -75,10 +85,12 @@ class FunctionAssertionScope internal constructor() {
         }
     }
 
+    /** Filter or assertion criteria for have name ending with. */
     fun haveNameEndingWith(vararg suffixes: String) {
         haveNameEndingWith(suffixes.asList())
     }
 
+    /** Filter or assertion criteria for be public. */
     fun bePublic() {
         assertions.add { func, violations ->
             if (func.visibility != Visibility.PUBLIC) {
@@ -87,6 +99,7 @@ class FunctionAssertionScope internal constructor() {
         }
     }
 
+    /** Filter or assertion criteria for be internal. */
     fun beInternal() {
         assertions.add { func, violations ->
             if (func.visibility != Visibility.INTERNAL) {
@@ -95,6 +108,7 @@ class FunctionAssertionScope internal constructor() {
         }
     }
 
+    /** Filter or assertion criteria for be private. */
     fun bePrivate() {
         assertions.add { func, violations ->
             if (func.visibility != Visibility.PRIVATE) {
@@ -103,6 +117,7 @@ class FunctionAssertionScope internal constructor() {
         }
     }
 
+    /** Filter or assertion criteria for be protected. */
     fun beProtected() {
         assertions.add { func, violations ->
             if (func.visibility != Visibility.PROTECTED) {
@@ -111,6 +126,7 @@ class FunctionAssertionScope internal constructor() {
         }
     }
 
+    /** Filter or assertion criteria for be suspend. */
     fun beSuspend() {
         assertions.add { func, violations ->
             if (!func.modifiers.contains(Modifier.SUSPEND)) {
@@ -119,6 +135,7 @@ class FunctionAssertionScope internal constructor() {
         }
     }
 
+    /** Filter or assertion criteria for be inline. */
     fun beInline() {
         assertions.add { func, violations ->
             if (!func.modifiers.contains(Modifier.INLINE)) {
@@ -127,6 +144,7 @@ class FunctionAssertionScope internal constructor() {
         }
     }
 
+    /** Filter or assertion criteria for be open. */
     fun beOpen() {
         assertions.add { func, violations ->
             if (!func.modifiers.contains(Modifier.OPEN)) {
@@ -135,6 +153,7 @@ class FunctionAssertionScope internal constructor() {
         }
     }
 
+    /** Filter or assertion criteria for be abstract. */
     fun beAbstract() {
         assertions.add { func, violations ->
             if (!func.modifiers.contains(Modifier.ABSTRACT)) {
@@ -143,6 +162,7 @@ class FunctionAssertionScope internal constructor() {
         }
     }
 
+    /** Filter or assertion criteria for have modifier. */
     fun haveModifier(modifier: Modifier) {
         assertions.add { func, violations ->
             if (!func.modifiers.contains(modifier)) {
@@ -151,10 +171,12 @@ class FunctionAssertionScope internal constructor() {
         }
     }
 
+    /** Filter or assertion criteria for have return type. */
     fun haveReturnType(typeFqName: String) {
         haveReturnType(listOf(typeFqName))
     }
 
+    /** Filter or assertion criteria for have return type. */
     fun haveReturnType(typeFqNames: List<String>) {
         assertions.add { func, violations ->
             if (typeFqNames.none { func.returnType == it }) {
@@ -169,16 +191,20 @@ class FunctionAssertionScope internal constructor() {
         }
     }
 
+    /** Filter or assertion criteria for have return type. */
     fun haveReturnType(vararg typeFqNames: String) {
         haveReturnType(typeFqNames.asList())
     }
 
+    /** Filter or assertion criteria for have annotation of. */
     fun haveAnnotationOf(annotationName: String) {
         haveAnnotationOf(listOf(annotationName))
     }
 
+    /** Filter or assertion criteria for have annotation of. */
     fun haveAnnotationOf(annotationNames: List<String>) {
         assertions.add { func, violations ->
+            /** Filter or assertion criteria for present. */
             val present = func.annotations.map { it.name }.toSet() + func.annotations.map { it.fqName }.toSet()
             if (annotationNames.none { it in present }) {
                 violations.add(
@@ -188,10 +214,12 @@ class FunctionAssertionScope internal constructor() {
         }
     }
 
+    /** Filter or assertion criteria for have annotation of. */
     fun haveAnnotationOf(vararg annotationNames: String) {
         haveAnnotationOf(annotationNames.asList())
     }
 
+    /** Filter or assertion criteria for be extension. */
     fun beExtension() {
         assertions.add { func, violations ->
             if (!func.isExtension) {
@@ -200,6 +228,7 @@ class FunctionAssertionScope internal constructor() {
         }
     }
 
+    /** Filter or assertion criteria for be documented with k doc. */
     fun beDocumentedWithKDoc() {
         assertions.add { func, violations ->
             if (func.kdocText.isNullOrBlank()) {
@@ -213,6 +242,7 @@ class FunctionAssertionScope internal constructor() {
      */
     fun haveAllAnnotationsOf(names: List<String>) {
         assertions.add { func, violations ->
+            /** Filter or assertion criteria for present. */
             val present = func.annotations.map { it.name }.toSet() + func.annotations.map { it.fqName }.toSet()
             if (!names.all { it in present }) {
                 violations.add(getMessage("function.scope.haveAllAnnotations", names.joinToString()))
@@ -232,6 +262,7 @@ class FunctionAssertionScope internal constructor() {
      */
     fun haveAnyAnnotationOf(names: List<String>) {
         assertions.add { func, violations ->
+            /** Filter or assertion criteria for present. */
             val present = func.annotations.map { it.name }.toSet() + func.annotations.map { it.fqName }.toSet()
             if (names.none { it in present }) {
                 violations.add(getMessage("function.scope.haveAtLeastOneAnnotationOf", names.joinToString()))

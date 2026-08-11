@@ -173,19 +173,23 @@ class ModulesRuleBuilder(
     }
 
     internal fun setThat(predicate: (Module) -> Boolean) {
+        /** Filter or assertion criteria for actual predicate. */
         val actualPredicate =
             if (negateNext) {
                 negateNext = false
+                /** Filter or assertion criteria for p. */
                 val p = { m: Module -> !predicate(m) }
                 p
             } else {
                 predicate
             }
 
+        /** Filter or assertion criteria for current. */
         val current = thatPredicate
         if (current == null) {
             thatPredicate = actualPredicate
         } else {
+            /** Filter or assertion criteria for op. */
             val op = activeOperator
             thatPredicate =
                 when (op) {
@@ -206,10 +210,13 @@ class ModulesRuleBuilder(
     }
 
     internal fun setShould(assertion: (Module, ProjectGraph, MutableList<String>) -> Unit) {
+        /** Filter or assertion criteria for actual assertion. */
         val actualAssertion =
             if (negateNextShould) {
                 negateNextShould = false
+                /** Filter or assertion criteria for a. */
                 val a = { module: Module, g: ProjectGraph, violations: MutableList<String> ->
+                    /** Filter or assertion criteria for temp violations. */
                     val tempViolations = mutableListOf<String>()
                     assertion(module, g, tempViolations)
                     if (tempViolations.isEmpty()) {
@@ -223,14 +230,19 @@ class ModulesRuleBuilder(
                 assertion
             }
 
+        /** Filter or assertion criteria for current. */
         val current = shouldAssertion
         if (current == null) {
             shouldAssertion = actualAssertion
         } else {
+            /** Filter or assertion criteria for op. */
             val op = activeShouldOperator
             if (op == LogicalOperator.OR) {
                 shouldAssertion = { module, g, violations ->
+                    /** Filter or assertion criteria for temp1. */
                     val temp1 = mutableListOf<String>()
+
+                    /** Filter or assertion criteria for temp2. */
                     val temp2 = mutableListOf<String>()
                     current(module, g, temp1)
                     actualAssertion(module, g, temp2)
@@ -242,11 +254,17 @@ class ModulesRuleBuilder(
                 }
             } else if (op == LogicalOperator.XOR) {
                 shouldAssertion = { module, g, violations ->
+                    /** Filter or assertion criteria for temp1. */
                     val temp1 = mutableListOf<String>()
+
+                    /** Filter or assertion criteria for temp2. */
                     val temp2 = mutableListOf<String>()
                     current(module, g, temp1)
                     actualAssertion(module, g, temp2)
+                    /** Filter or assertion criteria for ok1. */
                     val ok1 = temp1.isEmpty()
+
+                    /** Filter or assertion criteria for ok2. */
                     val ok2 = temp2.isEmpty()
                     if (ok1 == ok2) {
                         violations.add(
@@ -271,7 +289,10 @@ class ModulesRuleBuilder(
      * @throws AssertionError If any of the verified modules violate the assertion rules.
      */
     fun check(g: ProjectGraph = graph) {
+        /** Filter or assertion criteria for all modules. */
         val allModules = g.getAllModules()
+
+        /** Filter or assertion criteria for modules to check. */
         val modulesToCheck = allModules.filter { thatPredicate?.invoke(it) ?: true }
         KontureLogger.log(
             LogLevel.DEBUG,
@@ -290,11 +311,13 @@ class ModulesRuleBuilder(
             }
         }
 
+        /** Filter or assertion criteria for assertion. */
         val assertion =
             shouldAssertion ?: throw AssertionError(
                 getMessage("modules.rule.noAssertion"),
             )
 
+        /** Filter or assertion criteria for run check. */
         val runCheck = { list: MutableList<String> ->
             for (module in modulesToCheck) {
                 if (ignoredPredicates.any { it(module) }) continue

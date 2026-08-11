@@ -8,9 +8,12 @@ package io.github.baole.konture
 
 import io.github.baole.konture.i18n.getMessage
 
-interface PropertiesShouldModifierAssertions {
+/** Modifier and visibility assertions for property rules. */
+public interface PropertiesShouldModifierAssertions {
+    /** Filter or assertion criteria for builder. */
     val builder: PropertiesRuleBuilder
 
+    /** Filter or assertion criteria for be public. */
     fun bePublic(): PropertiesRuleBuilder {
         builder.setShould { prop, _, violations ->
             if (prop.declaration.visibility != Visibility.PUBLIC) {
@@ -22,6 +25,7 @@ interface PropertiesShouldModifierAssertions {
         return builder
     }
 
+    /** Filter or assertion criteria for be internal. */
     fun beInternal(): PropertiesRuleBuilder {
         builder.setShould { prop, _, violations ->
             if (prop.declaration.visibility != Visibility.INTERNAL) {
@@ -33,6 +37,7 @@ interface PropertiesShouldModifierAssertions {
         return builder
     }
 
+    /** Filter or assertion criteria for be private. */
     fun bePrivate(): PropertiesRuleBuilder {
         builder.setShould { prop, _, violations ->
             if (prop.declaration.visibility != Visibility.PRIVATE) {
@@ -44,6 +49,7 @@ interface PropertiesShouldModifierAssertions {
         return builder
     }
 
+    /** Filter or assertion criteria for be protected. */
     fun beProtected(): PropertiesRuleBuilder {
         builder.setShould { prop, _, violations ->
             if (prop.declaration.visibility != Visibility.PROTECTED) {
@@ -55,6 +61,7 @@ interface PropertiesShouldModifierAssertions {
         return builder
     }
 
+    /** Filter or assertion criteria for not be public. */
     fun notBePublic(): PropertiesRuleBuilder {
         builder.setShould { prop, _, violations ->
             if (prop.declaration.visibility == Visibility.PUBLIC) {
@@ -64,6 +71,7 @@ interface PropertiesShouldModifierAssertions {
         return builder
     }
 
+    /** Filter or assertion criteria for not be internal. */
     fun notBeInternal(): PropertiesRuleBuilder {
         builder.setShould { prop, _, violations ->
             if (prop.declaration.visibility == Visibility.INTERNAL) {
@@ -73,6 +81,7 @@ interface PropertiesShouldModifierAssertions {
         return builder
     }
 
+    /** Filter or assertion criteria for not be private. */
     fun notBePrivate(): PropertiesRuleBuilder {
         builder.setShould { prop, _, violations ->
             if (prop.declaration.visibility == Visibility.PRIVATE) {
@@ -82,6 +91,7 @@ interface PropertiesShouldModifierAssertions {
         return builder
     }
 
+    /** Filter or assertion criteria for not be protected. */
     fun notBeProtected(): PropertiesRuleBuilder {
         builder.setShould { prop, _, violations ->
             if (prop.declaration.visibility == Visibility.PROTECTED) {
@@ -91,6 +101,7 @@ interface PropertiesShouldModifierAssertions {
         return builder
     }
 
+    /** Filter or assertion criteria for be var. */
     fun beVar(): PropertiesRuleBuilder {
         builder.setShould { prop, _, violations ->
             if (prop.declaration.isVal) {
@@ -102,6 +113,7 @@ interface PropertiesShouldModifierAssertions {
         return builder
     }
 
+    /** Filter or assertion criteria for be val. */
     fun beVal(): PropertiesRuleBuilder {
         builder.setShould { prop, _, violations ->
             if (!prop.declaration.isVal) {
@@ -113,6 +125,7 @@ interface PropertiesShouldModifierAssertions {
         return builder
     }
 
+    /** Filter or assertion criteria for be open. */
     fun beOpen(): PropertiesRuleBuilder {
         builder.setShould { prop, _, violations ->
             if (!prop.declaration.modifiers.contains(Modifier.OPEN)) {
@@ -124,6 +137,7 @@ interface PropertiesShouldModifierAssertions {
         return builder
     }
 
+    /** Filter or assertion criteria for be abstract. */
     fun beAbstract(): PropertiesRuleBuilder {
         builder.setShould { prop, _, violations ->
             if (!prop.declaration.modifiers.contains(Modifier.ABSTRACT)) {
@@ -135,6 +149,7 @@ interface PropertiesShouldModifierAssertions {
         return builder
     }
 
+    /** Filter or assertion criteria for be override. */
     fun beOverride(): PropertiesRuleBuilder {
         builder.setShould { prop, _, violations ->
             if (!prop.declaration.modifiers.contains(Modifier.OVERRIDE)) {
@@ -146,6 +161,7 @@ interface PropertiesShouldModifierAssertions {
         return builder
     }
 
+    /** Filter or assertion criteria for be extension. */
     fun beExtension(): PropertiesRuleBuilder {
         builder.setShould { prop, _, violations ->
             if (!prop.declaration.isExtension) {
@@ -157,6 +173,7 @@ interface PropertiesShouldModifierAssertions {
         return builder
     }
 
+    /** Filter or assertion criteria for not be extension. */
     fun notBeExtension(): PropertiesRuleBuilder {
         builder.setShould { prop, _, violations ->
             if (prop.declaration.isExtension) {
@@ -166,6 +183,7 @@ interface PropertiesShouldModifierAssertions {
         return builder
     }
 
+    /** Filter or assertion criteria for be const. */
     fun beConst(): PropertiesRuleBuilder {
         builder.setShould { prop, _, violations ->
             if (!prop.declaration.modifiers.contains(Modifier.CONST)) {
@@ -177,6 +195,7 @@ interface PropertiesShouldModifierAssertions {
         return builder
     }
 
+    /** Filter or assertion criteria for not be const. */
     fun notBeConst(): PropertiesRuleBuilder {
         builder.setShould { prop, _, violations ->
             if (prop.declaration.modifiers.contains(Modifier.CONST)) {
@@ -186,6 +205,7 @@ interface PropertiesShouldModifierAssertions {
         return builder
     }
 
+    /** Filter or assertion criteria for be lateinit. */
     fun beLateinit(): PropertiesRuleBuilder {
         builder.setShould { prop, _, violations ->
             if (!prop.declaration.modifiers.contains(Modifier.LATEINIT)) {
@@ -197,6 +217,7 @@ interface PropertiesShouldModifierAssertions {
         return builder
     }
 
+    /** Filter or assertion criteria for not be lateinit. */
     fun notBeLateinit(): PropertiesRuleBuilder {
         builder.setShould { prop, _, violations ->
             if (prop.declaration.modifiers.contains(Modifier.LATEINIT)) {
@@ -206,8 +227,10 @@ interface PropertiesShouldModifierAssertions {
         return builder
     }
 
+    /** Filter or assertion criteria for have all modifiers. */
     infix fun haveAllModifiers(modifiers: List<Modifier>): PropertiesRuleBuilder {
         builder.setShould { prop, _, violations ->
+            /** Filter or assertion criteria for missing. */
             val missing = modifiers.filter { !prop.declaration.modifiers.contains(it) }
             if (missing.isNotEmpty()) {
                 violations.add(
@@ -223,8 +246,10 @@ interface PropertiesShouldModifierAssertions {
         return builder
     }
 
+    /** Filter or assertion criteria for have all modifiers. */
     fun haveAllModifiers(vararg modifiers: Modifier): PropertiesRuleBuilder = haveAllModifiers(modifiers.asList())
 
+    /** Filter or assertion criteria for have any modifier. */
     infix fun haveAnyModifier(modifiers: List<Modifier>): PropertiesRuleBuilder {
         builder.setShould { prop, _, violations ->
             if (!modifiers.any { prop.declaration.modifiers.contains(it) }) {
@@ -236,8 +261,10 @@ interface PropertiesShouldModifierAssertions {
         return builder
     }
 
+    /** Filter or assertion criteria for have any modifier. */
     fun haveAnyModifier(vararg modifiers: Modifier): PropertiesRuleBuilder = haveAnyModifier(modifiers.asList())
 
+    /** Filter or assertion criteria for have modifier. */
     infix fun haveModifier(modifier: Modifier): PropertiesRuleBuilder {
         builder.setShould { prop, _, violations ->
             if (!prop.declaration.modifiers.contains(modifier)) {
@@ -249,10 +276,13 @@ interface PropertiesShouldModifierAssertions {
         return builder
     }
 
+    /** Filter or assertion criteria for have modifier. */
     infix fun haveModifier(modifiers: List<Modifier>): PropertiesRuleBuilder = haveAnyModifier(modifiers)
 
+    /** Filter or assertion criteria for have modifier. */
     fun haveModifier(vararg modifiers: Modifier): PropertiesRuleBuilder = haveAnyModifier(modifiers.toList())
 
+    /** Filter or assertion criteria for have visibility. */
     infix fun haveVisibility(visibility: Visibility): PropertiesRuleBuilder {
         builder.setShould { prop, _, violations ->
             if (prop.declaration.visibility != visibility) {
@@ -269,6 +299,7 @@ interface PropertiesShouldModifierAssertions {
         return builder
     }
 
+    /** Filter or assertion criteria for have any visibility. */
     infix fun haveAnyVisibility(visibilities: List<Visibility>): PropertiesRuleBuilder {
         builder.setShould { prop, _, violations ->
             if (!visibilities.contains(prop.declaration.visibility)) {
@@ -285,6 +316,7 @@ interface PropertiesShouldModifierAssertions {
         return builder
     }
 
+    /** Filter or assertion criteria for have any visibility. */
     fun haveAnyVisibility(vararg visibilities: Visibility): PropertiesRuleBuilder =
         haveAnyVisibility(visibilities.asList())
 }

@@ -170,19 +170,23 @@ class SlicesRuleBuilder(
     }
 
     internal fun setThat(predicate: (Slice) -> Boolean) {
+        /** Filter or assertion criteria for actual predicate. */
         val actualPredicate: (Slice) -> Boolean =
             if (negateNext) {
                 negateNext = false
+                /** Filter or assertion criteria for fn. */
                 val fn: (Slice) -> Boolean = { s: Slice -> !predicate(s) }
                 fn
             } else {
                 predicate
             }
 
+        /** Filter or assertion criteria for current. */
         val current = thatPredicate
         if (current == null) {
             thatPredicate = actualPredicate
         } else {
+            /** Filter or assertion criteria for op. */
             val op = activeOperator
             thatPredicate =
                 when (op) {
@@ -201,13 +205,16 @@ class SlicesRuleBuilder(
     }
 
     internal fun setShould(assertion: (SliceGraph, MutableList<String>) -> Unit) {
+        /** Filter or assertion criteria for actual assertion. */
         val actualAssertion: (SliceGraph, MutableList<String>) -> Unit =
             if (negateNextShould) {
                 negateNextShould = false
+                /** Filter or assertion criteria for fn. */
                 val fn: (
                     SliceGraph,
                     MutableList<String>,
                 ) -> Unit = { graph: SliceGraph, violations: MutableList<String> ->
+                    /** Filter or assertion criteria for temp. */
                     val temp = mutableListOf<String>()
                     assertion(graph, temp)
                     if (temp.isEmpty()) {
@@ -230,8 +237,10 @@ class SlicesRuleBuilder(
      * Throws an [AssertionError] if any rule violations are detected.
      */
     fun check(g: ProjectGraph = graph) {
+        /** Filter or assertion criteria for slice pattern. */
         val slicePattern = pattern ?: throw AssertionError(getMessage("slices.rule.noPattern"))
 
+        /** Filter or assertion criteria for all classes. */
         val allClasses =
             g.getAllModules().flatMap { module ->
                 module.files.flatMap { file ->
@@ -239,15 +248,22 @@ class SlicesRuleBuilder(
                 }
             }.distinctBy { it.fqName to it.filePath }
 
+        /** Filter or assertion criteria for package to slice. */
         val packageToSlice = mutableMapOf<String, String>()
+
+        /** Filter or assertion criteria for classes by key. */
         val classesByKey = linkedMapOf<String, MutableList<ClassDeclaration>>()
+
+        /** Filter or assertion criteria for packages by key. */
         val packagesByKey = linkedMapOf<String, MutableSet<String>>()
         for (cls in allClasses) {
+            /** Filter or assertion criteria for key. */
             val key = PatternMatchers.sliceKeyFor(slicePattern, cls.packageName) ?: continue
             packageToSlice[cls.packageName] = key
             classesByKey.getOrPut(key) { mutableListOf() }.add(cls)
             packagesByKey.getOrPut(key) { mutableSetOf() }.add(cls.packageName)
         }
+        /** Filter or assertion criteria for all slices. */
         val allSlices =
             classesByKey.keys.sorted().map {
                 Slice(
@@ -256,6 +272,8 @@ class SlicesRuleBuilder(
                     classesByKey.getValue(it),
                 )
             }
+
+        /** Filter or assertion criteria for slices. */
         val slices = allSlices.filter { thatPredicate?.invoke(it) ?: true }
 
         KontureLogger.log(
@@ -275,9 +293,13 @@ class SlicesRuleBuilder(
         }
 
         if (assertions.isEmpty()) throw AssertionError(getMessage("slices.rule.noAssertion"))
+        /** Filter or assertion criteria for active slices. */
         val activeSlices = slices.filterNot { slice -> ignoredPredicates.any { it(slice) } }
+
+        /** Filter or assertion criteria for slice graph. */
         val sliceGraph = SliceCycleDetector.buildGraph(activeSlices, packageToSlice, allClasses, slicePattern)
 
+        /** Filter or assertion criteria for run check. */
         val runCheck = { list: MutableList<String> -> assertions.forEach { it(sliceGraph, list) } }
         BaselineManager.checkRule(getMessage("slices.rule.violationHeader"), runCheck)
     }

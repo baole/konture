@@ -19,9 +19,11 @@ import kotlin.jvm.JvmName
  * @property classes The list of [ClassDeclaration] structures included in this scope.
  */
 class KontureScope(
+    /** Filter or assertion criteria for classes. */
     val classes: List<ClassDeclaration>,
 ) {
-    companion object {
+    /** Factory methods for constructing class scopes. */
+    public companion object {
         /**
          * Creates a [KontureScope] representing the entire project structure from the given or default project graph.
          *
@@ -32,6 +34,7 @@ class KontureScope(
             graph: ProjectGraph = Konture.projectGraph,
             sourceSets: SourceSetSelector = SourceSets.production(),
         ): KontureScope {
+            /** Filter or assertion criteria for classes. */
             val classes =
                 graph.getAllModules().flatMap { module ->
                     module.files.filter {
@@ -56,6 +59,7 @@ class KontureScope(
             graph: ProjectGraph = Konture.projectGraph,
             sourceSets: SourceSetSelector = SourceSets.production(),
         ): KontureScope {
+            /** Filter or assertion criteria for module. */
             val module =
                 graph.getAllModules().find { it.path == path }
                     ?: throw IllegalArgumentException("Module $path not found in project graph")
@@ -78,6 +82,7 @@ class KontureScope(
             graph: ProjectGraph = Konture.projectGraph,
             sourceSets: SourceSetSelector = SourceSets.production(),
         ): KontureScope {
+            /** Filter or assertion criteria for classes. */
             val classes =
                 graph
                     .getAllModules()
@@ -95,9 +100,12 @@ class KontureScope(
     }
 }
 
-operator fun KontureScope.plus(other: KontureScope): KontureScope = KontureScope(this.classes + other.classes)
+/** Combines two [KontureScope] instances into a new scope containing classes from both. */
+public operator fun KontureScope.plus(other: KontureScope): KontureScope = KontureScope(this.classes + other.classes)
 
-operator fun KontureScope.minus(other: KontureScope): KontureScope {
+/** Subtracts classes present in [other] scope from this scope. */
+public operator fun KontureScope.minus(other: KontureScope): KontureScope {
+    /** Filter or assertion criteria for other fq names. */
     val otherFqNames = other.classes.map { it.fqName }.toSet()
     return KontureScope(this.classes.filterNot { it.fqName in otherFqNames })
 }
@@ -150,32 +158,39 @@ fun List<ClassDeclaration>.withParentOf(fqName: String): List<ClassDeclaration> 
 fun List<ClassDeclaration>.withVisibility(visibility: Visibility): List<ClassDeclaration> =
     filter { it.visibility == visibility }
 
-fun List<ClassDeclaration>.public(): List<ClassDeclaration> = withVisibility(Visibility.PUBLIC)
+/** Filters class declarations to public classes. */
+public fun List<ClassDeclaration>.public(): List<ClassDeclaration> = withVisibility(Visibility.PUBLIC)
 
-fun List<ClassDeclaration>.internal(): List<ClassDeclaration> = withVisibility(Visibility.INTERNAL)
+/** Filters class declarations to internal classes. */
+public fun List<ClassDeclaration>.internal(): List<ClassDeclaration> = withVisibility(Visibility.INTERNAL)
 
-fun List<ClassDeclaration>.private(): List<ClassDeclaration> = withVisibility(Visibility.PRIVATE)
+/** Filters class declarations to private classes. */
+public fun List<ClassDeclaration>.private(): List<ClassDeclaration> = withVisibility(Visibility.PRIVATE)
 
-fun List<ClassDeclaration>.protected(): List<ClassDeclaration> = withVisibility(Visibility.PROTECTED)
+/** Filters class declarations to protected classes. */
+public fun List<ClassDeclaration>.protected(): List<ClassDeclaration> = withVisibility(Visibility.PROTECTED)
 
 /**
  * Filters class declarations to those containing the specified modifier.
  */
-fun List<ClassDeclaration>.withModifier(modifier: Modifier): List<ClassDeclaration> =
+public fun List<ClassDeclaration>.withModifier(modifier: Modifier): List<ClassDeclaration> =
     filter { it.modifiers.contains(modifier) }
 
-fun List<ClassDeclaration>.dataClasses(): List<ClassDeclaration> = withModifier(Modifier.DATA)
+/** Filters class declarations to data classes. */
+public fun List<ClassDeclaration>.dataClasses(): List<ClassDeclaration> = withModifier(Modifier.DATA)
 
-fun List<ClassDeclaration>.sealedClasses(): List<ClassDeclaration> = withModifier(Modifier.SEALED)
+/** Filters class declarations to sealed classes. */
+public fun List<ClassDeclaration>.sealedClasses(): List<ClassDeclaration> = withModifier(Modifier.SEALED)
 
-fun List<ClassDeclaration>.inlineClasses(): List<ClassDeclaration> =
+/** Filters class declarations to inline/value classes. */
+public fun List<ClassDeclaration>.inlineClasses(): List<ClassDeclaration> =
     filter { it.modifiers.contains(Modifier.INLINE) || it.modifiers.contains(Modifier.VALUE) }
 
 /**
  * Filters the list of class declarations to include only those residing in packages matching the specified pattern.
  * Supports '..' segment wildcards.
  */
-fun List<ClassDeclaration>.withPackage(packagePattern: String): List<ClassDeclaration> =
+public fun List<ClassDeclaration>.withPackage(packagePattern: String): List<ClassDeclaration> =
     filter { PatternMatchers.matchesPackage(packagePattern, it.packageName) }
 
 /**
@@ -187,52 +202,79 @@ fun List<ClassDeclaration>.withNameMatching(pattern: String): List<ClassDeclarat
 
 // Scope-level delegation for KontureScope
 
-fun KontureScope.withNameEndingWith(suffix: String) = KontureScope(classes.withNameEndingWith(suffix))
+/** Filters classes in this scope ending with [suffix]. */
+public fun KontureScope.withNameEndingWith(suffix: String): KontureScope =
+    KontureScope(classes.withNameEndingWith(suffix))
 
-fun KontureScope.withNameStartingWith(prefix: String) = KontureScope(classes.withNameStartingWith(prefix))
+/** Filters classes in this scope starting with [prefix]. */
+public fun KontureScope.withNameStartingWith(prefix: String): KontureScope =
+    KontureScope(classes.withNameStartingWith(prefix))
 
-fun KontureScope.withAnnotationOf(annotationFqName: String) = KontureScope(classes.withAnnotationOf(annotationFqName))
+/** Filters classes in this scope with annotation [annotationFqName]. */
+public fun KontureScope.withAnnotationOf(annotationFqName: String): KontureScope =
+    KontureScope(classes.withAnnotationOf(annotationFqName))
 
-fun KontureScope.withoutAnnotationOf(annotationFqName: String) =
+/** Filters classes in this scope without annotation [annotationFqName]. */
+public fun KontureScope.withoutAnnotationOf(annotationFqName: String): KontureScope =
     KontureScope(
         classes.withoutAnnotationOf(annotationFqName),
     )
 
-fun KontureScope.interfaces() = KontureScope(classes.interfaces())
+/** Filters classes in this scope to interfaces. */
+public fun KontureScope.interfaces(): KontureScope = KontureScope(classes.interfaces())
 
-fun KontureScope.classes() = KontureScope(classes.classes())
+/** Filters classes in this scope to normal classes. */
+public fun KontureScope.classes(): KontureScope = KontureScope(classes.classes())
 
-fun KontureScope.withParentOf(fqName: String) = KontureScope(classes.withParentOf(fqName))
+/** Filters classes in this scope with parent [fqName]. */
+public fun KontureScope.withParentOf(fqName: String): KontureScope = KontureScope(classes.withParentOf(fqName))
 
-fun KontureScope.withVisibility(visibility: Visibility) = KontureScope(classes.withVisibility(visibility))
+/** Filters classes in this scope with [visibility]. */
+public fun KontureScope.withVisibility(visibility: Visibility): KontureScope =
+    KontureScope(classes.withVisibility(visibility))
 
-fun KontureScope.public() = KontureScope(classes.public())
+/** Filters classes in this scope to public classes. */
+public fun KontureScope.public(): KontureScope = KontureScope(classes.public())
 
-fun KontureScope.internal() = KontureScope(classes.internal())
+/** Filters classes in this scope to internal classes. */
+public fun KontureScope.internal(): KontureScope = KontureScope(classes.internal())
 
-fun KontureScope.private() = KontureScope(classes.private())
+/** Filters classes in this scope to private classes. */
+public fun KontureScope.private(): KontureScope = KontureScope(classes.private())
 
-fun KontureScope.protected() = KontureScope(classes.protected())
+/** Filters classes in this scope to protected classes. */
+public fun KontureScope.protected(): KontureScope = KontureScope(classes.protected())
 
-fun KontureScope.withModifier(modifier: Modifier) = KontureScope(classes.withModifier(modifier))
+/** Filters classes in this scope with [modifier]. */
+public fun KontureScope.withModifier(modifier: Modifier): KontureScope = KontureScope(classes.withModifier(modifier))
 
-fun KontureScope.dataClasses() = KontureScope(classes.dataClasses())
+/** Filters classes in this scope to data classes. */
+public fun KontureScope.dataClasses(): KontureScope = KontureScope(classes.dataClasses())
 
-fun KontureScope.sealedClasses() = KontureScope(classes.sealedClasses())
+/** Filters classes in this scope to sealed classes. */
+public fun KontureScope.sealedClasses(): KontureScope = KontureScope(classes.sealedClasses())
 
-fun KontureScope.inlineClasses() = KontureScope(classes.inlineClasses())
+/** Filters classes in this scope to inline/value classes. */
+public fun KontureScope.inlineClasses(): KontureScope = KontureScope(classes.inlineClasses())
 
-fun KontureScope.withPackage(packagePattern: String) = KontureScope(classes.withPackage(packagePattern))
+/** Filters classes in this scope residing in packages matching [packagePattern]. */
+public fun KontureScope.withPackage(packagePattern: String): KontureScope =
+    KontureScope(classes.withPackage(packagePattern))
 
-fun KontureScope.withNameMatching(pattern: String) = KontureScope(classes.withNameMatching(pattern))
+/** Filters classes in this scope matching name pattern [pattern]. */
+public fun KontureScope.withNameMatching(pattern: String): KontureScope =
+    KontureScope(classes.withNameMatching(pattern))
 
-fun KontureScope.withModule(
+/** Filters classes in this scope residing in module [modulePath]. */
+public fun KontureScope.withModule(
     modulePath: String,
     graph: ProjectGraph = Konture.projectGraph,
 ): KontureScope {
+    /** Filter or assertion criteria for norm. */
     val norm = if (!modulePath.startsWith(":") && !modulePath.startsWith("**") && modulePath.isNotEmpty()) ":$modulePath" else modulePath
     return KontureScope(
         classes.filter { cls ->
+            /** Filter or assertion criteria for mod. */
             val mod =
                 graph.getAllModules().find { m ->
                     m.files.any { f -> f.classes.any { c -> c.fqName == cls.fqName } || f.filePath == cls.filePath }
@@ -244,13 +286,16 @@ fun KontureScope.withModule(
 
 // Assertion extensions on List<ClassDeclaration>
 
+/** Asserts that all classes in this list satisfy [predicate]. */
 @JvmName("assertClassesTrue")
-fun List<ClassDeclaration>.assertTrue(
+public fun List<ClassDeclaration>.assertTrue(
     additionalMessage: String? = null,
     predicate: (ClassDeclaration) -> Boolean,
 ) {
+    /** Filter or assertion criteria for violations. */
     val violations = filterNot(predicate)
     if (violations.isNotEmpty()) {
+        /** Filter or assertion criteria for message. */
         val message =
             buildString {
                 appendLine("Assertion failed! The following classes do not meet the criteria:")
@@ -265,19 +310,23 @@ fun List<ClassDeclaration>.assertTrue(
     }
 }
 
+/** Asserts that all classes in this list have KDoc documentation. */
 @JvmName("assertClassesHasKDoc")
-fun List<ClassDeclaration>.assertHasKDoc(additionalMessage: String? = null) {
+public fun List<ClassDeclaration>.assertHasKDoc(additionalMessage: String? = null) {
     assertTrue(additionalMessage) { it.kdocText?.isNotBlank() == true }
 }
 
-fun KontureScope.assertTrue(
+/** Asserts that all classes in this scope satisfy [predicate]. */
+public fun KontureScope.assertTrue(
     additionalMessage: String? = null,
     predicate: (ClassDeclaration) -> Boolean,
 ) {
     classes.assertTrue(additionalMessage, predicate)
 }
 
-fun KontureScope.assertHasKDoc(additionalMessage: String? = null) = classes.assertHasKDoc(additionalMessage)
+/** Asserts that all classes in this scope have KDoc documentation. */
+public fun KontureScope.assertHasKDoc(additionalMessage: String? = null): Unit =
+    classes.assertHasKDoc(additionalMessage)
 
 // --- New high-level assertion extensions on List<ClassDeclaration> ---
 
@@ -556,13 +605,16 @@ fun List<ClassDeclaration>.assertOnlyBeAccessedByAnyPackage(
     vararg packagePatterns: String,
     allClasses: List<ClassDeclaration> = Konture.projectGraph.getAllModules().flatMap { it.classes },
 ) {
+    /** Filter or assertion criteria for violations. */
     val violations = mutableListOf<String>()
     for (targetCls in this) {
+        /** Filter or assertion criteria for accessing classes. */
         val accessingClasses =
             allClasses.filter { other ->
                 other.fqName != targetCls.fqName && other.dependsOn(targetCls)
             }
         for (accessor in accessingClasses) {
+            /** Filter or assertion criteria for is allowed. */
             val isAllowed =
                 packagePatterns.any { pattern ->
                     PatternMatchers.matchesPackage(pattern, accessor.packageName)
@@ -602,13 +654,16 @@ fun List<ClassDeclaration>.assertNotBeAccessedByAnyPackage(
     vararg packagePatterns: String,
     allClasses: List<ClassDeclaration> = Konture.projectGraph.getAllModules().flatMap { it.classes },
 ) {
+    /** Filter or assertion criteria for violations. */
     val violations = mutableListOf<String>()
     for (targetCls in this) {
+        /** Filter or assertion criteria for accessing classes. */
         val accessingClasses =
             allClasses.filter { other ->
                 other.fqName != targetCls.fqName && other.dependsOn(targetCls)
             }
         for (accessor in accessingClasses) {
+            /** Filter or assertion criteria for is forbidden. */
             val isForbidden =
                 packagePatterns.any { pattern ->
                     PatternMatchers.matchesPackage(pattern, accessor.packageName)
@@ -648,15 +703,20 @@ fun List<ClassDeclaration>.assertOnlyDependOnClassesInAnyPackage(
     vararg packagePatterns: String,
     allClasses: List<ClassDeclaration> = Konture.projectGraph.getAllModules().flatMap { it.classes },
 ) {
+    /** Filter or assertion criteria for violations. */
     val violations = mutableListOf<String>()
+
+    /** Filter or assertion criteria for standard exclusions. */
     val standardExclusions = listOf("java", "javax", "kotlin")
 
     for (cls in this) {
+        /** Filter or assertion criteria for dep packages. */
         val depPackages =
             cls.collectDependencyPackages(allClasses).filter { depPkg ->
                 depPkg != cls.packageName && standardExclusions.none { depPkg == it || depPkg.startsWith("$it.") }
             }
         for (depPkg in depPackages) {
+            /** Filter or assertion criteria for is allowed. */
             val isAllowed =
                 packagePatterns.any { pattern ->
                     PatternMatchers.matchesPackage(pattern, depPkg)

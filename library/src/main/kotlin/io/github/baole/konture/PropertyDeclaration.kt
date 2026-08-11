@@ -21,15 +21,25 @@ package io.github.baole.konture
  * @property sourceLine 1-based source code line number.
  */
 public data class PropertyDeclaration(
+    /** Filter or assertion criteria for name. */
     val name: String,
+    /** Filter or assertion criteria for visibility. */
     val visibility: Visibility,
+    /** Filter or assertion criteria for modifiers. */
     val modifiers: Set<Modifier>,
+    /** Filter or assertion criteria for type. */
     val type: String,
+    /** Filter or assertion criteria for is val. */
     val isVal: Boolean,
+    /** Filter or assertion criteria for annotations. */
     val annotations: List<AnnotationDeclaration>,
+    /** Filter or assertion criteria for kdoc text. */
     val kdocText: String?,
+    /** Filter or assertion criteria for is extension. */
     val isExtension: Boolean = false,
+    /** Filter or assertion criteria for resolved type. */
     val resolvedType: String? = null,
+    /** Filter or assertion criteria for source line. */
     val sourceLine: Int = -1,
 ) {
     /** Whether the property is mutable (`var`). */

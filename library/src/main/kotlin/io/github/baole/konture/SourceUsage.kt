@@ -29,27 +29,44 @@ public enum class ResolutionConfidence {
 
 /** A resolved (or conservatively possible) Kotlin source usage. */
 data class SourceUsage(
+    /** Filter or assertion criteria for kind. */
     val kind: UsageKind,
+    /** Filter or assertion criteria for target fq name. */
     val targetFqName: String,
+    /** Filter or assertion criteria for file path. */
     val filePath: String,
+    /** Filter or assertion criteria for line. */
     val line: Int,
+    /** Filter or assertion criteria for column. */
     val column: Int,
+    /** Filter or assertion criteria for enclosing function. */
     val enclosingFunction: String? = null,
+    /** Filter or assertion criteria for enclosing class. */
     val enclosingClass: String? = null,
+    /** Filter or assertion criteria for enclosing property. */
     val enclosingProperty: String? = null,
+    /** Filter or assertion criteria for raw expression. */
     val rawExpression: String = targetFqName,
+    /** Filter or assertion criteria for source sets. */
     val sourceSets: List<SourceSetId> = emptyList(),
+    /** Filter or assertion criteria for possible target fq names. */
     val possibleTargetFqNames: List<String> = emptyList(),
+    /** Filter or assertion criteria for unresolved possible usage. */
     val unresolvedPossibleUsage: Boolean = false,
+    /** Filter or assertion criteria for confidence. */
     val confidence: ResolutionConfidence =
         if (unresolvedPossibleUsage) {
             ResolutionConfidence.POSSIBLE
         } else {
             ResolutionConfidence.RESOLVED
         },
+    /** Filter or assertion criteria for source start offset. */
     val sourceStartOffset: Int = -1,
+    /** Filter or assertion criteria for source end offset. */
     val sourceEndOffset: Int = -1,
+    /** Filter or assertion criteria for enclosing function start offset. */
     val enclosingFunctionStartOffset: Int = -1,
+    /** Filter or assertion criteria for enclosing function end offset. */
     val enclosingFunctionEndOffset: Int = -1,
 )
 

@@ -1,5 +1,6 @@
 /*
- * Copyright 2026 Bao Le Duc
+ * Copyright 2026 The Konture Contributors
+ * Contributors: Bao Le Duc (@baole)
  * SPDX-License-Identifier: Apache-2.0
  */
 
@@ -34,7 +35,10 @@ fun ClassesRuleBuilder.that(predicate: ClassDeclaration.() -> Boolean): ClassesR
 fun ClassesRuleBuilder.should(assertion: ClassDeclarationShouldContext.() -> Any?): ClassesRuleBuilder =
     this.apply {
         setShould { cls, allClasses, violations ->
+            /** Filter or assertion criteria for context. */
             val context = ClassDeclarationShouldContext(cls, allClasses, violations)
+
+            /** Filter or assertion criteria for result. */
             val result = context.assertion()
             validateAssertionResult(result)
             if (result is Boolean && !result) {
@@ -54,27 +58,65 @@ fun ClassesRuleBuilder.should(assertion: ClassDeclarationShouldContext.() -> Any
  * @property violations Mutable collection where assertion failure messages are appended.
  */
 class ClassDeclarationShouldContext internal constructor(
+    /** Filter or assertion criteria for element. */
     val element: ClassDeclaration,
+    /** Filter or assertion criteria for all classes. */
     val allClasses: List<ClassDeclaration>,
+    /** Filter or assertion criteria for violations. */
     val violations: MutableList<String>,
 ) {
+    /** Filter or assertion criteria for name. */
     val name get() = element.name
+
+    /** Filter or assertion criteria for fq name. */
     val fqName get() = element.fqName
+
+    /** Filter or assertion criteria for package name. */
     val packageName get() = element.packageName
+
+    /** Filter or assertion criteria for is interface. */
     val isInterface get() = element.isInterface
+
+    /** Filter or assertion criteria for is abstract. */
     val isAbstract get() = element.isAbstract
+
+    /** Filter or assertion criteria for annotations. */
     val annotations get() = element.annotations
+
+    /** Filter or assertion criteria for imports. */
     val imports get() = element.imports
+
+    /** Filter or assertion criteria for referenced types. */
     val referencedTypes get() = element.referencedTypes
+
+    /** Filter or assertion criteria for file path. */
     val filePath get() = element.filePath
+
+    /** Filter or assertion criteria for visibility. */
     val visibility get() = element.visibility
+
+    /** Filter or assertion criteria for modifiers. */
     val modifiers get() = element.modifiers
+
+    /** Filter or assertion criteria for supertypes. */
     val supertypes get() = element.supertypes
+
+    /** Filter or assertion criteria for primary constructor. */
     val primaryConstructor get() = element.primaryConstructor
+
+    /** Filter or assertion criteria for secondary constructors. */
     val secondaryConstructors get() = element.secondaryConstructors
+
+    /** Filter or assertion criteria for functions. */
     val functions get() = element.functions
+
+    /** Filter or assertion criteria for properties. */
     val properties get() = element.properties
+
+    /** Filter or assertion criteria for companion object. */
     val companionObject get() = element.companionObject
+
+    /** Filter or assertion criteria for kdoc text. */
     val kdocText get() = element.kdocText
 
     /**

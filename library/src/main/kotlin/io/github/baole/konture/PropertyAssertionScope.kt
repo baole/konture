@@ -9,14 +9,18 @@ package io.github.baole.konture
 import io.github.baole.konture.i18n.getMessage
 import io.github.baole.konture.impl.PatternMatchers
 
+/** Assertion scope DSL for configuring rule expectations on Kotlin properties. */
 @KontureDsl
-class PropertyAssertionScope internal constructor() {
+public class PropertyAssertionScope internal constructor() {
+    /** Filter or assertion criteria for assertions. */
     val assertions = mutableListOf<(PropertyDeclaration, MutableList<String>) -> Unit>()
 
+    /** Filter or assertion criteria for have name matching. */
     fun haveNameMatching(pattern: String) {
         haveNameMatching(listOf(pattern))
     }
 
+    /** Filter or assertion criteria for have name matching. */
     fun haveNameMatching(patterns: List<String>) {
         assertions.add { prop, violations ->
             if (patterns.none { PatternMatchers.matchesSimpleGlob(it, prop.name) }) {
@@ -31,14 +35,17 @@ class PropertyAssertionScope internal constructor() {
         }
     }
 
+    /** Filter or assertion criteria for have name matching. */
     fun haveNameMatching(vararg patterns: String) {
         haveNameMatching(patterns.asList())
     }
 
+    /** Filter or assertion criteria for have name starting with. */
     fun haveNameStartingWith(prefix: String) {
         haveNameStartingWith(listOf(prefix))
     }
 
+    /** Filter or assertion criteria for have name starting with. */
     fun haveNameStartingWith(prefixes: List<String>) {
         assertions.add { prop, violations ->
             if (prefixes.none { prop.name.startsWith(it) }) {
@@ -53,14 +60,17 @@ class PropertyAssertionScope internal constructor() {
         }
     }
 
+    /** Filter or assertion criteria for have name starting with. */
     fun haveNameStartingWith(vararg prefixes: String) {
         haveNameStartingWith(prefixes.asList())
     }
 
+    /** Filter or assertion criteria for have name ending with. */
     fun haveNameEndingWith(suffix: String) {
         haveNameEndingWith(listOf(suffix))
     }
 
+    /** Filter or assertion criteria for have name ending with. */
     fun haveNameEndingWith(suffixes: List<String>) {
         assertions.add { prop, violations ->
             if (suffixes.none { prop.name.endsWith(it) }) {
@@ -75,10 +85,12 @@ class PropertyAssertionScope internal constructor() {
         }
     }
 
+    /** Filter or assertion criteria for have name ending with. */
     fun haveNameEndingWith(vararg suffixes: String) {
         haveNameEndingWith(suffixes.asList())
     }
 
+    /** Filter or assertion criteria for be public. */
     fun bePublic() {
         assertions.add { prop, violations ->
             if (prop.visibility != Visibility.PUBLIC) {
@@ -87,6 +99,7 @@ class PropertyAssertionScope internal constructor() {
         }
     }
 
+    /** Filter or assertion criteria for be internal. */
     fun beInternal() {
         assertions.add { prop, violations ->
             if (prop.visibility != Visibility.INTERNAL) {
@@ -95,6 +108,7 @@ class PropertyAssertionScope internal constructor() {
         }
     }
 
+    /** Filter or assertion criteria for be private. */
     fun bePrivate() {
         assertions.add { prop, violations ->
             if (prop.visibility != Visibility.PRIVATE) {
@@ -103,6 +117,7 @@ class PropertyAssertionScope internal constructor() {
         }
     }
 
+    /** Filter or assertion criteria for be protected. */
     fun beProtected() {
         assertions.add { prop, violations ->
             if (prop.visibility != Visibility.PROTECTED) {
@@ -111,6 +126,7 @@ class PropertyAssertionScope internal constructor() {
         }
     }
 
+    /** Filter or assertion criteria for be val. */
     fun beVal() {
         assertions.add { prop, violations ->
             if (!prop.isVal) {
@@ -119,6 +135,7 @@ class PropertyAssertionScope internal constructor() {
         }
     }
 
+    /** Filter or assertion criteria for be var. */
     fun beVar() {
         assertions.add { prop, violations ->
             if (prop.isVal) {
@@ -127,10 +144,12 @@ class PropertyAssertionScope internal constructor() {
         }
     }
 
+    /** Filter or assertion criteria for have type. */
     fun haveType(typeFqName: String) {
         haveType(listOf(typeFqName))
     }
 
+    /** Filter or assertion criteria for have type. */
     fun haveType(typeFqNames: List<String>) {
         assertions.add { prop, violations ->
             if (typeFqNames.none { prop.type == it }) {
@@ -145,16 +164,20 @@ class PropertyAssertionScope internal constructor() {
         }
     }
 
+    /** Filter or assertion criteria for have type. */
     fun haveType(vararg typeFqNames: String) {
         haveType(typeFqNames.asList())
     }
 
+    /** Filter or assertion criteria for have annotation of. */
     fun haveAnnotationOf(annotationName: String) {
         haveAnnotationOf(listOf(annotationName))
     }
 
+    /** Filter or assertion criteria for have annotation of. */
     fun haveAnnotationOf(annotationNames: List<String>) {
         assertions.add { prop, violations ->
+            /** Filter or assertion criteria for present. */
             val present = prop.annotations.map { it.name }.toSet() + prop.annotations.map { it.fqName }.toSet()
             if (annotationNames.none { it in present }) {
                 violations.add(
@@ -164,10 +187,12 @@ class PropertyAssertionScope internal constructor() {
         }
     }
 
+    /** Filter or assertion criteria for have annotation of. */
     fun haveAnnotationOf(vararg annotationNames: String) {
         haveAnnotationOf(annotationNames.asList())
     }
 
+    /** Filter or assertion criteria for be documented with k doc. */
     fun beDocumentedWithKDoc() {
         assertions.add { prop, violations ->
             if (prop.kdocText.isNullOrBlank()) {
@@ -181,6 +206,7 @@ class PropertyAssertionScope internal constructor() {
      */
     fun haveAllAnnotationsOf(names: List<String>) {
         assertions.add { prop, violations ->
+            /** Filter or assertion criteria for present. */
             val present = prop.annotations.map { it.name }.toSet() + prop.annotations.map { it.fqName }.toSet()
             if (!names.all { it in present }) {
                 violations.add(getMessage("property.scope.haveAllAnnotations", names.joinToString()))
@@ -200,6 +226,7 @@ class PropertyAssertionScope internal constructor() {
      */
     fun haveAnyAnnotationOf(names: List<String>) {
         assertions.add { prop, violations ->
+            /** Filter or assertion criteria for present. */
             val present = prop.annotations.map { it.name }.toSet() + prop.annotations.map { it.fqName }.toSet()
             if (names.none { it in present }) {
                 violations.add(getMessage("property.scope.haveAtLeastOneAnnotationOf", names.joinToString()))

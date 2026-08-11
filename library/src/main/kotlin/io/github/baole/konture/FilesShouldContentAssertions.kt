@@ -11,9 +11,12 @@ import io.github.baole.konture.impl.PatternMatchers
 import io.github.baole.konture.impl.ViolationLocation
 import kotlin.reflect.KClass
 
-interface FilesShouldContentAssertions {
+/** Content-based assertions for file rules. */
+public interface FilesShouldContentAssertions {
+    /** Filter or assertion criteria for builder. */
     val builder: FilesRuleBuilder
 
+    /** Filter or assertion criteria for contain classes. */
     fun containClasses(): FilesRuleBuilder {
         builder.setShould { file, _, violations ->
             if (file.declaration.classes.isEmpty()) {
@@ -23,8 +26,10 @@ interface FilesShouldContentAssertions {
         return builder
     }
 
+    /** Filter or assertion criteria for have classes. */
     fun haveClasses(): FilesRuleBuilder = containClasses()
 
+    /** Filter or assertion criteria for not contain classes. */
     fun notContainClasses(): FilesRuleBuilder {
         builder.setShould { file, _, violations ->
             if (file.declaration.classes.isNotEmpty()) {
@@ -34,8 +39,10 @@ interface FilesShouldContentAssertions {
         return builder
     }
 
+    /** Filter or assertion criteria for not have classes. */
     fun notHaveClasses(): FilesRuleBuilder = notContainClasses()
 
+    /** Filter or assertion criteria for have only one class per file. */
     fun haveOnlyOneClassPerFile(): FilesRuleBuilder {
         builder.setShould { file, _, violations ->
             if (file.declaration.classes.size > 1) {
@@ -52,9 +59,13 @@ interface FilesShouldContentAssertions {
         return builder
     }
 
+    /** Filter or assertion criteria for have name matching class name. */
     fun haveNameMatchingClassName(): FilesRuleBuilder {
         builder.setShould { file, _, violations ->
+            /** Filter or assertion criteria for file name without ext. */
             val fileNameWithoutExt = file.declaration.name.substringBeforeLast(".")
+
+            /** Filter or assertion criteria for matches. */
             val matches = file.declaration.classes.any { it.name == fileNameWithoutExt }
             if (!matches) {
                 violations.add(getMessage("file.should.matchClassName", file.declaration.name))
@@ -63,23 +74,31 @@ interface FilesShouldContentAssertions {
         return builder
     }
 
+    /** Filter or assertion criteria for have no wildcard imports. */
     fun haveNoWildcardImports(): FilesRuleBuilder = notContainWildcardImports()
 
+    /** Filter or assertion criteria for not have wildcard imports. */
     fun notHaveWildcardImports(): FilesRuleBuilder = notContainWildcardImports()
 
+    /** Filter or assertion criteria for have top level functions. */
     fun haveTopLevelFunctions(): FilesRuleBuilder = containTopLevelFunctions()
 
+    /** Filter or assertion criteria for not have top level functions. */
     fun notHaveTopLevelFunctions(): FilesRuleBuilder = notContainTopLevelFunctions()
 
+    /** Filter or assertion criteria for have top level properties. */
     fun haveTopLevelProperties(): FilesRuleBuilder = containTopLevelProperties()
 
+    /** Filter or assertion criteria for not have top level properties. */
     fun notHaveTopLevelProperties(): FilesRuleBuilder = notContainTopLevelProperties()
 
+    /** Filter or assertion criteria for not call. */
     fun notCall(fqName: String): FilesRuleBuilder {
         builder.setShould { file, _, violations ->
             file.declaration.usages
                 .filter { usage -> PatternMatchers.isCallUsageMatch(usage, fqName) }
                 .forEach { usage ->
+                    /** Filter or assertion criteria for unresolved. */
                     val unresolved = if (usage.unresolvedPossibleUsage) "unresolved possible " else ""
                     violations.add(
                         "${getMessage(
@@ -103,8 +122,10 @@ interface FilesShouldContentAssertions {
         return builder
     }
 
+    /** Filter or assertion criteria for not call. */
     fun notCall(kClass: KClass<*>): FilesRuleBuilder = notCall(kClass.kontureQualifiedName())
 
+    /** Filter or assertion criteria for not reference class. */
     fun notReferenceClass(fqName: String): FilesRuleBuilder {
         builder.setShould { file, _, violations ->
             file.declaration.usages
@@ -131,10 +152,13 @@ interface FilesShouldContentAssertions {
         return builder
     }
 
+    /** Filter or assertion criteria for not reference class. */
     fun notReferenceClass(kClass: KClass<*>): FilesRuleBuilder = notReferenceClass(kClass.kontureQualifiedName())
 
+    /** Filter or assertion criteria for not contain class. */
     infix fun notContainClass(fqName: String): FilesRuleBuilder {
         builder.setShould { file, _, violations ->
+            /** Filter or assertion criteria for contains. */
             val contains = file.declaration.classes.any { it.fqName == fqName || it.name == fqName }
             if (contains) {
                 violations.add(getMessage("file.should.notContainClass", file.declaration.name, fqName))
@@ -143,10 +167,13 @@ interface FilesShouldContentAssertions {
         return builder
     }
 
+    /** Filter or assertion criteria for not contain class. */
     infix fun notContainClass(kClass: KClass<*>): FilesRuleBuilder = notContainClass(kClass.kontureQualifiedName())
 
+    /** Filter or assertion criteria for contain class. */
     infix fun containClass(fqName: String): FilesRuleBuilder {
         builder.setShould { file, _, violations ->
+            /** Filter or assertion criteria for contains. */
             val contains = file.declaration.classes.any { it.fqName == fqName || it.name == fqName }
             if (!contains) {
                 violations.add(getMessage("file.should.containClasses", file.declaration.name, fqName))
@@ -155,10 +182,13 @@ interface FilesShouldContentAssertions {
         return builder
     }
 
+    /** Filter or assertion criteria for contain class. */
     infix fun containClass(kClass: KClass<*>): FilesRuleBuilder = containClass(kClass.kontureQualifiedName())
 
+    /** Filter or assertion criteria for have all classes ending with. */
     infix fun haveAllClassesEndingWith(suffix: String): FilesRuleBuilder {
         builder.setShould { file, _, violations ->
+            /** Filter or assertion criteria for offending. */
             val offending = file.declaration.classes.filterNot { it.name.endsWith(suffix) }
             if (offending.isNotEmpty()) {
                 violations.add(
@@ -174,8 +204,10 @@ interface FilesShouldContentAssertions {
         return builder
     }
 
+    /** Filter or assertion criteria for have all classes starting with. */
     infix fun haveAllClassesStartingWith(prefix: String): FilesRuleBuilder {
         builder.setShould { file, _, violations ->
+            /** Filter or assertion criteria for offending. */
             val offending = file.declaration.classes.filterNot { it.name.startsWith(prefix) }
             if (offending.isNotEmpty()) {
                 violations.add(
@@ -191,8 +223,10 @@ interface FilesShouldContentAssertions {
         return builder
     }
 
+    /** Filter or assertion criteria for have all classes matching. */
     infix fun haveAllClassesMatching(pattern: String): FilesRuleBuilder {
         builder.setShould { file, _, violations ->
+            /** Filter or assertion criteria for offending. */
             val offending = file.declaration.classes.filterNot { PatternMatchers.matchesSimpleGlob(pattern, it.name) }
             if (offending.isNotEmpty()) {
                 violations.add(
@@ -208,8 +242,10 @@ interface FilesShouldContentAssertions {
         return builder
     }
 
+    /** Filter or assertion criteria for have import of. */
     infix fun haveImportOf(importFqName: String): FilesRuleBuilder {
         builder.setShould { file, _, violations ->
+            /** Filter or assertion criteria for matches. */
             val matches =
                 file.declaration.imports.any {
                     it == importFqName || PatternMatchers.matchesPackage(importFqName, it)
@@ -221,10 +257,13 @@ interface FilesShouldContentAssertions {
         return builder
     }
 
+    /** Filter or assertion criteria for have import of. */
     infix fun haveImportOf(kClass: KClass<*>): FilesRuleBuilder = haveImportOf(kClass.kontureQualifiedName())
 
+    /** Filter or assertion criteria for not have import of. */
     infix fun notHaveImportOf(importFqName: String): FilesRuleBuilder {
         builder.setShould { file, _, violations ->
+            /** Filter or assertion criteria for matches. */
             val matches =
                 file.declaration.imports.any {
                     it == importFqName || PatternMatchers.matchesPackage(importFqName, it)
@@ -236,10 +275,13 @@ interface FilesShouldContentAssertions {
         return builder
     }
 
+    /** Filter or assertion criteria for not have import of. */
     infix fun notHaveImportOf(kClass: KClass<*>): FilesRuleBuilder = notHaveImportOf(kClass.kontureQualifiedName())
 
+    /** Filter or assertion criteria for not contain wildcard imports. */
     fun notContainWildcardImports(): FilesRuleBuilder {
         builder.setShould { file, _, violations ->
+            /** Filter or assertion criteria for wildcards. */
             val wildcards = file.declaration.imports.filter { it.endsWith(".*") }
             if (wildcards.isNotEmpty()) {
                 violations.add(
@@ -254,6 +296,7 @@ interface FilesShouldContentAssertions {
         return builder
     }
 
+    /** Filter or assertion criteria for contain top level functions. */
     fun containTopLevelFunctions(): FilesRuleBuilder {
         builder.setShould { file, _, violations ->
             if (file.declaration.topLevelFunctions.isEmpty()) {
@@ -263,6 +306,7 @@ interface FilesShouldContentAssertions {
         return builder
     }
 
+    /** Filter or assertion criteria for not contain top level functions. */
     fun notContainTopLevelFunctions(): FilesRuleBuilder {
         builder.setShould { file, _, violations ->
             if (file.declaration.topLevelFunctions.isNotEmpty()) {
@@ -272,6 +316,7 @@ interface FilesShouldContentAssertions {
         return builder
     }
 
+    /** Filter or assertion criteria for contain top level properties. */
     fun containTopLevelProperties(): FilesRuleBuilder {
         builder.setShould { file, _, violations ->
             if (file.declaration.topLevelProperties.isEmpty()) {
@@ -281,8 +326,10 @@ interface FilesShouldContentAssertions {
         return builder
     }
 
+    /** Filter or assertion criteria for have annotation of. */
     infix fun haveAnnotationOf(annotationName: String): FilesRuleBuilder {
         builder.setShould { file, _, violations ->
+            /** Filter or assertion criteria for has annotation. */
             val hasAnnotation =
                 file.declaration.classes.any { cls ->
                     cls.annotations.any { it.name == annotationName || it.fqName == annotationName }
@@ -294,9 +341,11 @@ interface FilesShouldContentAssertions {
         return builder
     }
 
+    /** Filter or assertion criteria for have annotation of. */
     infix fun haveAnnotationOf(annotation: KClass<out Annotation>): FilesRuleBuilder =
         haveAnnotationOf(annotation.kontureQualifiedName())
 
+    /** Filter or assertion criteria for not contain top level properties. */
     fun notContainTopLevelProperties(): FilesRuleBuilder {
         builder.setShould { file, _, violations ->
             if (file.declaration.topLevelProperties.isNotEmpty()) {
@@ -306,6 +355,7 @@ interface FilesShouldContentAssertions {
         return builder
     }
 
+    /** Filter or assertion criteria for be documented with k doc. */
     fun beDocumentedWithKDoc(): FilesRuleBuilder {
         builder.setShould { file, _, violations ->
             if (file.declaration.kdocText.isNullOrBlank()) {
@@ -315,8 +365,10 @@ interface FilesShouldContentAssertions {
         return builder
     }
 
+    /** Filter or assertion criteria for contain class. */
     infix fun containClass(fqNames: List<String>): FilesRuleBuilder {
         builder.setShould { file, _, violations ->
+            /** Filter or assertion criteria for contains. */
             val contains =
                 fqNames.all { expected ->
                     file.declaration.classes.any { it.fqName == expected || it.name == expected }
@@ -328,10 +380,13 @@ interface FilesShouldContentAssertions {
         return builder
     }
 
+    /** Filter or assertion criteria for contain class. */
     fun containClass(vararg fqNames: String): FilesRuleBuilder = containClass(fqNames.toList())
 
+    /** Filter or assertion criteria for have import of. */
     infix fun haveImportOf(imports: List<String>): FilesRuleBuilder {
         builder.setShould { file, _, violations ->
+            /** Filter or assertion criteria for has imports. */
             val hasImports =
                 imports.all { imp ->
                     file.declaration.imports.any { PatternMatchers.matchesPackage(imp, it) || it == imp }
@@ -343,10 +398,13 @@ interface FilesShouldContentAssertions {
         return builder
     }
 
+    /** Filter or assertion criteria for have import of. */
     fun haveImportOf(vararg imports: String): FilesRuleBuilder = haveImportOf(imports.toList())
 
+    /** Filter or assertion criteria for not have import of. */
     infix fun notHaveImportOf(imports: List<String>): FilesRuleBuilder {
         builder.setShould { file, _, violations ->
+            /** Filter or assertion criteria for has imports. */
             val hasImports =
                 imports.any { imp ->
                     file.declaration.imports.any { PatternMatchers.matchesPackage(imp, it) || it == imp }
@@ -358,13 +416,18 @@ interface FilesShouldContentAssertions {
         return builder
     }
 
+    /** Filter or assertion criteria for not have import of. */
     fun notHaveImportOf(vararg imports: String): FilesRuleBuilder = notHaveImportOf(imports.toList())
 
+    /** Filter or assertion criteria for only depend on packages. */
     infix fun onlyDependOnPackages(packages: List<String>): FilesRuleBuilder {
         builder.setShould { file, _, violations ->
+            /** Filter or assertion criteria for referenced packages. */
             val referencedPackages =
                 file.declaration.imports.map { imp -> imp.substringBeforeLast(".") } +
                     file.declaration.usages.map { it.targetFqName.substringBeforeLast(".") }
+
+            /** Filter or assertion criteria for offending. */
             val offending =
                 referencedPackages.filterNot { pkg ->
                     pkg == file.declaration.packageName ||
@@ -379,13 +442,18 @@ interface FilesShouldContentAssertions {
         return builder
     }
 
+    /** Filter or assertion criteria for only depend on packages. */
     fun onlyDependOnPackages(vararg packages: String): FilesRuleBuilder = onlyDependOnPackages(packages.toList())
 
+    /** Filter or assertion criteria for not depend on packages. */
     infix fun notDependOnPackages(packages: List<String>): FilesRuleBuilder {
         builder.setShould { file, _, violations ->
+            /** Filter or assertion criteria for referenced packages. */
             val referencedPackages =
                 file.declaration.imports.map { imp -> imp.substringBeforeLast(".") } +
                     file.declaration.usages.map { it.targetFqName.substringBeforeLast(".") }
+
+            /** Filter or assertion criteria for offending. */
             val offending =
                 referencedPackages.filter { pkg ->
                     packages.any { PatternMatchers.matchesPackage(it, pkg) }
@@ -399,17 +467,23 @@ interface FilesShouldContentAssertions {
         return builder
     }
 
+    /** Filter or assertion criteria for not depend on packages. */
     fun notDependOnPackages(vararg packages: String): FilesRuleBuilder = notDependOnPackages(packages.toList())
 
+    /** Filter or assertion criteria for only depend on modules. */
     infix fun onlyDependOnModules(modulePaths: List<String>): FilesRuleBuilder {
         builder.setShould { file, _, violations ->
+            /** Filter or assertion criteria for target modules. */
             val targetModules =
                 file.declaration.usages.mapNotNull { usage ->
+                    /** Filter or assertion criteria for fq name. */
                     val fqName = usage.targetFqName
                     builder.graph.getAllModules().find { module ->
                         module.files.any { f -> f.classes.any { it.fqName == fqName } }
                     }?.path
                 }.distinct()
+
+            /** Filter or assertion criteria for offending. */
             val offending =
                 targetModules.filterNot { m ->
                     m == file.modulePath || modulePaths.any { PatternMatchers.matchesModuleGlob(it, m) || it == m }
@@ -423,18 +497,23 @@ interface FilesShouldContentAssertions {
         return builder
     }
 
+    /** Filter or assertion criteria for only depend on modules. */
     fun onlyDependOnModules(vararg modulePaths: String): FilesRuleBuilder = onlyDependOnModules(modulePaths.toList())
 
+    /** Filter or assertion criteria for not depend on modules. */
     infix fun notDependOnModules(modulePaths: List<String>): FilesRuleBuilder {
         builder.setShould { file, _, violations ->
+            /** Filter or assertion criteria for target modules. */
             val targetModules =
                 file.declaration.usages.mapNotNull { usage ->
+                    /** Filter or assertion criteria for fq name. */
                     val fqName = usage.targetFqName
                     builder.graph.getAllModules().find { module ->
                         module.files.any { f -> f.classes.any { it.fqName == fqName } }
                     }?.path
                 }.distinct()
 
+            /** Filter or assertion criteria for offending. */
             val offending =
                 targetModules.filter { m ->
                     modulePaths.any { PatternMatchers.matchesModuleGlob(it, m) || it == m }
@@ -448,5 +527,6 @@ interface FilesShouldContentAssertions {
         return builder
     }
 
+    /** Filter or assertion criteria for not depend on modules. */
     fun notDependOnModules(vararg modulePaths: String): FilesRuleBuilder = notDependOnModules(modulePaths.toList())
 }

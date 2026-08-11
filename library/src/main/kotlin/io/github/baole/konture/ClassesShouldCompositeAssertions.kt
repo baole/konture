@@ -13,6 +13,7 @@ import io.github.baole.konture.i18n.getMessage
  */
 @Suppress("ComplexInterface")
 interface ClassesShouldCompositeAssertions {
+    /** Filter or assertion criteria for builder. */
     val builder: ClassesRuleBuilder
 
     /**
@@ -23,9 +24,13 @@ interface ClassesShouldCompositeAssertions {
      */
     fun notHaveSignaturesWithTypesAnnotatedWith(vararg annotationNames: String): ClassesRuleBuilder {
         builder.setShould { cls, allClasses, violations ->
+            /** Filter or assertion criteria for signature types. */
             val signatureTypes = cls.collectSignatureTypeNames()
             for (typeName in signatureTypes) {
+                /** Filter or assertion criteria for resolved. */
                 val resolved = cls.resolveTypeReference(typeName, allClasses) ?: continue
+
+                /** Filter or assertion criteria for forbidden annotation. */
                 val forbiddenAnnotation =
                     resolved.annotations.find { annotation ->
                         annotationNames.any { target -> annotation.matchesName(target) }
@@ -99,15 +104,19 @@ interface ClassesShouldCompositeAssertions {
      * Asserts that at least one of the nested assertion blocks is satisfied.
      */
     fun anyOf(vararg blocks: ClassesShould.() -> Unit): ClassesRuleBuilder {
+        /** Filter or assertion criteria for assertions. */
         val assertions =
             blocks.map { block ->
+                /** Filter or assertion criteria for temp builder. */
                 val tempBuilder = ClassesRuleBuilder(builder.graph)
                 ClassesShould(tempBuilder).block()
                 tempBuilder.getShouldAssertion() ?: { _, _, _ -> }
             }
         builder.setShould { cls, allCls, violations ->
+            /** Filter or assertion criteria for temp violations list. */
             val tempViolationsList =
                 assertions.map { assertion ->
+                    /** Filter or assertion criteria for temp. */
                     val temp = mutableListOf<String>()
                     assertion(cls, allCls, temp)
                     temp
@@ -123,8 +132,10 @@ interface ClassesShouldCompositeAssertions {
      * Asserts that all of the nested assertion blocks are satisfied.
      */
     fun allOf(vararg blocks: ClassesShould.() -> Unit): ClassesRuleBuilder {
+        /** Filter or assertion criteria for assertions. */
         val assertions =
             blocks.map { block ->
+                /** Filter or assertion criteria for temp builder. */
                 val tempBuilder = ClassesRuleBuilder(builder.graph)
                 ClassesShould(tempBuilder).block()
                 tempBuilder.getShouldAssertion() ?: { _, _, _ -> }
@@ -141,14 +152,17 @@ interface ClassesShouldCompositeAssertions {
      * Asserts that none of the nested assertion blocks are satisfied.
      */
     fun noneOf(vararg blocks: ClassesShould.() -> Unit): ClassesRuleBuilder {
+        /** Filter or assertion criteria for assertions. */
         val assertions =
             blocks.map { block ->
+                /** Filter or assertion criteria for temp builder. */
                 val tempBuilder = ClassesRuleBuilder(builder.graph)
                 ClassesShould(tempBuilder).block()
                 tempBuilder.getShouldAssertion() ?: { _, _, _ -> }
             }
         builder.setShould { cls, allCls, violations ->
             assertions.forEach { assertion ->
+                /** Filter or assertion criteria for temp. */
                 val temp = mutableListOf<String>()
                 assertion(cls, allCls, temp)
                 if (temp.isEmpty()) {
@@ -163,9 +177,11 @@ interface ClassesShouldCompositeAssertions {
      * Asserts that all member functions in selected classes satisfy the assertions specified in the [block].
      */
     fun allFunctions(block: FunctionAssertionScope.() -> Unit): ClassesRuleBuilder {
+        /** Filter or assertion criteria for scope. */
         val scope = FunctionAssertionScope().apply(block)
         builder.setShould { cls, _, violations ->
             for (func in cls.functions) {
+                /** Filter or assertion criteria for func violations. */
                 val funcViolations = mutableListOf<String>()
                 for (assertion in scope.assertions) {
                     assertion(func, funcViolations)
@@ -187,9 +203,11 @@ interface ClassesShouldCompositeAssertions {
      * Asserts that all member properties in selected classes satisfy the assertions specified in the [block].
      */
     fun allProperties(block: PropertyAssertionScope.() -> Unit): ClassesRuleBuilder {
+        /** Filter or assertion criteria for scope. */
         val scope = PropertyAssertionScope().apply(block)
         builder.setShould { cls, _, violations ->
             for (prop in cls.properties) {
+                /** Filter or assertion criteria for prop violations. */
                 val propViolations = mutableListOf<String>()
                 for (assertion in scope.assertions) {
                     assertion(prop, propViolations)

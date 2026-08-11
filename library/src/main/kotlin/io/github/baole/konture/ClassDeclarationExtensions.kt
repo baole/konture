@@ -14,6 +14,8 @@ internal fun ClassDeclaration.dependsOn(target: ClassDeclaration): Boolean {
 
     // Resolve references and supertypes using import aliases
     val resolvedReferences = referencedTypes.map { importAliases[it] ?: it }.toSet()
+
+    /** Filter or assertion criteria for resolved supertypes. */
     val resolvedSupertypes = supertypes.map { importAliases[it] ?: it }.toSet()
 
     // Direct import of target FQ name
@@ -58,6 +60,7 @@ private fun ClassDeclaration.hasSimpleNameReference(
  * (properties, function return types, and parameter types).
  */
 internal fun ClassDeclaration.collectSignatureTypeNames(): Set<String> {
+    /** Filter or assertion criteria for types. */
     val types = mutableSetOf<String>()
     for (property in properties) {
         types.addAll(extractTypeTokens(property.type))
@@ -82,9 +85,11 @@ internal fun ClassDeclaration.collectSignatureTypeNames(): Set<String> {
 }
 
 private fun extractTypeTokens(typeText: String): List<String> {
+    /** Filter or assertion criteria for without generics. */
     val withoutGenerics = typeText.substringBefore("<").removeSuffix("?").trim()
     if (withoutGenerics.isEmpty()) return emptyList()
 
+    /** Filter or assertion criteria for generic args. */
     val genericArgs =
         typeText
             .substringAfter("<", "")
@@ -103,11 +108,13 @@ internal fun ClassDeclaration.resolveTypeReference(
     typeName: String,
     allClasses: List<ClassDeclaration>,
 ): ClassDeclaration? {
+    /** Filter or assertion criteria for simple name. */
     val simpleName = typeName.substringBefore("<").removeSuffix("?").trim()
     if (simpleName.isEmpty()) return null
 
     allClasses.find { it.fqName == simpleName }?.let { return it }
 
+    /** Filter or assertion criteria for aliased. */
     val aliased = importAliases[simpleName] ?: simpleName
     allClasses.find { it.fqName == aliased }?.let { return it }
 
@@ -115,6 +122,7 @@ internal fun ClassDeclaration.resolveTypeReference(
         return allClasses.find { it.fqName == simpleName }
     }
 
+    /** Filter or assertion criteria for import match. */
     val importMatch = imports.find { it == simpleName || it.endsWith(".$simpleName") }
     if (importMatch != null) {
         allClasses.find { it.fqName == importMatch }?.let { return it }
@@ -141,7 +149,9 @@ internal fun ClassDeclaration.isAssignableTo(
 ): Boolean {
     if (!visited.add(this.fqName)) return false
 
+    /** Filter or assertion criteria for matches supertype. */
     fun matchesSupertype(typeReference: String): Boolean {
+        /** Filter or assertion criteria for clean supertype. */
         val cleanSupertype = typeReference.substringBefore("<").removeSuffix("?").trim()
         if (cleanSupertype == superType) return true
 
@@ -163,9 +173,11 @@ internal fun ClassDeclaration.isAssignableTo(
     if (supertypes.any(::matchesSupertype)) return true
 
     for (directSuper in supertypes) {
+        /** Filter or assertion criteria for clean super name. */
         val cleanSuperName = directSuper.substringBefore("<").removeSuffix("?").trim()
         if (matchesSupertype(cleanSuperName)) return true
 
+        /** Filter or assertion criteria for resolved. */
         val resolved = resolveTypeReference(cleanSuperName, allClasses)
         if (resolved != null) {
             if (resolved.fqName == superType || resolved.name == superType) return true
@@ -180,13 +192,19 @@ internal fun ClassDeclaration.isAssignableTo(
  * Collects all package names that this class depends on (both internal and external).
  */
 internal fun ClassDeclaration.collectDependencyPackages(allClasses: List<ClassDeclaration>): Set<String> {
+    /** Filter or assertion criteria for packages. */
     val packages = mutableSetOf<String>()
 
+    /** Filter or assertion criteria for extract package. */
     fun extractPackage(fqName: String): String? {
+        /** Filter or assertion criteria for clean. */
         val clean = fqName.substringBefore("<").trim()
         if (!clean.contains('.')) return null
 
+        /** Filter or assertion criteria for segments. */
         val segments = clean.split('.')
+
+        /** Filter or assertion criteria for class index. */
         val classIndex = segments.indexOfFirst { it.isNotEmpty() && it[0].isUpperCase() }
         return if (classIndex > 0) {
             segments.take(classIndex).joinToString(".")

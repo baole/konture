@@ -16,9 +16,14 @@ package io.github.baole.konture
  * @property resolvedType Fully qualified resolved type if available.
  */
 public data class ParameterDeclaration(
+    /** Filter or assertion criteria for name. */
     val name: String,
+    /** Filter or assertion criteria for type. */
     val type: String,
+    /** Filter or assertion criteria for has default value. */
     val hasDefaultValue: Boolean,
+    /** Filter or assertion criteria for annotations. */
     val annotations: List<AnnotationDeclaration>,
+    /** Filter or assertion criteria for resolved type. */
     val resolvedType: String? = null,
 )

@@ -13,6 +13,7 @@ import io.github.baole.konture.i18n.getMessage
  */
 @Suppress("ComplexInterface")
 interface ClassesShouldMetadataAssertions {
+    /** Filter or assertion criteria for builder. */
     val builder: ClassesRuleBuilder
 
     /**
@@ -23,6 +24,7 @@ interface ClassesShouldMetadataAssertions {
      */
     infix fun haveAnnotationOf(annotationFqName: String): ClassesRuleBuilder {
         builder.setShould { cls, _, violations ->
+            /** Filter or assertion criteria for has annotation. */
             val hasAnnotation = cls.annotations.any { it.fqName == annotationFqName || it.name == annotationFqName }
             if (!hasAnnotation) {
                 violations.add(getMessage("class.should.haveAnnotation", cls.fqName, annotationFqName))
@@ -86,6 +88,7 @@ interface ClassesShouldMetadataAssertions {
         argValue: String,
     ): ClassesRuleBuilder {
         builder.setShould { cls, _, violations ->
+            /** Filter or assertion criteria for matches. */
             val matches =
                 cls.annotations.any { ann ->
                     (ann.name == annotationName || ann.fqName == annotationName) &&
@@ -94,6 +97,7 @@ interface ClassesShouldMetadataAssertions {
                         }
                 }
             if (!matches) {
+                /** Filter or assertion criteria for detail. */
                 val detail =
                     if (argName !=
                         null
@@ -204,6 +208,7 @@ interface ClassesShouldMetadataAssertions {
         return builder
     }
 
+    /** Filter or assertion criteria for not have modifier. */
     infix fun notHaveModifier(modifier: Modifier): ClassesRuleBuilder {
         builder.setShould { cls, _, violations ->
             if (cls.modifiers.contains(modifier)) {
@@ -213,6 +218,7 @@ interface ClassesShouldMetadataAssertions {
         return builder
     }
 
+    /** Filter or assertion criteria for not be abstract. */
     fun notBeAbstract(): ClassesRuleBuilder {
         builder.setShould { cls, _, violations ->
             if (cls.isAbstract || cls.isInterface) {
@@ -222,16 +228,22 @@ interface ClassesShouldMetadataAssertions {
         return builder
     }
 
+    /** Filter or assertion criteria for not be sealed. */
     fun notBeSealed(): ClassesRuleBuilder = notHaveModifier(Modifier.SEALED)
 
+    /** Filter or assertion criteria for not be data. */
     fun notBeData(): ClassesRuleBuilder = notHaveModifier(Modifier.DATA)
 
+    /** Filter or assertion criteria for not be inline. */
     fun notBeInline(): ClassesRuleBuilder = notHaveModifier(Modifier.INLINE)
 
+    /** Filter or assertion criteria for not be open. */
     fun notBeOpen(): ClassesRuleBuilder = notHaveModifier(Modifier.OPEN)
 
+    /** Filter or assertion criteria for not be inner. */
     fun notBeInner(): ClassesRuleBuilder = notHaveModifier(Modifier.INNER)
 
+    /** Filter or assertion criteria for not be interface. */
     fun notBeInterface(): ClassesRuleBuilder {
         builder.setShould { cls, _, violations ->
             if (cls.isInterface) {
@@ -291,6 +303,7 @@ interface ClassesShouldMetadataAssertions {
      */
     infix fun haveAllModifiers(modifiers: List<Modifier>): ClassesRuleBuilder {
         builder.setShould { cls, _, violations ->
+            /** Filter or assertion criteria for missing. */
             val missing = modifiers.filter { !cls.modifiers.contains(it) }
             if (missing.isNotEmpty()) {
                 violations.add(
@@ -389,12 +402,16 @@ interface ClassesShouldMetadataAssertions {
     fun haveAnyVisibility(vararg visibilities: Visibility): ClassesRuleBuilder =
         haveAnyVisibility(visibilities.asList())
 
+    /** Filter or assertion criteria for be public. */
     fun bePublic(): ClassesRuleBuilder = haveVisibility(Visibility.PUBLIC)
 
+    /** Filter or assertion criteria for be internal. */
     fun beInternal(): ClassesRuleBuilder = haveVisibility(Visibility.INTERNAL)
 
+    /** Filter or assertion criteria for be private. */
     fun bePrivate(): ClassesRuleBuilder = haveVisibility(Visibility.PRIVATE)
 
+    /** Filter or assertion criteria for be protected. */
     fun beProtected(): ClassesRuleBuilder = haveVisibility(Visibility.PROTECTED)
 
     /**
@@ -451,6 +468,7 @@ interface ClassesShouldMetadataAssertions {
      */
     infix fun beAssignableToAllOf(superTypes: List<String>): ClassesRuleBuilder {
         builder.setShould { cls, allClasses, violations ->
+            /** Filter or assertion criteria for missing. */
             val missing = superTypes.filter { !cls.isAssignableTo(it, allClasses) }
             if (missing.isNotEmpty()) {
                 violations.add(
@@ -480,7 +498,10 @@ interface ClassesShouldMetadataAssertions {
      */
     infix fun beAssignableFrom(subType: String): ClassesRuleBuilder {
         builder.setShould { cls, allClasses, violations ->
+            /** Filter or assertion criteria for sub type decl. */
             val subTypeDecl = allClasses.find { it.fqName == subType || it.name == subType }
+
+            /** Filter or assertion criteria for is assignable. */
             val isAssignable =
                 if (subTypeDecl != null) {
                     subTypeDecl.fqName == cls.fqName ||
@@ -496,6 +517,7 @@ interface ClassesShouldMetadataAssertions {
         return builder
     }
 
+    /** Filter or assertion criteria for contain property. */
     infix fun containProperty(propertyName: String): ClassesRuleBuilder {
         builder.setShould { cls, _, violations ->
             if (!cls.properties.any { it.name == propertyName }) {
@@ -505,8 +527,10 @@ interface ClassesShouldMetadataAssertions {
         return builder
     }
 
+    /** Filter or assertion criteria for contain property. */
     infix fun containProperty(propertyNames: List<String>): ClassesRuleBuilder {
         builder.setShould { cls, _, violations ->
+            /** Filter or assertion criteria for missing. */
             val missing = propertyNames.filter { prop -> !cls.properties.any { it.name == prop } }
             if (missing.isNotEmpty()) {
                 violations.add(getMessage("class.should.containProperty", cls.fqName, missing.joinToString()))
@@ -515,12 +539,16 @@ interface ClassesShouldMetadataAssertions {
         return builder
     }
 
+    /** Filter or assertion criteria for contain property. */
     fun containProperty(vararg propertyNames: String): ClassesRuleBuilder = containProperty(propertyNames.toList())
 
+    /** Filter or assertion criteria for contain properties. */
     infix fun containProperties(propertyNames: List<String>): ClassesRuleBuilder = containProperty(propertyNames)
 
+    /** Filter or assertion criteria for contain properties. */
     fun containProperties(vararg propertyNames: String): ClassesRuleBuilder = containProperty(propertyNames.toList())
 
+    /** Filter or assertion criteria for not contain property. */
     infix fun notContainProperty(propertyName: String): ClassesRuleBuilder {
         builder.setShould { cls, _, violations ->
             if (cls.properties.any { it.name == propertyName }) {
@@ -530,8 +558,10 @@ interface ClassesShouldMetadataAssertions {
         return builder
     }
 
+    /** Filter or assertion criteria for not contain property. */
     infix fun notContainProperty(propertyNames: List<String>): ClassesRuleBuilder {
         builder.setShould { cls, _, violations ->
+            /** Filter or assertion criteria for present. */
             val present = propertyNames.filter { prop -> cls.properties.any { it.name == prop } }
             if (present.isNotEmpty()) {
                 violations.add(getMessage("class.should.notContainProperty", cls.fqName, present.joinToString()))
@@ -540,18 +570,22 @@ interface ClassesShouldMetadataAssertions {
         return builder
     }
 
+    /** Filter or assertion criteria for not contain property. */
     fun notContainProperty(vararg propertyNames: String): ClassesRuleBuilder =
         notContainProperty(
             propertyNames.toList(),
         )
 
+    /** Filter or assertion criteria for not contain properties. */
     infix fun notContainProperties(propertyNames: List<String>): ClassesRuleBuilder = notContainProperty(propertyNames)
 
+    /** Filter or assertion criteria for not contain properties. */
     fun notContainProperties(vararg propertyNames: String): ClassesRuleBuilder =
         notContainProperty(
             propertyNames.toList(),
         )
 
+    /** Filter or assertion criteria for contain function. */
     infix fun containFunction(functionName: String): ClassesRuleBuilder {
         builder.setShould { cls, _, violations ->
             if (!cls.functions.any { it.name == functionName }) {
@@ -561,8 +595,10 @@ interface ClassesShouldMetadataAssertions {
         return builder
     }
 
+    /** Filter or assertion criteria for contain function. */
     infix fun containFunction(functionNames: List<String>): ClassesRuleBuilder {
         builder.setShould { cls, _, violations ->
+            /** Filter or assertion criteria for missing. */
             val missing = functionNames.filter { func -> !cls.functions.any { it.name == func } }
             if (missing.isNotEmpty()) {
                 violations.add(getMessage("class.should.containFunction", cls.fqName, missing.joinToString()))
@@ -571,12 +607,16 @@ interface ClassesShouldMetadataAssertions {
         return builder
     }
 
+    /** Filter or assertion criteria for contain function. */
     fun containFunction(vararg functionNames: String): ClassesRuleBuilder = containFunction(functionNames.toList())
 
+    /** Filter or assertion criteria for contain functions. */
     infix fun containFunctions(functionNames: List<String>): ClassesRuleBuilder = containFunction(functionNames)
 
+    /** Filter or assertion criteria for contain functions. */
     fun containFunctions(vararg functionNames: String): ClassesRuleBuilder = containFunction(functionNames.toList())
 
+    /** Filter or assertion criteria for not contain function. */
     infix fun notContainFunction(functionName: String): ClassesRuleBuilder {
         builder.setShould { cls, _, violations ->
             if (cls.functions.any { it.name == functionName }) {
@@ -586,8 +626,10 @@ interface ClassesShouldMetadataAssertions {
         return builder
     }
 
+    /** Filter or assertion criteria for not contain function. */
     infix fun notContainFunction(functionNames: List<String>): ClassesRuleBuilder {
         builder.setShould { cls, _, violations ->
+            /** Filter or assertion criteria for present. */
             val present = functionNames.filter { func -> cls.functions.any { it.name == func } }
             if (present.isNotEmpty()) {
                 violations.add(getMessage("class.should.notContainFunction", cls.fqName, present.joinToString()))
@@ -596,13 +638,16 @@ interface ClassesShouldMetadataAssertions {
         return builder
     }
 
+    /** Filter or assertion criteria for not contain function. */
     fun notContainFunction(vararg functionNames: String): ClassesRuleBuilder =
         notContainFunction(
             functionNames.toList(),
         )
 
+    /** Filter or assertion criteria for not contain functions. */
     infix fun notContainFunctions(functionNames: List<String>): ClassesRuleBuilder = notContainFunction(functionNames)
 
+    /** Filter or assertion criteria for not contain functions. */
     fun notContainFunctions(vararg functionNames: String): ClassesRuleBuilder =
         notContainFunction(
             functionNames.toList(),

@@ -1,5 +1,6 @@
 /*
- * Copyright 2026 Bao Le Duc
+ * Copyright 2026 The Konture Contributors
+ * Contributors: Bao Le Duc (@baole)
  * SPDX-License-Identifier: Apache-2.0
  */
 
@@ -17,12 +18,19 @@ package io.github.baole.konture
  * @property filePath The project relative path to the source file defining this function.
  */
 data class FunctionDeclarationContext(
+    /** Filter or assertion criteria for declaration. */
     val declaration: FunctionDeclaration,
+    /** Filter or assertion criteria for package name. */
     val packageName: String,
+    /** Filter or assertion criteria for class name. */
     val className: String?,
+    /** Filter or assertion criteria for module path. */
     val modulePath: String,
+    /** Filter or assertion criteria for file path. */
     val filePath: String,
+    /** Filter or assertion criteria for source set. */
     val sourceSet: SourceSetId? = null,
+    /** Filter or assertion criteria for usages. */
     val usages: List<SourceUsage> = emptyList(),
 ) {
     /**

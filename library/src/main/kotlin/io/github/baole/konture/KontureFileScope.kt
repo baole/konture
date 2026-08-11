@@ -17,9 +17,11 @@ import kotlin.reflect.KClass
  * @property files The list of [FileDeclaration] structures included in this scope.
  */
 class KontureFileScope(
+    /** Filter or assertion criteria for files. */
     val files: List<FileDeclaration>,
 ) {
-    companion object {
+    /** Factory methods for constructing file scopes. */
+    public companion object {
         /**
          * Creates a [KontureFileScope] representing all files in the project.
          *
@@ -29,6 +31,7 @@ class KontureFileScope(
             graph: ProjectGraph = Konture.projectGraph,
             sourceSets: SourceSetSelector = SourceSets.production(),
         ): KontureFileScope {
+            /** Filter or assertion criteria for files. */
             val files =
                 graph.getAllModules().flatMap {
                         module ->
@@ -48,6 +51,7 @@ class KontureFileScope(
             graph: ProjectGraph = Konture.projectGraph,
             sourceSets: SourceSetSelector = SourceSets.production(),
         ): KontureFileScope {
+            /** Filter or assertion criteria for module. */
             val module =
                 graph.getAllModules().find { it.path == path }
                     ?: throw IllegalArgumentException("Module $path not found in project graph")
@@ -65,6 +69,7 @@ class KontureFileScope(
             graph: ProjectGraph = Konture.projectGraph,
             sourceSets: SourceSetSelector = SourceSets.production(),
         ): KontureFileScope {
+            /** Filter or assertion criteria for files. */
             val files =
                 graph
                     .getAllModules()
@@ -78,12 +83,15 @@ class KontureFileScope(
     }
 }
 
+/** Filter or assertion criteria for plus. */
 operator fun KontureFileScope.plus(other: KontureFileScope): KontureFileScope =
     KontureFileScope(
         this.files + other.files,
     )
 
+/** Filter or assertion criteria for minus. */
 operator fun KontureFileScope.minus(other: KontureFileScope): KontureFileScope {
+    /** Filter or assertion criteria for other paths. */
     val otherPaths = other.files.map { it.filePath }.toSet()
     return KontureFileScope(this.files.filterNot { it.filePath in otherPaths })
 }
@@ -122,21 +130,28 @@ fun List<FileDeclaration>.withPackage(packagePattern: String): List<FileDeclarat
 
 // Scope-level delegation for KontureFileScope
 
+/** Filter or assertion criteria for with name ending with. */
 fun KontureFileScope.withNameEndingWith(suffix: String) = KontureFileScope(files.withNameEndingWith(suffix))
 
+/** Filter or assertion criteria for with name starting with. */
 fun KontureFileScope.withNameStartingWith(prefix: String) = KontureFileScope(files.withNameStartingWith(prefix))
 
+/** Filter or assertion criteria for with name matching. */
 fun KontureFileScope.withNameMatching(pattern: String) = KontureFileScope(files.withNameMatching(pattern))
 
+/** Filter or assertion criteria for with package. */
 fun KontureFileScope.withPackage(packagePattern: String) = KontureFileScope(files.withPackage(packagePattern))
 
+/** Filter or assertion criteria for with module. */
 fun KontureFileScope.withModule(
     modulePath: String,
     graph: ProjectGraph = Konture.projectGraph,
 ): KontureFileScope {
+    /** Filter or assertion criteria for norm. */
     val norm = if (!modulePath.startsWith(":") && !modulePath.startsWith("**") && modulePath.isNotEmpty()) ":$modulePath" else modulePath
     return KontureFileScope(
         files.filter { file ->
+            /** Filter or assertion criteria for mod. */
             val mod =
                 graph.getAllModules().find { m ->
                     m.files.any { f -> f.filePath == file.filePath || f.name == file.name }
@@ -146,7 +161,8 @@ fun KontureFileScope.withModule(
     )
 }
 
-fun KontureFileScope.withImportOf(importPath: String) =
+/** Filters files in this scope to include only those with import matching [importPath]. */
+public fun KontureFileScope.withImportOf(importPath: String): KontureFileScope =
     KontureFileScope(
         files.filter {
                 file ->
@@ -154,22 +170,29 @@ fun KontureFileScope.withImportOf(importPath: String) =
         },
     )
 
-fun KontureFileScope.withImportOf(type: KClass<*>) = withImportOf(type.kontureQualifiedName())
+/** Filters files in this scope to include only those with import of class [type]. */
+public fun KontureFileScope.withImportOf(type: KClass<*>): KontureFileScope = withImportOf(type.kontureQualifiedName())
 
-fun KontureFileScope.containingClass(fqName: String) =
+/** Filters files in this scope to include only those containing class [fqName]. */
+public fun KontureFileScope.containingClass(fqName: String): KontureFileScope =
     KontureFileScope(files.filter { file -> file.classes.any { it.fqName == fqName || it.name == fqName } })
 
-fun KontureFileScope.containingClass(type: KClass<*>) = containingClass(type.kontureQualifiedName())
+/** Filters files in this scope to include only those containing class [type]. */
+public fun KontureFileScope.containingClass(type: KClass<*>): KontureFileScope =
+    containingClass(type.kontureQualifiedName())
 
 // Assertion extensions on List<FileDeclaration> and KontureFileScope
 
+/** Asserts that all files in this list satisfy [predicate]. */
 @JvmName("assertFilesTrue")
-fun List<FileDeclaration>.assertTrue(
+public fun List<FileDeclaration>.assertTrue(
     additionalMessage: String? = null,
     predicate: (FileDeclaration) -> Boolean,
 ) {
+    /** Filter or assertion criteria for violations. */
     val violations = filterNot(predicate)
     if (violations.isNotEmpty()) {
+        /** Filter or assertion criteria for message. */
         val message =
             buildString {
                 appendLine("Assertion failed! The following files do not meet the criteria:")
@@ -184,53 +207,64 @@ fun List<FileDeclaration>.assertTrue(
     }
 }
 
-fun List<FileDeclaration>.assertNoWildcardImports(additionalMessage: String? = null) {
+/** Asserts that no file in this list contains wildcard imports. */
+public fun List<FileDeclaration>.assertNoWildcardImports(additionalMessage: String? = null) {
     assertTrue(additionalMessage) { file ->
         file.imports.none { it.endsWith(".*") }
     }
 }
 
-fun List<FileDeclaration>.assertOnlyOneClassPerFile(additionalMessage: String? = null) {
+/** Asserts that files in this list contain at most one class. */
+public fun List<FileDeclaration>.assertOnlyOneClassPerFile(additionalMessage: String? = null) {
     assertTrue(additionalMessage) { file ->
         file.classes.size <= 1
     }
 }
 
-fun List<FileDeclaration>.assertFileNameMatchesClassName(additionalMessage: String? = null) {
+/** Asserts that file names match their primary class names. */
+public fun List<FileDeclaration>.assertFileNameMatchesClassName(additionalMessage: String? = null) {
     assertTrue(additionalMessage) { file ->
+        /** Filter or assertion criteria for expected name. */
         val expectedName = file.name.substringBeforeLast(".kt")
         file.classes.isEmpty() || file.classes.any { it.name == expectedName }
     }
 }
 
+/** Asserts that files in this list have KDoc documentation. */
 @JvmName("assertFilesHasKDoc")
-fun List<FileDeclaration>.assertHasKDoc(additionalMessage: String? = null) {
+public fun List<FileDeclaration>.assertHasKDoc(additionalMessage: String? = null) {
     assertTrue(additionalMessage) { it.kdocText?.isNotBlank() == true }
 }
 
-fun KontureFileScope.assertTrue(
+/** Asserts that all files in this scope satisfy [predicate]. */
+public fun KontureFileScope.assertTrue(
     additionalMessage: String? = null,
     predicate: (FileDeclaration) -> Boolean,
 ) {
     files.assertTrue(additionalMessage, predicate)
 }
 
-fun KontureFileScope.assertNoWildcardImports(additionalMessage: String? = null) =
+/** Asserts that no file in this scope contains wildcard imports. */
+public fun KontureFileScope.assertNoWildcardImports(additionalMessage: String? = null): Unit =
     files.assertNoWildcardImports(
         additionalMessage,
     )
 
-fun KontureFileScope.assertOnlyOneClassPerFile(additionalMessage: String? = null) =
+/** Asserts that files in this scope contain at most one class. */
+public fun KontureFileScope.assertOnlyOneClassPerFile(additionalMessage: String? = null): Unit =
     files.assertOnlyOneClassPerFile(
         additionalMessage,
     )
 
-fun KontureFileScope.assertFileNameMatchesClassName(additionalMessage: String? = null) =
+/** Asserts that file names in this scope match their primary class names. */
+public fun KontureFileScope.assertFileNameMatchesClassName(additionalMessage: String? = null): Unit =
     files.assertFileNameMatchesClassName(
         additionalMessage,
     )
 
-fun KontureFileScope.assertHasKDoc(additionalMessage: String? = null) = files.assertHasKDoc(additionalMessage)
+/** Asserts that files in this scope have KDoc documentation. */
+public fun KontureFileScope.assertHasKDoc(additionalMessage: String? = null): Unit =
+    files.assertHasKDoc(additionalMessage)
 
 /**
  * Asserts that all file declarations reside in packages matching any of the specified patterns.
@@ -335,12 +369,15 @@ fun KontureFileScope.assertNameStartingWith(vararg prefixes: String) = files.ass
  */
 fun KontureFileScope.assertNameMatching(vararg patterns: String) = files.assertNameMatching(*patterns)
 
+/** Filter or assertion criteria for list. */
 fun List<FileDeclaration>.assertResideInAModule(
     modulePath: String,
     graph: ProjectGraph = Konture.projectGraph,
 ) {
+    /** Filter or assertion criteria for norm. */
     val norm = if (!modulePath.startsWith(":") && !modulePath.startsWith("**") && modulePath.isNotEmpty()) ":$modulePath" else modulePath
     assertTrue("Files must reside in module '$norm'") { file ->
+        /** Filter or assertion criteria for mod. */
         val mod =
             graph.getAllModules().find { m ->
                 m.files.any { f -> f.filePath == file.filePath || f.name == file.name }
@@ -349,12 +386,15 @@ fun List<FileDeclaration>.assertResideInAModule(
     }
 }
 
+/** Filter or assertion criteria for list. */
 fun List<FileDeclaration>.assertNotResideInAModule(
     modulePath: String,
     graph: ProjectGraph = Konture.projectGraph,
 ) {
+    /** Filter or assertion criteria for norm. */
     val norm = if (!modulePath.startsWith(":") && !modulePath.startsWith("**") && modulePath.isNotEmpty()) ":$modulePath" else modulePath
     assertTrue("Files must not reside in module '$norm'") { file ->
+        /** Filter or assertion criteria for mod. */
         val mod =
             graph.getAllModules().find { m ->
                 m.files.any { f -> f.filePath == file.filePath || f.name == file.name }
@@ -363,11 +403,13 @@ fun List<FileDeclaration>.assertNotResideInAModule(
     }
 }
 
+/** Filter or assertion criteria for assert reside in a module. */
 fun KontureFileScope.assertResideInAModule(
     modulePath: String,
     graph: ProjectGraph = Konture.projectGraph,
 ) = files.assertResideInAModule(modulePath, graph)
 
+/** Filter or assertion criteria for assert not reside in a module. */
 fun KontureFileScope.assertNotResideInAModule(
     modulePath: String,
     graph: ProjectGraph = Konture.projectGraph,

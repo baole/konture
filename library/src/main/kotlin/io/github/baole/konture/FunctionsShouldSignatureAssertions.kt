@@ -9,10 +9,13 @@ package io.github.baole.konture
 import io.github.baole.konture.i18n.getMessage
 import kotlin.reflect.KClass
 
-interface FunctionsShouldSignatureAssertions {
+/** Signature and type assertions for function rules. */
+public interface FunctionsShouldSignatureAssertions {
+    /** Filter or assertion criteria for builder. */
     val builder: FunctionsRuleBuilder
 
-    infix fun haveReturnType(typeFqName: String): FunctionsRuleBuilder {
+    /** Asserts that selected functions have the specified return type fully qualified name [typeFqName]. */
+    public infix fun haveReturnType(typeFqName: String): FunctionsRuleBuilder {
         builder.setShould { func, _, violations ->
             if (func.declaration.returnType != typeFqName) {
                 violations.add(
@@ -30,6 +33,7 @@ interface FunctionsShouldSignatureAssertions {
 
     /** Asserts that selected functions have the specified raw return type. */
     infix fun haveReturnType(type: KClass<*>): FunctionsRuleBuilder {
+        /** Filter or assertion criteria for expected type. */
         val expectedType = type.toKontureTypeReference()
         builder.setShould { function, _, violations ->
             if (function.declaration.resolvedReturnType?.let { matchesKotlinType(it, expectedType) } != true) {
@@ -46,6 +50,7 @@ interface FunctionsShouldSignatureAssertions {
         return builder
     }
 
+    /** Filter or assertion criteria for have return type. */
     infix fun haveReturnType(typeFqNames: List<String>): FunctionsRuleBuilder {
         builder.setShould { func, _, violations ->
             if (!typeFqNames.contains(func.declaration.returnType)) {
@@ -62,10 +67,13 @@ interface FunctionsShouldSignatureAssertions {
         return builder
     }
 
+    /** Filter or assertion criteria for have return type. */
     fun haveReturnType(vararg typeFqNames: String): FunctionsRuleBuilder = haveReturnType(typeFqNames.asList())
 
+    /** Filter or assertion criteria for have annotation of. */
     infix fun haveAnnotationOf(annotationName: String): FunctionsRuleBuilder {
         builder.setShould { func, _, violations ->
+            /** Filter or assertion criteria for has annotation. */
             val hasAnnotation =
                 func.declaration.annotations.any {
                     it.name == annotationName || it.fqName == annotationName
@@ -79,8 +87,10 @@ interface FunctionsShouldSignatureAssertions {
         return builder
     }
 
+    /** Filter or assertion criteria for have annotation of. */
     infix fun haveAnnotationOf(annotationNames: List<String>): FunctionsRuleBuilder {
         builder.setShould { func, _, violations ->
+            /** Filter or assertion criteria for has annotation. */
             val hasAnnotation =
                 func.declaration.annotations.any { ann ->
                     annotationNames.any { it == ann.name || it == ann.fqName }
@@ -94,17 +104,20 @@ interface FunctionsShouldSignatureAssertions {
         return builder
     }
 
+    /** Filter or assertion criteria for have annotation of. */
     fun haveAnnotationOf(vararg annotationNames: String): FunctionsRuleBuilder =
         haveAnnotationOf(
             annotationNames.asList(),
         )
 
+    /** Filter or assertion criteria for have annotation with argument. */
     fun haveAnnotationWithArgument(
         annotationName: String,
         argName: String? = null,
         argValue: String,
     ): FunctionsRuleBuilder {
         builder.setShould { func, _, violations ->
+            /** Filter or assertion criteria for matches. */
             val matches =
                 func.declaration.annotations.any { ann ->
                     (ann.name == annotationName || ann.fqName == annotationName) &&
@@ -172,12 +185,14 @@ interface FunctionsShouldSignatureAssertions {
      */
     infix fun haveParameterTypes(types: List<String>): FunctionsRuleBuilder {
         builder.setShould { func, _, violations ->
+            /** Filter or assertion criteria for match. */
             val match =
                 func.declaration.parameters.size == types.size &&
                     func.declaration.parameters.zip(types).all { (param, expectedType) ->
                         param.type == expectedType || param.type.endsWith(".$expectedType")
                     }
             if (!match) {
+                /** Filter or assertion criteria for current types. */
                 val currentTypes = func.declaration.parameters.map { it.type }
                 violations.add(
                     getMessage(
@@ -204,8 +219,10 @@ interface FunctionsShouldSignatureAssertions {
         first: KClass<*>,
         vararg additional: KClass<*>,
     ): FunctionsRuleBuilder {
+        /** Filter or assertion criteria for types. */
         val types = arrayOf(first, *additional).map { it.toKontureTypeReference() }
         builder.setShould { function, _, violations ->
+            /** Filter or assertion criteria for matches. */
             val matches =
                 function.declaration.parameters.size == types.size &&
                     function.declaration.parameters.zip(types).all {
@@ -235,6 +252,7 @@ interface FunctionsShouldSignatureAssertions {
      */
     infix fun haveAnyParameterType(types: List<String>): FunctionsRuleBuilder {
         builder.setShould { func, _, violations ->
+            /** Filter or assertion criteria for has any. */
             val hasAny =
                 func.declaration.parameters.any { param ->
                     types.any { expectedType ->
@@ -262,6 +280,7 @@ interface FunctionsShouldSignatureAssertions {
         first: KClass<*>,
         vararg additional: KClass<*>,
     ): FunctionsRuleBuilder {
+        /** Filter or assertion criteria for types. */
         val types = arrayOf(first, *additional).map { it.toKontureTypeReference() }
         builder.setShould { function, _, violations ->
             if (function.declaration.parameters.none {
@@ -286,6 +305,7 @@ interface FunctionsShouldSignatureAssertions {
         return builder
     }
 
+    /** Filter or assertion criteria for have no parameters. */
     fun haveNoParameters(): FunctionsRuleBuilder {
         builder.setShould { func, _, violations ->
             if (func.declaration.parameters.isNotEmpty()) {

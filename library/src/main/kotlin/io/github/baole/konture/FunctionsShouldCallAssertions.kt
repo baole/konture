@@ -11,7 +11,9 @@ import io.github.baole.konture.impl.PatternMatchers
 import io.github.baole.konture.impl.ViolationLocation
 import kotlin.reflect.KClass
 
-interface FunctionsShouldCallAssertions {
+/** Member call assertions for function rules. */
+public interface FunctionsShouldCallAssertions {
+    /** Filter or assertion criteria for builder. */
     val builder: FunctionsRuleBuilder
 
     /** Fails when the selected function invokes [fqName]. */
@@ -20,6 +22,7 @@ interface FunctionsShouldCallAssertions {
             function.usages
                 .filter { usage -> PatternMatchers.isCallUsageMatch(usage, fqName) }
                 .forEach { usage ->
+                    /** Filter or assertion criteria for unresolved. */
                     val unresolved = if (usage.unresolvedPossibleUsage) "unresolved possible " else ""
                     violations.add(
                         "${getMessage("usage.notCall", unresolved, fqName, usage.rawExpression, usage.line, usage.column)} " +

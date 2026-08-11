@@ -31,7 +31,10 @@ fun FilesRuleBuilder.that(predicate: FileDeclarationContext.() -> Boolean): File
 fun FilesRuleBuilder.should(assertion: FileDeclarationShouldContext.() -> Any?): FilesRuleBuilder =
     this.apply {
         setShould { file, allFiles, violations ->
+            /** Filter or assertion criteria for context. */
             val context = FileDeclarationShouldContext(file, allFiles, violations)
+
+            /** Filter or assertion criteria for result. */
             val result = context.assertion()
             validateAssertionResult(result)
             if (result is Boolean && !result) {
@@ -51,19 +54,41 @@ fun FilesRuleBuilder.should(assertion: FileDeclarationShouldContext.() -> Any?):
  * @property violations Mutable collection where assertion failure messages are appended.
  */
 class FileDeclarationShouldContext internal constructor(
+    /** Filter or assertion criteria for element. */
     val element: FileDeclarationContext,
+    /** Filter or assertion criteria for all files. */
     val allFiles: List<FileDeclarationContext>,
+    /** Filter or assertion criteria for violations. */
     val violations: MutableList<String>,
 ) {
+    /** Filter or assertion criteria for declaration. */
     val declaration get() = element.declaration
+
+    /** Filter or assertion criteria for name. */
     val name get() = element.declaration.name
+
+    /** Filter or assertion criteria for package name. */
     val packageName get() = element.declaration.packageName
+
+    /** Filter or assertion criteria for imports. */
     val imports get() = element.declaration.imports
+
+    /** Filter or assertion criteria for classes. */
     val classes get() = element.declaration.classes
+
+    /** Filter or assertion criteria for top level functions. */
     val topLevelFunctions get() = element.declaration.topLevelFunctions
+
+    /** Filter or assertion criteria for top level properties. */
     val topLevelProperties get() = element.declaration.topLevelProperties
+
+    /** Filter or assertion criteria for kdoc text. */
     val kdocText get() = element.declaration.kdocText
+
+    /** Filter or assertion criteria for file path. */
     val filePath get() = element.declaration.filePath
+
+    /** Filter or assertion criteria for module path. */
     val modulePath get() = element.modulePath
 
     /**
@@ -108,6 +133,7 @@ class FileDeclarationShouldContext internal constructor(
      * Asserts that this file does not use any wildcard star imports.
      */
     fun assertNoWildcardImports() {
+        /** Filter or assertion criteria for wildcards. */
         val wildcards = imports.filter { it.endsWith(".*") }
         if (wildcards.isNotEmpty()) {
             addViolation(

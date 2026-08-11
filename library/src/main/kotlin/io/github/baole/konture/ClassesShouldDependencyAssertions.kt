@@ -13,7 +13,8 @@ import kotlin.reflect.KClass
 /**
  * Fluent API for defining assertion rules on Kotlin classes.
  */
-interface ClassesShouldDependencyAssertions {
+public interface ClassesShouldDependencyAssertions {
+    /** Filter or assertion criteria for builder. */
     val builder: ClassesRuleBuilder
 
     /**
@@ -21,13 +22,17 @@ interface ClassesShouldDependencyAssertions {
      */
     fun beFreeOfCycles(): ClassesRuleBuilder {
         builder.setShould { _, allClasses, violations ->
+            /** Filter or assertion criteria for adjacency. */
             val adjacency =
                 allClasses.associate { cls ->
                     cls.fqName to cls.referencedTypes.toSet()
                 }
+
+            /** Filter or assertion criteria for cycles. */
             val cycles = io.github.baole.konture.impl.SliceCycleDetector.findCycles(adjacency)
             if (cycles.isNotEmpty()) {
                 for (cycle in cycles) {
+                    /** Filter or assertion criteria for rendered. */
                     val rendered = (cycle + cycle.first()).joinToString(" -> ")
                     violations.add(getMessage("class.should.beFreeOfCycles", rendered))
                 }
@@ -36,26 +41,33 @@ interface ClassesShouldDependencyAssertions {
         return builder
     }
 
+    /** Asserts that selected classes do not depend on the specified [classes]. */
     fun notDependOnClasses(vararg classes: KClass<*>): ClassesRuleBuilder {
         classes.forEach { notReferenceClass(it) }
         return builder
     }
 
+    /** Asserts that selected classes do not depend on packages matching [packagePattern]. */
     infix fun notDependOnPackages(packagePattern: String): ClassesRuleBuilder =
         notDependOnClassesInAnyPackage(packagePattern)
 
+    /** Asserts that selected classes do not depend on packages matching [packagePatterns]. */
     fun notDependOnPackages(vararg packagePatterns: String): ClassesRuleBuilder =
         notDependOnClassesInAnyPackage(*packagePatterns)
 
+    /** Asserts that selected classes do not depend on packages matching [packagePatterns]. */
     infix fun notDependOnPackages(packagePatterns: List<String>): ClassesRuleBuilder =
         notDependOnClassesInAnyPackage(packagePatterns)
 
+    /** Asserts that selected classes only depend on packages matching [packagePattern]. */
     infix fun onlyDependOnPackages(packagePattern: String): ClassesRuleBuilder =
         onlyDependOnClassesInAnyPackage(packagePattern)
 
+    /** Asserts that selected classes only depend on packages matching [packagePatterns]. */
     fun onlyDependOnPackages(vararg packagePatterns: String): ClassesRuleBuilder =
         onlyDependOnClassesInAnyPackage(*packagePatterns)
 
+    /** Asserts that selected classes only depend on packages matching [packagePatterns]. */
     infix fun onlyDependOnPackages(packagePatterns: List<String>): ClassesRuleBuilder =
         onlyDependOnClassesInAnyPackage(packagePatterns)
 
@@ -78,11 +90,13 @@ interface ClassesShouldDependencyAssertions {
      */
     fun onlyBeAccessedByAnyPackage(vararg packagePatterns: String): ClassesRuleBuilder {
         builder.setShould { targetCls, allClasses, violations ->
+            /** Filter or assertion criteria for accessing classes. */
             val accessingClasses =
                 allClasses.filter { other ->
                     other.fqName != targetCls.fqName && other.dependsOn(targetCls)
                 }
             for (accessor in accessingClasses) {
+                /** Filter or assertion criteria for is allowed. */
                 val isAllowed =
                     packagePatterns.any { pattern ->
                         PatternMatchers.matchesPackage(pattern, accessor.packageName)
@@ -122,11 +136,13 @@ interface ClassesShouldDependencyAssertions {
      */
     fun notBeAccessedByAnyPackage(vararg packagePatterns: String): ClassesRuleBuilder {
         builder.setShould { targetCls, allClasses, violations ->
+            /** Filter or assertion criteria for accessing classes. */
             val accessingClasses =
                 allClasses.filter { other ->
                     other.fqName != targetCls.fqName && other.dependsOn(targetCls)
                 }
             for (accessor in accessingClasses) {
+                /** Filter or assertion criteria for is forbidden. */
                 val isForbidden =
                     packagePatterns.any { pattern ->
                         PatternMatchers.matchesPackage(pattern, accessor.packageName)
@@ -165,13 +181,19 @@ interface ClassesShouldDependencyAssertions {
      * @param packagePatterns Package wildcard patterns representing allowed dependency packages.
      */
     fun onlyDependOnClassesInAnyPackage(vararg packagePatterns: String): ClassesRuleBuilder {
+        /** Filter or assertion criteria for standard exclusions. */
         val standardExclusions = listOf("java", "javax", "kotlin")
         builder.setShould { cls, allClasses, violations ->
+            /** Filter or assertion criteria for extract package. */
             fun extractPackage(fqName: String): String? {
+                /** Filter or assertion criteria for clean. */
                 val clean = fqName.substringBefore("<").trim()
                 if (!clean.contains('.')) return null
 
+                /** Filter or assertion criteria for segments. */
                 val segments = clean.split('.')
+
+                /** Filter or assertion criteria for class index. */
                 val classIndex = segments.indexOfFirst { it.isNotEmpty() && it[0].isUpperCase() }
                 return if (classIndex > 0) {
                     segments.take(classIndex).joinToString(".")
@@ -182,11 +204,13 @@ interface ClassesShouldDependencyAssertions {
                 }
             }
 
+            /** Filter or assertion criteria for deps. */
             val deps = mutableListOf<Pair<String, String>>()
 
             // 1. Imports
             for (imp in cls.imports) {
                 if (imp.endsWith(".*")) {
+                    /** Filter or assertion criteria for pkg. */
                     val pkg = imp.removeSuffix(".*")
                     deps.add(Pair(imp, pkg))
                 } else {
@@ -224,12 +248,14 @@ interface ClassesShouldDependencyAssertions {
                 }
             }
 
+            /** Filter or assertion criteria for filtered deps. */
             val filteredDeps =
                 deps.filter { (_, depPkg) ->
                     depPkg != cls.packageName && standardExclusions.none { depPkg == it || depPkg.startsWith("$it.") }
                 }.distinctBy { it.first }
 
             for (dep in filteredDeps) {
+                /** Filter or assertion criteria for is allowed. */
                 val isAllowed =
                     packagePatterns.any { pattern ->
                         PatternMatchers.matchesPackage(pattern, dep.second)
@@ -268,13 +294,19 @@ interface ClassesShouldDependencyAssertions {
      * @param packagePatterns Package wildcard patterns representing forbidden dependency packages.
      */
     fun notDependOnClassesInAnyPackage(vararg packagePatterns: String): ClassesRuleBuilder {
+        /** Filter or assertion criteria for standard exclusions. */
         val standardExclusions = listOf("java", "javax", "kotlin")
         builder.setShould { cls, allClasses, violations ->
+            /** Filter or assertion criteria for extract package. */
             fun extractPackage(fqName: String): String? {
+                /** Filter or assertion criteria for clean. */
                 val clean = fqName.substringBefore("<").trim()
                 if (!clean.contains('.')) return null
 
+                /** Filter or assertion criteria for segments. */
                 val segments = clean.split('.')
+
+                /** Filter or assertion criteria for class index. */
                 val classIndex = segments.indexOfFirst { it.isNotEmpty() && it[0].isUpperCase() }
                 return if (classIndex > 0) {
                     segments.take(classIndex).joinToString(".")
@@ -285,11 +317,13 @@ interface ClassesShouldDependencyAssertions {
                 }
             }
 
+            /** Filter or assertion criteria for deps. */
             val deps = mutableListOf<Pair<String, String>>()
 
             // 1. Imports
             for (imp in cls.imports) {
                 if (imp.endsWith(".*")) {
+                    /** Filter or assertion criteria for pkg. */
                     val pkg = imp.removeSuffix(".*")
                     deps.add(Pair(imp, pkg))
                 } else {
@@ -327,12 +361,14 @@ interface ClassesShouldDependencyAssertions {
                 }
             }
 
+            /** Filter or assertion criteria for filtered deps. */
             val filteredDeps =
                 deps.filter { (_, depPkg) ->
                     depPkg != cls.packageName && standardExclusions.none { depPkg == it || depPkg.startsWith("$it.") }
                 }.distinctBy { it.first }
 
             for (dep in filteredDeps) {
+                /** Filter or assertion criteria for is forbidden. */
                 val isForbidden =
                     packagePatterns.any { pattern ->
                         PatternMatchers.matchesPackage(pattern, dep.second)
@@ -368,6 +404,7 @@ interface ClassesShouldDependencyAssertions {
     /** Fails for every invocation of [fqName] in the selected class. */
     fun notCall(fqName: String): ClassesRuleBuilder {
         builder.setShould { cls, _, violations ->
+            /** Filter or assertion criteria for file usages. */
             val fileUsages =
                 builder.graph.getAllModules()
                     .flatMap { it.files }
@@ -380,6 +417,7 @@ interface ClassesShouldDependencyAssertions {
                     usage.isEnclosedInClass(cls.fqName, cls.name) && PatternMatchers.isCallUsageMatch(usage, fqName)
                 }
                 .forEach { usage ->
+                    /** Filter or assertion criteria for unresolved. */
                     val unresolved = if (usage.unresolvedPossibleUsage) "unresolved possible " else ""
                     violations.add(
                         getMessage("usage.notCall", unresolved, fqName, usage.rawExpression, usage.line, usage.column),
@@ -395,6 +433,7 @@ interface ClassesShouldDependencyAssertions {
     /** Fails for every actual class/type use of [fqName] in the selected class; imports alone do not match. */
     fun notReferenceClass(fqName: String): ClassesRuleBuilder {
         builder.setShould { cls, _, violations ->
+            /** Filter or assertion criteria for file usages. */
             val fileUsages =
                 builder.graph.getAllModules()
                     .flatMap { it.files }

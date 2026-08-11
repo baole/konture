@@ -11,12 +11,17 @@ import io.github.baole.konture.impl.PatternMatchers
 import io.github.baole.konture.impl.SliceCycleDetector
 import io.github.baole.konture.impl.normalizeModulePath
 
-interface ModulesShouldDependencyAssertions {
+/** Dependency assertions for Gradle module rules. */
+public interface ModulesShouldDependencyAssertions {
+    /** Filter or assertion criteria for builder. */
     val builder: ModulesRuleBuilder
 
+    /** Filter or assertion criteria for not depend on module. */
     infix fun notDependOnModule(targetPath: String): ModulesRuleBuilder {
+        /** Filter or assertion criteria for normalized target. */
         val normalizedTarget = normalizeModulePath(targetPath)
         builder.setShould { module, _, violations ->
+            /** Filter or assertion criteria for depends on target. */
             val dependsOnTarget =
                 module.dependencies.any { dep ->
                     dep.targetPath == normalizedTarget ||
@@ -31,9 +36,12 @@ interface ModulesShouldDependencyAssertions {
         return builder
     }
 
+    /** Filter or assertion criteria for not depend on module. */
     infix fun notDependOnModule(targetPaths: List<String>): ModulesRuleBuilder {
+        /** Filter or assertion criteria for normalized targets. */
         val normalizedTargets = targetPaths.map { normalizeModulePath(it) }
         builder.setShould { module, _, violations ->
+            /** Filter or assertion criteria for offending. */
             val offending =
                 module.dependencies.filter { dep ->
                     normalizedTargets.any { targetPath ->
@@ -54,27 +62,35 @@ interface ModulesShouldDependencyAssertions {
         return builder
     }
 
+    /** Filter or assertion criteria for not depend on module. */
     fun notDependOnModule(vararg targetPaths: String): ModulesRuleBuilder = notDependOnModule(targetPaths.asList())
 
     @Deprecated("Use notDependOnModule instead.", ReplaceWith("notDependOnModule(targetPath)"))
+    /** Filter or assertion criteria for not depend on modules. */
     infix fun notDependOnModules(targetPath: String): ModulesRuleBuilder = notDependOnModule(targetPath)
 
     @Deprecated("Use notDependOnModule instead.", ReplaceWith("notDependOnModule(targetPaths)"))
+    /** Filter or assertion criteria for not depend on modules. */
     infix fun notDependOnModules(targetPaths: List<String>): ModulesRuleBuilder = notDependOnModule(targetPaths)
 
+    /** Filter or assertion criteria for not depend on modules. */
     @Deprecated("Use notDependOnModule instead.", ReplaceWith("notDependOnModule(*targetPaths)"))
     fun notDependOnModules(vararg targetPaths: String): ModulesRuleBuilder = notDependOnModule(*targetPaths)
 
+    /** Filter or assertion criteria for not depend on module. */
     infix fun notDependOnModule(predicate: (String) -> Boolean): ModulesRuleBuilder =
         notDependOnModule("custom predicate", predicate)
 
+    /** Filter or assertion criteria for not depend on module. */
     fun notDependOnModule(
         description: String,
         predicate: (String) -> Boolean,
     ): ModulesRuleBuilder {
         builder.setShould { module, _, violations ->
+            /** Filter or assertion criteria for offending deps. */
             val offendingDeps = module.dependencies.filter { dep -> predicate(dep.targetPath) }
             if (offendingDeps.isNotEmpty()) {
+                /** Filter or assertion criteria for paths. */
                 val paths = offendingDeps.joinToString { it.targetPath }
                 violations.add(
                     getMessage("module.should.notDependOnModulePredicate", module.path, description, paths),
@@ -84,13 +100,17 @@ interface ModulesShouldDependencyAssertions {
         return builder
     }
 
+    /** Filter or assertion criteria for only depend on modules. */
     infix fun onlyDependOnModules(allowedPattern: String): ModulesRuleBuilder =
         onlyDependOnModules(listOf(allowedPattern))
 
+    /** Filter or assertion criteria for only depend on modules. */
     infix fun onlyDependOnModules(allowedPatterns: List<String>): ModulesRuleBuilder {
+        /** Filter or assertion criteria for normalized patterns. */
         val normalizedPatterns = allowedPatterns.map { normalizeModulePath(it) }
         builder.setShould { module, _, violations ->
             for (dep in module.dependencies) {
+                /** Filter or assertion criteria for is allowed. */
                 val isAllowed =
                     normalizedPatterns.any { pattern ->
                         dep.targetPath == pattern || PatternMatchers.matchesModuleGlob(pattern, dep.targetPath)
@@ -110,12 +130,15 @@ interface ModulesShouldDependencyAssertions {
         return builder
     }
 
+    /** Filter or assertion criteria for only depend on modules. */
     fun onlyDependOnModules(vararg allowedPatterns: String): ModulesRuleBuilder =
         onlyDependOnModules(allowedPatterns.asList())
 
+    /** Filter or assertion criteria for only depend on modules. */
     infix fun onlyDependOnModules(predicate: (String) -> Boolean): ModulesRuleBuilder =
         onlyDependOnModules("custom predicate", predicate)
 
+    /** Filter or assertion criteria for only depend on modules. */
     fun onlyDependOnModules(
         description: String,
         predicate: (String) -> Boolean,
@@ -137,17 +160,22 @@ interface ModulesShouldDependencyAssertions {
         return builder
     }
 
+    /** Filter or assertion criteria for only be depended on by. */
     infix fun onlyBeDependedOnBy(allowedPattern: String): ModulesRuleBuilder =
         onlyBeDependedOnBy(listOf(allowedPattern))
 
+    /** Filter or assertion criteria for only be depended on by. */
     infix fun onlyBeDependedOnBy(allowedPatterns: List<String>): ModulesRuleBuilder {
+        /** Filter or assertion criteria for normalized patterns. */
         val normalizedPatterns = allowedPatterns.map { normalizeModulePath(it) }
         builder.setShould { module, graph, violations ->
+            /** Filter or assertion criteria for dependents. */
             val dependents =
                 graph.getAllModules().filter { other ->
                     other.dependencies.any { dep -> dep.targetPath == module.path }
                 }
             for (dep in dependents) {
+                /** Filter or assertion criteria for is allowed. */
                 val isAllowed =
                     normalizedPatterns.any { pattern ->
                         dep.path == pattern || PatternMatchers.matchesModuleGlob(pattern, dep.path)
@@ -162,17 +190,21 @@ interface ModulesShouldDependencyAssertions {
         return builder
     }
 
+    /** Filter or assertion criteria for only be depended on by. */
     fun onlyBeDependedOnBy(vararg allowedPatterns: String): ModulesRuleBuilder =
         onlyBeDependedOnBy(allowedPatterns.asList())
 
+    /** Filter or assertion criteria for only be depended on by. */
     infix fun onlyBeDependedOnBy(predicate: (String) -> Boolean): ModulesRuleBuilder =
         onlyBeDependedOnBy("custom predicate", predicate)
 
+    /** Filter or assertion criteria for only be depended on by. */
     fun onlyBeDependedOnBy(
         description: String,
         predicate: (String) -> Boolean,
     ): ModulesRuleBuilder {
         builder.setShould { module, graph, violations ->
+            /** Filter or assertion criteria for dependents. */
             val dependents =
                 graph.getAllModules().filter { other ->
                     other.dependencies.any { dep -> dep.targetPath == module.path }
@@ -193,12 +225,16 @@ interface ModulesShouldDependencyAssertions {
         return builder
     }
 
+    /** Filter or assertion criteria for not depend on external libraries. */
     fun notDependOnExternalLibraries(
         vararg coordinates: String,
         includeTransitive: Boolean = true,
     ): ModulesRuleBuilder {
         builder.setShould { module, graph, violations ->
+            /** Filter or assertion criteria for resolved deps. */
             val resolvedDeps = graph.requireExternalDependencies().modules[module.path] ?: emptyList()
+
+            /** Filter or assertion criteria for offending. */
             val offending =
                 resolvedDeps.filter { dep ->
                     if (!includeTransitive && dep.isTransitive) return@filter false
@@ -212,6 +248,7 @@ interface ModulesShouldDependencyAssertions {
                     }
                 }
             if (offending.isNotEmpty()) {
+                /** Filter or assertion criteria for coords. */
                 val coords =
                     offending.joinToString {
                         "${it.group}:${it.name}:${it.version}${if (it.isTransitive) " (transitive)" else ""}"
@@ -229,12 +266,16 @@ interface ModulesShouldDependencyAssertions {
         return builder
     }
 
+    /** Filter or assertion criteria for only depend on external libraries. */
     fun onlyDependOnExternalLibraries(
         vararg coordinates: String,
         includeTransitive: Boolean = true,
     ): ModulesRuleBuilder {
         builder.setShould { module, graph, violations ->
+            /** Filter or assertion criteria for resolved deps. */
             val resolvedDeps = graph.requireExternalDependencies().modules[module.path] ?: emptyList()
+
+            /** Filter or assertion criteria for offending. */
             val offending =
                 resolvedDeps.filter { dep ->
                     if (!includeTransitive && dep.isTransitive) return@filter false
@@ -248,6 +289,7 @@ interface ModulesShouldDependencyAssertions {
                     }
                 }
             if (offending.isNotEmpty()) {
+                /** Filter or assertion criteria for coords. */
                 val coords =
                     offending.joinToString {
                         "${it.group}:${it.name}:${it.version}${if (it.isTransitive) " (transitive)" else ""}"
@@ -265,6 +307,7 @@ interface ModulesShouldDependencyAssertions {
         return builder
     }
 
+    /** Filter or assertion criteria for not depend on external libraries. */
     fun notDependOnExternalLibraries(
         coordinates: List<String>,
         includeTransitive: Boolean = true,
@@ -274,6 +317,7 @@ interface ModulesShouldDependencyAssertions {
             includeTransitive = includeTransitive,
         )
 
+    /** Filter or assertion criteria for only depend on external libraries. */
     fun onlyDependOnExternalLibraries(
         coordinates: List<String>,
         includeTransitive: Boolean = true,
@@ -283,37 +327,46 @@ interface ModulesShouldDependencyAssertions {
             includeTransitive = includeTransitive,
         )
 
+    /** Filter or assertion criteria for depend on external library. */
     fun dependOnExternalLibrary(
         coordinate: String,
         includeTransitive: Boolean = true,
     ): ModulesRuleBuilder = dependOnExternalLibraries(coordinate, includeTransitive = includeTransitive)
 
+    /** Filter or assertion criteria for have dependency. */
     fun haveDependency(
         coordinate: String,
         includeTransitive: Boolean = true,
     ): ModulesRuleBuilder = dependOnExternalLibrary(coordinate, includeTransitive = includeTransitive)
 
+    /** Filter or assertion criteria for have dependencies. */
     fun haveDependencies(
         vararg coordinates: String,
         includeTransitive: Boolean = true,
     ): ModulesRuleBuilder = dependOnExternalLibraries(*coordinates, includeTransitive = includeTransitive)
 
+    /** Filter or assertion criteria for not have dependency. */
     fun notHaveDependency(
         coordinate: String,
         includeTransitive: Boolean = true,
     ): ModulesRuleBuilder = notDependOnExternalLibraries(coordinate, includeTransitive = includeTransitive)
 
+    /** Filter or assertion criteria for not have dependencies. */
     fun notHaveDependencies(
         vararg coordinates: String,
         includeTransitive: Boolean = true,
     ): ModulesRuleBuilder = notDependOnExternalLibraries(*coordinates, includeTransitive = includeTransitive)
 
+    /** Filter or assertion criteria for depend on external libraries. */
     fun dependOnExternalLibraries(
         vararg coordinates: String,
         includeTransitive: Boolean = true,
     ): ModulesRuleBuilder {
         builder.setShould { module, graph, violations ->
+            /** Filter or assertion criteria for resolved deps. */
             val resolvedDeps = graph.requireExternalDependencies().modules[module.path] ?: emptyList()
+
+            /** Filter or assertion criteria for matched. */
             val matched =
                 resolvedDeps.any { dep ->
                     if (!includeTransitive && dep.isTransitive) return@any false
@@ -339,6 +392,7 @@ interface ModulesShouldDependencyAssertions {
         return builder
     }
 
+    /** Filter or assertion criteria for depend on external libraries. */
     fun dependOnExternalLibraries(
         coordinates: List<String>,
         includeTransitive: Boolean = true,
@@ -348,9 +402,12 @@ interface ModulesShouldDependencyAssertions {
             includeTransitive = includeTransitive,
         )
 
+    /** Filter or assertion criteria for depend on module. */
     infix fun dependOnModule(targetPath: String): ModulesRuleBuilder {
+        /** Filter or assertion criteria for normalized target. */
         val normalizedTarget = normalizeModulePath(targetPath)
         builder.setShould { module, _, violations ->
+            /** Filter or assertion criteria for depends on target. */
             val dependsOnTarget =
                 module.dependencies.any { dep ->
                     dep.targetPath == normalizedTarget ||
@@ -365,22 +422,29 @@ interface ModulesShouldDependencyAssertions {
         return builder
     }
 
+    /** Filter or assertion criteria for depend on modules. */
     infix fun dependOnModules(targetPaths: List<String>): ModulesRuleBuilder {
         targetPaths.forEach { dependOnModule(it) }
         return builder
     }
 
+    /** Filter or assertion criteria for depend on modules. */
     fun dependOnModules(vararg targetPaths: String): ModulesRuleBuilder = dependOnModules(targetPaths.toList())
 
+    /** Filter or assertion criteria for be free of cycles. */
     fun beFreeOfCycles(): ModulesRuleBuilder {
         builder.setShould { _, graph, violations ->
+            /** Filter or assertion criteria for adjacency. */
             val adjacency =
                 graph.getAllModules().associate { module ->
                     module.path to module.dependencies.map { it.targetPath }.toSet()
                 }
+
+            /** Filter or assertion criteria for cycles. */
             val cycles = SliceCycleDetector.findCycles(adjacency)
             if (cycles.isNotEmpty()) {
                 for (cycle in cycles) {
+                    /** Filter or assertion criteria for rendered. */
                     val rendered = (cycle + cycle.first()).joinToString(" -> ")
                     violations.add(getMessage("module.should.beFreeOfCycles", rendered))
                 }
@@ -389,18 +453,23 @@ interface ModulesShouldDependencyAssertions {
         return builder
     }
 
+    /** Filter or assertion criteria for depend on module api. */
     infix fun dependOnModuleApi(targetPath: String): ModulesRuleBuilder =
         dependOnModuleViaConfiguration(targetPath, "api")
 
+    /** Filter or assertion criteria for depend on module implementation. */
     infix fun dependOnModuleImplementation(targetPath: String): ModulesRuleBuilder =
         dependOnModuleViaConfiguration(targetPath, "implementation")
 
+    /** Filter or assertion criteria for depend on module via configuration. */
     fun dependOnModuleViaConfiguration(
         targetPath: String,
         configuration: String,
     ): ModulesRuleBuilder {
+        /** Filter or assertion criteria for normalized target. */
         val normalizedTarget = normalizeModulePath(targetPath)
         builder.setShould { module, _, violations ->
+            /** Filter or assertion criteria for matches. */
             val matches =
                 module.dependencies.any { dep ->
                     (dep.targetPath == normalizedTarget || PatternMatchers.matchesModuleGlob(normalizedTarget, dep.targetPath)) &&
@@ -415,12 +484,15 @@ interface ModulesShouldDependencyAssertions {
         return builder
     }
 
+    /** Filter or assertion criteria for not depend on module via configuration. */
     fun notDependOnModuleViaConfiguration(
         targetPath: String,
         configuration: String,
     ): ModulesRuleBuilder {
+        /** Filter or assertion criteria for normalized target. */
         val normalizedTarget = normalizeModulePath(targetPath)
         builder.setShould { module, _, violations ->
+            /** Filter or assertion criteria for matches. */
             val matches =
                 module.dependencies.any { dep ->
                     (dep.targetPath == normalizedTarget || PatternMatchers.matchesModuleGlob(normalizedTarget, dep.targetPath)) &&
@@ -440,20 +512,27 @@ interface ModulesShouldDependencyAssertions {
         return builder
     }
 
+    /** Filter or assertion criteria for depend on module transitively. */
     infix fun dependOnModuleTransitively(targetPath: String): ModulesRuleBuilder {
+        /** Filter or assertion criteria for normalized target. */
         val normalizedTarget = normalizeModulePath(targetPath)
         builder.setShould { module, graph, violations ->
+            /** Filter or assertion criteria for visited. */
             val visited = mutableSetOf<String>()
+
+            /** Filter or assertion criteria for queue. */
             val queue = ArrayDeque<String>()
             queue.addAll(module.dependencies.map { it.targetPath })
             var found = false
             while (queue.isNotEmpty()) {
+                /** Filter or assertion criteria for current. */
                 val current = queue.removeFirst()
                 if (current == normalizedTarget || PatternMatchers.matchesModuleGlob(normalizedTarget, current)) {
                     found = true
                     break
                 }
                 if (visited.add(current)) {
+                    /** Filter or assertion criteria for current mod. */
                     val currentMod = graph.getAllModules().find { it.path == current }
                     if (currentMod != null) {
                         queue.addAll(currentMod.dependencies.map { it.targetPath })
@@ -467,20 +546,27 @@ interface ModulesShouldDependencyAssertions {
         return builder
     }
 
+    /** Filter or assertion criteria for not depend on module transitively. */
     infix fun notDependOnModuleTransitively(targetPath: String): ModulesRuleBuilder {
+        /** Filter or assertion criteria for normalized target. */
         val normalizedTarget = normalizeModulePath(targetPath)
         builder.setShould { module, graph, violations ->
+            /** Filter or assertion criteria for visited. */
             val visited = mutableSetOf<String>()
+
+            /** Filter or assertion criteria for queue. */
             val queue = ArrayDeque<String>()
             queue.addAll(module.dependencies.map { it.targetPath })
             var found = false
             while (queue.isNotEmpty()) {
+                /** Filter or assertion criteria for current. */
                 val current = queue.removeFirst()
                 if (current == normalizedTarget || PatternMatchers.matchesModuleGlob(normalizedTarget, current)) {
                     found = true
                     break
                 }
                 if (visited.add(current)) {
+                    /** Filter or assertion criteria for current mod. */
                     val currentMod = graph.getAllModules().find { it.path == current }
                     if (currentMod != null) {
                         queue.addAll(currentMod.dependencies.map { it.targetPath })
@@ -494,6 +580,7 @@ interface ModulesShouldDependencyAssertions {
         return builder
     }
 
+    /** Filter or assertion criteria for be standalone. */
     fun beStandalone(): ModulesRuleBuilder {
         builder.setShould { module, _, violations ->
             if (module.dependencies.isNotEmpty()) {
@@ -509,5 +596,6 @@ interface ModulesShouldDependencyAssertions {
         return builder
     }
 
+    /** Filter or assertion criteria for be leaf module. */
     fun beLeafModule(): ModulesRuleBuilder = beStandalone()
 }

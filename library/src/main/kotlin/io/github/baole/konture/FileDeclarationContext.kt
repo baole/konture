@@ -1,5 +1,6 @@
 /*
- * Copyright 2026 Bao Le Duc
+ * Copyright 2026 The Konture Contributors
+ * Contributors: Bao Le Duc (@baole)
  * SPDX-License-Identifier: Apache-2.0
  */
 
@@ -14,7 +15,10 @@ package io.github.baole.konture
  * @property modulePath The module subdirectory/path containing this file.
  */
 data class FileDeclarationContext(
+    /** Filter or assertion criteria for declaration. */
     val declaration: FileDeclaration,
+    /** Filter or assertion criteria for module path. */
     val modulePath: String,
+    /** Filter or assertion criteria for source set. */
     val sourceSet: SourceSetId? = null,
 )

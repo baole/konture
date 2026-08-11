@@ -59,6 +59,7 @@ tasks.matching { it.name == "check" }.configureEach {
 
 configure<DetektExtension> {
     config.setFrom(isolated.rootProject.projectDirectory.file("config/detekt/detekt.yml"))
+    baseline = isolated.rootProject.projectDirectory.file("config/detekt/baseline-${project.name}.xml").asFile
     buildUponDefaultConfig.set(true)
     parallel.set(true)
     ignoreFailures.set(false)

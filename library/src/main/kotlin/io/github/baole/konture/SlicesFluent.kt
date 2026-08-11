@@ -22,7 +22,10 @@ fun SlicesRuleBuilder.that(predicate: Slice.() -> Boolean): SlicesRuleBuilder =
 fun SlicesRuleBuilder.should(assertion: SliceShouldContext.() -> Any?): SlicesRuleBuilder =
     this.apply {
         setShould { graph, violations ->
+            /** Filter or assertion criteria for context. */
             val context = SliceShouldContext(graph, violations)
+
+            /** Filter or assertion criteria for result. */
             val result = context.assertion()
             validateAssertionResult(result)
             if (result is Boolean && !result) {
@@ -36,9 +39,13 @@ fun SlicesRuleBuilder.should(assertion: SliceShouldContext.() -> Any?): SlicesRu
  */
 class SliceShouldContext internal constructor(
     internal val graph: SliceGraph,
+    /** Filter or assertion criteria for violations. */
     val violations: MutableList<String>,
 ) {
+    /** Filter or assertion criteria for slices. */
     val slices get() = graph.slices
+
+    /** Filter or assertion criteria for adjacency. */
     val adjacency get() = graph.adjacency
 
     /**

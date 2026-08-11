@@ -19,7 +19,9 @@ class ModulesThat internal constructor(
     /** Logical NOT operator for negating the next filter condition. */
     fun not(): ModulesThat = builder.not()
 
+    /** Filter or assertion criteria for have name path. */
     infix fun haveNamePath(path: String): ModulesRuleBuilder {
+        /** Filter or assertion criteria for normalized. */
         val normalized = normalizeModulePath(path)
         builder.setThat { it.path == normalized }
         return builder
@@ -31,6 +33,7 @@ class ModulesThat internal constructor(
      * @param paths The list of Gradle paths of the module (e.g., ":core", ":app").
      */
     infix fun haveNamePath(paths: List<String>): ModulesRuleBuilder {
+        /** Filter or assertion criteria for normalized paths. */
         val normalizedPaths = paths.map { normalizeModulePath(it) }
         builder.setThat { normalizedPaths.contains(it.path) }
         return builder
@@ -53,17 +56,22 @@ class ModulesThat internal constructor(
         return builder
     }
 
+    /** Filter or assertion criteria for have name. */
     infix fun haveName(path: String): ModulesRuleBuilder = haveNamePath(path)
 
+    /** Filter or assertion criteria for have name. */
     infix fun haveName(paths: List<String>): ModulesRuleBuilder = haveNamePath(paths)
 
+    /** Filter or assertion criteria for have name. */
     fun haveName(vararg paths: String): ModulesRuleBuilder = haveNamePath(*paths)
 
+    /** Filter or assertion criteria for have name starting with. */
     infix fun haveNameStartingWith(prefix: String): ModulesRuleBuilder {
         builder.setThat { it.path.removePrefix(":").startsWith(prefix.removePrefix(":")) }
         return builder
     }
 
+    /** Filter or assertion criteria for have name starting with. */
     infix fun haveNameStartingWith(prefixes: List<String>): ModulesRuleBuilder {
         builder.setThat { module ->
             prefixes.any { module.path.removePrefix(":").startsWith(it.removePrefix(":")) }
@@ -71,18 +79,22 @@ class ModulesThat internal constructor(
         return builder
     }
 
+    /** Filter or assertion criteria for have name starting with. */
     fun haveNameStartingWith(vararg prefixes: String): ModulesRuleBuilder = haveNameStartingWith(prefixes.toList())
 
+    /** Filter or assertion criteria for have name ending with. */
     infix fun haveNameEndingWith(suffix: String): ModulesRuleBuilder {
         builder.setThat { it.path.endsWith(suffix) }
         return builder
     }
 
+    /** Filter or assertion criteria for have name ending with. */
     infix fun haveNameEndingWith(suffixes: List<String>): ModulesRuleBuilder {
         builder.setThat { module -> suffixes.any { module.path.endsWith(it) } }
         return builder
     }
 
+    /** Filter or assertion criteria for have name ending with. */
     fun haveNameEndingWith(vararg suffixes: String): ModulesRuleBuilder = haveNameEndingWith(suffixes.toList())
 
     /**
@@ -112,7 +124,9 @@ class ModulesThat internal constructor(
      */
     fun haveNameMatching(vararg patterns: String): ModulesRuleBuilder = haveNameMatching(patterns.toList())
 
+    /** Filter or assertion criteria for depend on module. */
     infix fun dependOnModule(modulePath: String): ModulesRuleBuilder {
+        /** Filter or assertion criteria for normalized. */
         val normalized = normalizeModulePath(modulePath)
         builder.setThat { module ->
             module.dependencies.any { normalizeModulePath(it.targetPath) == normalized }
@@ -120,7 +134,9 @@ class ModulesThat internal constructor(
         return builder
     }
 
+    /** Filter or assertion criteria for depend on modules. */
     infix fun dependOnModules(modulePaths: List<String>): ModulesRuleBuilder {
+        /** Filter or assertion criteria for normalized. */
         val normalized = modulePaths.map { normalizeModulePath(it) }
         builder.setThat { module ->
             module.dependencies.any { normalized.contains(normalizeModulePath(it.targetPath)) }
@@ -128,15 +144,19 @@ class ModulesThat internal constructor(
         return builder
     }
 
+    /** Filter or assertion criteria for depend on modules. */
     fun dependOnModules(vararg modulePaths: String): ModulesRuleBuilder = dependOnModules(modulePaths.toList())
 
+    /** Filter or assertion criteria for apply plugin. */
     infix fun applyPlugin(pluginId: String): ModulesRuleBuilder {
         builder.setThat { module -> module.appliedPlugins.contains(pluginId) }
         return builder
     }
 
+    /** Filter or assertion criteria for have plugin. */
     infix fun havePlugin(pluginId: String): ModulesRuleBuilder = applyPlugin(pluginId)
 
+    /** Filter or assertion criteria for have plugins. */
     fun havePlugins(vararg pluginIds: String): ModulesRuleBuilder {
         builder.setThat { module -> pluginIds.all { module.appliedPlugins.contains(it) } }
         return builder
@@ -164,8 +184,10 @@ class ModulesThat internal constructor(
      * Matches if any of the nested condition blocks are satisfied.
      */
     fun anyOf(vararg blocks: ModulesThat.() -> Unit): ModulesRuleBuilder {
+        /** Filter or assertion criteria for predicates. */
         val predicates =
             blocks.map { block ->
+                /** Filter or assertion criteria for temp builder. */
                 val tempBuilder = ModulesRuleBuilder(builder.graph)
                 ModulesThat(tempBuilder).block()
                 tempBuilder.getThatPredicate() ?: { true }
@@ -178,8 +200,10 @@ class ModulesThat internal constructor(
      * Matches if all of the nested condition blocks are satisfied.
      */
     fun allOf(vararg blocks: ModulesThat.() -> Unit): ModulesRuleBuilder {
+        /** Filter or assertion criteria for predicates. */
         val predicates =
             blocks.map { block ->
+                /** Filter or assertion criteria for temp builder. */
                 val tempBuilder = ModulesRuleBuilder(builder.graph)
                 ModulesThat(tempBuilder).block()
                 tempBuilder.getThatPredicate() ?: { true }
@@ -188,24 +212,29 @@ class ModulesThat internal constructor(
         return builder
     }
 
+    /** Filter or assertion criteria for have source set. */
     infix fun haveSourceSet(sourceSetName: String): ModulesRuleBuilder {
         builder.setThat { module -> module.sourceSets.any { it.name == sourceSetName } }
         return builder
     }
 
+    /** Filter or assertion criteria for have source set. */
     infix fun haveSourceSet(sourceSetNames: List<String>): ModulesRuleBuilder {
         builder.setThat { module -> sourceSetNames.all { name -> module.sourceSets.any { it.name == name } } }
         return builder
     }
 
+    /** Filter or assertion criteria for have source set. */
     fun haveSourceSet(vararg sourceSetNames: String): ModulesRuleBuilder = haveSourceSet(sourceSetNames.toList())
 
     /**
      * Matches if none of the nested condition blocks are satisfied.
      */
     fun noneOf(vararg blocks: ModulesThat.() -> Unit): ModulesRuleBuilder {
+        /** Filter or assertion criteria for predicates. */
         val predicates =
             blocks.map { block ->
+                /** Filter or assertion criteria for temp builder. */
                 val tempBuilder = ModulesRuleBuilder(builder.graph)
                 ModulesThat(tempBuilder).block()
                 tempBuilder.getThatPredicate() ?: { true }
@@ -214,14 +243,18 @@ class ModulesThat internal constructor(
         return builder
     }
 
+    /** Filter or assertion criteria for apply plugin. */
     infix fun applyPlugin(pluginIds: List<String>): ModulesRuleBuilder {
         builder.setThat { module -> pluginIds.all { module.appliedPlugins.contains(it) } }
         return builder
     }
 
+    /** Filter or assertion criteria for have plugins. */
     infix fun havePlugins(pluginIds: List<String>): ModulesRuleBuilder = applyPlugin(pluginIds)
 
+    /** Filter or assertion criteria for not depend on module. */
     infix fun notDependOnModule(modulePath: String): ModulesRuleBuilder {
+        /** Filter or assertion criteria for normalized. */
         val normalized = normalizeModulePath(modulePath)
         builder.setThat { module ->
             module.dependencies.none { normalizeModulePath(it.targetPath) == normalized }
@@ -229,7 +262,9 @@ class ModulesThat internal constructor(
         return builder
     }
 
+    /** Filter or assertion criteria for not depend on modules. */
     infix fun notDependOnModules(modulePaths: List<String>): ModulesRuleBuilder {
+        /** Filter or assertion criteria for normalized. */
         val normalized = modulePaths.map { normalizeModulePath(it) }
         builder.setThat { module ->
             module.dependencies.none { normalized.contains(normalizeModulePath(it.targetPath)) }
@@ -237,68 +272,84 @@ class ModulesThat internal constructor(
         return builder
     }
 
+    /** Filter or assertion criteria for not depend on modules. */
     fun notDependOnModules(vararg modulePaths: String): ModulesRuleBuilder = notDependOnModules(modulePaths.toList())
 
+    /** Filter or assertion criteria for not apply plugin. */
     infix fun notApplyPlugin(pluginId: String): ModulesRuleBuilder {
         builder.setThat { module -> !module.appliedPlugins.contains(pluginId) }
         return builder
     }
 
+    /** Filter or assertion criteria for not have plugin. */
     infix fun notHavePlugin(pluginId: String): ModulesRuleBuilder = notApplyPlugin(pluginId)
 
+    /** Filter or assertion criteria for not have plugins. */
     infix fun notHavePlugins(pluginIds: List<String>): ModulesRuleBuilder {
         builder.setThat { module -> pluginIds.none { module.appliedPlugins.contains(it) } }
         return builder
     }
 
+    /** Filter or assertion criteria for not have plugins. */
     fun notHavePlugins(vararg pluginIds: String): ModulesRuleBuilder = notHavePlugins(pluginIds.toList())
 
+    /** Filter or assertion criteria for not have source set. */
     infix fun notHaveSourceSet(sourceSetName: String): ModulesRuleBuilder {
         builder.setThat { module -> module.sourceSets.none { it.name == sourceSetName } }
         return builder
     }
 
+    /** Filter or assertion criteria for not have name. */
     infix fun notHaveName(path: String): ModulesRuleBuilder {
+        /** Filter or assertion criteria for normalized. */
         val normalized = normalizeModulePath(path)
         builder.setThat { it.path != normalized }
         return builder
     }
 
+    /** Filter or assertion criteria for not have name matching. */
     infix fun notHaveNameMatching(pattern: String): ModulesRuleBuilder {
         builder.setThat { !PatternMatchers.matchesModuleGlob(pattern, it.path) }
         return builder
     }
 
+    /** Filter or assertion criteria for not have name starting with. */
     infix fun notHaveNameStartingWith(prefix: String): ModulesRuleBuilder {
         builder.setThat { !it.path.removePrefix(":").startsWith(prefix.removePrefix(":")) }
         return builder
     }
 
+    /** Filter or assertion criteria for not have name ending with. */
     infix fun notHaveNameEndingWith(suffix: String): ModulesRuleBuilder {
         builder.setThat { !it.path.endsWith(suffix) }
         return builder
     }
 
+    /** Filter or assertion criteria for have build id. */
     infix fun haveBuildId(buildId: String): ModulesRuleBuilder {
         builder.setThat { it.buildId == buildId }
         return builder
     }
 
+    /** Filter or assertion criteria for not have build id. */
     infix fun notHaveBuildId(buildId: String): ModulesRuleBuilder {
         builder.setThat { it.buildId != buildId }
         return builder
     }
 
+    /** Filter or assertion criteria for have project dir. */
     infix fun haveProjectDir(dirPattern: String): ModulesRuleBuilder {
         builder.setThat { PatternMatchers.matchesSimpleGlob(dirPattern, it.projectDir) }
         return builder
     }
 
+    /** Filter or assertion criteria for not have project dir. */
     infix fun notHaveProjectDir(dirPattern: String): ModulesRuleBuilder {
         builder.setThat { !PatternMatchers.matchesSimpleGlob(dirPattern, it.projectDir) }
         return builder
     }
 
+    /** Filter or assertion criteria for contain classes in package. */
     infix fun containClassesInPackage(packagePattern: String): ModulesRuleBuilder {
         builder.setThat { module ->
             module.classes.any { PatternMatchers.matchesPackage(packagePattern, it.packageName) }
@@ -306,6 +357,7 @@ class ModulesThat internal constructor(
         return builder
     }
 
+    /** Filter or assertion criteria for not contain classes in package. */
     infix fun notContainClassesInPackage(packagePattern: String): ModulesRuleBuilder {
         builder.setThat { module ->
             module.classes.none { PatternMatchers.matchesPackage(packagePattern, it.packageName) }
@@ -313,6 +365,7 @@ class ModulesThat internal constructor(
         return builder
     }
 
+    /** Filter or assertion criteria for contain classes with annotation. */
     infix fun containClassesWithAnnotation(annotationFqName: String): ModulesRuleBuilder {
         builder.setThat { module ->
             module.classes.any { cls ->
@@ -322,6 +375,7 @@ class ModulesThat internal constructor(
         return builder
     }
 
+    /** Filter or assertion criteria for not contain classes with annotation. */
     infix fun notContainClassesWithAnnotation(annotationFqName: String): ModulesRuleBuilder {
         builder.setThat { module ->
             module.classesFor(builder.sourceSets).none { cls ->
@@ -331,6 +385,7 @@ class ModulesThat internal constructor(
         return builder
     }
 
+    /** Filter or assertion criteria for contain class. */
     infix fun containClass(fqName: String): ModulesRuleBuilder {
         builder.setThat { module ->
             module.classesFor(builder.sourceSets).any { it.fqName == fqName || it.name == fqName }
@@ -338,6 +393,7 @@ class ModulesThat internal constructor(
         return builder
     }
 
+    /** Filter or assertion criteria for not contain class. */
     infix fun notContainClass(fqName: String): ModulesRuleBuilder {
         builder.setThat { module ->
             module.classesFor(builder.sourceSets).none { it.fqName == fqName || it.name == fqName }
@@ -345,22 +401,29 @@ class ModulesThat internal constructor(
         return builder
     }
 
+    /** Filter or assertion criteria for contain classes with annotation. */
     infix fun containClassesWithAnnotation(annotation: kotlin.reflect.KClass<out Annotation>): ModulesRuleBuilder =
         containClassesWithAnnotation(annotation.kontureQualifiedName())
 
+    /** Filter or assertion criteria for not contain classes with annotation. */
     infix fun notContainClassesWithAnnotation(annotation: kotlin.reflect.KClass<out Annotation>): ModulesRuleBuilder =
         notContainClassesWithAnnotation(annotation.kontureQualifiedName())
 
+    /** Filter or assertion criteria for contain class. */
     infix fun containClass(type: kotlin.reflect.KClass<*>): ModulesRuleBuilder =
         containClass(type.kontureQualifiedName())
 
+    /** Filter or assertion criteria for not contain class. */
     infix fun notContainClass(type: kotlin.reflect.KClass<*>): ModulesRuleBuilder =
         notContainClass(type.kontureQualifiedName())
 
+    /** Filter or assertion criteria for depend on external library. */
     infix fun dependOnExternalLibrary(coordinate: String): ModulesRuleBuilder = dependOnExternalLibraries(coordinate)
 
+    /** Filter or assertion criteria for depend on external libraries. */
     fun dependOnExternalLibraries(vararg coordinates: String): ModulesRuleBuilder {
         builder.setThat { module ->
+            /** Filter or assertion criteria for resolved deps. */
             val resolvedDeps = builder.graph.requireExternalDependencies().modules[module.path] ?: emptyList()
             resolvedDeps.any { dep ->
                 coordinates.any { pattern ->

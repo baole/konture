@@ -31,7 +31,10 @@ fun PropertiesRuleBuilder.that(predicate: PropertyDeclarationContext.() -> Boole
 fun PropertiesRuleBuilder.should(assertion: PropertyDeclarationShouldContext.() -> Any?): PropertiesRuleBuilder =
     this.apply {
         setShould { prop, allProperties, violations ->
+            /** Filter or assertion criteria for context. */
             val context = PropertyDeclarationShouldContext(prop, allProperties, violations)
+
+            /** Filter or assertion criteria for result. */
             val result = context.assertion()
             validateAssertionResult(result)
             if (result is Boolean && !result) {
@@ -54,23 +57,53 @@ fun PropertiesRuleBuilder.should(assertion: PropertyDeclarationShouldContext.() 
  * @property violations Mutable collection where assertion failure messages are appended.
  */
 class PropertyDeclarationShouldContext internal constructor(
+    /** Filter or assertion criteria for element. */
     val element: PropertyDeclarationContext,
+    /** Filter or assertion criteria for all properties. */
     val allProperties: List<PropertyDeclarationContext>,
+    /** Filter or assertion criteria for violations. */
     val violations: MutableList<String>,
 ) {
+    /** Filter or assertion criteria for declaration. */
     val declaration get() = element.declaration
+
+    /** Filter or assertion criteria for name. */
     val name get() = element.declaration.name
+
+    /** Filter or assertion criteria for package name. */
     val packageName get() = element.packageName
+
+    /** Filter or assertion criteria for class name. */
     val className get() = element.className
+
+    /** Filter or assertion criteria for module path. */
     val modulePath get() = element.modulePath
+
+    /** Filter or assertion criteria for file path. */
     val filePath get() = element.filePath
+
+    /** Filter or assertion criteria for visibility. */
     val visibility get() = element.declaration.visibility
+
+    /** Filter or assertion criteria for modifiers. */
     val modifiers get() = element.declaration.modifiers
+
+    /** Filter or assertion criteria for type. */
     val type get() = element.declaration.type
+
+    /** Filter or assertion criteria for is val. */
     val isVal get() = element.declaration.isVal
+
+    /** Filter or assertion criteria for is var. */
     val isVar get() = element.declaration.isVar
+
+    /** Filter or assertion criteria for annotations. */
     val annotations get() = element.declaration.annotations
+
+    /** Filter or assertion criteria for kdoc text. */
     val kdocText get() = element.declaration.kdocText
+
+    /** Filter or assertion criteria for is extension. */
     val isExtension get() = element.declaration.isExtension
 
     /**

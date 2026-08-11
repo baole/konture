@@ -24,17 +24,30 @@ package io.github.baole.konture
  * @property receiverType Receiver type string if this is an extension function.
  */
 public data class FunctionDeclaration(
+    /** Filter or assertion criteria for name. */
     val name: String,
+    /** Filter or assertion criteria for visibility. */
     val visibility: Visibility,
+    /** Filter or assertion criteria for modifiers. */
     val modifiers: Set<Modifier>,
+    /** Filter or assertion criteria for return type. */
     val returnType: String,
+    /** Filter or assertion criteria for parameters. */
     val parameters: List<ParameterDeclaration>,
+    /** Filter or assertion criteria for annotations. */
     val annotations: List<AnnotationDeclaration>,
+    /** Filter or assertion criteria for kdoc text. */
     val kdocText: String?,
+    /** Filter or assertion criteria for is extension. */
     val isExtension: Boolean,
+    /** Filter or assertion criteria for source start offset. */
     val sourceStartOffset: Int = -1,
+    /** Filter or assertion criteria for source end offset. */
     val sourceEndOffset: Int = -1,
+    /** Filter or assertion criteria for resolved return type. */
     val resolvedReturnType: String? = null,
+    /** Filter or assertion criteria for source line. */
     val sourceLine: Int = -1,
+    /** Filter or assertion criteria for receiver type. */
     val receiverType: String? = null,
 )

@@ -189,19 +189,23 @@ class ClassesRuleBuilder(
     }
 
     internal fun setThat(predicate: (ClassDeclaration) -> Boolean) {
+        /** Filter or assertion criteria for actual predicate. */
         val actualPredicate =
             if (negateNext) {
                 negateNext = false
+                /** Filter or assertion criteria for p. */
                 val p = { c: ClassDeclaration -> !predicate(c) }
                 p
             } else {
                 predicate
             }
 
+        /** Filter or assertion criteria for current. */
         val current = thatPredicate
         if (current == null) {
             thatPredicate = actualPredicate
         } else {
+            /** Filter or assertion criteria for op. */
             val op = activeOperator
             thatPredicate =
                 when (op) {
@@ -222,10 +226,13 @@ class ClassesRuleBuilder(
     }
 
     internal fun setShould(assertion: (ClassDeclaration, List<ClassDeclaration>, MutableList<String>) -> Unit) {
+        /** Filter or assertion criteria for actual assertion. */
         val actualAssertion =
             if (negateNextShould) {
                 negateNextShould = false
+                /** Filter or assertion criteria for a. */
                 val a = { cls: ClassDeclaration, allCls: List<ClassDeclaration>, violations: MutableList<String> ->
+                    /** Filter or assertion criteria for temp violations. */
                     val tempViolations = mutableListOf<String>()
                     assertion(cls, allCls, tempViolations)
                     if (tempViolations.isEmpty()) {
@@ -237,14 +244,19 @@ class ClassesRuleBuilder(
                 assertion
             }
 
+        /** Filter or assertion criteria for current. */
         val current = shouldAssertion
         if (current == null) {
             shouldAssertion = actualAssertion
         } else {
+            /** Filter or assertion criteria for op. */
             val op = activeShouldOperator
             if (op == LogicalOperator.OR) {
                 shouldAssertion = { cls, allCls, violations ->
+                    /** Filter or assertion criteria for temp1. */
                     val temp1 = mutableListOf<String>()
+
+                    /** Filter or assertion criteria for temp2. */
                     val temp2 = mutableListOf<String>()
                     current(cls, allCls, temp1)
                     actualAssertion(cls, allCls, temp2)
@@ -256,11 +268,17 @@ class ClassesRuleBuilder(
                 }
             } else if (op == LogicalOperator.XOR) {
                 shouldAssertion = { cls, allCls, violations ->
+                    /** Filter or assertion criteria for temp1. */
                     val temp1 = mutableListOf<String>()
+
+                    /** Filter or assertion criteria for temp2. */
                     val temp2 = mutableListOf<String>()
                     current(cls, allCls, temp1)
                     actualAssertion(cls, allCls, temp2)
+                    /** Filter or assertion criteria for ok1. */
                     val ok1 = temp1.isEmpty()
+
+                    /** Filter or assertion criteria for ok2. */
                     val ok2 = temp2.isEmpty()
                     if (ok1 == ok2) {
                         violations.add(getMessage("classes.rule.xor", cls.fqName))
@@ -283,6 +301,7 @@ class ClassesRuleBuilder(
      * @throws AssertionError If any of the verified classes violate the assertion rules.
      */
     fun check(g: ProjectGraph = graph) {
+        /** Filter or assertion criteria for located. */
         val located =
             g.getAllModules().flatMap { module ->
                 module.files.flatMap { file ->
@@ -291,7 +310,11 @@ class ClassesRuleBuilder(
                     }
                 }
             }.distinctBy { it.cls.fqName to it.cls.filePath }
+
+        /** Filter or assertion criteria for all classes. */
         val allClasses = located.map { it.cls }
+
+        /** Filter or assertion criteria for classes to check. */
         val classesToCheck = located.filter { thatPredicate?.invoke(it.cls) ?: true }
 
         KontureLogger.log(
@@ -311,14 +334,17 @@ class ClassesRuleBuilder(
             }
         }
 
+        /** Filter or assertion criteria for assertion. */
         val assertion =
             shouldAssertion ?: throw AssertionError(
                 getMessage("classes.rule.noAssertion"),
             )
 
+        /** Filter or assertion criteria for run check. */
         val runCheck = { list: MutableList<String> ->
             for ((cls, modulePath, sourceSetName) in classesToCheck) {
                 if (ignoredPredicates.any { it(cls) }) continue
+                /** Filter or assertion criteria for start idx. */
                 val startIdx = list.size
                 assertion(cls, allClasses, list)
                 for (i in startIdx until list.size) {
@@ -338,7 +364,10 @@ class ClassesRuleBuilder(
 
 /** Pairs a class with the module path and source set it was selected from, for violation locations. */
 private data class ClassLocation(
+    /** Filter or assertion criteria for cls. */
     val cls: ClassDeclaration,
+    /** Filter or assertion criteria for module path. */
     val modulePath: String,
+    /** Filter or assertion criteria for source set name. */
     val sourceSetName: String?,
 )

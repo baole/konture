@@ -17,10 +17,14 @@ package io.github.baole.konture
  * @property platforms List of target platforms associated with this source set (e.g., "jvm", "js", "native").
  */
 data class SourceSet(
+    /** Filter or assertion criteria for name. */
     val name: String,
     // "KOTLIN_JVM", "ANDROID_VARIANT", "KMP"
     val kind: String,
+    /** Filter or assertion criteria for production. */
     val production: Boolean,
+    /** Filter or assertion criteria for src dirs. */
     val srcDirs: List<String>,
+    /** Filter or assertion criteria for platforms. */
     val platforms: List<String> = emptyList(),
 )

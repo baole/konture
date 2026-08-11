@@ -208,19 +208,23 @@ class FilesRuleBuilder(
     }
 
     internal fun setThat(predicate: (FileDeclarationContext) -> Boolean) {
+        /** Filter or assertion criteria for actual predicate. */
         val actualPredicate =
             if (negateNext) {
                 negateNext = false
+                /** Filter or assertion criteria for p. */
                 val p = { f: FileDeclarationContext -> !predicate(f) }
                 p
             } else {
                 predicate
             }
 
+        /** Filter or assertion criteria for current. */
         val current = thatPredicate
         if (current == null) {
             thatPredicate = actualPredicate
         } else {
+            /** Filter or assertion criteria for op. */
             val op = activeOperator
             thatPredicate =
                 when (op) {
@@ -243,14 +247,17 @@ class FilesRuleBuilder(
     internal fun setShould(
         assertion: (FileDeclarationContext, List<FileDeclarationContext>, MutableList<String>) -> Unit,
     ) {
+        /** Filter or assertion criteria for actual assertion. */
         val actualAssertion =
             if (negateNextShould) {
                 negateNextShould = false
+                /** Filter or assertion criteria for a. */
                 val a = {
                         file: FileDeclarationContext,
                         allFiles: List<FileDeclarationContext>,
                         violations: MutableList<String>,
                     ->
+                    /** Filter or assertion criteria for temp violations. */
                     val tempViolations = mutableListOf<String>()
                     assertion(file, allFiles, tempViolations)
                     if (tempViolations.isEmpty()) {
@@ -262,14 +269,19 @@ class FilesRuleBuilder(
                 assertion
             }
 
+        /** Filter or assertion criteria for current. */
         val current = shouldAssertion
         if (current == null) {
             shouldAssertion = actualAssertion
         } else {
+            /** Filter or assertion criteria for op. */
             val op = activeShouldOperator
             if (op == LogicalOperator.OR) {
                 shouldAssertion = { file, allFiles, violations ->
+                    /** Filter or assertion criteria for temp1. */
                     val temp1 = mutableListOf<String>()
+
+                    /** Filter or assertion criteria for temp2. */
                     val temp2 = mutableListOf<String>()
                     current(file, allFiles, temp1)
                     actualAssertion(file, allFiles, temp2)
@@ -281,11 +293,17 @@ class FilesRuleBuilder(
                 }
             } else if (op == LogicalOperator.XOR) {
                 shouldAssertion = { file, allFiles, violations ->
+                    /** Filter or assertion criteria for temp1. */
                     val temp1 = mutableListOf<String>()
+
+                    /** Filter or assertion criteria for temp2. */
                     val temp2 = mutableListOf<String>()
                     current(file, allFiles, temp1)
                     actualAssertion(file, allFiles, temp2)
+                    /** Filter or assertion criteria for ok1. */
                     val ok1 = temp1.isEmpty()
+
+                    /** Filter or assertion criteria for ok2. */
                     val ok2 = temp2.isEmpty()
                     if (ok1 == ok2) {
                         violations.add(
@@ -308,6 +326,7 @@ class FilesRuleBuilder(
      * Throws an [AssertionError] if any rule violations are detected.
      */
     fun check(g: ProjectGraph = graph) {
+        /** Filter or assertion criteria for all files. */
         val allFiles =
             g.getAllModules().flatMap { module ->
                 module.files.flatMap { file ->
@@ -316,6 +335,8 @@ class FilesRuleBuilder(
                     }
                 }
             }
+
+        /** Filter or assertion criteria for files to check. */
         val filesToCheck = allFiles.filter { thatPredicate?.invoke(it) ?: true }
 
         KontureLogger.log(
@@ -333,14 +354,17 @@ class FilesRuleBuilder(
             }
         }
 
+        /** Filter or assertion criteria for assertion. */
         val assertion =
             shouldAssertion ?: throw AssertionError(
                 getMessage("files.rule.noAssertion"),
             )
 
+        /** Filter or assertion criteria for run check. */
         val runCheck = { list: MutableList<String> ->
             for (file in filesToCheck) {
                 if (ignoredPredicates.any { it(file) }) continue
+                /** Filter or assertion criteria for start idx. */
                 val startIdx = list.size
                 assertion(file, allFiles, list)
                 for (i in startIdx until list.size) {

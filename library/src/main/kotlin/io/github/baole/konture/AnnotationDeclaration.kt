@@ -1,5 +1,6 @@
 /*
- * Copyright 2026 Bao Le Duc
+ * Copyright 2026 The Konture Contributors
+ * Contributors: Bao Le Duc (@baole)
  * SPDX-License-Identifier: Apache-2.0
  */
 
@@ -13,7 +14,10 @@ package io.github.baole.konture
  * @property arguments List of arguments declared on the annotation.
  */
 data class AnnotationDeclaration(
+    /** Filter or assertion criteria for name. */
     val name: String,
+    /** Filter or assertion criteria for fq name. */
     val fqName: String,
+    /** Filter or assertion criteria for arguments. */
     val arguments: List<AnnotationArgumentDeclaration> = emptyList(),
 )

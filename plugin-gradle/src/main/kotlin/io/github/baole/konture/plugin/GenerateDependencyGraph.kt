@@ -51,8 +51,9 @@ abstract class GenerateDependencyGraph : DefaultTask() {
     @get:OutputFile
     abstract val outputFile: RegularFileProperty
 
+    /** Generates and serializes the external dependency graph model. */
     @TaskAction
-    fun execute() {
+    public fun execute() {
         val modulesMap = mutableMapOf<String, MutableList<ResolvedDependencyModel>>()
 
         resolvedDependencies.get().forEach { (key, resolvedListString) ->

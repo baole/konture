@@ -15,37 +15,45 @@ import io.github.baole.konture.impl.ViolationLocation
 /**
  * A builder class implementing the Layered Architecture DSL.
  */
-class LayeredArchitectureBuilder(
+public class LayeredArchitectureBuilder(
     private val graph: ProjectGraph = Konture.projectGraph,
 ) {
     private val layers = mutableMapOf<String, LayerDefinition>()
     private val constraints = mutableListOf<LayerConstraint>()
 
-    fun layer(name: String): LayerSpec = LayerSpec(this, name)
+    /** Defines a new architectural layer with [name]. */
+    public fun layer(name: String): LayerSpec = LayerSpec(this, name)
 
     /** Specification for defining package boundaries of an architectural layer. */
     public class LayerSpec internal constructor(
         private val builder: LayeredArchitectureBuilder,
         private val name: String,
     ) {
-        infix fun definedBy(packagePatterns: List<String>): LayeredArchitectureBuilder {
+        /** Defines package boundaries for this layer using a list of package patterns. */
+        public infix fun definedBy(packagePatterns: List<String>): LayeredArchitectureBuilder {
             builder.layers[name] = LayerDefinition(name, packagePatterns)
             return builder
         }
 
-        fun definedBy(vararg packagePatterns: String): LayeredArchitectureBuilder = definedBy(packagePatterns.toList())
+        /** Defines package boundaries for this layer using vararg package patterns. */
+        public fun definedBy(vararg packagePatterns: String): LayeredArchitectureBuilder =
+            definedBy(packagePatterns.toList())
 
-        infix fun definedBy(packagePattern: String): LayeredArchitectureBuilder = definedBy(listOf(packagePattern))
+        /** Defines package boundaries for this layer using a single package pattern. */
+        public infix fun definedBy(packagePattern: String): LayeredArchitectureBuilder =
+            definedBy(listOf(packagePattern))
     }
 
-    fun whereLayer(name: String): ConstraintSpec = ConstraintSpec(this, name)
+    /** Specifies constraints for the layer identified by [name]. */
+    public fun whereLayer(name: String): ConstraintSpec = ConstraintSpec(this, name)
 
     /** Specification for defining dependency constraints on an architectural layer. */
     public class ConstraintSpec internal constructor(
         private val builder: LayeredArchitectureBuilder,
         private val name: String,
     ) {
-        fun mayNotBeAccessedByAnyLayer(): LayeredArchitectureBuilder {
+        /** Constrains this layer so it may not be accessed by any other layer. */
+        public fun mayNotBeAccessedByAnyLayer(): LayeredArchitectureBuilder {
             builder.constraints.add(
                 object : LayerConstraint {
                     override fun verify(
@@ -53,6 +61,7 @@ class LayeredArchitectureBuilder(
                         allClasses: List<ClassDeclaration>,
                         violations: MutableList<String>,
                     ) {
+                        /** Filter or assertion criteria for layer def. */
                         val layerDef = layers[name] ?: return
                         // Find all classes in this layer
                         val layerClasses =
@@ -94,7 +103,8 @@ class LayeredArchitectureBuilder(
             return builder
         }
 
-        infix fun mayOnlyBeAccessedByLayers(allowedLayerNames: List<String>): LayeredArchitectureBuilder {
+        /** Constrains this layer so it may only be accessed by layers in [allowedLayerNames]. */
+        public infix fun mayOnlyBeAccessedByLayers(allowedLayerNames: List<String>): LayeredArchitectureBuilder {
             builder.constraints.add(
                 object : LayerConstraint {
                     override fun verify(
@@ -102,8 +112,13 @@ class LayeredArchitectureBuilder(
                         allClasses: List<ClassDeclaration>,
                         violations: MutableList<String>,
                     ) {
+                        /** Filter or assertion criteria for layer def. */
                         val layerDef = layers[name] ?: return
+
+                        /** Filter or assertion criteria for allowed set. */
                         val allowedSet = allowedLayerNames.toSet()
+
+                        /** Filter or assertion criteria for layer classes. */
                         val layerClasses =
                             allClasses.filter { cls ->
                                 layerDef.packagePatterns.any { pattern ->
@@ -113,6 +128,7 @@ class LayeredArchitectureBuilder(
                         for (targetCls in layerClasses) {
                             for (otherCls in allClasses) {
                                 if (otherCls.fqName == targetCls.fqName) continue
+                                /** Filter or assertion criteria for other layer. */
                                 val otherLayer =
                                     layers.values.find { def ->
                                         def.packagePatterns.any { pattern ->
@@ -144,13 +160,16 @@ class LayeredArchitectureBuilder(
             return builder
         }
 
-        fun mayOnlyBeAccessedByLayers(vararg allowedLayerNames: String): LayeredArchitectureBuilder =
+        /** Constrains this layer so it may only be accessed by vararg layers [allowedLayerNames]. */
+        public fun mayOnlyBeAccessedByLayers(vararg allowedLayerNames: String): LayeredArchitectureBuilder =
             mayOnlyBeAccessedByLayers(allowedLayerNames.toList())
 
-        infix fun mayOnlyBeAccessedByLayers(allowedLayerName: String): LayeredArchitectureBuilder =
+        /** Constrains this layer so it may only be accessed by layer [allowedLayerName]. */
+        public infix fun mayOnlyBeAccessedByLayers(allowedLayerName: String): LayeredArchitectureBuilder =
             mayOnlyBeAccessedByLayers(listOf(allowedLayerName))
 
-        infix fun mayOnlyAccessLayers(allowedLayerNames: List<String>): LayeredArchitectureBuilder {
+        /** Constrains this layer so it may only access layers in [allowedLayerNames]. */
+        public infix fun mayOnlyAccessLayers(allowedLayerNames: List<String>): LayeredArchitectureBuilder {
             builder.constraints.add(
                 object : LayerConstraint {
                     override fun verify(
@@ -158,8 +177,13 @@ class LayeredArchitectureBuilder(
                         allClasses: List<ClassDeclaration>,
                         violations: MutableList<String>,
                     ) {
+                        /** Filter or assertion criteria for layer def. */
                         val layerDef = layers[name] ?: return
+
+                        /** Filter or assertion criteria for allowed set. */
                         val allowedSet = allowedLayerNames.toSet()
+
+                        /** Filter or assertion criteria for layer classes. */
                         val layerClasses =
                             allClasses.filter { cls ->
                                 layerDef.packagePatterns.any { pattern ->
@@ -169,6 +193,7 @@ class LayeredArchitectureBuilder(
                         for (sourceCls in layerClasses) {
                             for (otherCls in allClasses) {
                                 if (otherCls.fqName == sourceCls.fqName) continue
+                                /** Filter or assertion criteria for other layer. */
                                 val otherLayer =
                                     layers.values.find { def ->
                                         def.packagePatterns.any { pattern ->
@@ -200,17 +225,20 @@ class LayeredArchitectureBuilder(
             return builder
         }
 
-        fun mayOnlyAccessLayers(vararg allowedLayerNames: String): LayeredArchitectureBuilder =
+        /** Constrains this layer so it may only access vararg layers [allowedLayerNames]. */
+        public fun mayOnlyAccessLayers(vararg allowedLayerNames: String): LayeredArchitectureBuilder =
             mayOnlyAccessLayers(
                 allowedLayerNames.toList(),
             )
 
-        infix fun mayOnlyAccessLayers(allowedLayerName: String): LayeredArchitectureBuilder =
+        /** Constrains this layer so it may only access layer [allowedLayerName]. */
+        public infix fun mayOnlyAccessLayers(allowedLayerName: String): LayeredArchitectureBuilder =
             mayOnlyAccessLayers(
                 listOf(allowedLayerName),
             )
 
-        infix fun mayNotAccessLayers(forbiddenLayerNames: List<String>): LayeredArchitectureBuilder {
+        /** Constrains this layer so it may not access layers in [forbiddenLayerNames]. */
+        public infix fun mayNotAccessLayers(forbiddenLayerNames: List<String>): LayeredArchitectureBuilder {
             builder.constraints.add(
                 object : LayerConstraint {
                     override fun verify(
@@ -218,8 +246,13 @@ class LayeredArchitectureBuilder(
                         allClasses: List<ClassDeclaration>,
                         violations: MutableList<String>,
                     ) {
+                        /** Filter or assertion criteria for layer def. */
                         val layerDef = layers[name] ?: return
+
+                        /** Filter or assertion criteria for forbidden set. */
                         val forbiddenSet = forbiddenLayerNames.toSet()
+
+                        /** Filter or assertion criteria for layer classes. */
                         val layerClasses =
                             allClasses.filter { cls ->
                                 layerDef.packagePatterns.any { pattern ->
@@ -229,6 +262,7 @@ class LayeredArchitectureBuilder(
                         for (sourceCls in layerClasses) {
                             for (otherCls in allClasses) {
                                 if (otherCls.fqName == sourceCls.fqName) continue
+                                /** Filter or assertion criteria for other layer. */
                                 val otherLayer =
                                     layers.values.find { def ->
                                         def.packagePatterns.any { pattern ->
@@ -260,17 +294,20 @@ class LayeredArchitectureBuilder(
             return builder
         }
 
-        fun mayNotAccessLayers(vararg forbiddenLayerNames: String): LayeredArchitectureBuilder =
+        /** Constrains this layer so it may not access vararg layers [forbiddenLayerNames]. */
+        public fun mayNotAccessLayers(vararg forbiddenLayerNames: String): LayeredArchitectureBuilder =
             mayNotAccessLayers(
                 forbiddenLayerNames.toList(),
             )
 
-        infix fun mayNotAccessLayers(forbiddenLayerName: String): LayeredArchitectureBuilder =
+        /** Constrains this layer so it may not access layer [forbiddenLayerName]. */
+        public infix fun mayNotAccessLayers(forbiddenLayerName: String): LayeredArchitectureBuilder =
             mayNotAccessLayers(
                 listOf(forbiddenLayerName),
             )
 
-        infix fun mayNotBeAccessedByLayers(forbiddenLayerNames: List<String>): LayeredArchitectureBuilder {
+        /** Constrains this layer so it may not be accessed by layers in [forbiddenLayerNames]. */
+        public infix fun mayNotBeAccessedByLayers(forbiddenLayerNames: List<String>): LayeredArchitectureBuilder {
             builder.constraints.add(
                 object : LayerConstraint {
                     override fun verify(
@@ -278,8 +315,13 @@ class LayeredArchitectureBuilder(
                         allClasses: List<ClassDeclaration>,
                         violations: MutableList<String>,
                     ) {
+                        /** Filter or assertion criteria for layer def. */
                         val layerDef = layers[name] ?: return
+
+                        /** Filter or assertion criteria for forbidden set. */
                         val forbiddenSet = forbiddenLayerNames.toSet()
+
+                        /** Filter or assertion criteria for layer classes. */
                         val layerClasses =
                             allClasses.filter { cls ->
                                 layerDef.packagePatterns.any { pattern ->
@@ -289,6 +331,7 @@ class LayeredArchitectureBuilder(
                         for (targetCls in layerClasses) {
                             for (otherCls in allClasses) {
                                 if (otherCls.fqName == targetCls.fqName) continue
+                                /** Filter or assertion criteria for other layer. */
                                 val otherLayer =
                                     layers.values.find { def ->
                                         def.packagePatterns.any { pattern ->
@@ -320,16 +363,21 @@ class LayeredArchitectureBuilder(
             return builder
         }
 
-        fun mayNotBeAccessedByLayers(vararg forbiddenLayerNames: String): LayeredArchitectureBuilder =
+        /** Constrains this layer so it may not be accessed by vararg layers [forbiddenLayerNames]. */
+        public fun mayNotBeAccessedByLayers(vararg forbiddenLayerNames: String): LayeredArchitectureBuilder =
             mayNotBeAccessedByLayers(forbiddenLayerNames.toList())
 
-        infix fun mayNotBeAccessedByLayers(forbiddenLayerName: String): LayeredArchitectureBuilder =
+        /** Constrains this layer so it may not be accessed by layer [forbiddenLayerName]. */
+        public infix fun mayNotBeAccessedByLayers(forbiddenLayerName: String): LayeredArchitectureBuilder =
             mayNotBeAccessedByLayers(listOf(forbiddenLayerName))
     }
 
-    fun check(g: ProjectGraph = graph) {
+    /** Checks all configured layered architecture rules against [g]. */
+    public fun check(g: ProjectGraph = graph) {
+        /** Filter or assertion criteria for all classes. */
         val allClasses = g.getAllModules().flatMap { it.classes }
 
+        /** Filter or assertion criteria for run check. */
         val runCheck = { list: MutableList<String> ->
             for (constraint in constraints) {
                 constraint.verify(layers, allClasses, list)

@@ -31,7 +31,10 @@ fun ModulesRuleBuilder.that(predicate: Module.() -> Boolean): ModulesRuleBuilder
 fun ModulesRuleBuilder.should(assertion: ModuleShouldContext.() -> Any?): ModulesRuleBuilder =
     this.apply {
         setShould { module, graph, violations ->
+            /** Filter or assertion criteria for context. */
             val context = ModuleShouldContext(module, graph, violations)
+
+            /** Filter or assertion criteria for result. */
             val result = context.assertion()
             validateAssertionResult(result)
             if (result is Boolean && !result) {
@@ -51,17 +54,35 @@ fun ModulesRuleBuilder.should(assertion: ModuleShouldContext.() -> Any?): Module
  * @property violations Mutable collection where assertion failure messages are appended.
  */
 class ModuleShouldContext internal constructor(
+    /** Filter or assertion criteria for element. */
     val element: Module,
+    /** Filter or assertion criteria for graph. */
     val graph: ProjectGraph,
+    /** Filter or assertion criteria for violations. */
     val violations: MutableList<String>,
 ) {
+    /** Filter or assertion criteria for build id. */
     val buildId get() = element.buildId
+
+    /** Filter or assertion criteria for path. */
     val path get() = element.path
+
+    /** Filter or assertion criteria for project dir. */
     val projectDir get() = element.projectDir
+
+    /** Filter or assertion criteria for applied plugins. */
     val appliedPlugins get() = element.appliedPlugins
+
+    /** Filter or assertion criteria for source sets. */
     val sourceSets get() = element.sourceSets
+
+    /** Filter or assertion criteria for dependencies. */
     val dependencies get() = element.dependencies
+
+    /** Filter or assertion criteria for files. */
     val files get() = element.files
+
+    /** Filter or assertion criteria for classes. */
     val classes get() = element.classes
 
     /**

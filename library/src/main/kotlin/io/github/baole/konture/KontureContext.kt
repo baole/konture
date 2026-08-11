@@ -1,6 +1,6 @@
 /*
  * Copyright 2026 The Konture Contributors
- * Contributors: Bao Le Duc, Octavio Calleya Garcia (@octaviospain)
+ * Contributors: Bao Le Duc (@baole), Octavio Calleya Garcia (@octaviospain)
  * SPDX-License-Identifier: Apache-2.0
  */
 
@@ -18,7 +18,9 @@ class KontureContext(
     private val projectGraph: ProjectGraph,
 ) {
     private data class RuleSuite(
+        /** Filter or assertion criteria for label. */
         val label: String,
+        /** Filter or assertion criteria for run. */
         val run: () -> Unit,
     )
 
@@ -28,7 +30,10 @@ class KontureContext(
         label: String,
         block: () -> Unit,
     ) {
+        /** Filter or assertion criteria for duplicate count. */
         val duplicateCount = ruleSuites.count { it.label == label }
+
+        /** Filter or assertion criteria for resolved label. */
         val resolvedLabel = if (duplicateCount > 0) "$label (${duplicateCount + 1})" else label
         ruleSuites.add(RuleSuite(resolvedLabel, block))
     }
@@ -37,6 +42,7 @@ class KontureContext(
      * Declares a suite of module structure/dependency rules inside this architecture validation context.
      */
     fun modules(block: ModulesRuleBuilder.() -> Unit) {
+        /** Filter or assertion criteria for builder. */
         val builder = ModulesRuleBuilder(projectGraph)
         builder.apply(block)
         addSuite("modules") { builder.check() }
@@ -46,6 +52,7 @@ class KontureContext(
      * Declares a suite of class structure/dependency rules inside this architecture validation context.
      */
     fun classes(block: ClassesRuleBuilder.() -> Unit) {
+        /** Filter or assertion criteria for builder. */
         val builder = ClassesRuleBuilder(projectGraph)
         builder.apply(block)
         addSuite("classes") { builder.check() }
@@ -55,6 +62,7 @@ class KontureContext(
      * Declares a suite of function structure/dependency rules inside this architecture validation context.
      */
     fun functions(block: FunctionsRuleBuilder.() -> Unit) {
+        /** Filter or assertion criteria for builder. */
         val builder = FunctionsRuleBuilder(projectGraph)
         builder.apply(block)
         addSuite("functions") { builder.check() }
@@ -64,6 +72,7 @@ class KontureContext(
      * Declares a suite of property structure/dependency rules inside this architecture validation context.
      */
     fun properties(block: PropertiesRuleBuilder.() -> Unit) {
+        /** Filter or assertion criteria for builder. */
         val builder = PropertiesRuleBuilder(projectGraph)
         builder.apply(block)
         addSuite("properties") { builder.check() }
@@ -73,6 +82,7 @@ class KontureContext(
      * Declares a suite of file structure/dependency rules inside this architecture validation context.
      */
     fun files(block: FilesRuleBuilder.() -> Unit) {
+        /** Filter or assertion criteria for builder. */
         val builder = FilesRuleBuilder(projectGraph)
         builder.apply(block)
         addSuite("files") { builder.check() }
@@ -82,6 +92,7 @@ class KontureContext(
      * Declares a suite of slice rules inside this architecture validation context.
      */
     fun slices(block: SlicesRuleBuilder.() -> Unit) {
+        /** Filter or assertion criteria for builder. */
         val builder = SlicesRuleBuilder(projectGraph)
         builder.apply(block)
         addSuite("slices") { builder.check() }
@@ -91,6 +102,7 @@ class KontureContext(
      * Declares a suite of layered-architecture rules inside this architecture validation context.
      */
     fun layeredArchitecture(block: LayeredArchitectureBuilder.() -> Unit) {
+        /** Filter or assertion criteria for builder. */
         val builder = LayeredArchitectureBuilder(projectGraph)
         builder.apply(block)
         addSuite("layeredArchitecture") { builder.check() }
@@ -100,12 +112,14 @@ class KontureContext(
      * Declares a nested, type-safe layered-architecture specification inside this architecture validation context.
      */
     fun layered(block: LayeredArchitectureDsl.() -> Unit) {
+        /** Filter or assertion criteria for dsl. */
         val dsl = LayeredArchitectureDsl(projectGraph)
         dsl.apply(block)
         addSuite("layered") { dsl.verify() }
     }
 
     internal fun verifyAll() {
+        /** Filter or assertion criteria for failures. */
         val failures = mutableListOf<String>()
         for (suite in ruleSuites) {
             try {

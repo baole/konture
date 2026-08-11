@@ -9,10 +9,14 @@ package io.github.baole.konture
 import io.github.baole.konture.impl.PatternMatchers
 
 /** A source set as exposed to architecture rules. */
-data class SourceSetId(
+public data class SourceSetId(
+    /** Filter or assertion criteria for module path. */
     val modulePath: String,
+    /** Filter or assertion criteria for name. */
     val name: String,
+    /** Filter or assertion criteria for kind. */
     val kind: SourceSetKind,
+    /** Filter or assertion criteria for role. */
     val role: SourceSetRole,
 )
 
@@ -38,31 +42,40 @@ public enum class SourceSetRole {
 }
 
 /** Immutable selector used by source-backed Konture entry points. */
-class SourceSetSelector internal constructor(
+public class SourceSetSelector internal constructor(
     private val matchesSourceSet: (SourceSetId) -> Boolean,
 ) {
     internal fun matches(sourceSet: SourceSetId): Boolean = matchesSourceSet(sourceSet)
 
-    infix fun and(other: SourceSetSelector): SourceSetSelector = SourceSetSelector { matches(it) && other.matches(it) }
+    /** Combines two selectors with logical AND. */
+    public infix fun and(other: SourceSetSelector): SourceSetSelector =
+        SourceSetSelector { matches(it) && other.matches(it) }
 
-    infix fun or(other: SourceSetSelector): SourceSetSelector = SourceSetSelector { matches(it) || other.matches(it) }
+    /** Combines two selectors with logical OR. */
+    public infix fun or(other: SourceSetSelector): SourceSetSelector =
+        SourceSetSelector { matches(it) || other.matches(it) }
 
-    operator fun not(): SourceSetSelector = SourceSetSelector { !matches(it) }
+    /** Negates this selector with logical NOT. */
+    public operator fun not(): SourceSetSelector = SourceSetSelector { !matches(it) }
 }
 
 /** Factory methods for selecting captured Kotlin source sets. */
-object SourceSets {
-    fun named(vararg names: String): SourceSetSelector {
+public object SourceSets {
+    /** Selects source sets matching exact names. */
+    public fun named(vararg names: String): SourceSetSelector {
+        /** Filter or assertion criteria for accepted names. */
         val acceptedNames = names.toSet()
         return SourceSetSelector { it.name in acceptedNames }
     }
 
-    fun matchingName(pattern: String): SourceSetSelector =
+    /** Selects source sets matching a glob pattern. */
+    public fun matchingName(pattern: String): SourceSetSelector =
         SourceSetSelector {
             PatternMatchers.matchesSimpleGlob(pattern, it.name)
         }
 
-    fun of(
+    /** Selects source sets matching role and/or kind filters. */
+    public fun of(
         role: SourceSetRole? = null,
         kind: SourceSetKind? = null,
     ): SourceSetSelector =
@@ -70,11 +83,14 @@ object SourceSets {
             (role == null || sourceSet.role == role) && (kind == null || sourceSet.kind == kind)
         }
 
-    fun tests(): SourceSetSelector = of(role = SourceSetRole.TEST)
+    /** Selects test source sets. */
+    public fun tests(): SourceSetSelector = of(role = SourceSetRole.TEST)
 
-    fun production(): SourceSetSelector = of(role = SourceSetRole.PRODUCTION)
+    /** Selects production source sets. */
+    public fun production(): SourceSetSelector = of(role = SourceSetRole.PRODUCTION)
 
-    fun inModule(modulePath: String): SourceSetSelector = SourceSetSelector { it.modulePath == modulePath }
+    /** Selects source sets located in a specific module path. */
+    public fun inModule(modulePath: String): SourceSetSelector = SourceSetSelector { it.modulePath == modulePath }
 }
 
 internal fun FileDeclaration.membershipsFor(modulePath: String): List<SourceSetId> =
