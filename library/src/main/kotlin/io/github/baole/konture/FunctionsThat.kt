@@ -10,28 +10,35 @@ package io.github.baole.konture
  * Fluent API for filtering Kotlin functions in architecture rules.
  */
 @KontureDsl
-class FunctionsThat internal constructor(
-    override val builder: FunctionsRuleBuilder,
+public class FunctionsThat internal constructor(
+    /** Filter or assertion criteria for builder. */
+    public override val builder: FunctionsRuleBuilder,
 ) : FunctionsThatPackageFilter,
     FunctionsThatNameFilter,
     FunctionsThatStructureFilter,
     FunctionsThatModifierFilter,
     FunctionsThatCompositeFilter {
-    inline fun <reified T : Any> haveParameterOf(): FunctionsRuleBuilder =
+    /** Filters functions having parameter of type parameter [T]. */
+    public inline fun <reified T : Any> haveParameterOf(): FunctionsRuleBuilder =
         (this as FunctionsThatStructureFilter).haveParameterOf(T::class)
 
-    inline fun <reified T : Any> haveReturnTypeOf(): FunctionsRuleBuilder =
+    /** Filters functions having return type of type parameter [T]. */
+    public inline fun <reified T : Any> haveReturnTypeOf(): FunctionsRuleBuilder =
         (this as FunctionsThatStructureFilter).haveReturnType(T::class)
 
-    inline fun <reified T : Any> haveExtensionReceiver(): FunctionsRuleBuilder =
+    /** Filters functions having extension receiver of type parameter [T]. */
+    public inline fun <reified T : Any> haveExtensionReceiver(): FunctionsRuleBuilder =
         (this as FunctionsThatStructureFilter).haveExtensionReceiver(T::class)
 
-    inline fun <reified T : Any> haveAnyParameterTypeOf(): FunctionsRuleBuilder =
+    /** Filters functions having any parameter type of type parameter [T]. */
+    public inline fun <reified T : Any> haveAnyParameterTypeOf(): FunctionsRuleBuilder =
         (this as FunctionsThatStructureFilter).haveAnyParameterType(T::class)
 
-    inline fun <reified T : Annotation> areAnnotatedWith(): FunctionsRuleBuilder =
+    /** Filters functions annotated with annotation type parameter [T]. */
+    public inline fun <reified T : Annotation> areAnnotatedWith(): FunctionsRuleBuilder =
         (this as FunctionsThatModifierFilter).areAnnotatedWith(T::class)
 
-    inline fun <reified T : Annotation> haveAnnotationOf(): FunctionsRuleBuilder =
+    /** Filters functions having annotation of type parameter [T]. */
+    public inline fun <reified T : Annotation> haveAnnotationOf(): FunctionsRuleBuilder =
         (this as FunctionsThatModifierFilter).haveAnnotationOf(T::class)
 }

@@ -12,52 +12,63 @@ import kotlin.reflect.KClass
 /**
  * Common scope interface providing access to [ClassesRuleBuilder].
  */
-interface ClassesThatScope {
-    val builder: ClassesRuleBuilder
+public interface ClassesThatScope {
+    /** Filter or assertion criteria for builder. */
+    public val builder: ClassesRuleBuilder
 }
 
 /**
  * Trait interface for package and module residency filtering on classes.
  */
 @Suppress("ComplexInterface")
-interface ClassesThatPackageFilter : ClassesThatScope {
-    infix fun resideInAPackage(packagePattern: String): ClassesRuleBuilder {
+public interface ClassesThatPackageFilter : ClassesThatScope {
+    /** Specifies reside in a package criteria. */
+    public infix fun resideInAPackage(packagePattern: String): ClassesRuleBuilder {
         builder.setThat { PatternMatchers.matchesPackage(packagePattern, it.packageName) }
         return builder
     }
 
-    infix fun resideInAPackage(packagePatterns: List<String>): ClassesRuleBuilder {
+    /** Specifies reside in a package criteria. */
+    public infix fun resideInAPackage(packagePatterns: List<String>): ClassesRuleBuilder {
         builder.setThat { context ->
             packagePatterns.any { PatternMatchers.matchesPackage(it, context.packageName) }
         }
         return builder
     }
 
-    fun resideInAPackage(vararg packagePatterns: String): ClassesRuleBuilder =
+    /** Filter or assertion criteria for reside in a package. */
+    public fun resideInAPackage(vararg packagePatterns: String): ClassesRuleBuilder =
         resideInAPackage(packagePatterns.toList())
 
-    infix fun resideInAPackage(predicate: (String) -> Boolean): ClassesRuleBuilder {
+    /** Specifies reside in a package criteria. */
+    public infix fun resideInAPackage(predicate: (String) -> Boolean): ClassesRuleBuilder {
         builder.setThat { predicate(it.packageName) }
         return builder
     }
 
-    infix fun resideInPackageOf(type: KClass<*>): ClassesRuleBuilder =
+    /** Specifies reside in package of criteria. */
+    public infix fun resideInPackageOf(type: KClass<*>): ClassesRuleBuilder =
         resideInAPackage(type.toKonturePackageReference().packageName)
 
-    infix fun notResideInAPackage(packagePattern: String): ClassesRuleBuilder {
+    /** Specifies not reside in a package criteria. */
+    public infix fun notResideInAPackage(packagePattern: String): ClassesRuleBuilder {
         builder.setThat { !PatternMatchers.matchesPackage(packagePattern, it.packageName) }
         return builder
     }
 
-    infix fun notResideInAPackage(packagePatterns: List<String>): ClassesRuleBuilder {
+    /** Specifies not reside in a package criteria. */
+    public infix fun notResideInAPackage(packagePatterns: List<String>): ClassesRuleBuilder {
         builder.setThat { context -> packagePatterns.none { PatternMatchers.matchesPackage(it, context.packageName) } }
         return builder
     }
 
-    fun notResideInAPackage(vararg packagePatterns: String): ClassesRuleBuilder =
+    /** Filter or assertion criteria for not reside in a package. */
+    public fun notResideInAPackage(vararg packagePatterns: String): ClassesRuleBuilder =
         notResideInAPackage(packagePatterns.toList())
 
-    infix fun resideInAModule(modulePath: String): ClassesRuleBuilder {
+    /** Specifies reside in a module criteria. */
+    public infix fun resideInAModule(modulePath: String): ClassesRuleBuilder {
+        /** Filter or assertion criteria for normalized. */
         val normalized =
             if (!modulePath.startsWith(":") && !modulePath.startsWith("**") && modulePath.isNotEmpty()) {
                 ":$modulePath"
@@ -65,6 +76,7 @@ interface ClassesThatPackageFilter : ClassesThatScope {
                 modulePath
             }
         builder.setThat { cls ->
+            /** Filter or assertion criteria for module. */
             val module =
                 builder.graph.getAllModules().find { mod ->
                     mod.files.any { f -> f.classes.any { c -> c.fqName == cls.fqName } || f.filePath == cls.filePath }
@@ -74,7 +86,9 @@ interface ClassesThatPackageFilter : ClassesThatScope {
         return builder
     }
 
-    infix fun resideInAModule(modulePaths: List<String>): ClassesRuleBuilder {
+    /** Specifies reside in a module criteria. */
+    public infix fun resideInAModule(modulePaths: List<String>): ClassesRuleBuilder {
+        /** Filter or assertion criteria for normalized paths. */
         val normalizedPaths =
             modulePaths.map { path ->
                 if (!path.startsWith(":") && !path.startsWith("**") && path.isNotEmpty()) {
@@ -84,6 +98,7 @@ interface ClassesThatPackageFilter : ClassesThatScope {
                 }
             }
         builder.setThat { cls ->
+            /** Filter or assertion criteria for module. */
             val module =
                 builder.graph.getAllModules().find { mod ->
                     mod.files.any { f -> f.classes.any { c -> c.fqName == cls.fqName } || f.filePath == cls.filePath }
@@ -93,15 +108,21 @@ interface ClassesThatPackageFilter : ClassesThatScope {
         return builder
     }
 
-    fun resideInAModule(vararg modulePaths: String): ClassesRuleBuilder = resideInAModule(modulePaths.toList())
+    /** Filter or assertion criteria for reside in a module. */
+    public fun resideInAModule(vararg modulePaths: String): ClassesRuleBuilder = resideInAModule(modulePaths.toList())
 
-    infix fun resideInModule(modulePath: String): ClassesRuleBuilder = resideInAModule(modulePath)
+    /** Specifies reside in module criteria. */
+    public infix fun resideInModule(modulePath: String): ClassesRuleBuilder = resideInAModule(modulePath)
 
-    infix fun resideInModules(modulePaths: List<String>): ClassesRuleBuilder = resideInAModule(modulePaths)
+    /** Specifies reside in modules criteria. */
+    public infix fun resideInModules(modulePaths: List<String>): ClassesRuleBuilder = resideInAModule(modulePaths)
 
-    fun resideInModules(vararg modulePaths: String): ClassesRuleBuilder = resideInAModule(modulePaths.toList())
+    /** Filter or assertion criteria for reside in modules. */
+    public fun resideInModules(vararg modulePaths: String): ClassesRuleBuilder = resideInAModule(modulePaths.toList())
 
-    infix fun notResideInAModule(modulePath: String): ClassesRuleBuilder {
+    /** Specifies not reside in a module criteria. */
+    public infix fun notResideInAModule(modulePath: String): ClassesRuleBuilder {
+        /** Filter or assertion criteria for normalized. */
         val normalized =
             if (!modulePath.startsWith(":") && !modulePath.startsWith("**") && modulePath.isNotEmpty()) {
                 ":$modulePath"
@@ -109,6 +130,7 @@ interface ClassesThatPackageFilter : ClassesThatScope {
                 modulePath
             }
         builder.setThat { cls ->
+            /** Filter or assertion criteria for module. */
             val module =
                 builder.graph.getAllModules().find { mod ->
                     mod.files.any { f -> f.classes.any { c -> c.fqName == cls.fqName } || f.filePath == cls.filePath }
@@ -118,12 +140,15 @@ interface ClassesThatPackageFilter : ClassesThatScope {
         return builder
     }
 
-    infix fun notResideInAModule(modulePaths: List<String>): ClassesRuleBuilder {
+    /** Specifies not reside in a module criteria. */
+    public infix fun notResideInAModule(modulePaths: List<String>): ClassesRuleBuilder {
+        /** Filter or assertion criteria for normalized. */
         val normalized =
             modulePaths.map {
                 if (!it.startsWith(":") && !it.startsWith("**") && it.isNotEmpty()) ":$it" else it
             }
         builder.setThat { cls ->
+            /** Filter or assertion criteria for module. */
             val module =
                 builder.graph.getAllModules().find { mod ->
                     mod.files.any { f -> f.classes.any { c -> c.fqName == cls.fqName } || f.filePath == cls.filePath }
@@ -136,116 +161,146 @@ interface ClassesThatPackageFilter : ClassesThatScope {
         return builder
     }
 
-    fun notResideInAModule(vararg modulePaths: String): ClassesRuleBuilder = notResideInAModule(modulePaths.toList())
+    /** Filter or assertion criteria for not reside in a module. */
+    public fun notResideInAModule(vararg modulePaths: String): ClassesRuleBuilder =
+        notResideInAModule(modulePaths.toList())
 
-    infix fun notResideInModule(modulePath: String): ClassesRuleBuilder = notResideInAModule(modulePath)
+    /** Specifies not reside in module criteria. */
+    public infix fun notResideInModule(modulePath: String): ClassesRuleBuilder = notResideInAModule(modulePath)
 
-    infix fun notResideInModules(modulePaths: List<String>): ClassesRuleBuilder = notResideInAModule(modulePaths)
+    /** Specifies not reside in modules criteria. */
+    public infix fun notResideInModules(modulePaths: List<String>): ClassesRuleBuilder = notResideInAModule(modulePaths)
 
-    fun notResideInModules(vararg modulePaths: String): ClassesRuleBuilder = notResideInAModule(modulePaths.toList())
+    /** Filter or assertion criteria for not reside in modules. */
+    public fun notResideInModules(vararg modulePaths: String): ClassesRuleBuilder =
+        notResideInAModule(modulePaths.toList())
 }
 
 /**
  * Trait interface for name matching and naming pattern filtering on classes.
  */
 @Suppress("ComplexInterface")
-interface ClassesThatNameFilter : ClassesThatScope {
-    infix fun haveName(name: String): ClassesRuleBuilder {
+public interface ClassesThatNameFilter : ClassesThatScope {
+    /** Specifies have name criteria. */
+    public infix fun haveName(name: String): ClassesRuleBuilder {
         builder.setThat { it.fqName == name || it.name == name }
         return builder
     }
 
-    infix fun haveSimpleName(name: String): ClassesRuleBuilder {
+    /** Specifies have simple name criteria. */
+    public infix fun haveSimpleName(name: String): ClassesRuleBuilder {
         builder.setThat { it.name == name }
         return builder
     }
 
-    infix fun haveName(names: List<String>): ClassesRuleBuilder {
+    /** Specifies have name criteria. */
+    public infix fun haveName(names: List<String>): ClassesRuleBuilder {
         builder.setThat { names.contains(it.name) }
         return builder
     }
 
-    fun haveName(vararg names: String): ClassesRuleBuilder = haveName(names.toList())
+    /** Filter or assertion criteria for have name. */
+    public fun haveName(vararg names: String): ClassesRuleBuilder = haveName(names.toList())
 
-    infix fun notHaveName(name: String): ClassesRuleBuilder {
+    /** Specifies not have name criteria. */
+    public infix fun notHaveName(name: String): ClassesRuleBuilder {
         builder.setThat { it.name != name }
         return builder
     }
 
-    infix fun notHaveName(names: List<String>): ClassesRuleBuilder {
+    /** Specifies not have name criteria. */
+    public infix fun notHaveName(names: List<String>): ClassesRuleBuilder {
         builder.setThat { !names.contains(it.name) }
         return builder
     }
 
-    fun notHaveName(vararg names: String): ClassesRuleBuilder = notHaveName(names.toList())
+    /** Filter or assertion criteria for not have name. */
+    public fun notHaveName(vararg names: String): ClassesRuleBuilder = notHaveName(names.toList())
 
-    infix fun notHaveName(predicate: (String) -> Boolean): ClassesRuleBuilder {
+    /** Specifies not have name criteria. */
+    public infix fun notHaveName(predicate: (String) -> Boolean): ClassesRuleBuilder {
         builder.setThat { !predicate(it.name) }
         return builder
     }
 
-    infix fun haveNameEndingWith(suffix: String): ClassesRuleBuilder {
+    /** Specifies have name ending with criteria. */
+    public infix fun haveNameEndingWith(suffix: String): ClassesRuleBuilder {
         builder.setThat { it.name.endsWith(suffix) }
         return builder
     }
 
-    infix fun haveNameEndingWith(suffixes: List<String>): ClassesRuleBuilder {
+    /** Specifies have name ending with criteria. */
+    public infix fun haveNameEndingWith(suffixes: List<String>): ClassesRuleBuilder {
         builder.setThat { context ->
             suffixes.any { context.name.endsWith(it) }
         }
         return builder
     }
 
-    fun haveNameEndingWith(vararg suffixes: String): ClassesRuleBuilder = haveNameEndingWith(suffixes.toList())
+    /** Filter or assertion criteria for have name ending with. */
+    public fun haveNameEndingWith(vararg suffixes: String): ClassesRuleBuilder = haveNameEndingWith(suffixes.toList())
 
-    infix fun notHaveNameEndingWith(suffix: String): ClassesRuleBuilder {
+    /** Specifies not have name ending with criteria. */
+    public infix fun notHaveNameEndingWith(suffix: String): ClassesRuleBuilder {
         builder.setThat { !it.name.endsWith(suffix) }
         return builder
     }
 
-    infix fun notHaveNameEndingWith(suffixes: List<String>): ClassesRuleBuilder {
+    /** Specifies not have name ending with criteria. */
+    public infix fun notHaveNameEndingWith(suffixes: List<String>): ClassesRuleBuilder {
         builder.setThat { context ->
             !suffixes.any { context.name.endsWith(it) }
         }
         return builder
     }
 
-    fun notHaveNameEndingWith(vararg suffixes: String): ClassesRuleBuilder = notHaveNameEndingWith(suffixes.toList())
+    /** Filter or assertion criteria for not have name ending with. */
+    public fun notHaveNameEndingWith(vararg suffixes: String): ClassesRuleBuilder =
+        notHaveNameEndingWith(suffixes.toList())
 
-    infix fun haveNameStartingWith(prefix: String): ClassesRuleBuilder {
+    /** Specifies have name starting with criteria. */
+    public infix fun haveNameStartingWith(prefix: String): ClassesRuleBuilder {
         builder.setThat { it.name.startsWith(prefix) }
         return builder
     }
 
-    infix fun haveNameStartingWith(prefixes: List<String>): ClassesRuleBuilder {
+    /** Specifies have name starting with criteria. */
+    public infix fun haveNameStartingWith(prefixes: List<String>): ClassesRuleBuilder {
         builder.setThat { context ->
             prefixes.any { context.name.startsWith(it) }
         }
         return builder
     }
 
-    fun haveNameStartingWith(vararg prefixes: String): ClassesRuleBuilder = haveNameStartingWith(prefixes.toList())
+    /** Filter or assertion criteria for have name starting with. */
+    public fun haveNameStartingWith(vararg prefixes: String): ClassesRuleBuilder =
+        haveNameStartingWith(prefixes.toList())
 
-    infix fun notHaveNameStartingWith(prefix: String): ClassesRuleBuilder {
+    /** Specifies not have name starting with criteria. */
+    public infix fun notHaveNameStartingWith(prefix: String): ClassesRuleBuilder {
         builder.setThat { !it.name.startsWith(prefix) }
         return builder
     }
 
-    infix fun notHaveNameStartingWith(prefixes: List<String>): ClassesRuleBuilder {
+    /** Specifies not have name starting with criteria. */
+    public infix fun notHaveNameStartingWith(prefixes: List<String>): ClassesRuleBuilder {
         builder.setThat { context ->
             !prefixes.any { context.name.startsWith(it) }
         }
         return builder
     }
 
-    fun notHaveNameStartingWith(vararg prefixes: String): ClassesRuleBuilder =
+    /** Filter or assertion criteria for not have name starting with. */
+    public fun notHaveNameStartingWith(vararg prefixes: String): ClassesRuleBuilder =
         notHaveNameStartingWith(prefixes.toList())
 
-    infix fun haveName(predicate: (String) -> Boolean): ClassesRuleBuilder =
+    /** Specifies have name criteria. */
+    public infix fun haveName(predicate: (String) -> Boolean): ClassesRuleBuilder =
         haveName("custom name predicate", predicate)
 
+    /** Filter or assertion criteria for have name. */
     @Suppress("UnusedParameter")
-    fun haveName(
+    public fun haveName(
         description: String,
         predicate: (String) -> Boolean,
     ): ClassesRuleBuilder {
@@ -253,86 +308,114 @@ interface ClassesThatNameFilter : ClassesThatScope {
         return builder
     }
 
-    infix fun haveNameMatching(pattern: String): ClassesRuleBuilder {
+    /** Specifies have name matching criteria. */
+    public infix fun haveNameMatching(pattern: String): ClassesRuleBuilder {
         builder.setThat { PatternMatchers.matchesSimpleGlob(pattern, it.name) }
         return builder
     }
 
-    infix fun haveNameMatching(patterns: List<String>): ClassesRuleBuilder {
+    /** Specifies have name matching criteria. */
+    public infix fun haveNameMatching(patterns: List<String>): ClassesRuleBuilder {
         builder.setThat { context ->
             patterns.any { PatternMatchers.matchesSimpleGlob(it, context.name) }
         }
         return builder
     }
 
-    fun haveNameMatching(vararg patterns: String): ClassesRuleBuilder = haveNameMatching(patterns.toList())
+    /** Filter or assertion criteria for have name matching. */
+    public fun haveNameMatching(vararg patterns: String): ClassesRuleBuilder = haveNameMatching(patterns.toList())
 
-    infix fun notHaveNameMatching(pattern: String): ClassesRuleBuilder {
+    /** Specifies not have name matching criteria. */
+    public infix fun notHaveNameMatching(pattern: String): ClassesRuleBuilder {
         builder.setThat { !PatternMatchers.matchesSimpleGlob(pattern, it.name) }
         return builder
     }
 
-    infix fun notHaveNameMatching(patterns: List<String>): ClassesRuleBuilder {
+    /** Specifies not have name matching criteria. */
+    public infix fun notHaveNameMatching(patterns: List<String>): ClassesRuleBuilder {
         builder.setThat { context ->
             !patterns.any { PatternMatchers.matchesSimpleGlob(it, context.name) }
         }
         return builder
     }
 
-    fun notHaveNameMatching(vararg patterns: String): ClassesRuleBuilder = notHaveNameMatching(patterns.toList())
+    /** Filter or assertion criteria for not have name matching. */
+    public fun notHaveNameMatching(vararg patterns: String): ClassesRuleBuilder = notHaveNameMatching(patterns.toList())
 }
 
 /**
  * Trait interface for structural, hierarchy, member and type assignability filtering on classes.
  */
 @Suppress("ComplexInterface")
-interface ClassesThatStructureFilter : ClassesThatScope {
-    infix fun areAssignableTo(superType: String): ClassesRuleBuilder {
+public interface ClassesThatStructureFilter : ClassesThatScope {
+    /** Specifies are assignable to criteria. */
+    public infix fun areAssignableTo(superType: String): ClassesRuleBuilder {
+        /** Filter or assertion criteria for all classes. */
         val allClasses = builder.graph.getAllModules().flatMap { it.classes }
         builder.setThat { it.isAssignableTo(superType, allClasses) }
         return builder
     }
 
-    infix fun areAssignableTo(superType: KClass<*>): ClassesRuleBuilder =
+    /** Specifies are assignable to criteria. */
+    public infix fun areAssignableTo(superType: KClass<*>): ClassesRuleBuilder =
         areAssignableTo(superType.kontureQualifiedName())
 
-    infix fun beChildOf(superType: String): ClassesRuleBuilder = areAssignableTo(superType)
+    /** Specifies be child of criteria. */
+    public infix fun beChildOf(superType: String): ClassesRuleBuilder = areAssignableTo(superType)
 
-    infix fun beChildOf(superType: KClass<*>): ClassesRuleBuilder = areAssignableTo(superType)
+    /** Specifies be child of criteria. */
+    public infix fun beChildOf(superType: KClass<*>): ClassesRuleBuilder = areAssignableTo(superType)
 
-    infix fun areAssignableToAnyOf(superType: String): ClassesRuleBuilder = areAssignableToAnyOf(listOf(superType))
+    /** Specifies are assignable to any of criteria. */
+    public infix fun areAssignableToAnyOf(superType: String): ClassesRuleBuilder =
+        areAssignableToAnyOf(listOf(superType))
 
-    infix fun areAssignableToAnyOf(superTypes: List<String>): ClassesRuleBuilder {
+    /** Specifies are assignable to any of criteria. */
+    public infix fun areAssignableToAnyOf(superTypes: List<String>): ClassesRuleBuilder {
+        /** Filter or assertion criteria for all classes. */
         val allClasses = builder.graph.getAllModules().flatMap { it.classes }
         builder.setThat { cls -> superTypes.any { cls.isAssignableTo(it, allClasses) } }
         return builder
     }
 
-    fun areAssignableToAnyOf(vararg superTypes: String): ClassesRuleBuilder = areAssignableToAnyOf(superTypes.asList())
+    /** Filter or assertion criteria for are assignable to any of. */
+    public fun areAssignableToAnyOf(vararg superTypes: String): ClassesRuleBuilder =
+        areAssignableToAnyOf(superTypes.asList())
 
-    fun areAssignableToAnyOf(
+    /** Filter or assertion criteria for are assignable to any of. */
+    public fun areAssignableToAnyOf(
         first: KClass<*>,
         vararg additional: KClass<*>,
     ): ClassesRuleBuilder = areAssignableToAnyOf((arrayOf(first, *additional)).map { it.kontureQualifiedName() })
 
-    infix fun areAssignableToAllOf(superType: String): ClassesRuleBuilder = areAssignableToAllOf(listOf(superType))
+    /** Specifies are assignable to all of criteria. */
+    public infix fun areAssignableToAllOf(superType: String): ClassesRuleBuilder =
+        areAssignableToAllOf(listOf(superType))
 
-    infix fun areAssignableToAllOf(superTypes: List<String>): ClassesRuleBuilder {
+    /** Specifies are assignable to all of criteria. */
+    public infix fun areAssignableToAllOf(superTypes: List<String>): ClassesRuleBuilder {
+        /** Filter or assertion criteria for all classes. */
         val allClasses = builder.graph.getAllModules().flatMap { it.classes }
         builder.setThat { cls -> superTypes.all { cls.isAssignableTo(it, allClasses) } }
         return builder
     }
 
-    fun areAssignableToAllOf(vararg superTypes: String): ClassesRuleBuilder = areAssignableToAllOf(superTypes.asList())
+    /** Filter or assertion criteria for are assignable to all of. */
+    public fun areAssignableToAllOf(vararg superTypes: String): ClassesRuleBuilder =
+        areAssignableToAllOf(superTypes.asList())
 
-    fun areAssignableToAllOf(
+    /** Filter or assertion criteria for are assignable to all of. */
+    public fun areAssignableToAllOf(
         first: KClass<*>,
         vararg additional: KClass<*>,
     ): ClassesRuleBuilder = areAssignableToAllOf((arrayOf(first, *additional)).map { it.kontureQualifiedName() })
 
-    infix fun areAssignableFrom(subType: String): ClassesRuleBuilder {
+    /** Specifies are assignable from criteria. */
+    public infix fun areAssignableFrom(subType: String): ClassesRuleBuilder {
+        /** Filter or assertion criteria for all classes. */
         val allClasses = builder.graph.getAllModules().flatMap { it.classes }
         builder.setThat { cls ->
+            /** Filter or assertion criteria for sub type decl. */
             val subTypeDecl = allClasses.find { it.fqName == subType || it.name == subType }
             if (subTypeDecl != null) {
                 subTypeDecl.fqName == cls.fqName ||
@@ -345,15 +428,18 @@ interface ClassesThatStructureFilter : ClassesThatScope {
         return builder
     }
 
-    infix fun areAssignableFrom(subType: KClass<*>): ClassesRuleBuilder =
+    /** Specifies are assignable from criteria. */
+    public infix fun areAssignableFrom(subType: KClass<*>): ClassesRuleBuilder =
         areAssignableFrom(subType.kontureQualifiedName())
 
-    fun haveCompanionObject(): ClassesRuleBuilder {
+    /** Filter or assertion criteria for have companion object. */
+    public fun haveCompanionObject(): ClassesRuleBuilder {
         builder.setThat { it.companionObject != null }
         return builder
     }
 
-    fun haveNoArgConstructor(): ClassesRuleBuilder {
+    /** Filter or assertion criteria for have no arg constructor. */
+    public fun haveNoArgConstructor(): ClassesRuleBuilder {
         builder.setThat { cls ->
             cls.primaryConstructor?.parameters?.isEmpty() == true ||
                 cls.secondaryConstructors.any { it.parameters.isEmpty() }
@@ -361,57 +447,78 @@ interface ClassesThatStructureFilter : ClassesThatScope {
         return builder
     }
 
-    fun havePrivatePrimaryConstructor(): ClassesRuleBuilder {
+    /** Filter or assertion criteria for have private primary constructor. */
+    public fun havePrivatePrimaryConstructor(): ClassesRuleBuilder {
         builder.setThat { cls ->
             cls.primaryConstructor?.visibility == Visibility.PRIVATE
         }
         return builder
     }
 
-    infix fun containProperty(propertyName: String): ClassesRuleBuilder {
+    /** Specifies contain property criteria. */
+    public infix fun containProperty(propertyName: String): ClassesRuleBuilder {
         builder.setThat { cls -> cls.properties.any { it.name == propertyName } }
         return builder
     }
 
-    infix fun containProperty(propertyNames: List<String>): ClassesRuleBuilder {
+    /** Specifies contain property criteria. */
+    public infix fun containProperty(propertyNames: List<String>): ClassesRuleBuilder {
         builder.setThat { cls -> propertyNames.all { prop -> cls.properties.any { it.name == prop } } }
         return builder
     }
 
-    fun containProperty(vararg propertyNames: String): ClassesRuleBuilder = containProperty(propertyNames.toList())
+    /** Filter or assertion criteria for contain property. */
+    public fun containProperty(vararg propertyNames: String): ClassesRuleBuilder =
+        containProperty(propertyNames.toList())
 
-    infix fun containProperties(propertyNames: List<String>): ClassesRuleBuilder = containProperty(propertyNames)
+    /** Specifies contain properties criteria. */
+    public infix fun containProperties(propertyNames: List<String>): ClassesRuleBuilder = containProperty(propertyNames)
 
-    fun containProperties(vararg propertyNames: String): ClassesRuleBuilder = containProperty(propertyNames.toList())
+    /** Filter or assertion criteria for contain properties. */
+    public fun containProperties(vararg propertyNames: String): ClassesRuleBuilder =
+        containProperty(propertyNames.toList())
 
-    infix fun containFunction(functionName: String): ClassesRuleBuilder {
+    /** Specifies contain function criteria. */
+    public infix fun containFunction(functionName: String): ClassesRuleBuilder {
         builder.setThat { cls -> cls.functions.any { it.name == functionName } }
         return builder
     }
 
-    infix fun containFunction(functionNames: List<String>): ClassesRuleBuilder {
+    /** Specifies contain function criteria. */
+    public infix fun containFunction(functionNames: List<String>): ClassesRuleBuilder {
         builder.setThat { cls -> functionNames.all { func -> cls.functions.any { it.name == func } } }
         return builder
     }
 
-    fun containFunction(vararg functionNames: String): ClassesRuleBuilder = containFunction(functionNames.toList())
+    /** Filter or assertion criteria for contain function. */
+    public fun containFunction(vararg functionNames: String): ClassesRuleBuilder =
+        containFunction(functionNames.toList())
 
-    infix fun containFunctions(functionNames: List<String>): ClassesRuleBuilder = containFunction(functionNames)
+    /** Specifies contain functions criteria. */
+    public infix fun containFunctions(functionNames: List<String>): ClassesRuleBuilder = containFunction(functionNames)
 
-    fun containFunctions(vararg functionNames: String): ClassesRuleBuilder = containFunction(functionNames.toList())
+    /** Filter or assertion criteria for contain functions. */
+    public fun containFunctions(vararg functionNames: String): ClassesRuleBuilder =
+        containFunction(functionNames.toList())
 
-    infix fun areAssignableTo(superTypes: List<String>): ClassesRuleBuilder {
+    /** Specifies are assignable to criteria. */
+    public infix fun areAssignableTo(superTypes: List<String>): ClassesRuleBuilder {
+        /** Filter or assertion criteria for all classes. */
         val allClasses = builder.graph.getAllModules().flatMap { it.classes }
         builder.setThat { cls -> superTypes.all { cls.isAssignableTo(it, allClasses) } }
         return builder
     }
 
-    fun areAssignableTo(vararg superTypes: String): ClassesRuleBuilder = areAssignableTo(superTypes.toList())
+    /** Filter or assertion criteria for are assignable to. */
+    public fun areAssignableTo(vararg superTypes: String): ClassesRuleBuilder = areAssignableTo(superTypes.toList())
 
-    infix fun areAssignableFrom(subTypes: List<String>): ClassesRuleBuilder {
+    /** Specifies are assignable from criteria. */
+    public infix fun areAssignableFrom(subTypes: List<String>): ClassesRuleBuilder {
+        /** Filter or assertion criteria for all classes. */
         val allClasses = builder.graph.getAllModules().flatMap { it.classes }
         builder.setThat { cls ->
             subTypes.all { subType ->
+                /** Filter or assertion criteria for sub type decl. */
                 val subTypeDecl = allClasses.find { it.fqName == subType || it.name == subType }
                 if (subTypeDecl != null) {
                     subTypeDecl.fqName == cls.fqName ||
@@ -425,19 +532,27 @@ interface ClassesThatStructureFilter : ClassesThatScope {
         return builder
     }
 
-    fun areAssignableFrom(vararg subTypes: String): ClassesRuleBuilder = areAssignableFrom(subTypes.toList())
+    /** Filter or assertion criteria for are assignable from. */
+    public fun areAssignableFrom(vararg subTypes: String): ClassesRuleBuilder = areAssignableFrom(subTypes.toList())
 
-    infix fun areNotAssignableTo(superType: String): ClassesRuleBuilder {
+    /** Specifies are not assignable to criteria. */
+    public infix fun areNotAssignableTo(superType: String): ClassesRuleBuilder {
+        /** Filter or assertion criteria for all classes. */
         val allClasses = builder.graph.getAllModules().flatMap { it.classes }
         builder.setThat { cls -> !cls.isAssignableTo(superType, allClasses) }
         return builder
     }
 
-    infix fun areNotAssignableTo(type: KClass<*>): ClassesRuleBuilder = areNotAssignableTo(type.kontureQualifiedName())
+    /** Specifies are not assignable to criteria. */
+    public infix fun areNotAssignableTo(type: KClass<*>): ClassesRuleBuilder =
+        areNotAssignableTo(type.kontureQualifiedName())
 
-    infix fun areNotAssignableFrom(subType: String): ClassesRuleBuilder {
+    /** Specifies are not assignable from criteria. */
+    public infix fun areNotAssignableFrom(subType: String): ClassesRuleBuilder {
+        /** Filter or assertion criteria for all classes. */
         val allClasses = builder.graph.getAllModules().flatMap { it.classes }
         builder.setThat { cls ->
+            /** Filter or assertion criteria for sub type decl. */
             val subTypeDecl = allClasses.find { it.fqName == subType || it.name == subType }
             if (subTypeDecl != null) {
                 subTypeDecl.fqName != cls.fqName &&
@@ -450,7 +565,8 @@ interface ClassesThatStructureFilter : ClassesThatScope {
         return builder
     }
 
-    infix fun areNotAssignableFrom(type: KClass<*>): ClassesRuleBuilder =
+    /** Specifies are not assignable from criteria. */
+    public infix fun areNotAssignableFrom(type: KClass<*>): ClassesRuleBuilder =
         areNotAssignableFrom(type.kontureQualifiedName())
 }
 
@@ -458,40 +574,52 @@ interface ClassesThatStructureFilter : ClassesThatScope {
  * Trait interface for metadata, annotations, modifiers and visibility filtering on classes.
  */
 @Suppress("ComplexInterface")
-interface ClassesThatMetadataFilter : ClassesThatScope {
-    infix fun haveAnnotationOf(annotationFqName: String): ClassesRuleBuilder {
+public interface ClassesThatMetadataFilter : ClassesThatScope {
+    /** Specifies have annotation of criteria. */
+    public infix fun haveAnnotationOf(annotationFqName: String): ClassesRuleBuilder {
         builder.setThat { cls ->
             cls.annotations.any { it.fqName == annotationFqName || it.name == annotationFqName }
         }
         return builder
     }
 
-    infix fun haveAnnotationOf(annotation: KClass<out Annotation>): ClassesRuleBuilder =
+    /** Specifies have annotation of criteria. */
+    public infix fun haveAnnotationOf(annotation: KClass<out Annotation>): ClassesRuleBuilder =
         haveAnnotationOf(annotation.kontureQualifiedName())
 
-    infix fun areAnnotatedWith(annotationFqName: String): ClassesRuleBuilder = haveAnnotationOf(annotationFqName)
+    /** Specifies are annotated with criteria. */
+    public infix fun areAnnotatedWith(annotationFqName: String): ClassesRuleBuilder = haveAnnotationOf(annotationFqName)
 
-    infix fun areAnnotatedWith(annotation: KClass<out Annotation>): ClassesRuleBuilder = haveAnnotationOf(annotation)
+    /** Specifies are annotated with criteria. */
+    public infix fun areAnnotatedWith(annotation: KClass<out Annotation>): ClassesRuleBuilder =
+        haveAnnotationOf(annotation)
 
-    infix fun haveAllAnnotationsOf(name: String): ClassesRuleBuilder = haveAllAnnotationsOf(listOf(name))
+    /** Specifies have all annotations of criteria. */
+    public infix fun haveAllAnnotationsOf(name: String): ClassesRuleBuilder = haveAllAnnotationsOf(listOf(name))
 
-    infix fun haveAllAnnotationsOf(names: List<String>): ClassesRuleBuilder {
+    /** Specifies have all annotations of criteria. */
+    public infix fun haveAllAnnotationsOf(names: List<String>): ClassesRuleBuilder {
         builder.setThat { it.hasAllAnnotations(names) }
         return builder
     }
 
-    fun haveAllAnnotationsOf(vararg names: String): ClassesRuleBuilder = haveAllAnnotationsOf(names.asList())
+    /** Filter or assertion criteria for have all annotations of. */
+    public fun haveAllAnnotationsOf(vararg names: String): ClassesRuleBuilder = haveAllAnnotationsOf(names.asList())
 
-    infix fun haveAnyAnnotationOf(name: String): ClassesRuleBuilder = haveAnyAnnotationOf(listOf(name))
+    /** Specifies have any annotation of criteria. */
+    public infix fun haveAnyAnnotationOf(name: String): ClassesRuleBuilder = haveAnyAnnotationOf(listOf(name))
 
-    infix fun haveAnyAnnotationOf(names: List<String>): ClassesRuleBuilder {
+    /** Specifies have any annotation of criteria. */
+    public infix fun haveAnyAnnotationOf(names: List<String>): ClassesRuleBuilder {
         builder.setThat { it.hasAnyAnnotation(names) }
         return builder
     }
 
-    fun haveAnyAnnotationOf(vararg names: String): ClassesRuleBuilder = haveAnyAnnotationOf(names.asList())
+    /** Filter or assertion criteria for have any annotation of. */
+    public fun haveAnyAnnotationOf(vararg names: String): ClassesRuleBuilder = haveAnyAnnotationOf(names.asList())
 
-    fun haveAnnotationWithArgument(
+    /** Filter or assertion criteria for have annotation with argument. */
+    public fun haveAnnotationWithArgument(
         annotationName: String,
         argName: String?,
         argValue: String,
@@ -507,104 +635,132 @@ interface ClassesThatMetadataFilter : ClassesThatScope {
         return builder
     }
 
-    fun areInterfaces(): ClassesRuleBuilder {
+    /** Filter or assertion criteria for are interfaces. */
+    public fun areInterfaces(): ClassesRuleBuilder {
         builder.setThat { it.isInterface }
         return builder
     }
 
-    fun areEnums(): ClassesRuleBuilder {
+    /** Filter or assertion criteria for are enums. */
+    public fun areEnums(): ClassesRuleBuilder {
         builder.setThat { it.isEnum }
         return builder
     }
 
-    fun areAbstract(): ClassesRuleBuilder {
+    /** Filter or assertion criteria for are abstract. */
+    public fun areAbstract(): ClassesRuleBuilder {
         builder.setThat { it.isAbstract || it.isInterface }
         return builder
     }
 
-    infix fun haveVisibility(visibility: Visibility): ClassesRuleBuilder {
+    /** Specifies have visibility criteria. */
+    public infix fun haveVisibility(visibility: Visibility): ClassesRuleBuilder {
         builder.setThat { it.visibility == visibility }
         return builder
     }
 
-    infix fun haveAnyVisibility(visibility: Visibility): ClassesRuleBuilder = haveAnyVisibility(listOf(visibility))
+    /** Specifies have any visibility criteria. */
+    public infix fun haveAnyVisibility(visibility: Visibility): ClassesRuleBuilder =
+        haveAnyVisibility(listOf(visibility))
 
-    infix fun haveAnyVisibility(visibilities: List<Visibility>): ClassesRuleBuilder {
+    /** Specifies have any visibility criteria. */
+    public infix fun haveAnyVisibility(visibilities: List<Visibility>): ClassesRuleBuilder {
         builder.setThat { cls -> visibilities.contains(cls.visibility) }
         return builder
     }
 
-    fun haveAnyVisibility(vararg visibilities: Visibility): ClassesRuleBuilder =
+    /** Filter or assertion criteria for have any visibility. */
+    public fun haveAnyVisibility(vararg visibilities: Visibility): ClassesRuleBuilder =
         haveAnyVisibility(visibilities.asList())
 
-    fun bePublic(): ClassesRuleBuilder = haveVisibility(Visibility.PUBLIC)
+    /** Filter or assertion criteria for be public. */
+    public fun bePublic(): ClassesRuleBuilder = haveVisibility(Visibility.PUBLIC)
 
-    fun beInternal(): ClassesRuleBuilder = haveVisibility(Visibility.INTERNAL)
+    /** Filter or assertion criteria for be internal. */
+    public fun beInternal(): ClassesRuleBuilder = haveVisibility(Visibility.INTERNAL)
 
-    fun bePrivate(): ClassesRuleBuilder = haveVisibility(Visibility.PRIVATE)
+    /** Filter or assertion criteria for be private. */
+    public fun bePrivate(): ClassesRuleBuilder = haveVisibility(Visibility.PRIVATE)
 
-    fun beProtected(): ClassesRuleBuilder = haveVisibility(Visibility.PROTECTED)
+    /** Filter or assertion criteria for be protected. */
+    public fun beProtected(): ClassesRuleBuilder = haveVisibility(Visibility.PROTECTED)
 
-    infix fun haveModifier(modifier: Modifier): ClassesRuleBuilder {
+    /** Specifies have modifier criteria. */
+    public infix fun haveModifier(modifier: Modifier): ClassesRuleBuilder {
         builder.setThat { it.modifiers.contains(modifier) }
         return builder
     }
 
-    infix fun haveAnyModifier(modifier: Modifier): ClassesRuleBuilder = haveAnyModifier(listOf(modifier))
+    /** Specifies have any modifier criteria. */
+    public infix fun haveAnyModifier(modifier: Modifier): ClassesRuleBuilder = haveAnyModifier(listOf(modifier))
 
-    infix fun haveAnyModifier(modifiers: List<Modifier>): ClassesRuleBuilder {
+    /** Specifies have any modifier criteria. */
+    public infix fun haveAnyModifier(modifiers: List<Modifier>): ClassesRuleBuilder {
         builder.setThat { cls -> modifiers.any { cls.modifiers.contains(it) } }
         return builder
     }
 
-    fun haveAnyModifier(vararg modifiers: Modifier): ClassesRuleBuilder = haveAnyModifier(modifiers.asList())
+    /** Filter or assertion criteria for have any modifier. */
+    public fun haveAnyModifier(vararg modifiers: Modifier): ClassesRuleBuilder = haveAnyModifier(modifiers.asList())
 
-    infix fun haveAllModifiers(modifier: Modifier): ClassesRuleBuilder = haveAllModifiers(listOf(modifier))
+    /** Specifies have all modifiers criteria. */
+    public infix fun haveAllModifiers(modifier: Modifier): ClassesRuleBuilder = haveAllModifiers(listOf(modifier))
 
-    infix fun haveAllModifiers(modifiers: List<Modifier>): ClassesRuleBuilder {
+    /** Specifies have all modifiers criteria. */
+    public infix fun haveAllModifiers(modifiers: List<Modifier>): ClassesRuleBuilder {
         builder.setThat { cls -> modifiers.all { cls.modifiers.contains(it) } }
         return builder
     }
 
-    fun haveAllModifiers(vararg modifiers: Modifier): ClassesRuleBuilder = haveAllModifiers(modifiers.asList())
+    /** Filter or assertion criteria for have all modifiers. */
+    public fun haveAllModifiers(vararg modifiers: Modifier): ClassesRuleBuilder = haveAllModifiers(modifiers.asList())
 
-    fun beSealed(): ClassesRuleBuilder = haveModifier(Modifier.SEALED)
+    /** Filter or assertion criteria for be sealed. */
+    public fun beSealed(): ClassesRuleBuilder = haveModifier(Modifier.SEALED)
 
-    fun beData(): ClassesRuleBuilder = haveModifier(Modifier.DATA)
+    /** Filter or assertion criteria for be data. */
+    public fun beData(): ClassesRuleBuilder = haveModifier(Modifier.DATA)
 
-    fun beInline(): ClassesRuleBuilder {
+    /** Filter or assertion criteria for be inline. */
+    public fun beInline(): ClassesRuleBuilder {
         builder.setThat { it.modifiers.contains(Modifier.INLINE) || it.modifiers.contains(Modifier.VALUE) }
         return builder
     }
 
-    fun areOpen(): ClassesRuleBuilder {
+    /** Filter or assertion criteria for are open. */
+    public fun areOpen(): ClassesRuleBuilder {
         builder.setThat { cls -> cls.modifiers.contains(Modifier.OPEN) }
         return builder
     }
 
-    fun areOverride(): ClassesRuleBuilder {
+    /** Filter or assertion criteria for are override. */
+    public fun areOverride(): ClassesRuleBuilder {
         builder.setThat { cls -> cls.modifiers.contains(Modifier.OVERRIDE) }
         return builder
     }
 
-    fun areInner(): ClassesRuleBuilder {
+    /** Filter or assertion criteria for are inner. */
+    public fun areInner(): ClassesRuleBuilder {
         builder.setThat { cls -> cls.modifiers.contains(Modifier.INNER) }
         return builder
     }
 
-    fun areTopLevel(): ClassesRuleBuilder {
+    /** Filter or assertion criteria for are top level. */
+    public fun areTopLevel(): ClassesRuleBuilder {
         builder.setThat { cls ->
             !cls.fqName.substringBeforeLast('.').contains('.') || cls.packageName == cls.fqName.substringBeforeLast('.')
         }
         return builder
     }
 
-    fun areNested(): ClassesRuleBuilder {
+    /** Filter or assertion criteria for are nested. */
+    public fun areNested(): ClassesRuleBuilder {
         builder.setThat { cls -> cls.packageName != cls.fqName.substringBeforeLast('.') }
         return builder
     }
 
-    fun beDocumentedWithKDoc(): ClassesRuleBuilder {
+    /** Filter or assertion criteria for be documented with k doc. */
+    public fun beDocumentedWithKDoc(): ClassesRuleBuilder {
         builder.setThat { it.kdocText?.isNotBlank() == true }
         return builder
     }
@@ -613,22 +769,28 @@ interface ClassesThatMetadataFilter : ClassesThatScope {
 /**
  * Trait interface for composite, logical and custom predicate filtering on classes.
  */
-interface ClassesThatCompositeFilter : ClassesThatScope {
-    fun not(): ClassesThat = builder.not()
+public interface ClassesThatCompositeFilter : ClassesThatScope {
+    /** Filter or assertion criteria for not. */
+    public fun not(): ClassesThat = builder.not()
 
-    infix fun matching(predicate: (ClassDeclaration) -> Boolean): ClassesRuleBuilder {
+    /** Specifies matching criteria. */
+    public infix fun matching(predicate: (ClassDeclaration) -> Boolean): ClassesRuleBuilder {
         builder.setThat(predicate)
         return builder
     }
 
-    fun satisfy(predicate: (ClassDeclaration) -> Boolean): ClassesRuleBuilder {
+    /** Filter or assertion criteria for satisfy. */
+    public fun satisfy(predicate: (ClassDeclaration) -> Boolean): ClassesRuleBuilder {
         builder.setThat(predicate)
         return builder
     }
 
-    fun anyOf(vararg blocks: ClassesThat.() -> Unit): ClassesRuleBuilder {
+    /** Filter or assertion criteria for any of. */
+    public fun anyOf(vararg blocks: ClassesThat.() -> Unit): ClassesRuleBuilder {
+        /** Filter or assertion criteria for predicates. */
         val predicates =
             blocks.map { block ->
+                /** Filter or assertion criteria for temp builder. */
                 val tempBuilder = ClassesRuleBuilder(builder.graph)
                 ClassesThat(tempBuilder).block()
                 tempBuilder.getThatPredicate() ?: { true }
@@ -637,9 +799,12 @@ interface ClassesThatCompositeFilter : ClassesThatScope {
         return builder
     }
 
-    fun allOf(vararg blocks: ClassesThat.() -> Unit): ClassesRuleBuilder {
+    /** Filter or assertion criteria for all of. */
+    public fun allOf(vararg blocks: ClassesThat.() -> Unit): ClassesRuleBuilder {
+        /** Filter or assertion criteria for predicates. */
         val predicates =
             blocks.map { block ->
+                /** Filter or assertion criteria for temp builder. */
                 val tempBuilder = ClassesRuleBuilder(builder.graph)
                 ClassesThat(tempBuilder).block()
                 tempBuilder.getThatPredicate() ?: { true }
@@ -648,9 +813,12 @@ interface ClassesThatCompositeFilter : ClassesThatScope {
         return builder
     }
 
-    fun noneOf(vararg blocks: ClassesThat.() -> Unit): ClassesRuleBuilder {
+    /** Filter or assertion criteria for none of. */
+    public fun noneOf(vararg blocks: ClassesThat.() -> Unit): ClassesRuleBuilder {
+        /** Filter or assertion criteria for predicates. */
         val predicates =
             blocks.map { block ->
+                /** Filter or assertion criteria for temp builder. */
                 val tempBuilder = ClassesRuleBuilder(builder.graph)
                 ClassesThat(tempBuilder).block()
                 tempBuilder.getThatPredicate() ?: { true }

@@ -8,13 +8,17 @@ package io.github.baole.konture
 
 import io.github.baole.konture.i18n.getMessage
 
-interface FilesShouldCompositeAssertions {
-    val builder: FilesRuleBuilder
+/** Composite condition assertions for file rules. */
+public interface FilesShouldCompositeAssertions {
+    /** Filter or assertion criteria for builder. */
+    public val builder: FilesRuleBuilder
 
-    infix fun satisfy(assertion: (FileDeclarationContext) -> Boolean): FilesRuleBuilder =
+    /** Asserts that selected files satisfy a custom boolean condition. */
+    public infix fun satisfy(assertion: (FileDeclarationContext) -> Boolean): FilesRuleBuilder =
         satisfy("custom condition") { f, _ -> assertion(f) }
 
-    fun satisfy(
+    /** Asserts that selected files satisfy a custom boolean condition with description. */
+    public fun satisfy(
         description: String,
         assertion: (FileDeclarationContext, List<FileDeclarationContext>) -> Boolean,
     ): FilesRuleBuilder {
@@ -28,18 +32,25 @@ interface FilesShouldCompositeAssertions {
         return builder
     }
 
-    fun satisfy(assertion: (FileDeclarationContext, MutableList<String>) -> Unit): FilesRuleBuilder {
+    /** Asserts that selected files satisfy a custom violation-collecting assertion. */
+    public fun satisfy(assertion: (FileDeclarationContext, MutableList<String>) -> Unit): FilesRuleBuilder {
         builder.setShould { file, _, violations -> assertion(file, violations) }
         return builder
     }
 
-    fun anyOf(vararg blocks: FilesShould.() -> Unit): FilesRuleBuilder {
+    /** Asserts that selected files satisfy at least one of the specified assertion blocks. */
+    public fun anyOf(vararg blocks: FilesShould.() -> Unit): FilesRuleBuilder {
         builder.setShould { file, allFiles, violations ->
+            /** Filter or assertion criteria for any passed. */
             val anyPassed =
                 blocks.any { block ->
+                    /** Filter or assertion criteria for sub builder. */
                     val subBuilder = FilesRuleBuilder(builder.graph).allowEmpty()
                     FilesShould(subBuilder).apply(block)
+                    /** Filter or assertion criteria for sub assertion. */
                     val subAssertion = subBuilder.getShouldAssertion()
+
+                    /** Filter or assertion criteria for sub violations. */
                     val subViolations = mutableListOf<String>()
                     subAssertion?.invoke(file, allFiles, subViolations)
                     subViolations.isEmpty()
@@ -51,11 +62,14 @@ interface FilesShouldCompositeAssertions {
         return builder
     }
 
-    fun allOf(vararg blocks: FilesShould.() -> Unit): FilesRuleBuilder {
+    /** Filter or assertion criteria for all of. */
+    public fun allOf(vararg blocks: FilesShould.() -> Unit): FilesRuleBuilder {
         builder.setShould { file, allFiles, violations ->
             blocks.forEach { block ->
+                /** Filter or assertion criteria for sub builder. */
                 val subBuilder = FilesRuleBuilder(builder.graph).allowEmpty()
                 FilesShould(subBuilder).apply(block)
+                /** Filter or assertion criteria for sub assertion. */
                 val subAssertion = subBuilder.getShouldAssertion()
                 subAssertion?.invoke(file, allFiles, violations)
             }
@@ -63,13 +77,19 @@ interface FilesShouldCompositeAssertions {
         return builder
     }
 
-    fun noneOf(vararg blocks: FilesShould.() -> Unit): FilesRuleBuilder {
+    /** Filter or assertion criteria for none of. */
+    public fun noneOf(vararg blocks: FilesShould.() -> Unit): FilesRuleBuilder {
         builder.setShould { file, allFiles, violations ->
+            /** Filter or assertion criteria for any passed. */
             val anyPassed =
                 blocks.any { block ->
+                    /** Filter or assertion criteria for sub builder. */
                     val subBuilder = FilesRuleBuilder(builder.graph).allowEmpty()
                     FilesShould(subBuilder).apply(block)
+                    /** Filter or assertion criteria for sub assertion. */
                     val subAssertion = subBuilder.getShouldAssertion()
+
+                    /** Filter or assertion criteria for sub violations. */
                     val subViolations = mutableListOf<String>()
                     subAssertion?.invoke(file, allFiles, subViolations)
                     subViolations.isEmpty()

@@ -6,6 +6,7 @@
 
 package io.github.baole.konture.core
 
+/** Central logger for Konture diagnostic messages and warnings. */
 public object KontureLogger {
     private val threadLocalMinLevel = ThreadLocal.withInitial { LogLevel.INFO }
     private val threadLocalLogger =
@@ -24,18 +25,21 @@ public object KontureLogger {
             }
         }
 
+    /** The minimum log level required for log messages to be emitted. */
     public var minLevel: LogLevel
         get() = threadLocalMinLevel.get()
         set(value) {
             threadLocalMinLevel.set(value)
         }
 
+    /** Custom log handler function receiving the level, message, and optional throwable. */
     public var logger: (level: LogLevel, message: String, throwable: Throwable?) -> Unit
         get() = threadLocalLogger.get()
         set(value) {
             threadLocalLogger.set(value)
         }
 
+    /** Logs a diagnostic message with the given [level], [message], and optional [throwable]. */
     public fun log(
         level: LogLevel,
         message: String,

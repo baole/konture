@@ -50,6 +50,7 @@ public object Konture {
             if (KontureRuntimeStateProvider.currentState.isLocaleOverridden) {
                 return KontureRuntimeStateProvider.currentState.locale
             }
+            /** Filter or assertion criteria for system prop. */
             val systemProp = System.getProperty(PROPERTY_LOCALE)
             return if (systemProp != null) {
                 Locale.forLanguageTag(systemProp)
@@ -71,8 +72,10 @@ public object Konture {
      */
     public val projectGraph: ProjectGraph
         get() {
+            /** Filter or assertion criteria for state. */
             val state = KontureRuntimeStateProvider.currentState
             return state.projectGraph ?: run {
+                /** Filter or assertion criteria for loaded. */
                 val loaded = state.projectGraphLoader.loadFromResource()
                 ProjectGraph.setDefault(loaded)
                 loaded

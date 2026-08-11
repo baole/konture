@@ -16,7 +16,7 @@ package io.github.baole.konture
  * @param predicate The filter criteria block executed on the [PropertyDeclarationContext].
  * @return This [PropertiesRuleBuilder] with the filter condition applied.
  */
-fun PropertiesRuleBuilder.that(predicate: PropertyDeclarationContext.() -> Boolean): PropertiesRuleBuilder =
+public fun PropertiesRuleBuilder.that(predicate: PropertyDeclarationContext.() -> Boolean): PropertiesRuleBuilder =
     this.apply {
         setThat { it.predicate() }
     }
@@ -28,10 +28,13 @@ fun PropertiesRuleBuilder.that(predicate: PropertyDeclarationContext.() -> Boole
  * @param assertion The assertion block containing property validation rules or boolean predicate.
  * @return This [PropertiesRuleBuilder] with the assertion block registered.
  */
-fun PropertiesRuleBuilder.should(assertion: PropertyDeclarationShouldContext.() -> Any?): PropertiesRuleBuilder =
+public fun PropertiesRuleBuilder.should(assertion: PropertyDeclarationShouldContext.() -> Any?): PropertiesRuleBuilder =
     this.apply {
         setShould { prop, allProperties, violations ->
+            /** Filter or assertion criteria for context. */
             val context = PropertyDeclarationShouldContext(prop, allProperties, violations)
+
+            /** Filter or assertion criteria for result. */
             val result = context.assertion()
             validateAssertionResult(result)
             if (result is Boolean && !result) {
@@ -53,30 +56,60 @@ fun PropertiesRuleBuilder.should(assertion: PropertyDeclarationShouldContext.() 
  * @property allProperties The complete list of property declaration contexts in this test run scope.
  * @property violations Mutable collection where assertion failure messages are appended.
  */
-class PropertyDeclarationShouldContext internal constructor(
-    val element: PropertyDeclarationContext,
-    val allProperties: List<PropertyDeclarationContext>,
-    val violations: MutableList<String>,
+public class PropertyDeclarationShouldContext internal constructor(
+    /** Filter or assertion criteria for element. */
+    public val element: PropertyDeclarationContext,
+    /** Filter or assertion criteria for all properties. */
+    public val allProperties: List<PropertyDeclarationContext>,
+    /** Filter or assertion criteria for violations. */
+    public val violations: MutableList<String>,
 ) {
-    val declaration get() = element.declaration
-    val name get() = element.declaration.name
-    val packageName get() = element.packageName
-    val className get() = element.className
-    val modulePath get() = element.modulePath
-    val filePath get() = element.filePath
-    val visibility get() = element.declaration.visibility
-    val modifiers get() = element.declaration.modifiers
-    val type get() = element.declaration.type
-    val isVal get() = element.declaration.isVal
-    val isVar get() = element.declaration.isVar
-    val annotations get() = element.declaration.annotations
-    val kdocText get() = element.declaration.kdocText
-    val isExtension get() = element.declaration.isExtension
+    /** Filter or assertion criteria for declaration. */
+    public val declaration: PropertyDeclaration get() = element.declaration
+
+    /** Filter or assertion criteria for name. */
+    public val name: String get() = element.declaration.name
+
+    /** Filter or assertion criteria for package name. */
+    public val packageName: String get() = element.packageName
+
+    /** Filter or assertion criteria for class name. */
+    public val className: String? get() = element.className
+
+    /** Filter or assertion criteria for module path. */
+    public val modulePath: String get() = element.modulePath
+
+    /** Filter or assertion criteria for file path. */
+    public val filePath: String get() = element.filePath
+
+    /** Filter or assertion criteria for visibility. */
+    public val visibility: Visibility get() = element.declaration.visibility
+
+    /** Filter or assertion criteria for modifiers. */
+    public val modifiers: Set<Modifier> get() = element.declaration.modifiers
+
+    /** Filter or assertion criteria for type. */
+    public val type: String get() = element.declaration.type
+
+    /** Filter or assertion criteria for is val. */
+    public val isVal: Boolean get() = element.declaration.isVal
+
+    /** Filter or assertion criteria for is var. */
+    public val isVar: Boolean get() = element.declaration.isVar
+
+    /** Filter or assertion criteria for annotations. */
+    public val annotations: List<AnnotationDeclaration> get() = element.declaration.annotations
+
+    /** Filter or assertion criteria for kdoc text. */
+    public val kdocText: String? get() = element.declaration.kdocText
+
+    /** Filter or assertion criteria for is extension. */
+    public val isExtension: Boolean get() = element.declaration.isExtension
 
     /**
      * Appends a custom violation failure message to the assertion run.
      */
-    fun addViolation(message: String) {
+    public fun addViolation(message: String) {
         violations.add(message)
     }
 
@@ -84,7 +117,7 @@ class PropertyDeclarationShouldContext internal constructor(
      * Asserts [condition] is true, recording a violation with [message] when false.
      * When [message] is omitted, a default message referencing [element] is used.
      */
-    fun check(
+    public fun check(
         condition: Boolean,
         message: String? = null,
     ) {
@@ -96,32 +129,32 @@ class PropertyDeclarationShouldContext internal constructor(
     /**
      * Checks if this property is decorated with the specified annotation.
      */
-    fun hasAnnotation(name: String): Boolean = annotations.any { it.name == name || it.fqName == name }
+    public fun hasAnnotation(name: String): Boolean = annotations.any { it.name == name || it.fqName == name }
 
     /**
      * Checks if this property is decorated with all of the specified annotations.
      */
-    fun hasAllAnnotations(names: List<String>): Boolean = element.hasAllAnnotations(names)
+    public fun hasAllAnnotations(names: List<String>): Boolean = element.hasAllAnnotations(names)
 
     /**
      * Checks if this property is decorated with all of the specified annotations.
      */
-    fun hasAllAnnotations(vararg names: String): Boolean = hasAllAnnotations(names.asList())
+    public fun hasAllAnnotations(vararg names: String): Boolean = hasAllAnnotations(names.asList())
 
     /**
      * Checks if this property is decorated with any of the specified annotations.
      */
-    fun hasAnyAnnotation(names: List<String>): Boolean = element.hasAnyAnnotation(names)
+    public fun hasAnyAnnotation(names: List<String>): Boolean = element.hasAnyAnnotation(names)
 
     /**
      * Checks if this property is decorated with any of the specified annotations.
      */
-    fun hasAnyAnnotation(vararg names: String): Boolean = hasAnyAnnotation(names.asList())
+    public fun hasAnyAnnotation(vararg names: String): Boolean = hasAnyAnnotation(names.asList())
 
     /**
      * Asserts that this property is decorated with the specified annotation.
      */
-    fun assertAnnotationOf(annotationName: String) {
+    public fun assertAnnotationOf(annotationName: String) {
         if (!hasAnnotation(annotationName)) {
             addViolation(
                 io.github.baole.konture.i18n.getMessage("property.should.haveAnnotation", name, annotationName),
@@ -132,7 +165,7 @@ class PropertyDeclarationShouldContext internal constructor(
     /**
      * Asserts that this property is decorated with all of the specified annotations.
      */
-    fun assertAllAnnotationsOf(names: List<String>) {
+    public fun assertAllAnnotationsOf(names: List<String>) {
         if (!hasAllAnnotations(names)) {
             addViolation(
                 io.github.baole.konture.i18n.getMessage(
@@ -147,12 +180,12 @@ class PropertyDeclarationShouldContext internal constructor(
     /**
      * Asserts that this property is decorated with all of the specified annotations.
      */
-    fun assertAllAnnotationsOf(vararg names: String) = assertAllAnnotationsOf(names.asList())
+    public fun assertAllAnnotationsOf(vararg names: String): Unit = assertAllAnnotationsOf(names.asList())
 
     /**
      * Asserts that this property is decorated with at least one of the specified annotations.
      */
-    fun assertAnyAnnotationOf(names: List<String>) {
+    public fun assertAnyAnnotationOf(names: List<String>) {
         if (!hasAnyAnnotation(names)) {
             addViolation(
                 io.github.baole.konture.i18n.getMessage(
@@ -167,7 +200,7 @@ class PropertyDeclarationShouldContext internal constructor(
     /**
      * Asserts that this property is decorated with at least one of the specified annotations.
      */
-    fun assertAnyAnnotationOf(vararg names: String) = assertAnyAnnotationOf(names.asList())
+    public fun assertAnyAnnotationOf(vararg names: String): Unit = assertAnyAnnotationOf(names.asList())
 }
 
 // ==========================================
@@ -177,7 +210,7 @@ class PropertyDeclarationShouldContext internal constructor(
 /**
  * Helper extension to check if a property has the specified annotation.
  */
-fun PropertyDeclarationContext.hasAnnotation(name: String): Boolean =
+public fun PropertyDeclarationContext.hasAnnotation(name: String): Boolean =
     declaration.annotations.any { it.name == name || it.fqName == name }
 
 /**
@@ -186,7 +219,7 @@ fun PropertyDeclarationContext.hasAnnotation(name: String): Boolean =
  * @param names The list of annotation names or fully qualified names to check.
  * @return True if all annotations are present on this property, false otherwise.
  */
-fun PropertyDeclarationContext.hasAllAnnotations(names: List<String>): Boolean = names.all { hasAnnotation(it) }
+public fun PropertyDeclarationContext.hasAllAnnotations(names: List<String>): Boolean = names.all { hasAnnotation(it) }
 
 /**
  * Helper extension to check if a property has all of the specified annotations.
@@ -194,7 +227,8 @@ fun PropertyDeclarationContext.hasAllAnnotations(names: List<String>): Boolean =
  * @param names The vararg list of annotation names or fully qualified names to check.
  * @return True if all annotations are present on this property, false otherwise.
  */
-fun PropertyDeclarationContext.hasAllAnnotations(vararg names: String): Boolean = hasAllAnnotations(names.asList())
+public fun PropertyDeclarationContext.hasAllAnnotations(vararg names: String): Boolean =
+    hasAllAnnotations(names.asList())
 
 /**
  * Helper extension to check if a property has any of the specified annotations.
@@ -202,7 +236,7 @@ fun PropertyDeclarationContext.hasAllAnnotations(vararg names: String): Boolean 
  * @param names The list of annotation names or fully qualified names to check.
  * @return True if any annotation is present on this property, false otherwise.
  */
-fun PropertyDeclarationContext.hasAnyAnnotation(names: List<String>): Boolean = names.any { hasAnnotation(it) }
+public fun PropertyDeclarationContext.hasAnyAnnotation(names: List<String>): Boolean = names.any { hasAnnotation(it) }
 
 /**
  * Helper extension to check if a property has any of the specified annotations.
@@ -210,49 +244,51 @@ fun PropertyDeclarationContext.hasAnyAnnotation(names: List<String>): Boolean = 
  * @param names The vararg list of annotation names or fully qualified names to check.
  * @return True if any annotation is present on this property, false otherwise.
  */
-fun PropertyDeclarationContext.hasAnyAnnotation(vararg names: String): Boolean = hasAnyAnnotation(names.asList())
+public fun PropertyDeclarationContext.hasAnyAnnotation(vararg names: String): Boolean = hasAnyAnnotation(names.asList())
 
 // ==========================================
 // Properties Context Field Delegation Extensions
 // ==========================================
 
 /** Delegates name property to the underlying [PropertyDeclaration]. */
-val PropertyDeclarationContext.name: String get() = declaration.name
+public val PropertyDeclarationContext.name: String get() = declaration.name
 
 /** Delegates visibility property to the underlying [PropertyDeclaration]. */
-val PropertyDeclarationContext.visibility: Visibility get() = declaration.visibility
+public val PropertyDeclarationContext.visibility: Visibility get() = declaration.visibility
 
 /** Delegates modifiers property to the underlying [PropertyDeclaration]. */
-val PropertyDeclarationContext.modifiers: Set<Modifier> get() = declaration.modifiers
+public val PropertyDeclarationContext.modifiers: Set<Modifier> get() = declaration.modifiers
 
 /** Delegates type property to the underlying [PropertyDeclaration]. */
-val PropertyDeclarationContext.type: String get() = declaration.type
+public val PropertyDeclarationContext.type: String get() = declaration.type
 
 /** Delegates isVal property to the underlying [PropertyDeclaration]. */
-val PropertyDeclarationContext.isVal: Boolean get() = declaration.isVal
+public val PropertyDeclarationContext.isVal: Boolean get() = declaration.isVal
 
 /** Delegates isVar property to the underlying [PropertyDeclaration]. */
-val PropertyDeclarationContext.isVar: Boolean get() = declaration.isVar
+public val PropertyDeclarationContext.isVar: Boolean get() = declaration.isVar
 
 /** Delegates annotations property to the underlying [PropertyDeclaration]. */
-val PropertyDeclarationContext.annotations: List<AnnotationDeclaration> get() = declaration.annotations
+public val PropertyDeclarationContext.annotations: List<AnnotationDeclaration> get() = declaration.annotations
 
 /** Delegates isExtension property to the underlying [PropertyDeclaration]. */
-val PropertyDeclarationContext.isExtension: Boolean get() = declaration.isExtension
+public val PropertyDeclarationContext.isExtension: Boolean get() = declaration.isExtension
 
 /** Delegates kdocText property to the underlying [PropertyDeclaration]. */
-val PropertyDeclarationContext.kdocText: String? get() = declaration.kdocText
+public val PropertyDeclarationContext.kdocText: String? get() = declaration.kdocText
 
 /** Filters properties residing in a package matching [packagePattern]. */
-fun List<PropertyDeclarationContext>.residingInPackage(packagePattern: String): List<PropertyDeclarationContext> =
+public fun List<PropertyDeclarationContext>.residingInPackage(
+    packagePattern: String,
+): List<PropertyDeclarationContext> =
     filter { io.github.baole.konture.impl.PatternMatchers.matchesPackage(packagePattern, it.packageName) }
 
 /** Filters properties residing in a module matching [modulePath]. */
-fun List<PropertyDeclarationContext>.residingInModule(modulePath: String): List<PropertyDeclarationContext> =
+public fun List<PropertyDeclarationContext>.residingInModule(modulePath: String): List<PropertyDeclarationContext> =
     filter {
         it.modulePath == modulePath || io.github.baole.konture.impl.PatternMatchers.matchesModuleGlob(modulePath, it.modulePath)
     }
 
 /** Filters properties annotated with [annotationName]. */
-fun List<PropertyDeclarationContext>.annotatedWith(annotationName: String): List<PropertyDeclarationContext> =
+public fun List<PropertyDeclarationContext>.annotatedWith(annotationName: String): List<PropertyDeclarationContext> =
     filter { it.hasAnnotation(annotationName) }

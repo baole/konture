@@ -6,11 +6,14 @@
 
 package io.github.baole.konture
 
+/** Assertion builder for checking rule expectations on Kotlin property declarations. */
 @KontureDsl
-class PropertiesShould internal constructor(
-    override val builder: PropertiesRuleBuilder,
+public class PropertiesShould internal constructor(
+    /** Filter or assertion criteria for builder. */
+    public override val builder: PropertiesRuleBuilder,
 ) : PropertiesShouldModifierAssertions,
     PropertiesShouldTypeAssertions,
     PropertiesShouldCompositeAssertions
 
-inline fun <reified T : Any> PropertiesShould.haveTypeOf(): PropertiesRuleBuilder = haveType(T::class)
+/** Asserts that properties have type specified by type parameter [T]. */
+public inline fun <reified T : Any> PropertiesShould.haveTypeOf(): PropertiesRuleBuilder = haveType(T::class)

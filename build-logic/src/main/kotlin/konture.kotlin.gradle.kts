@@ -32,7 +32,6 @@ configure<KotlinJvmProjectExtension> {
     explicitApiWarning()
     compilerOptions {
         jvmTarget.set(JvmTarget.JVM_17)
-        freeCompilerArgs.add("-Xjvm-default=all")
     }
     @OptIn(ExperimentalAbiValidation::class)
     abiValidation()

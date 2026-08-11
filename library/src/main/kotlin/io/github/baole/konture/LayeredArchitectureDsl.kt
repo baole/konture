@@ -1,5 +1,6 @@
 /*
- * Copyright 2026 Bao Le Duc
+ * Copyright 2026 The Konture Contributors
+ * Contributors: Bao Le Duc (@baole)
  * SPDX-License-Identifier: Apache-2.0
  */
 
@@ -25,7 +26,7 @@ package io.github.baole.konture
  * ```
  */
 @KontureDsl
-class LayeredArchitectureDsl(
+public class LayeredArchitectureDsl(
     private val projectGraph: ProjectGraph,
 ) {
     private val builder = LayeredArchitectureBuilder(projectGraph)
@@ -35,20 +36,22 @@ class LayeredArchitectureDsl(
      *
      * @property name The human-readable name of the layer.
      */
-    class Layer(
-        val name: String,
+    public class Layer(
+        /** Filter or assertion criteria for name. */
+        public val name: String,
     )
 
     /**
      * Starts defining an architectural layer with the specified name.
      */
-    fun layer(name: String): LayerSpec = LayerSpec(name)
+    public fun layer(name: String): LayerSpec = LayerSpec(name)
 
     /**
      * Specification helper for associating a layer definition with a package/module pattern.
      */
-    inner class LayerSpec(
-        val name: String,
+    public inner class LayerSpec(
+        /** Filter or assertion criteria for name. */
+        public val name: String,
     ) {
         /**
          * Defines the package or module pattern that belongs to this layer.
@@ -56,7 +59,7 @@ class LayeredArchitectureDsl(
          * @param pattern An ant-style or package wildcard pattern (e.g. `com.example.service..`).
          * @return The completed [Layer] reference.
          */
-        infix fun definedBy(pattern: String): Layer {
+        public infix fun definedBy(pattern: String): Layer {
             builder.layer(name).definedBy(pattern)
             return Layer(name)
         }
@@ -65,7 +68,7 @@ class LayeredArchitectureDsl(
     /**
      * Specifies validation constraints for a given layer.
      */
-    fun where(
+    public fun where(
         layer: Layer,
         block: ConstraintSpec.() -> Unit,
     ) {
@@ -75,20 +78,22 @@ class LayeredArchitectureDsl(
     /**
      * DSL helper for specifying directional accessibility constraints on a layer.
      */
-    inner class ConstraintSpec(
-        val layerName: String,
+    public inner class ConstraintSpec(
+        /** Filter or assertion criteria for layer name. */
+        public val layerName: String,
     ) {
         /**
          * Asserts that no other defined layer in the system is allowed to access this layer.
          */
-        fun mayNotBeAccessedByAnyLayer() {
+        public fun mayNotBeAccessedByAnyLayer() {
             builder.whereLayer(layerName).mayNotBeAccessedByAnyLayer()
         }
 
         /**
          * Asserts that this layer can only be accessed by the specified subset of layers.
          */
-        fun mayOnlyBeAccessedByLayers(allowedLayers: List<Layer>) {
+        public fun mayOnlyBeAccessedByLayers(allowedLayers: List<Layer>) {
+            /** Filter or assertion criteria for names. */
             val names = allowedLayers.map { it.name }
             builder.whereLayer(layerName).mayOnlyBeAccessedByLayers(names)
         }
@@ -96,14 +101,15 @@ class LayeredArchitectureDsl(
         /**
          * Asserts that this layer can only be accessed by the specified subset of layers.
          */
-        fun mayOnlyBeAccessedByLayers(vararg allowedLayers: Layer) {
+        public fun mayOnlyBeAccessedByLayers(vararg allowedLayers: Layer) {
             mayOnlyBeAccessedByLayers(allowedLayers.toList())
         }
 
         /**
          * Asserts that this layer is only allowed to access the specified subset of layers.
          */
-        fun mayOnlyAccessLayers(allowedLayers: List<Layer>) {
+        public fun mayOnlyAccessLayers(allowedLayers: List<Layer>) {
+            /** Filter or assertion criteria for names. */
             val names = allowedLayers.map { it.name }
             builder.whereLayer(layerName).mayOnlyAccessLayers(names)
         }
@@ -111,7 +117,7 @@ class LayeredArchitectureDsl(
         /**
          * Asserts that this layer is only allowed to access the specified subset of layers.
          */
-        fun mayOnlyAccessLayers(vararg allowedLayers: Layer) {
+        public fun mayOnlyAccessLayers(vararg allowedLayers: Layer) {
             mayOnlyAccessLayers(allowedLayers.toList())
         }
     }

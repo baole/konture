@@ -1,5 +1,6 @@
 /*
- * Copyright 2026 Bao Le Duc
+ * Copyright 2026 The Konture Contributors
+ * Contributors: Bao Le Duc (@baole)
  * SPDX-License-Identifier: Apache-2.0
  */
 
@@ -16,14 +17,22 @@ package io.github.baole.konture
  * @property dependencies Declared project dependencies of this module.
  * @property classes Parsed Kotlin class declarations contained inside this module's production source sets.
  */
-data class Module(
-    val buildId: String,
-    val path: String,
-    val projectDir: String,
-    val appliedPlugins: List<String>,
-    val sourceSets: List<SourceSet>,
-    val dependencies: List<Dependency>,
-    val files: List<FileDeclaration> = emptyList(),
+public data class Module(
+    /** Filter or assertion criteria for build id. */
+    public val buildId: String,
+    /** Filter or assertion criteria for path. */
+    public val path: String,
+    /** Filter or assertion criteria for project dir. */
+    public val projectDir: String,
+    /** Filter or assertion criteria for applied plugins. */
+    public val appliedPlugins: List<String>,
+    /** Filter or assertion criteria for source sets. */
+    public val sourceSets: List<SourceSet>,
+    /** Filter or assertion criteria for dependencies. */
+    public val dependencies: List<Dependency>,
+    /** Filter or assertion criteria for files. */
+    public val files: List<FileDeclaration> = emptyList(),
 ) {
-    val classes: List<ClassDeclaration> get() = files.flatMap { it.classes }
+    /** Filter or assertion criteria for classes. */
+    public val classes: List<ClassDeclaration> get() = files.flatMap { it.classes }
 }

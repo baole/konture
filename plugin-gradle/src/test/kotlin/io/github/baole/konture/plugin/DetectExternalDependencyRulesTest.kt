@@ -23,7 +23,7 @@ class DetectExternalDependencyRulesTest {
         source.parentFile.mkdirs()
         source.writeText("// should().notDependOnExternalLibraries(\"a:b\")\nclass ArchitectureTest")
         val result = project.layout.buildDirectory.file("konture/requires-dependencies.txt").get().asFile
-        val task = project.tasks.create("detectExternalRules", DetectExternalDependencyRules::class.java)
+        val task = project.tasks.register("detectExternalRules", DetectExternalDependencyRules::class.java).get()
         task.testSources.from(source)
         task.resultFile.set(result)
 
@@ -57,7 +57,11 @@ class DetectExternalDependencyRulesTest {
         val source = project.file("src/test/kotlin/CommentsAndStringsTest.kt")
         source.parentFile.mkdirs()
         val result = project.layout.buildDirectory.file("konture/requires-dependencies.txt").get().asFile
-        val task = project.tasks.create("detectExternalRulesComments", DetectExternalDependencyRules::class.java)
+        val task =
+            project.tasks.register(
+                "detectExternalRulesComments",
+                DetectExternalDependencyRules::class.java,
+            ).get()
         task.testSources.from(source)
         task.resultFile.set(result)
 

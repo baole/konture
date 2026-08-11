@@ -13,34 +13,42 @@ import io.github.baole.konture.impl.PatternMatchers
  *
  * @property modules The list of [Module] structures included in this scope.
  */
-class KontureModuleScope(
-    val modules: List<Module>,
+public class KontureModuleScope(
+    /** Filter or assertion criteria for modules. */
+    public val modules: List<Module>,
 ) {
-    companion object {
+    /** Factory methods for constructing module scopes. */
+    public companion object {
         /**
          * Creates a [KontureModuleScope] representing all modules in the project.
          *
          * @param graph The project graph to use (defaults to [Konture.projectGraph]).
          * @param sourceSets The source set selector filter.
          */
-        fun fromProject(
+        public fun fromProject(
             graph: ProjectGraph = Konture.projectGraph,
             sourceSets: SourceSetSelector? = null,
         ): KontureModuleScope {
+            /** Filter or assertion criteria for all modules. */
             val allModules = graph.getAllModules()
             if (sourceSets == null) {
                 return KontureModuleScope(allModules)
             }
+            /** Filter or assertion criteria for filtered modules. */
             val filteredModules =
                 allModules.map { module ->
+                    /** Filter or assertion criteria for matching sets. */
                     val matchingSets =
                         module.sourceSets.filter { sourceSet ->
+                            /** Filter or assertion criteria for kind enum. */
                             val kindEnum =
                                 when (sourceSet.kind) {
                                     "ANDROID_VARIANT" -> SourceSetKind.ANDROID
                                     "KMP" -> SourceSetKind.KMP
                                     else -> SourceSetKind.JVM
                                 }
+
+                            /** Filter or assertion criteria for role enum. */
                             val roleEnum = if (sourceSet.production) SourceSetRole.PRODUCTION else SourceSetRole.TEST
                             sourceSets.matches(SourceSetId(module.path, sourceSet.name, kindEnum, roleEnum))
                         }
@@ -53,7 +61,8 @@ class KontureModuleScope(
     /**
      * Filters this scope to modules whose path matches the specified path pattern.
      */
-    fun byPath(pathPattern: String): KontureModuleScope {
+    public fun byPath(pathPattern: String): KontureModuleScope {
+        /** Filter or assertion criteria for normalized. */
         val normalized =
             if (!pathPattern.startsWith(":") && !pathPattern.startsWith("**") && pathPattern.isNotEmpty()) {
                 ":$pathPattern"
@@ -70,16 +79,17 @@ class KontureModuleScope(
     /**
      * Filters this scope to modules that have the specified plugin applied.
      */
-    fun withPlugin(pluginId: String): KontureModuleScope =
+    public fun withPlugin(pluginId: String): KontureModuleScope =
         KontureModuleScope(modules.filter { module -> module.appliedPlugins.contains(pluginId) })
 
     /**
      * Asserts that all modules in this scope satisfy the given predicate.
      */
-    fun assertAll(
+    public fun assertAll(
         message: (Module) -> String = { "Module ${it.path} failed assertion in KontureModuleScope" },
         predicate: (Module) -> Boolean,
     ) {
+        /** Filter or assertion criteria for failures. */
         val failures = modules.filterNot(predicate)
         if (failures.isNotEmpty()) {
             throw AssertionError(failures.joinToString("\n") { message(it) })
@@ -89,7 +99,7 @@ class KontureModuleScope(
     /**
      * Asserts that at least one module in this scope satisfies the given predicate.
      */
-    fun assertAny(
+    public fun assertAny(
         message: String = "No modules in KontureModuleScope satisfied the predicate",
         predicate: (Module) -> Boolean,
     ) {
@@ -101,10 +111,11 @@ class KontureModuleScope(
     /**
      * Asserts that no modules in this scope satisfy the given predicate.
      */
-    fun assertNone(
+    public fun assertNone(
         message: (Module) -> String = { "Module ${it.path} unexpectedly satisfied predicate in KontureModuleScope" },
         predicate: (Module) -> Boolean,
     ) {
+        /** Filter or assertion criteria for failures. */
         val failures = modules.filter(predicate)
         if (failures.isNotEmpty()) {
             throw AssertionError(failures.joinToString("\n") { message(it) })
@@ -112,8 +123,10 @@ class KontureModuleScope(
     }
 }
 
-operator fun KontureModuleScope.plus(other: KontureModuleScope): KontureModuleScope =
+/** Combines two module scopes into a new scope containing distinct modules by path. */
+public operator fun KontureModuleScope.plus(other: KontureModuleScope): KontureModuleScope =
     KontureModuleScope((this.modules + other.modules).distinctBy { it.path })
 
-operator fun KontureModuleScope.minus(other: KontureModuleScope): KontureModuleScope =
+/** Removes modules present in [other] scope from this scope by path. */
+public operator fun KontureModuleScope.minus(other: KontureModuleScope): KontureModuleScope =
     KontureModuleScope(this.modules.filterNot { otherModule -> other.modules.any { it.path == otherModule.path } })

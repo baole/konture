@@ -20,7 +20,7 @@ import io.github.baole.konture.impl.ViolationLocation
  * against all properties in the project (both member/class properties and top-level properties).
  */
 @KontureDsl
-class PropertiesRuleBuilder(
+public class PropertiesRuleBuilder(
     internal val graph: ProjectGraph = Konture.projectGraph,
     private val sourceSets: SourceSetSelector = SourceSets.production(),
 ) {
@@ -41,7 +41,7 @@ class PropertiesRuleBuilder(
      *
      * @param logger Custom log consumer (defaults to printing to standard output).
      */
-    fun printMatchedProperties(
+    public fun printMatchedProperties(
         logger: (PropertyDeclarationContext) -> Unit = {
             println(getMessage("debug.properties.matched", it.qualifiedName, ViolationLocation.format(it)))
         },
@@ -57,7 +57,7 @@ class PropertiesRuleBuilder(
      *
      * @param logger Custom log consumer (defaults to printing to standard output).
      */
-    fun printAllProperties(
+    public fun printAllProperties(
         logger: (PropertyDeclarationContext) -> Unit = {
             println(getMessage("debug.properties.discovered", it.qualifiedName, ViolationLocation.format(it)))
         },
@@ -65,10 +65,13 @@ class PropertiesRuleBuilder(
         this.apply {
             graph.getAllModules().flatMap { module ->
                 module.files.flatMap { file ->
+                    /** Filter or assertion criteria for top level. */
                     val topLevel =
                         file.topLevelProperties.map { prop ->
                             PropertyDeclarationContext(prop, file.packageName, null, module.path, file.filePath, null)
                         }
+
+                    /** Filter or assertion criteria for members. */
                     val members =
                         file.classes.flatMap { cls ->
                             cls.properties.map { prop ->
@@ -93,7 +96,7 @@ class PropertiesRuleBuilder(
      * Configures this builder to allow empty selections (i.e. if no properties match the `that()` filter,
      * the rule will pass instead of throwing an AssertionError).
      */
-    fun allowEmpty(): PropertiesRuleBuilder {
+    public fun allowEmpty(): PropertiesRuleBuilder {
         allowEmpty = true
         return this
     }
@@ -101,7 +104,7 @@ class PropertiesRuleBuilder(
     /**
      * Configures this builder to ignore failures for properties satisfying the given predicate.
      */
-    fun ignoreFailuresIn(predicate: (PropertyDeclarationContext) -> Boolean): PropertiesRuleBuilder {
+    public fun ignoreFailuresIn(predicate: (PropertyDeclarationContext) -> Boolean): PropertiesRuleBuilder {
         ignoredPredicates.add(predicate)
         return this
     }
@@ -109,7 +112,7 @@ class PropertiesRuleBuilder(
     /**
      * Configures this builder to ignore failures for properties matching any of the specified names or patterns.
      */
-    fun ignoreFailuresIn(vararg propertyNames: String): PropertiesRuleBuilder {
+    public fun ignoreFailuresIn(vararg propertyNames: String): PropertiesRuleBuilder {
         ignoredPredicates.add { ctx ->
             propertyNames.any { name ->
                 ctx.declaration.name == name || ctx.qualifiedName == name || io.github.baole.konture.impl.PatternMatchers.matchesSimpleGlob(name, ctx.declaration.name)
@@ -128,17 +131,17 @@ class PropertiesRuleBuilder(
     /**
      * Starts adding filtering conditions to select which properties to verify.
      */
-    fun that(): PropertiesThat = PropertiesThat(this)
+    public fun that(): PropertiesThat = PropertiesThat(this)
 
     /**
      * Starts adding assertion rules that the selected properties must satisfy.
      */
-    fun should(): PropertiesShould = PropertiesShould(this)
+    public fun should(): PropertiesShould = PropertiesShould(this)
 
     /**
      * Logical AND operator for chaining filter conditions.
      */
-    fun and(): PropertiesThat {
+    public fun and(): PropertiesThat {
         activeOperator = LogicalOperator.AND
         return PropertiesThat(this)
     }
@@ -146,7 +149,7 @@ class PropertiesRuleBuilder(
     /**
      * Logical OR operator for chaining filter conditions.
      */
-    fun or(): PropertiesThat {
+    public fun or(): PropertiesThat {
         activeOperator = LogicalOperator.OR
         return PropertiesThat(this)
     }
@@ -154,7 +157,7 @@ class PropertiesRuleBuilder(
     /**
      * Logical XOR operator for chaining filter conditions.
      */
-    fun xor(): PropertiesThat {
+    public fun xor(): PropertiesThat {
         activeOperator = LogicalOperator.XOR
         return PropertiesThat(this)
     }
@@ -162,7 +165,7 @@ class PropertiesRuleBuilder(
     /**
      * Negates the next filter condition in the chain.
      */
-    fun not(): PropertiesThat {
+    public fun not(): PropertiesThat {
         negateNext = true
         return PropertiesThat(this)
     }
@@ -170,7 +173,7 @@ class PropertiesRuleBuilder(
     /**
      * Logical AND operator for chaining assertion rules.
      */
-    fun andShould(): PropertiesShould {
+    public fun andShould(): PropertiesShould {
         activeShouldOperator = LogicalOperator.AND
         return PropertiesShould(this)
     }
@@ -178,7 +181,7 @@ class PropertiesRuleBuilder(
     /**
      * Logical OR operator for chaining assertion rules.
      */
-    fun orShould(): PropertiesShould {
+    public fun orShould(): PropertiesShould {
         activeShouldOperator = LogicalOperator.OR
         return PropertiesShould(this)
     }
@@ -186,7 +189,7 @@ class PropertiesRuleBuilder(
     /**
      * Logical XOR operator for chaining assertion rules.
      */
-    fun xorShould(): PropertiesShould {
+    public fun xorShould(): PropertiesShould {
         activeShouldOperator = LogicalOperator.XOR
         return PropertiesShould(this)
     }
@@ -194,25 +197,29 @@ class PropertiesRuleBuilder(
     /**
      * Negates the next assertion rule in the chain.
      */
-    fun notShould(): PropertiesShould {
+    public fun notShould(): PropertiesShould {
         negateNextShould = true
         return PropertiesShould(this)
     }
 
     internal fun setThat(predicate: (PropertyDeclarationContext) -> Boolean) {
+        /** Filter or assertion criteria for actual predicate. */
         val actualPredicate =
             if (negateNext) {
                 negateNext = false
+                /** Filter or assertion criteria for p. */
                 val p = { p: PropertyDeclarationContext -> !predicate(p) }
                 p
             } else {
                 predicate
             }
 
+        /** Filter or assertion criteria for current. */
         val current = thatPredicate
         if (current == null) {
             thatPredicate = actualPredicate
         } else {
+            /** Filter or assertion criteria for op. */
             val op = activeOperator
             thatPredicate =
                 when (op) {
@@ -235,14 +242,17 @@ class PropertiesRuleBuilder(
     internal fun setShould(
         assertion: (PropertyDeclarationContext, List<PropertyDeclarationContext>, MutableList<String>) -> Unit,
     ) {
+        /** Filter or assertion criteria for actual assertion. */
         val actualAssertion =
             if (negateNextShould) {
                 negateNextShould = false
+                /** Filter or assertion criteria for a. */
                 val a = {
                         prop: PropertyDeclarationContext,
                         allProps: List<PropertyDeclarationContext>,
                         violations: MutableList<String>,
                     ->
+                    /** Filter or assertion criteria for temp violations. */
                     val tempViolations = mutableListOf<String>()
                     assertion(prop, allProps, tempViolations)
                     if (tempViolations.isEmpty()) {
@@ -256,14 +266,19 @@ class PropertiesRuleBuilder(
                 assertion
             }
 
+        /** Filter or assertion criteria for current. */
         val current = shouldAssertion
         if (current == null) {
             shouldAssertion = actualAssertion
         } else {
+            /** Filter or assertion criteria for op. */
             val op = activeShouldOperator
             if (op == LogicalOperator.OR) {
                 shouldAssertion = { prop, allProps, violations ->
+                    /** Filter or assertion criteria for temp1. */
                     val temp1 = mutableListOf<String>()
+
+                    /** Filter or assertion criteria for temp2. */
                     val temp2 = mutableListOf<String>()
                     current(prop, allProps, temp1)
                     actualAssertion(prop, allProps, temp2)
@@ -275,11 +290,17 @@ class PropertiesRuleBuilder(
                 }
             } else if (op == LogicalOperator.XOR) {
                 shouldAssertion = { prop, allProps, violations ->
+                    /** Filter or assertion criteria for temp1. */
                     val temp1 = mutableListOf<String>()
+
+                    /** Filter or assertion criteria for temp2. */
                     val temp2 = mutableListOf<String>()
                     current(prop, allProps, temp1)
                     actualAssertion(prop, allProps, temp2)
+                    /** Filter or assertion criteria for ok1. */
                     val ok1 = temp1.isEmpty()
+
+                    /** Filter or assertion criteria for ok2. */
                     val ok2 = temp2.isEmpty()
                     if (ok1 == ok2) {
                         violations.add(
@@ -301,11 +322,13 @@ class PropertiesRuleBuilder(
      * Executes the compiled property rules against the provided project graph.
      * Throws an [AssertionError] if any rule violations are detected.
      */
-    fun check(g: ProjectGraph = graph) {
+    public fun check(g: ProjectGraph = graph) {
+        /** Filter or assertion criteria for all properties. */
         val allProperties =
             g.getAllModules().flatMap { module ->
                 module.files.flatMap { file ->
                     file.membershipsFor(module.path).filter(sourceSets::matches).flatMap { sourceSet ->
+                        /** Filter or assertion criteria for top level. */
                         val topLevel =
                             file.topLevelProperties.map { prop ->
                                 PropertyDeclarationContext(
@@ -317,6 +340,8 @@ class PropertiesRuleBuilder(
                                     sourceSet,
                                 )
                             }
+
+                        /** Filter or assertion criteria for members. */
                         val members =
                             file.classes.flatMap { cls ->
                                 cls.properties.map { prop ->
@@ -334,6 +359,8 @@ class PropertiesRuleBuilder(
                     }
                 }
             }.distinctBy { Triple(it.className, it.declaration.name, it.filePath) }
+
+        /** Filter or assertion criteria for properties to check. */
         val propertiesToCheck = allProperties.filter { thatPredicate?.invoke(it) ?: true }
         KontureLogger.log(
             LogLevel.DEBUG,
@@ -351,14 +378,17 @@ class PropertiesRuleBuilder(
                 )
             }
         }
+        /** Filter or assertion criteria for assertion. */
         val assertion =
             shouldAssertion ?: throw AssertionError(
                 getMessage("properties.rule.noAssertion"),
             )
 
+        /** Filter or assertion criteria for run check. */
         val runCheck = { list: MutableList<String> ->
             for (prop in propertiesToCheck) {
                 if (ignoredPredicates.any { it(prop) }) continue
+                /** Filter or assertion criteria for start idx. */
                 val startIdx = list.size
                 assertion(prop, allProperties, list)
                 for (i in startIdx until list.size) {

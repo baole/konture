@@ -8,15 +8,19 @@ package io.github.baole.konture
 
 import io.github.baole.konture.i18n.getMessage
 
-interface FunctionsShouldCompositeAssertions {
-    val builder: FunctionsRuleBuilder
+/** Composite condition assertions for function rules. */
+public interface FunctionsShouldCompositeAssertions {
+    /** Filter or assertion criteria for builder. */
+    public val builder: FunctionsRuleBuilder
 
-    infix fun satisfy(assertion: (FunctionDeclarationContext) -> Boolean): FunctionsRuleBuilder =
+    /** Asserts that selected functions satisfy a custom boolean condition. */
+    public infix fun satisfy(assertion: (FunctionDeclarationContext) -> Boolean): FunctionsRuleBuilder =
         satisfy(
             "custom condition",
         ) { f, _ -> assertion(f) }
 
-    fun satisfy(
+    /** Asserts that selected functions satisfy a custom boolean condition with description. */
+    public fun satisfy(
         description: String,
         assertion: (FunctionDeclarationContext, List<FunctionDeclarationContext>) -> Boolean,
     ): FunctionsRuleBuilder {
@@ -30,18 +34,25 @@ interface FunctionsShouldCompositeAssertions {
         return builder
     }
 
-    fun satisfy(assertion: (FunctionDeclarationContext, MutableList<String>) -> Unit): FunctionsRuleBuilder {
+    /** Asserts that selected functions satisfy a custom violation-collecting assertion. */
+    public fun satisfy(assertion: (FunctionDeclarationContext, MutableList<String>) -> Unit): FunctionsRuleBuilder {
         builder.setShould { func, _, violations -> assertion(func, violations) }
         return builder
     }
 
-    fun anyOf(vararg blocks: FunctionsShould.() -> Unit): FunctionsRuleBuilder {
+    /** Asserts that selected functions satisfy at least one of the specified assertion blocks. */
+    public fun anyOf(vararg blocks: FunctionsShould.() -> Unit): FunctionsRuleBuilder {
         builder.setShould { func, allFuncs, violations ->
+            /** Filter or assertion criteria for any passed. */
             val anyPassed =
                 blocks.any { block ->
+                    /** Filter or assertion criteria for sub builder. */
                     val subBuilder = FunctionsRuleBuilder(builder.graph).allowEmpty()
                     FunctionsShould(subBuilder).apply(block)
+                    /** Filter or assertion criteria for sub assertion. */
                     val subAssertion = subBuilder.getShouldAssertion()
+
+                    /** Filter or assertion criteria for sub violations. */
                     val subViolations = mutableListOf<String>()
                     subAssertion?.invoke(func, allFuncs, subViolations)
                     subViolations.isEmpty()
@@ -53,11 +64,14 @@ interface FunctionsShouldCompositeAssertions {
         return builder
     }
 
-    fun allOf(vararg blocks: FunctionsShould.() -> Unit): FunctionsRuleBuilder {
+    /** Filter or assertion criteria for all of. */
+    public fun allOf(vararg blocks: FunctionsShould.() -> Unit): FunctionsRuleBuilder {
         builder.setShould { func, allFuncs, violations ->
             blocks.forEach { block ->
+                /** Filter or assertion criteria for sub builder. */
                 val subBuilder = FunctionsRuleBuilder(builder.graph).allowEmpty()
                 FunctionsShould(subBuilder).apply(block)
+                /** Filter or assertion criteria for sub assertion. */
                 val subAssertion = subBuilder.getShouldAssertion()
                 subAssertion?.invoke(func, allFuncs, violations)
             }
@@ -65,13 +79,19 @@ interface FunctionsShouldCompositeAssertions {
         return builder
     }
 
-    fun noneOf(vararg blocks: FunctionsShould.() -> Unit): FunctionsRuleBuilder {
+    /** Filter or assertion criteria for none of. */
+    public fun noneOf(vararg blocks: FunctionsShould.() -> Unit): FunctionsRuleBuilder {
         builder.setShould { func, allFuncs, violations ->
+            /** Filter or assertion criteria for any passed. */
             val anyPassed =
                 blocks.any { block ->
+                    /** Filter or assertion criteria for sub builder. */
                     val subBuilder = FunctionsRuleBuilder(builder.graph).allowEmpty()
                     FunctionsShould(subBuilder).apply(block)
+                    /** Filter or assertion criteria for sub assertion. */
                     val subAssertion = subBuilder.getShouldAssertion()
+
+                    /** Filter or assertion criteria for sub violations. */
                     val subViolations = mutableListOf<String>()
                     subAssertion?.invoke(func, allFuncs, subViolations)
                     subViolations.isEmpty()

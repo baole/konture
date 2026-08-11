@@ -8,13 +8,17 @@ package io.github.baole.konture
 
 import io.github.baole.konture.i18n.getMessage
 
-interface PropertiesShouldCompositeAssertions {
-    val builder: PropertiesRuleBuilder
+/** Composite condition assertions for property rules. */
+public interface PropertiesShouldCompositeAssertions {
+    /** Filter or assertion criteria for builder. */
+    public val builder: PropertiesRuleBuilder
 
-    infix fun satisfy(assertion: (PropertyDeclarationContext) -> Boolean): PropertiesRuleBuilder =
+    /** Asserts that selected properties satisfy a custom boolean condition. */
+    public infix fun satisfy(assertion: (PropertyDeclarationContext) -> Boolean): PropertiesRuleBuilder =
         satisfy("custom condition") { p, _ -> assertion(p) }
 
-    fun satisfy(
+    /** Asserts that selected properties satisfy a custom boolean condition with description. */
+    public fun satisfy(
         description: String,
         assertion: (PropertyDeclarationContext, List<PropertyDeclarationContext>) -> Boolean,
     ): PropertiesRuleBuilder {
@@ -28,18 +32,25 @@ interface PropertiesShouldCompositeAssertions {
         return builder
     }
 
-    fun satisfy(assertion: (PropertyDeclarationContext, MutableList<String>) -> Unit): PropertiesRuleBuilder {
+    /** Asserts that selected properties satisfy a custom violation-collecting assertion. */
+    public fun satisfy(assertion: (PropertyDeclarationContext, MutableList<String>) -> Unit): PropertiesRuleBuilder {
         builder.setShould { prop, _, violations -> assertion(prop, violations) }
         return builder
     }
 
-    fun anyOf(vararg blocks: PropertiesShould.() -> Unit): PropertiesRuleBuilder {
+    /** Asserts that selected properties satisfy at least one of the specified assertion blocks. */
+    public fun anyOf(vararg blocks: PropertiesShould.() -> Unit): PropertiesRuleBuilder {
         builder.setShould { prop, allProps, violations ->
+            /** Filter or assertion criteria for any passed. */
             val anyPassed =
                 blocks.any { block ->
+                    /** Filter or assertion criteria for sub builder. */
                     val subBuilder = PropertiesRuleBuilder(builder.graph).allowEmpty()
                     PropertiesShould(subBuilder).apply(block)
+                    /** Filter or assertion criteria for sub assertion. */
                     val subAssertion = subBuilder.getShouldAssertion()
+
+                    /** Filter or assertion criteria for sub violations. */
                     val subViolations = mutableListOf<String>()
                     subAssertion?.invoke(prop, allProps, subViolations)
                     subViolations.isEmpty()
@@ -51,11 +62,14 @@ interface PropertiesShouldCompositeAssertions {
         return builder
     }
 
-    fun allOf(vararg blocks: PropertiesShould.() -> Unit): PropertiesRuleBuilder {
+    /** Filter or assertion criteria for all of. */
+    public fun allOf(vararg blocks: PropertiesShould.() -> Unit): PropertiesRuleBuilder {
         builder.setShould { prop, allProps, violations ->
             blocks.forEach { block ->
+                /** Filter or assertion criteria for sub builder. */
                 val subBuilder = PropertiesRuleBuilder(builder.graph).allowEmpty()
                 PropertiesShould(subBuilder).apply(block)
+                /** Filter or assertion criteria for sub assertion. */
                 val subAssertion = subBuilder.getShouldAssertion()
                 subAssertion?.invoke(prop, allProps, violations)
             }
@@ -63,13 +77,19 @@ interface PropertiesShouldCompositeAssertions {
         return builder
     }
 
-    fun noneOf(vararg blocks: PropertiesShould.() -> Unit): PropertiesRuleBuilder {
+    /** Filter or assertion criteria for none of. */
+    public fun noneOf(vararg blocks: PropertiesShould.() -> Unit): PropertiesRuleBuilder {
         builder.setShould { prop, allProps, violations ->
+            /** Filter or assertion criteria for any passed. */
             val anyPassed =
                 blocks.any { block ->
+                    /** Filter or assertion criteria for sub builder. */
                     val subBuilder = PropertiesRuleBuilder(builder.graph).allowEmpty()
                     PropertiesShould(subBuilder).apply(block)
+                    /** Filter or assertion criteria for sub assertion. */
                     val subAssertion = subBuilder.getShouldAssertion()
+
+                    /** Filter or assertion criteria for sub violations. */
                     val subViolations = mutableListOf<String>()
                     subAssertion?.invoke(prop, allProps, subViolations)
                     subViolations.isEmpty()

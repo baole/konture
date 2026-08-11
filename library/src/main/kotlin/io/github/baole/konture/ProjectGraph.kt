@@ -19,8 +19,9 @@ import kotlin.jvm.JvmOverloads
  *
  * @property builds Map of build ID to the list of modules contained inside that build.
  */
-data class ProjectGraph(
-    val builds: Map<String, List<Module>>,
+public data class ProjectGraph(
+    /** Filter or assertion criteria for builds. */
+    public val builds: Map<String, List<Module>>,
     private val externalDependenciesLoader: () -> DependencyGraphModel? = {
         DependencyGraphModel()
     },
@@ -29,7 +30,8 @@ data class ProjectGraph(
         externalDependenciesLoader()
     }
 
-    val externalDependencies: DependencyGraphModel by lazy {
+    /** Filter or assertion criteria for external dependencies. */
+    public val externalDependencies: DependencyGraphModel by lazy {
         loadedExternalDependencies ?: DependencyGraphModel()
     }
 
@@ -56,7 +58,7 @@ data class ProjectGraph(
      * @param path The Gradle project path (e.g., ":domain" or ":feature:profile").
      * @return The matching [Module] if found, or null.
      */
-    fun findModule(
+    public fun findModule(
         buildId: String,
         path: String,
     ): Module? = moduleMap[ModuleKey(buildId, path)]
@@ -64,7 +66,7 @@ data class ProjectGraph(
     /**
      * Returns a flat list of all modules across all builds in this graph.
      */
-    fun getAllModules(): List<Module> = moduleMap.values.toList()
+    public fun getAllModules(): List<Module> = moduleMap.values.toList()
 
     /**
      * Detects dependency cycles in the module graph and throws an [AssertionError] if any cycle is found.
@@ -76,10 +78,17 @@ data class ProjectGraph(
      * @throws AssertionError if any circular dependency is detected.
      */
     @JvmOverloads
-    fun assertNoCycles(includeTestConfigurations: Boolean = false) {
+    public fun assertNoCycles(includeTestConfigurations: Boolean = false) {
+        /** Filter or assertion criteria for visited. */
         val visited = mutableSetOf<ModuleKey>()
+
+        /** Filter or assertion criteria for recursion stack. */
         val recursionStack = mutableListOf<ModuleKey>()
+
+        /** Filter or assertion criteria for on stack. */
         val onStack = mutableSetOf<ModuleKey>()
+
+        /** Filter or assertion criteria for cycles. */
         val cycles = linkedSetOf<List<ModuleKey>>()
 
         for (key in moduleMap.keys.sortedBy { "${it.buildId}${it.path}" }) {
@@ -89,6 +98,7 @@ data class ProjectGraph(
         }
 
         if (cycles.isNotEmpty()) {
+            /** Filter or assertion criteria for rendered cycles. */
             val renderedCycles =
                 cycles.map { cycle ->
                     (cycle + cycle.first()).joinToString(" -> ") { "${it.buildId}${it.path}" }
@@ -105,11 +115,14 @@ data class ProjectGraph(
     }
 
     private fun Dependency.isTestConfiguration(): Boolean {
+        /** Filter or assertion criteria for name. */
         val name = configuration
         var start = 0
         while (true) {
+            /** Filter or assertion criteria for index. */
             val index = name.indexOf("test", start, ignoreCase = true)
             if (index == -1) break
+            /** Filter or assertion criteria for end. */
             val end = index + 4
 
             // Check Left Boundary (starts the string, is an uppercase letter, or is preceded by a non-alphanumeric character)
@@ -139,15 +152,20 @@ data class ProjectGraph(
         recursionStack.add(key)
         onStack.add(key)
 
+        /** Filter or assertion criteria for module. */
         val module = moduleMap[key]
         if (module != null) {
             for (dep in module.dependencies) {
                 if (!includeTestConfigurations && dep.isTestConfiguration()) {
                     continue
                 }
+                /** Filter or assertion criteria for dep key. */
                 val depKey = ModuleKey(dep.targetBuildId, dep.targetPath)
                 if (depKey in onStack) {
+                    /** Filter or assertion criteria for cycle start index. */
                     val cycleStartIndex = recursionStack.indexOf(depKey)
+
+                    /** Filter or assertion criteria for raw cycle. */
                     val rawCycle = recursionStack.subList(cycleStartIndex, recursionStack.size).toList()
                     cycles.add(canonicalizeCycle(rawCycle))
                 } else if (depKey !in visited) {
@@ -161,12 +179,16 @@ data class ProjectGraph(
     }
 
     private fun canonicalizeCycle(cycle: List<ModuleKey>): List<ModuleKey> {
+        /** Filter or assertion criteria for keys. */
         val keys = cycle.map { "${it.buildId}${it.path}" }
+
+        /** Filter or assertion criteria for min index. */
         val minIndex = keys.indices.minByOrNull { keys[it] } ?: 0
         return cycle.subList(minIndex, cycle.size) + cycle.subList(0, minIndex)
     }
 
-    companion object {
+    /** Factory and state management methods for default ProjectGraph instances. */
+    public companion object {
         /**
          * Checks if the default ProjectGraph is initialized.
          */

@@ -8,10 +8,13 @@ package io.github.baole.konture
 
 import io.github.baole.konture.i18n.getMessage
 
-interface FunctionsShouldModifierAssertions {
-    val builder: FunctionsRuleBuilder
+/** Modifier and visibility assertions for function rules. */
+public interface FunctionsShouldModifierAssertions {
+    /** Filter or assertion criteria for builder. */
+    public val builder: FunctionsRuleBuilder
 
-    fun bePublic(): FunctionsRuleBuilder {
+    /** Filter or assertion criteria for be public. */
+    public fun bePublic(): FunctionsRuleBuilder {
         builder.setShould { func, _, violations ->
             if (func.declaration.visibility != Visibility.PUBLIC) {
                 violations.add(
@@ -22,7 +25,8 @@ interface FunctionsShouldModifierAssertions {
         return builder
     }
 
-    fun beInternal(): FunctionsRuleBuilder {
+    /** Filter or assertion criteria for be internal. */
+    public fun beInternal(): FunctionsRuleBuilder {
         builder.setShould { func, _, violations ->
             if (func.declaration.visibility != Visibility.INTERNAL) {
                 violations.add(
@@ -33,7 +37,8 @@ interface FunctionsShouldModifierAssertions {
         return builder
     }
 
-    fun bePrivate(): FunctionsRuleBuilder {
+    /** Filter or assertion criteria for be private. */
+    public fun bePrivate(): FunctionsRuleBuilder {
         builder.setShould { func, _, violations ->
             if (func.declaration.visibility != Visibility.PRIVATE) {
                 violations.add(
@@ -44,7 +49,8 @@ interface FunctionsShouldModifierAssertions {
         return builder
     }
 
-    fun beProtected(): FunctionsRuleBuilder {
+    /** Filter or assertion criteria for be protected. */
+    public fun beProtected(): FunctionsRuleBuilder {
         builder.setShould { func, _, violations ->
             if (func.declaration.visibility != Visibility.PROTECTED) {
                 violations.add(
@@ -55,7 +61,8 @@ interface FunctionsShouldModifierAssertions {
         return builder
     }
 
-    fun beSuspend(): FunctionsRuleBuilder {
+    /** Filter or assertion criteria for be suspend. */
+    public fun beSuspend(): FunctionsRuleBuilder {
         builder.setShould { func, _, violations ->
             if (!func.declaration.modifiers.contains(Modifier.SUSPEND)) {
                 violations.add(
@@ -66,7 +73,8 @@ interface FunctionsShouldModifierAssertions {
         return builder
     }
 
-    fun beInline(): FunctionsRuleBuilder {
+    /** Filter or assertion criteria for be inline. */
+    public fun beInline(): FunctionsRuleBuilder {
         builder.setShould { func, _, violations ->
             if (!func.declaration.modifiers.contains(Modifier.INLINE)) {
                 violations.add(
@@ -77,7 +85,8 @@ interface FunctionsShouldModifierAssertions {
         return builder
     }
 
-    fun beOpen(): FunctionsRuleBuilder {
+    /** Filter or assertion criteria for be open. */
+    public fun beOpen(): FunctionsRuleBuilder {
         builder.setShould { func, _, violations ->
             if (!func.declaration.modifiers.contains(Modifier.OPEN)) {
                 violations.add(
@@ -88,7 +97,8 @@ interface FunctionsShouldModifierAssertions {
         return builder
     }
 
-    fun beAbstract(): FunctionsRuleBuilder {
+    /** Filter or assertion criteria for be abstract. */
+    public fun beAbstract(): FunctionsRuleBuilder {
         builder.setShould { func, _, violations ->
             if (!func.declaration.modifiers.contains(Modifier.ABSTRACT)) {
                 violations.add(
@@ -99,7 +109,8 @@ interface FunctionsShouldModifierAssertions {
         return builder
     }
 
-    fun beOverride(): FunctionsRuleBuilder {
+    /** Filter or assertion criteria for be override. */
+    public fun beOverride(): FunctionsRuleBuilder {
         builder.setShould { func, _, violations ->
             if (!func.declaration.modifiers.contains(Modifier.OVERRIDE)) {
                 violations.add(
@@ -110,7 +121,8 @@ interface FunctionsShouldModifierAssertions {
         return builder
     }
 
-    fun beOperator(): FunctionsRuleBuilder {
+    /** Filter or assertion criteria for be operator. */
+    public fun beOperator(): FunctionsRuleBuilder {
         builder.setShould { func, _, violations ->
             if (!func.declaration.modifiers.contains(Modifier.OPERATOR)) {
                 violations.add(
@@ -121,7 +133,8 @@ interface FunctionsShouldModifierAssertions {
         return builder
     }
 
-    fun beInfix(): FunctionsRuleBuilder {
+    /** Filter or assertion criteria for be infix. */
+    public fun beInfix(): FunctionsRuleBuilder {
         builder.setShould { func, _, violations ->
             if (!func.declaration.modifiers.contains(Modifier.INFIX)) {
                 violations.add(
@@ -132,7 +145,8 @@ interface FunctionsShouldModifierAssertions {
         return builder
     }
 
-    fun beTopLevel(): FunctionsRuleBuilder {
+    /** Filter or assertion criteria for be top level. */
+    public fun beTopLevel(): FunctionsRuleBuilder {
         builder.setShould { func, _, violations ->
             if (func.className != null) {
                 violations.add(getMessage("function.should.beTopLevel", func.qualifiedName))
@@ -141,7 +155,8 @@ interface FunctionsShouldModifierAssertions {
         return builder
     }
 
-    fun beMember(): FunctionsRuleBuilder {
+    /** Filter or assertion criteria for be member. */
+    public fun beMember(): FunctionsRuleBuilder {
         builder.setShould { func, _, violations ->
             if (func.className == null) {
                 violations.add(getMessage("function.should.beMember", func.qualifiedName))
@@ -153,7 +168,7 @@ interface FunctionsShouldModifierAssertions {
     /**
      * Asserts that selected functions contain the specified modifier.
      */
-    infix fun haveModifier(modifier: Modifier): FunctionsRuleBuilder {
+    public infix fun haveModifier(modifier: Modifier): FunctionsRuleBuilder {
         builder.setShould { func, _, violations ->
             if (!func.declaration.modifiers.contains(modifier)) {
                 violations.add(
@@ -164,7 +179,8 @@ interface FunctionsShouldModifierAssertions {
         return builder
     }
 
-    infix fun notHaveModifier(modifier: Modifier): FunctionsRuleBuilder {
+    /** Filter or assertion criteria for not have modifier. */
+    public infix fun notHaveModifier(modifier: Modifier): FunctionsRuleBuilder {
         builder.setShould { func, _, violations ->
             if (func.declaration.modifiers.contains(modifier)) {
                 violations.add(
@@ -175,7 +191,8 @@ interface FunctionsShouldModifierAssertions {
         return builder
     }
 
-    fun notBePublic(): FunctionsRuleBuilder {
+    /** Filter or assertion criteria for not be public. */
+    public fun notBePublic(): FunctionsRuleBuilder {
         builder.setShould { func, _, violations ->
             if (func.declaration.visibility == Visibility.PUBLIC) {
                 violations.add(getMessage("function.should.notBePublic", func.qualifiedName))
@@ -184,7 +201,8 @@ interface FunctionsShouldModifierAssertions {
         return builder
     }
 
-    fun notBeInternal(): FunctionsRuleBuilder {
+    /** Filter or assertion criteria for not be internal. */
+    public fun notBeInternal(): FunctionsRuleBuilder {
         builder.setShould { func, _, violations ->
             if (func.declaration.visibility == Visibility.INTERNAL) {
                 violations.add(getMessage("function.should.notBeInternal", func.qualifiedName))
@@ -193,7 +211,8 @@ interface FunctionsShouldModifierAssertions {
         return builder
     }
 
-    fun notBePrivate(): FunctionsRuleBuilder {
+    /** Filter or assertion criteria for not be private. */
+    public fun notBePrivate(): FunctionsRuleBuilder {
         builder.setShould { func, _, violations ->
             if (func.declaration.visibility == Visibility.PRIVATE) {
                 violations.add(getMessage("function.should.notBePrivate", func.qualifiedName))
@@ -202,7 +221,8 @@ interface FunctionsShouldModifierAssertions {
         return builder
     }
 
-    fun notBeProtected(): FunctionsRuleBuilder {
+    /** Filter or assertion criteria for not be protected. */
+    public fun notBeProtected(): FunctionsRuleBuilder {
         builder.setShould { func, _, violations ->
             if (func.declaration.visibility == Visibility.PROTECTED) {
                 violations.add(getMessage("function.should.notBeProtected", func.qualifiedName))
@@ -216,8 +236,9 @@ interface FunctionsShouldModifierAssertions {
      *
      * @param modifiers The list of modifiers that must all be present.
      */
-    infix fun haveAllModifiers(modifiers: List<Modifier>): FunctionsRuleBuilder {
+    public infix fun haveAllModifiers(modifiers: List<Modifier>): FunctionsRuleBuilder {
         builder.setShould { func, _, violations ->
+            /** Filter or assertion criteria for missing. */
             val missing = modifiers.filter { !func.declaration.modifiers.contains(it) }
             if (missing.isNotEmpty()) {
                 violations.add(
@@ -238,14 +259,14 @@ interface FunctionsShouldModifierAssertions {
      *
      * @param modifiers The vararg list of modifiers that must all be present.
      */
-    fun haveAllModifiers(vararg modifiers: Modifier): FunctionsRuleBuilder = haveAllModifiers(modifiers.asList())
+    public fun haveAllModifiers(vararg modifiers: Modifier): FunctionsRuleBuilder = haveAllModifiers(modifiers.asList())
 
     /**
      * Asserts that selected functions have at least one of the specified modifiers.
      *
      * @param modifiers The list of modifiers, at least one of which must be present.
      */
-    infix fun haveAnyModifier(modifiers: List<Modifier>): FunctionsRuleBuilder {
+    public infix fun haveAnyModifier(modifiers: List<Modifier>): FunctionsRuleBuilder {
         builder.setShould { func, _, violations ->
             if (!modifiers.any { func.declaration.modifiers.contains(it) }) {
                 violations.add(
@@ -261,12 +282,12 @@ interface FunctionsShouldModifierAssertions {
      *
      * @param modifiers The vararg list of modifiers, at least one of which must be present.
      */
-    fun haveAnyModifier(vararg modifiers: Modifier): FunctionsRuleBuilder = haveAnyModifier(modifiers.asList())
+    public fun haveAnyModifier(vararg modifiers: Modifier): FunctionsRuleBuilder = haveAnyModifier(modifiers.asList())
 
     /**
      * Asserts that selected functions have the specified visibility.
      */
-    infix fun haveVisibility(visibility: Visibility): FunctionsRuleBuilder {
+    public infix fun haveVisibility(visibility: Visibility): FunctionsRuleBuilder {
         builder.setShould { func, _, violations ->
             if (func.declaration.visibility != visibility) {
                 violations.add(
@@ -287,7 +308,7 @@ interface FunctionsShouldModifierAssertions {
      *
      * @param visibilities The list of acceptable visibilities.
      */
-    infix fun haveAnyVisibility(visibilities: List<Visibility>): FunctionsRuleBuilder {
+    public infix fun haveAnyVisibility(visibilities: List<Visibility>): FunctionsRuleBuilder {
         builder.setShould { func, _, violations ->
             if (!visibilities.contains(func.declaration.visibility)) {
                 violations.add(
@@ -308,10 +329,11 @@ interface FunctionsShouldModifierAssertions {
      *
      * @param visibilities The vararg list of acceptable visibilities.
      */
-    fun haveAnyVisibility(vararg visibilities: Visibility): FunctionsRuleBuilder =
+    public fun haveAnyVisibility(vararg visibilities: Visibility): FunctionsRuleBuilder =
         haveAnyVisibility(visibilities.asList())
 
-    fun beExtension(): FunctionsRuleBuilder {
+    /** Filter or assertion criteria for be extension. */
+    public fun beExtension(): FunctionsRuleBuilder {
         builder.setShould { func, _, violations ->
             if (!func.declaration.isExtension) {
                 violations.add(
@@ -322,7 +344,8 @@ interface FunctionsShouldModifierAssertions {
         return builder
     }
 
-    fun notBeExtension(): FunctionsRuleBuilder {
+    /** Filter or assertion criteria for not be extension. */
+    public fun notBeExtension(): FunctionsRuleBuilder {
         builder.setShould { func, _, violations ->
             if (func.declaration.isExtension) {
                 violations.add(getMessage("function.should.notBeExtension", func.qualifiedName))
@@ -331,7 +354,8 @@ interface FunctionsShouldModifierAssertions {
         return builder
     }
 
-    fun beDocumentedWithKDoc(): FunctionsRuleBuilder {
+    /** Filter or assertion criteria for be documented with k doc. */
+    public fun beDocumentedWithKDoc(): FunctionsRuleBuilder {
         builder.setShould { func, _, violations ->
             if (func.declaration.kdocText.isNullOrBlank()) {
                 violations.add(
@@ -342,7 +366,8 @@ interface FunctionsShouldModifierAssertions {
         return builder
     }
 
-    fun notBeSuspend(): FunctionsRuleBuilder {
+    /** Filter or assertion criteria for not be suspend. */
+    public fun notBeSuspend(): FunctionsRuleBuilder {
         builder.setShould { func, _, violations ->
             if (func.declaration.modifiers.contains(Modifier.SUSPEND)) {
                 violations.add(getMessage("function.should.notBeSuspend", func.qualifiedName))
@@ -351,7 +376,8 @@ interface FunctionsShouldModifierAssertions {
         return builder
     }
 
-    fun notBeInline(): FunctionsRuleBuilder {
+    /** Filter or assertion criteria for not be inline. */
+    public fun notBeInline(): FunctionsRuleBuilder {
         builder.setShould { func, _, violations ->
             if (func.declaration.modifiers.contains(Modifier.INLINE)) {
                 violations.add(getMessage("function.should.notBeInline", func.qualifiedName))
@@ -360,7 +386,8 @@ interface FunctionsShouldModifierAssertions {
         return builder
     }
 
-    fun notBeInfix(): FunctionsRuleBuilder {
+    /** Filter or assertion criteria for not be infix. */
+    public fun notBeInfix(): FunctionsRuleBuilder {
         builder.setShould { func, _, violations ->
             if (func.declaration.modifiers.contains(Modifier.INFIX)) {
                 violations.add(getMessage("function.should.notBeInfix", func.qualifiedName))
@@ -369,7 +396,8 @@ interface FunctionsShouldModifierAssertions {
         return builder
     }
 
-    fun notBeOperator(): FunctionsRuleBuilder {
+    /** Filter or assertion criteria for not be operator. */
+    public fun notBeOperator(): FunctionsRuleBuilder {
         builder.setShould { func, _, violations ->
             if (func.declaration.modifiers.contains(Modifier.OPERATOR)) {
                 violations.add(getMessage("function.should.notBeOperator", func.qualifiedName))
@@ -378,7 +406,8 @@ interface FunctionsShouldModifierAssertions {
         return builder
     }
 
-    fun notBeOpen(): FunctionsRuleBuilder {
+    /** Filter or assertion criteria for not be open. */
+    public fun notBeOpen(): FunctionsRuleBuilder {
         builder.setShould { func, _, violations ->
             if (func.declaration.modifiers.contains(Modifier.OPEN)) {
                 violations.add(getMessage("function.should.notBeOpen", func.qualifiedName))
@@ -387,7 +416,8 @@ interface FunctionsShouldModifierAssertions {
         return builder
     }
 
-    fun notBeAbstract(): FunctionsRuleBuilder {
+    /** Filter or assertion criteria for not be abstract. */
+    public fun notBeAbstract(): FunctionsRuleBuilder {
         builder.setShould { func, _, violations ->
             if (func.declaration.modifiers.contains(Modifier.ABSTRACT)) {
                 violations.add(getMessage("function.should.notBeAbstract", func.qualifiedName))
@@ -396,7 +426,8 @@ interface FunctionsShouldModifierAssertions {
         return builder
     }
 
-    fun notBeOverride(): FunctionsRuleBuilder {
+    /** Filter or assertion criteria for not be override. */
+    public fun notBeOverride(): FunctionsRuleBuilder {
         builder.setShould { func, _, violations ->
             if (func.declaration.modifiers.contains(Modifier.OVERRIDE)) {
                 violations.add(getMessage("function.should.notBeOverride", func.qualifiedName))

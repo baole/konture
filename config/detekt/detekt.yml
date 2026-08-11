@@ -5,9 +5,14 @@ config:
 comments:
   active: true
   UndocumentedPublicClass:
-    active: false
+    active: true
+    excludes: ['**/test/**', '**/testFixtures/**', '**/impl/**']
+    searchInNestedClass: true
+    searchInInnerClass: true
+    searchInInnerInterface: true
   UndocumentedPublicFunction:
-    active: false
+    active: true
+    excludes: ['**/test/**', '**/testFixtures/**', '**/impl/**']
 
 complexity:
   active: true

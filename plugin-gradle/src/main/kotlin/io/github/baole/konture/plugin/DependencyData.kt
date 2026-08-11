@@ -1,5 +1,6 @@
 /*
- * Copyright 2026 Bao Le Duc
+ * Copyright 2026 The Konture Contributors
+ * Contributors: Bao Le Duc (@baole)
  * SPDX-License-Identifier: Apache-2.0
  */
 
@@ -9,7 +10,8 @@ package io.github.baole.konture.plugin
 
 import java.io.Serializable
 
-data class DependencyData(
+/** Serialized representation of a Gradle project dependency relationship. */
+public data class DependencyData(
     val configuration: String,
     val targetBuildId: String,
     val targetPath: String,

@@ -24,17 +24,30 @@ package io.github.baole.konture
  * @property receiverType Receiver type string if this is an extension function.
  */
 public data class FunctionDeclaration(
-    val name: String,
-    val visibility: Visibility,
-    val modifiers: Set<Modifier>,
-    val returnType: String,
-    val parameters: List<ParameterDeclaration>,
-    val annotations: List<AnnotationDeclaration>,
-    val kdocText: String?,
-    val isExtension: Boolean,
-    val sourceStartOffset: Int = -1,
-    val sourceEndOffset: Int = -1,
-    val resolvedReturnType: String? = null,
-    val sourceLine: Int = -1,
-    val receiverType: String? = null,
+    /** Filter or assertion criteria for name. */
+    public val name: String,
+    /** Filter or assertion criteria for visibility. */
+    public val visibility: Visibility,
+    /** Filter or assertion criteria for modifiers. */
+    public val modifiers: Set<Modifier>,
+    /** Filter or assertion criteria for return type. */
+    public val returnType: String,
+    /** Filter or assertion criteria for parameters. */
+    public val parameters: List<ParameterDeclaration>,
+    /** Filter or assertion criteria for annotations. */
+    public val annotations: List<AnnotationDeclaration>,
+    /** Filter or assertion criteria for kdoc text. */
+    public val kdocText: String?,
+    /** Filter or assertion criteria for is extension. */
+    public val isExtension: Boolean,
+    /** Filter or assertion criteria for source start offset. */
+    public val sourceStartOffset: Int = -1,
+    /** Filter or assertion criteria for source end offset. */
+    public val sourceEndOffset: Int = -1,
+    /** Filter or assertion criteria for resolved return type. */
+    public val resolvedReturnType: String? = null,
+    /** Filter or assertion criteria for source line. */
+    public val sourceLine: Int = -1,
+    /** Filter or assertion criteria for receiver type. */
+    public val receiverType: String? = null,
 )

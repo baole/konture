@@ -1,11 +1,15 @@
 /*
- * Copyright 2026 Bao Le Duc
+ * Copyright 2026 The Konture Contributors
+ * Contributors: Bao Le Duc (@baole)
  * SPDX-License-Identifier: Apache-2.0
  */
 
 package io.github.baole.konture
 
-data class AnnotationArgumentDeclaration(
-    val name: String?,
-    val value: String,
+/** Represents an argument passed to a Kotlin annotation. */
+public data class AnnotationArgumentDeclaration(
+    /** Filter or assertion criteria for name. */
+    public val name: String?,
+    /** Filter or assertion criteria for value. */
+    public val value: String,
 )

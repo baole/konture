@@ -16,7 +16,7 @@ package io.github.baole.konture
  * @param predicate The filter criteria block executed on the [FunctionDeclarationContext].
  * @return This [FunctionsRuleBuilder] with the filter condition applied.
  */
-fun FunctionsRuleBuilder.that(predicate: FunctionDeclarationContext.() -> Boolean): FunctionsRuleBuilder =
+public fun FunctionsRuleBuilder.that(predicate: FunctionDeclarationContext.() -> Boolean): FunctionsRuleBuilder =
     this.apply {
         setThat { it.predicate() }
     }
@@ -28,10 +28,13 @@ fun FunctionsRuleBuilder.that(predicate: FunctionDeclarationContext.() -> Boolea
  * @param assertion The assertion block containing function validation rules or boolean predicate.
  * @return This [FunctionsRuleBuilder] with the assertion block registered.
  */
-fun FunctionsRuleBuilder.should(assertion: FunctionDeclarationShouldContext.() -> Any?): FunctionsRuleBuilder =
+public fun FunctionsRuleBuilder.should(assertion: FunctionDeclarationShouldContext.() -> Any?): FunctionsRuleBuilder =
     this.apply {
         setShould { func, allFuncs, violations ->
+            /** Filter or assertion criteria for context. */
             val context = FunctionDeclarationShouldContext(func, allFuncs, violations)
+
+            /** Filter or assertion criteria for result. */
             val result = context.assertion()
             validateAssertionResult(result)
             if (result is Boolean && !result) {
@@ -53,29 +56,57 @@ fun FunctionsRuleBuilder.should(assertion: FunctionDeclarationShouldContext.() -
  * @property allFunctions The complete list of function declaration contexts in this test run scope.
  * @property violations Mutable collection where assertion failure messages are appended.
  */
-class FunctionDeclarationShouldContext internal constructor(
-    val element: FunctionDeclarationContext,
-    val allFunctions: List<FunctionDeclarationContext>,
-    val violations: MutableList<String>,
+public class FunctionDeclarationShouldContext internal constructor(
+    /** Filter or assertion criteria for element. */
+    public val element: FunctionDeclarationContext,
+    /** Filter or assertion criteria for all functions. */
+    public val allFunctions: List<FunctionDeclarationContext>,
+    /** Filter or assertion criteria for violations. */
+    public val violations: MutableList<String>,
 ) {
-    val declaration get() = element.declaration
-    val name get() = element.declaration.name
-    val packageName get() = element.packageName
-    val className get() = element.className
-    val modulePath get() = element.modulePath
-    val filePath get() = element.filePath
-    val visibility get() = element.declaration.visibility
-    val modifiers get() = element.declaration.modifiers
-    val returnType get() = element.declaration.returnType
-    val parameters get() = element.declaration.parameters
-    val annotations get() = element.declaration.annotations
-    val kdocText get() = element.declaration.kdocText
-    val isExtension get() = element.declaration.isExtension
+    /** Filter or assertion criteria for declaration. */
+    public val declaration: FunctionDeclaration get() = element.declaration
+
+    /** Filter or assertion criteria for name. */
+    public val name: String get() = element.declaration.name
+
+    /** Filter or assertion criteria for package name. */
+    public val packageName: String get() = element.packageName
+
+    /** Filter or assertion criteria for class name. */
+    public val className: String? get() = element.className
+
+    /** Filter or assertion criteria for module path. */
+    public val modulePath: String get() = element.modulePath
+
+    /** Filter or assertion criteria for file path. */
+    public val filePath: String get() = element.filePath
+
+    /** Filter or assertion criteria for visibility. */
+    public val visibility: Visibility get() = element.declaration.visibility
+
+    /** Filter or assertion criteria for modifiers. */
+    public val modifiers: Set<Modifier> get() = element.declaration.modifiers
+
+    /** Filter or assertion criteria for return type. */
+    public val returnType: String get() = element.declaration.returnType
+
+    /** Filter or assertion criteria for parameters. */
+    public val parameters: List<ParameterDeclaration> get() = element.declaration.parameters
+
+    /** Filter or assertion criteria for annotations. */
+    public val annotations: List<AnnotationDeclaration> get() = element.declaration.annotations
+
+    /** Filter or assertion criteria for kdoc text. */
+    public val kdocText: String? get() = element.declaration.kdocText
+
+    /** Filter or assertion criteria for is extension. */
+    public val isExtension: Boolean get() = element.declaration.isExtension
 
     /**
      * Appends a custom violation failure message to the assertion run.
      */
-    fun addViolation(message: String) {
+    public fun addViolation(message: String) {
         violations.add(message)
     }
 
@@ -83,7 +114,7 @@ class FunctionDeclarationShouldContext internal constructor(
      * Asserts [condition] is true, recording a violation with [message] when false.
      * When [message] is omitted, a default message referencing [element] is used.
      */
-    fun check(
+    public fun check(
         condition: Boolean,
         message: String? = null,
     ) {
@@ -95,32 +126,32 @@ class FunctionDeclarationShouldContext internal constructor(
     /**
      * Checks if this function is decorated with the specified annotation.
      */
-    fun hasAnnotation(name: String): Boolean = annotations.any { it.name == name || it.fqName == name }
+    public fun hasAnnotation(name: String): Boolean = annotations.any { it.name == name || it.fqName == name }
 
     /**
      * Checks if this function is decorated with all of the specified annotations.
      */
-    fun hasAllAnnotations(names: List<String>): Boolean = element.hasAllAnnotations(names)
+    public fun hasAllAnnotations(names: List<String>): Boolean = element.hasAllAnnotations(names)
 
     /**
      * Checks if this function is decorated with all of the specified annotations.
      */
-    fun hasAllAnnotations(vararg names: String): Boolean = hasAllAnnotations(names.asList())
+    public fun hasAllAnnotations(vararg names: String): Boolean = hasAllAnnotations(names.asList())
 
     /**
      * Checks if this function is decorated with any of the specified annotations.
      */
-    fun hasAnyAnnotation(names: List<String>): Boolean = element.hasAnyAnnotation(names)
+    public fun hasAnyAnnotation(names: List<String>): Boolean = element.hasAnyAnnotation(names)
 
     /**
      * Checks if this function is decorated with any of the specified annotations.
      */
-    fun hasAnyAnnotation(vararg names: String): Boolean = hasAnyAnnotation(names.asList())
+    public fun hasAnyAnnotation(vararg names: String): Boolean = hasAnyAnnotation(names.asList())
 
     /**
      * Asserts that this function is decorated with the specified annotation.
      */
-    fun assertAnnotationOf(annotationName: String) {
+    public fun assertAnnotationOf(annotationName: String) {
         if (!hasAnnotation(annotationName)) {
             addViolation(
                 io.github.baole.konture.i18n.getMessage("function.should.haveAnnotation", name, annotationName),
@@ -131,7 +162,7 @@ class FunctionDeclarationShouldContext internal constructor(
     /**
      * Asserts that this function is decorated with all of the specified annotations.
      */
-    fun assertAllAnnotationsOf(names: List<String>) {
+    public fun assertAllAnnotationsOf(names: List<String>) {
         if (!hasAllAnnotations(names)) {
             addViolation(
                 io.github.baole.konture.i18n.getMessage(
@@ -146,12 +177,12 @@ class FunctionDeclarationShouldContext internal constructor(
     /**
      * Asserts that this function is decorated with all of the specified annotations.
      */
-    fun assertAllAnnotationsOf(vararg names: String) = assertAllAnnotationsOf(names.asList())
+    public fun assertAllAnnotationsOf(vararg names: String): Unit = assertAllAnnotationsOf(names.asList())
 
     /**
      * Asserts that this function is decorated with at least one of the specified annotations.
      */
-    fun assertAnyAnnotationOf(names: List<String>) {
+    public fun assertAnyAnnotationOf(names: List<String>) {
         if (!hasAnyAnnotation(names)) {
             addViolation(
                 io.github.baole.konture.i18n.getMessage(
@@ -166,16 +197,17 @@ class FunctionDeclarationShouldContext internal constructor(
     /**
      * Asserts that this function is decorated with at least one of the specified annotations.
      */
-    fun assertAnyAnnotationOf(vararg names: String) = assertAnyAnnotationOf(names.asList())
+    public fun assertAnyAnnotationOf(vararg names: String): Unit = assertAnyAnnotationOf(names.asList())
 
     /**
      * Asserts that none of the function's parameters match the given predicate block.
      * Appends the [message] suffix to the violation report on failure.
      */
-    fun noneParameterMatches(
+    public fun noneParameterMatches(
         message: String,
         predicate: (ParameterDeclaration) -> Boolean,
     ) {
+        /** Filter or assertion criteria for violated. */
         val violated = parameters.any { predicate(it) }
         if (violated) {
             addViolation("Function $name $message")
@@ -186,10 +218,11 @@ class FunctionDeclarationShouldContext internal constructor(
      * Asserts that at least one of the function's parameters matches the given predicate block.
      * Appends the [message] suffix to the violation report on failure.
      */
-    fun anyParameterMatches(
+    public fun anyParameterMatches(
         message: String,
         predicate: (ParameterDeclaration) -> Boolean,
     ) {
+        /** Filter or assertion criteria for matched. */
         val matched = parameters.any { predicate(it) }
         if (!matched) {
             addViolation(
@@ -206,7 +239,7 @@ class FunctionDeclarationShouldContext internal constructor(
 /**
  * Helper extension to check if a function has the specified annotation.
  */
-fun FunctionDeclarationContext.hasAnnotation(name: String): Boolean =
+public fun FunctionDeclarationContext.hasAnnotation(name: String): Boolean =
     declaration.annotations.any { it.name == name || it.fqName == name }
 
 /**
@@ -215,7 +248,7 @@ fun FunctionDeclarationContext.hasAnnotation(name: String): Boolean =
  * @param names The list of annotation names or fully qualified names to check.
  * @return True if all annotations are present on this function, false otherwise.
  */
-fun FunctionDeclarationContext.hasAllAnnotations(names: List<String>): Boolean = names.all { hasAnnotation(it) }
+public fun FunctionDeclarationContext.hasAllAnnotations(names: List<String>): Boolean = names.all { hasAnnotation(it) }
 
 /**
  * Helper extension to check if a function has all of the specified annotations.
@@ -223,7 +256,8 @@ fun FunctionDeclarationContext.hasAllAnnotations(names: List<String>): Boolean =
  * @param names The vararg list of annotation names or fully qualified names to check.
  * @return True if all annotations are present on this function, false otherwise.
  */
-fun FunctionDeclarationContext.hasAllAnnotations(vararg names: String): Boolean = hasAllAnnotations(names.asList())
+public fun FunctionDeclarationContext.hasAllAnnotations(vararg names: String): Boolean =
+    hasAllAnnotations(names.asList())
 
 /**
  * Helper extension to check if a function has any of the specified annotations.
@@ -231,7 +265,7 @@ fun FunctionDeclarationContext.hasAllAnnotations(vararg names: String): Boolean 
  * @param names The list of annotation names or fully qualified names to check.
  * @return True if any annotation is present on this function, false otherwise.
  */
-fun FunctionDeclarationContext.hasAnyAnnotation(names: List<String>): Boolean = names.any { hasAnnotation(it) }
+public fun FunctionDeclarationContext.hasAnyAnnotation(names: List<String>): Boolean = names.any { hasAnnotation(it) }
 
 /**
  * Helper extension to check if a function has any of the specified annotations.
@@ -239,46 +273,48 @@ fun FunctionDeclarationContext.hasAnyAnnotation(names: List<String>): Boolean = 
  * @param names The vararg list of annotation names or fully qualified names to check.
  * @return True if any annotation is present on this function, false otherwise.
  */
-fun FunctionDeclarationContext.hasAnyAnnotation(vararg names: String): Boolean = hasAnyAnnotation(names.asList())
+public fun FunctionDeclarationContext.hasAnyAnnotation(vararg names: String): Boolean = hasAnyAnnotation(names.asList())
 
 // ==========================================
 // Functions Context Field Delegation Extensions
 // ==========================================
 
 /** Delegates name property to the underlying [FunctionDeclaration]. */
-val FunctionDeclarationContext.name: String get() = declaration.name
+public val FunctionDeclarationContext.name: String get() = declaration.name
 
 /** Delegates visibility property to the underlying [FunctionDeclaration]. */
-val FunctionDeclarationContext.visibility: Visibility get() = declaration.visibility
+public val FunctionDeclarationContext.visibility: Visibility get() = declaration.visibility
 
 /** Delegates modifiers property to the underlying [FunctionDeclaration]. */
-val FunctionDeclarationContext.modifiers: Set<Modifier> get() = declaration.modifiers
+public val FunctionDeclarationContext.modifiers: Set<Modifier> get() = declaration.modifiers
 
 /** Delegates returnType property to the underlying [FunctionDeclaration]. */
-val FunctionDeclarationContext.returnType: String get() = declaration.returnType
+public val FunctionDeclarationContext.returnType: String get() = declaration.returnType
 
 /** Delegates parameters property to the underlying [FunctionDeclaration]. */
-val FunctionDeclarationContext.parameters: List<ParameterDeclaration> get() = declaration.parameters
+public val FunctionDeclarationContext.parameters: List<ParameterDeclaration> get() = declaration.parameters
 
 /** Delegates annotations property to the underlying [FunctionDeclaration]. */
-val FunctionDeclarationContext.annotations: List<AnnotationDeclaration> get() = declaration.annotations
+public val FunctionDeclarationContext.annotations: List<AnnotationDeclaration> get() = declaration.annotations
 
 /** Delegates isExtension property to the underlying [FunctionDeclaration]. */
-val FunctionDeclarationContext.isExtension: Boolean get() = declaration.isExtension
+public val FunctionDeclarationContext.isExtension: Boolean get() = declaration.isExtension
 
 /** Delegates kdocText property to the underlying [FunctionDeclaration]. */
-val FunctionDeclarationContext.kdocText: String? get() = declaration.kdocText
+public val FunctionDeclarationContext.kdocText: String? get() = declaration.kdocText
 
 /** Filters functions residing in a package matching [packagePattern]. */
-fun List<FunctionDeclarationContext>.residingInPackage(packagePattern: String): List<FunctionDeclarationContext> =
+public fun List<FunctionDeclarationContext>.residingInPackage(
+    packagePattern: String,
+): List<FunctionDeclarationContext> =
     filter { io.github.baole.konture.impl.PatternMatchers.matchesPackage(packagePattern, it.packageName) }
 
 /** Filters functions residing in a module matching [modulePath]. */
-fun List<FunctionDeclarationContext>.residingInModule(modulePath: String): List<FunctionDeclarationContext> =
+public fun List<FunctionDeclarationContext>.residingInModule(modulePath: String): List<FunctionDeclarationContext> =
     filter {
         it.modulePath == modulePath || io.github.baole.konture.impl.PatternMatchers.matchesModuleGlob(modulePath, it.modulePath)
     }
 
 /** Filters functions annotated with [annotationName]. */
-fun List<FunctionDeclarationContext>.annotatedWith(annotationName: String): List<FunctionDeclarationContext> =
+public fun List<FunctionDeclarationContext>.annotatedWith(annotationName: String): List<FunctionDeclarationContext> =
     filter { it.hasAnnotation(annotationName) }
