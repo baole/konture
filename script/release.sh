@@ -94,6 +94,7 @@ fi
 
 # List of files to modify and verify
 FILES_TO_BUMP=(
+    "gradle.properties"
     "gradle/libs.versions.toml"
     "build.gradle.kts"
     "settings.gradle.kts"
@@ -181,7 +182,10 @@ if [[ -f "docs/articles/kotlin-architecture-tests-with-konture.md" ]]; then
     perl -pi -e "s/\Q$OLD_VERSION\E/$NEW_VERSION/g" docs/articles/kotlin-architecture-tests-with-konture.md
 fi
 
-# 7. Update Root buildscript classpath and project version
+# 7. Update gradle.properties, Root buildscript classpath and project version
+if [[ -f "gradle.properties" ]]; then
+    perl -pi -e "s/version=\Q$OLD_VERSION\E/version=$NEW_VERSION/g" gradle.properties
+fi
 if [[ -f "settings.gradle.kts" ]]; then
     perl -pi -e "s/plugin-gradle:\Q$OLD_VERSION\E/plugin-gradle:$NEW_VERSION/g" settings.gradle.kts
 fi

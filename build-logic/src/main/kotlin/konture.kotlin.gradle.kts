@@ -8,8 +8,8 @@ plugins {
     id("org.jetbrains.kotlin.jvm")
 }
 
-group = "io.github.baole.konture"
-version = "0.8.0"
+group = providers.gradleProperty("group").get()
+version = providers.gradleProperty("version").get()
 
 repositories {
     mavenLocal()

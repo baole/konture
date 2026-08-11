@@ -226,9 +226,20 @@ def validate_files(files):
             missing_files.append(rel_path)
     return missing_files
 
+def get_current_version():
+    """Reads current project version from gradle.properties or version catalog."""
+    gradle_props = os.path.join(os.path.dirname(os.path.dirname(__file__)), "gradle.properties")
+    if os.path.exists(gradle_props):
+        with open(gradle_props, "r", encoding="utf-8") as f:
+            for line in f:
+                if line.strip().startswith("version="):
+                    return line.strip().split("=", 1)[1].strip()
+    return "0.8.0"
+
 def convert_files(files):
     converted_count = 0
     import re
+    current_version = get_current_version()
     # Matches a blockquote starting with GFM alert and all subsequent lines in that same blockquote
     alert_pattern = r'^[ \t]*>[ \t]*\[!(NOTE|TIP|IMPORTANT|WARNING|CAUTION)\][ \t]*\n((?:[ \t]*>[ \t]*.*\n?)*)'
 
@@ -244,8 +255,10 @@ def convert_files(files):
         with open(full_path, "r", encoding="utf-8") as f:
             content = f.read()
 
-        # Perform the GFM alert conversion
+        # Perform GFM alert and version tag substitution
         modified_content = re.sub(alert_pattern, replace_alert, content, flags=re.M | re.I)
+        if "{{KONTURE_VERSION}}" in modified_content:
+            modified_content = modified_content.replace("{{KONTURE_VERSION}}", current_version)
 
         if rel_path in FRONT_MATTER_MAP:
             metadata = FRONT_MATTER_MAP[rel_path]

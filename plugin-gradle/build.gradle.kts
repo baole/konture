@@ -19,11 +19,11 @@ private val descriptionText =
     build-tool-aware Kotlin architecture tests across Android,
     KMP, and JVM projects.
     """.trimIndent()
-private val groupId = "io.github.baole.konture"
+private val groupId = providers.gradleProperty("group").get()
 
 description = descriptionText
 group = groupId
-version = "0.8.0"
+version = providers.gradleProperty("version").get()
 
 gradlePlugin {
     website.set("https://baole.github.io/konture")
