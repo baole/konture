@@ -1,3 +1,12 @@
+public abstract interface annotation class io/github/baole/konture/annotation/ExperimentalKontureApi : java/lang/annotation/Annotation {
+}
+
+public abstract interface annotation class io/github/baole/konture/annotation/InternalKontureApi : java/lang/annotation/Annotation {
+}
+
+public abstract interface annotation class io/github/baole/konture/annotation/KontureDsl : java/lang/annotation/Annotation {
+}
+
 public final class io/github/baole/konture/core/BuildModel {
 	public static final field Companion Lio/github/baole/konture/core/BuildModel$Companion;
 	public fun <init> (Ljava/lang/String;Ljava/util/List;)V
@@ -20,7 +29,6 @@ public final synthetic class io/github/baole/konture/core/BuildModel$$serializer
 	public final fun getDescriptor ()Lkotlinx/serialization/descriptors/SerialDescriptor;
 	public final fun serialize (Lkotlinx/serialization/encoding/Encoder;Lio/github/baole/konture/core/BuildModel;)V
 	public synthetic fun serialize (Lkotlinx/serialization/encoding/Encoder;Ljava/lang/Object;)V
-	public fun typeParametersSerializers ()[Lkotlinx/serialization/KSerializer;
 }
 
 public final class io/github/baole/konture/core/BuildModel$Companion {
@@ -51,7 +59,6 @@ public final synthetic class io/github/baole/konture/core/DependencyEdge$$serial
 	public final fun getDescriptor ()Lkotlinx/serialization/descriptors/SerialDescriptor;
 	public final fun serialize (Lkotlinx/serialization/encoding/Encoder;Lio/github/baole/konture/core/DependencyEdge;)V
 	public synthetic fun serialize (Lkotlinx/serialization/encoding/Encoder;Ljava/lang/Object;)V
-	public fun typeParametersSerializers ()[Lkotlinx/serialization/KSerializer;
 }
 
 public final class io/github/baole/konture/core/DependencyEdge$Companion {
@@ -82,7 +89,6 @@ public final synthetic class io/github/baole/konture/core/DependencyGraphModel$$
 	public final fun getDescriptor ()Lkotlinx/serialization/descriptors/SerialDescriptor;
 	public final fun serialize (Lkotlinx/serialization/encoding/Encoder;Lio/github/baole/konture/core/DependencyGraphModel;)V
 	public synthetic fun serialize (Lkotlinx/serialization/encoding/Encoder;Ljava/lang/Object;)V
-	public fun typeParametersSerializers ()[Lkotlinx/serialization/KSerializer;
 }
 
 public final class io/github/baole/konture/core/DependencyGraphModel$Companion {
@@ -117,7 +123,6 @@ public final synthetic class io/github/baole/konture/core/ExclusionsModel$$seria
 	public final fun getDescriptor ()Lkotlinx/serialization/descriptors/SerialDescriptor;
 	public final fun serialize (Lkotlinx/serialization/encoding/Encoder;Lio/github/baole/konture/core/ExclusionsModel;)V
 	public synthetic fun serialize (Lkotlinx/serialization/encoding/Encoder;Ljava/lang/Object;)V
-	public fun typeParametersSerializers ()[Lkotlinx/serialization/KSerializer;
 }
 
 public final class io/github/baole/konture/core/ExclusionsModel$Companion {
@@ -171,7 +176,6 @@ public final synthetic class io/github/baole/konture/core/LayoutModel$$serialize
 	public final fun getDescriptor ()Lkotlinx/serialization/descriptors/SerialDescriptor;
 	public final fun serialize (Lkotlinx/serialization/encoding/Encoder;Lio/github/baole/konture/core/LayoutModel;)V
 	public synthetic fun serialize (Lkotlinx/serialization/encoding/Encoder;Ljava/lang/Object;)V
-	public fun typeParametersSerializers ()[Lkotlinx/serialization/KSerializer;
 }
 
 public final class io/github/baole/konture/core/LayoutModel$Companion {
@@ -217,7 +221,6 @@ public final synthetic class io/github/baole/konture/core/ModuleModel$$serialize
 	public final fun getDescriptor ()Lkotlinx/serialization/descriptors/SerialDescriptor;
 	public final fun serialize (Lkotlinx/serialization/encoding/Encoder;Lio/github/baole/konture/core/ModuleModel;)V
 	public synthetic fun serialize (Lkotlinx/serialization/encoding/Encoder;Ljava/lang/Object;)V
-	public fun typeParametersSerializers ()[Lkotlinx/serialization/KSerializer;
 }
 
 public final class io/github/baole/konture/core/ModuleModel$Companion {
@@ -252,7 +255,6 @@ public final synthetic class io/github/baole/konture/core/ResolvedDependencyMode
 	public final fun getDescriptor ()Lkotlinx/serialization/descriptors/SerialDescriptor;
 	public final fun serialize (Lkotlinx/serialization/encoding/Encoder;Lio/github/baole/konture/core/ResolvedDependencyModel;)V
 	public synthetic fun serialize (Lkotlinx/serialization/encoding/Encoder;Ljava/lang/Object;)V
-	public fun typeParametersSerializers ()[Lkotlinx/serialization/KSerializer;
 }
 
 public final class io/github/baole/konture/core/ResolvedDependencyModel$Companion {
@@ -307,7 +309,6 @@ public final synthetic class io/github/baole/konture/core/SourceSetModel$$serial
 	public final fun getDescriptor ()Lkotlinx/serialization/descriptors/SerialDescriptor;
 	public final fun serialize (Lkotlinx/serialization/encoding/Encoder;Lio/github/baole/konture/core/SourceSetModel;)V
 	public synthetic fun serialize (Lkotlinx/serialization/encoding/Encoder;Ljava/lang/Object;)V
-	public fun typeParametersSerializers ()[Lkotlinx/serialization/KSerializer;
 }
 
 public final class io/github/baole/konture/core/SourceSetModel$Companion {
