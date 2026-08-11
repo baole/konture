@@ -182,7 +182,12 @@ if [[ -f "docs/articles/kotlin-architecture-tests-with-konture.md" ]]; then
 fi
 
 # 7. Update Root buildscript classpath and project version
-perl -pi -e "s/plugin-gradle:\Q$OLD_VERSION\E/plugin-gradle:$NEW_VERSION/g" build.gradle.kts
+if [[ -f "settings.gradle.kts" ]]; then
+    perl -pi -e "s/plugin-gradle:\Q$OLD_VERSION\E/plugin-gradle:$NEW_VERSION/g" settings.gradle.kts
+fi
+if [[ -f "build.gradle.kts" ]]; then
+    perl -pi -e "s/plugin-gradle:\Q$OLD_VERSION\E/plugin-gradle:$NEW_VERSION/g" build.gradle.kts
+fi
 perl -pi -e "s/version = \"\Q$OLD_VERSION\E\"/version = \"$NEW_VERSION\"/g" build.gradle.kts
 perl -pi -e "s/version = \"\Q$OLD_VERSION\E\"/version = \"$NEW_VERSION\"/g" build-logic/src/main/kotlin/konture.kotlin.gradle.kts
 
@@ -194,6 +199,10 @@ perl -pi -e "s/<version>\Q$OLD_VERSION\E<\/version>/<version>$NEW_VERSION<\/vers
 
 # 8c. Update Sample Maven Showcase konture version
 perl -pi -e "s/<konture.version>\Q$OLD_VERSION\E<\/konture.version>/<konture.version>$NEW_VERSION<\/konture.version>/g" showcases/sample-maven/pom.xml
+
+# 8d. Publish newly bumped version to Maven Local
+echo -e "${BLUE}[INFO] Publishing newly bumped version v$NEW_VERSION to Maven Local...${NC}"
+./gradlew -q publishToMavenLocal
 
 # 9. Commit and push changes inside submodules if they have dirty changes
 echo -e "\n${BLUE}[3/3] Committing and pushing version bumps in git submodules...${NC}"

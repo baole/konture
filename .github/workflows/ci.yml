@@ -39,14 +39,14 @@ jobs:
         with:
           cache-cleanup: on-success
 
+      - name: Publish to Maven Local
+        run: ./gradlew publishToMavenLocal
+
       - name: Run Unified Verification (Lint, Detekt, Tests, Coverage)
         run: ./gradlew check --continue
 
       - name: Build Gradle Projects
         run: ./gradlew assemble
-
-      - name: Publish Core to Maven Local
-        run: ./gradlew publishToMavenLocal
 
       - name: Run Standalone Konture Tests
         run: ./gradlew runKontureTest -Dkonture.applyPlugin=true
