@@ -4,6 +4,9 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import org.jetbrains.kotlin.gradle.dsl.KotlinJvmProjectExtension
+import org.jetbrains.kotlin.gradle.dsl.abi.ExperimentalAbiValidation
+
 plugins {
     id("org.jetbrains.kotlin.jvm")
 }
@@ -15,4 +18,10 @@ repositories {
     mavenLocal()
     google()
     mavenCentral()
+}
+
+configure<KotlinJvmProjectExtension> {
+    explicitApiWarning()
+    @OptIn(ExperimentalAbiValidation::class)
+    abiValidation()
 }

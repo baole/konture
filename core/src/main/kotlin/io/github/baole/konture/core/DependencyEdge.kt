@@ -1,5 +1,6 @@
 /*
- * Copyright 2026 Bao Le Duc
+ * Copyright 2026 The Konture Contributors
+ * Contributors: Bao Le Duc (@baole)
  * SPDX-License-Identifier: Apache-2.0
  */
 
@@ -16,7 +17,7 @@ import kotlinx.serialization.Serializable
  * @property targetPath The Gradle path of the target project dependency (e.g., `:domain`).
  */
 @Serializable
-data class DependencyEdge(
+public data class DependencyEdge(
     val configuration: String,
     val targetBuildId: String,
     val targetPath: String,

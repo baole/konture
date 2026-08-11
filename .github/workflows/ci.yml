@@ -46,6 +46,9 @@ jobs:
       - name: Publish to Maven Local
         run: ./gradlew publishToMavenLocal
 
+      - name: Verify Kotlin ABI Compatibility
+        run: ./gradlew checkKotlinAbi
+
       - name: Run Unified Verification (Lint, Detekt, Tests, Coverage)
         run: ./gradlew check --continue
 

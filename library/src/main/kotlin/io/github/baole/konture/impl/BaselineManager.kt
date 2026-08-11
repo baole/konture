@@ -1,5 +1,6 @@
 /*
- * Copyright 2026 Bao Le Duc
+ * Copyright 2026 The Konture Contributors
+ * Contributors: Bao Le Duc (@baole)
  * SPDX-License-Identifier: Apache-2.0
  */
 
@@ -16,8 +17,8 @@ import java.util.Locale
 import java.util.concurrent.ConcurrentHashMap
 
 internal class BaselineManager {
-    private val context: KontureContext
-        get() = KontureContextProvider.currentContext
+    private val state: KontureRuntimeState
+        get() = KontureRuntimeStateProvider.currentState
 
     @Volatile
     private var capturedBaselinePath: String? = null
@@ -41,7 +42,7 @@ internal class BaselineManager {
     private fun captureContextSnapshot() {
         if (isShutdownRunning) return
         try {
-            val ctx = context
+            val ctx = state
             capturedGenerateBaseline = ctx.generateBaseline
             capturedBaselinePath = ctx.baselinePath
             capturedProjectGraph = ctx.projectGraph
@@ -68,7 +69,7 @@ internal class BaselineManager {
             if (isShutdownRunning) return capturedGenerateBaseline ?: false
             val ctxVal =
                 try {
-                    context.generateBaseline
+                    state.generateBaseline
                 } catch (e: Exception) {
                     null
                 }
@@ -90,7 +91,7 @@ internal class BaselineManager {
             if (isShutdownRunning) return capturedBaselinePath ?: "konture-baseline.json"
             val ctxVal =
                 try {
-                    context.baselinePath
+                    state.baselinePath
                 } catch (e: Exception) {
                     null
                 }
@@ -107,7 +108,7 @@ internal class BaselineManager {
             if (isShutdownRunning) return capturedProjectGraph
             val ctxVal =
                 try {
-                    context.projectGraph
+                    state.projectGraph
                 } catch (e: Exception) {
                     null
                 }
@@ -130,7 +131,7 @@ internal class BaselineManager {
             if (isShutdownRunning) return capturedBuildRoot
             if (hasCapturedBuildRoot) return capturedBuildRoot
             return try {
-                context.projectGraphLoader.findBuildRoot().also {
+                state.projectGraphLoader.findBuildRoot().also {
                     capturedBuildRoot = it
                     hasCapturedBuildRoot = true
                 }
@@ -519,39 +520,39 @@ internal class BaselineManager {
 
     companion object {
         fun resetForTest() {
-            KontureContextProvider.currentContext.baselineManager.resetForTest()
+            KontureRuntimeStateProvider.currentState.baselineManager.resetForTest()
         }
 
         fun normalize(
             violation: String,
             buildRoot: File?,
         ): String {
-            return KontureContextProvider.currentContext.baselineManager.normalize(violation, buildRoot)
+            return KontureRuntimeStateProvider.currentState.baselineManager.normalize(violation, buildRoot)
         }
 
         fun findModuleForViolation(
             violation: FlatBaselineViolation,
             graph: ProjectGraph,
         ): Module? {
-            return KontureContextProvider.currentContext.baselineManager.findModuleForViolation(violation, graph)
+            return KontureRuntimeStateProvider.currentState.baselineManager.findModuleForViolation(violation, graph)
         }
 
         fun handleViolations(
             violations: List<String>,
             header: String,
         ) {
-            KontureContextProvider.currentContext.baselineManager.handleViolations(violations, header)
+            KontureRuntimeStateProvider.currentState.baselineManager.handleViolations(violations, header)
         }
 
         fun checkRule(
             violationHeader: String,
             runCheck: (MutableList<String>) -> Unit,
         ) {
-            KontureContextProvider.currentContext.baselineManager.checkRule(violationHeader, runCheck)
+            KontureRuntimeStateProvider.currentState.baselineManager.checkRule(violationHeader, runCheck)
         }
 
         fun writeBaseline() {
-            KontureContextProvider.currentContext.baselineManager.writeBaseline()
+            KontureRuntimeStateProvider.currentState.baselineManager.writeBaseline()
         }
     }
 }

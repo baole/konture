@@ -1,11 +1,12 @@
 /*
- * Copyright 2026 Bao Le Duc
+ * Copyright 2026 The Konture Contributors
+ * Contributors: Bao Le Duc (@baole)
  * SPDX-License-Identifier: Apache-2.0
  */
 
 package io.github.baole.konture.core
 
-enum class LogLevel {
+public enum class LogLevel {
     TRACE,
     DEBUG,
     INFO,

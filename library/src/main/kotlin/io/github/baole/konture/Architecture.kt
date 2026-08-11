@@ -1,5 +1,6 @@
 /*
- * Copyright 2026 Bao Le Duc
+ * Copyright 2026 The Konture Contributors
+ * Contributors: Bao Le Duc (@baole)
  * SPDX-License-Identifier: Apache-2.0
  */
 
@@ -8,8 +9,10 @@ package io.github.baole.konture
 /**
  * Top-level entry point for defining and running architecture rule blocks.
  *
- * This serves as a top-level compatibility and quickstart facade.
+ * This function is an ergonomic shorthand for [Konture.architecture].
+ *
+ * @param block DSL configuration block scoped to [KontureContext].
  */
-fun architecture(block: KontureContext.() -> Unit) {
+public fun architecture(block: KontureContext.() -> Unit) {
     Konture.architecture(block)
 }

@@ -1,5 +1,6 @@
 /*
- * Copyright 2026 Bao Le Duc
+ * Copyright 2026 The Konture Contributors
+ * Contributors: Bao Le Duc (@baole)
  * SPDX-License-Identifier: Apache-2.0
  */
 
@@ -8,7 +9,7 @@ package io.github.baole.konture.core
 /**
  * Categorizes the source set types.
  */
-enum class SourceSetKind {
+public enum class SourceSetKind {
     /** Plain Kotlin JVM or Kotlin-only source set. */
     KOTLIN_JVM,
 

@@ -1,5 +1,6 @@
 /*
- * Copyright 2026 Bao Le Duc
+ * Copyright 2026 The Konture Contributors
+ * Contributors: Bao Le Duc (@baole)
  * SPDX-License-Identifier: Apache-2.0
  */
 
@@ -17,7 +18,7 @@ import kotlinx.serialization.Serializable
  * @property dependencies List of declared project dependency edges originating from this project.
  */
 @Serializable
-data class ModuleModel(
+public data class ModuleModel(
     val path: String,
     val projectDir: String,
     val appliedPlugins: List<String>,

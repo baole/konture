@@ -1,5 +1,6 @@
 /*
- * Copyright 2026 Bao Le Duc
+ * Copyright 2026 The Konture Contributors
+ * Contributors: Bao Le Duc (@baole)
  * SPDX-License-Identifier: Apache-2.0
  */
 
@@ -26,7 +27,7 @@ class I18nTest {
         originalDefaultLocale = Locale.getDefault()
         originalLocaleProperty = System.getProperty(Konture.PROPERTY_LOCALE)
         System.clearProperty(Konture.PROPERTY_LOCALE)
-        KontureContextProvider.reset()
+        KontureRuntimeStateProvider.reset()
     }
 
     @AfterEach
@@ -35,7 +36,7 @@ class I18nTest {
         originalLocaleProperty?.let {
             System.setProperty(Konture.PROPERTY_LOCALE, it)
         } ?: System.clearProperty(Konture.PROPERTY_LOCALE)
-        KontureContextProvider.reset()
+        KontureRuntimeStateProvider.reset()
     }
 
     @Test

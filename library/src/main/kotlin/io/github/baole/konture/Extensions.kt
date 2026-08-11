@@ -348,8 +348,10 @@ fun Konture.slices(
 /**
  * Unified multi-rule block supporting modules, classes, and layered architecture validations.
  * Runs every declared suite and aggregates all violations before failing.
+ *
+ * Can also be called directly via the top-level [architecture] shorthand function.
  */
-fun Konture.architecture(block: KontureContext.() -> Unit) {
+public fun Konture.architecture(block: KontureContext.() -> Unit) {
     KontureContext(projectGraph).apply(block).verifyAll()
 }
 

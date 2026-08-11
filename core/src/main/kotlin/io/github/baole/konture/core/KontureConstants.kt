@@ -1,5 +1,6 @@
 /*
- * Copyright 2026 Bao Le Duc
+ * Copyright 2026 The Konture Contributors
+ * Contributors: Bao Le Duc (@baole)
  * SPDX-License-Identifier: Apache-2.0
  */
 
@@ -8,29 +9,29 @@ package io.github.baole.konture.core
 /**
  * Shared constant definitions for the Konture architecture testing framework.
  */
-object KontureConstants {
+public object KontureConstants {
     /**
      * System property key used to override the path of baseline files.
      */
-    const val PROPERTY_BASELINE_PATH = "konture.baseline.path"
+    public const val PROPERTY_BASELINE_PATH: String = "konture.baseline.path"
 
     /**
      * System property key used to override the target translation language / locale.
      */
-    const val PROPERTY_LOCALE = "konture.locale"
+    public const val PROPERTY_LOCALE: String = "konture.locale"
 
     /**
      * System property key used to enable/disable baseline generation mode.
      */
-    const val PROPERTY_BASELINE_GENERATE = "konture.baseline.generate"
+    public const val PROPERTY_BASELINE_GENERATE: String = "konture.baseline.generate"
 
     /**
      * System property key used to override the target output directory for baseline files.
      */
-    const val PROPERTY_BASELINE_DIR = "konture.baseline.dir"
+    public const val PROPERTY_BASELINE_DIR: String = "konture.baseline.dir"
 
     /**
      * Default baseline filename fallback when no custom path is configured.
      */
-    const val DEFAULT_BASELINE_FILENAME = "konture-baseline.json"
+    public const val DEFAULT_BASELINE_FILENAME: String = "konture-baseline.json"
 }

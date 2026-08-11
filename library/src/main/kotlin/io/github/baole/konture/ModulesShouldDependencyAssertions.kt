@@ -56,10 +56,13 @@ interface ModulesShouldDependencyAssertions {
 
     fun notDependOnModule(vararg targetPaths: String): ModulesRuleBuilder = notDependOnModule(targetPaths.asList())
 
+    @Deprecated("Use notDependOnModule instead.", ReplaceWith("notDependOnModule(targetPath)"))
     infix fun notDependOnModules(targetPath: String): ModulesRuleBuilder = notDependOnModule(targetPath)
 
+    @Deprecated("Use notDependOnModule instead.", ReplaceWith("notDependOnModule(targetPaths)"))
     infix fun notDependOnModules(targetPaths: List<String>): ModulesRuleBuilder = notDependOnModule(targetPaths)
 
+    @Deprecated("Use notDependOnModule instead.", ReplaceWith("notDependOnModule(*targetPaths)"))
     fun notDependOnModules(vararg targetPaths: String): ModulesRuleBuilder = notDependOnModule(*targetPaths)
 
     infix fun notDependOnModule(predicate: (String) -> Boolean): ModulesRuleBuilder =

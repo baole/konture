@@ -1,5 +1,6 @@
 /*
- * Copyright 2026 Bao Le Duc
+ * Copyright 2026 The Konture Contributors
+ * Contributors: Bao Le Duc (@baole)
  * SPDX-License-Identifier: Apache-2.0
  */
 
@@ -9,7 +10,7 @@ import io.github.baole.konture.ProjectGraph
 import java.util.Locale
 
 @Suppress("LongParameterList")
-internal class KontureContext(
+internal class KontureRuntimeState(
     val baselinePath: String = "konture-baseline.json",
     val generateBaseline: Boolean = false,
     val projectGraph: ProjectGraph? = null,
@@ -25,8 +26,8 @@ internal class KontureContext(
         projectGraph: ProjectGraph? = this.projectGraph,
         locale: Locale = this.locale,
         isLocaleOverridden: Boolean = this.isLocaleOverridden,
-    ): KontureContext {
-        return KontureContext(
+    ): KontureRuntimeState {
+        return KontureRuntimeState(
             baselinePath = baselinePath,
             generateBaseline = generateBaseline,
             projectGraph = projectGraph,
@@ -37,35 +38,35 @@ internal class KontureContext(
     }
 }
 
-internal object KontureContextProvider {
-    private val threadLocalContext = ThreadLocal.withInitial { KontureContext() }
+internal object KontureRuntimeStateProvider {
+    private val threadLocalState = ThreadLocal.withInitial { KontureRuntimeState() }
 
-    var currentContext: KontureContext
-        get() = threadLocalContext.get()
+    var currentState: KontureRuntimeState
+        get() = threadLocalState.get()
         set(value) {
-            threadLocalContext.set(value)
+            threadLocalState.set(value)
         }
 
     @Suppress("TooGenericExceptionCaught", "SwallowedException")
     fun reset() {
         try {
-            threadLocalContext.get()?.baselineManager?.resetForTest()
+            threadLocalState.get()?.baselineManager?.resetForTest()
         } catch (e: Exception) {
             // Ignore
         }
-        threadLocalContext.set(KontureContext())
+        threadLocalState.set(KontureRuntimeState())
     }
 
-    inline fun <T> runWithContext(
-        context: KontureContext,
+    inline fun <T> runWithState(
+        state: KontureRuntimeState,
         block: () -> T,
     ): T {
-        val previous = currentContext
-        currentContext = context
+        val previous = currentState
+        currentState = state
         try {
             return block()
         } finally {
-            currentContext = previous
+            currentState = previous
         }
     }
 }
