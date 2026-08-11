@@ -62,13 +62,13 @@ fun Konture.slices() = SlicesRuleBuilder(projectGraph)
 fun Konture.slices(sourceSets: SourceSetSelector) = SlicesRuleBuilder(projectGraph, sourceSets)
 
 /**
- * Verifies that there are no package or module dependency cycles in the project.
+ * Verifies that there are no module dependency cycles in the project.
  * Throws an [AssertionError] if a cycle is detected.
  */
 fun Konture.assertNoCycles() = projectGraph.assertNoCycles(includeTestConfigurations = false)
 
 /**
- * Verifies that there are no package or module dependency cycles in the project.
+ * Verifies that there are no module dependency cycles in the project.
  * Throws an [AssertionError] if a cycle is detected.
  *
  * @param includeTestConfigurations if true, test-related dependency configurations will also be analyzed

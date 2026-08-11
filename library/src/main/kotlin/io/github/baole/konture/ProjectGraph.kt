@@ -67,8 +67,9 @@ data class ProjectGraph(
     fun getAllModules(): List<Module> = moduleMap.values.toList()
 
     /**
-     * Detects dependency cycles in the module graph and throws an [AssertionError] if a cycle is found.
-     * The verification is performed using a Depth-First Search (DFS) traversal.
+     * Detects dependency cycles in the module graph and throws an [AssertionError] if any cycle is found.
+     * The verification is performed using a Depth-First Search (DFS) traversal over module dependency edges.
+     * Note: DFS depth corresponds to the maximum module dependency depth in the graph.
      *
      * @param includeTestConfigurations if true, test-related dependency configurations will also be analyzed
      * for cycles. If false (default), they are skipped.
@@ -77,12 +78,28 @@ data class ProjectGraph(
     @JvmOverloads
     fun assertNoCycles(includeTestConfigurations: Boolean = false) {
         val visited = mutableSetOf<ModuleKey>()
-        val recursionStack = mutableSetOf<ModuleKey>()
-        val cycle = mutableListOf<ModuleKey>()
+        val recursionStack = mutableListOf<ModuleKey>()
+        val onStack = mutableSetOf<ModuleKey>()
+        val cycles = linkedSetOf<List<ModuleKey>>()
 
-        for (key in moduleMap.keys) {
+        for (key in moduleMap.keys.sortedBy { "${it.buildId}${it.path}" }) {
             if (key !in visited) {
-                dfs(key, visited, recursionStack, cycle, includeTestConfigurations)
+                dfs(key, visited, recursionStack, onStack, cycles, includeTestConfigurations)
+            }
+        }
+
+        if (cycles.isNotEmpty()) {
+            val renderedCycles =
+                cycles.map { cycle ->
+                    (cycle + cycle.first()).joinToString(" -> ") { "${it.buildId}${it.path}" }
+                }
+            if (renderedCycles.size == 1) {
+                throw AssertionError("Circular dependency detected in project graph: ${renderedCycles.first()}")
+            } else {
+                throw AssertionError(
+                    "Circular dependencies detected in project graph:\n" +
+                        renderedCycles.joinToString("\n") { "  - $it" },
+                )
             }
         }
     }
@@ -113,13 +130,14 @@ data class ProjectGraph(
     private fun dfs(
         key: ModuleKey,
         visited: MutableSet<ModuleKey>,
-        recursionStack: MutableSet<ModuleKey>,
-        cycle: MutableList<ModuleKey>,
+        recursionStack: MutableList<ModuleKey>,
+        onStack: MutableSet<ModuleKey>,
+        cycles: MutableSet<List<ModuleKey>>,
         includeTestConfigurations: Boolean,
-    ): Boolean {
+    ) {
         visited.add(key)
         recursionStack.add(key)
-        cycle.add(key)
+        onStack.add(key)
 
         val module = moduleMap[key]
         if (module != null) {
@@ -128,26 +146,24 @@ data class ProjectGraph(
                     continue
                 }
                 val depKey = ModuleKey(dep.targetBuildId, dep.targetPath)
-                if (depKey in recursionStack) {
-                    cycle.add(depKey)
-                    val cycleStartIndex = cycle.indexOf(depKey)
-                    val cyclePath =
-                        cycle
-                            .subList(
-                                cycleStartIndex,
-                                cycle.size,
-                            ).joinToString(" -> ") { "${it.buildId}${it.path}" }
-                    throw AssertionError("Circular dependency detected in project graph: $cyclePath")
-                }
-                if (depKey !in visited) {
-                    if (dfs(depKey, visited, recursionStack, cycle, includeTestConfigurations)) return true
+                if (depKey in onStack) {
+                    val cycleStartIndex = recursionStack.indexOf(depKey)
+                    val rawCycle = recursionStack.subList(cycleStartIndex, recursionStack.size).toList()
+                    cycles.add(canonicalizeCycle(rawCycle))
+                } else if (depKey !in visited) {
+                    dfs(depKey, visited, recursionStack, onStack, cycles, includeTestConfigurations)
                 }
             }
         }
 
-        recursionStack.remove(key)
-        cycle.removeAt(cycle.size - 1)
-        return false
+        onStack.remove(key)
+        recursionStack.removeAt(recursionStack.size - 1)
+    }
+
+    private fun canonicalizeCycle(cycle: List<ModuleKey>): List<ModuleKey> {
+        val keys = cycle.map { "${it.buildId}${it.path}" }
+        val minIndex = keys.indices.minByOrNull { keys[it] } ?: 0
+        return cycle.subList(minIndex, cycle.size) + cycle.subList(0, minIndex)
     }
 
     companion object {
