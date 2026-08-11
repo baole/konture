@@ -1,10 +1,3 @@
-val applyPlugin = System.getProperty("idea.active") == "true" ||
-    System.getProperty("idea.sync.active") == "true" ||
-    System.getProperty("konture.applyPlugin") == "true" ||
-    System.getenv("KONTURE_APPLY_PLUGIN") == "true"
-
-System.setProperty("konture.applyPluginInternal", applyPlugin.toString())
-
 pluginManagement {
     includeBuild("build-logic")
     repositories {
@@ -14,6 +7,29 @@ pluginManagement {
         gradlePluginPortal()
     }
 }
+
+buildscript {
+    val applyPlugin = System.getProperty("idea.active").toBoolean() ||
+        System.getProperty("idea.sync.active").toBoolean() ||
+        System.getProperty("konture.applyPlugin").toBoolean()
+
+    gradle.extensions.add("applyPlugin", applyPlugin)
+
+    if (applyPlugin) {
+        val kontureVersion = providers.gradleProperty("version").get()
+        repositories {
+            mavenLocal()
+            mavenCentral()
+        }
+        dependencies {
+            classpath("io.github.baole.konture:plugin-gradle:$kontureVersion")
+        }
+    }
+}
+
+val applyPlugin = gradle.extensions.get("applyPlugin") as Boolean
+
+enableFeaturePreview("NO_IMPLICIT_LOOKUP_IN_PARENT_PROJECTS")
 
 dependencyResolutionManagement {
     repositoriesMode.set(RepositoriesMode.PREFER_PROJECT)
@@ -31,3 +47,7 @@ include("library")
 include("plugin-gradle")
 
 include("konture-test")
+
+if (applyPlugin) {
+    apply(plugin = "io.github.baole.konture")
+}

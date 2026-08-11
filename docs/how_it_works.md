@@ -28,15 +28,15 @@ Layout extraction happens once at build time; tests only read the cached JSON an
 
 ### Key Advantages of This Architecture:
 1. **Gradle Configuration Cache Safe**: The topology is extracted during Gradle configuration and execution, allowing the task `generateArchitectureLayout` to be fully cached.
-2. **Project Isolation Compatible**: By sharing files via custom configurations and Gradle attributes rather than direct parent-to-child model access, Konture is fully compatible with Gradle's new **Project Isolation** requirement.
+2. **Project Isolation Compatible**: By sharing files via custom configurations and Gradle attributes rather than direct parent-to-child model access, Konture is fully compatible with Gradle's new **Project Isolation** requirement. The Konture settings plugin (`KontureSettingsPlugin`) applies Konture via `settings.gradle.lifecycle.beforeProject` hooks to every subproject safely without cross-project access.
 3. **No Classpath/ClassLoader Leaks**: The Kotlin compiler embeddable libraries are kept out of the production classpath, isolated inside the test runner process.
 4. **Execution Speed**: Because the architecture tests run as ordinary, **test-framework agnostic** unit tests (loading pre-analyzed metadata and parsing source files on-demand without full Kotlin compiler compilation or codegen), they are extremely fast.
 
 ---
 
-## 1. The Offline Layout Contract (`layout.json`)
+## 1. The Offline Layout Contract (`layout_v2.json`)
 
-At the heart of Konture is the `layout.json` file. It acts as the schema contract between the Gradle plugin and the test runner.
+At the heart of Konture is the `layout_v2.json` file. It acts as the schema contract between the Gradle plugin and the test runner.
 
 The structure of `LayoutModel` (defined in `core`) is serialized using `kotlinx-serialization`:
 
@@ -82,33 +82,32 @@ The structure of `LayoutModel` (defined in `core`) is serialized using `kotlinx-
 
 Gradle prevents projects from accessing other projects' internal task and file configurations directly (e.g., `parent.subprojects` is deprecated and violates Project Isolation).
 
-To share the generated `layout.json` safely, Konture uses Gradle's **Consuming/Publishing Artifacts API**:
+To share the generated `layout_v2.json` safely, Konture uses Gradle's **Consuming/Publishing Artifacts API**:
 
 ```mermaid
 sequenceDiagram
     participant Root as Root Project (:generateArchitectureLayout)
-    participant Out as Layout Configuration (Outgoing)
+    participant Out as Layout Configuration (archLayoutElements)
     participant Cons as Test Module (:konture-test)
 
-    Root->>Out: Registers layout.json as an Outgoing Artifact
+    Root->>Out: Registers layout_v2.json as an Outgoing Artifact
     Cons->>Cons: Automatically sets up consumer layout configuration
-    Cons->>Out: Resolves artifact via Attribute matching (konture.layout)
-    Out-->>Cons: Copies layout.json to test/resources/layout.json
+    Cons->>Out: Resolves artifact via Attribute matching (koarch-layout)
+    Out-->>Cons: Copies layout_v2.json to build/resources/test/konture/layout_v2.json
 ```
 
-The root project publishes `layout.json` as a Gradle artifact, and test modules consume it through attribute-matched configurations.
+The root project publishes `layout_v2.json` as a Gradle artifact, and test modules consume it through attribute-matched configurations.
 
 ### The Sharing Mechanism:
 1. **Producer (Root Project)**:
-   - Registers the `generateArchitectureLayout` task.
-   - Declares a custom consumable configuration named `kontureLayoutElements`.
-   - Associates the configuration with a specific attribute: `ArtifactTypeDefinition.ARTIFACT_TYPE_ATTRIBUTE` set to `konture-layout-json`.
-   - Registers the task output (`layout.json`) as an artifact of this configuration.
+   - Registers the `generateArchitectureLayout` task (and `generateDependencyGraph` when direct external dependency assertions are present).
+   - Declares custom consumable configurations named `archLayoutElements` and `archDepsElements`.
+   - Associates configurations with Usage attributes set to `koarch-layout` and `koarch-deps`.
+   - Registers task outputs (`layout_v2.json` and `dependencies.json`) as artifacts of these configurations.
 2. **Consumer (Test Module)**:
-   - When the plugin is applied to a subproject, it automatically sets up a custom resolvable configuration named `archLayoutIncoming`.
-   - Declares a dependency on the root project under this configuration.
-   - Sets the matching attribute to `konture-layout-json`.
-   - Registers a copy task that extracts `layout.json` from the resolved configuration and copies it directly into the test project's generated resources folder before the `test` task runs.
+   - When the plugin is applied to subprojects via `settings.gradle.kts`, `setupConsumerLayout` sets up resolvable configurations named `archLayoutIncoming` and `archDepsIncoming`.
+   - Declares dependencies on the root project (`:`) under these configurations with matching `koarch-layout` and `koarch-deps` usage attributes.
+   - Registers copy tasks (`copyArchitectureLayout` and `copyDependencyGraph`) that copy the resolved layout and dependency graph directly into `build/resources/test/konture/` before tests run.
 
 This pure artifact-sharing model allows Gradle to establish a secure task dependency: calling `./gradlew :konture-test:test` automatically triggers the root project's `:generateArchitectureLayout` first.
 

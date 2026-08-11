@@ -27,8 +27,17 @@ else
     exit 1
 fi
 
-# Step 2: Run standalone konture-test module tests
-echo -e "\n${BLUE}[2/4] Running standalone konture-test module tests...${NC}"
+# Step 2: Publish artifacts to Maven Local
+echo -e "\n${BLUE}[2/4] Publishing artifacts to Maven Local...${NC}"
+if ./gradlew -q publishToMavenLocal; then
+    echo -e "${GREEN}[SUCCESS] Published artifacts to Maven Local successfully!${NC}"
+else
+    echo -e "${RED}[ERROR] Failed to publish artifacts to Maven Local.${NC}"
+    exit 1
+fi
+
+# Step 3: Run standalone konture-test module tests
+echo -e "\n${BLUE}[3/4] Running standalone konture-test module tests...${NC}"
 if ./gradlew -q :runKontureTest -Dkonture.applyPlugin=true; then
     echo -e "${GREEN}[SUCCESS] Standalone konture-test module tests passed!${NC}"
 else
@@ -36,18 +45,9 @@ else
     exit 1
 fi
 
-# Step 3: Build Gradle Subprojects
-echo -e "\n${BLUE}[3/4] Building Gradle subprojects...${NC}"
-if ./gradlew build -x test; then
-    echo -e "${GREEN}[SUCCESS] Gradle build completed successfully!${NC}"
-else
-    echo -e "${RED}[ERROR] Gradle build failed.${NC}"
-    exit 1
-fi
-
 # Step 4: Build Maven Plugin
 echo -e "\n${BLUE}[4/4] Building Maven plugin...${NC}"
-if ./gradlew -q :core:publishToMavenLocal && mvn clean compile -f plugin-maven/pom.xml; then
+if mvn clean compile -f plugin-maven/pom.xml; then
     echo -e "${GREEN}[SUCCESS] Maven plugin compilation passed!${NC}"
 else
     echo -e "${RED}[ERROR] Maven plugin compilation failed.${NC}"

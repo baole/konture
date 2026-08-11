@@ -25,7 +25,7 @@ class KonturePluginTest {
         val project = ProjectBuilder.builder().build()
 
         // Apply our plugin
-        project.plugins.apply("io.github.baole.konture")
+        project.plugins.apply("io.github.baole.konture.internal")
 
         // Assert extension is registered
         val extension = project.extensions.findByName("konture") as? KontureExtension
@@ -47,7 +47,7 @@ class KonturePluginTest {
     @Test
     fun `plugin extension accepts exclusions`() {
         val project = ProjectBuilder.builder().build()
-        project.plugins.apply("io.github.baole.konture")
+        project.plugins.apply("io.github.baole.konture.internal")
 
         val extension = project.extensions.getByName("konture") as KontureExtension
 
@@ -71,7 +71,7 @@ class KonturePluginTest {
                 .build()
 
         // Apply plugin to subproject
-        subProject.plugins.apply("io.github.baole.konture")
+        subProject.plugins.apply("io.github.baole.konture.internal")
 
         // Verify incoming configuration was created automatically without manual configuration
         val incomingConfig = subProject.configurations.findByName("archLayoutIncoming")
@@ -117,7 +117,7 @@ class KonturePluginTest {
     @Test
     fun `testOutgoingArtifactResolution`() {
         val rootProject = ProjectBuilder.builder().build()
-        rootProject.plugins.apply("io.github.baole.konture")
+        rootProject.plugins.apply("io.github.baole.konture.internal")
 
         val config = rootProject.configurations.getByName("archLayoutElements")
         assertNotNull(config)
@@ -139,7 +139,7 @@ class KonturePluginTest {
         project.plugins.apply("java") // Registers Test tasks
 
         // Default locale from extension
-        project.plugins.apply("io.github.baole.konture")
+        project.plugins.apply("io.github.baole.konture.internal")
         val testTask = project.tasks.getByName("test") as GradleTestTask
         val localeProp = testTask.systemProperties[KontureConstants.PROPERTY_LOCALE]
         val resolvedLocale =
@@ -154,7 +154,7 @@ class KonturePluginTest {
         try {
             val project2 = ProjectBuilder.builder().build()
             project2.plugins.apply("java")
-            project2.plugins.apply("io.github.baole.konture")
+            project2.plugins.apply("io.github.baole.konture.internal")
             val testTask2 = project2.tasks.getByName("test") as GradleTestTask
             val localeProp2 = testTask2.systemProperties[KontureConstants.PROPERTY_LOCALE]
             val resolvedLocale2 =
@@ -171,7 +171,7 @@ class KonturePluginTest {
     @Test
     fun `testOutgoingConfigurationsAttributes`() {
         val rootProject = ProjectBuilder.builder().build()
-        rootProject.plugins.apply("io.github.baole.konture")
+        rootProject.plugins.apply("io.github.baole.konture.internal")
 
         val layoutConfig = rootProject.configurations.getByName("archLayoutElements")
         val layoutUsage = layoutConfig.attributes.getAttribute(Usage.USAGE_ATTRIBUTE)?.name
@@ -194,7 +194,7 @@ class KonturePluginTest {
         val versionCatalog = File(libsDir, "libs.versions.toml")
         versionCatalog.writeText("[versions]\n")
 
-        rootProject.plugins.apply("io.github.baole.konture")
+        rootProject.plugins.apply("io.github.baole.konture.internal")
         (rootProject as ProjectInternal).evaluate()
 
         val generateDepsTask = rootProject.tasks.getByName("generateDependencyGraph") as GenerateDependencyGraph
@@ -210,7 +210,7 @@ class KonturePluginTest {
         val subProject = ProjectBuilder.builder().withName("sub").withParent(rootProject).build()
 
         subProject.plugins.apply("java")
-        subProject.plugins.apply("io.github.baole.konture")
+        subProject.plugins.apply("io.github.baole.konture.internal")
 
         val processTestResources = subProject.tasks.getByName("processTestResources")
         val dependencies = processTestResources.taskDependencies.getDependencies(processTestResources)
@@ -238,7 +238,7 @@ class KonturePluginTest {
         val kotlinExt = child.extensions.getByType(org.jetbrains.kotlin.gradle.dsl.KotlinProjectExtension::class.java)
         kotlinExt.sourceSets.getByName("main").kotlin.srcDir(buildSrcDir)
 
-        rootProject.plugins.apply("io.github.baole.konture")
+        rootProject.plugins.apply("io.github.baole.konture.internal")
         (rootProject as ProjectInternal).evaluate()
         (child as ProjectInternal).evaluate()
 

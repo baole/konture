@@ -21,7 +21,7 @@ class KontureBaselineTaskTest {
     @Test
     fun `plugin extension configures baseline path`() {
         val project = ProjectBuilder.builder().build()
-        project.plugins.apply("io.github.baole.konture")
+        project.plugins.apply("io.github.baole.konture.internal")
 
         val extension = project.extensions.getByName("konture") as KontureExtension
         extension.baselinePath.set("custom-baseline.json")
@@ -33,7 +33,7 @@ class KontureBaselineTaskTest {
     fun `plugin configures test tasks with baseline path`() {
         val project = ProjectBuilder.builder().build()
         project.plugins.apply("java") // Registers Test tasks
-        project.plugins.apply("io.github.baole.konture")
+        project.plugins.apply("io.github.baole.konture.internal")
 
         val extension = project.extensions.getByName("konture") as KontureExtension
         extension.baselinePath.set("custom-baseline-test.json")
@@ -52,12 +52,18 @@ class KontureBaselineTaskTest {
     fun `test task accepts a missing baseline file`(
         @TempDir projectDir: Path,
     ) {
-        projectDir.resolve("settings.gradle.kts").toFile().writeText("rootProject.name = \"missing-baseline\"")
+        projectDir.resolve("settings.gradle.kts").toFile().writeText(
+            """
+            plugins {
+                id("io.github.baole.konture")
+            }
+            rootProject.name = "missing-baseline"
+            """.trimIndent(),
+        )
         projectDir.resolve("build.gradle.kts").toFile().writeText(
             """
             plugins {
                 java
-                id("io.github.baole.konture")
             }
 
             repositories {
@@ -102,8 +108,8 @@ class KontureBaselineTaskTest {
         val rootProject = ProjectBuilder.builder().withName("root").build()
         val childProject = ProjectBuilder.builder().withName("child").withParent(rootProject).build()
 
-        rootProject.plugins.apply("io.github.baole.konture")
-        childProject.plugins.apply("io.github.baole.konture")
+        rootProject.plugins.apply("io.github.baole.konture.internal")
+        childProject.plugins.apply("io.github.baole.konture.internal")
 
         val rootTask = rootProject.tasks.getByName("generateKontureBaseline")
         val childTask = childProject.tasks.getByName("generateKontureBaseline")
@@ -120,7 +126,7 @@ class KontureBaselineTaskTest {
         System.setProperty(KontureConstants.PROPERTY_BASELINE_PATH, "cli-override-baseline.json")
         System.setProperty(KontureConstants.PROPERTY_BASELINE_DIR, "/cli-override-dir")
         try {
-            project.plugins.apply("io.github.baole.konture")
+            project.plugins.apply("io.github.baole.konture.internal")
 
             val extension = project.extensions.getByName("konture") as KontureExtension
             extension.baselinePath.set("dsl-baseline.json")
@@ -157,9 +163,9 @@ class KontureBaselineTaskTest {
 
         rootProject.gradle.startParameter.setTaskNames(listOf(":generateKontureBaseline"))
 
-        rootProject.plugins.apply("io.github.baole.konture")
+        rootProject.plugins.apply("io.github.baole.konture.internal")
         childProject.plugins.apply("java") // Registers Test tasks
-        childProject.plugins.apply("io.github.baole.konture")
+        childProject.plugins.apply("io.github.baole.konture.internal")
 
         val childTestTask = childProject.tasks.getByName("test") as GradleTestTask
         val generateProp = childTestTask.systemProperties[KontureConstants.PROPERTY_BASELINE_GENERATE]

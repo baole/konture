@@ -60,17 +60,17 @@ fi
 PROJECT_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 cd "$PROJECT_ROOT"
 
-# Extract current version from Version Catalog
-VERSION_CATALOG="gradle/libs.versions.toml"
-if [[ ! -f "$VERSION_CATALOG" ]]; then
-    echo -e "${RED}[ERROR] Version catalog not found at '$VERSION_CATALOG'. Please run this from the project root.${NC}" >&2
+# Extract current version from gradle.properties
+PROPERTIES_FILE="gradle.properties"
+if [[ ! -f "$PROPERTIES_FILE" ]]; then
+    echo -e "${RED}[ERROR] '$PROPERTIES_FILE' not found. Please run this from the project root.${NC}" >&2
     exit 1
 fi
 
-OLD_VERSION=$(grep 'konture =' "$VERSION_CATALOG" | head -n 1 | cut -d'"' -f2)
+OLD_VERSION=$(grep '^version=' "$PROPERTIES_FILE" | head -n 1 | cut -d'=' -f2)
 
 if [[ -z "$OLD_VERSION" ]]; then
-    echo -e "${RED}[ERROR] Could not extract current konture version from '$VERSION_CATALOG'.${NC}" >&2
+    echo -e "${RED}[ERROR] Could not extract current konture version from '$PROPERTIES_FILE'.${NC}" >&2
     exit 1
 fi
 
@@ -94,24 +94,29 @@ fi
 
 # List of files to modify and verify
 FILES_TO_BUMP=(
-    "gradle/libs.versions.toml"
+    "gradle.properties"
     "build.gradle.kts"
+    "settings.gradle.kts"
     "build-logic/src/main/kotlin/konture.kotlin.gradle.kts"
     "plugin-gradle/build.gradle.kts"
-    "docs/scripts.js"
+    "showcases/sample-gradle/settings.gradle.kts"
     "showcases/sample-gradle/build.gradle.kts"
     "showcases/sample-gradle/konture-test/build.gradle.kts"
+    "showcases/nowinandroid/settings.gradle.kts"
     "showcases/nowinandroid/build.gradle.kts"
     "showcases/nowinandroid/konture-test/build.gradle.kts"
+    "showcases/kotlinconf-app/settings.gradle.kts"
     "showcases/kotlinconf-app/build.gradle.kts"
     "showcases/kotlinconf-app/konture-test/build.gradle.kts"
+    "showcases/ktor-arrow-example/gradle/libs.versions.toml"
     "README.md"
-    "CONTRIBUTING.md"
     "docs/contributing.md"
     "docs/installation.md"
     "docs/usage.md"
     "docs/configuration.md"
     "docs/baseline.md"
+    "docs/ai-prompts/integration-prompt.md"
+    "docs/articles/kotlin-architecture-tests-with-konture.md"
     "plugin-maven/pom.xml"
     "showcases/sample-maven/pom.xml"
 )
@@ -131,45 +136,60 @@ done
 # Perform in-place search-and-replace using cross-platform perl
 echo -e "${BLUE}[2/3] Bumping version coordinates in source and documentation files...${NC}"
 
-# 1. Update Version Catalog
-perl -pi -e "s/konture = \"\Q$OLD_VERSION\E\"/konture = \"$NEW_VERSION\"/g" gradle/libs.versions.toml
+# 1. Update Showcase Version Catalogs
+if [[ -f "showcases/ktor-arrow-example/gradle/libs.versions.toml" ]]; then
+    perl -pi -e "s/konture = \"\Q$OLD_VERSION\E\"/konture = \"$NEW_VERSION\"/g" showcases/ktor-arrow-example/gradle/libs.versions.toml
+fi
 
-# 2. Update Docsify dynamic script
-perl -pi -e "s/const latestVersion = '\Q$OLD_VERSION\E'/const latestVersion = '$NEW_VERSION'/g" docs/scripts.js
+# 2. Update Settings and Showcase Root plugins (both settings and project level)
+if [[ -f "settings.gradle.kts" ]]; then
+    perl -pi -e "s/id\(\"io.github.baole.konture\"\)\s+version\s+\"\Q$OLD_VERSION\E\"/id(\"io.github.baole.konture\") version \"$NEW_VERSION\"/g" settings.gradle.kts
+fi
+perl -pi -e "s/id\(\"io.github.baole.konture\"\)\s+version\s+\"\Q$OLD_VERSION\E\"/id(\"io.github.baole.konture\") version \"$NEW_VERSION\"/g" showcases/sample-gradle/settings.gradle.kts
+perl -pi -e "s/id\(\"io.github.baole.konture\"\)\s+version\s+\"\Q$OLD_VERSION\E\"/id(\"io.github.baole.konture\") version \"$NEW_VERSION\"/g" showcases/nowinandroid/settings.gradle.kts
+perl -pi -e "s/id\(\"io.github.baole.konture\"\)\s+version\s+\"\Q$OLD_VERSION\E\"/id(\"io.github.baole.konture\") version \"$NEW_VERSION\"/g" showcases/kotlinconf-app/settings.gradle.kts
+if [[ -f "showcases/ktor-arrow-example/settings.gradle.kts" ]]; then
+    perl -pi -e "s/id\(\"io.github.baole.konture\"\)\s+version\s+\"\Q$OLD_VERSION\E\"/id(\"io.github.baole.konture\") version \"$NEW_VERSION\"/g" showcases/ktor-arrow-example/settings.gradle.kts
+fi
 
-# 3. Update Showcase Root build plugins
 perl -pi -e "s/id\(\"io.github.baole.konture\"\)\s+version\s+\"\Q$OLD_VERSION\E\"/id(\"io.github.baole.konture\") version \"$NEW_VERSION\"/g" showcases/sample-gradle/build.gradle.kts
 perl -pi -e "s/id\(\"io.github.baole.konture\"\)\s+version\s+\"\Q$OLD_VERSION\E\"/id(\"io.github.baole.konture\") version \"$NEW_VERSION\"/g" showcases/nowinandroid/build.gradle.kts
 perl -pi -e "s/id\(\"io.github.baole.konture\"\)\s+version\s+\"\Q$OLD_VERSION\E\"/id(\"io.github.baole.konture\") version \"$NEW_VERSION\"/g" showcases/kotlinconf-app/build.gradle.kts
 
-# 4. Update Showcase konture-test module dependencies
+# 3. Update Showcase konture-test module dependencies
 perl -pi -e "s/testImplementation\(\"io.github.baole:konture:\Q$OLD_VERSION\E\"\)/testImplementation(\"io.github.baole:konture:$NEW_VERSION\")/g" showcases/sample-gradle/konture-test/build.gradle.kts
 perl -pi -e "s/testImplementation\(\"io.github.baole:konture:\Q$OLD_VERSION\E\"\)/testImplementation(\"io.github.baole:konture:$NEW_VERSION\")/g" showcases/nowinandroid/konture-test/build.gradle.kts
 perl -pi -e "s/testImplementation\(\"io.github.baole:konture:\Q$OLD_VERSION\E\"\)/testImplementation(\"io.github.baole:konture:$NEW_VERSION\")/g" showcases/kotlinconf-app/konture-test/build.gradle.kts
+perl -pi -e "s/io.github.baole.konture:library:\Q$OLD_VERSION\E/io.github.baole.konture:library:$NEW_VERSION/g" showcases/sample-gradle/konture-test/build.gradle.kts
+perl -pi -e "s/io.github.baole.konture:library:\Q$OLD_VERSION\E/io.github.baole.konture:library:$NEW_VERSION/g" showcases/nowinandroid/konture-test/build.gradle.kts
+perl -pi -e "s/io.github.baole.konture:library:\Q$OLD_VERSION\E/io.github.baole.konture:library:$NEW_VERSION/g" showcases/kotlinconf-app/konture-test/build.gradle.kts
 
-# 5. Update GitHub README.md references
+# 4. Update GitHub README.md references
 perl -pi -e "s/\Q$OLD_VERSION\E/$NEW_VERSION/g" README.md
 
-# 6. Update GitHub CONTRIBUTING.md references
-perl -pi -e "s/\Q$OLD_VERSION\E/$NEW_VERSION/g" CONTRIBUTING.md
-
-# 6b. Update docs/contributing.md references
+# 5. Update docs markdown references
 perl -pi -e "s/\Q$OLD_VERSION\E/$NEW_VERSION/g" docs/contributing.md
-
-# 6c. Update docs/installation.md references
 perl -pi -e "s/\Q$OLD_VERSION\E/$NEW_VERSION/g" docs/installation.md
-
-# 6d. Update docs/usage.md references
 perl -pi -e "s/\Q$OLD_VERSION\E/$NEW_VERSION/g" docs/usage.md
-
-# 6e. Update docs/configuration.md references
 perl -pi -e "s/\Q$OLD_VERSION\E/$NEW_VERSION/g" docs/configuration.md
-
-# 6f. Update docs/baseline.md references
 perl -pi -e "s/\Q$OLD_VERSION\E/$NEW_VERSION/g" docs/baseline.md
+if [[ -f "docs/ai-prompts/integration-prompt.md" ]]; then
+    perl -pi -e "s/\Q$OLD_VERSION\E/$NEW_VERSION/g" docs/ai-prompts/integration-prompt.md
+fi
+if [[ -f "docs/articles/kotlin-architecture-tests-with-konture.md" ]]; then
+    perl -pi -e "s/\Q$OLD_VERSION\E/$NEW_VERSION/g" docs/articles/kotlin-architecture-tests-with-konture.md
+fi
 
-# 7. Update Root buildscript classpath and project version
-perl -pi -e "s/plugin-gradle:\Q$OLD_VERSION\E/plugin-gradle:$NEW_VERSION/g" build.gradle.kts
+# 7. Update gradle.properties, Root buildscript classpath and project version
+if [[ -f "gradle.properties" ]]; then
+    perl -pi -e "s/version=\Q$OLD_VERSION\E/version=$NEW_VERSION/g" gradle.properties
+fi
+if [[ -f "settings.gradle.kts" ]]; then
+    perl -pi -e "s/plugin-gradle:\Q$OLD_VERSION\E/plugin-gradle:$NEW_VERSION/g" settings.gradle.kts
+fi
+if [[ -f "build.gradle.kts" ]]; then
+    perl -pi -e "s/plugin-gradle:\Q$OLD_VERSION\E/plugin-gradle:$NEW_VERSION/g" build.gradle.kts
+fi
 perl -pi -e "s/version = \"\Q$OLD_VERSION\E\"/version = \"$NEW_VERSION\"/g" build.gradle.kts
 perl -pi -e "s/version = \"\Q$OLD_VERSION\E\"/version = \"$NEW_VERSION\"/g" build-logic/src/main/kotlin/konture.kotlin.gradle.kts
 
@@ -181,6 +201,10 @@ perl -pi -e "s/<version>\Q$OLD_VERSION\E<\/version>/<version>$NEW_VERSION<\/vers
 
 # 8c. Update Sample Maven Showcase konture version
 perl -pi -e "s/<konture.version>\Q$OLD_VERSION\E<\/konture.version>/<konture.version>$NEW_VERSION<\/konture.version>/g" showcases/sample-maven/pom.xml
+
+# 8d. Publish newly bumped version to Maven Local
+echo -e "${BLUE}[INFO] Publishing newly bumped version v$NEW_VERSION to Maven Local...${NC}"
+./gradlew -q publishToMavenLocal
 
 # 9. Commit and push changes inside submodules if they have dirty changes
 echo -e "\n${BLUE}[3/3] Committing and pushing version bumps in git submodules...${NC}"

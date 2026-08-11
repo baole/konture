@@ -54,15 +54,15 @@ konture = { id = "io.github.baole.konture", version.ref = "konture" }
 konture = { group = "io.github.baole", name = "konture", version.ref = "konture" }
 ```
 
-Apply the plugin in the root build:
+Apply the plugin in `settings.gradle.kts`:
 
 ```kotlin
 plugins {
-    alias(libs.plugins.konture) apply true
+    alias(libs.plugins.konture)
 }
 ```
 
-The plugin generates the layout metadata Konture needs for module-aware rules.
+The plugin automatically configures layout metadata generation across subprojects.
 
 ## Step 2: Create the Architecture-Test Module
 
@@ -77,11 +77,11 @@ Create `konture-test/build.gradle.kts`:
 ```kotlin
 plugins {
     kotlin("jvm")
-    alias(libs.plugins.konture)
 }
 
 dependencies {
     testImplementation(libs.konture)
+```,StartLine:57,TargetContent:
 
     // Reuse your project's existing test framework dependencies (JUnit 5, Kotest, TestBalloon, etc.)
     testImplementation("org.junit.jupiter:junit-jupiter-api:5.11.0")

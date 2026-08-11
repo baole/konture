@@ -4,34 +4,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-val applyPlugin = System.getProperty("konture.applyPluginInternal") == "true"
-
-buildscript {
-    repositories {
-        mavenLocal()
-        google()
-        mavenCentral()
-    }
-    dependencies {
-
-        val applyPlugin = System.getProperty("konture.applyPluginInternal") == "true"
-
-        if (applyPlugin) {
-            val versionFile = file("gradle/libs.versions.toml")
-            if (versionFile.exists()) {
-                val kontureVersion = versionFile.readLines()
-                    .firstOrNull { it.trim().startsWith("konture =") }
-                    ?.substringAfter("=")
-                    ?.replace("\"", "")
-                    ?.trim()
-
-                if (kontureVersion != null) {
-                    classpath("io.github.baole.konture:plugin-gradle:$kontureVersion")
-                }
-            }
-        }
-    }
-}
+val applyPlugin = gradle.extensions.get("applyPlugin") as Boolean ||
+    System.getProperty("konture.applyPluginInternal").toBoolean()
 
 plugins {
     id("konture.root")
@@ -46,15 +20,7 @@ plugins {
 }
 
 if (applyPlugin) {
-    pluginManager.apply("io.github.baole.konture")
-}
-
-allprojects {
-    repositories {
-        mavenLocal()
-        google()
-        mavenCentral()
-    }
+    pluginManager.apply("io.github.baole.konture.internal")
 }
 
 tasks.register("runKontureTest") {

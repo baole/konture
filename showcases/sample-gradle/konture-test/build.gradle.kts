@@ -1,16 +1,15 @@
 plugins {
     kotlin("jvm")
-    id("io.github.baole.konture")
 }
 
 
 dependencies {
-    testImplementation("io.github.baole:konture:0.7.7")
+    testImplementation("io.github.baole:konture:0.8.0")
     
     testImplementation("org.junit.jupiter:junit-jupiter:5.11.0")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 }
 
-tasks.test {
+tasks.withType<Test> {
     useJUnitPlatform()
 }

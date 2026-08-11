@@ -8,7 +8,6 @@
 
 package io.github.baole.konture.plugin
 
-import com.android.build.api.dsl.CommonExtension
 import io.github.baole.konture.core.KontureConstants
 import org.gradle.api.Plugin
 import org.gradle.api.Project
@@ -19,9 +18,6 @@ import org.gradle.api.tasks.Delete
 import org.gradle.api.tasks.PathSensitivity
 import org.gradle.api.tasks.SourceSetContainer
 import org.gradle.api.tasks.testing.Test
-import org.jetbrains.kotlin.gradle.dsl.KotlinMultiplatformExtension
-import org.jetbrains.kotlin.gradle.dsl.KotlinProjectExtension
-import org.jetbrains.kotlin.gradle.plugin.mpp.KotlinNativeTarget
 import java.io.File
 
 /**
@@ -54,13 +50,34 @@ class KonturePlugin : Plugin<Project> {
             task.description = TASK_DESC_BASELINE
             task.dependsOn(project.tasks.withType(Test::class.java))
             if (isProducer) {
-                project.subprojects.forEach { subproject ->
-                    task.dependsOn(subproject.tasks.matching { t -> t.name == TASK_GENERATE_BASELINE })
+                project.rootProject.subprojects.forEach { subproject ->
+                    task.dependsOn("${subproject.path}:$TASK_GENERATE_BASELINE")
                 }
             }
         }
 
         project.tasks.withType(Test::class.java).configureEach { testTask ->
+            val rootExtension =
+                if (project == project.rootProject) {
+                    extension
+                } else {
+                    try {
+                        project.rootProject.extensions.findByType(KontureExtension::class.java)
+                    } catch (_: Exception) {
+                        null
+                    }
+                }
+            val effectiveBaselinePath =
+                if (rootExtension != null) {
+                    extension.baselinePath.orElse(
+                        rootExtension.baselinePath,
+                    )
+                } else {
+                    extension.baselinePath
+                }
+            val effectiveLanguage =
+                if (rootExtension != null) extension.language.orElse(rootExtension.language) else extension.language
+
             val cliBaselinePath = project.providers.systemProperty(KontureConstants.PROPERTY_BASELINE_PATH).orNull
             val cliBaselineDir = project.providers.systemProperty(KontureConstants.PROPERTY_BASELINE_DIR).orNull
             val cliLanguage = project.providers.systemProperty(KontureConstants.PROPERTY_LOCALE).orNull
@@ -71,12 +88,18 @@ class KonturePlugin : Plugin<Project> {
             if (cliBaselinePath != null) {
                 testTask.systemProperty(KontureConstants.PROPERTY_BASELINE_PATH, cliBaselinePath)
             } else {
-                testTask.systemProperty(KontureConstants.PROPERTY_BASELINE_PATH, extension.baselinePath)
+                testTask.systemProperty(
+                    KontureConstants.PROPERTY_BASELINE_PATH,
+                    effectiveBaselinePath.getOrElse(KontureConstants.DEFAULT_BASELINE_FILENAME),
+                )
             }
             if (cliLanguage != null) {
                 testTask.systemProperty(KontureConstants.PROPERTY_LOCALE, cliLanguage)
             } else {
-                testTask.systemProperty(KontureConstants.PROPERTY_LOCALE, extension.language)
+                testTask.systemProperty(
+                    KontureConstants.PROPERTY_LOCALE,
+                    effectiveLanguage.getOrElse(""),
+                )
             }
             val isRecordProperty =
                 project.providers.systemProperty(KontureConstants.PROPERTY_BASELINE_GENERATE).orNull?.toBoolean() ?: false
@@ -119,11 +142,11 @@ class KonturePlugin : Plugin<Project> {
                 project.tasks.register(TASK_GENERATE_LAYOUT, GenerateArchitectureLayout::class.java) { task ->
                     task.outputFile.convention(project.layout.buildDirectory.file(PATH_LAYOUT_V2))
                     task.rootProjectDir.set(project.rootDir)
-                    task.excludeModules.set(extension.excludeModules)
-                    task.excludePackages.set(extension.excludePackages)
-                    task.excludeClasses.set(extension.excludeClasses)
-                    task.excludeConfigurations.set(extension.excludeConfigurations)
-                    task.logLevel.set(extension.logLevel)
+                    task.excludeModules.convention(extension.excludeModules)
+                    task.excludePackages.convention(extension.excludePackages)
+                    task.excludeClasses.convention(extension.excludeClasses)
+                    task.excludeConfigurations.convention(extension.excludeConfigurations)
+                    task.logLevel.convention(extension.logLevel)
                 }
 
             val generateDepsTask =
@@ -133,6 +156,16 @@ class KonturePlugin : Plugin<Project> {
             val detectExternalDependencyRules =
                 project.tasks.register(TASK_DETECT_RULES, DetectExternalDependencyRules::class.java) { task ->
                     task.resultFile.convention(project.layout.buildDirectory.file(PATH_EXTERNAL_RULES))
+                    val testFiles =
+                        project.rootProject.allprojects.flatMap { sub ->
+                            val srcDir = File(sub.projectDir, DIR_SRC)
+                            if (srcDir.exists()) {
+                                project.fileTree(srcDir) { pattern -> pattern.include(GLOB_KT) }.files
+                            } else {
+                                emptyList()
+                            }
+                        }
+                    task.testSources.from(testFiles)
                 }
             val dependencyGraphRequired = detectExternalDependencyRules.flatMap { it.resultFile }
             generateDepsTask.configure { task ->
@@ -141,87 +174,49 @@ class KonturePlugin : Plugin<Project> {
                 task.onlyIf { dependencyGraphRequired.get().asFile.readText().trim().toBoolean() }
             }
 
-            // Eagerly evaluate project mapping and source directory listings during configuration phase
-            // by using afterEvaluate block. This ensures full Configuration Cache compatibility
-            // since the computed list is passed directly as a task property without capturing any live Project references.
-            project.afterEvaluate {
-                generateTask.configure { task ->
-                    val allSourceDirs = collectAllSourceDirs(project)
-                    task.sourceFiles.from(allSourceDirs)
+            val configureTasksAction =
+                Runnable {
+                    generateTask.configure { task ->
+                        val allSourceDirs = collectAllSourceDirs(project)
+                        task.sourceFiles.from(allSourceDirs)
 
-                    val modulesList =
-                        project.allprojects.map { sub ->
-                            val plugins = mutableListOf<String>()
-                            if (sub.pluginManager.hasPlugin(ID_KOTLIN_JVM)) plugins.add(PLUGIN_KOTLIN_JVM)
-                            if (sub.pluginManager.hasPlugin(ID_ANDROID_APPLICATION)) {
-                                plugins.add(PLUGIN_ANDROID_APP)
+                        val modulesList =
+                            project.rootProject.allprojects.map { sub ->
+                                collectModuleDataForProject(sub)
                             }
-                            if (sub.pluginManager.hasPlugin(ID_ANDROID_LIBRARY)) plugins.add(PLUGIN_ANDROID_LIB)
-                            // Support specialized Android plugins: dynamic-feature modules and separate test modules
-                            if (sub.pluginManager.hasPlugin(ID_ANDROID_DYNAMIC_FEATURE) ||
-                                sub.plugins.any { it.javaClass.simpleName.contains("DynamicFeature") }
-                            ) {
-                                plugins.add(PLUGIN_ANDROID_FEATURE)
-                            }
-                            if (sub.pluginManager.hasPlugin(ID_ANDROID_TEST) ||
-                                sub.plugins.any {
-                                    it.javaClass.simpleName.contains("TestPlugin") ||
-                                        it.javaClass.simpleName.contains("AndroidTest")
-                                }
-                            ) {
-                                plugins.add(PLUGIN_ANDROID_TEST)
-                            }
-                            if (sub.pluginManager.hasPlugin(ID_KOTLIN_MULTIPLATFORM)) {
-                                plugins.add(PLUGIN_KOTLIN_KMP)
-                            }
+                        task.modules.set(modulesList)
+                    }
 
-                            val sourceSets = collectSourceSets(sub)
-                            val dependencies = collectDependencies(sub)
-
-                            ModuleData(
-                                path = sub.path,
-                                projectDir =
-                                    if (sub.projectDir == project.rootDir) {
-                                        "."
-                                    } else {
-                                        sub.projectDir.relativeTo(
-                                            project.rootDir,
-                                        ).path
-                                    },
-                                appliedPlugins = plugins,
-                                sourceSets = sourceSets,
-                                dependencies = dependencies,
-                            )
+                    generateDepsTask.configure { task ->
+                        val buildFilesList =
+                            project.rootProject.allprojects.mapNotNull { sub ->
+                                val dir = sub.projectDir
+                                File(dir, "build.gradle.kts").takeIf { it.exists() }
+                                    ?: File(dir, "build.gradle").takeIf { it.exists() }
+                            }
+                        val filesCollection = project.files(buildFilesList)
+                        val settingsFile =
+                            project.rootProject.file(FILE_SETTINGS_KTS).takeIf { it.exists() }
+                                ?: project.rootProject.file(FILE_SETTINGS_GROOVY).takeIf { it.exists() }
+                        if (settingsFile != null) {
+                            filesCollection.from(settingsFile)
                         }
-                    task.modules.set(modulesList)
-                }
+                        val versionCatalog = project.rootProject.file(FILE_LIBS_VERSIONS_TOML).takeIf { it.exists() }
+                        if (versionCatalog != null) {
+                            filesCollection.from(versionCatalog)
+                        }
 
-                generateDepsTask.configure { task ->
-                    val buildFilesList = project.allprojects.map { it.buildFile }
-                    val filesCollection = project.files(buildFilesList)
-                    val settingsFile =
-                        project.rootProject.file(FILE_SETTINGS_KTS).takeIf { it.exists() }
-                            ?: project.rootProject.file(FILE_SETTINGS_GROOVY).takeIf { it.exists() }
-                    if (settingsFile != null) {
-                        filesCollection.from(settingsFile)
-                    }
-                    val versionCatalog = project.rootProject.file(FILE_LIBS_VERSIONS_TOML).takeIf { it.exists() }
-                    if (versionCatalog != null) {
-                        filesCollection.from(versionCatalog)
-                    }
+                        task.buildFiles.from(filesCollection)
 
-                    task.buildFiles.from(filesCollection)
+                        val declaredMap = mutableMapOf<String, List<String>>()
+                        val resolvedMap = mutableMapOf<String, List<String>>()
 
-                    val declaredMap = mutableMapOf<String, List<String>>()
-                    val resolvedMap = mutableMapOf<String, List<String>>()
-
-                    project.allprojects.forEach { sub ->
                         val resolvableConfigs =
-                            sub.configurations.filter { config ->
+                            project.configurations.filter { config ->
                                 config.isCanBeResolved && isKontureDependencyConfiguration(config.name)
                             }
                         resolvableConfigs.forEach { config ->
-                            val key = "${sub.path}:${config.name}"
+                            val key = "${project.path}:${config.name}"
                             val declared =
                                 config.dependencies.mapNotNull { dep ->
                                     val g = dep.group
@@ -240,11 +235,21 @@ class KonturePlugin : Plugin<Project> {
                                     "$group:${dependency.name}:$version"
                                 }
                         }
+
+                        task.declaredDependencies.set(declaredMap)
+
+                        task.resolvedDependencies.set(resolvedMap)
                     }
+                }
 
-                    task.declaredDependencies.set(declaredMap)
-
-                    task.resolvedDependencies.set(resolvedMap)
+            if (project.state.executed) {
+                configureTasksAction.run()
+            } else {
+                project.afterEvaluate {
+                    configureTasksAction.run()
+                }
+                project.gradle.projectsEvaluated {
+                    configureTasksAction.run()
                 }
             }
 
@@ -287,139 +292,11 @@ class KonturePlugin : Plugin<Project> {
     @Suppress("CyclomaticComplexMethod")
     internal fun collectSourceSets(proj: Project): List<SourceSetData> {
         val list = mutableListOf<SourceSetData>()
-        // CommonExtension is supplied by AGP, which is intentionally only a compile-time
-        // dependency of this plugin. Do not resolve its class in ordinary JVM/KMP builds.
-        val androidExtension =
-            if (proj.hasAndroidPlugin()) {
-                proj.extensions.findByType(
-                    CommonExtension::class.java,
-                )
-            } else {
-                null
-            }
-        if (androidExtension != null) {
-            androidExtension.sourceSets.forEach { sourceSet ->
-                val name = sourceSet.name
-                val srcDirs = sourceSet.java.directories + sourceSet.kotlin.directories
-                list.add(
-                    SourceSetData(
-                        name = name,
-                        kind = KIND_ANDROID,
-                        production = !name.lowercase().contains(SUBSTRING_TEST_LOWERCASE),
-                        srcDirs = srcDirs.map { toRelPath(proj, File(it)) },
-                        platforms = listOf(PLATFORM_ANDROID),
-                        compileClasspath = compilationClasspath(proj, name),
-                    ),
-                )
-            }
+        if (proj.hasAndroidPlugin()) {
+            AgpInspector.collectAndroidSourceSets(proj, list)
         }
-
-        if (list.isEmpty()) {
-            val kotlinExt = proj.extensions.findByType(KotlinProjectExtension::class.java)
-            if (kotlinExt != null) {
-                val kmpExtension = proj.extensions.findByType(KotlinMultiplatformExtension::class.java)
-                val isKmp = kmpExtension != null
-                val kind = if (isKmp) KIND_KMP else KIND_JVM
-
-                // Capture target metadata and each compilation's actual source-set closure with
-                // the public Kotlin Gradle API. The latter includes KGP's implicit commonMain
-                // relationship as well as explicit dependsOn edges.
-                val sourceSetPlatforms = mutableMapOf<String, MutableSet<String>>()
-                val sourceSetTargets = mutableMapOf<String, MutableSet<String>>()
-                val sourceSetVisibility = mutableMapOf<String, MutableSet<String>>()
-                val sourceSetDependencyConfigurations = mutableMapOf<String, MutableSet<String>>()
-                val mainCompilationSourceSets = mutableSetOf<String>()
-                kmpExtension?.targets?.forEach { target ->
-                    val targetPlatforms = listOf(target.platformType.name)
-                    val nativeTargetIdentity = (target as? KotlinNativeTarget)?.konanTarget?.name
-                    target.compilations.forEach { compilation ->
-                        val compilationSourceSets = compilation.allKotlinSourceSets
-                        compilationSourceSets.forEach { sourceSet ->
-                            sourceSetPlatforms.getOrPut(sourceSet.name) { mutableSetOf() }.addAll(targetPlatforms)
-                            if (nativeTargetIdentity != null) {
-                                sourceSetTargets.getOrPut(sourceSet.name) { mutableSetOf() }.add(nativeTargetIdentity)
-                            }
-                        }
-                        val defaultSourceSet = compilation.defaultSourceSet.name
-                        sourceSetVisibility
-                            .getOrPut(defaultSourceSet) { mutableSetOf() }
-                            .addAll(compilationSourceSets.map { it.name }.filterNot { it == defaultSourceSet })
-                        sourceSetDependencyConfigurations
-                            .getOrPut(defaultSourceSet) { mutableSetOf() }
-                            .addAll(
-                                listOfNotNull(
-                                    compilation.apiConfigurationName,
-                                    compilation.implementationConfigurationName,
-                                    compilation.compileOnlyConfigurationName,
-                                    compilation.runtimeOnlyConfigurationName,
-                                    compilation.compileDependencyConfigurationName,
-                                    compilation.runtimeDependencyConfigurationName,
-                                ),
-                            )
-                        if (compilation.name.equals(COMPILATION_MAIN, ignoreCase = true)) {
-                            mainCompilationSourceSets.addAll(compilationSourceSets.map { it.name })
-                        }
-                    }
-                }
-                // Source-set dependency buckets do not necessarily belong to a target's default
-                // compilation (for example, an intermediate source set). Associate each actual
-                // Gradle configuration with its longest matching source-set name.
-                proj.configurations.forEach { configuration ->
-                    val owner =
-                        kotlinExt.sourceSets
-                            .map { it.name }
-                            .filter { sourceSetName ->
-                                configuration.name == sourceSetName ||
-                                    (
-                                        configuration.name.startsWith(sourceSetName) &&
-                                            configuration.name.getOrNull(sourceSetName.length)?.isUpperCase() == true
-                                    )
-                            }.maxByOrNull(String::length)
-                    if (owner != null) {
-                        sourceSetDependencyConfigurations.getOrPut(owner) { mutableSetOf() }.add(configuration.name)
-                    }
-                }
-
-                for (sourceSet in kotlinExt.sourceSets) {
-                    val name = sourceSet.name
-                    val isProduction =
-                        if (isKmp) {
-                            name in mainCompilationSourceSets
-                        } else {
-                            // Single-platform Java/Kotlin JVM modules use main and test.
-                            name == NAME_MAIN_LOWERCASE ||
-                                (
-                                    name.endsWith(SUFFIX_MAIN, ignoreCase = true) &&
-                                        !name.lowercase().contains(SUBSTRING_TEST_LOWERCASE)
-                                )
-                        }
-                    val platforms =
-                        if (isKmp) {
-                            sourceSetPlatforms[name]?.toList() ?: emptyList()
-                        } else {
-                            listOf(PLATFORM_JVM)
-                        }
-                    list.add(
-                        SourceSetData(
-                            name = name,
-                            kind = kind,
-                            production = isProduction,
-                            srcDirs = sourceSet.kotlin.srcDirs.map { toRelPath(proj, it) },
-                            platforms = platforms,
-                            targetNames = if (isKmp) sourceSetTargets[name]?.toList() ?: emptyList() else emptyList(),
-                            dependsOnSourceSets =
-                                if (isKmp) {
-                                    sourceSetVisibility[name]?.toList() ?: sourceSet.dependsOn.map { it.name }
-                                } else {
-                                    emptyList()
-                                },
-                            dependencyConfigurations =
-                                if (isKmp) sourceSetDependencyConfigurations[name]?.toList() ?: emptyList() else emptyList(),
-                            compileClasspath = compilationClasspath(proj, name),
-                        ),
-                    )
-                }
-            }
+        if (list.isEmpty() && proj.hasKotlinPlugin()) {
+            KgpInspector.collectKotlinSourceSets(proj, list)
         }
 
         if (list.isEmpty()) {
@@ -442,7 +319,7 @@ class KonturePlugin : Plugin<Project> {
         return list
     }
 
-    private fun toRelPath(
+    internal fun toRelPath(
         proj: Project,
         file: File,
     ): String {
@@ -457,7 +334,7 @@ class KonturePlugin : Plugin<Project> {
     }
 
     /** Returns resolved compile-classpath paths when Gradle exposes a matching configuration. */
-    private fun compilationClasspath(
+    internal fun compilationClasspath(
         project: Project,
         sourceSetName: String,
     ): List<String> {
@@ -472,11 +349,77 @@ class KonturePlugin : Plugin<Project> {
         }
     }
 
+    private fun collectModuleDataForProject(proj: Project): ModuleData {
+        val plugins = mutableListOf<String>()
+        if (proj.pluginManager.hasPlugin(ID_KOTLIN_JVM)) plugins.add(PLUGIN_KOTLIN_JVM)
+        if (proj.pluginManager.hasPlugin(ID_ANDROID_APPLICATION)) plugins.add(PLUGIN_ANDROID_APP)
+        if (proj.pluginManager.hasPlugin(ID_ANDROID_LIBRARY)) plugins.add(PLUGIN_ANDROID_LIB)
+        if (proj.pluginManager.hasPlugin(ID_ANDROID_DYNAMIC_FEATURE) ||
+            proj.plugins.any { it.javaClass.simpleName.contains("DynamicFeature") }
+        ) {
+            plugins.add(PLUGIN_ANDROID_FEATURE)
+        }
+        if (proj.pluginManager.hasPlugin(ID_ANDROID_TEST) ||
+            proj.plugins.any {
+                it.javaClass.simpleName.contains("TestPlugin") ||
+                    it.javaClass.simpleName.contains("AndroidTest")
+            }
+        ) {
+            plugins.add(PLUGIN_ANDROID_TEST)
+        }
+        if (proj.pluginManager.hasPlugin(ID_KOTLIN_MULTIPLATFORM)) plugins.add(PLUGIN_KOTLIN_KMP)
+
+        val sourceSets = collectSourceSets(proj)
+        val dependencies = collectDependencies(proj)
+
+        return ModuleData(
+            path = proj.path,
+            projectDir =
+                if (proj.projectDir == proj.rootDir) {
+                    "."
+                } else {
+                    proj.projectDir.relativeTo(proj.rootDir).path
+                },
+            appliedPlugins = plugins,
+            sourceSets = sourceSets,
+            dependencies = dependencies,
+        )
+    }
+
+    private fun collectModuleDataForSubproject(
+        rootProject: Project,
+        sub: Project,
+    ): ModuleData {
+        val subDir = sub.projectDir
+        val relDir = if (subDir == rootProject.rootDir) "." else subDir.relativeTo(rootProject.rootDir).path
+        val srcDir = File(subDir, "src/main/kotlin")
+        val srcDirs = if (srcDir.exists()) listOf(srcDir.relativeTo(subDir).path) else emptyList()
+
+        val sourceSets =
+            listOf(
+                SourceSetData(
+                    name = "main",
+                    kind = KIND_JVM,
+                    production = true,
+                    srcDirs = srcDirs,
+                    platforms = listOf(PLATFORM_JVM),
+                ),
+            )
+
+        return ModuleData(
+            path = sub.path,
+            projectDir = relDir,
+            appliedPlugins = listOf(PLUGIN_KOTLIN_JVM),
+            sourceSets = sourceSets,
+            dependencies = emptyList(),
+        )
+    }
+
     private fun collectDependencies(proj: Project): List<DependencyData> {
         val deps = mutableListOf<DependencyData>()
-        val localGroups =
+        val localNames =
             proj.rootProject.allprojects
-                .mapNotNull { it.group as? String }
+                .map { it.name }
                 .filter { it.isNotEmpty() }
                 .toSet()
         val includedBuildGroups =
@@ -489,6 +432,7 @@ class KonturePlugin : Plugin<Project> {
             }
 
         proj.configurations.forEach { config ->
+            if (config.name == CONFIG_LAYOUT_INCOMING || config.name == CONFIG_DEPS_INCOMING) return@forEach
             config.dependencies.forEach { dep ->
                 if (dep is ProjectDependency) {
                     deps.add(
@@ -499,11 +443,10 @@ class KonturePlugin : Plugin<Project> {
                         ),
                     )
                 } else {
-                    // Composite build and dynamic group dependency resolution heuristic
                     val depGroup = dep.group
                     val depName = dep.name
                     if (depGroup != null) {
-                        if (depGroup in localGroups || depGroup in includedBuildGroups ||
+                        if (depName in localNames || depGroup in includedBuildGroups ||
                             depGroup.startsWith(GROUP_PREFIX_KONTURE)
                         ) {
                             deps.add(
@@ -521,73 +464,66 @@ class KonturePlugin : Plugin<Project> {
         return deps
     }
 
-    private fun collectAllSourceDirs(proj: Project): List<File> =
-        proj.allprojects.flatMap { sub ->
-            val list = mutableListOf<File>()
-            val androidExtension =
-                if (sub.hasAndroidPlugin()) {
-                    sub.extensions.findByType(
-                        CommonExtension::class.java,
-                    )
-                } else {
-                    null
-                }
-            if (androidExtension != null) {
-                androidExtension.sourceSets.forEach { sourceSet ->
-                    (sourceSet.java.directories + sourceSet.kotlin.directories).forEach { dir ->
-                        val f = File(dir.toString())
-                        list.add(if (f.isAbsolute) f else File(sub.projectDir, f.path))
+    private fun collectAllSourceDirs(proj: Project): List<File> {
+        val list = mutableListOf<File>()
+        if (proj.hasAndroidPlugin()) {
+            AgpInspector.collectAndroidSourceDirs(proj, list)
+        }
+        if (proj.hasKotlinPlugin()) {
+            KgpInspector.collectKotlinSourceDirs(proj, list)
+        }
+        if (list.isEmpty()) {
+            val javaSourceSets = proj.extensions.findByName(EXTENSION_SOURCE_SETS) as? SourceSetContainer
+            if (javaSourceSets != null) {
+                for (ss in javaSourceSets) {
+                    for (dir in ss.allSource.srcDirs) {
+                        list.add(if (dir.isAbsolute) dir else File(proj.projectDir, dir.path))
                     }
                 }
-            }
-
-            if (list.isEmpty()) {
-                val kotlinExt = sub.extensions.findByType(KotlinProjectExtension::class.java)
-                if (kotlinExt != null) {
-                    for (sourceSet in kotlinExt.sourceSets) {
-                        for (dir in sourceSet.kotlin.srcDirs) {
-                            list.add(if (dir.isAbsolute) dir else File(sub.projectDir, dir.path))
-                        }
-                    }
-                }
-            }
-            if (list.isEmpty()) {
-                val javaSourceSets = sub.extensions.findByName(EXTENSION_SOURCE_SETS) as? SourceSetContainer
-                if (javaSourceSets != null) {
-                    for (ss in javaSourceSets) {
-                        for (dir in ss.allSource.srcDirs) {
-                            list.add(if (dir.isAbsolute) dir else File(sub.projectDir, dir.path))
-                        }
-                    }
-                }
-            }
-            val buildDir =
-                try {
-                    sub.layout.buildDirectory
-                        .get()
-                        .asFile.canonicalFile
-                } catch (e: Exception) {
-                    null
-                }
-            if (buildDir != null) {
-                list.filter { dir ->
-                    try {
-                        val canonicalDir = dir.canonicalFile
-                        !canonicalDir.startsWith(buildDir)
-                    } catch (e: Exception) {
-                        true
-                    }
-                }
-            } else {
-                list
             }
         }
+        proj.rootProject.subprojects.forEach { sub ->
+            val srcDir = File(sub.projectDir, DIR_SRC)
+            if (srcDir.exists()) {
+                srcDir.walkTopDown().filter { it.isDirectory && (it.name == "kotlin" || it.name == "java") }.forEach {
+                    list.add(it)
+                }
+            }
+        }
+        val buildDir =
+            try {
+                proj.layout.buildDirectory
+                    .get()
+                    .asFile.canonicalFile
+            } catch (e: Exception) {
+                null
+            }
+        return if (buildDir != null) {
+            list.filter { dir ->
+                try {
+                    val canonicalDir = dir.canonicalFile
+                    !canonicalDir.startsWith(buildDir)
+                } catch (e: Exception) {
+                    true
+                }
+            }
+        } else {
+            list
+        }
+    }
 
     private fun Project.hasAndroidPlugin(): Boolean =
         pluginManager.hasPlugin(ID_ANDROID_APPLICATION) ||
             pluginManager.hasPlugin(ID_ANDROID_LIBRARY) ||
             pluginManager.hasPlugin(ID_ANDROID_TEST) ||
             pluginManager.hasPlugin(ID_ANDROID_DYNAMIC_FEATURE)
+
+    private fun Project.hasKotlinPlugin(): Boolean =
+        pluginManager.hasPlugin(ID_KOTLIN_JVM) ||
+            pluginManager.hasPlugin(ID_KOTLIN_MULTIPLATFORM) ||
+            pluginManager.hasPlugin("org.jetbrains.kotlin.android") ||
+            pluginManager.hasPlugin("kotlin") ||
+            extensions.findByName("kotlin") != null
 
     private fun setupConsumerLayout(project: Project) {
         if (project.configurations.findByName(CONFIG_LAYOUT_INCOMING) != null) {
@@ -660,27 +596,36 @@ class KonturePlugin : Plugin<Project> {
             project.tasks.register(TASK_CLEAN_DEPS_RESOURCE, Delete::class.java) { delete ->
                 delete.delete(project.layout.buildDirectory.file("$PATH_RESOURCES_TEST_KONTURE/$FILE_DEPENDENCIES"))
             }
-        val rootDetector = project.rootProject.tasks.findByName(TASK_DETECT_RULES) as? DetectExternalDependencyRules
-        rootDetector?.testSources?.from(project.fileTree(DIR_SRC) { pattern -> pattern.include(GLOB_KT) })
         copyDepsTask.configure { task ->
             task.dependsOn(cleanDependencyResource)
-            if (rootDetector == null) {
-                task.onlyIf { false }
-            } else {
-                val detectorOutput = rootDetector.resultFile
-                task.dependsOn(rootDetector)
-                task.inputs.file(detectorOutput)
-                task.onlyIf { detectorOutput.get().asFile.readText().trim().toBoolean() }
+            task.dependsOn(":$TASK_DETECT_RULES")
+            val detectorOutputFile = project.rootProject.layout.buildDirectory.file(PATH_EXTERNAL_RULES)
+            task.inputs.file(detectorOutputFile)
+            task.onlyIf {
+                val f = detectorOutputFile.get().asFile
+                f.exists() && f.readText().trim().toBoolean()
             }
         }
-        // Make processTestResources depend on copy tasks
+        // Make processTestResources and test execution tasks depend on copy tasks
         project.tasks.configureEach { task ->
-            if (task.name == TASK_PROCESS_TEST_RESOURCES) {
+            if (isTestTask(task)) {
                 task.dependsOn(copyLayoutTask)
                 task.dependsOn(cleanDependencyResource)
                 task.dependsOn(copyDepsTask)
             }
         }
+    }
+
+    private fun isTestTask(task: org.gradle.api.Task): Boolean {
+        if (task is Test) return true
+        val testTaskNames =
+            setOf(
+                TASK_PROCESS_TEST_RESOURCES,
+                "compileTestKotlin",
+                "compileTestJava",
+                "testClasses",
+            )
+        return task.name in testTaskNames
     }
 
     companion object {
@@ -734,20 +679,20 @@ class KonturePlugin : Plugin<Project> {
         private const val ID_ANDROID_TEST = "com.android.test"
         private const val ID_KOTLIN_MULTIPLATFORM = "org.jetbrains.kotlin.multiplatform"
 
-        private const val KIND_ANDROID = "ANDROID_VARIANT"
-        private const val KIND_KMP = "KMP"
-        private const val KIND_JVM = "KOTLIN_JVM"
+        internal const val KIND_ANDROID = "ANDROID_VARIANT"
+        internal const val KIND_KMP = "KMP"
+        internal const val KIND_JVM = "KOTLIN_JVM"
 
-        private const val PLATFORM_ANDROID = "android"
-        private const val PLATFORM_JVM = "jvm"
+        internal const val PLATFORM_ANDROID = "android"
+        internal const val PLATFORM_JVM = "jvm"
 
         private const val CONFIG_COMPILE_CLASSPATH = "compileclasspath"
         private const val CONFIG_RUNTIME_CLASSPATH = "runtimeclasspath"
 
-        private const val COMPILATION_MAIN = "main"
-        private const val NAME_MAIN_LOWERCASE = "main"
-        private const val SUFFIX_MAIN = "Main"
-        private const val SUBSTRING_TEST_LOWERCASE = "test"
+        internal const val COMPILATION_MAIN = "main"
+        internal const val NAME_MAIN_LOWERCASE = "main"
+        internal const val SUFFIX_MAIN = "Main"
+        internal const val SUBSTRING_TEST_LOWERCASE = "test"
 
         private const val SUFFIX_COMPILE_CLASSPATH_CAMEL = "CompileClasspath"
         private const val CONFIG_COMPILE_CLASSPATH_LOWER = "compileClasspath"

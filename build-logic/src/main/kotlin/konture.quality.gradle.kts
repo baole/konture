@@ -58,7 +58,7 @@ tasks.matching { it.name == "check" }.configureEach {
 }
 
 configure<DetektExtension> {
-    config.setFrom(files("${rootProject.projectDir}/config/detekt/detekt.yml"))
+    config.setFrom(isolated.rootProject.projectDirectory.file("config/detekt/detekt.yml"))
     buildUponDefaultConfig.set(true)
     parallel.set(true)
     ignoreFailures.set(false)
@@ -91,10 +91,7 @@ configure<SpotlessExtension> {
 }
 
 tasks.matching { it.name == "spotlessApply" }.configureEach {
-    val updateTask = rootProject.tasks.findByName("updateKotlinContributors")
-    if (updateTask != null) {
-        dependsOn(updateTask)
-    }
+    dependsOn(":updateKotlinContributors")
 }
 
 plugins.withId("org.jetbrains.dokka") {

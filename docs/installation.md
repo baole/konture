@@ -26,15 +26,15 @@ You can set up Konture using either **Gradle** or **Maven**. Choose your preferr
 
 #### Step 1: Apply the Gradle Plugin
 
-Apply the Konture plugin to your **root project's `build.gradle.kts`**:
+Apply the Konture plugin to your **root `settings.gradle.kts`**:
 
 ```kotlin
 plugins {
-    id("io.github.baole.konture") version "0.7.7"
+    id("io.github.baole.konture") version "0.8.0"
 }
 ```
 
-When applied to the root project, the plugin automatically registers a task named `generateArchitectureLayout`. This task serializes all subprojects in the build, gathering their source sets and declared dependency paths into a consolidated, relocatable `layout.json` metadata file.
+When applied in `settings.gradle.kts`, the plugin automatically configures all subprojects and registers the layout generation tasks.
 
 ---
 
@@ -68,7 +68,6 @@ Create a subfolder named `konture-test/` with a `build.gradle.kts` file:
 ```kotlin
 plugins {
     kotlin("jvm")
-    id("io.github.baole.konture") // this is important!
 }
 
 repositories {
@@ -77,12 +76,12 @@ repositories {
 
 dependencies {
     // The only required Konture assertion library dependency
-    testImplementation("io.github.baole:konture:0.7.7")
+    testImplementation("io.github.baole:konture:0.8.0")
 
     // Plus your standard test runner of choice (JUnit 5, Kotest, TestBalloon, etc.)
 }
 
-tasks.test {
+tasks.withType<Test> {
     useJUnitPlatform()
 }
 ```
@@ -123,7 +122,7 @@ Create a subdirectory named `konture-test/` with a `pom.xml` file. Ensure that y
         <dependency>
             <groupId>io.github.baole</groupId>
             <artifactId>konture</artifactId>
-            <version>0.7.7</version>
+            <version>0.8.0</version>
             <scope>test</scope>
         </dependency>
 
@@ -154,7 +153,7 @@ Create a subdirectory named `konture-test/` with a `pom.xml` file. Ensure that y
             <plugin>
                 <groupId>io.github.baole.konture</groupId>
                 <artifactId>konture-maven-plugin</artifactId>
-                <version>0.7.7</version>
+                <version>0.8.0</version>
                 <executions>
                     <execution>
                         <phase>process-test-resources</phase>

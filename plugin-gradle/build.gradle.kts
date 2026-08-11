@@ -19,11 +19,11 @@ private val descriptionText =
     build-tool-aware Kotlin architecture tests across Android,
     KMP, and JVM projects.
     """.trimIndent()
-private val groupId = "io.github.baole.konture"
+private val groupId = providers.gradleProperty("group").get()
 
 description = descriptionText
 group = groupId
-version = "0.7.7"
+version = providers.gradleProperty("version").get()
 
 gradlePlugin {
     website.set("https://baole.github.io/konture")
@@ -32,6 +32,13 @@ gradlePlugin {
     plugins {
         create("konture") {
             id = groupId
+            implementationClass = "io.github.baole.konture.plugin.KontureSettingsPlugin"
+            displayName = "Konture Settings Plugin"
+            description = "Applies Konture to all projects via settings lifecycle hooks"
+            tags.set(listOf("kotlin", "architecture", "testing", "archunit", "konture"))
+        }
+        create("kontureInternal") {
+            id = "$groupId.internal"
             implementationClass = "io.github.baole.konture.plugin.KonturePlugin"
             displayName = "Kotlin Architecture Testing Tool Plugin"
             description = descriptionText

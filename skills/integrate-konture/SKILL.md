@@ -80,7 +80,7 @@ modules.
    `:konture-test` doesn't.
 2. Use
    [resources/konture-test-module.build.gradle.kts.template](resources/konture-test-module.build.gradle.kts.template)
-   as the starting `build.gradle.kts`. Ensure the Konture plugin (`alias(libs.plugins.konture)` or `id("io.github.baole.konture")`) is applied in `plugins { ... }`.
+   as the starting `build.gradle.kts`. Ensure the Konture plugin (`alias(libs.plugins.konture)` or `id("io.github.baole.konture")`) is applied in `settings.gradle.kts`.
    **Reuse existing test framework dependencies**: Check the test framework discovered in Step 1 and reuse its dependency alias/coordinates in `konture-test/build.gradle.kts` (e.g. `libs.junit.jupiter.api`, `libs.kotest.runner.junit5`, `libs.kotlin.test`). Do **not** force-add JUnit 5 if the project standardizes on Kotest, JUnit 4, or another framework.
    Do **not** add `testImplementation(project(":..."))` dependencies for production modules, as Konture discovers multi-module layout automatically.
 3. Don't write actual architecture rules yet — that's Step 5 / the
