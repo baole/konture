@@ -16,13 +16,8 @@ dependencies {
     testRuntimeOnly(libs.junit.platform.launcher)
 }
 
-fun isPropertyTrue(key: String): Boolean = System.getProperty(key).toBoolean()
-
-val isKonturePluginApplied = isPropertyTrue("idea.active") ||
-    isPropertyTrue("idea.sync.active") ||
-    isPropertyTrue("konture.applyPlugin") ||
-    isPropertyTrue("konture.applyPluginInternal") ||
-    System.getenv("KONTURE_APPLY_PLUGIN") == "true" ||
+val isKonturePluginApplied = gradle.extensions.get("applyPlugin") as Boolean ||
+    System.getProperty("konture.applyPluginInternal").toBoolean() ||
     rootProject.pluginManager.hasPlugin("io.github.baole.konture.internal")
 
 tasks.withType<Test> {

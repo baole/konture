@@ -4,15 +4,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-fun isPropertyTrue(key: String): Boolean = System.getProperty(key).toBoolean()
-
-val applyPlugin = isPropertyTrue("idea.active") ||
-    isPropertyTrue("idea.sync.active") ||
-    isPropertyTrue("konture.applyPlugin") ||
-    isPropertyTrue("konture.applyPluginInternal") ||
-    System.getenv("KONTURE_APPLY_PLUGIN") == "true"
-
-
+val applyPlugin = gradle.extensions.get("applyPlugin") as Boolean ||
+    System.getProperty("konture.applyPluginInternal").toBoolean()
 
 plugins {
     id("konture.root")

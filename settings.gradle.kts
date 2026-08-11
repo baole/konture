@@ -13,6 +13,9 @@ buildscript {
         System.getProperty("idea.sync.active").toBoolean() ||
         System.getProperty("konture.applyPlugin").toBoolean() ||
         System.getenv("KONTURE_APPLY_PLUGIN") == "true"
+
+    gradle.extensions.add("applyPlugin", applyPlugin)
+
     if (applyPlugin) {
         repositories {
             mavenLocal()
@@ -24,12 +27,7 @@ buildscript {
     }
 }
 
-fun isPropertyTrue(key: String): Boolean = System.getProperty(key).toBoolean()
-
-val applyPlugin = isPropertyTrue("idea.active") ||
-    isPropertyTrue("idea.sync.active") ||
-    isPropertyTrue("konture.applyPlugin") ||
-    System.getenv("KONTURE_APPLY_PLUGIN") == "true"
+val applyPlugin = gradle.extensions.get("applyPlugin") as Boolean
 
 enableFeaturePreview("NO_IMPLICIT_LOOKUP_IN_PARENT_PROJECTS")
 
