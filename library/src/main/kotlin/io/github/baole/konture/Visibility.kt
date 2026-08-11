@@ -6,9 +6,27 @@
 
 package io.github.baole.konture
 
+/**
+ * Represents the visibility modifier of a Kotlin declaration (public, internal, protected, or private).
+ */
 public enum class Visibility {
+    /**
+     * Public visibility modifier.
+     */
     PUBLIC,
+
+    /**
+     * Internal visibility modifier.
+     */
     INTERNAL,
+
+    /**
+     * Protected visibility modifier.
+     */
     PROTECTED,
+
+    /**
+     * Private visibility modifier.
+     */
     PRIVATE,
 }

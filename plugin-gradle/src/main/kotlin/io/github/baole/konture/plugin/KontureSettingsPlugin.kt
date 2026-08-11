@@ -16,7 +16,7 @@ import org.gradle.api.initialization.Settings
  * Registers the `gradle.lifecycle.beforeProject` callback on the consumer's behalf
  * to apply [KonturePlugin] to every project in an Isolated Projects compatible manner.
  */
-class KontureSettingsPlugin : Plugin<Any> {
+public class KontureSettingsPlugin : Plugin<Any> {
     override fun apply(target: Any) {
         when (target) {
             is Settings -> {

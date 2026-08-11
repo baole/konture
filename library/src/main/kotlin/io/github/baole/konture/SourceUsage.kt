@@ -6,9 +6,26 @@
 
 package io.github.baole.konture
 
-enum class UsageKind { CALL, CLASS_REFERENCE }
+/** Category of source code usage (e.g. function call or class reference). */
+public enum class UsageKind {
+    /** Direct function or constructor call. */
+    CALL,
 
-enum class ResolutionConfidence { RESOLVED, POSSIBLE, UNRESOLVED }
+    /** Class or type reference. */
+    CLASS_REFERENCE,
+}
+
+/** Confidence level of a resolved symbol usage in source code analysis. */
+public enum class ResolutionConfidence {
+    /** Symbol usage was deterministically resolved. */
+    RESOLVED,
+
+    /** Symbol usage is conservatively inferred as possible. */
+    POSSIBLE,
+
+    /** Symbol usage could not be resolved. */
+    UNRESOLVED,
+}
 
 /** A resolved (or conservatively possible) Kotlin source usage. */
 data class SourceUsage(

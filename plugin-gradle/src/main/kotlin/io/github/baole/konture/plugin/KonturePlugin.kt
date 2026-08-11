@@ -26,7 +26,7 @@ import java.io.File
  * 2. **Consumer Role (Subprojects)**: Exposes the `konture` DSL block via [KontureExtension] to
  *    allow dedicated test modules to consume the generated layout schema safely in isolated projects.
  */
-class KonturePlugin : Plugin<Project> {
+public class KonturePlugin : Plugin<Project> {
     @Suppress("CyclomaticComplexMethod")
     override fun apply(project: Project) {
         val extension = project.extensions.create(EXTENSION_NAME, KontureExtension::class.java, project)

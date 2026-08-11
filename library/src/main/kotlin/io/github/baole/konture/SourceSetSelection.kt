@@ -1,5 +1,6 @@
 /*
- * Copyright 2026 Bao Le Duc
+ * Copyright 2026 The Konture Contributors
+ * Contributors: Bao Le Duc (@baole)
  * SPDX-License-Identifier: Apache-2.0
  */
 
@@ -15,9 +16,26 @@ data class SourceSetId(
     val role: SourceSetRole,
 )
 
-enum class SourceSetKind { JVM, ANDROID, KMP }
+/** Broad technology stack classification of a source set. */
+public enum class SourceSetKind {
+    /** JVM source set. */
+    JVM,
 
-enum class SourceSetRole { PRODUCTION, TEST }
+    /** Android variant source set. */
+    ANDROID,
+
+    /** Kotlin Multiplatform source set. */
+    KMP,
+}
+
+/** Indicates whether a source set contains production or test code. */
+public enum class SourceSetRole {
+    /** Production application or library source set. */
+    PRODUCTION,
+
+    /** Test source set. */
+    TEST,
+}
 
 /** Immutable selector used by source-backed Konture entry points. */
 class SourceSetSelector internal constructor(

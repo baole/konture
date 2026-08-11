@@ -1,5 +1,6 @@
 /*
- * Copyright 2026 Bao Le Duc
+ * Copyright 2026 The Konture Contributors
+ * Contributors: Bao Le Duc (@baole)
  * SPDX-License-Identifier: Apache-2.0
  */
 
@@ -14,48 +15,57 @@ import org.gradle.api.provider.Property
  *
  * Typically applied inside dedicated architecture test subprojects (e.g. `:konture-test`).
  */
-open class KontureExtension(
+public open class KontureExtension(
     private val project: Project,
 ) {
-    val excludeModules: ListProperty<String> = project.objects.listProperty(String::class.java).convention(emptyList())
-    val excludePackages: ListProperty<String> = project.objects.listProperty(String::class.java).convention(emptyList())
-    val excludeClasses: ListProperty<String> = project.objects.listProperty(String::class.java).convention(emptyList())
-    val excludeConfigurations: ListProperty<String> =
+    public val excludeModules: ListProperty<String> =
+        project.objects
+            .listProperty(String::class.java)
+            .convention(emptyList())
+    public val excludePackages: ListProperty<String> =
+        project.objects
+            .listProperty(String::class.java)
+            .convention(emptyList())
+    public val excludeClasses: ListProperty<String> =
+        project.objects
+            .listProperty(String::class.java)
+            .convention(emptyList())
+    public val excludeConfigurations: ListProperty<String> =
         project.objects
             .listProperty(String::class.java)
             .convention(listOf("test", "benchmark", "profile", "testedapks"))
-    val logLevel: Property<String> = project.objects.property(String::class.java).convention("INFO")
-    val baselinePath: Property<String> =
+    public val logLevel: Property<String> = project.objects.property(String::class.java).convention("INFO")
+    public val baselinePath: Property<String> =
         project.objects.property(
             String::class.java,
         ).convention("konture-baseline.json")
-    val language: Property<String> = project.objects.property(String::class.java).convention("en")
+    public val language: Property<String> = project.objects.property(String::class.java).convention("en")
 
-    fun logLevel(level: String) {
+    public fun logLevel(level: String) {
         logLevel.set(level)
     }
 
-    fun baselinePath(path: String) {
+    public fun baselinePath(path: String) {
         baselinePath.set(path)
     }
 
-    fun language(lang: String) {
+    public fun language(lang: String) {
         language.set(lang)
     }
 
-    fun excludeModules(vararg modules: String) {
+    public fun excludeModules(vararg modules: String) {
         excludeModules.addAll(*modules)
     }
 
-    fun excludePackages(vararg packages: String) {
+    public fun excludePackages(vararg packages: String) {
         excludePackages.addAll(*packages)
     }
 
-    fun excludeClasses(vararg classes: String) {
+    public fun excludeClasses(vararg classes: String) {
         excludeClasses.addAll(*classes)
     }
 
-    fun excludeConfigurations(vararg configurations: String) {
+    public fun excludeConfigurations(vararg configurations: String) {
         excludeConfigurations.addAll(*configurations)
     }
 }

@@ -23,7 +23,8 @@ class LayeredArchitectureBuilder(
 
     fun layer(name: String): LayerSpec = LayerSpec(this, name)
 
-    class LayerSpec internal constructor(
+    /** Specification for defining package boundaries of an architectural layer. */
+    public class LayerSpec internal constructor(
         private val builder: LayeredArchitectureBuilder,
         private val name: String,
     ) {
@@ -39,7 +40,8 @@ class LayeredArchitectureBuilder(
 
     fun whereLayer(name: String): ConstraintSpec = ConstraintSpec(this, name)
 
-    class ConstraintSpec internal constructor(
+    /** Specification for defining dependency constraints on an architectural layer. */
+    public class ConstraintSpec internal constructor(
         private val builder: LayeredArchitectureBuilder,
         private val name: String,
     ) {
