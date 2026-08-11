@@ -22,13 +22,13 @@ private const val TRIPLE_QUOTE_LENGTH = 3
 
 /** Detects direct Konture external-dependency assertions in Kotlin test sources. */
 @CacheableTask
-abstract class DetectExternalDependencyRules : DefaultTask() {
+public abstract class DetectExternalDependencyRules : DefaultTask() {
     @get:InputFiles
     @get:PathSensitive(PathSensitivity.RELATIVE)
-    abstract val testSources: ConfigurableFileCollection
+    public abstract val testSources: ConfigurableFileCollection
 
     @get:OutputFile
-    abstract val resultFile: RegularFileProperty
+    public abstract val resultFile: RegularFileProperty
 
     /** Scans configured test source files to detect whether external dependency rules are referenced. */
     @TaskAction

@@ -32,7 +32,7 @@ private const val EXPECTED_COORD_PARTS_SIZE = 3
  * This task operates in parallel with layout generation to preserve build-cache relocatability.
  */
 @CacheableTask
-abstract class GenerateDependencyGraph : DefaultTask() {
+public abstract class GenerateDependencyGraph : DefaultTask() {
     /**
      * Track all build and settings definition files to enable proper Gradle build caching.
      * When any dependency version or coordinate changes in a build script or version catalog,
@@ -40,16 +40,16 @@ abstract class GenerateDependencyGraph : DefaultTask() {
      */
     @get:InputFiles
     @get:PathSensitive(PathSensitivity.RELATIVE)
-    abstract val buildFiles: ConfigurableFileCollection
+    public abstract val buildFiles: ConfigurableFileCollection
 
     @get:Input
-    abstract val declaredDependencies: MapProperty<String, List<String>>
+    public abstract val declaredDependencies: MapProperty<String, List<String>>
 
     @get:Input
-    abstract val resolvedDependencies: MapProperty<String, List<String>>
+    public abstract val resolvedDependencies: MapProperty<String, List<String>>
 
     @get:OutputFile
-    abstract val outputFile: RegularFileProperty
+    public abstract val outputFile: RegularFileProperty
 
     /** Generates and serializes the external dependency graph model. */
     @TaskAction

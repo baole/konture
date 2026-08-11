@@ -40,57 +40,57 @@ import kotlinx.serialization.json.Json
  * This task acts as the "Producer" phase of Konture's offline static analysis mechanism.
  */
 @CacheableTask
-abstract class GenerateArchitectureLayout : DefaultTask() {
+public abstract class GenerateArchitectureLayout : DefaultTask() {
     /**
      * Track all Kotlin/Java source files in all modules to enable cache and up-to-date checking.
      */
     @get:InputFiles
     @get:PathSensitive(PathSensitivity.RELATIVE)
-    abstract val sourceFiles: ConfigurableFileCollection
+    public abstract val sourceFiles: ConfigurableFileCollection
 
     /**
      * The root project directory of the build, used to resolve and serialize relative paths.
      */
     @get:Internal
-    abstract val rootProjectDir: Property<File>
+    public abstract val rootProjectDir: Property<File>
 
     /**
      * Lazily populated list of module configurations from all projects in the build.
      */
     @get:Input
-    abstract val modules: ListProperty<ModuleData>
+    public abstract val modules: ListProperty<ModuleData>
 
     @get:Input
     @get:Optional
-    abstract val excludeModules: ListProperty<String>
+    public abstract val excludeModules: ListProperty<String>
 
     @get:Input
     @get:Optional
-    abstract val excludePackages: ListProperty<String>
+    public abstract val excludePackages: ListProperty<String>
 
     @get:Input
     @get:Optional
-    abstract val excludeClasses: ListProperty<String>
+    public abstract val excludeClasses: ListProperty<String>
 
     @get:Input
     @get:Optional
-    abstract val excludeConfigurations: ListProperty<String>
+    public abstract val excludeConfigurations: ListProperty<String>
 
     @get:Input
-    abstract val logLevel: Property<String>
+    public abstract val logLevel: Property<String>
 
     /**
      * The output location of the generated `layout_v2.json` file.
      */
     @get:OutputFile
-    abstract val outputFile: RegularFileProperty
+    public abstract val outputFile: RegularFileProperty
 
     /**
      * Main task action that executes the extraction and serialization of layout metadata.
      */
     @TaskAction
     @Suppress("SwallowedException")
-    fun generate() {
+    public fun generate() {
         val levelStr = logLevel.getOrElse("INFO").uppercase()
         val mappedLevel =
             try {

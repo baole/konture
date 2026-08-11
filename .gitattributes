@@ -1,0 +1,19 @@
+# Auto-detect text files and normalize line endings to LF
+* text=auto eol=lf
+
+# Force LF line endings for Kotlin, Java, Gradle, Markdown, and configuration files
+*.kt text eol=lf
+*.kts text eol=lf
+*.java text eol=lf
+*.gradle text eol=lf
+*.gradle.kts text eol=lf
+*.md text eol=lf
+*.xml text eol=lf
+*.yml text eol=lf
+*.yaml text eol=lf
+*.properties text eol=lf
+*.sh text eol=lf
+
+# Force CRLF line endings for Windows batch scripts
+*.bat text eol=crlf
+*.cmd text eol=crlf
