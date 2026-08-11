@@ -19,6 +19,7 @@ import java.io.File
 internal class PsiParserTypeResolutionExtendedTest : KontureScopeTestFixture() {
     @TempDir
     lateinit var tempDir: File
+
     @Test
     fun `test qualified method call extraction for instance and static receivers`() {
         val file =

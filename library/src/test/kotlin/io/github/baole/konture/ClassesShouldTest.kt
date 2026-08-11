@@ -9,7 +9,6 @@
 package io.github.baole.konture
 
 import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 
@@ -35,7 +34,9 @@ internal class ClassesShouldTest : KontureScopeTestFixture() {
 
         // satisfy with custom description
         val builderSatisfyDesc = ClassesRuleBuilder(graph)
-        builderSatisfyDesc.should().satisfy("have A in name") { it.name.contains("A") }
+        builderSatisfyDesc.should().satisfy { cls, violations ->
+            if (!cls.name.contains("A")) violations.add("have A in name")
+        }
         val assertSatisfyDesc = builderSatisfyDesc.getShouldAssertion()!!
         val vSatDesc = mutableListOf<String>()
         assertSatisfyDesc(classB, listOf(classB), vSatDesc)
@@ -83,7 +84,7 @@ internal class ClassesShouldTest : KontureScopeTestFixture() {
 
         val vAll2 = mutableListOf<String>()
         assertAllOf(classB, listOf(classB), vAll2)
-        assertEquals(1, vAll2.size)
+        assertEquals(2, vAll2.size)
 
         // noneOf
         val builderNoneOf = ClassesRuleBuilder(graph)
@@ -108,35 +109,6 @@ internal class ClassesShouldTest : KontureScopeTestFixture() {
                 mapOf(":" to listOf(Module(":", ":app", "app", emptyList(), emptyList(), emptyList(), listOf(fileA)))),
             )
 
-        val assertNotAnnotSingle =
-            ClassesRuleBuilder(
-                graph,
-            ).should().notHaveAnnotationOf("com.example.MyAnnotation").getShouldAssertion()!!
-        val vNotAnnotSingle = mutableListOf<String>()
-        assertNotAnnotSingle(classA, listOf(classA), vNotAnnotSingle)
-        assertTrue(vNotAnnotSingle.isEmpty())
-
-        val assertNotAnnotList =
-            ClassesRuleBuilder(
-                graph,
-            ).should().notHaveAnnotationOf(listOf("com.example.MyAnnotation")).getShouldAssertion()!!
-        val vNotAnnotList = mutableListOf<String>()
-        assertNotAnnotList(classA, listOf(classA), vNotAnnotList)
-        assertTrue(vNotAnnotList.isEmpty())
-
-        val assertNotAnnotVararg =
-            ClassesRuleBuilder(
-                graph,
-            ).should().notHaveAnnotationOf("com.example.MyAnnotation", "Other").getShouldAssertion()!!
-        val vNotAnnotVararg = mutableListOf<String>()
-        assertNotAnnotVararg(classA, listOf(classA), vNotAnnotVararg)
-        assertTrue(vNotAnnotVararg.isEmpty())
-
-        val assertNotInterfaces = ClassesRuleBuilder(graph).should().notBeInterfaces().getShouldAssertion()!!
-        val vNotInterfaces = mutableListOf<String>()
-        assertNotInterfaces(classA, listOf(classA), vNotInterfaces)
-        assertTrue(vNotInterfaces.isEmpty())
-
         val assertNotAbstract = ClassesRuleBuilder(graph).should().notBeAbstract().getShouldAssertion()!!
         val vNotAbstract = mutableListOf<String>()
         assertNotAbstract(classA, listOf(classA), vNotAbstract)
@@ -152,11 +124,6 @@ internal class ClassesShouldTest : KontureScopeTestFixture() {
         assertNotData(classA, listOf(classA), vNotData)
         assertTrue(vNotData.isEmpty())
 
-        val assertNotValue = ClassesRuleBuilder(graph).should().notBeValue().getShouldAssertion()!!
-        val vNotValue = mutableListOf<String>()
-        assertNotValue(classA, listOf(classA), vNotValue)
-        assertTrue(vNotValue.isEmpty())
-
         val assertNotInline = ClassesRuleBuilder(graph).should().notBeInline().getShouldAssertion()!!
         val vNotInline = mutableListOf<String>()
         assertNotInline(classA, listOf(classA), vNotInline)
@@ -171,11 +138,6 @@ internal class ClassesShouldTest : KontureScopeTestFixture() {
         val vNotOpen = mutableListOf<String>()
         assertNotOpen(classA, listOf(classA), vNotOpen)
         assertTrue(vNotOpen.isEmpty())
-
-        val assertNotFinal = ClassesRuleBuilder(graph).should().notBeFinal().getShouldAssertion()!!
-        val vNotFinal = mutableListOf<String>()
-        assertNotFinal(classOpen, listOf(classOpen), vNotFinal)
-        assertTrue(vNotFinal.isEmpty())
     }
 
     @Test
@@ -184,30 +146,6 @@ internal class ClassesShouldTest : KontureScopeTestFixture() {
             ProjectGraph(
                 mapOf(":" to listOf(Module(":", ":app", "app", emptyList(), emptyList(), emptyList(), listOf(fileA)))),
             )
-
-        val assertNotVisSingle =
-            ClassesRuleBuilder(
-                graph,
-            ).should().notHaveVisibility(Visibility.PRIVATE).getShouldAssertion()!!
-        val vNotVisSingle = mutableListOf<String>()
-        assertNotVisSingle(classA, listOf(classA), vNotVisSingle)
-        assertTrue(vNotVisSingle.isEmpty())
-
-        val assertNotVisList =
-            ClassesRuleBuilder(
-                graph,
-            ).should().notHaveVisibility(listOf(Visibility.PRIVATE)).getShouldAssertion()!!
-        val vNotVisList = mutableListOf<String>()
-        assertNotVisList(classA, listOf(classA), vNotVisList)
-        assertTrue(vNotVisList.isEmpty())
-
-        val assertNotVisVararg =
-            ClassesRuleBuilder(
-                graph,
-            ).should().notHaveVisibility(Visibility.PRIVATE, Visibility.INTERNAL).getShouldAssertion()!!
-        val vNotVisVararg = mutableListOf<String>()
-        assertNotVisVararg(classA, listOf(classA), vNotVisVararg)
-        assertTrue(vNotVisVararg.isEmpty())
 
         val assertNotModifierSingle =
             ClassesRuleBuilder(

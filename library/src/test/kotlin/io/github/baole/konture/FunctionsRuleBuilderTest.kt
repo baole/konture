@@ -21,7 +21,12 @@ internal class FunctionsRuleBuilderTest : KontureScopeTestFixture() {
                 returnType = "kotlin.String",
                 parameters =
                     listOf(
-                        ParameterDeclaration("userId", "kotlin.Int", hasDefaultValue = false, annotations = emptyList()),
+                        ParameterDeclaration(
+                            "userId",
+                            "kotlin.Int",
+                            hasDefaultValue = false,
+                            annotations = emptyList(),
+                        ),
                     ),
                 annotations =
                     listOf(
@@ -191,7 +196,12 @@ internal class FunctionsRuleBuilderTest : KontureScopeTestFixture() {
                 returnType = "kotlin.Boolean",
                 parameters =
                     listOf(
-                        ParameterDeclaration("flag", "kotlin.Boolean", hasDefaultValue = true, annotations = emptyList()),
+                        ParameterDeclaration(
+                            "flag",
+                            "kotlin.Boolean",
+                            hasDefaultValue = true,
+                            annotations = emptyList(),
+                        ),
                     ),
                 annotations =
                     listOf(

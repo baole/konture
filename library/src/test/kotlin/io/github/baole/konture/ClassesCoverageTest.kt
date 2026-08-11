@@ -44,13 +44,18 @@ internal class ClassesCoverageTest : KontureScopeTestFixture() {
         val vNotPkgList = mutableListOf<String>()
         ClassesRuleBuilder(
             graph,
-        ).should().notResideInAPackage(listOf("com.example")).getShouldAssertion()!!(classA, listOf(classA), vNotPkgList)
+        ).should().notResideInAPackage(
+            listOf("com.example"),
+        ).getShouldAssertion()!!(classA, listOf(classA), vNotPkgList)
         assertEquals(1, vNotPkgList.size)
 
         val vNotPkgVararg = mutableListOf<String>()
         ClassesRuleBuilder(
             graph,
-        ).should().notResideInAPackage("com.example", "other").getShouldAssertion()!!(classA, listOf(classA), vNotPkgVararg)
+        ).should().notResideInAPackage(
+            "com.example",
+            "other",
+        ).getShouldAssertion()!!(classA, listOf(classA), vNotPkgVararg)
         assertEquals(1, vNotPkgVararg.size)
 
         val vModSingle = mutableListOf<String>()

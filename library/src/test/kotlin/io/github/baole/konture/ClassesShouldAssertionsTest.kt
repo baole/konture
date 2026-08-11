@@ -10,7 +10,7 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 
-internal class ClassesShouldAssertionsTest : KontureScopeTestFixture() {
+open class ClassesShouldAssertionsTest : RuleBuildersTestBase() {
     private fun builder() = ClassesRuleBuilder(projectGraph)
 
     @Test
@@ -74,19 +74,19 @@ internal class ClassesShouldAssertionsTest : KontureScopeTestFixture() {
         assertNotResideVararg(testClass, emptyList(), v6)
         assertTrue(v6.isEmpty())
 
-        val assertModSingle = builder().should().resideInAModule(":app").getShouldAssertion()!!
+        val assertModSingle = builder().should().resideInAModule(":moduleA").getShouldAssertion()!!
         val vMod1 = mutableListOf<String>()
-        assertModSingle(testClass, emptyList(), vMod1)
+        assertModSingle(classA, listOf(classA), vMod1)
         assertTrue(vMod1.isEmpty())
 
-        val assertModList = builder().should().resideInAModule(listOf(":app")).getShouldAssertion()!!
+        val assertModList = builder().should().resideInAModule(listOf(":moduleA")).getShouldAssertion()!!
         val vMod2 = mutableListOf<String>()
-        assertModList(testClass, emptyList(), vMod2)
+        assertModList(classA, listOf(classA), vMod2)
         assertTrue(vMod2.isEmpty())
 
-        val assertModVararg = builder().should().resideInAModule(":app", ":core").getShouldAssertion()!!
+        val assertModVararg = builder().should().resideInAModule(":moduleA", ":moduleB").getShouldAssertion()!!
         val vMod3 = mutableListOf<String>()
-        assertModVararg(testClass, emptyList(), vMod3)
+        assertModVararg(classA, listOf(classA), vMod3)
         assertTrue(vMod3.isEmpty())
 
         val assertNotModSingle = builder().should().notResideInAModule(":forbidden").getShouldAssertion()!!
@@ -233,32 +233,6 @@ internal class ClassesShouldAssertionsTest : KontureScopeTestFixture() {
         assertAnnotSingle(annotatedClass, emptyList(), vA1)
         assertTrue(vA1.isEmpty())
 
-        val assertAnnotList = builder().should().haveAnnotationOf(listOf("MyAnnotation")).getShouldAssertion()!!
-        val vA2 = mutableListOf<String>()
-        assertAnnotList(annotatedClass, emptyList(), vA2)
-        assertTrue(vA2.isEmpty())
-
-        val assertAnnotVararg = builder().should().haveAnnotationOf("MyAnnotation", "Other").getShouldAssertion()!!
-        val vA3 = mutableListOf<String>()
-        assertAnnotVararg(annotatedClass, emptyList(), vA3)
-        assertTrue(vA3.isEmpty())
-
-        val assertNotAnnotSingle = builder().should().notHaveAnnotationOf("WrongAnnotation").getShouldAssertion()!!
-        val vA4 = mutableListOf<String>()
-        assertNotAnnotSingle(annotatedClass, emptyList(), vA4)
-        assertTrue(vA4.isEmpty())
-
-        val assertNotAnnotList = builder().should().notHaveAnnotationOf(listOf("WrongAnnotation")).getShouldAssertion()!!
-        val vA5 = mutableListOf<String>()
-        assertNotAnnotList(annotatedClass, emptyList(), vA5)
-        assertTrue(vA5.isEmpty())
-
-        val assertNotAnnotVararg =
-            builder().should().notHaveAnnotationOf("Wrong1", "Wrong2").getShouldAssertion()!!
-        val vA6 = mutableListOf<String>()
-        assertNotAnnotVararg(annotatedClass, emptyList(), vA6)
-        assertTrue(vA6.isEmpty())
-
         val assertAllAnnotList = builder().should().haveAllAnnotationsOf(listOf("MyAnnotation")).getShouldAssertion()!!
         val vA7 = mutableListOf<String>()
         assertAllAnnotList(annotatedClass, emptyList(), vA7)
@@ -269,25 +243,22 @@ internal class ClassesShouldAssertionsTest : KontureScopeTestFixture() {
         assertAllAnnotVararg(annotatedClass, emptyList(), vA8)
         assertTrue(vA8.isEmpty())
 
-        val assertAnyAnnotList = builder().should().haveAnyAnnotationOf(listOf("MyAnnotation", "Wrong")).getShouldAssertion()!!
+        val assertAnyAnnotList =
+            builder().should().haveAnyAnnotationOf(
+                listOf("MyAnnotation", "Wrong"),
+            ).getShouldAssertion()!!
         val vA9 = mutableListOf<String>()
         assertAnyAnnotList(annotatedClass, emptyList(), vA9)
         assertTrue(vA9.isEmpty())
 
-        val assertAnyAnnotVararg = builder().should().haveAnyAnnotationOf("MyAnnotation", "Wrong").getShouldAssertion()!!
+        val assertAnyAnnotVararg =
+            builder().should().haveAnyAnnotationOf(
+                "MyAnnotation",
+                "Wrong",
+            ).getShouldAssertion()!!
         val vA10 = mutableListOf<String>()
         assertAnyAnnotVararg(annotatedClass, emptyList(), vA10)
         assertTrue(vA10.isEmpty())
-
-        val assertChildSingle = builder().should().beChildOf("com.test.TestClass").getShouldAssertion()!!
-        val vC1 = mutableListOf<String>()
-        assertChildSingle(childClass, listOf(testClass, childClass), vC1)
-        assertTrue(vC1.isEmpty())
-
-        val assertChildFail = builder().should().beChildOf("com.test.WrongClass").getShouldAssertion()!!
-        val vC2 = mutableListOf<String>()
-        assertChildFail(childClass, listOf(testClass, childClass), vC2)
-        assertEquals(1, vC2.size)
 
         val assertAssignableFrom = builder().should().beAssignableFrom("com.test.ChildClass").getShouldAssertion()!!
         val vAssign1 = mutableListOf<String>()

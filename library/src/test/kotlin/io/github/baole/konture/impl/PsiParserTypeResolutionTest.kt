@@ -7,8 +7,8 @@
 package io.github.baole.konture.impl
 
 import io.github.baole.konture.KontureScopeTestFixture
-import io.github.baole.konture.isAssignableTo
 import io.github.baole.konture.impl.psi.MapSymbolLookup
+import io.github.baole.konture.isAssignableTo
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -20,6 +20,7 @@ import java.io.Serializable
 internal class PsiParserTypeResolutionTest : KontureScopeTestFixture() {
     @TempDir
     lateinit var tempDir: File
+
     @Test
     fun `symbol pre-scan excludes local classes`() {
         val file =

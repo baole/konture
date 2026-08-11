@@ -6,9 +6,9 @@
 
 package io.github.baole.konture.impl
 
+import io.github.baole.konture.KontureScopeTestFixture
 import io.github.baole.konture.Modifier
 import io.github.baole.konture.Visibility
-import io.github.baole.konture.KontureScopeTestFixture
 import io.github.baole.konture.impl.psi.MapSymbolLookup
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
@@ -22,6 +22,7 @@ import java.io.File
 internal class PsiParserTest : KontureScopeTestFixture() {
     @TempDir
     lateinit var tempDir: File
+
     @Test
     fun `test PsiParser parses Kotlin classes correctly`() {
         val file =

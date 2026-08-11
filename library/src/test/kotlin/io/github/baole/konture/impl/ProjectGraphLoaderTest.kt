@@ -17,8 +17,6 @@ import io.github.baole.konture.core.ModuleModel
 import io.github.baole.konture.core.ResolvedDependencyModel
 import io.github.baole.konture.core.SourceSetKind
 import io.github.baole.konture.core.SourceSetModel
-import kotlinx.serialization.encodeToString
-import kotlinx.serialization.json.Json
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertThrows
@@ -27,6 +25,8 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.io.TempDir
 import java.io.ByteArrayInputStream
 import java.io.File
+import kotlinx.serialization.encodeToString
+import kotlinx.serialization.json.Json
 
 class ProjectGraphLoaderTest {
     @TempDir

@@ -82,7 +82,9 @@ internal class FunctionsCoverageExtendedTest : KontureScopeTestFixture() {
         assertEquals(1, v3.size)
 
         val v4 = mutableListOf<String>()
-        FunctionsRuleBuilder(graph).should().resideInAPackage { false }.getShouldAssertion()!!(funcCtx, listOf(funcCtx), v4)
+        FunctionsRuleBuilder(
+            graph,
+        ).should().resideInAPackage { false }.getShouldAssertion()!!(funcCtx, listOf(funcCtx), v4)
         assertEquals(1, v4.size)
 
         val v5 = mutableListOf<String>()
@@ -324,7 +326,10 @@ internal class FunctionsCoverageExtendedTest : KontureScopeTestFixture() {
                 "fPriv",
                 "C",
                 "com.example",
-                parameters = listOf(ParameterDeclaration("x", "Int", false, emptyList())),
+                parameters =
+                    listOf(
+                        ParameterDeclaration("x", "kotlin.Int", false, emptyList(), resolvedType = "kotlin.Int"),
+                    ),
             )
 
         var b = FunctionsRuleBuilder(graph)

@@ -36,7 +36,12 @@ internal class PropertiesCoverageTest : KontureScopeTestFixture() {
                     filePath = "/src/$it.kt",
                 )
             }
-        val file = FileDeclaration("${className ?: "TopLevel"}.kt", packageName, classes = cls?.let { listOf(it) } ?: emptyList())
+        val file =
+            FileDeclaration(
+                "${className ?: "TopLevel"}.kt",
+                packageName,
+                classes = cls?.let { listOf(it) } ?: emptyList(),
+            )
         return PropertyDeclarationContext(decl, packageName, className, modulePath, file.filePath)
     }
 

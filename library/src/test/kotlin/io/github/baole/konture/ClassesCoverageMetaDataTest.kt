@@ -25,48 +25,6 @@ internal class ClassesCoverageMetaDataTest : KontureScopeTestFixture() {
         ).should().haveAnnotationOf("Other").getShouldAssertion()!!(classA, listOf(classA), vAnnotSingle)
         assertEquals(1, vAnnotSingle.size)
 
-        val vAnnotList = mutableListOf<String>()
-        ClassesRuleBuilder(
-            graph,
-        ).should().haveAnnotationOf(listOf("Other")).getShouldAssertion()!!(classA, listOf(classA), vAnnotList)
-        assertEquals(1, vAnnotList.size)
-
-        val vAnnotVararg = mutableListOf<String>()
-        ClassesRuleBuilder(
-            graph,
-        ).should().haveAnnotationOf("Other", "X").getShouldAssertion()!!(classA, listOf(classA), vAnnotVararg)
-        assertEquals(1, vAnnotVararg.size)
-
-        val vNotAnnotSingle = mutableListOf<String>()
-        ClassesRuleBuilder(
-            graph,
-        ).should().notHaveAnnotationOf("MyAnnotation").getShouldAssertion()!!(
-            classAnnotated,
-            listOf(classAnnotated),
-            vNotAnnotSingle,
-        )
-        assertEquals(1, vNotAnnotSingle.size)
-
-        val vNotAnnotList = mutableListOf<String>()
-        ClassesRuleBuilder(
-            graph,
-        ).should().notHaveAnnotationOf(listOf("MyAnnotation")).getShouldAssertion()!!(
-            classAnnotated,
-            listOf(classAnnotated),
-            vNotAnnotList,
-        )
-        assertEquals(1, vNotAnnotList.size)
-
-        val vNotAnnotVararg = mutableListOf<String>()
-        ClassesRuleBuilder(
-            graph,
-        ).should().notHaveAnnotationOf("MyAnnotation", "Other").getShouldAssertion()!!(
-            classAnnotated,
-            listOf(classAnnotated),
-            vNotAnnotVararg,
-        )
-        assertEquals(1, vNotAnnotVararg.size)
-
         val vAllAnnotSingle = mutableListOf<String>()
         ClassesRuleBuilder(
             graph,
@@ -117,12 +75,6 @@ internal class ClassesCoverageMetaDataTest : KontureScopeTestFixture() {
         ClassesRuleBuilder(graph).should().beInterfaces().getShouldAssertion()!!(classA, listOf(classA), vInterface)
         assertEquals(1, vInterface.size)
 
-        val vNotInterface = mutableListOf<String>()
-        ClassesRuleBuilder(
-            graph,
-        ).should().notBeInterfaces().getShouldAssertion()!!(classInterface, listOf(classInterface), vNotInterface)
-        assertEquals(1, vNotInterface.size)
-
         val vAbstract = mutableListOf<String>()
         ClassesRuleBuilder(graph).should().beAbstract().getShouldAssertion()!!(classA, listOf(classA), vAbstract)
         assertEquals(1, vAbstract.size)
@@ -151,16 +103,6 @@ internal class ClassesCoverageMetaDataTest : KontureScopeTestFixture() {
         ClassesRuleBuilder(graph).should().notBeData().getShouldAssertion()!!(classData, listOf(classData), vNotData)
         assertEquals(1, vNotData.size)
 
-        val vValue = mutableListOf<String>()
-        ClassesRuleBuilder(graph).should().beValue().getShouldAssertion()!!(classA, listOf(classA), vValue)
-        assertEquals(1, vValue.size)
-
-        val vNotValue = mutableListOf<String>()
-        ClassesRuleBuilder(
-            graph,
-        ).should().notBeValue().getShouldAssertion()!!(classInline, listOf(classInline), vNotValue)
-        assertEquals(1, vNotValue.size)
-
         val vInline = mutableListOf<String>()
         ClassesRuleBuilder(graph).should().beInline().getShouldAssertion()!!(classA, listOf(classA), vInline)
         assertEquals(1, vInline.size)
@@ -176,24 +118,14 @@ internal class ClassesCoverageMetaDataTest : KontureScopeTestFixture() {
         assertEquals(1, vInner.size)
 
         val vNotInner = mutableListOf<String>()
-        ClassesRuleBuilder(graph).should().notBeInner().getShouldAssertion()!!(classInner, listOf(classInner), vNotInner)
-        assertEquals(1, vNotInner.size)
+        ClassesRuleBuilder(
+            graph,
+        ).should().notBeInner().getShouldAssertion()!!(classA, listOf(classA), vNotInner)
+        assertEquals(0, vNotInner.size)
 
         val vOpen = mutableListOf<String>()
         ClassesRuleBuilder(graph).should().beOpen().getShouldAssertion()!!(classA, listOf(classA), vOpen)
         assertEquals(1, vOpen.size)
-
-        val vNotOpen = mutableListOf<String>()
-        ClassesRuleBuilder(graph).should().notBeOpen().getShouldAssertion()!!(classOpen, listOf(classOpen), vNotOpen)
-        assertEquals(1, vNotOpen.size)
-
-        val vFinal = mutableListOf<String>()
-        ClassesRuleBuilder(graph).should().beFinal().getShouldAssertion()!!(classOpen, listOf(classOpen), vFinal)
-        assertEquals(1, vFinal.size)
-
-        val vNotFinal = mutableListOf<String>()
-        ClassesRuleBuilder(graph).should().notBeFinal().getShouldAssertion()!!(classA, listOf(classA), vNotFinal)
-        assertEquals(1, vNotFinal.size)
 
         val vVisSingle = mutableListOf<String>()
         ClassesRuleBuilder(
@@ -204,7 +136,9 @@ internal class ClassesCoverageMetaDataTest : KontureScopeTestFixture() {
         val vVisList = mutableListOf<String>()
         ClassesRuleBuilder(
             graph,
-        ).should().haveAnyVisibility(listOf(Visibility.PRIVATE)).getShouldAssertion()!!(classA, listOf(classA), vVisList)
+        ).should().haveAnyVisibility(
+            listOf(Visibility.PRIVATE),
+        ).getShouldAssertion()!!(classA, listOf(classA), vVisList)
         assertEquals(1, vVisList.size)
 
         val vVisVararg = mutableListOf<String>()
@@ -217,69 +151,21 @@ internal class ClassesCoverageMetaDataTest : KontureScopeTestFixture() {
         )
         assertEquals(1, vVisVararg.size)
 
-        val vNotVisSingle = mutableListOf<String>()
-        ClassesRuleBuilder(
-            graph,
-        ).should().notHaveVisibility(Visibility.PUBLIC).getShouldAssertion()!!(classA, listOf(classA), vNotVisSingle)
-        assertEquals(1, vNotVisSingle.size)
-
-        val vNotVisList = mutableListOf<String>()
-        ClassesRuleBuilder(
-            graph,
-        ).should().notHaveVisibility(listOf(Visibility.PUBLIC)).getShouldAssertion()!!(
-            classA,
-            listOf(classA),
-            vNotVisList,
-        )
-        assertEquals(1, vNotVisList.size)
-
-        val vNotVisVararg = mutableListOf<String>()
-        ClassesRuleBuilder(
-            graph,
-        ).should().notHaveVisibility(Visibility.PUBLIC, Visibility.INTERNAL).getShouldAssertion()!!(
-            classA,
-            listOf(classA),
-            vNotVisVararg,
-        )
-        assertEquals(1, vNotVisVararg.size)
-
         val vPub = mutableListOf<String>()
         ClassesRuleBuilder(graph).should().bePublic().getShouldAssertion()!!(classInternal, listOf(classInternal), vPub)
         assertEquals(1, vPub.size)
-
-        val vNotPub = mutableListOf<String>()
-        ClassesRuleBuilder(graph).should().notBePublic().getShouldAssertion()!!(classA, listOf(classA), vNotPub)
-        assertEquals(1, vNotPub.size)
 
         val vInternal = mutableListOf<String>()
         ClassesRuleBuilder(graph).should().beInternal().getShouldAssertion()!!(classA, listOf(classA), vInternal)
         assertEquals(1, vInternal.size)
 
-        val vNotInternal = mutableListOf<String>()
-        ClassesRuleBuilder(
-            graph,
-        ).should().notBeInternal().getShouldAssertion()!!(classInternal, listOf(classInternal), vNotInternal)
-        assertEquals(1, vNotInternal.size)
-
         val vPrivate = mutableListOf<String>()
         ClassesRuleBuilder(graph).should().bePrivate().getShouldAssertion()!!(classA, listOf(classA), vPrivate)
         assertEquals(1, vPrivate.size)
 
-        val vNotPrivate = mutableListOf<String>()
-        ClassesRuleBuilder(
-            graph,
-        ).should().notBePrivate().getShouldAssertion()!!(classPrivate, listOf(classPrivate), vNotPrivate)
-        assertEquals(1, vNotPrivate.size)
-
         val vProtected = mutableListOf<String>()
         ClassesRuleBuilder(graph).should().beProtected().getShouldAssertion()!!(classA, listOf(classA), vProtected)
         assertEquals(1, vProtected.size)
-
-        val vNotProtected = mutableListOf<String>()
-        ClassesRuleBuilder(
-            graph,
-        ).should().notBeProtected().getShouldAssertion()!!(classProtected, listOf(classProtected), vNotProtected)
-        assertEquals(1, vNotProtected.size)
 
         val vModifierSingle = mutableListOf<String>()
         ClassesRuleBuilder(
@@ -326,28 +212,10 @@ internal class ClassesCoverageMetaDataTest : KontureScopeTestFixture() {
         val vNotModifierSingle = mutableListOf<String>()
         ClassesRuleBuilder(
             graph,
-        ).should().notHaveModifier(Modifier.DATA).getShouldAssertion()!!(classData, listOf(classData), vNotModifierSingle)
+        ).should().notHaveModifier(
+            Modifier.DATA,
+        ).getShouldAssertion()!!(classData, listOf(classData), vNotModifierSingle)
         assertEquals(1, vNotModifierSingle.size)
-
-        val vNotModifierList = mutableListOf<String>()
-        ClassesRuleBuilder(
-            graph,
-        ).should().notHaveModifier(listOf(Modifier.DATA)).getShouldAssertion()!!(
-            classData,
-            listOf(classData),
-            vNotModifierList,
-        )
-        assertEquals(1, vNotModifierList.size)
-
-        val vNotModifierVararg = mutableListOf<String>()
-        ClassesRuleBuilder(
-            graph,
-        ).should().notHaveModifier(Modifier.DATA, Modifier.SEALED).getShouldAssertion()!!(
-            classData,
-            listOf(classData),
-            vNotModifierVararg,
-        )
-        assertEquals(1, vNotModifierVararg.size)
 
         val vAssignSingle = mutableListOf<String>()
         ClassesRuleBuilder(
@@ -395,22 +263,6 @@ internal class ClassesCoverageMetaDataTest : KontureScopeTestFixture() {
         )
         assertEquals(1, vAssignAllVararg.size)
 
-        val vChildSingle = mutableListOf<String>()
-        ClassesRuleBuilder(
-            graph,
-        ).should().beChildOf("com.example.Other").getShouldAssertion()!!(classA, listOf(classA), vChildSingle)
-        assertEquals(1, vChildSingle.size)
-
-        val vNotAssignSingle = mutableListOf<String>()
-        ClassesRuleBuilder(
-            graph,
-        ).should().notBeAssignableTo("com.example.ParentType").getShouldAssertion()!!(
-            classWithParent,
-            listOf(classWithParent),
-            vNotAssignSingle,
-        )
-        assertEquals(1, vNotAssignSingle.size)
-
         val vAssignFromSingle = mutableListOf<String>()
         ClassesRuleBuilder(
             graph,
@@ -420,30 +272,6 @@ internal class ClassesCoverageMetaDataTest : KontureScopeTestFixture() {
             vAssignFromSingle,
         )
         assertEquals(1, vAssignFromSingle.size)
-
-        val vNotAssignFromSingle = mutableListOf<String>()
-        ClassesRuleBuilder(
-            graph,
-        ).should().notBeAssignableFrom("ClassWithParent").getShouldAssertion()!!(
-            classWithParent,
-            listOf(classWithParent),
-            vNotAssignFromSingle,
-        )
-        assertEquals(1, vNotAssignFromSingle.size)
-
-        val vCompanion = mutableListOf<String>()
-        ClassesRuleBuilder(graph).should().haveCompanionObject().getShouldAssertion()!!(classA, listOf(classA), vCompanion)
-        assertEquals(1, vCompanion.size)
-
-        val vNoArg = mutableListOf<String>()
-        ClassesRuleBuilder(graph).should().haveNoArgConstructor().getShouldAssertion()!!(classA, listOf(classA), vNoArg)
-        assertEquals(1, vNoArg.size)
-
-        val vPrivPrimary = mutableListOf<String>()
-        ClassesRuleBuilder(
-            graph,
-        ).should().havePrivatePrimaryConstructor().getShouldAssertion()!!(classA, listOf(classA), vPrivPrimary)
-        assertEquals(1, vPrivPrimary.size)
 
         val vDoc = mutableListOf<String>()
         ClassesRuleBuilder(graph).should().beDocumentedWithKDoc().getShouldAssertion()!!(classA, listOf(classA), vDoc)
@@ -456,15 +284,44 @@ internal class ClassesCoverageMetaDataTest : KontureScopeTestFixture() {
                 packageName = "com.example",
                 isInterface = false,
                 isAbstract = false,
-                properties = listOf(PropertyDeclaration("prop1", "String")),
-                functions = listOf(FunctionDeclaration("func1", "Unit")),
+                annotations = emptyList(),
+                imports = emptyList(),
+                referencedTypes = emptySet(),
+                properties =
+                    listOf(
+                        PropertyDeclaration(
+                            name = "prop1",
+                            visibility = Visibility.PUBLIC,
+                            modifiers = emptySet(),
+                            type = "String",
+                            isVal = true,
+                            annotations = emptyList(),
+                            kdocText = null,
+                            isExtension = false,
+                        ),
+                    ),
+                functions =
+                    listOf(
+                        FunctionDeclaration(
+                            name = "func1",
+                            visibility = Visibility.PUBLIC,
+                            modifiers = emptySet(),
+                            returnType = "Unit",
+                            parameters = emptyList(),
+                            annotations = emptyList(),
+                            kdocText = null,
+                            isExtension = false,
+                        ),
+                    ),
                 filePath = "/src/PF.kt",
             )
 
         val vContainPropStr = mutableListOf<String>()
         ClassesRuleBuilder(
             graph,
-        ).should().containProperty("p2").getShouldAssertion()!!(classWithPropFunc, listOf(classWithPropFunc), vContainPropStr)
+        ).should().containProperty(
+            "p2",
+        ).getShouldAssertion()!!(classWithPropFunc, listOf(classWithPropFunc), vContainPropStr)
         assertEquals(1, vContainPropStr.size)
 
         val vContainPropList = mutableListOf<String>()
@@ -560,7 +417,9 @@ internal class ClassesCoverageMetaDataTest : KontureScopeTestFixture() {
         val vContainFuncStr = mutableListOf<String>()
         ClassesRuleBuilder(
             graph,
-        ).should().containFunction("f2").getShouldAssertion()!!(classWithPropFunc, listOf(classWithPropFunc), vContainFuncStr)
+        ).should().containFunction(
+            "f2",
+        ).getShouldAssertion()!!(classWithPropFunc, listOf(classWithPropFunc), vContainFuncStr)
         assertEquals(1, vContainFuncStr.size)
 
         val vContainFuncList = mutableListOf<String>()

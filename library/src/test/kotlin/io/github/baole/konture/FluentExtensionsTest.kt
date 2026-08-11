@@ -167,7 +167,7 @@ internal class FluentExtensionsTest : KontureScopeTestFixture() {
         assertEquals("ClassA.kt", context.name)
         assertEquals("com.example", context.packageName)
         assertEquals(listOf("com.example.other.*", "java.util.List"), context.imports)
-        assertEquals(listOf(classA), context.classes)
+        assertEquals(listOf(myClassA), context.classes)
 
         context.check(true, "ok")
         assertTrue(violations.isEmpty())

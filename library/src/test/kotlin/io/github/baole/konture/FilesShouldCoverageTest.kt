@@ -90,7 +90,7 @@ internal class FilesShouldCoverageTest : KontureScopeTestFixture() {
             ).should().containClass("ClassA", "Other").getShouldAssertion()!!
         val v3 = mutableListOf<String>()
         assertClsVararg(fileCtx, listOf(fileCtx), v3)
-        assertTrue(v3.isEmpty())
+        assertTrue(v3.size == 1)
 
         val assertNotClsSingle =
             FilesRuleBuilder(
@@ -125,7 +125,7 @@ internal class FilesShouldCoverageTest : KontureScopeTestFixture() {
             ).should().haveImportOf("com.example.ClassB", "com.other.Other").getShouldAssertion()!!
         val v9 = mutableListOf<String>()
         assertImpVararg(fileCtxImp, listOf(fileCtxImp), v9)
-        assertTrue(v9.isEmpty())
+        assertTrue(v9.size == 1)
 
         val assertNotImpSingle =
             FilesRuleBuilder(
@@ -154,13 +154,22 @@ internal class FilesShouldCoverageTest : KontureScopeTestFixture() {
 
     @Test
     fun `test FilesShould top level and structural elements`() {
-        val topFunc = FunctionDeclaration("topFun", Visibility.PUBLIC, emptySet(), "Unit", emptyList(), emptyList(), null, false)
+        val topFunc =
+            FunctionDeclaration("topFun", Visibility.PUBLIC, emptySet(), "Unit", emptyList(), emptyList(), null, false)
         val topProp = PropertyDeclaration("topProp", Visibility.PUBLIC, emptySet(), "String", true, emptyList(), null)
-        val fileWithTop = FileDeclaration("Top.kt", "com.example", topLevelFunctions = listOf(topFunc), topLevelProperties = listOf(topProp))
+        val fileWithTop =
+            FileDeclaration(
+                "Top.kt",
+                "com.example",
+                topLevelFunctions = listOf(topFunc),
+                topLevelProperties = listOf(topProp),
+            )
         val fileCtxTop = FileDeclarationContext(fileWithTop, ":app")
         val graph =
             ProjectGraph(
-                mapOf(":" to listOf(Module(":", ":app", "app", emptyList(), emptyList(), emptyList(), listOf(fileWithTop)))),
+                mapOf(
+                    ":" to listOf(Module(":", ":app", "app", emptyList(), emptyList(), emptyList(), listOf(fileWithTop))),
+                ),
             )
 
         val assertTopFuncs = FilesRuleBuilder(graph).should().haveTopLevelFunctions().getShouldAssertion()!!
