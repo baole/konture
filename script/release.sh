@@ -60,17 +60,17 @@ fi
 PROJECT_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 cd "$PROJECT_ROOT"
 
-# Extract current version from Version Catalog
-VERSION_CATALOG="gradle/libs.versions.toml"
-if [[ ! -f "$VERSION_CATALOG" ]]; then
-    echo -e "${RED}[ERROR] Version catalog not found at '$VERSION_CATALOG'. Please run this from the project root.${NC}" >&2
+# Extract current version from gradle.properties
+PROPERTIES_FILE="gradle.properties"
+if [[ ! -f "$PROPERTIES_FILE" ]]; then
+    echo -e "${RED}[ERROR] '$PROPERTIES_FILE' not found. Please run this from the project root.${NC}" >&2
     exit 1
 fi
 
-OLD_VERSION=$(grep 'konture =' "$VERSION_CATALOG" | head -n 1 | cut -d'"' -f2)
+OLD_VERSION=$(grep '^version=' "$PROPERTIES_FILE" | head -n 1 | cut -d'=' -f2)
 
 if [[ -z "$OLD_VERSION" ]]; then
-    echo -e "${RED}[ERROR] Could not extract current konture version from '$VERSION_CATALOG'.${NC}" >&2
+    echo -e "${RED}[ERROR] Could not extract current konture version from '$PROPERTIES_FILE'.${NC}" >&2
     exit 1
 fi
 
@@ -95,7 +95,6 @@ fi
 # List of files to modify and verify
 FILES_TO_BUMP=(
     "gradle.properties"
-    "gradle/libs.versions.toml"
     "build.gradle.kts"
     "settings.gradle.kts"
     "build-logic/src/main/kotlin/konture.kotlin.gradle.kts"
@@ -137,8 +136,7 @@ done
 # Perform in-place search-and-replace using cross-platform perl
 echo -e "${BLUE}[2/3] Bumping version coordinates in source and documentation files...${NC}"
 
-# 1. Update Version Catalogs
-perl -pi -e "s/konture = \"\Q$OLD_VERSION\E\"/konture = \"$NEW_VERSION\"/g" gradle/libs.versions.toml
+# 1. Update Showcase Version Catalogs
 if [[ -f "showcases/ktor-arrow-example/gradle/libs.versions.toml" ]]; then
     perl -pi -e "s/konture = \"\Q$OLD_VERSION\E\"/konture = \"$NEW_VERSION\"/g" showcases/ktor-arrow-example/gradle/libs.versions.toml
 fi
