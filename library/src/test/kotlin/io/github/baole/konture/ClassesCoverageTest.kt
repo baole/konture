@@ -4,6 +4,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+@file:Suppress("LongMethod")
+
 package io.github.baole.konture
 
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -11,7 +13,6 @@ import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 
-@Suppress("LargeClass", "LongMethod")
 internal class ClassesCoverageTest : KontureScopeTestFixture() {
     @Test
     fun `test ClassesShouldPackageAssertions package, module, and name`() {
@@ -21,204 +22,240 @@ internal class ClassesCoverageTest : KontureScopeTestFixture() {
             )
 
         val vPkgSingle = mutableListOf<String>()
-        ClassesRuleBuilder(graph).should().resideInAPackage("com.example")
-            .getShouldAssertion()!!(classA, listOf(classA), vPkgSingle)
-        assertTrue(vPkgSingle.isEmpty())
+        ClassesRuleBuilder(
+            graph,
+        ).should().resideInAPackage("wrong.pkg").getShouldAssertion()!!(classA, listOf(classA), vPkgSingle)
+        assertEquals(1, vPkgSingle.size)
 
         val vPkgList = mutableListOf<String>()
-        ClassesRuleBuilder(graph).should().resideInAPackage(listOf("com.example"))
-            .getShouldAssertion()!!(classA, listOf(classA), vPkgList)
-        assertTrue(vPkgList.isEmpty())
+        ClassesRuleBuilder(
+            graph,
+        ).should().resideInAPackage(listOf("wrong.pkg")).getShouldAssertion()!!(classA, listOf(classA), vPkgList)
+        assertEquals(1, vPkgList.size)
 
         val vPkgVararg = mutableListOf<String>()
-        ClassesRuleBuilder(graph).should().resideInAPackage("com.example", "com.other")
-            .getShouldAssertion()!!(classA, listOf(classA), vPkgVararg)
-        assertTrue(vPkgVararg.isEmpty())
+        ClassesRuleBuilder(
+            graph,
+        ).should().resideInAPackage("wrong.pkg", "other").getShouldAssertion()!!(classA, listOf(classA), vPkgVararg)
+        assertEquals(1, vPkgVararg.size)
 
         val vPkgPred = mutableListOf<String>()
-        ClassesRuleBuilder(graph).should().resideInAPackage { it.startsWith("com") }
-            .getShouldAssertion()!!(classA, listOf(classA), vPkgPred)
-        assertTrue(vPkgPred.isEmpty())
+        ClassesRuleBuilder(graph).should().resideInAPackage { false }.getShouldAssertion()!!(classA, listOf(classA), vPkgPred)
+        assertEquals(1, vPkgPred.size)
 
         val vNotPkgSingle = mutableListOf<String>()
-        ClassesRuleBuilder(graph).should().notResideInAPackage("com.other")
-            .getShouldAssertion()!!(classA, listOf(classA), vNotPkgSingle)
-        assertTrue(vNotPkgSingle.isEmpty())
+        ClassesRuleBuilder(
+            graph,
+        ).should().notResideInAPackage("com.example").getShouldAssertion()!!(classA, listOf(classA), vNotPkgSingle)
+        assertEquals(1, vNotPkgSingle.size)
 
         val vNotPkgList = mutableListOf<String>()
-        ClassesRuleBuilder(graph).should().notResideInAPackage(listOf("com.other"))
-            .getShouldAssertion()!!(classA, listOf(classA), vNotPkgList)
-        assertTrue(vNotPkgList.isEmpty())
+        ClassesRuleBuilder(
+            graph,
+        ).should().notResideInAPackage(listOf("com.example")).getShouldAssertion()!!(classA, listOf(classA), vNotPkgList)
+        assertEquals(1, vNotPkgList.size)
 
         val vNotPkgVararg = mutableListOf<String>()
-        ClassesRuleBuilder(graph).should().notResideInAPackage("com.other", "org.wrong")
-            .getShouldAssertion()!!(classA, listOf(classA), vNotPkgVararg)
-        assertTrue(vNotPkgVararg.isEmpty())
+        ClassesRuleBuilder(
+            graph,
+        ).should().notResideInAPackage("com.example", "other").getShouldAssertion()!!(classA, listOf(classA), vNotPkgVararg)
+        assertEquals(1, vNotPkgVararg.size)
 
-        val vModSingle = mutableListOf<String>()
-        ClassesRuleBuilder(graph).should().resideInAModule("app")
-            .getShouldAssertion()!!(classA, listOf(classA), vModSingle)
-        assertTrue(vModSingle.isEmpty())
+        val vModuleSingle = mutableListOf<String>()
+        ClassesRuleBuilder(
+            graph,
+        ).should().resideInAModule(":other").getShouldAssertion()!!(classA, listOf(classA), vModuleSingle)
+        assertEquals(1, vModuleSingle.size)
 
-        val vModList = mutableListOf<String>()
-        ClassesRuleBuilder(graph).should().resideInAModule(listOf("app"))
-            .getShouldAssertion()!!(classA, listOf(classA), vModList)
-        assertTrue(vModList.isEmpty())
+        val vModuleList = mutableListOf<String>()
+        ClassesRuleBuilder(
+            graph,
+        ).should().resideInAModule(listOf(":other")).getShouldAssertion()!!(classA, listOf(classA), vModuleList)
+        assertEquals(1, vModuleList.size)
 
-        val vModVararg = mutableListOf<String>()
-        ClassesRuleBuilder(graph).should().resideInAModule("app", "core")
-            .getShouldAssertion()!!(classA, listOf(classA), vModVararg)
-        assertTrue(vModVararg.isEmpty())
+        val vModuleVararg = mutableListOf<String>()
+        ClassesRuleBuilder(
+            graph,
+        ).should().resideInAModule(":other", ":app").getShouldAssertion()!!(classA, listOf(classA), vModuleVararg)
+        assertTrue(vModuleVararg.isEmpty())
 
-        val vModAlias = mutableListOf<String>()
-        ClassesRuleBuilder(graph).should().resideInModule("app")
-            .getShouldAssertion()!!(classA, listOf(classA), vModAlias)
-        assertTrue(vModAlias.isEmpty())
+        val vNotModuleSingle = mutableListOf<String>()
+        ClassesRuleBuilder(
+            graph,
+        ).should().notResideInAModule(":app").getShouldAssertion()!!(classA, listOf(classA), vNotModuleSingle)
+        assertEquals(1, vNotModuleSingle.size)
 
-        val vModsAlias = mutableListOf<String>()
-        ClassesRuleBuilder(graph).should().resideInModules(listOf("app"))
-            .getShouldAssertion()!!(classA, listOf(classA), vModsAlias)
-        assertTrue(vModsAlias.isEmpty())
+        val vNotModuleList = mutableListOf<String>()
+        ClassesRuleBuilder(
+            graph,
+        ).should().notResideInAModule(listOf(":app")).getShouldAssertion()!!(classA, listOf(classA), vNotModuleList)
+        assertEquals(1, vNotModuleList.size)
 
-        val vModsVarargAlias = mutableListOf<String>()
-        ClassesRuleBuilder(graph).should().resideInModules("app", "core")
-            .getShouldAssertion()!!(classA, listOf(classA), vModsVarargAlias)
-        assertTrue(vModsVarargAlias.isEmpty())
-
-        val vNotModSingle = mutableListOf<String>()
-        ClassesRuleBuilder(graph).should().notResideInAModule("core")
-            .getShouldAssertion()!!(classA, listOf(classA), vNotModSingle)
-        assertTrue(vNotModSingle.isEmpty())
-
-        val vNotModList = mutableListOf<String>()
-        ClassesRuleBuilder(graph).should().notResideInAModule(listOf("core"))
-            .getShouldAssertion()!!(classA, listOf(classA), vNotModList)
-        assertTrue(vNotModList.isEmpty())
-
-        val vNotModVararg = mutableListOf<String>()
-        ClassesRuleBuilder(graph).should().notResideInAModule("core", "feature")
-            .getShouldAssertion()!!(classA, listOf(classA), vNotModVararg)
-        assertTrue(vNotModVararg.isEmpty())
-
-        val vEndSingle = mutableListOf<String>()
-        ClassesRuleBuilder(graph).should().haveNameEndingWith("A")
-            .getShouldAssertion()!!(classA, listOf(classA), vEndSingle)
-        assertTrue(vEndSingle.isEmpty())
-
-        val vEndList = mutableListOf<String>()
-        ClassesRuleBuilder(graph).should().haveNameEndingWith(listOf("A"))
-            .getShouldAssertion()!!(classA, listOf(classA), vEndList)
-        assertTrue(vEndList.isEmpty())
-
-        val vEndVararg = mutableListOf<String>()
-        ClassesRuleBuilder(graph).should().haveNameEndingWith("A", "B")
-            .getShouldAssertion()!!(classA, listOf(classA), vEndVararg)
-        assertTrue(vEndVararg.isEmpty())
-
-        val vStartSingle = mutableListOf<String>()
-        ClassesRuleBuilder(graph).should().haveNameStartingWith("Class")
-            .getShouldAssertion()!!(classA, listOf(classA), vStartSingle)
-        assertTrue(vStartSingle.isEmpty())
-
-        val vStartList = mutableListOf<String>()
-        ClassesRuleBuilder(graph).should().haveNameStartingWith(listOf("Class"))
-            .getShouldAssertion()!!(classA, listOf(classA), vStartList)
-        assertTrue(vStartList.isEmpty())
-
-        val vStartVararg = mutableListOf<String>()
-        ClassesRuleBuilder(graph).should().haveNameStartingWith("Class", "My")
-            .getShouldAssertion()!!(classA, listOf(classA), vStartVararg)
-        assertTrue(vStartVararg.isEmpty())
-
-        val vMatchSingle = mutableListOf<String>()
-        ClassesRuleBuilder(graph).should().haveNameMatching("Class*")
-            .getShouldAssertion()!!(classA, listOf(classA), vMatchSingle)
-        assertTrue(vMatchSingle.isEmpty())
-
-        val vMatchList = mutableListOf<String>()
-        ClassesRuleBuilder(graph).should().haveNameMatching(listOf("Class*"))
-            .getShouldAssertion()!!(classA, listOf(classA), vMatchList)
-        assertTrue(vMatchList.isEmpty())
-
-        val vMatchVararg = mutableListOf<String>()
-        ClassesRuleBuilder(graph).should().haveNameMatching("Class*", "My*")
-            .getShouldAssertion()!!(classA, listOf(classA), vMatchVararg)
-        assertTrue(vMatchVararg.isEmpty())
+        val vNotModuleVararg = mutableListOf<String>()
+        ClassesRuleBuilder(
+            graph,
+        ).should().notResideInAModule(":app", ":other").getShouldAssertion()!!(classA, listOf(classA), vNotModuleVararg)
+        assertEquals(1, vNotModuleVararg.size)
 
         val vNameSingle = mutableListOf<String>()
-        ClassesRuleBuilder(graph).should().haveName("ClassA")
-            .getShouldAssertion()!!(classA, listOf(classA), vNameSingle)
-        assertTrue(vNameSingle.isEmpty())
+        ClassesRuleBuilder(
+            graph,
+        ).should().haveName("ClassB").getShouldAssertion()!!(classA, listOf(classA), vNameSingle)
+        assertEquals(1, vNameSingle.size)
 
         val vNameList = mutableListOf<String>()
-        ClassesRuleBuilder(graph).should().haveName(listOf("ClassA"))
-            .getShouldAssertion()!!(classA, listOf(classA), vNameList)
-        assertTrue(vNameList.isEmpty())
+        ClassesRuleBuilder(
+            graph,
+        ).should().haveName(listOf("ClassB")).getShouldAssertion()!!(classA, listOf(classA), vNameList)
+        assertEquals(1, vNameList.size)
 
         val vNameVararg = mutableListOf<String>()
-        ClassesRuleBuilder(graph).should().haveName("ClassA", "ClassB")
-            .getShouldAssertion()!!(classA, listOf(classA), vNameVararg)
-        assertTrue(vNameVararg.isEmpty())
+        ClassesRuleBuilder(
+            graph,
+        ).should().haveName("ClassB", "ClassC").getShouldAssertion()!!(classA, listOf(classA), vNameVararg)
+        assertEquals(1, vNameVararg.size)
+
+        val vNamePred = mutableListOf<String>()
+        ClassesRuleBuilder(graph).should().haveName { false }.getShouldAssertion()!!(classA, listOf(classA), vNamePred)
+        assertEquals(1, vNamePred.size)
 
         val vNotNameSingle = mutableListOf<String>()
-        ClassesRuleBuilder(graph).should().notHaveName("ClassB")
-            .getShouldAssertion()!!(classA, listOf(classA), vNotNameSingle)
-        assertTrue(vNotNameSingle.isEmpty())
+        ClassesRuleBuilder(
+            graph,
+        ).should().notHaveName("ClassA").getShouldAssertion()!!(classA, listOf(classA), vNotNameSingle)
+        assertEquals(1, vNotNameSingle.size)
 
         val vNotNameList = mutableListOf<String>()
-        ClassesRuleBuilder(graph).should().notHaveName(listOf("ClassB"))
-            .getShouldAssertion()!!(classA, listOf(classA), vNotNameList)
-        assertTrue(vNotNameList.isEmpty())
+        ClassesRuleBuilder(
+            graph,
+        ).should().notHaveName(listOf("ClassA")).getShouldAssertion()!!(classA, listOf(classA), vNotNameList)
+        assertEquals(1, vNotNameList.size)
 
         val vNotNameVararg = mutableListOf<String>()
-        ClassesRuleBuilder(graph).should().notHaveName("ClassB", "ClassC")
-            .getShouldAssertion()!!(classA, listOf(classA), vNotNameVararg)
-        assertTrue(vNotNameVararg.isEmpty())
+        ClassesRuleBuilder(
+            graph,
+        ).should().notHaveName("ClassA", "ClassB").getShouldAssertion()!!(classA, listOf(classA), vNotNameVararg)
+        assertEquals(1, vNotNameVararg.size)
 
-        val vNotMatchSingle = mutableListOf<String>()
-        ClassesRuleBuilder(graph).should().notHaveNameMatching("Wrong*")
-            .getShouldAssertion()!!(classA, listOf(classA), vNotMatchSingle)
-        assertTrue(vNotMatchSingle.isEmpty())
+        val vEndSingle = mutableListOf<String>()
+        ClassesRuleBuilder(
+            graph,
+        ).should().haveNameEndingWith("B").getShouldAssertion()!!(classA, listOf(classA), vEndSingle)
+        assertEquals(1, vEndSingle.size)
 
-        val vNotMatchList = mutableListOf<String>()
-        ClassesRuleBuilder(graph).should().notHaveNameMatching(listOf("Wrong*"))
-            .getShouldAssertion()!!(classA, listOf(classA), vNotMatchList)
-        assertTrue(vNotMatchList.isEmpty())
+        val vEndList = mutableListOf<String>()
+        ClassesRuleBuilder(
+            graph,
+        ).should().haveNameEndingWith(listOf("B")).getShouldAssertion()!!(classA, listOf(classA), vEndList)
+        assertEquals(1, vEndList.size)
 
-        val vNotMatchVararg = mutableListOf<String>()
-        ClassesRuleBuilder(graph).should().notHaveNameMatching("Wrong*", "Bad*")
-            .getShouldAssertion()!!(classA, listOf(classA), vNotMatchVararg)
-        assertTrue(vNotMatchVararg.isEmpty())
-
-        val vNotStartSingle = mutableListOf<String>()
-        ClassesRuleBuilder(graph).should().notHaveNameStartingWith("Wrong")
-            .getShouldAssertion()!!(classA, listOf(classA), vNotStartSingle)
-        assertTrue(vNotStartSingle.isEmpty())
-
-        val vNotStartList = mutableListOf<String>()
-        ClassesRuleBuilder(graph).should().notHaveNameStartingWith(listOf("Wrong"))
-            .getShouldAssertion()!!(classA, listOf(classA), vNotStartList)
-        assertTrue(vNotStartList.isEmpty())
-
-        val vNotStartVararg = mutableListOf<String>()
-        ClassesRuleBuilder(graph).should().notHaveNameStartingWith("Wrong", "Bad")
-            .getShouldAssertion()!!(classA, listOf(classA), vNotStartVararg)
-        assertTrue(vNotStartVararg.isEmpty())
+        val vEndVararg = mutableListOf<String>()
+        ClassesRuleBuilder(
+            graph,
+        ).should().haveNameEndingWith("B", "C").getShouldAssertion()!!(classA, listOf(classA), vEndVararg)
+        assertEquals(1, vEndVararg.size)
 
         val vNotEndSingle = mutableListOf<String>()
-        ClassesRuleBuilder(graph).should().notHaveNameEndingWith("Wrong")
-            .getShouldAssertion()!!(classA, listOf(classA), vNotEndSingle)
-        assertTrue(vNotEndSingle.isEmpty())
+        ClassesRuleBuilder(
+            graph,
+        ).should().notHaveNameEndingWith("A").getShouldAssertion()!!(classA, listOf(classA), vNotEndSingle)
+        assertEquals(1, vNotEndSingle.size)
 
         val vNotEndList = mutableListOf<String>()
-        ClassesRuleBuilder(graph).should().notHaveNameEndingWith(listOf("Wrong"))
-            .getShouldAssertion()!!(classA, listOf(classA), vNotEndList)
-        assertTrue(vNotEndList.isEmpty())
+        ClassesRuleBuilder(
+            graph,
+        ).should().notHaveNameEndingWith(listOf("A")).getShouldAssertion()!!(classA, listOf(classA), vNotEndList)
+        assertEquals(1, vNotEndList.size)
 
         val vNotEndVararg = mutableListOf<String>()
-        ClassesRuleBuilder(graph).should().notHaveNameEndingWith("Wrong", "Bad")
-            .getShouldAssertion()!!(classA, listOf(classA), vNotEndVararg)
-        assertTrue(vNotEndVararg.isEmpty())
+        ClassesRuleBuilder(
+            graph,
+        ).should().notHaveNameEndingWith("A", "B").getShouldAssertion()!!(classA, listOf(classA), vNotEndVararg)
+        assertEquals(1, vNotEndVararg.size)
+
+        val vStartSingle = mutableListOf<String>()
+        ClassesRuleBuilder(
+            graph,
+        ).should().haveNameStartingWith("B").getShouldAssertion()!!(classA, listOf(classA), vStartSingle)
+        assertEquals(1, vStartSingle.size)
+
+        val vStartList = mutableListOf<String>()
+        ClassesRuleBuilder(
+            graph,
+        ).should().haveNameStartingWith(listOf("B")).getShouldAssertion()!!(classA, listOf(classA), vStartList)
+        assertEquals(1, vStartList.size)
+
+        val vStartVararg = mutableListOf<String>()
+        ClassesRuleBuilder(
+            graph,
+        ).should().haveNameStartingWith("B", "C").getShouldAssertion()!!(classA, listOf(classA), vStartVararg)
+        assertEquals(1, vStartVararg.size)
+
+        val vNotStartSingle = mutableListOf<String>()
+        ClassesRuleBuilder(
+            graph,
+        ).should().notHaveNameStartingWith("Class").getShouldAssertion()!!(classA, listOf(classA), vNotStartSingle)
+        assertEquals(1, vNotStartSingle.size)
+
+        val vNotStartList = mutableListOf<String>()
+        ClassesRuleBuilder(
+            graph,
+        ).should().notHaveNameStartingWith(listOf("Class")).getShouldAssertion()!!(
+            classA,
+            listOf(classA),
+            vNotStartList,
+        )
+        assertEquals(1, vNotStartList.size)
+
+        val vNotStartVararg = mutableListOf<String>()
+        ClassesRuleBuilder(
+            graph,
+        ).should().notHaveNameStartingWith("Class", "Other").getShouldAssertion()!!(
+            classA,
+            listOf(classA),
+            vNotStartVararg,
+        )
+        assertEquals(1, vNotStartVararg.size)
+
+        val vMatchSingle = mutableListOf<String>()
+        ClassesRuleBuilder(
+            graph,
+        ).should().haveNameMatching("Other*").getShouldAssertion()!!(classA, listOf(classA), vMatchSingle)
+        assertEquals(1, vMatchSingle.size)
+
+        val vMatchList = mutableListOf<String>()
+        ClassesRuleBuilder(
+            graph,
+        ).should().haveNameMatching(listOf("Other*")).getShouldAssertion()!!(classA, listOf(classA), vMatchList)
+        assertEquals(1, vMatchList.size)
+
+        val vMatchVararg = mutableListOf<String>()
+        ClassesRuleBuilder(
+            graph,
+        ).should().haveNameMatching("Other*", "X*").getShouldAssertion()!!(classA, listOf(classA), vMatchVararg)
+        assertEquals(1, vMatchVararg.size)
+
+        val vNotMatchSingle = mutableListOf<String>()
+        ClassesRuleBuilder(
+            graph,
+        ).should().notHaveNameMatching("Class*").getShouldAssertion()!!(classA, listOf(classA), vNotMatchSingle)
+        assertEquals(1, vNotMatchSingle.size)
+
+        val vNotMatchList = mutableListOf<String>()
+        ClassesRuleBuilder(
+            graph,
+        ).should().notHaveNameMatching(listOf("Class*")).getShouldAssertion()!!(classA, listOf(classA), vNotMatchList)
+        assertEquals(1, vNotMatchList.size)
+
+        val vNotMatchVararg = mutableListOf<String>()
+        ClassesRuleBuilder(
+            graph,
+        ).should().notHaveNameMatching("Class*", "Other*").getShouldAssertion()!!(
+            classA,
+            listOf(classA),
+            vNotMatchVararg,
+        )
+        assertEquals(1, vNotMatchVararg.size)
     }
 
     @Test
@@ -229,994 +266,633 @@ internal class ClassesCoverageTest : KontureScopeTestFixture() {
             )
 
         val vAnnotSingle = mutableListOf<String>()
-        ClassesRuleBuilder(graph).should().haveAnnotationOf("MyAnnotation")
-            .getShouldAssertion()!!(classAnnotated, listOf(classAnnotated), vAnnotSingle)
-        assertTrue(vAnnotSingle.isEmpty())
+        ClassesRuleBuilder(
+            graph,
+        ).should().haveAnnotationOf("Other").getShouldAssertion()!!(classA, listOf(classA), vAnnotSingle)
+        assertEquals(1, vAnnotSingle.size)
+
+        val vAnnotList = mutableListOf<String>()
+        ClassesRuleBuilder(
+            graph,
+        ).should().haveAnnotationOf(listOf("Other")).getShouldAssertion()!!(classA, listOf(classA), vAnnotList)
+        assertEquals(1, vAnnotList.size)
+
+        val vAnnotVararg = mutableListOf<String>()
+        ClassesRuleBuilder(
+            graph,
+        ).should().haveAnnotationOf("Other", "X").getShouldAssertion()!!(classA, listOf(classA), vAnnotVararg)
+        assertEquals(1, vAnnotVararg.size)
+
+        val vNotAnnotSingle = mutableListOf<String>()
+        ClassesRuleBuilder(
+            graph,
+        ).should().notHaveAnnotationOf("MyAnnotation").getShouldAssertion()!!(
+            classAnnotated,
+            listOf(classAnnotated),
+            vNotAnnotSingle,
+        )
+        assertEquals(1, vNotAnnotSingle.size)
+
+        val vNotAnnotList = mutableListOf<String>()
+        ClassesRuleBuilder(
+            graph,
+        ).should().notHaveAnnotationOf(listOf("MyAnnotation")).getShouldAssertion()!!(
+            classAnnotated,
+            listOf(classAnnotated),
+            vNotAnnotList,
+        )
+        assertEquals(1, vNotAnnotList.size)
+
+        val vNotAnnotVararg = mutableListOf<String>()
+        ClassesRuleBuilder(
+            graph,
+        ).should().notHaveAnnotationOf("MyAnnotation", "Other").getShouldAssertion()!!(
+            classAnnotated,
+            listOf(classAnnotated),
+            vNotAnnotVararg,
+        )
+        assertEquals(1, vNotAnnotVararg.size)
 
         val vAllAnnotSingle = mutableListOf<String>()
-        ClassesRuleBuilder(graph).should().haveAllAnnotationsOf("MyAnnotation")
-            .getShouldAssertion()!!(classAnnotated, listOf(classAnnotated), vAllAnnotSingle)
-        assertTrue(vAllAnnotSingle.isEmpty())
+        ClassesRuleBuilder(
+            graph,
+        ).should().haveAllAnnotationsOf("Other").getShouldAssertion()!!(classA, listOf(classA), vAllAnnotSingle)
+        assertEquals(1, vAllAnnotSingle.size)
 
         val vAllAnnotList = mutableListOf<String>()
-        ClassesRuleBuilder(graph).should().haveAllAnnotationsOf(listOf("MyAnnotation"))
-            .getShouldAssertion()!!(classAnnotated, listOf(classAnnotated), vAllAnnotList)
-        assertTrue(vAllAnnotList.isEmpty())
+        ClassesRuleBuilder(
+            graph,
+        ).should().haveAllAnnotationsOf(listOf("Other")).getShouldAssertion()!!(classA, listOf(classA), vAllAnnotList)
+        assertEquals(1, vAllAnnotList.size)
 
         val vAllAnnotVararg = mutableListOf<String>()
-        ClassesRuleBuilder(graph).should().haveAllAnnotationsOf("MyAnnotation", "Other")
-            .getShouldAssertion()!!(classAnnotated, listOf(classAnnotated), vAllAnnotVararg)
+        ClassesRuleBuilder(
+            graph,
+        ).should().haveAllAnnotationsOf("Other", "X").getShouldAssertion()!!(classA, listOf(classA), vAllAnnotVararg)
         assertEquals(1, vAllAnnotVararg.size)
 
         val vAnyAnnotSingle = mutableListOf<String>()
-        ClassesRuleBuilder(graph).should().haveAnyAnnotationOf("MyAnnotation")
-            .getShouldAssertion()!!(classAnnotated, listOf(classAnnotated), vAnyAnnotSingle)
-        assertTrue(vAnyAnnotSingle.isEmpty())
+        ClassesRuleBuilder(
+            graph,
+        ).should().haveAnyAnnotationOf("Other").getShouldAssertion()!!(classA, listOf(classA), vAnyAnnotSingle)
+        assertEquals(1, vAnyAnnotSingle.size)
 
         val vAnyAnnotList = mutableListOf<String>()
-        ClassesRuleBuilder(graph).should().haveAnyAnnotationOf(listOf("MyAnnotation"))
-            .getShouldAssertion()!!(classAnnotated, listOf(classAnnotated), vAnyAnnotList)
-        assertTrue(vAnyAnnotList.isEmpty())
+        ClassesRuleBuilder(
+            graph,
+        ).should().haveAnyAnnotationOf(listOf("Other")).getShouldAssertion()!!(classA, listOf(classA), vAnyAnnotList)
+        assertEquals(1, vAnyAnnotList.size)
 
         val vAnyAnnotVararg = mutableListOf<String>()
-        ClassesRuleBuilder(graph).should().haveAnyAnnotationOf("MyAnnotation", "Other")
-            .getShouldAssertion()!!(classAnnotated, listOf(classAnnotated), vAnyAnnotVararg)
-        assertTrue(vAnyAnnotVararg.isEmpty())
+        ClassesRuleBuilder(
+            graph,
+        ).should().haveAnyAnnotationOf("Other", "X").getShouldAssertion()!!(classA, listOf(classA), vAnyAnnotVararg)
+        assertEquals(1, vAnyAnnotVararg.size)
+
+        val vAnnotArg = mutableListOf<String>()
+        ClassesRuleBuilder(
+            graph,
+        ).should().haveAnnotationWithArgument("MyAnnotation", "value", "wrong").getShouldAssertion()!!(
+            classAnnotated,
+            listOf(classAnnotated),
+            vAnnotArg,
+        )
+        assertEquals(1, vAnnotArg.size)
 
         val vInterface = mutableListOf<String>()
-        ClassesRuleBuilder(graph).should().beInterfaces()
-            .getShouldAssertion()!!(classInterface, listOf(classInterface), vInterface)
-        assertTrue(vInterface.isEmpty())
-
-        val vAbstract = mutableListOf<String>()
-        ClassesRuleBuilder(graph).should().beAbstract()
-            .getShouldAssertion()!!(classAbstract, listOf(classAbstract), vAbstract)
-        assertTrue(vAbstract.isEmpty())
-
-        val vSealed = mutableListOf<String>()
-        ClassesRuleBuilder(graph).should().beSealed()
-            .getShouldAssertion()!!(classSealed, listOf(classSealed), vSealed)
-        assertTrue(vSealed.isEmpty())
-
-        val vData = mutableListOf<String>()
-        ClassesRuleBuilder(graph).should().beData()
-            .getShouldAssertion()!!(classData, listOf(classData), vData)
-        assertTrue(vData.isEmpty())
-
-        val vInline = mutableListOf<String>()
-        ClassesRuleBuilder(graph).should().beInline()
-            .getShouldAssertion()!!(classInline, listOf(classInline), vInline)
-        assertTrue(vInline.isEmpty())
-
-        val vTopLevel = mutableListOf<String>()
-        ClassesRuleBuilder(graph).should().beTopLevel()
-            .getShouldAssertion()!!(classA, listOf(classA), vTopLevel)
-        assertTrue(vTopLevel.isEmpty())
-
-        val vModifier = mutableListOf<String>()
-        ClassesRuleBuilder(graph).should().haveModifier(Modifier.DATA)
-            .getShouldAssertion()!!(classData, listOf(classData), vModifier)
-        assertTrue(vModifier.isEmpty())
-
-        val vAllModifiersSingle = mutableListOf<String>()
-        ClassesRuleBuilder(graph).should().haveAllModifiers(Modifier.DATA)
-            .getShouldAssertion()!!(classData, listOf(classData), vAllModifiersSingle)
-        assertTrue(vAllModifiersSingle.isEmpty())
-
-        val vAllModifiersList = mutableListOf<String>()
-        ClassesRuleBuilder(graph).should().haveAllModifiers(listOf(Modifier.DATA))
-            .getShouldAssertion()!!(classData, listOf(classData), vAllModifiersList)
-        assertTrue(vAllModifiersList.isEmpty())
-
-        val vAllModifiersVararg = mutableListOf<String>()
-        ClassesRuleBuilder(graph).should().haveAllModifiers(Modifier.DATA)
-            .getShouldAssertion()!!(classData, listOf(classData), vAllModifiersVararg)
-        assertTrue(vAllModifiersVararg.isEmpty())
-
-        val vAnyModifierSingle = mutableListOf<String>()
-        ClassesRuleBuilder(graph).should().haveAnyModifier(Modifier.DATA)
-            .getShouldAssertion()!!(classData, listOf(classData), vAnyModifierSingle)
-        assertTrue(vAnyModifierSingle.isEmpty())
-
-        val vAnyModifierList = mutableListOf<String>()
-        ClassesRuleBuilder(graph).should().haveAnyModifier(listOf(Modifier.DATA))
-            .getShouldAssertion()!!(classData, listOf(classData), vAnyModifierList)
-        assertTrue(vAnyModifierList.isEmpty())
-
-        val vAnyModifierVararg = mutableListOf<String>()
-        ClassesRuleBuilder(graph).should().haveAnyModifier(Modifier.DATA, Modifier.SEALED)
-            .getShouldAssertion()!!(classData, listOf(classData), vAnyModifierVararg)
-        assertTrue(vAnyModifierVararg.isEmpty())
-
-        val vVisSingle = mutableListOf<String>()
-        ClassesRuleBuilder(graph).should().haveVisibility(Visibility.INTERNAL)
-            .getShouldAssertion()!!(classInternal, listOf(classInternal), vVisSingle)
-        assertTrue(vVisSingle.isEmpty())
-
-        val vVisList = mutableListOf<String>()
-        ClassesRuleBuilder(graph).should().haveAnyVisibility(listOf(Visibility.INTERNAL, Visibility.PUBLIC))
-            .getShouldAssertion()!!(classInternal, listOf(classInternal), vVisList)
-        assertTrue(vVisList.isEmpty())
-
-        val vVisVararg = mutableListOf<String>()
-        ClassesRuleBuilder(graph).should().haveAnyVisibility(Visibility.INTERNAL, Visibility.PUBLIC)
-            .getShouldAssertion()!!(classInternal, listOf(classInternal), vVisVararg)
-        assertTrue(vVisVararg.isEmpty())
-
-        val vPub = mutableListOf<String>()
-        ClassesRuleBuilder(graph).should().bePublic()
-            .getShouldAssertion()!!(classA, listOf(classA), vPub)
-        assertTrue(vPub.isEmpty())
-
-        val vInternal = mutableListOf<String>()
-        ClassesRuleBuilder(graph).should().beInternal()
-            .getShouldAssertion()!!(classInternal, listOf(classInternal), vInternal)
-        assertTrue(vInternal.isEmpty())
-
-        val vPrivate = mutableListOf<String>()
-        ClassesRuleBuilder(graph).should().bePrivate()
-            .getShouldAssertion()!!(classPrivate, listOf(classPrivate), vPrivate)
-        assertTrue(vPrivate.isEmpty())
-
-        val vProtected = mutableListOf<String>()
-        ClassesRuleBuilder(graph).should().beProtected()
-            .getShouldAssertion()!!(classProtected, listOf(classProtected), vProtected)
-        assertTrue(vProtected.isEmpty())
-
-        val vAssignTo = mutableListOf<String>()
-        ClassesRuleBuilder(graph).should().beAssignableTo("com.example.ParentType")
-            .getShouldAssertion()!!(classWithParent, listOf(classWithParent), vAssignTo)
-        assertTrue(vAssignTo.isEmpty())
-
-        val vAssignToAnySingle = mutableListOf<String>()
-        ClassesRuleBuilder(graph).should().beAssignableToAnyOf("com.example.ParentType")
-            .getShouldAssertion()!!(classWithParent, listOf(classWithParent), vAssignToAnySingle)
-        assertTrue(vAssignToAnySingle.isEmpty())
-
-        val vAssignToAnyList = mutableListOf<String>()
-        ClassesRuleBuilder(graph).should().beAssignableToAnyOf(listOf("com.example.ParentType"))
-            .getShouldAssertion()!!(classWithParent, listOf(classWithParent), vAssignToAnyList)
-        assertTrue(vAssignToAnyList.isEmpty())
-
-        val vAssignToAnyVararg = mutableListOf<String>()
-        ClassesRuleBuilder(graph).should().beAssignableToAnyOf("com.example.ParentType", "Other")
-            .getShouldAssertion()!!(classWithParent, listOf(classWithParent), vAssignToAnyVararg)
-        assertTrue(vAssignToAnyVararg.isEmpty())
-
-        val vAssignToAllSingle = mutableListOf<String>()
-        ClassesRuleBuilder(graph).should().beAssignableToAllOf("com.example.ParentType")
-            .getShouldAssertion()!!(classWithParent, listOf(classWithParent), vAssignToAllSingle)
-        assertTrue(vAssignToAllSingle.isEmpty())
-
-        val vAssignToAllList = mutableListOf<String>()
-        ClassesRuleBuilder(graph).should().beAssignableToAllOf(listOf("com.example.ParentType"))
-            .getShouldAssertion()!!(classWithParent, listOf(classWithParent), vAssignToAllList)
-        assertTrue(vAssignToAllList.isEmpty())
-
-        val vAssignToAllVararg = mutableListOf<String>()
-        ClassesRuleBuilder(graph).should().beAssignableToAllOf("com.example.ParentType")
-            .getShouldAssertion()!!(classWithParent, listOf(classWithParent), vAssignToAllVararg)
-        assertTrue(vAssignToAllVararg.isEmpty())
-
-        val vAssignFrom = mutableListOf<String>()
-        ClassesRuleBuilder(graph).should().beAssignableFrom("ClassWithParent")
-            .getShouldAssertion()!!(classWithParent, listOf(classWithParent), vAssignFrom)
-        assertTrue(vAssignFrom.isEmpty())
-
-        // Enum, Inner, Nested, notBe* methods
-        val classEnum =
-            ClassDeclaration("MyEnum", "com.example.MyEnum", "com.example", isInterface = false, isAbstract = false, isEnum = true, annotations = emptyList(), imports = emptyList(), referencedTypes = emptySet(), filePath = "/src/MyEnum.kt")
-        val classInner =
-            ClassDeclaration(
-                "MyInner", "com.example.MyInner", "com.example", isInterface = false, isAbstract = false, annotations = emptyList(), imports = emptyList(), referencedTypes = emptySet(), filePath = "/src/MyInner.kt",
-                modifiers =
-                    setOf(
-                        Modifier.INNER,
-                    ),
-            )
-        val classNested =
-            ClassDeclaration("Nested", "com.example.Outer.Nested", "com.example", isInterface = false, isAbstract = false, annotations = emptyList(), imports = emptyList(), referencedTypes = emptySet(), filePath = "/src/Outer.kt")
-
-        val vEnum = mutableListOf<String>()
-        ClassesRuleBuilder(graph).should().beEnums().getShouldAssertion()!!(classEnum, listOf(classEnum), vEnum)
-        assertTrue(vEnum.isEmpty())
-
-        val vInner = mutableListOf<String>()
-        ClassesRuleBuilder(graph).should().beInner().getShouldAssertion()!!(classInner, listOf(classInner), vInner)
-        assertTrue(vInner.isEmpty())
-
-        val vNested = mutableListOf<String>()
-        ClassesRuleBuilder(graph).should().beNested().getShouldAssertion()!!(classNested, listOf(classNested), vNested)
-        assertTrue(vNested.isEmpty())
-
-        val vNotAbs = mutableListOf<String>()
-        ClassesRuleBuilder(graph).should().notBeAbstract().getShouldAssertion()!!(classA, listOf(classA), vNotAbs)
-        assertTrue(vNotAbs.isEmpty())
-
-        val vNotSealed = mutableListOf<String>()
-        ClassesRuleBuilder(graph).should().notBeSealed().getShouldAssertion()!!(classA, listOf(classA), vNotSealed)
-        assertTrue(vNotSealed.isEmpty())
-
-        val vNotData = mutableListOf<String>()
-        ClassesRuleBuilder(graph).should().notBeData().getShouldAssertion()!!(classA, listOf(classA), vNotData)
-        assertTrue(vNotData.isEmpty())
-
-        val vNotInline = mutableListOf<String>()
-        ClassesRuleBuilder(graph).should().notBeInline().getShouldAssertion()!!(classA, listOf(classA), vNotInline)
-        assertTrue(vNotInline.isEmpty())
-
-        val vNotOpen = mutableListOf<String>()
-        ClassesRuleBuilder(graph).should().notBeOpen().getShouldAssertion()!!(classA, listOf(classA), vNotOpen)
-        assertTrue(vNotOpen.isEmpty())
-
-        val vNotInner = mutableListOf<String>()
-        ClassesRuleBuilder(graph).should().notBeInner().getShouldAssertion()!!(classA, listOf(classA), vNotInner)
-        assertTrue(vNotInner.isEmpty())
+        ClassesRuleBuilder(graph).should().beInterfaces().getShouldAssertion()!!(classA, listOf(classA), vInterface)
+        assertEquals(1, vInterface.size)
 
         val vNotInterface = mutableListOf<String>()
         ClassesRuleBuilder(
             graph,
-        ).should().notBeInterface().getShouldAssertion()!!(classA, listOf(classA), vNotInterface)
-        assertTrue(vNotInterface.isEmpty())
+        ).should().notBeInterfaces().getShouldAssertion()!!(classInterface, listOf(classInterface), vNotInterface)
+        assertEquals(1, vNotInterface.size)
 
-        // Property & Function containment
-        val propDecl = PropertyDeclaration("p1", Visibility.PUBLIC, emptySet(), "String", true, emptyList(), null)
-        val funcDecl =
-            FunctionDeclaration("f1", Visibility.PUBLIC, emptySet(), "Unit", emptyList(), emptyList(), null, false)
+        val vAbstract = mutableListOf<String>()
+        ClassesRuleBuilder(graph).should().beAbstract().getShouldAssertion()!!(classA, listOf(classA), vAbstract)
+        assertEquals(1, vAbstract.size)
+
+        val vNotAbstract = mutableListOf<String>()
+        ClassesRuleBuilder(
+            graph,
+        ).should().notBeAbstract().getShouldAssertion()!!(classAbstract, listOf(classAbstract), vNotAbstract)
+        assertEquals(1, vNotAbstract.size)
+
+        val vSealed = mutableListOf<String>()
+        ClassesRuleBuilder(graph).should().beSealed().getShouldAssertion()!!(classA, listOf(classA), vSealed)
+        assertEquals(1, vSealed.size)
+
+        val vNotSealed = mutableListOf<String>()
+        ClassesRuleBuilder(
+            graph,
+        ).should().notBeSealed().getShouldAssertion()!!(classSealed, listOf(classSealed), vNotSealed)
+        assertEquals(1, vNotSealed.size)
+
+        val vData = mutableListOf<String>()
+        ClassesRuleBuilder(graph).should().beData().getShouldAssertion()!!(classA, listOf(classA), vData)
+        assertEquals(1, vData.size)
+
+        val vNotData = mutableListOf<String>()
+        ClassesRuleBuilder(graph).should().notBeData().getShouldAssertion()!!(classData, listOf(classData), vNotData)
+        assertEquals(1, vNotData.size)
+
+        val vValue = mutableListOf<String>()
+        ClassesRuleBuilder(graph).should().beValue().getShouldAssertion()!!(classA, listOf(classA), vValue)
+        assertEquals(1, vValue.size)
+
+        val vNotValue = mutableListOf<String>()
+        ClassesRuleBuilder(
+            graph,
+        ).should().notBeValue().getShouldAssertion()!!(classInline, listOf(classInline), vNotValue)
+        assertEquals(1, vNotValue.size)
+
+        val vInline = mutableListOf<String>()
+        ClassesRuleBuilder(graph).should().beInline().getShouldAssertion()!!(classA, listOf(classA), vInline)
+        assertEquals(1, vInline.size)
+
+        val vNotInline = mutableListOf<String>()
+        ClassesRuleBuilder(
+            graph,
+        ).should().notBeInline().getShouldAssertion()!!(classInline, listOf(classInline), vNotInline)
+        assertEquals(1, vNotInline.size)
+
+        val vInner = mutableListOf<String>()
+        ClassesRuleBuilder(graph).should().beInner().getShouldAssertion()!!(classA, listOf(classA), vInner)
+        assertEquals(1, vInner.size)
+
+        val vNotInner = mutableListOf<String>()
+        ClassesRuleBuilder(graph).should().notBeInner().getShouldAssertion()!!(classInner, listOf(classInner), vNotInner)
+        assertEquals(1, vNotInner.size)
+
+        val vOpen = mutableListOf<String>()
+        ClassesRuleBuilder(graph).should().beOpen().getShouldAssertion()!!(classA, listOf(classA), vOpen)
+        assertEquals(1, vOpen.size)
+
+        val vNotOpen = mutableListOf<String>()
+        ClassesRuleBuilder(graph).should().notBeOpen().getShouldAssertion()!!(classOpen, listOf(classOpen), vNotOpen)
+        assertEquals(1, vNotOpen.size)
+
+        val vFinal = mutableListOf<String>()
+        ClassesRuleBuilder(graph).should().beFinal().getShouldAssertion()!!(classOpen, listOf(classOpen), vFinal)
+        assertEquals(1, vFinal.size)
+
+        val vNotFinal = mutableListOf<String>()
+        ClassesRuleBuilder(graph).should().notBeFinal().getShouldAssertion()!!(classA, listOf(classA), vNotFinal)
+        assertEquals(1, vNotFinal.size)
+
+        val vVisSingle = mutableListOf<String>()
+        ClassesRuleBuilder(
+            graph,
+        ).should().haveVisibility(Visibility.PRIVATE).getShouldAssertion()!!(classA, listOf(classA), vVisSingle)
+        assertEquals(1, vVisSingle.size)
+
+        val vVisList = mutableListOf<String>()
+        ClassesRuleBuilder(
+            graph,
+        ).should().haveAnyVisibility(listOf(Visibility.PRIVATE)).getShouldAssertion()!!(classA, listOf(classA), vVisList)
+        assertEquals(1, vVisList.size)
+
+        val vVisVararg = mutableListOf<String>()
+        ClassesRuleBuilder(
+            graph,
+        ).should().haveAnyVisibility(Visibility.PRIVATE, Visibility.INTERNAL).getShouldAssertion()!!(
+            classA,
+            listOf(classA),
+            vVisVararg,
+        )
+        assertEquals(1, vVisVararg.size)
+
+        val vNotVisSingle = mutableListOf<String>()
+        ClassesRuleBuilder(
+            graph,
+        ).should().notHaveVisibility(Visibility.PUBLIC).getShouldAssertion()!!(classA, listOf(classA), vNotVisSingle)
+        assertEquals(1, vNotVisSingle.size)
+
+        val vNotVisList = mutableListOf<String>()
+        ClassesRuleBuilder(
+            graph,
+        ).should().notHaveVisibility(listOf(Visibility.PUBLIC)).getShouldAssertion()!!(
+            classA,
+            listOf(classA),
+            vNotVisList,
+        )
+        assertEquals(1, vNotVisList.size)
+
+        val vNotVisVararg = mutableListOf<String>()
+        ClassesRuleBuilder(
+            graph,
+        ).should().notHaveVisibility(Visibility.PUBLIC, Visibility.INTERNAL).getShouldAssertion()!!(
+            classA,
+            listOf(classA),
+            vNotVisVararg,
+        )
+        assertEquals(1, vNotVisVararg.size)
+
+        val vPub = mutableListOf<String>()
+        ClassesRuleBuilder(graph).should().bePublic().getShouldAssertion()!!(classInternal, listOf(classInternal), vPub)
+        assertEquals(1, vPub.size)
+
+        val vNotPub = mutableListOf<String>()
+        ClassesRuleBuilder(graph).should().notBePublic().getShouldAssertion()!!(classA, listOf(classA), vNotPub)
+        assertEquals(1, vNotPub.size)
+
+        val vInternal = mutableListOf<String>()
+        ClassesRuleBuilder(graph).should().beInternal().getShouldAssertion()!!(classA, listOf(classA), vInternal)
+        assertEquals(1, vInternal.size)
+
+        val vNotInternal = mutableListOf<String>()
+        ClassesRuleBuilder(
+            graph,
+        ).should().notBeInternal().getShouldAssertion()!!(classInternal, listOf(classInternal), vNotInternal)
+        assertEquals(1, vNotInternal.size)
+
+        val vPrivate = mutableListOf<String>()
+        ClassesRuleBuilder(graph).should().bePrivate().getShouldAssertion()!!(classA, listOf(classA), vPrivate)
+        assertEquals(1, vPrivate.size)
+
+        val vNotPrivate = mutableListOf<String>()
+        ClassesRuleBuilder(
+            graph,
+        ).should().notBePrivate().getShouldAssertion()!!(classPrivate, listOf(classPrivate), vNotPrivate)
+        assertEquals(1, vNotPrivate.size)
+
+        val vProtected = mutableListOf<String>()
+        ClassesRuleBuilder(graph).should().beProtected().getShouldAssertion()!!(classA, listOf(classA), vProtected)
+        assertEquals(1, vProtected.size)
+
+        val vNotProtected = mutableListOf<String>()
+        ClassesRuleBuilder(
+            graph,
+        ).should().notBeProtected().getShouldAssertion()!!(classProtected, listOf(classProtected), vNotProtected)
+        assertEquals(1, vNotProtected.size)
+
+        val vModifierSingle = mutableListOf<String>()
+        ClassesRuleBuilder(
+            graph,
+        ).should().haveModifier(Modifier.DATA).getShouldAssertion()!!(classA, listOf(classA), vModifierSingle)
+        assertEquals(1, vModifierSingle.size)
+
+        val vAnyModifierList = mutableListOf<String>()
+        ClassesRuleBuilder(
+            graph,
+        ).should().haveAnyModifier(listOf(Modifier.DATA)).getShouldAssertion()!!(
+            classA,
+            listOf(classA),
+            vAnyModifierList,
+        )
+        assertEquals(1, vAnyModifierList.size)
+
+        val vAnyModifierVararg = mutableListOf<String>()
+        ClassesRuleBuilder(
+            graph,
+        ).should().haveAnyModifier(Modifier.DATA, Modifier.SEALED).getShouldAssertion()!!(
+            classA,
+            listOf(classA),
+            vAnyModifierVararg,
+        )
+        assertEquals(1, vAnyModifierVararg.size)
+
+        val vAllModifiersList = mutableListOf<String>()
+        ClassesRuleBuilder(
+            graph,
+        ).should().haveAllModifiers(listOf(Modifier.DATA)).getShouldAssertion()!!(
+            classA,
+            listOf(classA),
+            vAllModifiersList,
+        )
+        assertEquals(1, vAllModifiersList.size)
+
+        val vAllModifiersVararg = mutableListOf<String>()
+        ClassesRuleBuilder(
+            graph,
+        ).should().haveAllModifiers(Modifier.DATA).getShouldAssertion()!!(classA, listOf(classA), vAllModifiersVararg)
+        assertEquals(1, vAllModifiersVararg.size)
+
+        val vNotModifierSingle = mutableListOf<String>()
+        ClassesRuleBuilder(
+            graph,
+        ).should().notHaveModifier(Modifier.DATA).getShouldAssertion()!!(classData, listOf(classData), vNotModifierSingle)
+        assertEquals(1, vNotModifierSingle.size)
+
+        val vNotModifierList = mutableListOf<String>()
+        ClassesRuleBuilder(
+            graph,
+        ).should().notHaveModifier(listOf(Modifier.DATA)).getShouldAssertion()!!(
+            classData,
+            listOf(classData),
+            vNotModifierList,
+        )
+        assertEquals(1, vNotModifierList.size)
+
+        val vNotModifierVararg = mutableListOf<String>()
+        ClassesRuleBuilder(
+            graph,
+        ).should().notHaveModifier(Modifier.DATA, Modifier.SEALED).getShouldAssertion()!!(
+            classData,
+            listOf(classData),
+            vNotModifierVararg,
+        )
+        assertEquals(1, vNotModifierVararg.size)
+
+        val vAssignSingle = mutableListOf<String>()
+        ClassesRuleBuilder(
+            graph,
+        ).should().beAssignableTo("com.example.Other").getShouldAssertion()!!(classA, listOf(classA), vAssignSingle)
+        assertEquals(1, vAssignSingle.size)
+
+        val vAssignAnyList = mutableListOf<String>()
+        ClassesRuleBuilder(
+            graph,
+        ).should().beAssignableToAnyOf(listOf("com.example.Other")).getShouldAssertion()!!(
+            classA,
+            listOf(classA),
+            vAssignAnyList,
+        )
+        assertEquals(1, vAssignAnyList.size)
+
+        val vAssignAnyVararg = mutableListOf<String>()
+        ClassesRuleBuilder(
+            graph,
+        ).should().beAssignableToAnyOf("com.example.Other", "X").getShouldAssertion()!!(
+            classA,
+            listOf(classA),
+            vAssignAnyVararg,
+        )
+        assertEquals(1, vAssignAnyVararg.size)
+
+        val vAssignAllList = mutableListOf<String>()
+        ClassesRuleBuilder(
+            graph,
+        ).should().beAssignableToAllOf(listOf("com.example.Other")).getShouldAssertion()!!(
+            classA,
+            listOf(classA),
+            vAssignAllList,
+        )
+        assertEquals(1, vAssignAllList.size)
+
+        val vAssignAllVararg = mutableListOf<String>()
+        ClassesRuleBuilder(
+            graph,
+        ).should().beAssignableToAllOf("com.example.Other", "X").getShouldAssertion()!!(
+            classA,
+            listOf(classA),
+            vAssignAllVararg,
+        )
+        assertEquals(1, vAssignAllVararg.size)
+
+        val vChildSingle = mutableListOf<String>()
+        ClassesRuleBuilder(
+            graph,
+        ).should().beChildOf("com.example.Other").getShouldAssertion()!!(classA, listOf(classA), vChildSingle)
+        assertEquals(1, vChildSingle.size)
+
+        val vNotAssignSingle = mutableListOf<String>()
+        ClassesRuleBuilder(
+            graph,
+        ).should().notBeAssignableTo("com.example.ParentType").getShouldAssertion()!!(
+            classWithParent,
+            listOf(classWithParent),
+            vNotAssignSingle,
+        )
+        assertEquals(1, vNotAssignSingle.size)
+
+        val vAssignFromSingle = mutableListOf<String>()
+        ClassesRuleBuilder(
+            graph,
+        ).should().beAssignableFrom("com.example.ClassA").getShouldAssertion()!!(
+            classWithParent,
+            listOf(classWithParent),
+            vAssignFromSingle,
+        )
+        assertEquals(1, vAssignFromSingle.size)
+
+        val vNotAssignFromSingle = mutableListOf<String>()
+        ClassesRuleBuilder(
+            graph,
+        ).should().notBeAssignableFrom("ClassWithParent").getShouldAssertion()!!(
+            classWithParent,
+            listOf(classWithParent),
+            vNotAssignFromSingle,
+        )
+        assertEquals(1, vNotAssignFromSingle.size)
+
+        val vCompanion = mutableListOf<String>()
+        ClassesRuleBuilder(graph).should().haveCompanionObject().getShouldAssertion()!!(classA, listOf(classA), vCompanion)
+        assertEquals(1, vCompanion.size)
+
+        val vNoArg = mutableListOf<String>()
+        ClassesRuleBuilder(graph).should().haveNoArgConstructor().getShouldAssertion()!!(classA, listOf(classA), vNoArg)
+        assertEquals(1, vNoArg.size)
+
+        val vPrivPrimary = mutableListOf<String>()
+        ClassesRuleBuilder(
+            graph,
+        ).should().havePrivatePrimaryConstructor().getShouldAssertion()!!(classA, listOf(classA), vPrivPrimary)
+        assertEquals(1, vPrivPrimary.size)
+
+        val vDoc = mutableListOf<String>()
+        ClassesRuleBuilder(graph).should().beDocumentedWithKDoc().getShouldAssertion()!!(classA, listOf(classA), vDoc)
+        assertEquals(1, vDoc.size)
+
         val classWithPropFunc =
             ClassDeclaration(
-                "ClassWithPropFunc", "com.example.ClassWithPropFunc", "com.example", isInterface = false, isAbstract = false, annotations = emptyList(), imports = emptyList(), referencedTypes = emptySet(), filePath = "/src/ClassWithPropFunc.kt",
-                properties =
-                    listOf(
-                        propDecl,
-                    ),
-                functions = listOf(funcDecl),
+                "ClassWithPF", "com.example.ClassWithPF", "com.example", false, false,
+                properties = listOf(PropertyDeclaration("prop1", "String")),
+                functions = listOf(FunctionDeclaration("func1", "Unit")),
+                filePath = "/src/PF.kt",
             )
 
         val vContainPropStr = mutableListOf<String>()
         ClassesRuleBuilder(
             graph,
-        ).should().containProperty(
-            "p1",
-        ).getShouldAssertion()!!(classWithPropFunc, listOf(classWithPropFunc), vContainPropStr)
-        assertTrue(vContainPropStr.isEmpty())
+        ).should().containProperty("p2").getShouldAssertion()!!(classWithPropFunc, listOf(classWithPropFunc), vContainPropStr)
+        assertEquals(1, vContainPropStr.size)
 
         val vContainPropList = mutableListOf<String>()
         ClassesRuleBuilder(
             graph,
-        ).should().containProperty(
-            listOf("p1"),
-        ).getShouldAssertion()!!(classWithPropFunc, listOf(classWithPropFunc), vContainPropList)
-        assertTrue(vContainPropList.isEmpty())
+        ).should().containProperty(listOf("p2")).getShouldAssertion()!!(
+            classWithPropFunc,
+            listOf(classWithPropFunc),
+            vContainPropList,
+        )
+        assertEquals(1, vContainPropList.size)
 
         val vContainPropVararg = mutableListOf<String>()
         ClassesRuleBuilder(
             graph,
-        ).should().containProperty(
-            "p1",
-            "p2",
-        ).getShouldAssertion()!!(classWithPropFunc, listOf(classWithPropFunc), vContainPropVararg)
+        ).should().containProperty("p1", "p2").getShouldAssertion()!!(
+            classWithPropFunc,
+            listOf(classWithPropFunc),
+            vContainPropVararg,
+        )
         assertEquals(1, vContainPropVararg.size)
 
         val vContainPropsList = mutableListOf<String>()
         ClassesRuleBuilder(
             graph,
-        ).should().containProperties(
-            listOf("p1"),
-        ).getShouldAssertion()!!(classWithPropFunc, listOf(classWithPropFunc), vContainPropsList)
-        assertTrue(vContainPropsList.isEmpty())
+        ).should().containProperties(listOf("p1", "p2")).getShouldAssertion()!!(
+            classWithPropFunc,
+            listOf(classWithPropFunc),
+            vContainPropsList,
+        )
+        assertEquals(1, vContainPropsList.size)
 
         val vContainPropsVararg = mutableListOf<String>()
         ClassesRuleBuilder(
             graph,
-        ).should().containProperties(
-            "p1",
-            "p2",
-        ).getShouldAssertion()!!(classWithPropFunc, listOf(classWithPropFunc), vContainPropsVararg)
+        ).should().containProperties("p1", "p2").getShouldAssertion()!!(
+            classWithPropFunc,
+            listOf(classWithPropFunc),
+            vContainPropsVararg,
+        )
         assertEquals(1, vContainPropsVararg.size)
 
         val vNotContainPropStr = mutableListOf<String>()
         ClassesRuleBuilder(
             graph,
-        ).should().notContainProperty(
-            "p2",
-        ).getShouldAssertion()!!(classWithPropFunc, listOf(classWithPropFunc), vNotContainPropStr)
-        assertTrue(vNotContainPropStr.isEmpty())
+        ).should().notContainProperty("prop1").getShouldAssertion()!!(
+            classWithPropFunc,
+            listOf(classWithPropFunc),
+            vNotContainPropStr,
+        )
+        assertEquals(1, vNotContainPropStr.size)
 
         val vNotContainPropList = mutableListOf<String>()
         ClassesRuleBuilder(
             graph,
-        ).should().notContainProperty(
-            listOf("p1"),
-        ).getShouldAssertion()!!(classWithPropFunc, listOf(classWithPropFunc), vNotContainPropList)
+        ).should().notContainProperty(listOf("prop1")).getShouldAssertion()!!(
+            classWithPropFunc,
+            listOf(classWithPropFunc),
+            vNotContainPropList,
+        )
         assertEquals(1, vNotContainPropList.size)
 
         val vNotContainPropVararg = mutableListOf<String>()
         ClassesRuleBuilder(
             graph,
-        ).should().notContainProperty(
-            "p1",
-            "p2",
-        ).getShouldAssertion()!!(classWithPropFunc, listOf(classWithPropFunc), vNotContainPropVararg)
+        ).should().notContainProperty("prop1", "p2").getShouldAssertion()!!(
+            classWithPropFunc,
+            listOf(classWithPropFunc),
+            vNotContainPropVararg,
+        )
         assertEquals(1, vNotContainPropVararg.size)
 
         val vNotContainPropsList = mutableListOf<String>()
         ClassesRuleBuilder(
             graph,
-        ).should().notContainProperties(
-            listOf("p1"),
-        ).getShouldAssertion()!!(classWithPropFunc, listOf(classWithPropFunc), vNotContainPropsList)
+        ).should().notContainProperties(listOf("prop1")).getShouldAssertion()!!(
+            classWithPropFunc,
+            listOf(classWithPropFunc),
+            vNotContainPropsList,
+        )
         assertEquals(1, vNotContainPropsList.size)
 
         val vNotContainPropsVararg = mutableListOf<String>()
         ClassesRuleBuilder(
             graph,
-        ).should().notContainProperties(
-            "p1",
-            "p2",
-        ).getShouldAssertion()!!(classWithPropFunc, listOf(classWithPropFunc), vNotContainPropsVararg)
+        ).should().notContainProperties("prop1", "p2").getShouldAssertion()!!(
+            classWithPropFunc,
+            listOf(classWithPropFunc),
+            vNotContainPropsVararg,
+        )
         assertEquals(1, vNotContainPropsVararg.size)
 
         val vContainFuncStr = mutableListOf<String>()
         ClassesRuleBuilder(
             graph,
-        ).should().containFunction(
-            "f1",
-        ).getShouldAssertion()!!(classWithPropFunc, listOf(classWithPropFunc), vContainFuncStr)
-        assertTrue(vContainFuncStr.isEmpty())
+        ).should().containFunction("f2").getShouldAssertion()!!(classWithPropFunc, listOf(classWithPropFunc), vContainFuncStr)
+        assertEquals(1, vContainFuncStr.size)
 
         val vContainFuncList = mutableListOf<String>()
         ClassesRuleBuilder(
             graph,
-        ).should().containFunction(
-            listOf("f1"),
-        ).getShouldAssertion()!!(classWithPropFunc, listOf(classWithPropFunc), vContainFuncList)
-        assertTrue(vContainFuncList.isEmpty())
+        ).should().containFunction(listOf("f2")).getShouldAssertion()!!(
+            classWithPropFunc,
+            listOf(classWithPropFunc),
+            vContainFuncList,
+        )
+        assertEquals(1, vContainFuncList.size)
 
         val vContainFuncVararg = mutableListOf<String>()
         ClassesRuleBuilder(
             graph,
-        ).should().containFunction(
-            "f1",
-            "f2",
-        ).getShouldAssertion()!!(classWithPropFunc, listOf(classWithPropFunc), vContainFuncVararg)
+        ).should().containFunction("func1", "f2").getShouldAssertion()!!(
+            classWithPropFunc,
+            listOf(classWithPropFunc),
+            vContainFuncVararg,
+        )
         assertEquals(1, vContainFuncVararg.size)
 
         val vContainFuncsList = mutableListOf<String>()
         ClassesRuleBuilder(
             graph,
-        ).should().containFunctions(
-            listOf("f1"),
-        ).getShouldAssertion()!!(classWithPropFunc, listOf(classWithPropFunc), vContainFuncsList)
-        assertTrue(vContainFuncsList.isEmpty())
+        ).should().containFunctions(listOf("func1", "f2")).getShouldAssertion()!!(
+            classWithPropFunc,
+            listOf(classWithPropFunc),
+            vContainFuncsList,
+        )
+        assertEquals(1, vContainFuncsList.size)
 
         val vContainFuncsVararg = mutableListOf<String>()
         ClassesRuleBuilder(
             graph,
-        ).should().containFunctions(
-            "f1",
-            "f2",
-        ).getShouldAssertion()!!(classWithPropFunc, listOf(classWithPropFunc), vContainFuncsVararg)
+        ).should().containFunctions("func1", "f2").getShouldAssertion()!!(
+            classWithPropFunc,
+            listOf(classWithPropFunc),
+            vContainFuncsVararg,
+        )
         assertEquals(1, vContainFuncsVararg.size)
 
         val vNotContainFuncStr = mutableListOf<String>()
         ClassesRuleBuilder(
             graph,
-        ).should().notContainFunction(
-            "f2",
-        ).getShouldAssertion()!!(classWithPropFunc, listOf(classWithPropFunc), vNotContainFuncStr)
-        assertTrue(vNotContainFuncStr.isEmpty())
+        ).should().notContainFunction("func1").getShouldAssertion()!!(
+            classWithPropFunc,
+            listOf(classWithPropFunc),
+            vNotContainFuncStr,
+        )
+        assertEquals(1, vNotContainFuncStr.size)
 
         val vNotContainFuncList = mutableListOf<String>()
         ClassesRuleBuilder(
             graph,
-        ).should().notContainFunction(
-            listOf("f1"),
-        ).getShouldAssertion()!!(classWithPropFunc, listOf(classWithPropFunc), vNotContainFuncList)
+        ).should().notContainFunction(listOf("func1")).getShouldAssertion()!!(
+            classWithPropFunc,
+            listOf(classWithPropFunc),
+            vNotContainFuncList,
+        )
         assertEquals(1, vNotContainFuncList.size)
 
         val vNotContainFuncVararg = mutableListOf<String>()
         ClassesRuleBuilder(
             graph,
-        ).should().notContainFunction(
-            "f1",
-            "f2",
-        ).getShouldAssertion()!!(classWithPropFunc, listOf(classWithPropFunc), vNotContainFuncVararg)
+        ).should().notContainFunction("func1", "f2").getShouldAssertion()!!(
+            classWithPropFunc,
+            listOf(classWithPropFunc),
+            vNotContainFuncVararg,
+        )
         assertEquals(1, vNotContainFuncVararg.size)
 
         val vNotContainFuncsList = mutableListOf<String>()
         ClassesRuleBuilder(
             graph,
-        ).should().notContainFunctions(
-            listOf("f1"),
-        ).getShouldAssertion()!!(classWithPropFunc, listOf(classWithPropFunc), vNotContainFuncsList)
+        ).should().notContainFunctions(listOf("func1")).getShouldAssertion()!!(
+            classWithPropFunc,
+            listOf(classWithPropFunc),
+            vNotContainFuncsList,
+        )
         assertEquals(1, vNotContainFuncsList.size)
 
         val vNotContainFuncsVararg = mutableListOf<String>()
         ClassesRuleBuilder(
             graph,
-        ).should().notContainFunctions(
-            "f1",
-            "f2",
-        ).getShouldAssertion()!!(classWithPropFunc, listOf(classWithPropFunc), vNotContainFuncsVararg)
+        ).should().notContainFunctions("func1", "f2").getShouldAssertion()!!(
+            classWithPropFunc,
+            listOf(classWithPropFunc),
+            vNotContainFuncsVararg,
+        )
         assertEquals(1, vNotContainFuncsVararg.size)
-    }
-
-    @Test
-    fun `test ClassesThat filters`() {
-        val graph =
-            ProjectGraph(
-                mapOf(":" to listOf(Module(":", ":app", "app", emptyList(), emptyList(), emptyList(), listOf(fileA)))),
-            )
-
-        val pPkgSingle = ClassesRuleBuilder(graph).that().resideInAPackage("com.example").getThatPredicate()!!
-        assertTrue(pPkgSingle(classA))
-        assertFalse(pPkgSingle(classC))
-
-        val pPkgList = ClassesRuleBuilder(graph).that().resideInAPackage(listOf("com.example")).getThatPredicate()!!
-        assertTrue(pPkgList(classA))
-        assertFalse(pPkgList(classC))
-
-        val pPkgVararg =
-            ClassesRuleBuilder(
-                graph,
-            ).that().resideInAPackage("com.example", "com.example.service").getThatPredicate()!!
-        assertTrue(pPkgVararg(classA))
-        assertFalse(pPkgVararg(classC))
-
-        val pPkgPred =
-            ClassesRuleBuilder(
-                graph,
-            ).that().resideInAPackage { it.startsWith("com.example") }.getThatPredicate()!!
-        assertTrue(pPkgPred(classA))
-        assertFalse(pPkgPred(classC))
-
-        val pNameSingle = ClassesRuleBuilder(graph).that().haveName("ClassA").getThatPredicate()!!
-        assertTrue(pNameSingle(classA))
-        assertFalse(pNameSingle(classB))
-
-        val pNameList = ClassesRuleBuilder(graph).that().haveName(listOf("ClassA")).getThatPredicate()!!
-        assertTrue(pNameList(classA))
-        assertFalse(pNameList(classB))
-
-        val pNameVararg = ClassesRuleBuilder(graph).that().haveName("ClassA", "ClassB").getThatPredicate()!!
-        assertTrue(pNameVararg(classA))
-        assertFalse(pNameVararg(classInterface))
-
-        val pNotNameSingle = ClassesRuleBuilder(graph).that().notHaveName("ClassB").getThatPredicate()!!
-        assertTrue(pNotNameSingle(classA))
-        assertFalse(pNotNameSingle(classB))
-
-        val pNotNameList = ClassesRuleBuilder(graph).that().notHaveName(listOf("ClassB")).getThatPredicate()!!
-        assertTrue(pNotNameList(classA))
-        assertFalse(pNotNameList(classB))
-
-        val pNotNameVararg = ClassesRuleBuilder(graph).that().notHaveName("ClassB", "ClassC").getThatPredicate()!!
-        assertTrue(pNotNameVararg(classA))
-        assertFalse(pNotNameVararg(classB))
-
-        val pEndSingle = ClassesRuleBuilder(graph).that().haveNameEndingWith("A").getThatPredicate()!!
-        assertTrue(pEndSingle(classA))
-        assertFalse(pEndSingle(classB))
-
-        val pEndList = ClassesRuleBuilder(graph).that().haveNameEndingWith(listOf("A")).getThatPredicate()!!
-        assertTrue(pEndList(classA))
-        assertFalse(pEndList(classB))
-
-        val pEndVararg = ClassesRuleBuilder(graph).that().haveNameEndingWith("A", "B").getThatPredicate()!!
-        assertTrue(pEndVararg(classA))
-        assertFalse(pEndVararg(classInterface))
-
-        val nonMatchingClass =
-            ClassDeclaration("X", "com.other.X", "com.other", false, false, emptyList(), emptyList(), emptySet(), "/src/X.kt")
-
-        val pStartSingle = ClassesRuleBuilder(graph).that().haveNameStartingWith("Class").getThatPredicate()!!
-        assertTrue(pStartSingle(classA))
-        assertFalse(pStartSingle(nonMatchingClass))
-
-        val pStartList = ClassesRuleBuilder(graph).that().haveNameStartingWith(listOf("Class")).getThatPredicate()!!
-        assertTrue(pStartList(classA))
-        assertFalse(pStartList(nonMatchingClass))
-
-        val pStartVararg = ClassesRuleBuilder(graph).that().haveNameStartingWith("Class", "My").getThatPredicate()!!
-        assertTrue(pStartVararg(classA))
-        assertFalse(pStartVararg(nonMatchingClass))
-
-        val pMatchSingle = ClassesRuleBuilder(graph).that().haveNameMatching("Class*").getThatPredicate()!!
-        assertTrue(pMatchSingle(classA))
-        assertFalse(pMatchSingle(nonMatchingClass))
-
-        val pMatchList = ClassesRuleBuilder(graph).that().haveNameMatching(listOf("Class*")).getThatPredicate()!!
-        assertTrue(pMatchList(classA))
-        assertFalse(pMatchList(nonMatchingClass))
-
-        val pMatchVararg = ClassesRuleBuilder(graph).that().haveNameMatching("Class*", "Other*").getThatPredicate()!!
-        assertTrue(pMatchVararg(classA))
-        assertFalse(pMatchVararg(nonMatchingClass))
-
-        val pAnnotSingle = ClassesRuleBuilder(graph).that().haveAnnotationOf("MyAnnotation").getThatPredicate()!!
-        assertTrue(pAnnotSingle(classAnnotated))
-        assertFalse(pAnnotSingle(classA))
-
-        val pAnnotAllSingle = ClassesRuleBuilder(graph).that().haveAllAnnotationsOf("MyAnnotation").getThatPredicate()!!
-        assertTrue(pAnnotAllSingle(classAnnotated))
-        assertFalse(pAnnotAllSingle(classA))
-
-        val pAnnotAllList =
-            ClassesRuleBuilder(
-                graph,
-            ).that().haveAllAnnotationsOf(listOf("MyAnnotation")).getThatPredicate()!!
-        assertTrue(pAnnotAllList(classAnnotated))
-        assertFalse(pAnnotAllList(classA))
-
-        val pAnnotAllVararg = ClassesRuleBuilder(graph).that().haveAllAnnotationsOf("MyAnnotation").getThatPredicate()!!
-        assertTrue(pAnnotAllVararg(classAnnotated))
-        assertFalse(pAnnotAllVararg(classA))
-
-        val pAnnotAnySingle = ClassesRuleBuilder(graph).that().haveAnyAnnotationOf("MyAnnotation").getThatPredicate()!!
-        assertTrue(pAnnotAnySingle(classAnnotated))
-        assertFalse(pAnnotAnySingle(classA))
-
-        val pAnnotAnyList =
-            ClassesRuleBuilder(
-                graph,
-            ).that().haveAnyAnnotationOf(listOf("MyAnnotation")).getThatPredicate()!!
-        assertTrue(pAnnotAnyList(classAnnotated))
-        assertFalse(pAnnotAnyList(classA))
-
-        val pAnnotAnyVararg =
-            ClassesRuleBuilder(
-                graph,
-            ).that().haveAnyAnnotationOf("MyAnnotation", "Other").getThatPredicate()!!
-        assertTrue(pAnnotAnyVararg(classAnnotated))
-        assertFalse(pAnnotAnyVararg(classA))
-
-        val pInterface = ClassesRuleBuilder(graph).that().areInterfaces().getThatPredicate()!!
-        assertTrue(pInterface(classInterface))
-        assertFalse(pInterface(classA))
-
-        val pAbstract = ClassesRuleBuilder(graph).that().areAbstract().getThatPredicate()!!
-        assertTrue(pAbstract(classAbstract))
-        assertFalse(pAbstract(classA))
-
-        val pVisSingle = ClassesRuleBuilder(graph).that().haveVisibility(Visibility.INTERNAL).getThatPredicate()!!
-        assertTrue(pVisSingle(classInternal))
-        assertFalse(pVisSingle(classA))
-
-        val pVisList =
-            ClassesRuleBuilder(
-                graph,
-            ).that().haveAnyVisibility(listOf(Visibility.INTERNAL)).getThatPredicate()!!
-        assertTrue(pVisList(classInternal))
-        assertFalse(pVisList(classA))
-
-        val pVisVararg =
-            ClassesRuleBuilder(
-                graph,
-            ).that().haveAnyVisibility(Visibility.INTERNAL, Visibility.PUBLIC).getThatPredicate()!!
-        assertTrue(pVisVararg(classInternal))
-        assertFalse(pVisVararg(classPrivate))
-
-        val pPub = ClassesRuleBuilder(graph).that().bePublic().getThatPredicate()!!
-        assertTrue(pPub(classA))
-        assertFalse(pPub(classInternal))
-
-        val pInternal = ClassesRuleBuilder(graph).that().beInternal().getThatPredicate()!!
-        assertTrue(pInternal(classInternal))
-        assertFalse(pInternal(classA))
-
-        val pPrivate = ClassesRuleBuilder(graph).that().bePrivate().getThatPredicate()!!
-        assertTrue(pPrivate(classPrivate))
-        assertFalse(pPrivate(classA))
-
-        val pProtected = ClassesRuleBuilder(graph).that().beProtected().getThatPredicate()!!
-        assertTrue(pProtected(classProtected))
-        assertFalse(pProtected(classA))
-
-        val pModifier = ClassesRuleBuilder(graph).that().haveModifier(Modifier.DATA).getThatPredicate()!!
-        assertTrue(pModifier(classData))
-        assertFalse(pModifier(classA))
-
-        val pAnyModifierList =
-            ClassesRuleBuilder(
-                graph,
-            ).that().haveAnyModifier(listOf(Modifier.DATA)).getThatPredicate()!!
-        assertTrue(pAnyModifierList(classData))
-        assertFalse(pAnyModifierList(classA))
-
-        val pAnyModifierVararg =
-            ClassesRuleBuilder(
-                graph,
-            ).that().haveAnyModifier(Modifier.DATA, Modifier.SEALED).getThatPredicate()!!
-        assertTrue(pAnyModifierVararg(classData))
-        assertFalse(pAnyModifierVararg(classA))
-
-        val pAllModifiersList =
-            ClassesRuleBuilder(
-                graph,
-            ).that().haveAllModifiers(listOf(Modifier.DATA)).getThatPredicate()!!
-        assertTrue(pAllModifiersList(classData))
-        assertFalse(pAllModifiersList(classA))
-
-        val pAllModifiersVararg = ClassesRuleBuilder(graph).that().haveAllModifiers(Modifier.DATA).getThatPredicate()!!
-        assertTrue(pAllModifiersVararg(classData))
-        assertFalse(pAllModifiersVararg(classA))
-
-        val pSealed = ClassesRuleBuilder(graph).that().beSealed().getThatPredicate()!!
-        assertTrue(pSealed(classSealed))
-        assertFalse(pSealed(classA))
-
-        val pData = ClassesRuleBuilder(graph).that().beData().getThatPredicate()!!
-        assertTrue(pData(classData))
-        assertFalse(pData(classA))
-
-        val pInline = ClassesRuleBuilder(graph).that().beInline().getThatPredicate()!!
-        assertTrue(pInline(classInline))
-        assertFalse(pInline(classA))
-
-        val pAssignTo = ClassesRuleBuilder(graph).that().areAssignableTo("com.example.ParentType").getThatPredicate()!!
-        assertTrue(pAssignTo(classWithParent))
-        assertFalse(pAssignTo(classA))
-
-        val pAssignToAnySingle =
-            ClassesRuleBuilder(
-                graph,
-            ).that().areAssignableToAnyOf("com.example.ParentType").getThatPredicate()!!
-        assertTrue(pAssignToAnySingle(classWithParent))
-        assertFalse(pAssignToAnySingle(classA))
-
-        val pAssignToAnyList =
-            ClassesRuleBuilder(
-                graph,
-            ).that().areAssignableToAnyOf(listOf("com.example.ParentType")).getThatPredicate()!!
-        assertTrue(pAssignToAnyList(classWithParent))
-        assertFalse(pAssignToAnyList(classA))
-
-        val pAssignToAnyVararg =
-            ClassesRuleBuilder(
-                graph,
-            ).that().areAssignableToAnyOf("com.example.ParentType", "Other").getThatPredicate()!!
-        assertTrue(pAssignToAnyVararg(classWithParent))
-        assertFalse(pAssignToAnyVararg(classA))
-
-        val pAssignToAllSingle =
-            ClassesRuleBuilder(
-                graph,
-            ).that().areAssignableToAllOf("com.example.ParentType").getThatPredicate()!!
-        assertTrue(pAssignToAllSingle(classWithParent))
-        assertFalse(pAssignToAllSingle(classA))
-
-        val pAssignToAllList =
-            ClassesRuleBuilder(
-                graph,
-            ).that().areAssignableToAllOf(listOf("com.example.ParentType")).getThatPredicate()!!
-        assertTrue(pAssignToAllList(classWithParent))
-        assertFalse(pAssignToAllList(classA))
-
-        val pAssignToAllVararg =
-            ClassesRuleBuilder(
-                graph,
-            ).that().areAssignableToAllOf("com.example.ParentType").getThatPredicate()!!
-        assertTrue(pAssignToAllVararg(classWithParent))
-        assertFalse(pAssignToAllVararg(classA))
-
-        val pAssignFrom = ClassesRuleBuilder(graph).that().areAssignableFrom("ClassWithParent").getThatPredicate()!!
-        assertTrue(pAssignFrom(classWithParent))
-        assertFalse(pAssignFrom(classA))
-
-        val pDoc = ClassesRuleBuilder(graph).that().beDocumentedWithKDoc().getThatPredicate()!!
-        assertTrue(pDoc(classWithKdoc))
-        assertFalse(pDoc(classA))
-
-        val pAnyOf =
-            ClassesRuleBuilder(graph).that().anyOf(
-                { haveName("ClassA") },
-                { haveName("ClassB") },
-            ).getThatPredicate()!!
-        assertTrue(pAnyOf(classA))
-
-        val pAllOf =
-            ClassesRuleBuilder(graph).that().allOf(
-                { haveName("ClassA") },
-                { resideInAPackage("com.example") },
-            ).getThatPredicate()!!
-        assertTrue(pAllOf(classA))
-
-        val pNoneOf =
-            ClassesRuleBuilder(graph).that().noneOf(
-                { haveName("ClassB") },
-            ).getThatPredicate()!!
-        assertTrue(pNoneOf(classA))
-    }
-
-    @Test
-    fun `test ClassesShould failure messages`() {
-        val graph =
-            ProjectGraph(
-                mapOf(":" to listOf(Module(":", ":app", "app", emptyList(), emptyList(), emptyList(), listOf(fileA)))),
-            )
-
-        val v1 = mutableListOf<String>()
-        ClassesRuleBuilder(
-            graph,
-        ).should().resideInAPackage("wrong.pkg").getShouldAssertion()!!(classA, listOf(classA), v1)
-        assertEquals(1, v1.size)
-
-        val v2 = mutableListOf<String>()
-        ClassesRuleBuilder(
-            graph,
-        ).should().resideInAPackage(listOf("wrong.pkg")).getShouldAssertion()!!(classA, listOf(classA), v2)
-        assertEquals(1, v2.size)
-
-        val v3 = mutableListOf<String>()
-        ClassesRuleBuilder(
-            graph,
-        ).should().resideInAPackage("wrong.pkg", "other").getShouldAssertion()!!(classA, listOf(classA), v3)
-        assertEquals(1, v3.size)
-
-        val v4 = mutableListOf<String>()
-        ClassesRuleBuilder(graph).should().resideInAPackage { false }.getShouldAssertion()!!(classA, listOf(classA), v4)
-        assertEquals(1, v4.size)
-
-        val v5 = mutableListOf<String>()
-        ClassesRuleBuilder(
-            graph,
-        ).should().notResideInAPackage("com.example").getShouldAssertion()!!(classA, listOf(classA), v5)
-        assertEquals(1, v5.size)
-
-        val v6 = mutableListOf<String>()
-        ClassesRuleBuilder(
-            graph,
-        ).should().notResideInAPackage(listOf("com.example")).getShouldAssertion()!!(classA, listOf(classA), v6)
-        assertEquals(1, v6.size)
-
-        val v7 = mutableListOf<String>()
-        ClassesRuleBuilder(
-            graph,
-        ).should().haveNameEndingWith("Wrong").getShouldAssertion()!!(classA, listOf(classA), v7)
-        assertEquals(1, v7.size)
-
-        val v8 = mutableListOf<String>()
-        ClassesRuleBuilder(
-            graph,
-        ).should().haveNameEndingWith(listOf("Wrong")).getShouldAssertion()!!(classA, listOf(classA), v8)
-        assertEquals(1, v8.size)
-
-        val v9 = mutableListOf<String>()
-        ClassesRuleBuilder(
-            graph,
-        ).should().haveNameStartingWith("Wrong").getShouldAssertion()!!(classA, listOf(classA), v9)
-        assertEquals(1, v9.size)
-
-        val v10 = mutableListOf<String>()
-        ClassesRuleBuilder(
-            graph,
-        ).should().haveNameStartingWith(listOf("Wrong")).getShouldAssertion()!!(classA, listOf(classA), v10)
-        assertEquals(1, v10.size)
-
-        val v11 = mutableListOf<String>()
-        ClassesRuleBuilder(
-            graph,
-        ).should().haveNameMatching("wrong*").getShouldAssertion()!!(classA, listOf(classA), v11)
-        assertEquals(1, v11.size)
-
-        val v12 = mutableListOf<String>()
-        ClassesRuleBuilder(
-            graph,
-        ).should().haveNameMatching(listOf("wrong*")).getShouldAssertion()!!(classA, listOf(classA), v12)
-        assertEquals(1, v12.size)
-
-        val v13 = mutableListOf<String>()
-        ClassesRuleBuilder(
-            graph,
-        ).should().haveAnnotationOf("MissingAnnotation").getShouldAssertion()!!(classA, listOf(classA), v13)
-        assertEquals(1, v13.size)
-
-        val v14 = mutableListOf<String>()
-        ClassesRuleBuilder(
-            graph,
-        ).should().haveAllAnnotationsOf("MissingAnnotation").getShouldAssertion()!!(classA, listOf(classA), v14)
-        assertEquals(1, v14.size)
-
-        val v15 = mutableListOf<String>()
-        ClassesRuleBuilder(
-            graph,
-        ).should().haveAnyAnnotationOf("MissingAnnotation").getShouldAssertion()!!(classA, listOf(classA), v15)
-        assertEquals(1, v15.size)
-
-        val v16 = mutableListOf<String>()
-        ClassesRuleBuilder(graph).should().beInterfaces().getShouldAssertion()!!(classA, listOf(classA), v16)
-        assertEquals(1, v16.size)
-
-        val v17 = mutableListOf<String>()
-        ClassesRuleBuilder(graph).should().beAbstract().getShouldAssertion()!!(classA, listOf(classA), v17)
-        assertEquals(1, v17.size)
-
-        val v18 = mutableListOf<String>()
-        ClassesRuleBuilder(graph).should().beSealed().getShouldAssertion()!!(classA, listOf(classA), v18)
-        assertEquals(1, v18.size)
-
-        val v19 = mutableListOf<String>()
-        ClassesRuleBuilder(graph).should().beData().getShouldAssertion()!!(classA, listOf(classA), v19)
-        assertEquals(1, v19.size)
-
-        val v20 = mutableListOf<String>()
-        ClassesRuleBuilder(graph).should().beInline().getShouldAssertion()!!(classA, listOf(classA), v20)
-        assertEquals(1, v20.size)
-
-        val v21 = mutableListOf<String>()
-        ClassesRuleBuilder(graph).should().bePublic().getShouldAssertion()!!(classInternal, listOf(classInternal), v21)
-        assertEquals(1, v21.size)
-
-        val v22 = mutableListOf<String>()
-        ClassesRuleBuilder(graph).should().beInternal().getShouldAssertion()!!(classA, listOf(classA), v22)
-        assertEquals(1, v22.size)
-
-        val v23 = mutableListOf<String>()
-        ClassesRuleBuilder(graph).should().bePrivate().getShouldAssertion()!!(classA, listOf(classA), v23)
-        assertEquals(1, v23.size)
-
-        val v24 = mutableListOf<String>()
-        ClassesRuleBuilder(graph).should().beProtected().getShouldAssertion()!!(classA, listOf(classA), v24)
-        assertEquals(1, v24.size)
-
-        val v25 = mutableListOf<String>()
-        ClassesRuleBuilder(
-            graph,
-        ).should().beAssignableTo("com.example.NonExistentParent").getShouldAssertion()!!(classA, listOf(classA), v25)
-        assertEquals(1, v25.size)
-    }
-
-    @Test
-    fun `test ClassesShouldDependencyAssertions access, dependency, and usage assertions`() {
-        val accessor =
-            ClassDeclaration(
-                "Accessor", "com.forbidden.Accessor", "com.forbidden", false, false, emptyList(), emptyList(),
-                setOf(
-                    "com.example.ClassA",
-                ),
-                "/src/Accessor.kt",
-            )
-        val graph =
-            ProjectGraph(
-                mapOf(
-                    ":" to listOf(Module(":", ":app", "app", emptyList(), emptyList(), emptyList(), listOf(fileA, FileDeclaration("Accessor.kt", "com.forbidden", classes = listOf(accessor))))),
-                ),
-            )
-
-        val vOnlyAccessVararg = mutableListOf<String>()
-        ClassesRuleBuilder(graph).should().onlyBeAccessedByAnyPackage("com.allowed")
-            .getShouldAssertion()!!(classA, listOf(classA, accessor), vOnlyAccessVararg)
-        assertEquals(1, vOnlyAccessVararg.size)
-
-        val vOnlyAccessStr = mutableListOf<String>()
-        ClassesRuleBuilder(graph).should().onlyBeAccessedByAnyPackage("com.allowed")
-            .getShouldAssertion()!!(classA, listOf(classA, accessor), vOnlyAccessStr)
-        assertEquals(1, vOnlyAccessStr.size)
-
-        val vOnlyAccessList = mutableListOf<String>()
-        ClassesRuleBuilder(graph).should().onlyBeAccessedByAnyPackage(listOf("com.allowed"))
-            .getShouldAssertion()!!(classA, listOf(classA, accessor), vOnlyAccessList)
-        assertEquals(1, vOnlyAccessList.size)
-
-        val vNotAccessVararg = mutableListOf<String>()
-        ClassesRuleBuilder(graph).should().notBeAccessedByAnyPackage("com.forbidden")
-            .getShouldAssertion()!!(classA, listOf(classA, accessor), vNotAccessVararg)
-        assertEquals(1, vNotAccessVararg.size)
-
-        val vNotAccessStr = mutableListOf<String>()
-        ClassesRuleBuilder(graph).should().notBeAccessedByAnyPackage("com.forbidden")
-            .getShouldAssertion()!!(classA, listOf(classA, accessor), vNotAccessStr)
-        assertEquals(1, vNotAccessStr.size)
-
-        val vNotAccessList = mutableListOf<String>()
-        ClassesRuleBuilder(graph).should().notBeAccessedByAnyPackage(listOf("com.forbidden"))
-            .getShouldAssertion()!!(classA, listOf(classA, accessor), vNotAccessList)
-        assertEquals(1, vNotAccessList.size)
-
-        val classWithDep =
-            ClassDeclaration(
-                "WithDep", "com.example.WithDep", "com.example", false, false, emptyList(),
-                listOf(
-                    "com.forbidden.Accessor",
-                ),
-                setOf("com.forbidden.Accessor"), "/src/WithDep.kt",
-            )
-        val vOnlyDepClassesVararg = mutableListOf<String>()
-        ClassesRuleBuilder(graph).should().onlyDependOnClassesInAnyPackage("com.allowed")
-            .getShouldAssertion()!!(classWithDep, listOf(classWithDep), vOnlyDepClassesVararg)
-        assertEquals(1, vOnlyDepClassesVararg.size)
-
-        val vOnlyDepClassesStr = mutableListOf<String>()
-        ClassesRuleBuilder(graph).should().onlyDependOnClassesInAnyPackage("com.allowed")
-            .getShouldAssertion()!!(classWithDep, listOf(classWithDep), vOnlyDepClassesStr)
-        assertEquals(1, vOnlyDepClassesStr.size)
-
-        val vOnlyDepClassesList = mutableListOf<String>()
-        ClassesRuleBuilder(graph).should().onlyDependOnClassesInAnyPackage(listOf("com.allowed"))
-            .getShouldAssertion()!!(classWithDep, listOf(classWithDep), vOnlyDepClassesList)
-        assertEquals(1, vOnlyDepClassesList.size)
-
-        val vNotDepClassesVararg = mutableListOf<String>()
-        ClassesRuleBuilder(graph).should().notDependOnClassesInAnyPackage("com.forbidden")
-            .getShouldAssertion()!!(classWithDep, listOf(classWithDep), vNotDepClassesVararg)
-        assertEquals(1, vNotDepClassesVararg.size)
-
-        val vNotDepClassesStr = mutableListOf<String>()
-        ClassesRuleBuilder(graph).should().notDependOnClassesInAnyPackage("com.forbidden")
-            .getShouldAssertion()!!(classWithDep, listOf(classWithDep), vNotDepClassesStr)
-        assertEquals(1, vNotDepClassesStr.size)
-
-        val vNotDepClassesList = mutableListOf<String>()
-        ClassesRuleBuilder(graph).should().notDependOnClassesInAnyPackage(listOf("com.forbidden"))
-            .getShouldAssertion()!!(classWithDep, listOf(classWithDep), vNotDepClassesList)
-        assertEquals(1, vNotDepClassesList.size)
-
-        // Usages: notCall and notReferenceClass
-        val usageCall =
-            SourceUsage(
-                UsageKind.CALL,
-                "com.example.Target.foo",
-                "Usage.kt",
-                1,
-                1,
-                rawExpression = "Target.foo()",
-                enclosingClass = "com.example.ClassWithUsage",
-            )
-        val usageRef =
-            SourceUsage(
-                UsageKind.CLASS_REFERENCE,
-                "com.example.TargetClass",
-                "Usage.kt",
-                2,
-                1,
-                rawExpression = "TargetClass::class",
-                enclosingClass = "com.example.ClassWithUsage",
-            )
-        val classWithUsage =
-            ClassDeclaration("ClassWithUsage", "com.example.ClassWithUsage", "com.example", false, false, emptyList(), emptyList(), emptySet(), "/src/Usage.kt")
-        val fileUsage =
-            FileDeclaration(
-                "Usage.kt",
-                "com.example",
-                classes = listOf(classWithUsage),
-                usages = listOf(usageCall, usageRef),
-            )
-        val graphUsage =
-            ProjectGraph(
-                mapOf(
-                    ":" to listOf(Module(":", ":app", "app", emptyList(), emptyList(), emptyList(), listOf(fileUsage))),
-                ),
-            )
-
-        val vCallStr = mutableListOf<String>()
-        ClassesRuleBuilder(graphUsage).should().notCall("com.example.Target.foo")
-            .getShouldAssertion()!!(classWithUsage, listOf(classWithUsage), vCallStr)
-        assertEquals(1, vCallStr.size)
-
-        val vCallKClass = mutableListOf<String>()
-        ClassesRuleBuilder(graphUsage).should().notCall(String::class)
-            .getShouldAssertion()!!(classWithUsage, listOf(classWithUsage), vCallKClass)
-        assertTrue(vCallKClass.isEmpty())
-
-        val vCallReified = mutableListOf<String>()
-        ClassesRuleBuilder(graphUsage).should().notCall<String>()
-            .getShouldAssertion()!!(classWithUsage, listOf(classWithUsage), vCallReified)
-        assertTrue(vCallReified.isEmpty())
-
-        val vRefStr = mutableListOf<String>()
-        ClassesRuleBuilder(graphUsage).should().notReferenceClass("com.example.TargetClass")
-            .getShouldAssertion()!!(classWithUsage, listOf(classWithUsage), vRefStr)
-        assertEquals(1, vRefStr.size)
-
-        val vRefKClass = mutableListOf<String>()
-        ClassesRuleBuilder(graphUsage).should().notReferenceClass(String::class)
-            .getShouldAssertion()!!(classWithUsage, listOf(classWithUsage), vRefKClass)
-        assertTrue(vRefKClass.isEmpty())
-
-        val vRefReified = mutableListOf<String>()
-        ClassesRuleBuilder(graphUsage).should().notReferenceClass<String>()
-            .getShouldAssertion()!!(classWithUsage, listOf(classWithUsage), vRefReified)
-        assertTrue(vRefReified.isEmpty())
     }
 }

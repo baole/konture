@@ -1,5 +1,6 @@
 /*
- * Copyright 2026 Bao Le Duc
+ * Copyright 2026 The Konture Contributors
+ * Contributors: Bao Le Duc (@baole)
  * SPDX-License-Identifier: Apache-2.0
  */
 
@@ -10,7 +11,8 @@ import io.github.baole.konture.i18n.getMessage
 /**
  * Fluent API for defining assertion rules on Kotlin classes.
  */
-internal interface ClassesShouldCompositeAssertions {
+@Suppress("ComplexInterface")
+interface ClassesShouldCompositeAssertions {
     val builder: ClassesRuleBuilder
 
     /**

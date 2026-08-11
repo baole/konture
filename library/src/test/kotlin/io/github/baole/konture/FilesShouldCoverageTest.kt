@@ -4,13 +4,13 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+@file:Suppress("LongMethod")
+
 package io.github.baole.konture
 
-import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 
-@Suppress("LargeClass")
 internal class FilesShouldCoverageTest : KontureScopeTestFixture() {
     @Test
     fun `test FilesShould module residency assertions`() {
@@ -20,703 +20,481 @@ internal class FilesShouldCoverageTest : KontureScopeTestFixture() {
                 mapOf(":" to listOf(Module(":", ":app", "app", emptyList(), emptyList(), emptyList(), listOf(fileA)))),
             )
 
-        val vModSingle = mutableListOf<String>()
-        FilesRuleBuilder(graph).should().resideInAModule("app")
-            .getShouldAssertion()!!(fileCtx, listOf(fileCtx), vModSingle)
-        assertTrue(vModSingle.isEmpty())
+        val assertModSingle = FilesRuleBuilder(graph).should().resideInAModule(":app").getShouldAssertion()!!
+        val v1 = mutableListOf<String>()
+        assertModSingle(fileCtx, listOf(fileCtx), v1)
+        assertTrue(v1.isEmpty())
 
-        val vModList = mutableListOf<String>()
-        FilesRuleBuilder(graph).should().resideInModules(listOf(":app", ":core"))
-            .getShouldAssertion()!!(fileCtx, listOf(fileCtx), vModList)
-        assertTrue(vModList.isEmpty())
+        val assertModList = FilesRuleBuilder(graph).should().resideInAModule(listOf(":app")).getShouldAssertion()!!
+        val v2 = mutableListOf<String>()
+        assertModList(fileCtx, listOf(fileCtx), v2)
+        assertTrue(v2.isEmpty())
 
-        val vModVararg = mutableListOf<String>()
-        FilesRuleBuilder(graph).should().resideInModules(":core", ":feature")
-            .getShouldAssertion()!!(fileCtx, listOf(fileCtx), vModVararg)
-        assertEquals(1, vModVararg.size)
+        val assertModVararg =
+            FilesRuleBuilder(
+                graph,
+            ).should().resideInAModule(":app", ":core").getShouldAssertion()!!
+        val v3 = mutableListOf<String>()
+        assertModVararg(fileCtx, listOf(fileCtx), v3)
+        assertTrue(v3.isEmpty())
 
-        val vNotModSingle = mutableListOf<String>()
-        FilesRuleBuilder(graph).should().notResideInAModule("core")
-            .getShouldAssertion()!!(fileCtx, listOf(fileCtx), vNotModSingle)
-        assertTrue(vNotModSingle.isEmpty())
+        val assertNotModSingle =
+            FilesRuleBuilder(
+                graph,
+            ).should().notResideInAModule(":forbidden").getShouldAssertion()!!
+        val v4 = mutableListOf<String>()
+        assertNotModSingle(fileCtx, listOf(fileCtx), v4)
+        assertTrue(v4.isEmpty())
 
-        val vNotModList = mutableListOf<String>()
-        FilesRuleBuilder(graph).should().notResideInModules(listOf(":app"))
-            .getShouldAssertion()!!(fileCtx, listOf(fileCtx), vNotModList)
-        assertEquals(1, vNotModList.size)
+        val assertNotModList =
+            FilesRuleBuilder(
+                graph,
+            ).should().notResideInAModule(listOf(":forbidden")).getShouldAssertion()!!
+        val v5 = mutableListOf<String>()
+        assertNotModList(fileCtx, listOf(fileCtx), v5)
+        assertTrue(v5.isEmpty())
 
-        val vNotModVararg = mutableListOf<String>()
-        FilesRuleBuilder(graph).should().notResideInModules(":app", ":core")
-            .getShouldAssertion()!!(fileCtx, listOf(fileCtx), vNotModVararg)
-        assertEquals(1, vNotModVararg.size)
+        val assertNotModVararg =
+            FilesRuleBuilder(
+                graph,
+            ).should().notResideInAModule(":forbidden", ":other").getShouldAssertion()!!
+        val v6 = mutableListOf<String>()
+        assertNotModVararg(fileCtx, listOf(fileCtx), v6)
+        assertTrue(v6.isEmpty())
     }
 
     @Test
     fun `test FilesShould containClass and import assertions`() {
-        val fileWithClassAndImport =
-            FileDeclaration(
-                name = "Test.kt",
-                packageName = "com.example",
-                classes = listOf(classA),
-                imports = listOf("com.example.ClassA"),
-            )
-        val fileCtx = FileDeclarationContext(fileWithClassAndImport, ":app")
-        val graph =
-            ProjectGraph(
-                mapOf(
-                    ":" to listOf(Module(":", ":app", "app", emptyList(), emptyList(), emptyList(), listOf(fileWithClassAndImport))),
-                ),
-            )
-
-        // containClass / notContainClass
-        val vClsSingle = mutableListOf<String>()
-        FilesRuleBuilder(graph).should().containClass("com.example.ClassA")
-            .getShouldAssertion()!!(fileCtx, listOf(fileCtx), vClsSingle)
-        assertTrue(vClsSingle.isEmpty())
-
-        val vClsKClass = mutableListOf<String>()
-        FilesRuleBuilder(graph).should().containClass(String::class)
-            .getShouldAssertion()!!(fileCtx, listOf(fileCtx), vClsKClass)
-        assertEquals(1, vClsKClass.size)
-
-        val vNotCls = mutableListOf<String>()
-        FilesRuleBuilder(graph).should().notContainClass("com.example.ClassA")
-            .getShouldAssertion()!!(fileCtx, listOf(fileCtx), vNotCls)
-        assertEquals(1, vNotCls.size)
-
-        val vClsList = mutableListOf<String>()
-        FilesRuleBuilder(graph).should().containClass(listOf("com.example.ClassA"))
-            .getShouldAssertion()!!(fileCtx, listOf(fileCtx), vClsList)
-        assertTrue(vClsList.isEmpty())
-
-        val vClsVararg = mutableListOf<String>()
-        FilesRuleBuilder(graph).should().containClass("com.example.ClassA", "com.example.ClassB")
-            .getShouldAssertion()!!(fileCtx, listOf(fileCtx), vClsVararg)
-        assertEquals(1, vClsVararg.size)
-
-        // haveImportOf / notHaveImportOf
-        val vImpSingle = mutableListOf<String>()
-        FilesRuleBuilder(graph).should().haveImportOf("com.example.ClassA")
-            .getShouldAssertion()!!(fileCtx, listOf(fileCtx), vImpSingle)
-        assertTrue(vImpSingle.isEmpty())
-
-        val vImpKClass = mutableListOf<String>()
-        FilesRuleBuilder(graph).should().haveImportOf(String::class)
-            .getShouldAssertion()!!(fileCtx, listOf(fileCtx), vImpKClass)
-        assertEquals(1, vImpKClass.size)
-
-        val vNotImp = mutableListOf<String>()
-        FilesRuleBuilder(graph).should().notHaveImportOf("com.example.ClassA")
-            .getShouldAssertion()!!(fileCtx, listOf(fileCtx), vNotImp)
-        assertEquals(1, vNotImp.size)
-
-        val vImpList = mutableListOf<String>()
-        FilesRuleBuilder(graph).should().haveImportOf(listOf("com.example.ClassA"))
-            .getShouldAssertion()!!(fileCtx, listOf(fileCtx), vImpList)
-        assertTrue(vImpList.isEmpty())
-
-        val vNotImpList = mutableListOf<String>()
-        FilesRuleBuilder(graph).should().notHaveImportOf(listOf("com.example.ClassA"))
-            .getShouldAssertion()!!(fileCtx, listOf(fileCtx), vNotImpList)
-        assertEquals(1, vNotImpList.size)
-    }
-
-    @Test
-    fun `test FilesShould top level and structural elements`() {
-        val func =
-            FunctionDeclaration("myFunc", Visibility.PUBLIC, emptySet(), "Unit", emptyList(), emptyList(), null, false)
-        val prop = PropertyDeclaration("myProp", Visibility.PUBLIC, emptySet(), "String", true, emptyList(), null)
-        val fileWithTopLevel =
-            FileDeclaration(
-                name = "Top.kt",
-                packageName = "com.example",
-                topLevelFunctions = listOf(func),
-                topLevelProperties = listOf(prop),
-                classes = listOf(classA),
-            )
-        val fileCtx = FileDeclarationContext(fileWithTopLevel, ":app")
-        val graph =
-            ProjectGraph(
-                mapOf(
-                    ":" to listOf(Module(":", ":app", "app", emptyList(), emptyList(), emptyList(), listOf(fileWithTopLevel))),
-                ),
-            )
-
-        val vTopFunc = mutableListOf<String>()
-        FilesRuleBuilder(graph).should().containTopLevelFunctions()
-            .getShouldAssertion()!!(fileCtx, listOf(fileCtx), vTopFunc)
-        assertTrue(vTopFunc.isEmpty())
-
-        val vNotTopFunc = mutableListOf<String>()
-        FilesRuleBuilder(graph).should().notContainTopLevelFunctions()
-            .getShouldAssertion()!!(fileCtx, listOf(fileCtx), vNotTopFunc)
-        assertEquals(1, vNotTopFunc.size)
-
-        val vTopProp = mutableListOf<String>()
-        FilesRuleBuilder(graph).should().containTopLevelProperties()
-            .getShouldAssertion()!!(fileCtx, listOf(fileCtx), vTopProp)
-        assertTrue(vTopProp.isEmpty())
-
-        val vNotTopProp = mutableListOf<String>()
-        FilesRuleBuilder(graph).should().notContainTopLevelProperties()
-            .getShouldAssertion()!!(fileCtx, listOf(fileCtx), vNotTopProp)
-        assertEquals(1, vNotTopProp.size)
-
-        val vHaveFunc = mutableListOf<String>()
-        FilesRuleBuilder(graph).should().haveTopLevelFunctions()
-            .getShouldAssertion()!!(fileCtx, listOf(fileCtx), vHaveFunc)
-        assertTrue(vHaveFunc.isEmpty())
-
-        val vNotHaveFunc = mutableListOf<String>()
-        FilesRuleBuilder(graph).should().notHaveTopLevelFunctions()
-            .getShouldAssertion()!!(fileCtx, listOf(fileCtx), vNotHaveFunc)
-        assertEquals(1, vNotHaveFunc.size)
-
-        val vHaveProp = mutableListOf<String>()
-        FilesRuleBuilder(graph).should().haveTopLevelProperties()
-            .getShouldAssertion()!!(fileCtx, listOf(fileCtx), vHaveProp)
-        assertTrue(vHaveProp.isEmpty())
-
-        val vNotHaveProp = mutableListOf<String>()
-        FilesRuleBuilder(graph).should().notHaveTopLevelProperties()
-            .getShouldAssertion()!!(fileCtx, listOf(fileCtx), vNotHaveProp)
-        assertEquals(1, vNotHaveProp.size)
-
-        val vHaveClasses = mutableListOf<String>()
-        FilesRuleBuilder(graph).should().haveClasses()
-            .getShouldAssertion()!!(fileCtx, listOf(fileCtx), vHaveClasses)
-        assertTrue(vHaveClasses.isEmpty())
-
-        val vNotHaveClasses = mutableListOf<String>()
-        FilesRuleBuilder(graph).should().notHaveClasses()
-            .getShouldAssertion()!!(fileCtx, listOf(fileCtx), vNotHaveClasses)
-        assertEquals(1, vNotHaveClasses.size)
-
-        // haveNoWildcardImports & haveAnnotationOf
-        val fileNoWild = FileDeclaration("Clean.kt", "com.example", classes = listOf(classAnnotated))
-        val fileCtxClean = FileDeclarationContext(fileNoWild, ":app")
-
-        val vNoWild = mutableListOf<String>()
-        FilesRuleBuilder(graph).should().haveNoWildcardImports()
-            .getShouldAssertion()!!(fileCtxClean, listOf(fileCtxClean), vNoWild)
-        assertTrue(vNoWild.isEmpty())
-
-        val vAnnotStr = mutableListOf<String>()
-        FilesRuleBuilder(graph).should().haveAnnotationOf("MyAnnotation")
-            .getShouldAssertion()!!(fileCtxClean, listOf(fileCtxClean), vAnnotStr)
-        assertTrue(vAnnotStr.isEmpty())
-    }
-
-    @Test
-    fun `test FilesShould name assertions and package dependencies`() {
-        val file = FileDeclaration("MyFile.kt", "com.example")
-        val fileCtx = FileDeclarationContext(file, ":app")
-        val graph =
-            ProjectGraph(
-                mapOf(":" to listOf(Module(":", ":app", "app", emptyList(), emptyList(), emptyList(), listOf(file)))),
-            )
-
-        val vNameSingle = mutableListOf<String>()
-        FilesRuleBuilder(graph).should().haveName("MyFile.kt")
-            .getShouldAssertion()!!(fileCtx, listOf(fileCtx), vNameSingle)
-        assertTrue(vNameSingle.isEmpty())
-
-        val vNameList = mutableListOf<String>()
-        FilesRuleBuilder(graph).should().haveName(listOf("MyFile.kt", "Other.kt"))
-            .getShouldAssertion()!!(fileCtx, listOf(fileCtx), vNameList)
-        assertTrue(vNameList.isEmpty())
-
-        val vNameVararg = mutableListOf<String>()
-        FilesRuleBuilder(graph).should().haveName("MyFile.kt", "Other.kt")
-            .getShouldAssertion()!!(fileCtx, listOf(fileCtx), vNameVararg)
-        assertTrue(vNameVararg.isEmpty())
-
-        val vNamePred = mutableListOf<String>()
-        FilesRuleBuilder(graph).should().haveName { it.startsWith("My") }
-            .getShouldAssertion()!!(fileCtx, listOf(fileCtx), vNamePred)
-        assertTrue(vNamePred.isEmpty())
-
-        val vNotNameSingle = mutableListOf<String>()
-        FilesRuleBuilder(graph).should().notHaveName("MyFile.kt")
-            .getShouldAssertion()!!(fileCtx, listOf(fileCtx), vNotNameSingle)
-        assertEquals(1, vNotNameSingle.size)
-
-        val vNotNameList = mutableListOf<String>()
-        FilesRuleBuilder(graph).should().notHaveName(listOf("MyFile.kt"))
-            .getShouldAssertion()!!(fileCtx, listOf(fileCtx), vNotNameList)
-        assertEquals(1, vNotNameList.size)
-
-        val vNotNameVararg = mutableListOf<String>()
-        FilesRuleBuilder(graph).should().notHaveName("MyFile.kt", "Other.kt")
-            .getShouldAssertion()!!(fileCtx, listOf(fileCtx), vNotNameVararg)
-        assertEquals(1, vNotNameVararg.size)
-
-        val vNotMatchSingle = mutableListOf<String>()
-        FilesRuleBuilder(graph).should().notHaveNameMatching("My*")
-            .getShouldAssertion()!!(fileCtx, listOf(fileCtx), vNotMatchSingle)
-        assertEquals(1, vNotMatchSingle.size)
-
-        val vNotMatchList = mutableListOf<String>()
-        FilesRuleBuilder(graph).should().notHaveNameMatching(listOf("My*"))
-            .getShouldAssertion()!!(fileCtx, listOf(fileCtx), vNotMatchList)
-        assertEquals(1, vNotMatchList.size)
-
-        val vNotMatchVararg = mutableListOf<String>()
-        FilesRuleBuilder(graph).should().notHaveNameMatching("My*", "Other*")
-            .getShouldAssertion()!!(fileCtx, listOf(fileCtx), vNotMatchVararg)
-        assertEquals(1, vNotMatchVararg.size)
-
-        val vNotStartSingle = mutableListOf<String>()
-        FilesRuleBuilder(graph).should().notHaveNameStartingWith("My")
-            .getShouldAssertion()!!(fileCtx, listOf(fileCtx), vNotStartSingle)
-        assertEquals(1, vNotStartSingle.size)
-
-        val vNotStartList = mutableListOf<String>()
-        FilesRuleBuilder(graph).should().notHaveNameStartingWith(listOf("My"))
-            .getShouldAssertion()!!(fileCtx, listOf(fileCtx), vNotStartList)
-        assertEquals(1, vNotStartList.size)
-
-        val vNotStartVararg = mutableListOf<String>()
-        FilesRuleBuilder(graph).should().notHaveNameStartingWith("My", "Other")
-            .getShouldAssertion()!!(fileCtx, listOf(fileCtx), vNotStartVararg)
-        assertEquals(1, vNotStartVararg.size)
-
-        val vNotEndSingle = mutableListOf<String>()
-        FilesRuleBuilder(graph).should().notHaveNameEndingWith(".kt")
-            .getShouldAssertion()!!(fileCtx, listOf(fileCtx), vNotEndSingle)
-        assertEquals(1, vNotEndSingle.size)
-
-        val vNotEndList = mutableListOf<String>()
-        FilesRuleBuilder(graph).should().notHaveNameEndingWith(listOf(".kt"))
-            .getShouldAssertion()!!(fileCtx, listOf(fileCtx), vNotEndList)
-        assertEquals(1, vNotEndList.size)
-
-        val vNotEndVararg = mutableListOf<String>()
-        FilesRuleBuilder(graph).should().notHaveNameEndingWith(".kt", ".java")
-            .getShouldAssertion()!!(fileCtx, listOf(fileCtx), vNotEndVararg)
-        assertEquals(1, vNotEndVararg.size)
-
-        // Packages & Modules dependency assertions
-        val fileWithImp = FileDeclaration("Imp.kt", "com.example", imports = listOf("com.other.Feature"))
-        val fileCtxImp = FileDeclarationContext(fileWithImp, ":app")
-
-        val vOnlyPkg = mutableListOf<String>()
-        FilesRuleBuilder(graph).should().onlyDependOnPackages(listOf("com.other"))
-            .getShouldAssertion()!!(fileCtxImp, listOf(fileCtxImp), vOnlyPkg)
-        assertTrue(vOnlyPkg.isEmpty())
-
-        val vOnlyPkgVararg = mutableListOf<String>()
-        FilesRuleBuilder(graph).should().onlyDependOnPackages("com.other")
-            .getShouldAssertion()!!(fileCtxImp, listOf(fileCtxImp), vOnlyPkgVararg)
-        assertTrue(vOnlyPkgVararg.isEmpty())
-
-        val vNotPkg = mutableListOf<String>()
-        FilesRuleBuilder(graph).should().notDependOnPackages(listOf("com.other"))
-            .getShouldAssertion()!!(fileCtxImp, listOf(fileCtxImp), vNotPkg)
-        assertEquals(1, vNotPkg.size)
-
-        val vNotPkgVararg = mutableListOf<String>()
-        FilesRuleBuilder(graph).should().notDependOnPackages("com.other")
-            .getShouldAssertion()!!(fileCtxImp, listOf(fileCtxImp), vNotPkgVararg)
-        assertEquals(1, vNotPkgVararg.size)
-
-        val vOnlyMod = mutableListOf<String>()
-        FilesRuleBuilder(graph).should().onlyDependOnModules(listOf(":app", ":core"))
-            .getShouldAssertion()!!(fileCtxImp, listOf(fileCtxImp), vOnlyMod)
-        assertTrue(vOnlyMod.isEmpty())
-
-        val vOnlyModVararg = mutableListOf<String>()
-        FilesRuleBuilder(graph).should().onlyDependOnModules(":app", ":core")
-            .getShouldAssertion()!!(fileCtxImp, listOf(fileCtxImp), vOnlyModVararg)
-        assertTrue(vOnlyModVararg.isEmpty())
-
-        val vNotMod = mutableListOf<String>()
-        FilesRuleBuilder(graph).should().notDependOnModules(listOf(":core"))
-            .getShouldAssertion()!!(fileCtxImp, listOf(fileCtxImp), vNotMod)
-        assertTrue(vNotMod.isEmpty())
-
-        val vNotModVararg = mutableListOf<String>()
-        FilesRuleBuilder(graph).should().notDependOnModules(":core")
-            .getShouldAssertion()!!(fileCtxImp, listOf(fileCtxImp), vNotModVararg)
-        assertTrue(vNotModVararg.isEmpty())
-    }
-
-    @Test
-    fun `test FilesShould failure messages`() {
-        val file = FileDeclaration("MyFile.kt", "com.example")
-        val fileCtx = FileDeclarationContext(file, ":app")
-        val graph =
-            ProjectGraph(
-                mapOf(":" to listOf(Module(":", ":app", "app", emptyList(), emptyList(), emptyList(), listOf(file)))),
-            )
-
-        val v1 = mutableListOf<String>()
-        FilesRuleBuilder(
-            graph,
-        ).should().resideInAPackage("wrong.pkg").getShouldAssertion()!!(fileCtx, listOf(fileCtx), v1)
-        assertEquals(1, v1.size)
-
-        val v2 = mutableListOf<String>()
-        FilesRuleBuilder(
-            graph,
-        ).should().resideInAPackage(listOf("wrong.pkg")).getShouldAssertion()!!(fileCtx, listOf(fileCtx), v2)
-        assertEquals(1, v2.size)
-
-        val v3 = mutableListOf<String>()
-        FilesRuleBuilder(
-            graph,
-        ).should().resideInAPackage("wrong.pkg", "other").getShouldAssertion()!!(fileCtx, listOf(fileCtx), v3)
-        assertEquals(1, v3.size)
-
-        val v4 = mutableListOf<String>()
-        FilesRuleBuilder(graph).should().resideInAPackage { false }.getShouldAssertion()!!(fileCtx, listOf(fileCtx), v4)
-        assertEquals(1, v4.size)
-
-        val v5 = mutableListOf<String>()
-        FilesRuleBuilder(
-            graph,
-        ).should().notResideInAPackage("com.example").getShouldAssertion()!!(fileCtx, listOf(fileCtx), v5)
-        assertEquals(1, v5.size)
-
-        val v6 = mutableListOf<String>()
-        FilesRuleBuilder(
-            graph,
-        ).should().notResideInAPackage(listOf("com.example")).getShouldAssertion()!!(fileCtx, listOf(fileCtx), v6)
-        assertEquals(1, v6.size)
-
-        val v7 = mutableListOf<String>()
-        FilesRuleBuilder(
-            graph,
-        ).should().haveNameEndingWith("Wrong").getShouldAssertion()!!(fileCtx, listOf(fileCtx), v7)
-        assertEquals(1, v7.size)
-
-        val v8 = mutableListOf<String>()
-        FilesRuleBuilder(
-            graph,
-        ).should().haveNameEndingWith(listOf("Wrong")).getShouldAssertion()!!(fileCtx, listOf(fileCtx), v8)
-        assertEquals(1, v8.size)
-
-        val v9 = mutableListOf<String>()
-        FilesRuleBuilder(
-            graph,
-        ).should().haveNameStartingWith("Wrong").getShouldAssertion()!!(fileCtx, listOf(fileCtx), v9)
-        assertEquals(1, v9.size)
-
-        val v10 = mutableListOf<String>()
-        FilesRuleBuilder(
-            graph,
-        ).should().haveNameStartingWith(listOf("Wrong")).getShouldAssertion()!!(fileCtx, listOf(fileCtx), v10)
-        assertEquals(1, v10.size)
-
-        val v11 = mutableListOf<String>()
-        FilesRuleBuilder(
-            graph,
-        ).should().haveNameMatching("wrong*").getShouldAssertion()!!(fileCtx, listOf(fileCtx), v11)
-        assertEquals(1, v11.size)
-
-        val v12 = mutableListOf<String>()
-        FilesRuleBuilder(
-            graph,
-        ).should().haveNameMatching(listOf("wrong*")).getShouldAssertion()!!(fileCtx, listOf(fileCtx), v12)
-        assertEquals(1, v12.size)
-
-        val v13 = mutableListOf<String>()
-        FilesRuleBuilder(
-            graph,
-        ).should().containClass("MissingClass").getShouldAssertion()!!(fileCtx, listOf(fileCtx), v13)
-        assertEquals(1, v13.size)
-
-        val v14 = mutableListOf<String>()
-        FilesRuleBuilder(
-            graph,
-        ).should().containClass(listOf("MissingClass")).getShouldAssertion()!!(fileCtx, listOf(fileCtx), v14)
-        assertEquals(1, v14.size)
-
-        val v15 = mutableListOf<String>()
-        FilesRuleBuilder(
-            graph,
-        ).should().haveImportOf("MissingImport").getShouldAssertion()!!(fileCtx, listOf(fileCtx), v15)
-        assertEquals(1, v15.size)
-
-        val v16 = mutableListOf<String>()
-        FilesRuleBuilder(
-            graph,
-        ).should().haveImportOf(listOf("MissingImport")).getShouldAssertion()!!(fileCtx, listOf(fileCtx), v16)
-        assertEquals(1, v16.size)
-
-        val v17 = mutableListOf<String>()
-        FilesRuleBuilder(
-            graph,
-        ).should().haveAnnotationOf("MissingAnnotation").getShouldAssertion()!!(fileCtx, listOf(fileCtx), v17)
-        assertEquals(1, v17.size)
-    }
-
-    @Test
-    fun `test FilesShould usages, matching, and composite assertions`() {
-        val usageCall =
-            SourceUsage(
-                UsageKind.CALL,
-                "com.example.Foo.bar",
-                "Test.kt",
-                10,
-                5,
-                rawExpression = "Foo.bar()",
-                unresolvedPossibleUsage = true,
-            )
-        val usageRef =
-            SourceUsage(
-                UsageKind.CLASS_REFERENCE,
-                "com.example.TargetClass",
-                "Test.kt",
-                12,
-                5,
-                rawExpression = "TargetClass::class",
-            )
-        val fileWithUsages =
-            FileDeclaration(
-                "Test.kt",
-                "com.example",
-                classes = listOf(classA, classB),
-                usages = listOf(usageCall, usageRef),
-                imports = listOf("com.wrong.*"),
-            )
-        val fileCtx = FileDeclarationContext(fileWithUsages, ":app")
-        val graph =
-            ProjectGraph(
-                mapOf(
-                    ":" to listOf(Module(":", ":app", "app", emptyList(), emptyList(), emptyList(), listOf(fileWithUsages))),
-                ),
-            )
-
-        // notCall
-        val vCallStr = mutableListOf<String>()
-        FilesRuleBuilder(
-            graph,
-        ).should().notCall("com.example.Foo.bar").getShouldAssertion()!!(fileCtx, listOf(fileCtx), vCallStr)
-        assertEquals(1, vCallStr.size)
-
-        val vCallKClass = mutableListOf<String>()
-        FilesRuleBuilder(
-            graph,
-        ).should().notCall(String::class).getShouldAssertion()!!(fileCtx, listOf(fileCtx), vCallKClass)
-        assertTrue(vCallKClass.isEmpty())
-
-        val vCallReified = mutableListOf<String>()
-        FilesRuleBuilder(
-            graph,
-        ).should().notCall<String>().getShouldAssertion()!!(fileCtx, listOf(fileCtx), vCallReified)
-        assertTrue(vCallReified.isEmpty())
-
-        // notReferenceClass
-        val vRefStr = mutableListOf<String>()
-        FilesRuleBuilder(
-            graph,
-        ).should().notReferenceClass(
-            "com.example.TargetClass",
-        ).getShouldAssertion()!!(fileCtx, listOf(fileCtx), vRefStr)
-        assertEquals(1, vRefStr.size)
-
-        val vRefKClass = mutableListOf<String>()
-        FilesRuleBuilder(
-            graph,
-        ).should().notReferenceClass(String::class).getShouldAssertion()!!(fileCtx, listOf(fileCtx), vRefKClass)
-        assertTrue(vRefKClass.isEmpty())
-
-        val vRefReified = mutableListOf<String>()
-        FilesRuleBuilder(
-            graph,
-        ).should().notReferenceClass<String>().getShouldAssertion()!!(fileCtx, listOf(fileCtx), vRefReified)
-        assertTrue(vRefReified.isEmpty())
-
-        // Wildcards & structural checks
-        val vWildcard = mutableListOf<String>()
-        FilesRuleBuilder(
-            graph,
-        ).should().notHaveWildcardImports().getShouldAssertion()!!(fileCtx, listOf(fileCtx), vWildcard)
-        assertEquals(1, vWildcard.size)
-
-        val vOneClass = mutableListOf<String>()
-        FilesRuleBuilder(
-            graph,
-        ).should().haveOnlyOneClassPerFile().getShouldAssertion()!!(fileCtx, listOf(fileCtx), vOneClass)
-        assertEquals(1, vOneClass.size)
-
-        val vMatchClsName = mutableListOf<String>()
-        FilesRuleBuilder(
-            graph,
-        ).should().haveNameMatchingClassName().getShouldAssertion()!!(fileCtx, listOf(fileCtx), vMatchClsName)
-        assertEquals(1, vMatchClsName.size)
-
-        val vKdoc = mutableListOf<String>()
-        FilesRuleBuilder(graph).should().beDocumentedWithKDoc().getShouldAssertion()!!(fileCtx, listOf(fileCtx), vKdoc)
-        assertEquals(1, vKdoc.size)
-
-        // satisfy & composites
-        val vSatisfy1 = mutableListOf<String>()
-        FilesRuleBuilder(graph).should().satisfy {
-            it.declaration.name == "Test.kt"
-        }.getShouldAssertion()!!(fileCtx, listOf(fileCtx), vSatisfy1)
-        assertTrue(vSatisfy1.isEmpty())
-
-        val vSatisfy2 = mutableListOf<String>()
-        FilesRuleBuilder(graph).should().satisfy {
-                _,
-                v,
-            ->
-            v.add("error")
-        }.getShouldAssertion()!!(fileCtx, listOf(fileCtx), vSatisfy2)
-        assertEquals(1, vSatisfy2.size)
-
-        val vAnyOfPass = mutableListOf<String>()
-        FilesRuleBuilder(graph).should().anyOf({
-            haveName("Test.kt")
-        }, { haveName("Wrong.kt") }).getShouldAssertion()!!(fileCtx, listOf(fileCtx), vAnyOfPass)
-        assertTrue(vAnyOfPass.isEmpty())
-
-        val vAnyOfFail = mutableListOf<String>()
-        FilesRuleBuilder(graph).should().anyOf({
-            haveName("Wrong1.kt")
-        }, { haveName("Wrong2.kt") }).getShouldAssertion()!!(fileCtx, listOf(fileCtx), vAnyOfFail)
-        assertEquals(1, vAnyOfFail.size)
-
-        val vAllOfPass = mutableListOf<String>()
-        FilesRuleBuilder(graph).should().allOf({
-            haveName("Test.kt")
-        }).getShouldAssertion()!!(fileCtx, listOf(fileCtx), vAllOfPass)
-        assertTrue(vAllOfPass.isEmpty())
-
-        val vNoneOfPass = mutableListOf<String>()
-        FilesRuleBuilder(graph).should().noneOf({
-            haveName("Wrong.kt")
-        }).getShouldAssertion()!!(fileCtx, listOf(fileCtx), vNoneOfPass)
-        assertTrue(vNoneOfPass.isEmpty())
-
-        val vNoneOfFail = mutableListOf<String>()
-        FilesRuleBuilder(graph).should().noneOf({
-            haveName("Test.kt")
-        }).getShouldAssertion()!!(fileCtx, listOf(fileCtx), vNoneOfFail)
-        assertEquals(1, vNoneOfFail.size)
-
-        // Unauthorized packages & modules
-        val fileCtxImp =
-            FileDeclarationContext(
-                FileDeclaration("Imp.kt", "com.example", imports = listOf("com.prohibited.Feature")),
-                ":app",
-            )
-        val vOnlyPkg = mutableListOf<String>()
-        FilesRuleBuilder(
-            graph,
-        ).should().onlyDependOnPackages("com.allowed").getShouldAssertion()!!(fileCtxImp, listOf(fileCtxImp), vOnlyPkg)
-        assertEquals(1, vOnlyPkg.size)
-
-        val vNotPkg = mutableListOf<String>()
-        FilesRuleBuilder(
-            graph,
-        ).should().notDependOnPackages("com.prohibited").getShouldAssertion()!!(fileCtxImp, listOf(fileCtxImp), vNotPkg)
-        assertEquals(1, vNotPkg.size)
-
-        val otherMod = Module(":", ":other", "other", emptyList(), emptyList(), emptyList(), listOf(fileA))
-        val graphWithModules =
-            ProjectGraph(
-                mapOf(
-                    ":" to listOf(Module(":", ":app", "app", emptyList(), emptyList(), emptyList(), listOf(fileWithUsages)), otherMod),
-                ),
-            )
-        val fileWithOtherModUsage =
-            FileDeclaration(
-                "Usage.kt",
-                "com.example",
-                usages = listOf(SourceUsage(UsageKind.CLASS_REFERENCE, "com.example.ClassA", "Usage.kt", 1, 1)),
-            )
-        val fileCtxOtherUsage = FileDeclarationContext(fileWithOtherModUsage, ":other")
-
-        val vOnlyMod = mutableListOf<String>()
-        FilesRuleBuilder(
-            graphWithModules,
-        ).should().onlyDependOnModules(
-            ":allowed",
-        ).getShouldAssertion()!!(fileCtxOtherUsage, listOf(fileCtxOtherUsage), vOnlyMod)
-        assertEquals(1, vOnlyMod.size)
-
-        val vNotMod = mutableListOf<String>()
-        FilesRuleBuilder(
-            graphWithModules,
-        ).should().notDependOnModules(
-            ":app",
-        ).getShouldAssertion()!!(fileCtxOtherUsage, listOf(fileCtxOtherUsage), vNotMod)
-        assertEquals(1, vNotMod.size)
-    }
-
-    @Test
-    fun `test FilesShould path and content alias assertions`() {
         val fileCtx = FileDeclarationContext(fileA, ":app")
         val graph =
             ProjectGraph(
                 mapOf(":" to listOf(Module(":", ":app", "app", emptyList(), emptyList(), emptyList(), listOf(fileA)))),
             )
 
-        fun assertPass(builder: FilesRuleBuilder) {
-            val v = mutableListOf<String>()
-            builder.getShouldAssertion()!!(fileCtx, listOf(fileCtx), v)
-            assertTrue(v.isEmpty())
-        }
+        val assertClsSingle = FilesRuleBuilder(graph).should().containClass("ClassA").getShouldAssertion()!!
+        val v1 = mutableListOf<String>()
+        assertClsSingle(fileCtx, listOf(fileCtx), v1)
+        assertTrue(v1.isEmpty())
 
-        assertPass(FilesRuleBuilder(graph).should().resideInAPackage("com.example"))
-        assertPass(FilesRuleBuilder(graph).should().resideInAPackage(listOf("com.example")))
-        assertPass(FilesRuleBuilder(graph).should().resideInAPackage("com.example", "com.other"))
-        assertPass(FilesRuleBuilder(graph).should().resideInAPackage { it.startsWith("com") })
+        val assertClsList =
+            FilesRuleBuilder(
+                graph,
+            ).should().containClass(listOf("ClassA")).getShouldAssertion()!!
+        val v2 = mutableListOf<String>()
+        assertClsList(fileCtx, listOf(fileCtx), v2)
+        assertTrue(v2.isEmpty())
 
-        assertPass(FilesRuleBuilder(graph).should().notResideInAPackage("com.other"))
-        assertPass(FilesRuleBuilder(graph).should().notResideInAPackage(listOf("com.other")))
-        assertPass(FilesRuleBuilder(graph).should().notResideInAPackage("com.other", "com.forbidden"))
+        val assertClsVararg =
+            FilesRuleBuilder(
+                graph,
+            ).should().containClass("ClassA", "Other").getShouldAssertion()!!
+        val v3 = mutableListOf<String>()
+        assertClsVararg(fileCtx, listOf(fileCtx), v3)
+        assertTrue(v3.isEmpty())
 
-        assertPass(FilesRuleBuilder(graph).should().resideInAModule(":app"))
-        assertPass(FilesRuleBuilder(graph).should().resideInAModule(listOf(":app")))
-        assertPass(FilesRuleBuilder(graph).should().resideInAModule(":app", ":core"))
+        val assertNotClsSingle =
+            FilesRuleBuilder(
+                graph,
+            ).should().notContainClass("Missing").getShouldAssertion()!!
+        val v4 = mutableListOf<String>()
+        assertNotClsSingle(fileCtx, listOf(fileCtx), v4)
+        assertTrue(v4.isEmpty())
 
-        assertPass(FilesRuleBuilder(graph).should().notResideInAModule(":forbidden"))
-        assertPass(FilesRuleBuilder(graph).should().notResideInAModule(listOf(":forbidden")))
-        assertPass(FilesRuleBuilder(graph).should().notResideInAModule(":forbidden", ":other"))
+        val assertNotClsList =
+            FilesRuleBuilder(
+                graph,
+            ).should().notContainClass(listOf("Missing")).getShouldAssertion()!!
+        val v5 = mutableListOf<String>()
+        assertNotClsList(fileCtx, listOf(fileCtx), v5)
+        assertTrue(v5.isEmpty())
 
-        assertPass(FilesRuleBuilder(graph).should().haveName(listOf("ClassA.kt")))
-        assertPass(FilesRuleBuilder(graph).should().haveName("ClassA.kt", "FileB.kt"))
-        assertPass(FilesRuleBuilder(graph).should().haveName { it.startsWith("ClassA") })
+        val assertNotClsVararg =
+            FilesRuleBuilder(
+                graph,
+            ).should().notContainClass("Missing", "Bad").getShouldAssertion()!!
+        val v6 = mutableListOf<String>()
+        assertNotClsVararg(fileCtx, listOf(fileCtx), v6)
+        assertTrue(v6.isEmpty())
 
-        assertPass(FilesRuleBuilder(graph).should().notHaveName(listOf("Forbidden.kt")))
-        assertPass(FilesRuleBuilder(graph).should().notHaveName("Forbidden.kt", "Other.kt"))
+        val fileWithImports = FileDeclaration("Imp.kt", "com.example", imports = listOf("com.example.ClassB"))
+        val fileCtxImp = FileDeclarationContext(fileWithImports, ":app")
 
-        assertPass(FilesRuleBuilder(graph).should().notHaveNameMatching("Forbidden*"))
-        assertPass(FilesRuleBuilder(graph).should().notHaveNameMatching(listOf("Forbidden*")))
-        assertPass(FilesRuleBuilder(graph).should().notHaveNameMatching("Forbidden*", "Other*"))
+        val assertImpSingle =
+            FilesRuleBuilder(
+                graph,
+            ).should().haveImportOf("com.example.ClassB").getShouldAssertion()!!
+        val v7 = mutableListOf<String>()
+        assertImpSingle(fileCtxImp, listOf(fileCtxImp), v7)
+        assertTrue(v7.isEmpty())
 
-        assertPass(FilesRuleBuilder(graph).should().notHaveNameStartingWith("Forbidden"))
-        assertPass(FilesRuleBuilder(graph).should().notHaveNameStartingWith(listOf("Forbidden")))
-        assertPass(FilesRuleBuilder(graph).should().notHaveNameStartingWith("Forbidden", "Other"))
+        val assertImpList =
+            FilesRuleBuilder(
+                graph,
+            ).should().haveImportOf(listOf("com.example.ClassB")).getShouldAssertion()!!
+        val v8 = mutableListOf<String>()
+        assertImpList(fileCtxImp, listOf(fileCtxImp), v8)
+        assertTrue(v8.isEmpty())
 
-        assertPass(FilesRuleBuilder(graph).should().notHaveNameEndingWith("Forbidden.kt"))
-        assertPass(FilesRuleBuilder(graph).should().notHaveNameEndingWith(listOf("Forbidden.kt")))
-        assertPass(FilesRuleBuilder(graph).should().notHaveNameEndingWith("Forbidden.kt", "Other.kt"))
+        val assertImpVararg =
+            FilesRuleBuilder(
+                graph,
+            ).should().haveImportOf("com.example.ClassB", "com.other.Other").getShouldAssertion()!!
+        val v9 = mutableListOf<String>()
+        assertImpVararg(fileCtxImp, listOf(fileCtxImp), v9)
+        assertTrue(v9.isEmpty())
 
-        assertPass(FilesRuleBuilder(graph).should().haveOnlyOneClassPerFile())
-        assertPass(FilesRuleBuilder(graph).should().haveNameMatchingClassName())
-        assertPass(FilesRuleBuilder(graph).should().haveNoWildcardImports())
+        val assertNotImpSingle =
+            FilesRuleBuilder(
+                graph,
+            ).should().notHaveImportOf("com.other.Missing").getShouldAssertion()!!
+        val v10 = mutableListOf<String>()
+        assertNotImpSingle(fileCtxImp, listOf(fileCtxImp), v10)
+        assertTrue(v10.isEmpty())
 
-        FilesRuleBuilder(graph).should().haveTopLevelFunctions()
-            .getShouldAssertion()!!(fileCtx, listOf(fileCtx), mutableListOf())
+        val assertNotImpList =
+            FilesRuleBuilder(
+                graph,
+            ).should().notHaveImportOf(listOf("com.other.Missing")).getShouldAssertion()!!
+        val v11 = mutableListOf<String>()
+        assertNotImpList(fileCtxImp, listOf(fileCtxImp), v11)
+        assertTrue(v11.isEmpty())
 
-        FilesRuleBuilder(graph).should().notHaveTopLevelFunctions()
-            .getShouldAssertion()!!(fileCtx, listOf(fileCtx), mutableListOf())
+        val assertNotImpVararg =
+            FilesRuleBuilder(
+                graph,
+            ).should().notHaveImportOf("com.other.Missing", "com.other.Bad").getShouldAssertion()!!
+        val v12 = mutableListOf<String>()
+        assertNotImpVararg(fileCtxImp, listOf(fileCtxImp), v12)
+        assertTrue(v12.isEmpty())
+    }
 
-        FilesRuleBuilder(graph).should().haveTopLevelProperties()
-            .getShouldAssertion()!!(fileCtx, listOf(fileCtx), mutableListOf())
+    @Test
+    fun `test FilesShould top level and structural elements`() {
+        val topFunc = FunctionDeclaration("topFun", Visibility.PUBLIC, emptySet(), "Unit", emptyList(), emptyList(), null)
+        val topProp = PropertyDeclaration("topProp", Visibility.PUBLIC, emptySet(), "String", true, emptyList(), null)
+        val fileWithTop = FileDeclaration("Top.kt", "com.example", topLevelFunctions = listOf(topFunc), topLevelProperties = listOf(topProp))
+        val fileCtxTop = FileDeclarationContext(fileWithTop, ":app")
+        val graph =
+            ProjectGraph(
+                mapOf(":" to listOf(Module(":", ":app", "app", emptyList(), emptyList(), emptyList(), listOf(fileWithTop)))),
+            )
 
-        FilesRuleBuilder(graph).should().notHaveTopLevelProperties()
-            .getShouldAssertion()!!(fileCtx, listOf(fileCtx), mutableListOf())
+        val assertTopFuncs = FilesRuleBuilder(graph).should().haveTopLevelFunctions().getShouldAssertion()!!
+        val v1 = mutableListOf<String>()
+        assertTopFuncs(fileCtxTop, listOf(fileCtxTop), v1)
+        assertTrue(v1.isEmpty())
 
-        FilesRuleBuilder(graph).should().haveClasses()
-            .getShouldAssertion()!!(fileCtx, listOf(fileCtx), mutableListOf())
+        val assertTopProps = FilesRuleBuilder(graph).should().haveTopLevelProperties().getShouldAssertion()!!
+        val v2 = mutableListOf<String>()
+        assertTopProps(fileCtxTop, listOf(fileCtxTop), v2)
+        assertTrue(v2.isEmpty())
 
-        FilesRuleBuilder(graph).should().notHaveClasses()
-            .getShouldAssertion()!!(fileCtx, listOf(fileCtx), mutableListOf())
+        val fileNoTop = FileDeclaration("NoTop.kt", "com.example", classes = listOf(classA))
+        val fileCtxNoTop = FileDeclarationContext(fileNoTop, ":app")
+
+        val assertNotTopFuncs = FilesRuleBuilder(graph).should().notHaveTopLevelFunctions().getShouldAssertion()!!
+        val v3 = mutableListOf<String>()
+        assertNotTopFuncs(fileCtxNoTop, listOf(fileCtxNoTop), v3)
+        assertTrue(v3.isEmpty())
+
+        val assertNotTopProps = FilesRuleBuilder(graph).should().notHaveTopLevelProperties().getShouldAssertion()!!
+        val v4 = mutableListOf<String>()
+        assertNotTopProps(fileCtxNoTop, listOf(fileCtxNoTop), v4)
+        assertTrue(v4.isEmpty())
+
+        val assertClasses = FilesRuleBuilder(graph).should().haveClasses().getShouldAssertion()!!
+        val v5 = mutableListOf<String>()
+        assertClasses(fileCtxNoTop, listOf(fileCtxNoTop), v5)
+        assertTrue(v5.isEmpty())
+
+        val assertNotClasses = FilesRuleBuilder(graph).should().notHaveClasses().getShouldAssertion()!!
+        val v6 = mutableListOf<String>()
+        assertNotClasses(fileCtxTop, listOf(fileCtxTop), v6)
+        assertTrue(v6.isEmpty())
+    }
+
+    @Test
+    fun `test FilesShould name assertions and package dependencies`() {
+        val fileCtx = FileDeclarationContext(fileA, ":app")
+        val graph =
+            ProjectGraph(
+                mapOf(":" to listOf(Module(":", ":app", "app", emptyList(), emptyList(), emptyList(), listOf(fileA)))),
+            )
+
+        val assertNameSingle = FilesRuleBuilder(graph).should().haveName("ClassA.kt").getShouldAssertion()!!
+        val v1 = mutableListOf<String>()
+        assertNameSingle(fileCtx, listOf(fileCtx), v1)
+        assertTrue(v1.isEmpty())
+
+        val assertNameList = FilesRuleBuilder(graph).should().haveName(listOf("ClassA.kt")).getShouldAssertion()!!
+        val v2 = mutableListOf<String>()
+        assertNameList(fileCtx, listOf(fileCtx), v2)
+        assertTrue(v2.isEmpty())
+
+        val assertNameVararg =
+            FilesRuleBuilder(
+                graph,
+            ).should().haveName("ClassA.kt", "FileB.kt").getShouldAssertion()!!
+        val v3 = mutableListOf<String>()
+        assertNameVararg(fileCtx, listOf(fileCtx), v3)
+        assertTrue(v3.isEmpty())
+
+        val assertNamePred =
+            FilesRuleBuilder(
+                graph,
+            ).should().haveName { it.startsWith("ClassA") }.getShouldAssertion()!!
+        val v4 = mutableListOf<String>()
+        assertNamePred(fileCtx, listOf(fileCtx), v4)
+        assertTrue(v4.isEmpty())
+
+        val assertNamePredDesc =
+            FilesRuleBuilder(
+                graph,
+            ).should().haveName("custom desc") { it.startsWith("ClassA") }.getShouldAssertion()!!
+        val v5 = mutableListOf<String>()
+        assertNamePredDesc(fileCtx, listOf(fileCtx), v5)
+        assertTrue(v5.isEmpty())
+
+        val assertNotNameSingle = FilesRuleBuilder(graph).should().notHaveName("Other.kt").getShouldAssertion()!!
+        val v6 = mutableListOf<String>()
+        assertNotNameSingle(fileCtx, listOf(fileCtx), v6)
+        assertTrue(v6.isEmpty())
+
+        val assertNotNameList =
+            FilesRuleBuilder(
+                graph,
+            ).should().notHaveName(listOf("Other.kt")).getShouldAssertion()!!
+        val v7 = mutableListOf<String>()
+        assertNotNameList(fileCtx, listOf(fileCtx), v7)
+        assertTrue(v7.isEmpty())
+
+        val assertNotNameVararg =
+            FilesRuleBuilder(
+                graph,
+            ).should().notHaveName("Other.kt", "Wrong.kt").getShouldAssertion()!!
+        val v8 = mutableListOf<String>()
+        assertNotNameVararg(fileCtx, listOf(fileCtx), v8)
+        assertTrue(v8.isEmpty())
+
+        val assertNotNamePred =
+            FilesRuleBuilder(
+                graph,
+            ).should().notHaveName { it.startsWith("Other") }.getShouldAssertion()!!
+        val v9 = mutableListOf<String>()
+        assertNotNamePred(fileCtx, listOf(fileCtx), v9)
+        assertTrue(v9.isEmpty())
+
+        val assertEndSingle = FilesRuleBuilder(graph).should().haveNameEndingWith(".kt").getShouldAssertion()!!
+        val v10 = mutableListOf<String>()
+        assertEndSingle(fileCtx, listOf(fileCtx), v10)
+        assertTrue(v10.isEmpty())
+
+        val assertEndList = FilesRuleBuilder(graph).should().haveNameEndingWith(listOf(".kt")).getShouldAssertion()!!
+        val v11 = mutableListOf<String>()
+        assertEndList(fileCtx, listOf(fileCtx), v11)
+        assertTrue(v11.isEmpty())
+
+        val assertEndVararg =
+            FilesRuleBuilder(
+                graph,
+            ).should().haveNameEndingWith(".kt", ".kts").getShouldAssertion()!!
+        val v12 = mutableListOf<String>()
+        assertEndVararg(fileCtx, listOf(fileCtx), v12)
+        assertTrue(v12.isEmpty())
+
+        val assertNotEndSingle =
+            FilesRuleBuilder(
+                graph,
+            ).should().notHaveNameEndingWith(".java").getShouldAssertion()!!
+        val v13 = mutableListOf<String>()
+        assertNotEndSingle(fileCtx, listOf(fileCtx), v13)
+        assertTrue(v13.isEmpty())
+
+        val assertNotEndList =
+            FilesRuleBuilder(
+                graph,
+            ).should().notHaveNameEndingWith(listOf(".java")).getShouldAssertion()!!
+        val v14 = mutableListOf<String>()
+        assertNotEndList(fileCtx, listOf(fileCtx), v14)
+        assertTrue(v14.isEmpty())
+
+        val assertNotEndVararg =
+            FilesRuleBuilder(
+                graph,
+            ).should().notHaveNameEndingWith(".java", ".cpp").getShouldAssertion()!!
+        val v15 = mutableListOf<String>()
+        assertNotEndVararg(fileCtx, listOf(fileCtx), v15)
+        assertTrue(v15.isEmpty())
+
+        val assertStartSingle = FilesRuleBuilder(graph).should().haveNameStartingWith("Class").getShouldAssertion()!!
+        val v16 = mutableListOf<String>()
+        assertStartSingle(fileCtx, listOf(fileCtx), v16)
+        assertTrue(v16.isEmpty())
+
+        val assertStartList =
+            FilesRuleBuilder(
+                graph,
+            ).should().haveNameStartingWith(listOf("Class")).getShouldAssertion()!!
+        val v17 = mutableListOf<String>()
+        assertStartList(fileCtx, listOf(fileCtx), v17)
+        assertTrue(v17.isEmpty())
+
+        val assertStartVararg =
+            FilesRuleBuilder(
+                graph,
+            ).should().haveNameStartingWith("Class", "File").getShouldAssertion()!!
+        val v18 = mutableListOf<String>()
+        assertStartVararg(fileCtx, listOf(fileCtx), v18)
+        assertTrue(v18.isEmpty())
+
+        val assertNotStartSingle =
+            FilesRuleBuilder(
+                graph,
+            ).should().notHaveNameStartingWith("Other").getShouldAssertion()!!
+        val v19 = mutableListOf<String>()
+        assertNotStartSingle(fileCtx, listOf(fileCtx), v19)
+        assertTrue(v19.isEmpty())
+
+        val assertNotStartList =
+            FilesRuleBuilder(
+                graph,
+            ).should().notHaveNameStartingWith(listOf("Other")).getShouldAssertion()!!
+        val v20 = mutableListOf<String>()
+        assertNotStartList(fileCtx, listOf(fileCtx), v20)
+        assertTrue(v20.isEmpty())
+
+        val assertNotStartVararg =
+            FilesRuleBuilder(
+                graph,
+            ).should().notHaveNameStartingWith("Other", "Wrong").getShouldAssertion()!!
+        val v21 = mutableListOf<String>()
+        assertNotStartVararg(fileCtx, listOf(fileCtx), v21)
+        assertTrue(v21.isEmpty())
+
+        val assertMatchSingle = FilesRuleBuilder(graph).should().haveNameMatching("Class*").getShouldAssertion()!!
+        val v22 = mutableListOf<String>()
+        assertMatchSingle(fileCtx, listOf(fileCtx), v22)
+        assertTrue(v22.isEmpty())
+
+        val assertMatchList =
+            FilesRuleBuilder(
+                graph,
+            ).should().haveNameMatching(listOf("Class*")).getShouldAssertion()!!
+        val v23 = mutableListOf<String>()
+        assertMatchList(fileCtx, listOf(fileCtx), v23)
+        assertTrue(v23.isEmpty())
+
+        val assertMatchVararg =
+            FilesRuleBuilder(
+                graph,
+            ).should().haveNameMatching("Class*", "File*").getShouldAssertion()!!
+        val v24 = mutableListOf<String>()
+        assertMatchVararg(fileCtx, listOf(fileCtx), v24)
+        assertTrue(v24.isEmpty())
+
+        val assertNotMatchSingle =
+            FilesRuleBuilder(
+                graph,
+            ).should().notHaveNameMatching("Other*").getShouldAssertion()!!
+        val v25 = mutableListOf<String>()
+        assertNotMatchSingle(fileCtx, listOf(fileCtx), v25)
+        assertTrue(v25.isEmpty())
+
+        val assertNotMatchList =
+            FilesRuleBuilder(
+                graph,
+            ).should().notHaveNameMatching(listOf("Other*")).getShouldAssertion()!!
+        val v26 = mutableListOf<String>()
+        assertNotMatchList(fileCtx, listOf(fileCtx), v26)
+        assertTrue(v26.isEmpty())
+
+        val assertNotMatchVararg =
+            FilesRuleBuilder(
+                graph,
+            ).should().notHaveNameMatching("Other*", "Wrong*").getShouldAssertion()!!
+        val v27 = mutableListOf<String>()
+        assertNotMatchVararg(fileCtx, listOf(fileCtx), v27)
+        assertTrue(v27.isEmpty())
+
+        val fileWithImports = FileDeclaration("Imp.kt", "com.example", imports = listOf("com.example.ClassB"))
+        val fileCtxImp = FileDeclarationContext(fileWithImports, ":app")
+
+        val assertOnlyPkgSingle =
+            FilesRuleBuilder(
+                graph,
+            ).should().onlyDependOnPackages("com.example.*").getShouldAssertion()!!
+        val v28 = mutableListOf<String>()
+        assertOnlyPkgSingle(fileCtxImp, listOf(fileCtxImp), v28)
+        assertTrue(v28.isEmpty())
+
+        val assertOnlyPkgList =
+            FilesRuleBuilder(
+                graph,
+            ).should().onlyDependOnPackages(listOf("com.example.*")).getShouldAssertion()!!
+        val v29 = mutableListOf<String>()
+        assertOnlyPkgList(fileCtxImp, listOf(fileCtxImp), v29)
+        assertTrue(v29.isEmpty())
+
+        val assertOnlyPkgVararg =
+            FilesRuleBuilder(
+                graph,
+            ).should().onlyDependOnPackages("com.example.*", "com.other.*").getShouldAssertion()!!
+        val v30 = mutableListOf<String>()
+        assertOnlyPkgVararg(fileCtxImp, listOf(fileCtxImp), v30)
+        assertTrue(v30.isEmpty())
+
+        val assertNotPkgSingle =
+            FilesRuleBuilder(
+                graph,
+            ).should().notDependOnPackages("com.forbidden.*").getShouldAssertion()!!
+        val v31 = mutableListOf<String>()
+        assertNotPkgSingle(fileCtxImp, listOf(fileCtxImp), v31)
+        assertTrue(v31.isEmpty())
+
+        val assertNotPkgList =
+            FilesRuleBuilder(
+                graph,
+            ).should().notDependOnPackages(listOf("com.forbidden.*")).getShouldAssertion()!!
+        val v32 = mutableListOf<String>()
+        assertNotPkgList(fileCtxImp, listOf(fileCtxImp), v32)
+        assertTrue(v32.isEmpty())
+
+        val assertNotPkgVararg =
+            FilesRuleBuilder(
+                graph,
+            ).should().notDependOnPackages("com.forbidden.*", "org.wrong.*").getShouldAssertion()!!
+        val v33 = mutableListOf<String>()
+        assertNotPkgVararg(fileCtxImp, listOf(fileCtxImp), v33)
+        assertTrue(v33.isEmpty())
+
+        val vOnlyModSingle = mutableListOf<String>()
+        FilesRuleBuilder(graph).should().onlyDependOnModules(":app")
+            .getShouldAssertion()!!(fileCtxImp, listOf(fileCtxImp), vOnlyModSingle)
+        assertTrue(vOnlyModSingle.isEmpty())
+
+        val vOnlyModList = mutableListOf<String>()
+        FilesRuleBuilder(graph).should().onlyDependOnModules(listOf(":app"))
+            .getShouldAssertion()!!(fileCtxImp, listOf(fileCtxImp), vOnlyModList)
+        assertTrue(vOnlyModList.isEmpty())
+
+        val vOnlyModVararg = mutableListOf<String>()
+        FilesRuleBuilder(graph).should().onlyDependOnModules(":app", ":core")
+            .getShouldAssertion()!!(fileCtxImp, listOf(fileCtxImp), vOnlyModVararg)
+        assertTrue(vOnlyModVararg.isEmpty())
+
+        val vNotModSingle = mutableListOf<String>()
+        FilesRuleBuilder(graph).should().notDependOnModules(":core")
+            .getShouldAssertion()!!(fileCtxImp, listOf(fileCtxImp), vNotModSingle)
+        assertTrue(vNotModSingle.isEmpty())
+
+        val vNotModList = mutableListOf<String>()
+        FilesRuleBuilder(graph).should().notDependOnModules(listOf(":core"))
+            .getShouldAssertion()!!(fileCtxImp, listOf(fileCtxImp), vNotModList)
+        assertTrue(vNotModList.isEmpty())
+
+        val vNotModVararg = mutableListOf<String>()
+        FilesRuleBuilder(graph).should().notDependOnModules(":core")
+            .getShouldAssertion()!!(fileCtxImp, listOf(fileCtxImp), vNotModVararg)
+        assertTrue(vNotModVararg.isEmpty())
     }
 }

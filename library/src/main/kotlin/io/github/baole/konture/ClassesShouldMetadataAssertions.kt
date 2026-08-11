@@ -12,7 +12,7 @@ import io.github.baole.konture.i18n.getMessage
  * Fluent API for defining assertion rules on Kotlin classes.
  */
 @Suppress("ComplexInterface")
-internal interface ClassesShouldMetadataAssertions {
+interface ClassesShouldMetadataAssertions {
     val builder: ClassesRuleBuilder
 
     /**

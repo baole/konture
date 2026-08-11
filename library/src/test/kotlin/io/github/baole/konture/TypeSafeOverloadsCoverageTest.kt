@@ -272,27 +272,37 @@ internal class TypeSafeOverloadsCoverageTest : KontureScopeTestFixture() {
                 KontureScope::class.java to KontureScope(classesList),
             )
 
-        val typeSafeOverloadsClass = Class.forName("io.github.baole.konture.TypeSafeOverloadsKt")
-        for (method in typeSafeOverloadsClass.declaredMethods) {
-            val paramTypes = method.parameterTypes
-            if (paramTypes.isEmpty()) continue
+        val typeSafeOverloadsClasses =
+            listOf(
+                "io.github.baole.konture.TypeSafeOverloadsClassesKt",
+                "io.github.baole.konture.TypeSafeOverloadsFunctionsKt",
+                "io.github.baole.konture.TypeSafeOverloadsPropertiesKt",
+                "io.github.baole.konture.TypeSafeOverloadsFilesKt",
+                "io.github.baole.konture.TypeSafeOverloadsModulesKt",
+            )
+        for (className in typeSafeOverloadsClasses) {
+            val typeSafeOverloadsClass = Class.forName(className)
+            for (method in typeSafeOverloadsClass.declaredMethods) {
+                val paramTypes = method.parameterTypes
+                if (paramTypes.isEmpty()) continue
 
-            var valid = true
-            val args =
-                Array(paramTypes.size) { i ->
-                    val resolved = resolveReflectionArgument(paramTypes[i], contextMap)
-                    if (resolved == UNRESOLVED) {
-                        valid = false
-                        null
-                    } else {
-                        resolved
+                var valid = true
+                val args =
+                    Array(paramTypes.size) { i ->
+                        val resolved = resolveReflectionArgument(paramTypes[i], contextMap)
+                        if (resolved == UNRESOLVED) {
+                            valid = false
+                            null
+                        } else {
+                            resolved
+                        }
                     }
-                }
-            if (valid) {
-                try {
-                    method.isAccessible = true
-                    method.invoke(null, *args)
-                } catch (_: Throwable) {
+                if (valid) {
+                    try {
+                        method.isAccessible = true
+                        method.invoke(null, *args)
+                    } catch (_: Throwable) {
+                    }
                 }
             }
         }

@@ -12,7 +12,8 @@ import io.github.baole.konture.impl.PatternMatchers
 /**
  * Fluent API for defining assertion rules on Kotlin classes.
  */
-internal interface ClassesShouldPackageAssertions {
+@Suppress("ComplexInterface")
+interface ClassesShouldPackageAssertions {
     val builder: ClassesRuleBuilder
 
     /**
