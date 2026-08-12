@@ -150,20 +150,47 @@ public operator fun KonturePropertyScope.minus(other: KonturePropertyScope): Kon
 // Filtering extensions
 
 /** Filters the list of properties to include only those whose names end with [suffix]. */
-public fun List<PropertyDeclarationContext>.withNameEndingWith(suffix: String): List<PropertyDeclarationContext> =
+public fun List<PropertyDeclarationContext>.haveNameEndingWith(suffix: String): List<PropertyDeclarationContext> =
     filter { it.declaration.name.endsWith(suffix) }
 
+/** Filters the list of properties to include only those whose names end with [suffix]. */
+@Deprecated(
+    message = "Renamed for consistency across Konture DSL scopes.",
+    replaceWith = ReplaceWith("haveNameEndingWith(suffix)"),
+    level = DeprecationLevel.WARNING,
+)
+public fun List<PropertyDeclarationContext>.withNameEndingWith(suffix: String): List<PropertyDeclarationContext> =
+    haveNameEndingWith(suffix)
+
 /** Filters the list of properties to include only those whose names start with [prefix]. */
-public fun List<PropertyDeclarationContext>.withNameStartingWith(prefix: String): List<PropertyDeclarationContext> =
+public fun List<PropertyDeclarationContext>.haveNameStartingWith(prefix: String): List<PropertyDeclarationContext> =
     filter { it.declaration.name.startsWith(prefix) }
+
+/** Filters the list of properties to include only those whose names start with [prefix]. */
+@Deprecated(
+    message = "Renamed for consistency across Konture DSL scopes.",
+    replaceWith = ReplaceWith("haveNameStartingWith(prefix)"),
+    level = DeprecationLevel.WARNING,
+)
+public fun List<PropertyDeclarationContext>.withNameStartingWith(prefix: String): List<PropertyDeclarationContext> =
+    haveNameStartingWith(prefix)
 
 /** Filters the list of properties to include only those matching the glob pattern [pattern]. */
 public fun List<PropertyDeclarationContext>.withNameMatching(pattern: String): List<PropertyDeclarationContext> =
     filter { PatternMatchers.matchesSimpleGlob(pattern, it.declaration.name) }
 
 /** Filters the list of properties to include only those residing in packages matching [packagePattern]. */
-public fun List<PropertyDeclarationContext>.withPackage(packagePattern: String): List<PropertyDeclarationContext> =
+public fun List<PropertyDeclarationContext>.resideInAPackage(packagePattern: String): List<PropertyDeclarationContext> =
     filter { PatternMatchers.matchesPackage(packagePattern, it.packageName) }
+
+/** Filters the list of properties to include only those residing in packages matching [packagePattern]. */
+@Deprecated(
+    message = "Renamed for consistency across Konture DSL scopes.",
+    replaceWith = ReplaceWith("resideInAPackage(packagePattern)"),
+    level = DeprecationLevel.WARNING,
+)
+public fun List<PropertyDeclarationContext>.withPackage(packagePattern: String): List<PropertyDeclarationContext> =
+    resideInAPackage(packagePattern)
 
 /** Filters the list of properties to include only read-only (`val`) properties. */
 public fun List<PropertyDeclarationContext>.valProperties(): List<PropertyDeclarationContext> =
@@ -225,6 +252,44 @@ public fun KonturePropertyScope.topLevelProperties(): KonturePropertyScope =
 /** Filters properties in this scope to include only extension properties. */
 public fun KonturePropertyScope.extensionProperties(): KonturePropertyScope =
     KonturePropertyScope(properties.extensionProperties())
+
+/** Filters properties in this scope ending with [suffix]. */
+public fun KonturePropertyScope.haveNameEndingWith(suffix: String): KonturePropertyScope =
+    KonturePropertyScope(properties.haveNameEndingWith(suffix))
+
+/** Filters properties in this scope ending with [suffix]. */
+@Deprecated(
+    message = "Renamed for consistency across Konture DSL scopes.",
+    replaceWith = ReplaceWith("haveNameEndingWith(suffix)"),
+    level = DeprecationLevel.WARNING,
+)
+public fun KonturePropertyScope.withNameEndingWith(suffix: String): KonturePropertyScope = haveNameEndingWith(suffix)
+
+/** Filters properties in this scope starting with [prefix]. */
+public fun KonturePropertyScope.haveNameStartingWith(prefix: String): KonturePropertyScope =
+    KonturePropertyScope(properties.haveNameStartingWith(prefix))
+
+/** Filters properties in this scope starting with [prefix]. */
+@Deprecated(
+    message = "Renamed for consistency across Konture DSL scopes.",
+    replaceWith = ReplaceWith("haveNameStartingWith(prefix)"),
+    level = DeprecationLevel.WARNING,
+)
+public fun KonturePropertyScope.withNameStartingWith(prefix: String): KonturePropertyScope =
+    haveNameStartingWith(prefix)
+
+/** Filters properties in this scope residing in packages matching [packagePattern]. */
+public fun KonturePropertyScope.resideInAPackage(packagePattern: String): KonturePropertyScope =
+    KonturePropertyScope(properties.resideInAPackage(packagePattern))
+
+/** Filters properties in this scope residing in packages matching [packagePattern]. */
+@Deprecated(
+    message = "Renamed for consistency across Konture DSL scopes.",
+    replaceWith = ReplaceWith("resideInAPackage(packagePattern)"),
+    level = DeprecationLevel.WARNING,
+)
+public fun KonturePropertyScope.withPackage(packagePattern: String): KonturePropertyScope =
+    resideInAPackage(packagePattern)
 
 // Assertion extensions on KonturePropertyScope
 

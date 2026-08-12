@@ -115,14 +115,36 @@ public operator fun KontureScope.minus(other: KontureScope): KontureScope {
 /**
  * Filters the list of class declarations to include only those whose names end with the specified suffix.
  */
-public fun List<ClassDeclaration>.withNameEndingWith(suffix: String): List<ClassDeclaration> =
+public fun List<ClassDeclaration>.haveNameEndingWith(suffix: String): List<ClassDeclaration> =
     filter { it.name.endsWith(suffix) }
+
+/**
+ * Filters the list of class declarations to include only those whose names end with the specified suffix.
+ */
+@Deprecated(
+    message = "Renamed for consistency across Konture DSL scopes.",
+    replaceWith = ReplaceWith("haveNameEndingWith(suffix)"),
+    level = DeprecationLevel.WARNING,
+)
+public fun List<ClassDeclaration>.withNameEndingWith(suffix: String): List<ClassDeclaration> =
+    haveNameEndingWith(suffix)
 
 /**
  * Filters the list of class declarations to include only those whose names start with the specified prefix.
  */
-public fun List<ClassDeclaration>.withNameStartingWith(prefix: String): List<ClassDeclaration> =
+public fun List<ClassDeclaration>.haveNameStartingWith(prefix: String): List<ClassDeclaration> =
     filter { it.name.startsWith(prefix) }
+
+/**
+ * Filters the list of class declarations to include only those whose names start with the specified prefix.
+ */
+@Deprecated(
+    message = "Renamed for consistency across Konture DSL scopes.",
+    replaceWith = ReplaceWith("haveNameStartingWith(prefix)"),
+    level = DeprecationLevel.WARNING,
+)
+public fun List<ClassDeclaration>.withNameStartingWith(prefix: String): List<ClassDeclaration> =
+    haveNameStartingWith(prefix)
 
 /**
  * Filters the list of class declarations to include only those annotated with the specified annotation.
@@ -190,8 +212,20 @@ public fun List<ClassDeclaration>.inlineClasses(): List<ClassDeclaration> =
  * Filters the list of class declarations to include only those residing in packages matching the specified pattern.
  * Supports '..' segment wildcards.
  */
-public fun List<ClassDeclaration>.withPackage(packagePattern: String): List<ClassDeclaration> =
+public fun List<ClassDeclaration>.resideInAPackage(packagePattern: String): List<ClassDeclaration> =
     filter { PatternMatchers.matchesPackage(packagePattern, it.packageName) }
+
+/**
+ * Filters the list of class declarations to include only those residing in packages matching the specified pattern.
+ * Supports '..' segment wildcards.
+ */
+@Deprecated(
+    message = "Renamed for consistency across Konture DSL scopes.",
+    replaceWith = ReplaceWith("resideInAPackage(packagePattern)"),
+    level = DeprecationLevel.WARNING,
+)
+public fun List<ClassDeclaration>.withPackage(packagePattern: String): List<ClassDeclaration> =
+    resideInAPackage(packagePattern)
 
 /**
  * Filters the list of class declarations to include only those whose simple names match the specified glob pattern.
@@ -203,12 +237,28 @@ public fun List<ClassDeclaration>.withNameMatching(pattern: String): List<ClassD
 // Scope-level delegation for KontureScope
 
 /** Filters classes in this scope ending with [suffix]. */
-public fun KontureScope.withNameEndingWith(suffix: String): KontureScope =
-    KontureScope(classes.withNameEndingWith(suffix))
+public fun KontureScope.haveNameEndingWith(suffix: String): KontureScope =
+    KontureScope(classes.haveNameEndingWith(suffix))
+
+/** Filters classes in this scope ending with [suffix]. */
+@Deprecated(
+    message = "Renamed for consistency across Konture DSL scopes.",
+    replaceWith = ReplaceWith("haveNameEndingWith(suffix)"),
+    level = DeprecationLevel.WARNING,
+)
+public fun KontureScope.withNameEndingWith(suffix: String): KontureScope = haveNameEndingWith(suffix)
 
 /** Filters classes in this scope starting with [prefix]. */
-public fun KontureScope.withNameStartingWith(prefix: String): KontureScope =
-    KontureScope(classes.withNameStartingWith(prefix))
+public fun KontureScope.haveNameStartingWith(prefix: String): KontureScope =
+    KontureScope(classes.haveNameStartingWith(prefix))
+
+/** Filters classes in this scope starting with [prefix]. */
+@Deprecated(
+    message = "Renamed for consistency across Konture DSL scopes.",
+    replaceWith = ReplaceWith("haveNameStartingWith(prefix)"),
+    level = DeprecationLevel.WARNING,
+)
+public fun KontureScope.withNameStartingWith(prefix: String): KontureScope = haveNameStartingWith(prefix)
 
 /** Filters classes in this scope with annotation [annotationFqName]. */
 public fun KontureScope.withAnnotationOf(annotationFqName: String): KontureScope =
@@ -258,8 +308,16 @@ public fun KontureScope.sealedClasses(): KontureScope = KontureScope(classes.sea
 public fun KontureScope.inlineClasses(): KontureScope = KontureScope(classes.inlineClasses())
 
 /** Filters classes in this scope residing in packages matching [packagePattern]. */
-public fun KontureScope.withPackage(packagePattern: String): KontureScope =
-    KontureScope(classes.withPackage(packagePattern))
+public fun KontureScope.resideInAPackage(packagePattern: String): KontureScope =
+    KontureScope(classes.resideInAPackage(packagePattern))
+
+/** Filters classes in this scope residing in packages matching [packagePattern]. */
+@Deprecated(
+    message = "Renamed for consistency across Konture DSL scopes.",
+    replaceWith = ReplaceWith("resideInAPackage(packagePattern)"),
+    level = DeprecationLevel.WARNING,
+)
+public fun KontureScope.withPackage(packagePattern: String): KontureScope = resideInAPackage(packagePattern)
 
 /** Filters classes in this scope matching name pattern [pattern]. */
 public fun KontureScope.withNameMatching(pattern: String): KontureScope =

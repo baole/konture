@@ -52,8 +52,8 @@ class AnnotationFilteringTest {
     @Test
     fun `files annotation filtering and assertions`() {
         Konture.files {
-            that().resideInAPackage(pkg).and().haveAnnotationOf<AnnMarkerA>()
-            should().beAnnotatedWith<AnnMarkerA>()
+            that().resideInAPackage(pkg).and().containClassesWithAnnotation<AnnMarkerA>()
+            should().containClassesWithAnnotation<AnnMarkerA>()
         }
     }
 

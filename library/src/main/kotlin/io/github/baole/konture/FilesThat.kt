@@ -425,18 +425,22 @@ public class FilesThat internal constructor(
     }
 
     /** Filter or assertion criteria for have annotation of. */
-    public infix fun haveAnnotationOf(annotationName: String): FilesRuleBuilder {
-        builder.setThat { file ->
-            file.declaration.classes.any { cls ->
-                cls.annotations.any { it.name == annotationName || it.fqName == annotationName }
-            }
-        }
-        return builder
-    }
+    @Deprecated(
+        message = "Renamed to containClassesWithAnnotation for consistency across file/module/slice scopes.",
+        replaceWith = ReplaceWith("containClassesWithAnnotation(annotationName)"),
+        level = DeprecationLevel.WARNING,
+    )
+    public infix fun haveAnnotationOf(annotationName: String): FilesRuleBuilder =
+        containClassesWithAnnotation(annotationName)
 
     /** Filter or assertion criteria for have annotation of. */
+    @Deprecated(
+        message = "Renamed to containClassesWithAnnotation for consistency across file/module/slice scopes.",
+        replaceWith = ReplaceWith("containClassesWithAnnotation(annotation)"),
+        level = DeprecationLevel.WARNING,
+    )
     public infix fun haveAnnotationOf(annotation: kotlin.reflect.KClass<out Annotation>): FilesRuleBuilder =
-        haveAnnotationOf(annotation.kontureQualifiedName())
+        containClassesWithAnnotation(annotation)
 
     /** Filter or assertion criteria for have all annotations of. */
     public infix fun haveAllAnnotationsOf(names: List<String>): FilesRuleBuilder {

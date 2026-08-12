@@ -67,7 +67,7 @@ class SpringConfigurationSanityTest {
     @Test
     fun `spring configuration annotations must not exist inside pure domain layers`() {
         Konture.scope.classes
-            .withPackage("..domain..")
+            .resideInAPackage("..domain..")
             .assertTrue("Domain classes must not declare Spring configuration") { cls ->
                 cls.annotations.none { ann ->
                     ann.name.contains("org.springframework.context.annotation.Configuration")

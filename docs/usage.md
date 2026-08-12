@@ -20,8 +20,8 @@ Konture provides a expressive DSL across six core scopes: `files {}`, `classes {
 | **Batch Context Integration** | ✅ `architecture { ... }` | ✅ `architecture { ... }` | ✅ `architecture { ... }` | ✅ `architecture { ... }` | ✅ `architecture { ... }` | ✅ `architecture { ... }` |
 | **Functional Inspection Scope** | ✅ `fileScope` | ✅ `classScope` | ✅ `functionScope` | ✅ `moduleScope` | ✅ `sliceScope(...)` | ✅ `propertyScope` |
 | **Module-Scoped Entry** | ✅ `fileScopeFromModule` | ✅ `classScopeFromModule` | ✅ `functionScopeFromModule` | ✅ `moduleScopeFromModule` | ✅ `sliceScopeFromModule` | ✅ `propertyScopeFromModule` |
-| **Package Filtering** | ✅ `resideInAPackage` | ✅ `resideInAPackage` | ✅ `resideInAPackage` | ✅ `containPackage` | ✅ `resideInAPackage` | ✅ `resideInAPackage` |
-| **Annotation Filtering** | ✅ `haveAnnotationOf` | ✅ `beAnnotatedWith` | ✅ `beAnnotatedWith` | ✅ `containClassesWithAnnotation` | ✅ `containClassesWithAnnotation` | ✅ `beAnnotatedWith` |
+| **Package Filtering** | ✅ `resideInAPackage` | ✅ `resideInAPackage` | ✅ `resideInAPackage` | ✅ `resideInAPackage` | ✅ `resideInAPackage` | ✅ `resideInAPackage` |
+| **Annotation Filtering** | ✅ `containClassesWithAnnotation` | ✅ `beAnnotatedWith` | ✅ `beAnnotatedWith` | ✅ `containClassesWithAnnotation` | ✅ `containClassesWithAnnotation` | ✅ `beAnnotatedWith` |
 | **Call & Reference Prohibitions** | ✅ `notCall` / `notReferenceClass` | ✅ `notCall` / `notReferenceClass` | ✅ `notCall` / `notReferenceClass` | ✅ `notCall` / `notReferenceClass` | ✅ `notCall` / `notReferenceClass` | ✅ `notCall` / `notReferenceClass` |
 | **Dependency Assertions** | ✅ `onlyDependOn*` / `notDependOn*` | ✅ `onlyDependOn*` / `notDependOn*` | ➖ | ✅ `onlyDependOnModules` | ✅ `onlyDependOnSlices` | ➖ |
 | **Cycle Detection** | ➖ | ✅ `beFreeOfCycles()` | ➖ | ✅ `beFreeOfCycles()` | ✅ `beFreeOfCycles()` | ➖ |
@@ -54,7 +54,7 @@ class FluentArchitectureTest {
     fun "repositories should be interfaces"() {
         Konture.scope
             .classes
-            .withNameEndingWith("Repository")
+            .haveNameEndingWith("Repository")
             .assertTrue("Repositories must be declared as interfaces!") { classDecl ->
                 classDecl.isInterface
             }
@@ -64,7 +64,7 @@ class FluentArchitectureTest {
     fun "viewmodel getters should not return Unit"() {
         Konture.functionScope
             .functions
-            .withNameStartingWith("get")
+            .haveNameStartingWith("get")
             .assertTrue("Getters must return non-Unit types!") { func ->
                 func.declaration.returnType != "Unit"
             }
@@ -74,7 +74,7 @@ class FluentArchitectureTest {
     fun "properties in domain models must be read-only"() {
         Konture.propertyScope
             .properties
-            .withPackage("..domain..")
+            .resideInAPackage("..domain..")
             .assertTrue("Domain model properties must be val!") { prop ->
                 prop.declaration.isVal
             }
@@ -176,7 +176,7 @@ Konture.slices {
 
 Konture.modules {
     that().resideInAModule(":feature-*")
-        .and().containPackage("com.acme.feature..")
+        .and().resideInAPackage("com.acme.feature..")
         .should().beFreeOfCycles()
         .andShould().notCall("java.lang.System.exit")
 }
@@ -278,7 +278,7 @@ The `assertOnlyDependOnClassesInAnyPackage()` assertion enforces layer isolation
 // Ensure domain model only depends on the core business layer
 Konture.scope
     .classes
-    .withPackage("..domain..")
+    .resideInAPackage("..domain..")
     .assertOnlyDependOnClassesInAnyPackage("..domain..", "..core..")
 ```
 

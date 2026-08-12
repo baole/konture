@@ -60,7 +60,7 @@ class StandardArchitectureTest {
         val scope = Konture.scope
 
         // Repositories must be interfaces
-        scope.withNameEndingWith("Repository")
+        scope.haveNameEndingWith("Repository")
             .assertTrue("Repositories must be interfaces") {
                 it.isInterface
             }
@@ -102,7 +102,7 @@ class StandardArchitectureTest {
     @Test
     fun `use cases must reside in domain package and have names ending with UseCase via konsist style`() {
         val scope = Konture.scope
-        scope.withNameEndingWith("UseCase")
+        scope.haveNameEndingWith("UseCase")
             .assertTrue("UseCases must reside in the domain package") { cls ->
                 cls.packageName.contains(".domain")
             }
@@ -166,7 +166,7 @@ class StandardArchitectureTest {
     fun `domain class signatures must not leak implementation-specific packages`() {
         // Enforce Type Leakage check using the Konsist-style functional scope API
         Konture.scope.classes()
-            .withNameEndingWith("UseCase")
+            .haveNameEndingWith("UseCase")
             .assertTrue("UseCase signature must be technical-agnostic") { cls ->
                 val signatureTypes = cls.functions.flatMap { func ->
                     listOf(func.returnType) + func.parameters.map { it.type }
