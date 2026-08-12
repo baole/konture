@@ -145,7 +145,7 @@ class KontureLayoutGenerationTest {
         val outputFile = task.outputFile.get().asFile
         assertTrue(outputFile.exists())
         val jsonText = outputFile.readText()
-        assertTrue(jsonText.contains("/some/external/absolute/path"))
+        assertTrue(jsonText.contains("some/external/absolute/path"))
     }
 
     @Test

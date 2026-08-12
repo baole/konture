@@ -138,7 +138,14 @@ public abstract class GenerateArchitectureLayout : DefaultTask() {
                     File(input.projectDir).let {
                         if (it.isAbsolute) it.canonicalFile else File(rootDir, input.projectDir).canonicalFile
                     }
-                val relProjectDir = if (moduleDir == rootDir) "." else moduleDir.relativeTo(rootDir).path
+                val relProjectDir =
+                    if (moduleDir == rootDir) {
+                        "."
+                    } else {
+                        moduleDir.relativeTo(
+                            rootDir,
+                        ).path.replace("\\", "/")
+                    }
 
                 val sourceSetModels =
                     input.sourceSets.map { ssInput ->
@@ -158,9 +165,9 @@ public abstract class GenerateArchitectureLayout : DefaultTask() {
                                         }
                                     }
                                 try {
-                                    dirFile.relativeTo(moduleDir).path
+                                    dirFile.relativeTo(moduleDir).path.replace("\\", "/")
                                 } catch (e: IllegalArgumentException) {
-                                    dirPath
+                                    dirPath.replace("\\", "/")
                                 }
                             }
 

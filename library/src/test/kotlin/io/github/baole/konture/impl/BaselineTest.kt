@@ -1,5 +1,6 @@
 /*
- * Copyright 2026 Bao Le Duc
+ * Copyright 2026 The Konture Contributors
+ * Contributors: Bao Le Duc (@baole)
  * SPDX-License-Identifier: Apache-2.0
  */
 
@@ -62,8 +63,9 @@ class BaselineTest : RuleBuildersTestBase() {
 
     @Test
     fun `test path normalization`() {
-        val buildRoot = File("/Users/baole/workspace/konture").canonicalFile
-        val violation = "Class com.example.ClassA in file /Users/baole/workspace/konture/library/src/ClassA.kt violates architecture rules"
+        val buildRoot = File(".").canonicalFile
+        val rootPathString = buildRoot.canonicalPath.replace('\\', '/')
+        val violation = "Class com.example.ClassA in file $rootPathString/library/src/ClassA.kt violates architecture rules"
 
         val normalized = BaselineManager.normalize(violation, buildRoot)
         assertEquals(
