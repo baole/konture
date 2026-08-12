@@ -396,7 +396,8 @@ public class SlicesThat internal constructor(
         val cleanName = modulePath.removePrefix(":").removePrefix("/")
         builder.setThat { slice ->
             slice.classes.any { cls ->
-                cls.filePath.contains("/$cleanName/") || cls.filePath.contains("$cleanName/")
+                val normPath = cls.filePath.replace('\\', '/')
+                normPath.contains("/$cleanName/") || normPath.contains("$cleanName/")
             }
         }
         return builder
@@ -408,8 +409,9 @@ public class SlicesThat internal constructor(
         val cleanNames = modulePaths.map { it.removePrefix(":").removePrefix("/") }
         builder.setThat { slice ->
             slice.classes.any { cls ->
+                val normPath = cls.filePath.replace('\\', '/')
                 cleanNames.any { cleanName ->
-                    cls.filePath.contains("/$cleanName/") || cls.filePath.contains("$cleanName/")
+                    normPath.contains("/$cleanName/") || normPath.contains("$cleanName/")
                 }
             }
         }
@@ -435,7 +437,8 @@ public class SlicesThat internal constructor(
         val cleanName = modulePath.removePrefix(":").removePrefix("/")
         builder.setThat { slice ->
             slice.classes.none { cls ->
-                cls.filePath.contains("/$cleanName/") || cls.filePath.contains("$cleanName/")
+                val normPath = cls.filePath.replace('\\', '/')
+                normPath.contains("/$cleanName/") || normPath.contains("$cleanName/")
             }
         }
         return builder
@@ -447,8 +450,9 @@ public class SlicesThat internal constructor(
         val cleanNames = modulePaths.map { it.removePrefix(":").removePrefix("/") }
         builder.setThat { slice ->
             slice.classes.none { cls ->
+                val normPath = cls.filePath.replace('\\', '/')
                 cleanNames.any { cleanName ->
-                    cls.filePath.contains("/$cleanName/") || cls.filePath.contains("$cleanName/")
+                    normPath.contains("/$cleanName/") || normPath.contains("$cleanName/")
                 }
             }
         }

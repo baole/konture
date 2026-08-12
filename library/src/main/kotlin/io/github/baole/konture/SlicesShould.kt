@@ -401,9 +401,14 @@ public class SlicesShould(private val builder: SlicesRuleBuilder) {
 
     /** Asserts that slices reside in module [modulePath]. */
     public infix fun resideInModule(modulePath: String): SlicesRuleBuilder {
+        val cleanName = modulePath.removePrefix(":").removePrefix("/")
         builder.addShouldAssertion { sliceGraph, violations ->
             for (slice in sliceGraph.slices) {
-                if (!slice.classes.any { it.filePath.contains(modulePath) }) {
+                if (!slice.classes.any { cls ->
+                        val normPath = cls.filePath.replace('\\', '/')
+                        normPath.contains("/$cleanName/") || normPath.contains("$cleanName/") || normPath.contains(modulePath)
+                    }
+                ) {
                     violations.add(getMessage("slice.should.resideInModulePath", slice.key, modulePath))
                 }
             }
@@ -413,9 +418,16 @@ public class SlicesShould(private val builder: SlicesRuleBuilder) {
 
     /** Asserts that slices reside in modules [modulePaths]. */
     public infix fun resideInModules(modulePaths: List<String>): SlicesRuleBuilder {
+        val cleanNames = modulePaths.map { it.removePrefix(":").removePrefix("/") }
         builder.addShouldAssertion { sliceGraph, violations ->
             for (slice in sliceGraph.slices) {
-                if (!slice.classes.any { cls -> modulePaths.any { cls.filePath.contains(it) } }) {
+                if (!slice.classes.any { cls ->
+                        val normPath = cls.filePath.replace('\\', '/')
+                        cleanNames.any { cleanName ->
+                            normPath.contains("/$cleanName/") || normPath.contains("$cleanName/") || normPath.contains(cleanName)
+                        }
+                    }
+                ) {
                     violations.add(getMessage("slice.should.resideInModulePaths", slice.key, modulePaths.toString()))
                 }
             }
@@ -428,9 +440,14 @@ public class SlicesShould(private val builder: SlicesRuleBuilder) {
 
     /** Asserts that slices do not reside in module [modulePath]. */
     public infix fun notResideInModule(modulePath: String): SlicesRuleBuilder {
+        val cleanName = modulePath.removePrefix(":").removePrefix("/")
         builder.addShouldAssertion { sliceGraph, violations ->
             for (slice in sliceGraph.slices) {
-                if (slice.classes.any { it.filePath.contains(modulePath) }) {
+                if (slice.classes.any { cls ->
+                        val normPath = cls.filePath.replace('\\', '/')
+                        normPath.contains("/$cleanName/") || normPath.contains("$cleanName/") || normPath.contains(modulePath)
+                    }
+                ) {
                     violations.add(getMessage("slice.should.notResideInModulePath", slice.key, modulePath))
                 }
             }
@@ -440,9 +457,16 @@ public class SlicesShould(private val builder: SlicesRuleBuilder) {
 
     /** Asserts that slices do not reside in modules [modulePaths]. */
     public infix fun notResideInModules(modulePaths: List<String>): SlicesRuleBuilder {
+        val cleanNames = modulePaths.map { it.removePrefix(":").removePrefix("/") }
         builder.addShouldAssertion { sliceGraph, violations ->
             for (slice in sliceGraph.slices) {
-                if (slice.classes.any { cls -> modulePaths.any { cls.filePath.contains(it) } }) {
+                if (slice.classes.any { cls ->
+                        val normPath = cls.filePath.replace('\\', '/')
+                        cleanNames.any { cleanName ->
+                            normPath.contains("/$cleanName/") || normPath.contains("$cleanName/") || normPath.contains(cleanName)
+                        }
+                    }
+                ) {
                     violations.add(getMessage("slice.should.notResideInModulePaths", slice.key, modulePaths.toString()))
                 }
             }
