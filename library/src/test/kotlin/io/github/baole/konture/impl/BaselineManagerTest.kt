@@ -19,14 +19,15 @@ import java.io.File
 internal class BaselineManagerTest : KontureScopeTestFixture() {
     @Test
     fun `test BaselineNormalizer normalize`() {
-        val root = File("/app/project").canonicalFile
-        val normalized = BaselineNormalizer.normalize("Class /app/project/src/Main.kt violates rule", root)
+        val root = File(".").canonicalFile
+        val rootPathString = root.canonicalPath.replace('\\', '/')
+        val normalized = BaselineNormalizer.normalize("Class $rootPathString/src/Main.kt violates rule", root)
         assertTrue(normalized.contains("<root>"))
     }
 
     @Test
     fun `test BaselineNormalizer parseLocationAndMessage`() {
-        val root = File("/app/project").canonicalFile
+        val root = File(".").canonicalFile
         val res =
             BaselineNormalizer.parseLocationAndMessage(
                 "Class com.example.Main violates rule (at src/Main.kt)",
