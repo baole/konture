@@ -23,7 +23,7 @@ publishing {
 }
 
 dependencies {
-    implementation(project(":core"))
+    api(project(":core"))
     implementation(libs.kotlin.compiler.embeddable)
     implementation(libs.kotlinx.serialization.json)
 

@@ -37,7 +37,7 @@ class DependencyAssertionsTest {
     fun `modules dependency assertions`() {
         Konture.modules {
             that().resideInAModule(":konture-test")
-            should().onlyDependOnModules(":core").andShould().notDependOnModules(":nonExistentModule")
+            should().onlyDependOnModules(":core").andShould().notDependOnModule(":nonExistentModule")
         }
     }
 

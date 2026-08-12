@@ -2,6 +2,18 @@ config:
   validation: true
   warningsAsErrors: false
 
+comments:
+  active: true
+  UndocumentedPublicClass:
+    active: true
+    excludes: ['**/test/**', '**/testFixtures/**', '**/impl/**']
+    searchInNestedClass: true
+    searchInInnerClass: true
+    searchInInnerInterface: true
+  UndocumentedPublicFunction:
+    active: true
+    excludes: ['**/test/**', '**/testFixtures/**', '**/impl/**']
+
 complexity:
   active: true
   ComplexCondition:

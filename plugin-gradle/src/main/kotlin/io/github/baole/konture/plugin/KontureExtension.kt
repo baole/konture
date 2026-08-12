@@ -1,5 +1,6 @@
 /*
- * Copyright 2026 Bao Le Duc
+ * Copyright 2026 The Konture Contributors
+ * Contributors: Bao Le Duc (@baole)
  * SPDX-License-Identifier: Apache-2.0
  */
 
@@ -14,48 +15,77 @@ import org.gradle.api.provider.Property
  *
  * Typically applied inside dedicated architecture test subprojects (e.g. `:konture-test`).
  */
-open class KontureExtension(
+public open class KontureExtension(
     private val project: Project,
 ) {
-    val excludeModules: ListProperty<String> = project.objects.listProperty(String::class.java).convention(emptyList())
-    val excludePackages: ListProperty<String> = project.objects.listProperty(String::class.java).convention(emptyList())
-    val excludeClasses: ListProperty<String> = project.objects.listProperty(String::class.java).convention(emptyList())
-    val excludeConfigurations: ListProperty<String> =
+    /** List of module paths to exclude from architecture rules. */
+    public val excludeModules: ListProperty<String> =
+        project.objects
+            .listProperty(String::class.java)
+            .convention(emptyList())
+
+    /** List of package names to exclude from architecture rules. */
+    public val excludePackages: ListProperty<String> =
+        project.objects
+            .listProperty(String::class.java)
+            .convention(emptyList())
+
+    /** List of class names to exclude from architecture rules. */
+    public val excludeClasses: ListProperty<String> =
+        project.objects
+            .listProperty(String::class.java)
+            .convention(emptyList())
+
+    /** List of build configuration names to exclude from architecture rules. */
+    public val excludeConfigurations: ListProperty<String> =
         project.objects
             .listProperty(String::class.java)
             .convention(listOf("test", "benchmark", "profile", "testedapks"))
-    val logLevel: Property<String> = project.objects.property(String::class.java).convention("INFO")
-    val baselinePath: Property<String> =
+
+    /** Diagnostic log level string. */
+    public val logLevel: Property<String> = project.objects.property(String::class.java).convention("INFO")
+
+    /** Relative path to the baseline JSON file. */
+    public val baselinePath: Property<String> =
         project.objects.property(
             String::class.java,
         ).convention("konture-baseline.json")
-    val language: Property<String> = project.objects.property(String::class.java).convention("en")
 
-    fun logLevel(level: String) {
+    /** Locale string for error and assertion message internationalization. */
+    public val language: Property<String> = project.objects.property(String::class.java).convention("en")
+
+    /** Sets the diagnostic [level]. */
+    public fun logLevel(level: String) {
         logLevel.set(level)
     }
 
-    fun baselinePath(path: String) {
+    /** Sets the baseline relative [path]. */
+    public fun baselinePath(path: String) {
         baselinePath.set(path)
     }
 
-    fun language(lang: String) {
+    /** Sets the message locale [lang]. */
+    public fun language(lang: String) {
         language.set(lang)
     }
 
-    fun excludeModules(vararg modules: String) {
+    /** Adds [modules] to the excluded modules list. */
+    public fun excludeModules(vararg modules: String) {
         excludeModules.addAll(*modules)
     }
 
-    fun excludePackages(vararg packages: String) {
+    /** Adds [packages] to the excluded packages list. */
+    public fun excludePackages(vararg packages: String) {
         excludePackages.addAll(*packages)
     }
 
-    fun excludeClasses(vararg classes: String) {
+    /** Adds [classes] to the excluded classes list. */
+    public fun excludeClasses(vararg classes: String) {
         excludeClasses.addAll(*classes)
     }
 
-    fun excludeConfigurations(vararg configurations: String) {
+    /** Adds [configurations] to the excluded build configurations list. */
+    public fun excludeConfigurations(vararg configurations: String) {
         excludeConfigurations.addAll(*configurations)
     }
 }

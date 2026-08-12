@@ -1,5 +1,6 @@
 /*
- * Copyright 2026 Bao Le Duc
+ * Copyright 2026 The Konture Contributors
+ * Contributors: Bao Le Duc (@baole)
  * SPDX-License-Identifier: Apache-2.0
  */
 
@@ -15,7 +16,7 @@ import kotlinx.serialization.Serializable
  * @property modules Map of Gradle module paths (e.g. ":app", ":library") to their resolved external dependencies.
  */
 @Serializable
-data class DependencyGraphModel(
+public data class DependencyGraphModel(
     val schemaVersion: Int = 1,
     val modules: Map<String, List<ResolvedDependencyModel>> = emptyMap(),
 )

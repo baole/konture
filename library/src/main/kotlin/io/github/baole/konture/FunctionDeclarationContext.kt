@@ -1,5 +1,6 @@
 /*
- * Copyright 2026 Bao Le Duc
+ * Copyright 2026 The Konture Contributors
+ * Contributors: Bao Le Duc (@baole)
  * SPDX-License-Identifier: Apache-2.0
  */
 
@@ -16,20 +17,27 @@ package io.github.baole.konture
  * @property modulePath The module subdirectory/path containing this function.
  * @property filePath The project relative path to the source file defining this function.
  */
-data class FunctionDeclarationContext(
-    val declaration: FunctionDeclaration,
-    val packageName: String,
-    val className: String?,
-    val modulePath: String,
-    val filePath: String,
-    val sourceSet: SourceSetId? = null,
-    val usages: List<SourceUsage> = emptyList(),
+public data class FunctionDeclarationContext(
+    /** Filter or assertion criteria for declaration. */
+    public val declaration: FunctionDeclaration,
+    /** Filter or assertion criteria for package name. */
+    public val packageName: String,
+    /** Filter or assertion criteria for class name. */
+    public val className: String?,
+    /** Filter or assertion criteria for module path. */
+    public val modulePath: String,
+    /** Filter or assertion criteria for file path. */
+    public val filePath: String,
+    /** Filter or assertion criteria for source set. */
+    public val sourceSet: SourceSetId? = null,
+    /** Filter or assertion criteria for usages. */
+    public val usages: List<SourceUsage> = emptyList(),
 ) {
     /**
      * The fully-qualified name of the function, combining package, enclosing class (if any), and
      * simple name (e.g. `com.acme.UserService.getUser`), used to identify it unambiguously in
      * violation messages.
      */
-    val qualifiedName: String
+    public val qualifiedName: String
         get() = listOfNotNull(packageName.ifEmpty { null }, className, declaration.name).joinToString(".")
 }

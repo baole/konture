@@ -1,0 +1,148 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="3456" height="2016" viewBox="0 0 1152 672" role="img" aria-labelledby="title desc">
+  <title id="title">Architecture drift in an Android and Kotlin Multiplatform monorepo</title>
+  <desc id="desc">A comparison of a healthy feature dependency graph and a drifting one. In the healthy graph, checkout and profile feature implementation modules depend only on their own API modules and shared core. In the drifting graph, checkout implementation depends directly on profile implementation. A Konture rule blocks the forbidden edge.</desc>
+  <defs>
+    <linearGradient id="healthy" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#f0fdf4"/>
+      <stop offset="100%" stop-color="#dcfce7"/>
+    </linearGradient>
+    <linearGradient id="drift" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#fff7ed"/>
+      <stop offset="100%" stop-color="#ffedd5"/>
+    </linearGradient>
+    <linearGradient id="impl" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#e0f2fe"/>
+      <stop offset="100%" stop-color="#bae6fd"/>
+    </linearGradient>
+    <linearGradient id="api" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#eff6ff"/>
+      <stop offset="100%" stop-color="#dbeafe"/>
+    </linearGradient>
+    <linearGradient id="core" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#f5f3ff"/>
+      <stop offset="100%" stop-color="#ede9fe"/>
+    </linearGradient>
+    <filter id="shadow" x="-10%" y="-10%" width="120%" height="130%">
+      <feDropShadow dx="0" dy="2" stdDeviation="3" flood-color="#0f172a" flood-opacity="0.10"/>
+    </filter>
+    <marker id="arrow" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto">
+      <path d="M1,1 L7,4 L1,7 Z" fill="#64748b"/>
+    </marker>
+    <marker id="blocked" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto">
+      <path d="M1,1 L7,4 L1,7 Z" fill="#dc2626"/>
+    </marker>
+    <style>
+      .canvas { fill: #ffffff; }
+      .panel { stroke-width: 1.5; rx: 16; }
+      .panel-healthy { fill: url(#healthy); stroke: #86efac; }
+      .panel-drift { fill: url(#drift); stroke: #fdba74; }
+      .node { stroke-width: 1.5; rx: 9; filter: url(#shadow); }
+      .node-impl { fill: url(#impl); stroke: #0284c7; }
+      .node-api { fill: url(#api); stroke: #2563eb; }
+      .node-core { fill: url(#core); stroke: #7c3aed; }
+      .heading { font-family: Inter, system-ui, -apple-system, sans-serif; font-size: 21px; font-weight: 750; fill: #0f172a; }
+      .subheading { font-family: Inter, system-ui, -apple-system, sans-serif; font-size: 13px; font-weight: 550; fill: #475569; }
+      .node-title { font-family: Inter, system-ui, -apple-system, sans-serif; font-size: 13px; font-weight: 700; fill: #0f172a; }
+      .node-detail { font-family: Inter, system-ui, -apple-system, sans-serif; font-size: 11px; font-weight: 500; fill: #475569; }
+      .caption { font-family: Inter, system-ui, -apple-system, sans-serif; font-size: 12px; font-weight: 700; fill: #166534; }
+      .warning { font-family: Inter, system-ui, -apple-system, sans-serif; font-size: 12px; font-weight: 750; fill: #b91c1c; }
+      .arrow { stroke: #64748b; stroke-width: 1.75; fill: none; marker-end: url(#arrow); stroke-linecap: round; }
+      .bad-arrow { stroke: #dc2626; stroke-width: 2.25; fill: none; stroke-dasharray: 7 5; marker-end: url(#blocked); stroke-linecap: round; }
+      .rule { fill: #fff1f2; stroke: #fda4af; stroke-width: 1.25; rx: 9; }
+      .rule-text { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 12px; font-weight: 650; fill: #9f1239; }
+    </style>
+  </defs>
+
+  <rect class="canvas" width="1152" height="672"/>
+
+  <g transform="translate(34, 34)">
+    <rect class="panel panel-healthy" width="522" height="418"/>
+    <text class="heading" x="28" y="42">Healthy dependency contract</text>
+    <text class="subheading" x="28" y="66">Features share stable contracts and core services—not implementation details.</text>
+
+    <g transform="translate(35, 103)">
+      <rect class="node node-impl" width="178" height="62"/>
+      <text class="node-title" x="89" y="26" text-anchor="middle">:feature:checkout:impl</text>
+      <text class="node-detail" x="89" y="45" text-anchor="middle">implementation</text>
+    </g>
+    <g transform="translate(309, 103)">
+      <rect class="node node-impl" width="178" height="62"/>
+      <text class="node-title" x="89" y="26" text-anchor="middle">:feature:profile:impl</text>
+      <text class="node-detail" x="89" y="45" text-anchor="middle">implementation</text>
+    </g>
+    <g transform="translate(35, 214)">
+      <rect class="node node-api" width="178" height="62"/>
+      <text class="node-title" x="89" y="26" text-anchor="middle">:feature:checkout:api</text>
+      <text class="node-detail" x="89" y="45" text-anchor="middle">stable contract</text>
+    </g>
+    <g transform="translate(309, 214)">
+      <rect class="node node-api" width="178" height="62"/>
+      <text class="node-title" x="89" y="26" text-anchor="middle">:feature:profile:api</text>
+      <text class="node-detail" x="89" y="45" text-anchor="middle">stable contract</text>
+    </g>
+    <g transform="translate(172, 326)">
+      <rect class="node node-core" width="178" height="62"/>
+      <text class="node-title" x="89" y="26" text-anchor="middle">:shared:core</text>
+      <text class="node-detail" x="89" y="45" text-anchor="middle">KMP-safe shared code</text>
+    </g>
+
+    <path class="arrow" d="M124 165 L124 212"/>
+    <path class="arrow" d="M398 165 L398 212"/>
+    <path class="arrow" d="M124 165 C124 242, 261 242, 261 324"/>
+    <path class="arrow" d="M398 165 C398 242, 261 242, 261 324"/>
+    <text class="caption" x="261" y="408" text-anchor="middle">Ownership and change stay local.</text>
+  </g>
+
+  <g transform="translate(596, 34)">
+    <rect class="panel panel-drift" width="522" height="418"/>
+    <text class="heading" x="28" y="42">Drift begins with one shortcut</text>
+    <text class="subheading" x="28" y="66">Checkout reaches into Profile because the needed contract was never made explicit.</text>
+
+    <g transform="translate(35, 103)">
+      <rect class="node node-impl" width="178" height="62"/>
+      <text class="node-title" x="89" y="26" text-anchor="middle">:feature:checkout:impl</text>
+      <text class="node-detail" x="89" y="45" text-anchor="middle">implementation</text>
+    </g>
+    <g transform="translate(309, 103)">
+      <rect class="node node-impl" width="178" height="62"/>
+      <text class="node-title" x="89" y="26" text-anchor="middle">:feature:profile:impl</text>
+      <text class="node-detail" x="89" y="45" text-anchor="middle">implementation</text>
+    </g>
+    <g transform="translate(35, 214)">
+      <rect class="node node-api" width="178" height="62"/>
+      <text class="node-title" x="89" y="26" text-anchor="middle">:feature:checkout:api</text>
+      <text class="node-detail" x="89" y="45" text-anchor="middle">stable contract</text>
+    </g>
+    <g transform="translate(309, 214)">
+      <rect class="node node-api" width="178" height="62"/>
+      <text class="node-title" x="89" y="26" text-anchor="middle">:feature:profile:api</text>
+      <text class="node-detail" x="89" y="45" text-anchor="middle">stable contract</text>
+    </g>
+    <g transform="translate(172, 326)">
+      <rect class="node node-core" width="178" height="62"/>
+      <text class="node-title" x="89" y="26" text-anchor="middle">:shared:core</text>
+      <text class="node-detail" x="89" y="45" text-anchor="middle">KMP-safe shared code</text>
+    </g>
+
+    <path class="arrow" d="M124 165 L124 212"/>
+    <path class="arrow" d="M398 165 L398 212"/>
+    <path class="arrow" d="M124 165 C124 242, 261 242, 261 324"/>
+    <path class="arrow" d="M398 165 C398 242, 261 242, 261 324"/>
+    <path class="bad-arrow" d="M213 132 L307 132"/>
+    <rect x="229" y="83" width="145" height="27" rx="6" fill="#fee2e2" stroke="#fecaca"/>
+    <text class="warning" x="301" y="101" text-anchor="middle">forbidden impl edge</text>
+    <text class="warning" x="261" y="408" text-anchor="middle">The graph still builds; coordination cost grows.</text>
+  </g>
+
+  <g transform="translate(306, 482)">
+    <rect class="rule" width="540" height="150"/>
+    <text class="rule-text" x="34" y="21">Konture.modules {</text>
+    <text class="rule-text" x="57" y="39">that().haveNameMatching(":feature:**:impl")</text>
+    <text class="rule-text" x="57" y="57">should().onlyDependOnModules(</text>
+    <text class="rule-text" x="80" y="75">":feature:**:api",</text>
+    <text class="rule-text" x="80" y="93">":shared:**",</text>
+    <text class="rule-text" x="80" y="111">":core:**",</text>
+    <text class="rule-text" x="57" y="129">)</text>
+    <text class="rule-text" x="34" y="143">}</text>
+  </g>
+</svg>

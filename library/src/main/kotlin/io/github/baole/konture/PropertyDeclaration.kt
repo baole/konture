@@ -1,21 +1,47 @@
 /*
- * Copyright 2026 Bao Le Duc
+ * Copyright 2026 The Konture Contributors
+ * Contributors: Bao Le Duc (@baole)
  * SPDX-License-Identifier: Apache-2.0
  */
 
 package io.github.baole.konture
 
-data class PropertyDeclaration(
-    val name: String,
-    val visibility: Visibility,
-    val modifiers: Set<Modifier>,
-    val type: String,
-    val isVal: Boolean,
-    val annotations: List<AnnotationDeclaration>,
-    val kdocText: String?,
-    val isExtension: Boolean = false,
-    val resolvedType: String? = null,
-    val sourceLine: Int = -1,
+/**
+ * Represents a property declaration within a Kotlin class or source file.
+ *
+ * @property name Property name.
+ * @property visibility Explicit or implicit visibility modifier.
+ * @property modifiers Set of modifiers attached to the property.
+ * @property type Declared property type string.
+ * @property isVal Whether the property is read-only (`val`).
+ * @property annotations List of annotations attached to this property.
+ * @property kdocText KDoc comment string if present.
+ * @property isExtension Whether this property is an extension property.
+ * @property resolvedType Fully qualified resolved type string if available.
+ * @property sourceLine 1-based source code line number.
+ */
+public data class PropertyDeclaration(
+    /** Filter or assertion criteria for name. */
+    public val name: String,
+    /** Filter or assertion criteria for visibility. */
+    public val visibility: Visibility,
+    /** Filter or assertion criteria for modifiers. */
+    public val modifiers: Set<Modifier>,
+    /** Filter or assertion criteria for type. */
+    public val type: String,
+    /** Filter or assertion criteria for is val. */
+    public val isVal: Boolean,
+    /** Filter or assertion criteria for annotations. */
+    public val annotations: List<AnnotationDeclaration>,
+    /** Filter or assertion criteria for kdoc text. */
+    public val kdocText: String?,
+    /** Filter or assertion criteria for is extension. */
+    public val isExtension: Boolean = false,
+    /** Filter or assertion criteria for resolved type. */
+    public val resolvedType: String? = null,
+    /** Filter or assertion criteria for source line. */
+    public val sourceLine: Int = -1,
 ) {
-    val isVar: Boolean get() = !isVal
+    /** Whether the property is mutable (`var`). */
+    public val isVar: Boolean get() = !isVal
 }

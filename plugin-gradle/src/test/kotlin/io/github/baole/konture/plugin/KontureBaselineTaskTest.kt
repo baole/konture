@@ -31,21 +31,31 @@ class KontureBaselineTaskTest {
 
     @Test
     fun `plugin configures test tasks with baseline path`() {
-        val project = ProjectBuilder.builder().build()
-        project.plugins.apply("java") // Registers Test tasks
-        project.plugins.apply("io.github.baole.konture.internal")
+        val originalBaselinePath = System.getProperty(KontureConstants.PROPERTY_BASELINE_PATH)
+        System.clearProperty(KontureConstants.PROPERTY_BASELINE_PATH)
+        try {
+            val project = ProjectBuilder.builder().build()
+            project.plugins.apply("java") // Registers Test tasks
+            project.plugins.apply("io.github.baole.konture.internal")
 
-        val extension = project.extensions.getByName("konture") as KontureExtension
-        extension.baselinePath.set("custom-baseline-test.json")
+            val extension = project.extensions.getByName("konture") as KontureExtension
+            extension.baselinePath.set("custom-baseline-test.json")
 
-        val testTask = project.tasks.getByName("test") as GradleTestTask
-        val baselinePathProp = testTask.systemProperties["konture.baseline.path"]
-        val resolvedValue =
-            when (baselinePathProp) {
-                is Provider<*> -> baselinePathProp.get()
-                else -> baselinePathProp
+            val testTask = project.tasks.getByName("test") as GradleTestTask
+            val baselinePathProp = testTask.systemProperties["konture.baseline.path"]
+            val resolvedValue =
+                when (baselinePathProp) {
+                    is Provider<*> -> baselinePathProp.get()
+                    else -> baselinePathProp
+                }
+            assertEquals("custom-baseline-test.json", resolvedValue)
+        } finally {
+            if (originalBaselinePath != null) {
+                System.setProperty(KontureConstants.PROPERTY_BASELINE_PATH, originalBaselinePath)
+            } else {
+                System.clearProperty(KontureConstants.PROPERTY_BASELINE_PATH)
             }
-        assertEquals("custom-baseline-test.json", resolvedValue)
+        }
     }
 
     @Test

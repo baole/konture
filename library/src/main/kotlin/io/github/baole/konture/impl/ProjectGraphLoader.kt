@@ -443,21 +443,21 @@ internal class ProjectGraphLoader {
 
     companion object {
         fun findBuildRoot(): File {
-            return KontureContextProvider.currentContext.projectGraphLoader.findBuildRoot()
+            return KontureRuntimeStateProvider.currentState.projectGraphLoader.findBuildRoot()
         }
 
         fun loadFromStream(
             inputStream: InputStream,
             depsStreamLoader: () -> InputStream? = { null },
         ): ProjectGraph {
-            return KontureContextProvider.currentContext.projectGraphLoader.loadFromStream(
+            return KontureRuntimeStateProvider.currentState.projectGraphLoader.loadFromStream(
                 inputStream,
                 depsStreamLoader,
             )
         }
 
         fun loadFromResource(resourcePath: String = "/konture/layout_v2.json"): ProjectGraph {
-            return KontureContextProvider.currentContext.projectGraphLoader.loadFromResource(resourcePath)
+            return KontureRuntimeStateProvider.currentState.projectGraphLoader.loadFromResource(resourcePath)
         }
     }
 }
@@ -506,7 +506,7 @@ private fun resolveSourceSetFiles(
  * @param resourcePath Classpath resource path to load from (defaults to `/konture/layout.json`).
  * @return The loaded [ProjectGraph] instance.
  */
-fun ProjectGraph.Companion.fromResource(resourcePath: String = "/konture/layout_v2.json"): ProjectGraph {
+public fun ProjectGraph.Companion.fromResource(resourcePath: String = "/konture/layout_v2.json"): ProjectGraph {
     val graph = ProjectGraphLoader.loadFromResource(resourcePath)
     setDefault(graph)
     return graph

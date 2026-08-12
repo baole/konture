@@ -1,5 +1,6 @@
 /*
- * Copyright 2026 Bao Le Duc
+ * Copyright 2026 The Konture Contributors
+ * Contributors: Bao Le Duc (@baole)
  * SPDX-License-Identifier: Apache-2.0
  */
 
@@ -19,18 +20,23 @@ internal fun KClass<*>.kontureQualifiedName(): String =
 internal fun KClass<*>.konturePackageName(): String = java.packageName
 
 internal data class KonturePackageReference(
-    val packageName: String,
+    /** Filter or assertion criteria for package name. */
+    public val packageName: String,
 )
 
 internal fun KClass<*>.toKonturePackageReference() = KonturePackageReference(konturePackageName())
 
 internal data class KontureTypeReference(
-    val qualifiedName: String,
-    val simpleName: String?,
-    val nestedName: String,
+    /** Filter or assertion criteria for qualified name. */
+    public val qualifiedName: String,
+    /** Filter or assertion criteria for simple name. */
+    public val simpleName: String?,
+    /** Filter or assertion criteria for nested name. */
+    public val nestedName: String,
 )
 
 internal fun KClass<*>.toKontureTypeReference(): KontureTypeReference {
+    /** Filter or assertion criteria for qualified name. */
     val qualifiedName = kontureQualifiedName()
     return KontureTypeReference(
         qualifiedName = qualifiedName,
@@ -48,6 +54,7 @@ internal fun matchesKotlinType(
     declaredType: String,
     expectedType: KontureTypeReference,
 ): Boolean {
+    /** Filter or assertion criteria for declared raw type. */
     val declaredRawType = declaredType.trim().removeSuffix("?").substringBefore('<').trim()
     return declaredRawType == expectedType.qualifiedName
 }

@@ -252,15 +252,16 @@ internal object BaselineNormalizer {
         }
 
         // Fallback relative path matching
+        val normalizedLoc = location.replace("\\", "/")
         for (module in sortedModules) {
             val dirPrefix = module.projectDir.replace("\\", "/")
-            if (location.startsWith(dirPrefix + "/") || location == dirPrefix) {
+            if (normalizedLoc.startsWith(dirPrefix + "/") || normalizedLoc == dirPrefix) {
                 return module
             }
             if (root != null) {
                 try {
                     val relPath = File(module.projectDir).relativeToOrNull(root)?.path?.replace("\\", "/")
-                    if (relPath != null && (location.startsWith(relPath + "/") || location == relPath)) {
+                    if (relPath != null && (normalizedLoc.startsWith(relPath + "/") || normalizedLoc == relPath)) {
                         return module
                     }
                 } catch (e: Exception) {

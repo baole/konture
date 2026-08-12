@@ -1,5 +1,6 @@
 /*
- * Copyright 2026 Bao Le Duc
+ * Copyright 2026 The Konture Contributors
+ * Contributors: Bao Le Duc (@baole)
  * SPDX-License-Identifier: Apache-2.0
  */
 
@@ -18,7 +19,7 @@ import kotlinx.serialization.Serializable
  * @property isTransitive True if this is a transitive dependency (not directly declared by the module).
  */
 @Serializable
-data class ResolvedDependencyModel(
+public data class ResolvedDependencyModel(
     val group: String,
     val name: String,
     val version: String,

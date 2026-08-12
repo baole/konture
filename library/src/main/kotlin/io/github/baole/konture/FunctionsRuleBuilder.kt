@@ -20,7 +20,7 @@ import io.github.baole.konture.impl.ViolationLocation
  * against all functions in the project (both member/class functions and top-level functions).
  */
 @KontureDsl
-class FunctionsRuleBuilder(
+public class FunctionsRuleBuilder(
     internal val graph: ProjectGraph = Konture.projectGraph,
     private val sourceSets: SourceSetSelector = SourceSets.production(),
 ) {
@@ -41,7 +41,7 @@ class FunctionsRuleBuilder(
      *
      * @param logger Custom log consumer (defaults to printing to standard output).
      */
-    fun printMatchedFunctions(
+    public fun printMatchedFunctions(
         logger: (FunctionDeclarationContext) -> Unit = {
             println(getMessage("debug.functions.matched", it.qualifiedName, ViolationLocation.format(it)))
         },
@@ -57,7 +57,7 @@ class FunctionsRuleBuilder(
      *
      * @param logger Custom log consumer (defaults to printing to standard output).
      */
-    fun printAllFunctions(
+    public fun printAllFunctions(
         logger: (FunctionDeclarationContext) -> Unit = {
             println(getMessage("debug.functions.discovered", it.qualifiedName, ViolationLocation.format(it)))
         },
@@ -65,10 +65,13 @@ class FunctionsRuleBuilder(
         this.apply {
             graph.getAllModules().flatMap { module ->
                 module.files.flatMap { file ->
+                    /** Filter or assertion criteria for top level. */
                     val topLevel =
                         file.topLevelFunctions.map { func ->
                             FunctionDeclarationContext(func, file.packageName, null, module.path, file.filePath, null)
                         }
+
+                    /** Filter or assertion criteria for members. */
                     val members =
                         file.classes.flatMap { cls ->
                             cls.functions.map { func ->
@@ -104,7 +107,7 @@ class FunctionsRuleBuilder(
      * Configures this builder to allow empty selections (i.e. if no functions match the `that()` filter,
      * the rule will pass instead of throwing an AssertionError).
      */
-    fun allowEmpty(): FunctionsRuleBuilder {
+    public fun allowEmpty(): FunctionsRuleBuilder {
         allowEmpty = true
         return this
     }
@@ -112,7 +115,7 @@ class FunctionsRuleBuilder(
     /**
      * Configures this builder to ignore failures for functions satisfying the given predicate.
      */
-    fun ignoreFailuresIn(predicate: (FunctionDeclarationContext) -> Boolean): FunctionsRuleBuilder {
+    public fun ignoreFailuresIn(predicate: (FunctionDeclarationContext) -> Boolean): FunctionsRuleBuilder {
         ignoredPredicates.add(predicate)
         return this
     }
@@ -120,7 +123,7 @@ class FunctionsRuleBuilder(
     /**
      * Configures this builder to ignore failures for functions matching any of the specified names or patterns.
      */
-    fun ignoreFailuresIn(vararg functionNames: String): FunctionsRuleBuilder {
+    public fun ignoreFailuresIn(vararg functionNames: String): FunctionsRuleBuilder {
         ignoredPredicates.add { ctx ->
             functionNames.any { name ->
                 ctx.declaration.name == name || ctx.qualifiedName == name || io.github.baole.konture.impl.PatternMatchers.matchesSimpleGlob(name, ctx.declaration.name)
@@ -139,17 +142,17 @@ class FunctionsRuleBuilder(
     /**
      * Starts adding filtering conditions to select which functions to verify.
      */
-    fun that(): FunctionsThat = FunctionsThat(this)
+    public fun that(): FunctionsThat = FunctionsThat(this)
 
     /**
      * Starts adding assertion rules that the selected functions must satisfy.
      */
-    fun should(): FunctionsShould = FunctionsShould(this)
+    public fun should(): FunctionsShould = FunctionsShould(this)
 
     /**
      * Logical AND operator for chaining filter conditions.
      */
-    fun and(): FunctionsThat {
+    public fun and(): FunctionsThat {
         activeOperator = LogicalOperator.AND
         return FunctionsThat(this)
     }
@@ -157,7 +160,7 @@ class FunctionsRuleBuilder(
     /**
      * Logical OR operator for chaining filter conditions.
      */
-    fun or(): FunctionsThat {
+    public fun or(): FunctionsThat {
         activeOperator = LogicalOperator.OR
         return FunctionsThat(this)
     }
@@ -165,7 +168,7 @@ class FunctionsRuleBuilder(
     /**
      * Logical XOR operator for chaining filter conditions.
      */
-    fun xor(): FunctionsThat {
+    public fun xor(): FunctionsThat {
         activeOperator = LogicalOperator.XOR
         return FunctionsThat(this)
     }
@@ -173,7 +176,7 @@ class FunctionsRuleBuilder(
     /**
      * Negates the next filter condition in the chain.
      */
-    fun not(): FunctionsThat {
+    public fun not(): FunctionsThat {
         negateNext = true
         return FunctionsThat(this)
     }
@@ -181,7 +184,7 @@ class FunctionsRuleBuilder(
     /**
      * Logical AND operator for chaining assertion rules.
      */
-    fun andShould(): FunctionsShould {
+    public fun andShould(): FunctionsShould {
         activeShouldOperator = LogicalOperator.AND
         return FunctionsShould(this)
     }
@@ -189,7 +192,7 @@ class FunctionsRuleBuilder(
     /**
      * Logical OR operator for chaining assertion rules.
      */
-    fun orShould(): FunctionsShould {
+    public fun orShould(): FunctionsShould {
         activeShouldOperator = LogicalOperator.OR
         return FunctionsShould(this)
     }
@@ -197,7 +200,7 @@ class FunctionsRuleBuilder(
     /**
      * Logical XOR operator for chaining assertion rules.
      */
-    fun xorShould(): FunctionsShould {
+    public fun xorShould(): FunctionsShould {
         activeShouldOperator = LogicalOperator.XOR
         return FunctionsShould(this)
     }
@@ -205,25 +208,29 @@ class FunctionsRuleBuilder(
     /**
      * Negates the next assertion rule in the chain.
      */
-    fun notShould(): FunctionsShould {
+    public fun notShould(): FunctionsShould {
         negateNextShould = true
         return FunctionsShould(this)
     }
 
     internal fun setThat(predicate: (FunctionDeclarationContext) -> Boolean) {
+        /** Filter or assertion criteria for actual predicate. */
         val actualPredicate =
             if (negateNext) {
                 negateNext = false
+                /** Filter or assertion criteria for p. */
                 val p = { f: FunctionDeclarationContext -> !predicate(f) }
                 p
             } else {
                 predicate
             }
 
+        /** Filter or assertion criteria for current. */
         val current = thatPredicate
         if (current == null) {
             thatPredicate = actualPredicate
         } else {
+            /** Filter or assertion criteria for op. */
             val op = activeOperator
             thatPredicate =
                 when (op) {
@@ -246,14 +253,17 @@ class FunctionsRuleBuilder(
     internal fun setShould(
         assertion: (FunctionDeclarationContext, List<FunctionDeclarationContext>, MutableList<String>) -> Unit,
     ) {
+        /** Filter or assertion criteria for actual assertion. */
         val actualAssertion =
             if (negateNextShould) {
                 negateNextShould = false
+                /** Filter or assertion criteria for a. */
                 val a = {
                         func: FunctionDeclarationContext,
                         allFuncs: List<FunctionDeclarationContext>,
                         violations: MutableList<String>,
                     ->
+                    /** Filter or assertion criteria for temp violations. */
                     val tempViolations = mutableListOf<String>()
                     assertion(func, allFuncs, tempViolations)
                     if (tempViolations.isEmpty()) {
@@ -267,14 +277,19 @@ class FunctionsRuleBuilder(
                 assertion
             }
 
+        /** Filter or assertion criteria for current. */
         val current = shouldAssertion
         if (current == null) {
             shouldAssertion = actualAssertion
         } else {
+            /** Filter or assertion criteria for op. */
             val op = activeShouldOperator
             if (op == LogicalOperator.OR) {
                 shouldAssertion = { func, allFuncs, violations ->
+                    /** Filter or assertion criteria for temp1. */
                     val temp1 = mutableListOf<String>()
+
+                    /** Filter or assertion criteria for temp2. */
                     val temp2 = mutableListOf<String>()
                     current(func, allFuncs, temp1)
                     actualAssertion(func, allFuncs, temp2)
@@ -286,11 +301,17 @@ class FunctionsRuleBuilder(
                 }
             } else if (op == LogicalOperator.XOR) {
                 shouldAssertion = { func, allFuncs, violations ->
+                    /** Filter or assertion criteria for temp1. */
                     val temp1 = mutableListOf<String>()
+
+                    /** Filter or assertion criteria for temp2. */
                     val temp2 = mutableListOf<String>()
                     current(func, allFuncs, temp1)
                     actualAssertion(func, allFuncs, temp2)
+                    /** Filter or assertion criteria for ok1. */
                     val ok1 = temp1.isEmpty()
+
+                    /** Filter or assertion criteria for ok2. */
                     val ok2 = temp2.isEmpty()
                     if (ok1 == ok2) {
                         violations.add(
@@ -312,11 +333,13 @@ class FunctionsRuleBuilder(
      * Executes the compiled function rules against the provided project graph.
      * Throws an [AssertionError] if any rule violations are detected.
      */
-    fun check(g: ProjectGraph = graph) {
+    public fun check(g: ProjectGraph = graph) {
+        /** Filter or assertion criteria for all functions. */
         val allFunctions =
             g.getAllModules().flatMap { module ->
                 module.files.flatMap { file ->
                     file.membershipsFor(module.path).filter(sourceSets::matches).flatMap { sourceSet ->
+                        /** Filter or assertion criteria for top level. */
                         val topLevel =
                             file.topLevelFunctions.map { func ->
                                 FunctionDeclarationContext(
@@ -332,6 +355,8 @@ class FunctionsRuleBuilder(
                                     },
                                 )
                             }
+
+                        /** Filter or assertion criteria for members. */
                         val members =
                             file.classes.flatMap { cls ->
                                 cls.functions.map { func ->
@@ -353,6 +378,8 @@ class FunctionsRuleBuilder(
                     }
                 }
             }
+
+        /** Filter or assertion criteria for functions to check. */
         val functionsToCheck = allFunctions.filter { thatPredicate?.invoke(it) ?: true }
         KontureLogger.log(
             LogLevel.DEBUG,
@@ -370,14 +397,17 @@ class FunctionsRuleBuilder(
                 )
             }
         }
+        /** Filter or assertion criteria for assertion. */
         val assertion =
             shouldAssertion ?: throw AssertionError(
                 getMessage("functions.rule.noAssertion"),
             )
 
+        /** Filter or assertion criteria for run check. */
         val runCheck = { list: MutableList<String> ->
             for (func in functionsToCheck) {
                 if (ignoredPredicates.any { it(func) }) continue
+                /** Filter or assertion criteria for start idx. */
                 val startIdx = list.size
                 assertion(func, allFunctions, list)
                 for (i in startIdx until list.size) {

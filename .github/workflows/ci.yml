@@ -22,14 +22,18 @@ env:
 
 jobs:
   build-and-test:
-    name: Build, Lint, and Test
-    runs-on: ubuntu-latest
+    name: Build, Lint, and Test (${{ matrix.os }})
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
 
       - name: Set up Java 21
-        uses: actions/setup-java@v4
+        uses: actions/setup-java@v5
         with:
           distribution: 'temurin'
           java-version: '21'
@@ -42,6 +46,9 @@ jobs:
       - name: Publish to Maven Local
         run: ./gradlew publishToMavenLocal
 
+      - name: Verify Kotlin ABI Compatibility
+        run: ./gradlew checkKotlinAbi
+
       - name: Run Unified Verification (Lint, Detekt, Tests, Coverage)
         run: ./gradlew check --continue
 
@@ -49,8 +56,7 @@ jobs:
         run: ./gradlew assemble
 
       - name: Run Standalone Konture Tests
-        run: ./gradlew runKontureTest -Dkonture.applyPlugin=true
-
+        run: ./gradlew runKontureTest "-Dkonture.applyPlugin=true"
 
       - name: Build and Install Maven Plugin
         run: mvn clean install -f plugin-maven/pom.xml

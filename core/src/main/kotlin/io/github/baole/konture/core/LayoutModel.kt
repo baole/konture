@@ -1,5 +1,6 @@
 /*
- * Copyright 2026 Bao Le Duc
+ * Copyright 2026 The Konture Contributors
+ * Contributors: Bao Le Duc (@baole)
  * SPDX-License-Identifier: Apache-2.0
  */
 
@@ -18,14 +19,15 @@ import kotlinx.serialization.Serializable
  * @property exclusions Optional exclusion rules configured at build-time.
  */
 @Serializable
-data class LayoutModel(
+public data class LayoutModel(
     val schemaVersion: Int,
     val builds: List<BuildModel>,
     val exclusions: ExclusionsModel = ExclusionsModel(),
     val logLevel: String = "INFO",
 ) {
-    companion object {
+    /** Companion object containing layout schema version constants. */
+    public companion object {
         /** Current version of the serialized Konture layout schema. */
-        const val CURRENT_SCHEMA_VERSION: Int = 2
+        public const val CURRENT_SCHEMA_VERSION: Int = 2
     }
 }

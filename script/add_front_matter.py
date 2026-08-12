@@ -166,12 +166,20 @@ FRONT_MATTER_MAP = {
         "nav_order": 80,
         "permalink": "/articles/"
     },
+    "articles/architecture-drift-android-kmp-monorepos.md": {
+        "layout": "default",
+        "title": "Architecture Drift in Android & KMP Monorepos",
+        "description": "How locally rational module dependencies erode feature autonomy—and how executable architecture contracts stop the drift.",
+        "parent": "Articles",
+        "nav_order": 1,
+        "permalink": "/articles/architecture-drift-android-kmp-monorepos/"
+    },
     "articles/how-to-ban-a-class-or-method.md": {
         "layout": "default",
         "title": "How to Ban a Class or Method in Code",
         "description": "Prevent footguns, fragile tests, and architecture drift by turning code guidelines into automated guardrails.",
         "parent": "Articles",
-        "nav_order": 1,
+        "nav_order": 2,
         "permalink": "/articles/how-to-ban-a-class-or-method/"
     },
     "articles/kotlin-architecture-tests-what-and-why.md": {
@@ -179,7 +187,7 @@ FRONT_MATTER_MAP = {
         "title": "Kotlin Architecture Tests: What and Why",
         "description": "Why green Kotlin builds do not prove architectural boundaries are intact.",
         "parent": "Articles",
-        "nav_order": 2,
+        "nav_order": 3,
         "permalink": "/articles/kotlin-architecture-tests-what-and-why/"
     },
     "articles/kotlin-architecture-tests-why-konture-exists.md": {
@@ -187,7 +195,7 @@ FRONT_MATTER_MAP = {
         "title": "Kotlin Architecture Tests: Why Konture Exists",
         "description": "Why Kotlin architecture tests need both Gradle graph and source-model awareness.",
         "parent": "Articles",
-        "nav_order": 3,
+        "nav_order": 4,
         "permalink": "/articles/kotlin-architecture-tests-why-konture-exists/"
     },
     "articles/kotlin-architecture-tests-with-konture.md": {
@@ -195,7 +203,7 @@ FRONT_MATTER_MAP = {
         "title": "Kotlin Architecture Tests with Konture",
         "description": "How to set up Konture architecture tests with rule-design and rollout guidance.",
         "parent": "Articles",
-        "nav_order": 4,
+        "nav_order": 5,
         "permalink": "/articles/kotlin-architecture-tests-with-konture/"
     },
     "api-docs.md": {

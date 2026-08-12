@@ -4,6 +4,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+@file:Suppress("PLATFORM_CLASS_MAPPED_TO_KOTLIN")
+
 package io.github.baole.konture.tests.defaultImports
 
 import java.io.File

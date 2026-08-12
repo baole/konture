@@ -24,7 +24,7 @@ import io.github.baole.konture.impl.SliceGraph
  * (for example, that they are free of cyclic dependencies).
  */
 @KontureDsl
-class SlicesRuleBuilder(
+public class SlicesRuleBuilder(
     internal val graph: ProjectGraph = Konture.projectGraph,
     private val sourceSets: SourceSetSelector = SourceSets.production(),
 ) {
@@ -43,7 +43,7 @@ class SlicesRuleBuilder(
      * Sets the slice pattern. It must contain exactly one capture group: `(*)` for one package
      * segment or `(**)` for one or more segments. The captured text becomes the slice key.
      */
-    fun matching(pattern: String): SlicesRuleBuilder {
+    public fun matching(pattern: String): SlicesRuleBuilder {
         this.pattern = pattern
         return this
     }
@@ -53,7 +53,7 @@ class SlicesRuleBuilder(
      *
      * @param logger Custom log consumer (defaults to printing to standard output).
      */
-    fun printMatchedSlices(
+    public fun printMatchedSlices(
         logger: (Slice) -> Unit = {
             println(getMessage("debug.slices.derived", it.key, it.packages, it.classes.size))
         },
@@ -69,7 +69,7 @@ class SlicesRuleBuilder(
      *
      * @param logger Custom log consumer (defaults to printing to standard output).
      */
-    fun printAllSlices(
+    public fun printAllSlices(
         logger: (Slice) -> Unit = {
             println(getMessage("debug.slices.derived", it.key, it.packages, it.classes.size))
         },
@@ -90,7 +90,7 @@ class SlicesRuleBuilder(
      * Configures this builder to allow empty selections (if no packages match the slice pattern the
      * rule passes instead of throwing an AssertionError).
      */
-    fun allowEmpty(): SlicesRuleBuilder {
+    public fun allowEmpty(): SlicesRuleBuilder {
         allowEmpty = true
         return this
     }
@@ -98,7 +98,7 @@ class SlicesRuleBuilder(
     /**
      * Configures this builder to ignore failures for slices satisfying the given predicate.
      */
-    fun ignoreFailuresIn(predicate: (Slice) -> Boolean): SlicesRuleBuilder {
+    public fun ignoreFailuresIn(predicate: (Slice) -> Boolean): SlicesRuleBuilder {
         ignoredPredicates.add(predicate)
         return this
     }
@@ -106,7 +106,7 @@ class SlicesRuleBuilder(
     /**
      * Configures this builder to ignore failures for slices matching any of the specified slice keys or patterns.
      */
-    fun ignoreFailuresIn(vararg sliceKeys: String): SlicesRuleBuilder {
+    public fun ignoreFailuresIn(vararg sliceKeys: String): SlicesRuleBuilder {
         ignoredPredicates.add { slice ->
             sliceKeys.any { key ->
                 slice.key == key || io.github.baole.konture.impl.PatternMatchers.matchesSimpleGlob(key, slice.key)
@@ -116,73 +116,77 @@ class SlicesRuleBuilder(
     }
 
     /** Starts filtering conditions to select which slices to verify. */
-    fun that(): SlicesThat = SlicesThat(this)
+    public fun that(): SlicesThat = SlicesThat(this)
 
     /** Starts adding assertion rules that the derived slices must satisfy. */
-    fun should(): SlicesShould = SlicesShould(this)
+    public fun should(): SlicesShould = SlicesShould(this)
 
     /** Logical AND operator for chaining filter conditions. */
-    fun and(): SlicesThat {
+    public fun and(): SlicesThat {
         activeOperator = LogicalOperator.AND
         return SlicesThat(this)
     }
 
     /** Logical OR operator for chaining filter conditions. */
-    fun or(): SlicesThat {
+    public fun or(): SlicesThat {
         activeOperator = LogicalOperator.OR
         return SlicesThat(this)
     }
 
     /** Logical XOR operator for chaining filter conditions. */
-    fun xor(): SlicesThat {
+    public fun xor(): SlicesThat {
         activeOperator = LogicalOperator.XOR
         return SlicesThat(this)
     }
 
     /** Negates the next filter condition. */
-    fun not(): SlicesThat {
+    public fun not(): SlicesThat {
         negateNext = true
         return SlicesThat(this)
     }
 
     /** Logical AND operator for chaining assertion rules. */
-    fun andShould(): SlicesShould {
+    public fun andShould(): SlicesShould {
         activeShouldOperator = LogicalOperator.AND
         return SlicesShould(this)
     }
 
     /** Logical OR operator for chaining assertion rules. */
-    fun orShould(): SlicesShould {
+    public fun orShould(): SlicesShould {
         activeShouldOperator = LogicalOperator.OR
         return SlicesShould(this)
     }
 
     /** Logical XOR operator for chaining assertion rules. */
-    fun xorShould(): SlicesShould {
+    public fun xorShould(): SlicesShould {
         activeShouldOperator = LogicalOperator.XOR
         return SlicesShould(this)
     }
 
     /** Negates the next assertion rule. */
-    fun notShould(): SlicesShould {
+    public fun notShould(): SlicesShould {
         negateNextShould = true
         return SlicesShould(this)
     }
 
     internal fun setThat(predicate: (Slice) -> Boolean) {
+        /** Filter or assertion criteria for actual predicate. */
         val actualPredicate: (Slice) -> Boolean =
             if (negateNext) {
                 negateNext = false
+                /** Filter or assertion criteria for fn. */
                 val fn: (Slice) -> Boolean = { s: Slice -> !predicate(s) }
                 fn
             } else {
                 predicate
             }
 
+        /** Filter or assertion criteria for current. */
         val current = thatPredicate
         if (current == null) {
             thatPredicate = actualPredicate
         } else {
+            /** Filter or assertion criteria for op. */
             val op = activeOperator
             thatPredicate =
                 when (op) {
@@ -201,13 +205,16 @@ class SlicesRuleBuilder(
     }
 
     internal fun setShould(assertion: (SliceGraph, MutableList<String>) -> Unit) {
+        /** Filter or assertion criteria for actual assertion. */
         val actualAssertion: (SliceGraph, MutableList<String>) -> Unit =
             if (negateNextShould) {
                 negateNextShould = false
+                /** Filter or assertion criteria for fn. */
                 val fn: (
                     SliceGraph,
                     MutableList<String>,
                 ) -> Unit = { graph: SliceGraph, violations: MutableList<String> ->
+                    /** Filter or assertion criteria for temp. */
                     val temp = mutableListOf<String>()
                     assertion(graph, temp)
                     if (temp.isEmpty()) {
@@ -229,9 +236,11 @@ class SlicesRuleBuilder(
      * Executes the compiled slice rules against the provided project graph.
      * Throws an [AssertionError] if any rule violations are detected.
      */
-    fun check(g: ProjectGraph = graph) {
+    public fun check(g: ProjectGraph = graph) {
+        /** Filter or assertion criteria for slice pattern. */
         val slicePattern = pattern ?: throw AssertionError(getMessage("slices.rule.noPattern"))
 
+        /** Filter or assertion criteria for all classes. */
         val allClasses =
             g.getAllModules().flatMap { module ->
                 module.files.flatMap { file ->
@@ -239,15 +248,22 @@ class SlicesRuleBuilder(
                 }
             }.distinctBy { it.fqName to it.filePath }
 
+        /** Filter or assertion criteria for package to slice. */
         val packageToSlice = mutableMapOf<String, String>()
+
+        /** Filter or assertion criteria for classes by key. */
         val classesByKey = linkedMapOf<String, MutableList<ClassDeclaration>>()
+
+        /** Filter or assertion criteria for packages by key. */
         val packagesByKey = linkedMapOf<String, MutableSet<String>>()
         for (cls in allClasses) {
+            /** Filter or assertion criteria for key. */
             val key = PatternMatchers.sliceKeyFor(slicePattern, cls.packageName) ?: continue
             packageToSlice[cls.packageName] = key
             classesByKey.getOrPut(key) { mutableListOf() }.add(cls)
             packagesByKey.getOrPut(key) { mutableSetOf() }.add(cls.packageName)
         }
+        /** Filter or assertion criteria for all slices. */
         val allSlices =
             classesByKey.keys.sorted().map {
                 Slice(
@@ -256,6 +272,8 @@ class SlicesRuleBuilder(
                     classesByKey.getValue(it),
                 )
             }
+
+        /** Filter or assertion criteria for slices. */
         val slices = allSlices.filter { thatPredicate?.invoke(it) ?: true }
 
         KontureLogger.log(
@@ -275,9 +293,13 @@ class SlicesRuleBuilder(
         }
 
         if (assertions.isEmpty()) throw AssertionError(getMessage("slices.rule.noAssertion"))
+        /** Filter or assertion criteria for active slices. */
         val activeSlices = slices.filterNot { slice -> ignoredPredicates.any { it(slice) } }
+
+        /** Filter or assertion criteria for slice graph. */
         val sliceGraph = SliceCycleDetector.buildGraph(activeSlices, packageToSlice, allClasses, slicePattern)
 
+        /** Filter or assertion criteria for run check. */
         val runCheck = { list: MutableList<String> -> assertions.forEach { it(sliceGraph, list) } }
         BaselineManager.checkRule(getMessage("slices.rule.violationHeader"), runCheck)
     }

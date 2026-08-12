@@ -1,6 +1,6 @@
 /*
  * Copyright 2026 The Konture Contributors
- * Contributors: Octavio Calleya Garcia (@octaviospain)
+ * Contributors: Octavio Calleya Garcia (@octaviospain), Bao Le Duc (@baole)
  * SPDX-License-Identifier: Apache-2.0
  */
 
@@ -17,8 +17,11 @@ package io.github.baole.konture
  * @property packages The package names that belong to this slice.
  * @property classes The classes contained in this slice's packages.
  */
-data class Slice(
-    val key: String,
-    val packages: Set<String>,
-    val classes: List<ClassDeclaration>,
+public data class Slice(
+    /** Filter or assertion criteria for key. */
+    public val key: String,
+    /** Filter or assertion criteria for packages. */
+    public val packages: Set<String>,
+    /** Filter or assertion criteria for classes. */
+    public val classes: List<ClassDeclaration>,
 )

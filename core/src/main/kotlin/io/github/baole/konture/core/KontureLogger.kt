@@ -1,11 +1,13 @@
 /*
- * Copyright 2026 Bao Le Duc
+ * Copyright 2026 The Konture Contributors
+ * Contributors: Bao Le Duc (@baole)
  * SPDX-License-Identifier: Apache-2.0
  */
 
 package io.github.baole.konture.core
 
-object KontureLogger {
+/** Central logger for Konture diagnostic messages and warnings. */
+public object KontureLogger {
     private val threadLocalMinLevel = ThreadLocal.withInitial { LogLevel.INFO }
     private val threadLocalLogger =
         ThreadLocal.withInitial<(LogLevel, String, Throwable?) -> Unit> {
@@ -23,19 +25,22 @@ object KontureLogger {
             }
         }
 
-    var minLevel: LogLevel
+    /** The minimum log level required for log messages to be emitted. */
+    public var minLevel: LogLevel
         get() = threadLocalMinLevel.get()
         set(value) {
             threadLocalMinLevel.set(value)
         }
 
-    var logger: (level: LogLevel, message: String, throwable: Throwable?) -> Unit
+    /** Custom log handler function receiving the level, message, and optional throwable. */
+    public var logger: (level: LogLevel, message: String, throwable: Throwable?) -> Unit
         get() = threadLocalLogger.get()
         set(value) {
             threadLocalLogger.set(value)
         }
 
-    fun log(
+    /** Logs a diagnostic message with the given [level], [message], and optional [throwable]. */
+    public fun log(
         level: LogLevel,
         message: String,
         throwable: Throwable? = null,

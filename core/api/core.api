@@ -1,0 +1,325 @@
+public abstract interface annotation class io/github/baole/konture/annotation/ExperimentalKontureApi : java/lang/annotation/Annotation {
+}
+
+public abstract interface annotation class io/github/baole/konture/annotation/InternalKontureApi : java/lang/annotation/Annotation {
+}
+
+public abstract interface annotation class io/github/baole/konture/annotation/KontureDsl : java/lang/annotation/Annotation {
+}
+
+public final class io/github/baole/konture/core/BuildModel {
+	public static final field Companion Lio/github/baole/konture/core/BuildModel$Companion;
+	public fun <init> (Ljava/lang/String;Ljava/util/List;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()Ljava/util/List;
+	public final fun copy (Ljava/lang/String;Ljava/util/List;)Lio/github/baole/konture/core/BuildModel;
+	public static synthetic fun copy$default (Lio/github/baole/konture/core/BuildModel;Ljava/lang/String;Ljava/util/List;ILjava/lang/Object;)Lio/github/baole/konture/core/BuildModel;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getId ()Ljava/lang/String;
+	public final fun getModules ()Ljava/util/List;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final synthetic class io/github/baole/konture/core/BuildModel$$serializer : kotlinx/serialization/internal/GeneratedSerializer {
+	public static final field INSTANCE Lio/github/baole/konture/core/BuildModel$$serializer;
+	public final fun childSerializers ()[Lkotlinx/serialization/KSerializer;
+	public final fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Lio/github/baole/konture/core/BuildModel;
+	public synthetic fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Ljava/lang/Object;
+	public final fun getDescriptor ()Lkotlinx/serialization/descriptors/SerialDescriptor;
+	public final fun serialize (Lkotlinx/serialization/encoding/Encoder;Lio/github/baole/konture/core/BuildModel;)V
+	public synthetic fun serialize (Lkotlinx/serialization/encoding/Encoder;Ljava/lang/Object;)V
+	public fun typeParametersSerializers ()[Lkotlinx/serialization/KSerializer;
+}
+
+public final class io/github/baole/konture/core/BuildModel$Companion {
+	public final fun serializer ()Lkotlinx/serialization/KSerializer;
+}
+
+public final class io/github/baole/konture/core/DependencyEdge {
+	public static final field Companion Lio/github/baole/konture/core/DependencyEdge$Companion;
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()Ljava/lang/String;
+	public final fun component3 ()Ljava/lang/String;
+	public final fun copy (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)Lio/github/baole/konture/core/DependencyEdge;
+	public static synthetic fun copy$default (Lio/github/baole/konture/core/DependencyEdge;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ILjava/lang/Object;)Lio/github/baole/konture/core/DependencyEdge;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getConfiguration ()Ljava/lang/String;
+	public final fun getTargetBuildId ()Ljava/lang/String;
+	public final fun getTargetPath ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final synthetic class io/github/baole/konture/core/DependencyEdge$$serializer : kotlinx/serialization/internal/GeneratedSerializer {
+	public static final field INSTANCE Lio/github/baole/konture/core/DependencyEdge$$serializer;
+	public final fun childSerializers ()[Lkotlinx/serialization/KSerializer;
+	public final fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Lio/github/baole/konture/core/DependencyEdge;
+	public synthetic fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Ljava/lang/Object;
+	public final fun getDescriptor ()Lkotlinx/serialization/descriptors/SerialDescriptor;
+	public final fun serialize (Lkotlinx/serialization/encoding/Encoder;Lio/github/baole/konture/core/DependencyEdge;)V
+	public synthetic fun serialize (Lkotlinx/serialization/encoding/Encoder;Ljava/lang/Object;)V
+	public fun typeParametersSerializers ()[Lkotlinx/serialization/KSerializer;
+}
+
+public final class io/github/baole/konture/core/DependencyEdge$Companion {
+	public final fun serializer ()Lkotlinx/serialization/KSerializer;
+}
+
+public final class io/github/baole/konture/core/DependencyGraphModel {
+	public static final field Companion Lio/github/baole/konture/core/DependencyGraphModel$Companion;
+	public fun <init> ()V
+	public fun <init> (ILjava/util/Map;)V
+	public synthetic fun <init> (ILjava/util/Map;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()I
+	public final fun component2 ()Ljava/util/Map;
+	public final fun copy (ILjava/util/Map;)Lio/github/baole/konture/core/DependencyGraphModel;
+	public static synthetic fun copy$default (Lio/github/baole/konture/core/DependencyGraphModel;ILjava/util/Map;ILjava/lang/Object;)Lio/github/baole/konture/core/DependencyGraphModel;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getModules ()Ljava/util/Map;
+	public final fun getSchemaVersion ()I
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final synthetic class io/github/baole/konture/core/DependencyGraphModel$$serializer : kotlinx/serialization/internal/GeneratedSerializer {
+	public static final field INSTANCE Lio/github/baole/konture/core/DependencyGraphModel$$serializer;
+	public final fun childSerializers ()[Lkotlinx/serialization/KSerializer;
+	public final fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Lio/github/baole/konture/core/DependencyGraphModel;
+	public synthetic fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Ljava/lang/Object;
+	public final fun getDescriptor ()Lkotlinx/serialization/descriptors/SerialDescriptor;
+	public final fun serialize (Lkotlinx/serialization/encoding/Encoder;Lio/github/baole/konture/core/DependencyGraphModel;)V
+	public synthetic fun serialize (Lkotlinx/serialization/encoding/Encoder;Ljava/lang/Object;)V
+	public fun typeParametersSerializers ()[Lkotlinx/serialization/KSerializer;
+}
+
+public final class io/github/baole/konture/core/DependencyGraphModel$Companion {
+	public final fun serializer ()Lkotlinx/serialization/KSerializer;
+}
+
+public final class io/github/baole/konture/core/ExclusionsModel {
+	public static final field Companion Lio/github/baole/konture/core/ExclusionsModel$Companion;
+	public fun <init> ()V
+	public fun <init> (Ljava/util/List;Ljava/util/List;Ljava/util/List;Ljava/util/List;)V
+	public synthetic fun <init> (Ljava/util/List;Ljava/util/List;Ljava/util/List;Ljava/util/List;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Ljava/util/List;
+	public final fun component2 ()Ljava/util/List;
+	public final fun component3 ()Ljava/util/List;
+	public final fun component4 ()Ljava/util/List;
+	public final fun copy (Ljava/util/List;Ljava/util/List;Ljava/util/List;Ljava/util/List;)Lio/github/baole/konture/core/ExclusionsModel;
+	public static synthetic fun copy$default (Lio/github/baole/konture/core/ExclusionsModel;Ljava/util/List;Ljava/util/List;Ljava/util/List;Ljava/util/List;ILjava/lang/Object;)Lio/github/baole/konture/core/ExclusionsModel;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getExcludeClasses ()Ljava/util/List;
+	public final fun getExcludeConfigurations ()Ljava/util/List;
+	public final fun getExcludeModules ()Ljava/util/List;
+	public final fun getExcludePackages ()Ljava/util/List;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final synthetic class io/github/baole/konture/core/ExclusionsModel$$serializer : kotlinx/serialization/internal/GeneratedSerializer {
+	public static final field INSTANCE Lio/github/baole/konture/core/ExclusionsModel$$serializer;
+	public final fun childSerializers ()[Lkotlinx/serialization/KSerializer;
+	public final fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Lio/github/baole/konture/core/ExclusionsModel;
+	public synthetic fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Ljava/lang/Object;
+	public final fun getDescriptor ()Lkotlinx/serialization/descriptors/SerialDescriptor;
+	public final fun serialize (Lkotlinx/serialization/encoding/Encoder;Lio/github/baole/konture/core/ExclusionsModel;)V
+	public synthetic fun serialize (Lkotlinx/serialization/encoding/Encoder;Ljava/lang/Object;)V
+	public fun typeParametersSerializers ()[Lkotlinx/serialization/KSerializer;
+}
+
+public final class io/github/baole/konture/core/ExclusionsModel$Companion {
+	public final fun serializer ()Lkotlinx/serialization/KSerializer;
+}
+
+public final class io/github/baole/konture/core/KontureConstants {
+	public static final field DEFAULT_BASELINE_FILENAME Ljava/lang/String;
+	public static final field INSTANCE Lio/github/baole/konture/core/KontureConstants;
+	public static final field PROPERTY_BASELINE_DIR Ljava/lang/String;
+	public static final field PROPERTY_BASELINE_GENERATE Ljava/lang/String;
+	public static final field PROPERTY_BASELINE_PATH Ljava/lang/String;
+	public static final field PROPERTY_LOCALE Ljava/lang/String;
+}
+
+public final class io/github/baole/konture/core/KontureLogger {
+	public static final field INSTANCE Lio/github/baole/konture/core/KontureLogger;
+	public final fun getLogger ()Lkotlin/jvm/functions/Function3;
+	public final fun getMinLevel ()Lio/github/baole/konture/core/LogLevel;
+	public final fun log (Lio/github/baole/konture/core/LogLevel;Ljava/lang/String;Ljava/lang/Throwable;)V
+	public static synthetic fun log$default (Lio/github/baole/konture/core/KontureLogger;Lio/github/baole/konture/core/LogLevel;Ljava/lang/String;Ljava/lang/Throwable;ILjava/lang/Object;)V
+	public final fun setLogger (Lkotlin/jvm/functions/Function3;)V
+	public final fun setMinLevel (Lio/github/baole/konture/core/LogLevel;)V
+}
+
+public final class io/github/baole/konture/core/LayoutModel {
+	public static final field CURRENT_SCHEMA_VERSION I
+	public static final field Companion Lio/github/baole/konture/core/LayoutModel$Companion;
+	public fun <init> (ILjava/util/List;Lio/github/baole/konture/core/ExclusionsModel;Ljava/lang/String;)V
+	public synthetic fun <init> (ILjava/util/List;Lio/github/baole/konture/core/ExclusionsModel;Ljava/lang/String;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()I
+	public final fun component2 ()Ljava/util/List;
+	public final fun component3 ()Lio/github/baole/konture/core/ExclusionsModel;
+	public final fun component4 ()Ljava/lang/String;
+	public final fun copy (ILjava/util/List;Lio/github/baole/konture/core/ExclusionsModel;Ljava/lang/String;)Lio/github/baole/konture/core/LayoutModel;
+	public static synthetic fun copy$default (Lio/github/baole/konture/core/LayoutModel;ILjava/util/List;Lio/github/baole/konture/core/ExclusionsModel;Ljava/lang/String;ILjava/lang/Object;)Lio/github/baole/konture/core/LayoutModel;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getBuilds ()Ljava/util/List;
+	public final fun getExclusions ()Lio/github/baole/konture/core/ExclusionsModel;
+	public final fun getLogLevel ()Ljava/lang/String;
+	public final fun getSchemaVersion ()I
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final synthetic class io/github/baole/konture/core/LayoutModel$$serializer : kotlinx/serialization/internal/GeneratedSerializer {
+	public static final field INSTANCE Lio/github/baole/konture/core/LayoutModel$$serializer;
+	public final fun childSerializers ()[Lkotlinx/serialization/KSerializer;
+	public final fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Lio/github/baole/konture/core/LayoutModel;
+	public synthetic fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Ljava/lang/Object;
+	public final fun getDescriptor ()Lkotlinx/serialization/descriptors/SerialDescriptor;
+	public final fun serialize (Lkotlinx/serialization/encoding/Encoder;Lio/github/baole/konture/core/LayoutModel;)V
+	public synthetic fun serialize (Lkotlinx/serialization/encoding/Encoder;Ljava/lang/Object;)V
+	public fun typeParametersSerializers ()[Lkotlinx/serialization/KSerializer;
+}
+
+public final class io/github/baole/konture/core/LayoutModel$Companion {
+	public final fun serializer ()Lkotlinx/serialization/KSerializer;
+}
+
+public final class io/github/baole/konture/core/LogLevel : java/lang/Enum {
+	public static final field DEBUG Lio/github/baole/konture/core/LogLevel;
+	public static final field ERROR Lio/github/baole/konture/core/LogLevel;
+	public static final field INFO Lio/github/baole/konture/core/LogLevel;
+	public static final field TRACE Lio/github/baole/konture/core/LogLevel;
+	public static final field WARNING Lio/github/baole/konture/core/LogLevel;
+	public static fun getEntries ()Lkotlin/enums/EnumEntries;
+	public static fun valueOf (Ljava/lang/String;)Lio/github/baole/konture/core/LogLevel;
+	public static fun values ()[Lio/github/baole/konture/core/LogLevel;
+}
+
+public final class io/github/baole/konture/core/ModuleModel {
+	public static final field Companion Lio/github/baole/konture/core/ModuleModel$Companion;
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/util/List;Ljava/util/List;Ljava/util/List;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()Ljava/lang/String;
+	public final fun component3 ()Ljava/util/List;
+	public final fun component4 ()Ljava/util/List;
+	public final fun component5 ()Ljava/util/List;
+	public final fun copy (Ljava/lang/String;Ljava/lang/String;Ljava/util/List;Ljava/util/List;Ljava/util/List;)Lio/github/baole/konture/core/ModuleModel;
+	public static synthetic fun copy$default (Lio/github/baole/konture/core/ModuleModel;Ljava/lang/String;Ljava/lang/String;Ljava/util/List;Ljava/util/List;Ljava/util/List;ILjava/lang/Object;)Lio/github/baole/konture/core/ModuleModel;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getAppliedPlugins ()Ljava/util/List;
+	public final fun getDependencies ()Ljava/util/List;
+	public final fun getPath ()Ljava/lang/String;
+	public final fun getProjectDir ()Ljava/lang/String;
+	public final fun getSourceSets ()Ljava/util/List;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final synthetic class io/github/baole/konture/core/ModuleModel$$serializer : kotlinx/serialization/internal/GeneratedSerializer {
+	public static final field INSTANCE Lio/github/baole/konture/core/ModuleModel$$serializer;
+	public final fun childSerializers ()[Lkotlinx/serialization/KSerializer;
+	public final fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Lio/github/baole/konture/core/ModuleModel;
+	public synthetic fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Ljava/lang/Object;
+	public final fun getDescriptor ()Lkotlinx/serialization/descriptors/SerialDescriptor;
+	public final fun serialize (Lkotlinx/serialization/encoding/Encoder;Lio/github/baole/konture/core/ModuleModel;)V
+	public synthetic fun serialize (Lkotlinx/serialization/encoding/Encoder;Ljava/lang/Object;)V
+	public fun typeParametersSerializers ()[Lkotlinx/serialization/KSerializer;
+}
+
+public final class io/github/baole/konture/core/ModuleModel$Companion {
+	public final fun serializer ()Lkotlinx/serialization/KSerializer;
+}
+
+public final class io/github/baole/konture/core/ResolvedDependencyModel {
+	public static final field Companion Lio/github/baole/konture/core/ResolvedDependencyModel$Companion;
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Z)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()Ljava/lang/String;
+	public final fun component3 ()Ljava/lang/String;
+	public final fun component4 ()Ljava/lang/String;
+	public final fun component5 ()Z
+	public final fun copy (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Z)Lio/github/baole/konture/core/ResolvedDependencyModel;
+	public static synthetic fun copy$default (Lio/github/baole/konture/core/ResolvedDependencyModel;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ZILjava/lang/Object;)Lio/github/baole/konture/core/ResolvedDependencyModel;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getConfiguration ()Ljava/lang/String;
+	public final fun getGroup ()Ljava/lang/String;
+	public final fun getName ()Ljava/lang/String;
+	public final fun getVersion ()Ljava/lang/String;
+	public fun hashCode ()I
+	public final fun isTransitive ()Z
+	public fun toString ()Ljava/lang/String;
+}
+
+public final synthetic class io/github/baole/konture/core/ResolvedDependencyModel$$serializer : kotlinx/serialization/internal/GeneratedSerializer {
+	public static final field INSTANCE Lio/github/baole/konture/core/ResolvedDependencyModel$$serializer;
+	public final fun childSerializers ()[Lkotlinx/serialization/KSerializer;
+	public final fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Lio/github/baole/konture/core/ResolvedDependencyModel;
+	public synthetic fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Ljava/lang/Object;
+	public final fun getDescriptor ()Lkotlinx/serialization/descriptors/SerialDescriptor;
+	public final fun serialize (Lkotlinx/serialization/encoding/Encoder;Lio/github/baole/konture/core/ResolvedDependencyModel;)V
+	public synthetic fun serialize (Lkotlinx/serialization/encoding/Encoder;Ljava/lang/Object;)V
+	public fun typeParametersSerializers ()[Lkotlinx/serialization/KSerializer;
+}
+
+public final class io/github/baole/konture/core/ResolvedDependencyModel$Companion {
+	public final fun serializer ()Lkotlinx/serialization/KSerializer;
+}
+
+public final class io/github/baole/konture/core/SourceSetKind : java/lang/Enum {
+	public static final field ANDROID_VARIANT Lio/github/baole/konture/core/SourceSetKind;
+	public static final field KMP Lio/github/baole/konture/core/SourceSetKind;
+	public static final field KOTLIN_JVM Lio/github/baole/konture/core/SourceSetKind;
+	public static fun getEntries ()Lkotlin/enums/EnumEntries;
+	public static fun valueOf (Ljava/lang/String;)Lio/github/baole/konture/core/SourceSetKind;
+	public static fun values ()[Lio/github/baole/konture/core/SourceSetKind;
+}
+
+public final class io/github/baole/konture/core/SourceSetModel {
+	public static final field Companion Lio/github/baole/konture/core/SourceSetModel$Companion;
+	public fun <init> (Ljava/lang/String;Lio/github/baole/konture/core/SourceSetKind;ZLjava/util/List;Ljava/util/List;Ljava/util/List;Ljava/util/List;Ljava/util/List;Ljava/util/List;Ljava/lang/String;)V
+	public synthetic fun <init> (Ljava/lang/String;Lio/github/baole/konture/core/SourceSetKind;ZLjava/util/List;Ljava/util/List;Ljava/util/List;Ljava/util/List;Ljava/util/List;Ljava/util/List;Ljava/lang/String;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component10 ()Ljava/lang/String;
+	public final fun component2 ()Lio/github/baole/konture/core/SourceSetKind;
+	public final fun component3 ()Z
+	public final fun component4 ()Ljava/util/List;
+	public final fun component5 ()Ljava/util/List;
+	public final fun component6 ()Ljava/util/List;
+	public final fun component7 ()Ljava/util/List;
+	public final fun component8 ()Ljava/util/List;
+	public final fun component9 ()Ljava/util/List;
+	public final fun copy (Ljava/lang/String;Lio/github/baole/konture/core/SourceSetKind;ZLjava/util/List;Ljava/util/List;Ljava/util/List;Ljava/util/List;Ljava/util/List;Ljava/util/List;Ljava/lang/String;)Lio/github/baole/konture/core/SourceSetModel;
+	public static synthetic fun copy$default (Lio/github/baole/konture/core/SourceSetModel;Ljava/lang/String;Lio/github/baole/konture/core/SourceSetKind;ZLjava/util/List;Ljava/util/List;Ljava/util/List;Ljava/util/List;Ljava/util/List;Ljava/util/List;Ljava/lang/String;ILjava/lang/Object;)Lio/github/baole/konture/core/SourceSetModel;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getCompileClasspath ()Ljava/util/List;
+	public final fun getDependencyConfigurations ()Ljava/util/List;
+	public final fun getDependsOnSourceSets ()Ljava/util/List;
+	public final fun getJvmTarget ()Ljava/lang/String;
+	public final fun getKind ()Lio/github/baole/konture/core/SourceSetKind;
+	public final fun getName ()Ljava/lang/String;
+	public final fun getPlatforms ()Ljava/util/List;
+	public final fun getProduction ()Z
+	public final fun getSrcDirs ()Ljava/util/List;
+	public final fun getTargetNames ()Ljava/util/List;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final synthetic class io/github/baole/konture/core/SourceSetModel$$serializer : kotlinx/serialization/internal/GeneratedSerializer {
+	public static final field INSTANCE Lio/github/baole/konture/core/SourceSetModel$$serializer;
+	public final fun childSerializers ()[Lkotlinx/serialization/KSerializer;
+	public final fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Lio/github/baole/konture/core/SourceSetModel;
+	public synthetic fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Ljava/lang/Object;
+	public final fun getDescriptor ()Lkotlinx/serialization/descriptors/SerialDescriptor;
+	public final fun serialize (Lkotlinx/serialization/encoding/Encoder;Lio/github/baole/konture/core/SourceSetModel;)V
+	public synthetic fun serialize (Lkotlinx/serialization/encoding/Encoder;Ljava/lang/Object;)V
+	public fun typeParametersSerializers ()[Lkotlinx/serialization/KSerializer;
+}
+
+public final class io/github/baole/konture/core/SourceSetModel$Companion {
+	public final fun serializer ()Lkotlinx/serialization/KSerializer;
+}
+

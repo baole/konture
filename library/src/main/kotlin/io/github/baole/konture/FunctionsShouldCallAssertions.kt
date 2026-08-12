@@ -11,15 +11,18 @@ import io.github.baole.konture.impl.PatternMatchers
 import io.github.baole.konture.impl.ViolationLocation
 import kotlin.reflect.KClass
 
-interface FunctionsShouldCallAssertions {
-    val builder: FunctionsRuleBuilder
+/** Member call assertions for function rules. */
+public interface FunctionsShouldCallAssertions {
+    /** Filter or assertion criteria for builder. */
+    public val builder: FunctionsRuleBuilder
 
     /** Fails when the selected function invokes [fqName]. */
-    fun notCall(fqName: String): FunctionsRuleBuilder {
+    public fun notCall(fqName: String): FunctionsRuleBuilder {
         builder.setShould { function, _, violations ->
             function.usages
                 .filter { usage -> PatternMatchers.isCallUsageMatch(usage, fqName) }
                 .forEach { usage ->
+                    /** Filter or assertion criteria for unresolved. */
                     val unresolved = if (usage.unresolvedPossibleUsage) "unresolved possible " else ""
                     violations.add(
                         "${getMessage("usage.notCall", unresolved, fqName, usage.rawExpression, usage.line, usage.column)} " +
@@ -31,10 +34,10 @@ interface FunctionsShouldCallAssertions {
     }
 
     /** Fails when the selected function invokes [kClass]. */
-    fun notCall(kClass: KClass<*>): FunctionsRuleBuilder = notCall(kClass.kontureQualifiedName())
+    public fun notCall(kClass: KClass<*>): FunctionsRuleBuilder = notCall(kClass.kontureQualifiedName())
 
     /** Fails for every actual class/type use of [fqName] in the selected function; imports alone do not match. */
-    fun notReferenceClass(fqName: String): FunctionsRuleBuilder {
+    public fun notReferenceClass(fqName: String): FunctionsRuleBuilder {
         builder.setShould { function, _, violations ->
             function.usages
                 .filter { usage ->
@@ -51,14 +54,15 @@ interface FunctionsShouldCallAssertions {
     }
 
     /** Fails for every actual class/type use of [kClass] in the selected function; imports alone do not match. */
-    fun notReferenceClass(kClass: KClass<*>): FunctionsRuleBuilder = notReferenceClass(kClass.kontureQualifiedName())
+    public fun notReferenceClass(kClass: KClass<*>): FunctionsRuleBuilder =
+        notReferenceClass(kClass.kontureQualifiedName())
 }
 
 /** Fails when the selected function invokes [T]. */
-inline fun <reified T : Any> FunctionsShouldCallAssertions.notCall(): FunctionsRuleBuilder = notCall(T::class)
+public inline fun <reified T : Any> FunctionsShouldCallAssertions.notCall(): FunctionsRuleBuilder = notCall(T::class)
 
 /** Fails for every actual class/type use of [T] in the selected function. */
-inline fun <reified T : Any> FunctionsShouldCallAssertions.notReferenceClass(): FunctionsRuleBuilder =
+public inline fun <reified T : Any> FunctionsShouldCallAssertions.notReferenceClass(): FunctionsRuleBuilder =
     notReferenceClass(
         T::class,
     )

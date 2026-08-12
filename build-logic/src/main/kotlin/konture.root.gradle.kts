@@ -45,9 +45,11 @@ tasks.register<JacocoReport>("jacocoRootReport") {
 
     val classDirs =
         coverageProjects.map { sub ->
-            sub.layout.buildDirectory.dir("classes/kotlin/main")
+            sub.fileTree(sub.layout.buildDirectory.dir("classes/kotlin/main")) {
+                exclude("**/DefaultImpls*", "**/*\$DefaultImpls*")
+            }
         }
-    classDirectories.setFrom(files(classDirs))
+    classDirectories.setFrom(classDirs)
 
     val srcDirs =
         coverageProjects.map { sub ->
@@ -82,9 +84,12 @@ tasks.register<JacocoCoverageVerification>("jacocoRootCoverageVerification") {
 
     val classDirs =
         coverageProjects.map { sub ->
-            sub.layout.buildDirectory.dir("classes/kotlin/main")
+            sub.fileTree(sub.layout.buildDirectory.dir("classes/kotlin/main")) {
+                exclude("**/DefaultImpls*", "**/*\$DefaultImpls*")
+            }
         }
-    classDirectories.setFrom(files(classDirs))
+    classDirectories.setFrom(classDirs)
+
 
     val srcDirs =
         coverageProjects.map { sub ->

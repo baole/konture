@@ -16,7 +16,7 @@ package io.github.baole.konture
  * @param predicate The filter criteria block executed on the [Module].
  * @return This [ModulesRuleBuilder] with the filter condition applied.
  */
-fun ModulesRuleBuilder.that(predicate: Module.() -> Boolean): ModulesRuleBuilder =
+public fun ModulesRuleBuilder.that(predicate: Module.() -> Boolean): ModulesRuleBuilder =
     this.apply {
         setThat { it.predicate() }
     }
@@ -28,10 +28,13 @@ fun ModulesRuleBuilder.that(predicate: Module.() -> Boolean): ModulesRuleBuilder
  * @param assertion The assertion block containing module validation rules or boolean predicate.
  * @return This [ModulesRuleBuilder] with the assertion block registered.
  */
-fun ModulesRuleBuilder.should(assertion: ModuleShouldContext.() -> Any?): ModulesRuleBuilder =
+public fun ModulesRuleBuilder.should(assertion: ModuleShouldContext.() -> Any?): ModulesRuleBuilder =
     this.apply {
         setShould { module, graph, violations ->
+            /** Filter or assertion criteria for context. */
             val context = ModuleShouldContext(module, graph, violations)
+
+            /** Filter or assertion criteria for result. */
             val result = context.assertion()
             validateAssertionResult(result)
             if (result is Boolean && !result) {
@@ -50,24 +53,42 @@ fun ModulesRuleBuilder.should(assertion: ModuleShouldContext.() -> Any?): Module
  * @property graph The overall analyzed Gradle project graph.
  * @property violations Mutable collection where assertion failure messages are appended.
  */
-class ModuleShouldContext internal constructor(
-    val element: Module,
-    val graph: ProjectGraph,
-    val violations: MutableList<String>,
+public class ModuleShouldContext internal constructor(
+    /** Filter or assertion criteria for element. */
+    public val element: Module,
+    /** Filter or assertion criteria for graph. */
+    public val graph: ProjectGraph,
+    /** Filter or assertion criteria for violations. */
+    public val violations: MutableList<String>,
 ) {
-    val buildId get() = element.buildId
-    val path get() = element.path
-    val projectDir get() = element.projectDir
-    val appliedPlugins get() = element.appliedPlugins
-    val sourceSets get() = element.sourceSets
-    val dependencies get() = element.dependencies
-    val files get() = element.files
-    val classes get() = element.classes
+    /** Filter or assertion criteria for build id. */
+    public val buildId: String get() = element.buildId
+
+    /** Filter or assertion criteria for path. */
+    public val path: String get() = element.path
+
+    /** Filter or assertion criteria for project dir. */
+    public val projectDir: String get() = element.projectDir
+
+    /** Filter or assertion criteria for applied plugins. */
+    public val appliedPlugins: List<String> get() = element.appliedPlugins
+
+    /** Filter or assertion criteria for source sets. */
+    public val sourceSets: List<SourceSet> get() = element.sourceSets
+
+    /** Filter or assertion criteria for dependencies. */
+    public val dependencies: List<Dependency> get() = element.dependencies
+
+    /** Filter or assertion criteria for files. */
+    public val files: List<FileDeclaration> get() = element.files
+
+    /** Filter or assertion criteria for classes. */
+    public val classes: List<ClassDeclaration> get() = element.classes
 
     /**
      * Appends a custom violation failure message to the assertion run.
      */
-    fun addViolation(message: String) {
+    public fun addViolation(message: String) {
         violations.add(message)
     }
 
@@ -75,7 +96,7 @@ class ModuleShouldContext internal constructor(
      * Asserts [condition] is true, recording a violation with [message] when false.
      * When [message] is omitted, a default message referencing [element] is used.
      */
-    fun check(
+    public fun check(
         condition: Boolean,
         message: String? = null,
     ) {
@@ -86,7 +107,7 @@ class ModuleShouldContext internal constructor(
 }
 
 /** Filters modules that depend on [targetModulePath]. */
-fun List<Module>.dependingOnModule(targetModulePath: String): List<Module> =
+public fun List<Module>.dependingOnModule(targetModulePath: String): List<Module> =
     filter { module ->
         module.dependencies.any { dep ->
             dep.targetPath == targetModulePath || io.github.baole.konture.impl.PatternMatchers.matchesModuleGlob(targetModulePath, dep.targetPath)

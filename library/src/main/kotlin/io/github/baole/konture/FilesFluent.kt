@@ -16,7 +16,7 @@ package io.github.baole.konture
  * @param predicate The filter criteria block executed on the [FileDeclarationContext].
  * @return This [FilesRuleBuilder] with the filter condition applied.
  */
-fun FilesRuleBuilder.that(predicate: FileDeclarationContext.() -> Boolean): FilesRuleBuilder =
+public fun FilesRuleBuilder.that(predicate: FileDeclarationContext.() -> Boolean): FilesRuleBuilder =
     this.apply {
         setThat { it.predicate() }
     }
@@ -28,10 +28,13 @@ fun FilesRuleBuilder.that(predicate: FileDeclarationContext.() -> Boolean): File
  * @param assertion The assertion block containing file validation rules or boolean predicate.
  * @return This [FilesRuleBuilder] with the assertion block registered.
  */
-fun FilesRuleBuilder.should(assertion: FileDeclarationShouldContext.() -> Any?): FilesRuleBuilder =
+public fun FilesRuleBuilder.should(assertion: FileDeclarationShouldContext.() -> Any?): FilesRuleBuilder =
     this.apply {
         setShould { file, allFiles, violations ->
+            /** Filter or assertion criteria for context. */
             val context = FileDeclarationShouldContext(file, allFiles, violations)
+
+            /** Filter or assertion criteria for result. */
             val result = context.assertion()
             validateAssertionResult(result)
             if (result is Boolean && !result) {
@@ -50,26 +53,48 @@ fun FilesRuleBuilder.should(assertion: FileDeclarationShouldContext.() -> Any?):
  * @property allFiles The complete list of file declaration contexts in this test run scope.
  * @property violations Mutable collection where assertion failure messages are appended.
  */
-class FileDeclarationShouldContext internal constructor(
-    val element: FileDeclarationContext,
-    val allFiles: List<FileDeclarationContext>,
-    val violations: MutableList<String>,
+public class FileDeclarationShouldContext internal constructor(
+    /** Filter or assertion criteria for element. */
+    public val element: FileDeclarationContext,
+    /** Filter or assertion criteria for all files. */
+    public val allFiles: List<FileDeclarationContext>,
+    /** Filter or assertion criteria for violations. */
+    public val violations: MutableList<String>,
 ) {
-    val declaration get() = element.declaration
-    val name get() = element.declaration.name
-    val packageName get() = element.declaration.packageName
-    val imports get() = element.declaration.imports
-    val classes get() = element.declaration.classes
-    val topLevelFunctions get() = element.declaration.topLevelFunctions
-    val topLevelProperties get() = element.declaration.topLevelProperties
-    val kdocText get() = element.declaration.kdocText
-    val filePath get() = element.declaration.filePath
-    val modulePath get() = element.modulePath
+    /** Filter or assertion criteria for declaration. */
+    public val declaration: FileDeclaration get() = element.declaration
+
+    /** Filter or assertion criteria for name. */
+    public val name: String get() = element.declaration.name
+
+    /** Filter or assertion criteria for package name. */
+    public val packageName: String get() = element.declaration.packageName
+
+    /** Filter or assertion criteria for imports. */
+    public val imports: List<String> get() = element.declaration.imports
+
+    /** Filter or assertion criteria for classes. */
+    public val classes: List<ClassDeclaration> get() = element.declaration.classes
+
+    /** Filter or assertion criteria for top level functions. */
+    public val topLevelFunctions: List<FunctionDeclaration> get() = element.declaration.topLevelFunctions
+
+    /** Filter or assertion criteria for top level properties. */
+    public val topLevelProperties: List<PropertyDeclaration> get() = element.declaration.topLevelProperties
+
+    /** Filter or assertion criteria for kdoc text. */
+    public val kdocText: String? get() = element.declaration.kdocText
+
+    /** Filter or assertion criteria for file path. */
+    public val filePath: String get() = element.declaration.filePath
+
+    /** Filter or assertion criteria for module path. */
+    public val modulePath: String get() = element.modulePath
 
     /**
      * Appends a custom violation failure message to the assertion run.
      */
-    fun addViolation(message: String) {
+    public fun addViolation(message: String) {
         violations.add(message)
     }
 
@@ -77,7 +102,7 @@ class FileDeclarationShouldContext internal constructor(
      * Asserts [condition] is true, recording a violation with [message] when false.
      * When [message] is omitted, a default message referencing [element] is used.
      */
-    fun check(
+    public fun check(
         condition: Boolean,
         message: String? = null,
     ) {
@@ -89,12 +114,12 @@ class FileDeclarationShouldContext internal constructor(
     /**
      * Checks if this file contains an import matching the given predicate.
      */
-    fun hasImport(predicate: (String) -> Boolean): Boolean = imports.any(predicate)
+    public fun hasImport(predicate: (String) -> Boolean): Boolean = imports.any(predicate)
 
     /**
      * Checks if this file contains any import with matching package path segment strings.
      */
-    fun hasImportContaining(vararg segments: String): Boolean =
+    public fun hasImportContaining(vararg segments: String): Boolean =
         imports.any { importPath ->
             segments.any { segment -> importPath.contains(segment) }
         }
@@ -102,12 +127,13 @@ class FileDeclarationShouldContext internal constructor(
     /**
      * Checks if this file contains any classes matching the given predicate.
      */
-    fun containsClassWith(predicate: (ClassDeclaration) -> Boolean): Boolean = classes.any(predicate)
+    public fun containsClassWith(predicate: (ClassDeclaration) -> Boolean): Boolean = classes.any(predicate)
 
     /**
      * Asserts that this file does not use any wildcard star imports.
      */
-    fun assertNoWildcardImports() {
+    public fun assertNoWildcardImports() {
+        /** Filter or assertion criteria for wildcards. */
         val wildcards = imports.filter { it.endsWith(".*") }
         if (wildcards.isNotEmpty()) {
             addViolation(
@@ -123,7 +149,7 @@ class FileDeclarationShouldContext internal constructor(
     /**
      * Asserts that this file contains at most one class declaration.
      */
-    fun assertOnlyOneClassPerFile() {
+    public fun assertOnlyOneClassPerFile() {
         if (classes.size > 1) {
             addViolation(
                 io.github.baole.konture.i18n.getMessage(
@@ -144,12 +170,13 @@ class FileDeclarationShouldContext internal constructor(
 /**
  * Helper extension to check if a file imports the specified match.
  */
-fun FileDeclarationContext.hasImport(predicate: (String) -> Boolean): Boolean = declaration.imports.any(predicate)
+public fun FileDeclarationContext.hasImport(predicate: (String) -> Boolean): Boolean =
+    declaration.imports.any(predicate)
 
 /**
  * Helper extension to check if a file imports any match containing target segments.
  */
-fun FileDeclarationContext.hasImportContaining(vararg segments: String): Boolean =
+public fun FileDeclarationContext.hasImportContaining(vararg segments: String): Boolean =
     declaration.imports.any { importPath ->
         segments.any { segment -> importPath.contains(segment) }
     }
@@ -157,7 +184,7 @@ fun FileDeclarationContext.hasImportContaining(vararg segments: String): Boolean
 /**
  * Helper extension to check if a file contains a class matching the predicate.
  */
-fun FileDeclarationContext.containsClassWith(predicate: (ClassDeclaration) -> Boolean): Boolean =
+public fun FileDeclarationContext.containsClassWith(predicate: (ClassDeclaration) -> Boolean): Boolean =
     declaration.classes.any(predicate)
 
 // ==========================================
@@ -165,29 +192,29 @@ fun FileDeclarationContext.containsClassWith(predicate: (ClassDeclaration) -> Bo
 // ==========================================
 
 /** Delegates name property to the underlying [FileDeclaration]. */
-val FileDeclarationContext.name: String get() = declaration.name
+public val FileDeclarationContext.name: String get() = declaration.name
 
 /** Delegates packageName property to the underlying [FileDeclaration]. */
-val FileDeclarationContext.packageName: String get() = declaration.packageName
+public val FileDeclarationContext.packageName: String get() = declaration.packageName
 
 /** Delegates imports property to the underlying [FileDeclaration]. */
-val FileDeclarationContext.imports: List<String> get() = declaration.imports
+public val FileDeclarationContext.imports: List<String> get() = declaration.imports
 
 /** Delegates classes property to the underlying [FileDeclaration]. */
-val FileDeclarationContext.classes: List<ClassDeclaration> get() = declaration.classes
+public val FileDeclarationContext.classes: List<ClassDeclaration> get() = declaration.classes
 
 /** Delegates topLevelFunctions property to the underlying [FileDeclaration]. */
-val FileDeclarationContext.topLevelFunctions: List<FunctionDeclaration> get() = declaration.topLevelFunctions
+public val FileDeclarationContext.topLevelFunctions: List<FunctionDeclaration> get() = declaration.topLevelFunctions
 
 /** Delegates topLevelProperties property to the underlying [FileDeclaration]. */
-val FileDeclarationContext.topLevelProperties: List<PropertyDeclaration> get() = declaration.topLevelProperties
+public val FileDeclarationContext.topLevelProperties: List<PropertyDeclaration> get() = declaration.topLevelProperties
 
 /** Filters files residing in a package matching [packagePattern]. */
-fun List<FileDeclarationContext>.residingInPackage(packagePattern: String): List<FileDeclarationContext> =
+public fun List<FileDeclarationContext>.residingInPackage(packagePattern: String): List<FileDeclarationContext> =
     filter { io.github.baole.konture.impl.PatternMatchers.matchesPackage(packagePattern, it.packageName) }
 
 /** Filters files residing in a module matching [modulePath]. */
-fun List<FileDeclarationContext>.residingInModule(modulePath: String): List<FileDeclarationContext> =
+public fun List<FileDeclarationContext>.residingInModule(modulePath: String): List<FileDeclarationContext> =
     filter {
         it.modulePath == modulePath || io.github.baole.konture.impl.PatternMatchers.matchesModuleGlob(modulePath, it.modulePath)
     }

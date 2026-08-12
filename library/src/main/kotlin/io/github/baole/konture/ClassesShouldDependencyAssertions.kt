@@ -13,21 +13,26 @@ import kotlin.reflect.KClass
 /**
  * Fluent API for defining assertion rules on Kotlin classes.
  */
-interface ClassesShouldDependencyAssertions {
-    val builder: ClassesRuleBuilder
+public interface ClassesShouldDependencyAssertions {
+    /** Filter or assertion criteria for builder. */
+    public val builder: ClassesRuleBuilder
 
     /**
      * Asserts that selected classes are free of dependency cycles.
      */
-    fun beFreeOfCycles(): ClassesRuleBuilder {
+    public fun beFreeOfCycles(): ClassesRuleBuilder {
         builder.setShould { _, allClasses, violations ->
+            /** Filter or assertion criteria for adjacency. */
             val adjacency =
                 allClasses.associate { cls ->
                     cls.fqName to cls.referencedTypes.toSet()
                 }
+
+            /** Filter or assertion criteria for cycles. */
             val cycles = io.github.baole.konture.impl.SliceCycleDetector.findCycles(adjacency)
             if (cycles.isNotEmpty()) {
                 for (cycle in cycles) {
+                    /** Filter or assertion criteria for rendered. */
                     val rendered = (cycle + cycle.first()).joinToString(" -> ")
                     violations.add(getMessage("class.should.beFreeOfCycles", rendered))
                 }
@@ -36,33 +41,40 @@ interface ClassesShouldDependencyAssertions {
         return builder
     }
 
-    fun notDependOnClasses(vararg classes: KClass<*>): ClassesRuleBuilder {
+    /** Asserts that selected classes do not depend on the specified [classes]. */
+    public fun notDependOnClasses(vararg classes: KClass<*>): ClassesRuleBuilder {
         classes.forEach { notReferenceClass(it) }
         return builder
     }
 
-    infix fun notDependOnPackages(packagePattern: String): ClassesRuleBuilder =
+    /** Asserts that selected classes do not depend on packages matching [packagePattern]. */
+    public infix fun notDependOnPackages(packagePattern: String): ClassesRuleBuilder =
         notDependOnClassesInAnyPackage(packagePattern)
 
-    fun notDependOnPackages(vararg packagePatterns: String): ClassesRuleBuilder =
+    /** Asserts that selected classes do not depend on packages matching [packagePatterns]. */
+    public fun notDependOnPackages(vararg packagePatterns: String): ClassesRuleBuilder =
         notDependOnClassesInAnyPackage(*packagePatterns)
 
-    infix fun notDependOnPackages(packagePatterns: List<String>): ClassesRuleBuilder =
+    /** Asserts that selected classes do not depend on packages matching [packagePatterns]. */
+    public infix fun notDependOnPackages(packagePatterns: List<String>): ClassesRuleBuilder =
         notDependOnClassesInAnyPackage(packagePatterns)
 
-    infix fun onlyDependOnPackages(packagePattern: String): ClassesRuleBuilder =
+    /** Asserts that selected classes only depend on packages matching [packagePattern]. */
+    public infix fun onlyDependOnPackages(packagePattern: String): ClassesRuleBuilder =
         onlyDependOnClassesInAnyPackage(packagePattern)
 
-    fun onlyDependOnPackages(vararg packagePatterns: String): ClassesRuleBuilder =
+    /** Asserts that selected classes only depend on packages matching [packagePatterns]. */
+    public fun onlyDependOnPackages(vararg packagePatterns: String): ClassesRuleBuilder =
         onlyDependOnClassesInAnyPackage(*packagePatterns)
 
-    infix fun onlyDependOnPackages(packagePatterns: List<String>): ClassesRuleBuilder =
+    /** Asserts that selected classes only depend on packages matching [packagePatterns]. */
+    public infix fun onlyDependOnPackages(packagePatterns: List<String>): ClassesRuleBuilder =
         onlyDependOnClassesInAnyPackage(packagePatterns)
 
     /**
      * Asserts that selected classes have KDoc documentation.
      */
-    fun beDocumentedWithKDoc(): ClassesRuleBuilder {
+    public fun beDocumentedWithKDoc(): ClassesRuleBuilder {
         builder.setShould { cls, _, violations ->
             if (cls.kdocText?.isBlank() != false) {
                 violations.add(getMessage("class.should.beDocumented", cls.fqName))
@@ -76,13 +88,15 @@ interface ClassesShouldDependencyAssertions {
      *
      * @param packagePatterns Package wildcard patterns representing allowed accessing classes.
      */
-    fun onlyBeAccessedByAnyPackage(vararg packagePatterns: String): ClassesRuleBuilder {
+    public fun onlyBeAccessedByAnyPackage(vararg packagePatterns: String): ClassesRuleBuilder {
         builder.setShould { targetCls, allClasses, violations ->
+            /** Filter or assertion criteria for accessing classes. */
             val accessingClasses =
                 allClasses.filter { other ->
                     other.fqName != targetCls.fqName && other.dependsOn(targetCls)
                 }
             for (accessor in accessingClasses) {
+                /** Filter or assertion criteria for is allowed. */
                 val isAllowed =
                     packagePatterns.any { pattern ->
                         PatternMatchers.matchesPackage(pattern, accessor.packageName)
@@ -106,13 +120,13 @@ interface ClassesShouldDependencyAssertions {
     /**
      * Asserts that selected classes are accessed only by classes residing in packages matching the specified pattern.
      */
-    infix fun onlyBeAccessedByAnyPackage(packagePattern: String): ClassesRuleBuilder =
+    public infix fun onlyBeAccessedByAnyPackage(packagePattern: String): ClassesRuleBuilder =
         onlyBeAccessedByAnyPackage(listOf(packagePattern))
 
     /**
      * Asserts that selected classes are accessed only by classes residing in packages matching the specified patterns.
      */
-    infix fun onlyBeAccessedByAnyPackage(packagePatterns: List<String>): ClassesRuleBuilder =
+    public infix fun onlyBeAccessedByAnyPackage(packagePatterns: List<String>): ClassesRuleBuilder =
         onlyBeAccessedByAnyPackage(*packagePatterns.toTypedArray())
 
     /**
@@ -120,13 +134,15 @@ interface ClassesShouldDependencyAssertions {
      *
      * @param packagePatterns Package wildcard patterns representing forbidden accessing classes.
      */
-    fun notBeAccessedByAnyPackage(vararg packagePatterns: String): ClassesRuleBuilder {
+    public fun notBeAccessedByAnyPackage(vararg packagePatterns: String): ClassesRuleBuilder {
         builder.setShould { targetCls, allClasses, violations ->
+            /** Filter or assertion criteria for accessing classes. */
             val accessingClasses =
                 allClasses.filter { other ->
                     other.fqName != targetCls.fqName && other.dependsOn(targetCls)
                 }
             for (accessor in accessingClasses) {
+                /** Filter or assertion criteria for is forbidden. */
                 val isForbidden =
                     packagePatterns.any { pattern ->
                         PatternMatchers.matchesPackage(pattern, accessor.packageName)
@@ -150,13 +166,13 @@ interface ClassesShouldDependencyAssertions {
     /**
      * Asserts that selected classes are not accessed by any class residing in packages matching the specified pattern.
      */
-    infix fun notBeAccessedByAnyPackage(packagePattern: String): ClassesRuleBuilder =
+    public infix fun notBeAccessedByAnyPackage(packagePattern: String): ClassesRuleBuilder =
         notBeAccessedByAnyPackage(listOf(packagePattern))
 
     /**
      * Asserts that selected classes are not accessed by any class residing in packages matching the specified patterns.
      */
-    infix fun notBeAccessedByAnyPackage(packagePatterns: List<String>): ClassesRuleBuilder =
+    public infix fun notBeAccessedByAnyPackage(packagePatterns: List<String>): ClassesRuleBuilder =
         notBeAccessedByAnyPackage(*packagePatterns.toTypedArray())
 
     /**
@@ -164,14 +180,20 @@ interface ClassesShouldDependencyAssertions {
      *
      * @param packagePatterns Package wildcard patterns representing allowed dependency packages.
      */
-    fun onlyDependOnClassesInAnyPackage(vararg packagePatterns: String): ClassesRuleBuilder {
+    public fun onlyDependOnClassesInAnyPackage(vararg packagePatterns: String): ClassesRuleBuilder {
+        /** Filter or assertion criteria for standard exclusions. */
         val standardExclusions = listOf("java", "javax", "kotlin")
         builder.setShould { cls, allClasses, violations ->
+            /** Filter or assertion criteria for extract package. */
             fun extractPackage(fqName: String): String? {
+                /** Filter or assertion criteria for clean. */
                 val clean = fqName.substringBefore("<").trim()
                 if (!clean.contains('.')) return null
 
+                /** Filter or assertion criteria for segments. */
                 val segments = clean.split('.')
+
+                /** Filter or assertion criteria for class index. */
                 val classIndex = segments.indexOfFirst { it.isNotEmpty() && it[0].isUpperCase() }
                 return if (classIndex > 0) {
                     segments.take(classIndex).joinToString(".")
@@ -182,11 +204,13 @@ interface ClassesShouldDependencyAssertions {
                 }
             }
 
+            /** Filter or assertion criteria for deps. */
             val deps = mutableListOf<Pair<String, String>>()
 
             // 1. Imports
             for (imp in cls.imports) {
                 if (imp.endsWith(".*")) {
+                    /** Filter or assertion criteria for pkg. */
                     val pkg = imp.removeSuffix(".*")
                     deps.add(Pair(imp, pkg))
                 } else {
@@ -224,12 +248,14 @@ interface ClassesShouldDependencyAssertions {
                 }
             }
 
+            /** Filter or assertion criteria for filtered deps. */
             val filteredDeps =
                 deps.filter { (_, depPkg) ->
                     depPkg != cls.packageName && standardExclusions.none { depPkg == it || depPkg.startsWith("$it.") }
                 }.distinctBy { it.first }
 
             for (dep in filteredDeps) {
+                /** Filter or assertion criteria for is allowed. */
                 val isAllowed =
                     packagePatterns.any { pattern ->
                         PatternMatchers.matchesPackage(pattern, dep.second)
@@ -253,13 +279,13 @@ interface ClassesShouldDependencyAssertions {
     /**
      * Asserts that selected classes depend only on classes residing in packages matching the specified pattern.
      */
-    infix fun onlyDependOnClassesInAnyPackage(packagePattern: String): ClassesRuleBuilder =
+    public infix fun onlyDependOnClassesInAnyPackage(packagePattern: String): ClassesRuleBuilder =
         onlyDependOnClassesInAnyPackage(listOf(packagePattern))
 
     /**
      * Asserts that selected classes depend only on classes residing in packages matching the specified patterns.
      */
-    infix fun onlyDependOnClassesInAnyPackage(packagePatterns: List<String>): ClassesRuleBuilder =
+    public infix fun onlyDependOnClassesInAnyPackage(packagePatterns: List<String>): ClassesRuleBuilder =
         onlyDependOnClassesInAnyPackage(*packagePatterns.toTypedArray())
 
     /**
@@ -267,14 +293,20 @@ interface ClassesShouldDependencyAssertions {
      *
      * @param packagePatterns Package wildcard patterns representing forbidden dependency packages.
      */
-    fun notDependOnClassesInAnyPackage(vararg packagePatterns: String): ClassesRuleBuilder {
+    public fun notDependOnClassesInAnyPackage(vararg packagePatterns: String): ClassesRuleBuilder {
+        /** Filter or assertion criteria for standard exclusions. */
         val standardExclusions = listOf("java", "javax", "kotlin")
         builder.setShould { cls, allClasses, violations ->
+            /** Filter or assertion criteria for extract package. */
             fun extractPackage(fqName: String): String? {
+                /** Filter or assertion criteria for clean. */
                 val clean = fqName.substringBefore("<").trim()
                 if (!clean.contains('.')) return null
 
+                /** Filter or assertion criteria for segments. */
                 val segments = clean.split('.')
+
+                /** Filter or assertion criteria for class index. */
                 val classIndex = segments.indexOfFirst { it.isNotEmpty() && it[0].isUpperCase() }
                 return if (classIndex > 0) {
                     segments.take(classIndex).joinToString(".")
@@ -285,11 +317,13 @@ interface ClassesShouldDependencyAssertions {
                 }
             }
 
+            /** Filter or assertion criteria for deps. */
             val deps = mutableListOf<Pair<String, String>>()
 
             // 1. Imports
             for (imp in cls.imports) {
                 if (imp.endsWith(".*")) {
+                    /** Filter or assertion criteria for pkg. */
                     val pkg = imp.removeSuffix(".*")
                     deps.add(Pair(imp, pkg))
                 } else {
@@ -327,12 +361,14 @@ interface ClassesShouldDependencyAssertions {
                 }
             }
 
+            /** Filter or assertion criteria for filtered deps. */
             val filteredDeps =
                 deps.filter { (_, depPkg) ->
                     depPkg != cls.packageName && standardExclusions.none { depPkg == it || depPkg.startsWith("$it.") }
                 }.distinctBy { it.first }
 
             for (dep in filteredDeps) {
+                /** Filter or assertion criteria for is forbidden. */
                 val isForbidden =
                     packagePatterns.any { pattern ->
                         PatternMatchers.matchesPackage(pattern, dep.second)
@@ -356,18 +392,19 @@ interface ClassesShouldDependencyAssertions {
     /**
      * Asserts that selected classes do not depend on classes residing in packages matching the specified pattern.
      */
-    infix fun notDependOnClassesInAnyPackage(packagePattern: String): ClassesRuleBuilder =
+    public infix fun notDependOnClassesInAnyPackage(packagePattern: String): ClassesRuleBuilder =
         notDependOnClassesInAnyPackage(listOf(packagePattern))
 
     /**
      * Asserts that selected classes do not depend on classes residing in packages matching the specified patterns.
      */
-    infix fun notDependOnClassesInAnyPackage(packagePatterns: List<String>): ClassesRuleBuilder =
+    public infix fun notDependOnClassesInAnyPackage(packagePatterns: List<String>): ClassesRuleBuilder =
         notDependOnClassesInAnyPackage(*packagePatterns.toTypedArray())
 
     /** Fails for every invocation of [fqName] in the selected class. */
-    fun notCall(fqName: String): ClassesRuleBuilder {
+    public fun notCall(fqName: String): ClassesRuleBuilder {
         builder.setShould { cls, _, violations ->
+            /** Filter or assertion criteria for file usages. */
             val fileUsages =
                 builder.graph.getAllModules()
                     .flatMap { it.files }
@@ -380,6 +417,7 @@ interface ClassesShouldDependencyAssertions {
                     usage.isEnclosedInClass(cls.fqName, cls.name) && PatternMatchers.isCallUsageMatch(usage, fqName)
                 }
                 .forEach { usage ->
+                    /** Filter or assertion criteria for unresolved. */
                     val unresolved = if (usage.unresolvedPossibleUsage) "unresolved possible " else ""
                     violations.add(
                         getMessage("usage.notCall", unresolved, fqName, usage.rawExpression, usage.line, usage.column),
@@ -390,11 +428,12 @@ interface ClassesShouldDependencyAssertions {
     }
 
     /** Fails for every invocation of [kClass] in the selected class. */
-    fun notCall(kClass: KClass<*>): ClassesRuleBuilder = notCall(kClass.kontureQualifiedName())
+    public fun notCall(kClass: KClass<*>): ClassesRuleBuilder = notCall(kClass.kontureQualifiedName())
 
     /** Fails for every actual class/type use of [fqName] in the selected class; imports alone do not match. */
-    fun notReferenceClass(fqName: String): ClassesRuleBuilder {
+    public fun notReferenceClass(fqName: String): ClassesRuleBuilder {
         builder.setShould { cls, _, violations ->
+            /** Filter or assertion criteria for file usages. */
             val fileUsages =
                 builder.graph.getAllModules()
                     .flatMap { it.files }
@@ -416,11 +455,12 @@ interface ClassesShouldDependencyAssertions {
     }
 
     /** Fails for every actual class/type use of [kClass] in the selected class; imports alone do not match. */
-    fun notReferenceClass(kClass: KClass<*>): ClassesRuleBuilder = notReferenceClass(kClass.kontureQualifiedName())
+    public fun notReferenceClass(kClass: KClass<*>): ClassesRuleBuilder =
+        notReferenceClass(kClass.kontureQualifiedName())
 }
 
 /** Fails for every invocation of type [T] in the selected class. */
-inline fun <reified T : Any> ClassesShould.notCall(): ClassesRuleBuilder = notCall(T::class)
+public inline fun <reified T : Any> ClassesShould.notCall(): ClassesRuleBuilder = notCall(T::class)
 
 /** Fails for every actual class/type use of type [T] in the selected class; imports alone do not match. */
-inline fun <reified T : Any> ClassesShould.notReferenceClass(): ClassesRuleBuilder = notReferenceClass(T::class)
+public inline fun <reified T : Any> ClassesShould.notReferenceClass(): ClassesRuleBuilder = notReferenceClass(T::class)

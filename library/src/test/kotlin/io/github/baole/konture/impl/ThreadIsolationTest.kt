@@ -1,5 +1,6 @@
 /*
- * Copyright 2026 Bao Le Duc
+ * Copyright 2026 The Konture Contributors
+ * Contributors: Bao Le Duc (@baole)
  * SPDX-License-Identifier: Apache-2.0
  */
 
@@ -35,7 +36,7 @@ class ThreadIsolationTest : RuleBuildersTestBase() {
         originalBaselineDirProp = System.getProperty(Konture.PROPERTY_BASELINE_DIR)
 
         System.setProperty(Konture.PROPERTY_BASELINE_DIR, tempDir.absolutePath)
-        KontureContextProvider.reset()
+        KontureRuntimeStateProvider.reset()
     }
 
     @AfterEach
@@ -47,7 +48,7 @@ class ThreadIsolationTest : RuleBuildersTestBase() {
         } else {
             System.clearProperty(Konture.PROPERTY_BASELINE_DIR)
         }
-        KontureContextProvider.reset()
+        KontureRuntimeStateProvider.reset()
     }
 
     @Test
@@ -112,7 +113,7 @@ class ThreadIsolationTest : RuleBuildersTestBase() {
 
     @Test
     fun testSettingsChangePreservesBaselineManagerAndViolations() {
-        val originalManager = KontureContextProvider.currentContext.baselineManager
+        val originalManager = KontureRuntimeStateProvider.currentState.baselineManager
         assertNotNull(originalManager)
 
         // Record a dummy violation
@@ -130,14 +131,14 @@ class ThreadIsolationTest : RuleBuildersTestBase() {
         Konture.baselinePath = "brand-new-path.json"
         Konture.generateBaseline = true
 
-        // Retrieve the current context's baselineManager
-        val newManager = KontureContextProvider.currentContext.baselineManager
+        // Retrieve the current state's baselineManager
+        val newManager = KontureRuntimeStateProvider.currentState.baselineManager
 
         // It must be the exact same instance
         assertSame(originalManager, newManager, "BaselineManager instance should be preserved across settings updates")
         assertEquals(1, newManager.recordedViolations.size, "Recorded violations must be preserved")
-        assertEquals("brand-new-path.json", KontureContextProvider.currentContext.baselinePath)
-        assertTrue(KontureContextProvider.currentContext.generateBaseline)
+        assertEquals("brand-new-path.json", KontureRuntimeStateProvider.currentState.baselinePath)
+        assertTrue(KontureRuntimeStateProvider.currentState.generateBaseline)
     }
 
     @Test

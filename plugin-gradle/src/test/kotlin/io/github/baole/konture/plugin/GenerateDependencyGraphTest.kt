@@ -19,7 +19,7 @@ class GenerateDependencyGraphTest {
     @Test
     fun `generate dependency graph resolves direct and transitive dependencies correctly`() {
         val project = ProjectBuilder.builder().build()
-        val task = project.tasks.create("testGenerateDependencyGraph", GenerateDependencyGraph::class.java)
+        val task = project.tasks.register("testGenerateDependencyGraph", GenerateDependencyGraph::class.java).get()
 
         val outputFile = project.layout.buildDirectory.file("konture/dependencies.json").get().asFile
         outputFile.parentFile.mkdirs()
@@ -75,7 +75,11 @@ class GenerateDependencyGraphTest {
     @Test
     fun `generate dependency graph deduplicates identical dependencies`() {
         val project = ProjectBuilder.builder().build()
-        val task = project.tasks.create("testGenerateDependencyGraphDeduplicate", GenerateDependencyGraph::class.java)
+        val task =
+            project.tasks.register(
+                "testGenerateDependencyGraphDeduplicate",
+                GenerateDependencyGraph::class.java,
+            ).get()
 
         val outputFile = project.layout.buildDirectory.file("konture/dependencies_dedup.json").get().asFile
         outputFile.parentFile.mkdirs()

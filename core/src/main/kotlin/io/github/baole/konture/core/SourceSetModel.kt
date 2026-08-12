@@ -19,7 +19,7 @@ import kotlinx.serialization.Serializable
  * source set.
  */
 @Serializable
-data class SourceSetModel(
+public data class SourceSetModel(
     val name: String,
     val kind: SourceSetKind,
     val production: Boolean,

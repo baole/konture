@@ -1,5 +1,6 @@
 /*
- * Copyright 2026 Bao Le Duc
+ * Copyright 2026 The Konture Contributors
+ * Contributors: Bao Le Duc (@baole)
  * SPDX-License-Identifier: Apache-2.0
  */
 
@@ -12,8 +13,11 @@ package io.github.baole.konture
  * @property fqName The fully qualified name of the annotation if resolvable, or its simple name (e.g., `com.acme.annotations.UseCase`).
  * @property arguments List of arguments declared on the annotation.
  */
-data class AnnotationDeclaration(
-    val name: String,
-    val fqName: String,
-    val arguments: List<AnnotationArgumentDeclaration> = emptyList(),
+public data class AnnotationDeclaration(
+    /** Filter or assertion criteria for name. */
+    public val name: String,
+    /** Filter or assertion criteria for fq name. */
+    public val fqName: String,
+    /** Filter or assertion criteria for arguments. */
+    public val arguments: List<AnnotationArgumentDeclaration> = emptyList(),
 )

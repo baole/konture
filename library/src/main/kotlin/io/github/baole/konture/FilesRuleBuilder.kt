@@ -20,7 +20,7 @@ import io.github.baole.konture.impl.ViolationLocation
  * against all source files in the project.
  */
 @KontureDsl
-class FilesRuleBuilder(
+public class FilesRuleBuilder(
     internal val graph: ProjectGraph = Konture.projectGraph,
     private val sourceSets: SourceSetSelector = SourceSets.production(),
 ) {
@@ -45,7 +45,7 @@ class FilesRuleBuilder(
      *
      * @param logger Custom log consumer (defaults to printing to standard output).
      */
-    fun printMatchedFiles(
+    public fun printMatchedFiles(
         logger: (FileDeclarationContext) -> Unit = {
             println(
                 getMessage(
@@ -68,7 +68,7 @@ class FilesRuleBuilder(
      *
      * @param logger Custom log consumer (defaults to printing to standard output).
      */
-    fun printAllFiles(
+    public fun printAllFiles(
         logger: (FileDeclarationContext) -> Unit = {
             println(
                 getMessage(
@@ -101,7 +101,7 @@ class FilesRuleBuilder(
      * Configures this builder to allow empty selections (i.e. if no files match the `that()` filter,
      * the rule will pass instead of throwing an AssertionError).
      */
-    fun allowEmpty(): FilesRuleBuilder {
+    public fun allowEmpty(): FilesRuleBuilder {
         allowEmpty = true
         return this
     }
@@ -109,7 +109,7 @@ class FilesRuleBuilder(
     /**
      * Configures this builder to ignore failures for files satisfying the given predicate.
      */
-    fun ignoreFailuresIn(predicate: (FileDeclarationContext) -> Boolean): FilesRuleBuilder {
+    public fun ignoreFailuresIn(predicate: (FileDeclarationContext) -> Boolean): FilesRuleBuilder {
         ignoredPredicates.add(predicate)
         return this
     }
@@ -117,7 +117,7 @@ class FilesRuleBuilder(
     /**
      * Configures this builder to ignore failures for files matching any of the specified names or patterns.
      */
-    fun ignoreFailuresIn(vararg fileNames: String): FilesRuleBuilder {
+    public fun ignoreFailuresIn(vararg fileNames: String): FilesRuleBuilder {
         ignoredPredicates.add { ctx ->
             fileNames.any { name ->
                 ctx.declaration.name == name || ctx.declaration.filePath == name || io.github.baole.konture.impl.PatternMatchers.matchesSimpleGlob(name, ctx.declaration.name)
@@ -136,17 +136,17 @@ class FilesRuleBuilder(
     /**
      * Starts adding filtering conditions to select which files to verify.
      */
-    fun that(): FilesThat = FilesThat(this)
+    public fun that(): FilesThat = FilesThat(this)
 
     /**
      * Starts adding assertion rules that the selected files must satisfy.
      */
-    fun should(): FilesShould = FilesShould(this)
+    public fun should(): FilesShould = FilesShould(this)
 
     /**
      * Logical AND operator for chaining filter conditions.
      */
-    fun and(): FilesThat {
+    public fun and(): FilesThat {
         activeOperator = LogicalOperator.AND
         return FilesThat(this)
     }
@@ -154,7 +154,7 @@ class FilesRuleBuilder(
     /**
      * Logical OR operator for chaining filter conditions.
      */
-    fun or(): FilesThat {
+    public fun or(): FilesThat {
         activeOperator = LogicalOperator.OR
         return FilesThat(this)
     }
@@ -162,7 +162,7 @@ class FilesRuleBuilder(
     /**
      * Logical XOR operator for chaining filter conditions.
      */
-    fun xor(): FilesThat {
+    public fun xor(): FilesThat {
         activeOperator = LogicalOperator.XOR
         return FilesThat(this)
     }
@@ -170,7 +170,7 @@ class FilesRuleBuilder(
     /**
      * Negates the next filter condition in the chain.
      */
-    fun not(): FilesThat {
+    public fun not(): FilesThat {
         negateNext = true
         return FilesThat(this)
     }
@@ -178,7 +178,7 @@ class FilesRuleBuilder(
     /**
      * Logical AND operator for chaining assertion rules.
      */
-    fun andShould(): FilesShould {
+    public fun andShould(): FilesShould {
         activeShouldOperator = LogicalOperator.AND
         return FilesShould(this)
     }
@@ -186,7 +186,7 @@ class FilesRuleBuilder(
     /**
      * Logical OR operator for chaining assertion rules.
      */
-    fun orShould(): FilesShould {
+    public fun orShould(): FilesShould {
         activeShouldOperator = LogicalOperator.OR
         return FilesShould(this)
     }
@@ -194,7 +194,7 @@ class FilesRuleBuilder(
     /**
      * Logical XOR operator for chaining assertion rules.
      */
-    fun xorShould(): FilesShould {
+    public fun xorShould(): FilesShould {
         activeShouldOperator = LogicalOperator.XOR
         return FilesShould(this)
     }
@@ -202,25 +202,29 @@ class FilesRuleBuilder(
     /**
      * Negates the next assertion rule in the chain.
      */
-    fun notShould(): FilesShould {
+    public fun notShould(): FilesShould {
         negateNextShould = true
         return FilesShould(this)
     }
 
     internal fun setThat(predicate: (FileDeclarationContext) -> Boolean) {
+        /** Filter or assertion criteria for actual predicate. */
         val actualPredicate =
             if (negateNext) {
                 negateNext = false
+                /** Filter or assertion criteria for p. */
                 val p = { f: FileDeclarationContext -> !predicate(f) }
                 p
             } else {
                 predicate
             }
 
+        /** Filter or assertion criteria for current. */
         val current = thatPredicate
         if (current == null) {
             thatPredicate = actualPredicate
         } else {
+            /** Filter or assertion criteria for op. */
             val op = activeOperator
             thatPredicate =
                 when (op) {
@@ -243,14 +247,17 @@ class FilesRuleBuilder(
     internal fun setShould(
         assertion: (FileDeclarationContext, List<FileDeclarationContext>, MutableList<String>) -> Unit,
     ) {
+        /** Filter or assertion criteria for actual assertion. */
         val actualAssertion =
             if (negateNextShould) {
                 negateNextShould = false
+                /** Filter or assertion criteria for a. */
                 val a = {
                         file: FileDeclarationContext,
                         allFiles: List<FileDeclarationContext>,
                         violations: MutableList<String>,
                     ->
+                    /** Filter or assertion criteria for temp violations. */
                     val tempViolations = mutableListOf<String>()
                     assertion(file, allFiles, tempViolations)
                     if (tempViolations.isEmpty()) {
@@ -262,14 +269,19 @@ class FilesRuleBuilder(
                 assertion
             }
 
+        /** Filter or assertion criteria for current. */
         val current = shouldAssertion
         if (current == null) {
             shouldAssertion = actualAssertion
         } else {
+            /** Filter or assertion criteria for op. */
             val op = activeShouldOperator
             if (op == LogicalOperator.OR) {
                 shouldAssertion = { file, allFiles, violations ->
+                    /** Filter or assertion criteria for temp1. */
                     val temp1 = mutableListOf<String>()
+
+                    /** Filter or assertion criteria for temp2. */
                     val temp2 = mutableListOf<String>()
                     current(file, allFiles, temp1)
                     actualAssertion(file, allFiles, temp2)
@@ -281,11 +293,17 @@ class FilesRuleBuilder(
                 }
             } else if (op == LogicalOperator.XOR) {
                 shouldAssertion = { file, allFiles, violations ->
+                    /** Filter or assertion criteria for temp1. */
                     val temp1 = mutableListOf<String>()
+
+                    /** Filter or assertion criteria for temp2. */
                     val temp2 = mutableListOf<String>()
                     current(file, allFiles, temp1)
                     actualAssertion(file, allFiles, temp2)
+                    /** Filter or assertion criteria for ok1. */
                     val ok1 = temp1.isEmpty()
+
+                    /** Filter or assertion criteria for ok2. */
                     val ok2 = temp2.isEmpty()
                     if (ok1 == ok2) {
                         violations.add(
@@ -307,7 +325,8 @@ class FilesRuleBuilder(
      * Executes the compiled file rules against the provided project graph.
      * Throws an [AssertionError] if any rule violations are detected.
      */
-    fun check(g: ProjectGraph = graph) {
+    public fun check(g: ProjectGraph = graph) {
+        /** Filter or assertion criteria for all files. */
         val allFiles =
             g.getAllModules().flatMap { module ->
                 module.files.flatMap { file ->
@@ -316,6 +335,8 @@ class FilesRuleBuilder(
                     }
                 }
             }
+
+        /** Filter or assertion criteria for files to check. */
         val filesToCheck = allFiles.filter { thatPredicate?.invoke(it) ?: true }
 
         KontureLogger.log(
@@ -333,14 +354,17 @@ class FilesRuleBuilder(
             }
         }
 
+        /** Filter or assertion criteria for assertion. */
         val assertion =
             shouldAssertion ?: throw AssertionError(
                 getMessage("files.rule.noAssertion"),
             )
 
+        /** Filter or assertion criteria for run check. */
         val runCheck = { list: MutableList<String> ->
             for (file in filesToCheck) {
                 if (ignoredPredicates.any { it(file) }) continue
+                /** Filter or assertion criteria for start idx. */
                 val startIdx = list.size
                 assertion(file, allFiles, list)
                 for (i in startIdx until list.size) {

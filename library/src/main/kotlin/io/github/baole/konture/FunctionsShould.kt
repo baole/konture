@@ -6,9 +6,11 @@
 
 package io.github.baole.konture
 
+/** Assertion builder for checking rule expectations on Kotlin function declarations. */
 @KontureDsl
-class FunctionsShould internal constructor(
-    override val builder: FunctionsRuleBuilder,
+public class FunctionsShould internal constructor(
+    /** Filter or assertion criteria for builder. */
+    public override val builder: FunctionsRuleBuilder,
 ) : FunctionsShouldCallAssertions,
     FunctionsShouldNameAssertions,
     FunctionsShouldModifierAssertions,

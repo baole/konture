@@ -1,5 +1,6 @@
 /*
- * Copyright 2026 Bao Le Duc
+ * Copyright 2026 The Konture Contributors
+ * Contributors: Bao Le Duc (@baole)
  * SPDX-License-Identifier: Apache-2.0
  */
 
@@ -15,7 +16,7 @@ package io.github.baole.konture
  * @param predicate The filter criteria block executed on the [ClassDeclaration].
  * @return This [ClassesRuleBuilder] with the filter condition applied.
  */
-fun ClassesRuleBuilder.that(predicate: ClassDeclaration.() -> Boolean): ClassesRuleBuilder =
+public fun ClassesRuleBuilder.that(predicate: ClassDeclaration.() -> Boolean): ClassesRuleBuilder =
     this.apply {
         setThat { it.predicate() }
     }
@@ -31,10 +32,13 @@ fun ClassesRuleBuilder.that(predicate: ClassDeclaration.() -> Boolean): ClassesR
  * @param assertion The assertion block containing class validation rules or boolean predicate.
  * @return This [ClassesRuleBuilder] with the assertion registered.
  */
-fun ClassesRuleBuilder.should(assertion: ClassDeclarationShouldContext.() -> Any?): ClassesRuleBuilder =
+public fun ClassesRuleBuilder.should(assertion: ClassDeclarationShouldContext.() -> Any?): ClassesRuleBuilder =
     this.apply {
         setShould { cls, allClasses, violations ->
+            /** Filter or assertion criteria for context. */
             val context = ClassDeclarationShouldContext(cls, allClasses, violations)
+
+            /** Filter or assertion criteria for result. */
             val result = context.assertion()
             validateAssertionResult(result)
             if (result is Boolean && !result) {
@@ -53,59 +57,97 @@ fun ClassesRuleBuilder.should(assertion: ClassDeclarationShouldContext.() -> Any
  * @property allClasses The complete list of class declarations in this test run scope.
  * @property violations Mutable collection where assertion failure messages are appended.
  */
-class ClassDeclarationShouldContext internal constructor(
-    val element: ClassDeclaration,
-    val allClasses: List<ClassDeclaration>,
-    val violations: MutableList<String>,
+public class ClassDeclarationShouldContext internal constructor(
+    /** Filter or assertion criteria for element. */
+    public val element: ClassDeclaration,
+    /** Filter or assertion criteria for all classes. */
+    public val allClasses: List<ClassDeclaration>,
+    /** Filter or assertion criteria for violations. */
+    public val violations: MutableList<String>,
 ) {
-    val name get() = element.name
-    val fqName get() = element.fqName
-    val packageName get() = element.packageName
-    val isInterface get() = element.isInterface
-    val isAbstract get() = element.isAbstract
-    val annotations get() = element.annotations
-    val imports get() = element.imports
-    val referencedTypes get() = element.referencedTypes
-    val filePath get() = element.filePath
-    val visibility get() = element.visibility
-    val modifiers get() = element.modifiers
-    val supertypes get() = element.supertypes
-    val primaryConstructor get() = element.primaryConstructor
-    val secondaryConstructors get() = element.secondaryConstructors
-    val functions get() = element.functions
-    val properties get() = element.properties
-    val companionObject get() = element.companionObject
-    val kdocText get() = element.kdocText
+    /** Filter or assertion criteria for name. */
+    public val name: String get() = element.name
+
+    /** Filter or assertion criteria for fq name. */
+    public val fqName: String get() = element.fqName
+
+    /** Filter or assertion criteria for package name. */
+    public val packageName: String get() = element.packageName
+
+    /** Filter or assertion criteria for is interface. */
+    public val isInterface: Boolean get() = element.isInterface
+
+    /** Filter or assertion criteria for is abstract. */
+    public val isAbstract: Boolean get() = element.isAbstract
+
+    /** Filter or assertion criteria for annotations. */
+    public val annotations: List<AnnotationDeclaration> get() = element.annotations
+
+    /** Filter or assertion criteria for imports. */
+    public val imports: List<String> get() = element.imports
+
+    /** Filter or assertion criteria for referenced types. */
+    public val referencedTypes: Set<String> get() = element.referencedTypes
+
+    /** Filter or assertion criteria for file path. */
+    public val filePath: String get() = element.filePath
+
+    /** Filter or assertion criteria for visibility. */
+    public val visibility: Visibility get() = element.visibility
+
+    /** Filter or assertion criteria for modifiers. */
+    public val modifiers: Set<Modifier> get() = element.modifiers
+
+    /** Filter or assertion criteria for supertypes. */
+    public val supertypes: List<String> get() = element.supertypes
+
+    /** Filter or assertion criteria for primary constructor. */
+    public val primaryConstructor: ConstructorDeclaration? get() = element.primaryConstructor
+
+    /** Filter or assertion criteria for secondary constructors. */
+    public val secondaryConstructors: List<ConstructorDeclaration> get() = element.secondaryConstructors
+
+    /** Filter or assertion criteria for functions. */
+    public val functions: List<FunctionDeclaration> get() = element.functions
+
+    /** Filter or assertion criteria for properties. */
+    public val properties: List<PropertyDeclaration> get() = element.properties
+
+    /** Filter or assertion criteria for companion object. */
+    public val companionObject: ClassDeclaration? get() = element.companionObject
+
+    /** Filter or assertion criteria for kdoc text. */
+    public val kdocText: String? get() = element.kdocText
 
     /**
      * Checks if this class is annotated with the given annotation name or fully qualified name.
      */
-    fun hasAnnotation(name: String): Boolean = element.annotations.any { it.name == name || it.fqName == name }
+    public fun hasAnnotation(name: String): Boolean = element.annotations.any { it.name == name || it.fqName == name }
 
     /**
      * Checks if this class is annotated with all of the given annotation names.
      */
-    fun hasAllAnnotations(names: List<String>): Boolean = element.hasAllAnnotations(names)
+    public fun hasAllAnnotations(names: List<String>): Boolean = element.hasAllAnnotations(names)
 
     /**
      * Checks if this class is annotated with all of the given annotation names.
      */
-    fun hasAllAnnotations(vararg names: String): Boolean = hasAllAnnotations(names.asList())
+    public fun hasAllAnnotations(vararg names: String): Boolean = hasAllAnnotations(names.asList())
 
     /**
      * Checks if this class is annotated with any of the given annotation names.
      */
-    fun hasAnyAnnotation(names: List<String>): Boolean = element.hasAnyAnnotation(names)
+    public fun hasAnyAnnotation(names: List<String>): Boolean = element.hasAnyAnnotation(names)
 
     /**
      * Checks if this class is annotated with any of the given annotation names.
      */
-    fun hasAnyAnnotation(vararg names: String): Boolean = hasAnyAnnotation(names.asList())
+    public fun hasAnyAnnotation(vararg names: String): Boolean = hasAnyAnnotation(names.asList())
 
     /**
      * Appends a custom violation failure message to the assertion run.
      */
-    fun addViolation(message: String) {
+    public fun addViolation(message: String) {
         violations.add(message)
     }
 
@@ -113,7 +155,7 @@ class ClassDeclarationShouldContext internal constructor(
      * Asserts [condition] is true, recording a violation with [message] when false.
      * When [message] is omitted, a default message referencing [element] is used.
      */
-    fun check(
+    public fun check(
         condition: Boolean,
         message: String? = null,
     ) {
@@ -125,7 +167,7 @@ class ClassDeclarationShouldContext internal constructor(
     /**
      * Asserts that this class is decorated with the specified annotation.
      */
-    fun assertAnnotationOf(annotationName: String) {
+    public fun assertAnnotationOf(annotationName: String) {
         if (!hasAnnotation(annotationName)) {
             addViolation(io.github.baole.konture.i18n.getMessage("class.should.haveAnnotation", fqName, annotationName))
         }
@@ -134,7 +176,7 @@ class ClassDeclarationShouldContext internal constructor(
     /**
      * Asserts that this class is decorated with all of the specified annotations.
      */
-    fun assertAllAnnotationsOf(names: List<String>) {
+    public fun assertAllAnnotationsOf(names: List<String>) {
         if (!hasAllAnnotations(names)) {
             addViolation(
                 io.github.baole.konture.i18n.getMessage(
@@ -149,12 +191,12 @@ class ClassDeclarationShouldContext internal constructor(
     /**
      * Asserts that this class is decorated with all of the specified annotations.
      */
-    fun assertAllAnnotationsOf(vararg names: String) = assertAllAnnotationsOf(names.asList())
+    public fun assertAllAnnotationsOf(vararg names: String): Unit = assertAllAnnotationsOf(names.asList())
 
     /**
      * Asserts that this class is decorated with at least one of the specified annotations.
      */
-    fun assertAnyAnnotationOf(names: List<String>) {
+    public fun assertAnyAnnotationOf(names: List<String>) {
         if (!hasAnyAnnotation(names)) {
             addViolation(
                 io.github.baole.konture.i18n.getMessage(
@@ -169,7 +211,7 @@ class ClassDeclarationShouldContext internal constructor(
     /**
      * Asserts that this class is decorated with at least one of the specified annotations.
      */
-    fun assertAnyAnnotationOf(vararg names: String) = assertAnyAnnotationOf(names.asList())
+    public fun assertAnyAnnotationOf(vararg names: String): Unit = assertAnyAnnotationOf(names.asList())
 }
 
 // ==========================================
@@ -179,7 +221,8 @@ class ClassDeclarationShouldContext internal constructor(
 /**
  * Helper extension to check if a class is annotated with the given annotation.
  */
-fun ClassDeclaration.hasAnnotation(name: String): Boolean = annotations.any { it.name == name || it.fqName == name }
+public fun ClassDeclaration.hasAnnotation(name: String): Boolean =
+    annotations.any { it.name == name || it.fqName == name }
 
 /**
  * Helper extension to check if a class is annotated with all of the specified annotations.
@@ -187,7 +230,7 @@ fun ClassDeclaration.hasAnnotation(name: String): Boolean = annotations.any { it
  * @param names The list of annotation names or fully qualified names to check.
  * @return True if all annotations are present on this class, false otherwise.
  */
-fun ClassDeclaration.hasAllAnnotations(names: List<String>): Boolean = names.all { hasAnnotation(it) }
+public fun ClassDeclaration.hasAllAnnotations(names: List<String>): Boolean = names.all { hasAnnotation(it) }
 
 /**
  * Helper extension to check if a class is annotated with all of the specified annotations.
@@ -195,7 +238,7 @@ fun ClassDeclaration.hasAllAnnotations(names: List<String>): Boolean = names.all
  * @param names The vararg list of annotation names or fully qualified names to check.
  * @return True if all annotations are present on this class, false otherwise.
  */
-fun ClassDeclaration.hasAllAnnotations(vararg names: String): Boolean = hasAllAnnotations(names.asList())
+public fun ClassDeclaration.hasAllAnnotations(vararg names: String): Boolean = hasAllAnnotations(names.asList())
 
 /**
  * Helper extension to check if a class is annotated with any of the specified annotations.
@@ -203,7 +246,7 @@ fun ClassDeclaration.hasAllAnnotations(vararg names: String): Boolean = hasAllAn
  * @param names The list of annotation names or fully qualified names to check.
  * @return True if any annotation is present on this class, false otherwise.
  */
-fun ClassDeclaration.hasAnyAnnotation(names: List<String>): Boolean = names.any { hasAnnotation(it) }
+public fun ClassDeclaration.hasAnyAnnotation(names: List<String>): Boolean = names.any { hasAnnotation(it) }
 
 /**
  * Helper extension to check if a class is annotated with any of the specified annotations.
@@ -211,7 +254,7 @@ fun ClassDeclaration.hasAnyAnnotation(names: List<String>): Boolean = names.any 
  * @param names The vararg list of annotation names or fully qualified names to check.
  * @return True if any annotation is present on this class, false otherwise.
  */
-fun ClassDeclaration.hasAnyAnnotation(vararg names: String): Boolean = hasAnyAnnotation(names.asList())
+public fun ClassDeclaration.hasAnyAnnotation(vararg names: String): Boolean = hasAnyAnnotation(names.asList())
 
 internal fun validateAssertionResult(result: Any?) {
     if (result !is Boolean && result !is Unit) {

@@ -20,10 +20,16 @@ class BaselineForkedJvmTest {
     @TempDir
     lateinit var tempDir: File
 
+    private fun getJavaExecutable(): String {
+        val javaHome = System.getProperty("java.home")
+        val isWindows = System.getProperty("os.name").lowercase().contains("win")
+        val exe = if (isWindows) "bin/java.exe" else "bin/java"
+        return File(javaHome, exe).absolutePath
+    }
+
     @Test
     fun testForkedJvmShutdownHookWritesBaselineUsingSystemProperties() {
-        val javaHome = System.getProperty("java.home")
-        val javaBin = File(javaHome, "bin/java").absolutePath
+        val javaBin = getJavaExecutable()
         val classpath = System.getProperty("java.class.path")
 
         val baselineFileName = "forked-baseline.json"
@@ -65,8 +71,7 @@ class BaselineForkedJvmTest {
 
     @Test
     fun testForkedJvmShutdownHookWritesProgrammaticBaseline() {
-        val javaHome = System.getProperty("java.home")
-        val javaBin = File(javaHome, "bin/java").absolutePath
+        val javaBin = getJavaExecutable()
         val classpath = System.getProperty("java.class.path")
 
         val expectedFile = File(tempDir, "programmatic-baseline.json")
@@ -104,8 +109,7 @@ class BaselineForkedJvmTest {
 
     @Test
     fun testForkedJvmShutdownHookWritesDistributedBaselines() {
-        val javaHome = System.getProperty("java.home")
-        val javaBin = File(javaHome, "bin/java").absolutePath
+        val javaBin = getJavaExecutable()
         val classpath = System.getProperty("java.class.path")
 
         val moduleADir = File(tempDir, "module-a")

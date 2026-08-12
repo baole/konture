@@ -1,5 +1,6 @@
 /*
- * Copyright 2026 Bao Le Duc
+ * Copyright 2026 The Konture Contributors
+ * Contributors: Bao Le Duc (@baole)
  * SPDX-License-Identifier: Apache-2.0
  */
 
@@ -261,6 +262,65 @@ class ProjectGraphTest {
             "Circular dependency detected in project graph: ::first -> included:second -> ::first",
             error.message,
         )
+    }
+
+    @Test
+    fun `assertNoCycles detects self-loop dependency`() {
+        val selfModule =
+            module(
+                buildId = ":",
+                path = ":a",
+                dependencies = listOf(Dependency("implementation", ":", ":a")),
+            )
+        val graph = ProjectGraph(mapOf(":" to listOf(selfModule)))
+
+        val error =
+            assertThrows(AssertionError::class.java) {
+                graph.assertNoCycles()
+            }
+        assertEquals(
+            "Circular dependency detected in project graph: ::a -> ::a",
+            error.message,
+        )
+    }
+
+    @Test
+    fun `assertNoCycles reports all simultaneous cycles`() {
+        val prod1 =
+            module(
+                buildId = ":",
+                path = ":prod1",
+                dependencies = listOf(Dependency("implementation", ":", ":prod2")),
+            )
+        val prod2 =
+            module(
+                buildId = ":",
+                path = ":prod2",
+                dependencies = listOf(Dependency("api", ":", ":prod1")),
+            )
+        val prod3 =
+            module(
+                buildId = ":",
+                path = ":prod3",
+                dependencies = listOf(Dependency("implementation", ":", ":prod4")),
+            )
+        val prod4 =
+            module(
+                buildId = ":",
+                path = ":prod4",
+                dependencies = listOf(Dependency("api", ":", ":prod3")),
+            )
+        val graph = ProjectGraph(mapOf(":" to listOf(prod1, prod2, prod3, prod4)))
+
+        val error =
+            assertThrows(AssertionError::class.java) {
+                graph.assertNoCycles()
+            }
+        val expectedMessage =
+            "Circular dependencies detected in project graph:\n" +
+                "  - ::prod1 -> ::prod2 -> ::prod1\n" +
+                "  - ::prod3 -> ::prod4 -> ::prod3"
+        assertEquals(expectedMessage, error.message)
     }
 
     private fun module(
