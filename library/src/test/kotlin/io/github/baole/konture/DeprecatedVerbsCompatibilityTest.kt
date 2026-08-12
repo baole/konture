@@ -171,7 +171,7 @@ class DeprecatedVerbsCompatibilityTest {
 
         val funcScope = KontureFunctionScope(funcList)
         assertEquals(1, funcScope.withPackage("com.example..").functions.size)
-        assertEquals(1, funcScope.haveNameStartingWith("fetch").functions.size)
+        assertEquals(1, funcScope.resideInAPackage("com.example..").functions.size)
 
         val propList = listOf(dummyProperty)
         assertEquals(1, propList.withPackage("com.example..").size)
