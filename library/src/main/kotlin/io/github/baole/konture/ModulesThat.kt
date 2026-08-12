@@ -477,7 +477,7 @@ public class ModulesThat internal constructor(
     /**
      * Restricts the rules to modules containing files in a package matching the specified package pattern.
      */
-    public infix fun containPackage(packagePattern: String): ModulesRuleBuilder {
+    public infix fun resideInAPackage(packagePattern: String): ModulesRuleBuilder {
         builder.setThat { module ->
             module.files.any { file -> PatternMatchers.matchesPackage(packagePattern, file.packageName) }
         }
@@ -487,7 +487,7 @@ public class ModulesThat internal constructor(
     /**
      * Restricts the rules to modules containing files in a package matching any of the specified package patterns.
      */
-    public infix fun containPackage(packagePatterns: List<String>): ModulesRuleBuilder {
+    public infix fun resideInAPackage(packagePatterns: List<String>): ModulesRuleBuilder {
         builder.setThat { module ->
             module.files.any { file -> packagePatterns.any { PatternMatchers.matchesPackage(it, file.packageName) } }
         }
@@ -497,25 +497,39 @@ public class ModulesThat internal constructor(
     /**
      * Restricts the rules to modules containing files in a package matching any of the specified package patterns.
      */
-    public fun containPackage(vararg packagePatterns: String): ModulesRuleBuilder =
-        containPackage(packagePatterns.toList())
-
-    /**
-     * Alias for [containPackage].
-     */
-    public infix fun resideInAPackage(packagePattern: String): ModulesRuleBuilder = containPackage(packagePattern)
-
-    /**
-     * Alias for [containPackage].
-     */
-    public infix fun resideInAPackage(packagePatterns: List<String>): ModulesRuleBuilder =
-        containPackage(packagePatterns)
-
-    /**
-     * Alias for [containPackage].
-     */
     public fun resideInAPackage(vararg packagePatterns: String): ModulesRuleBuilder =
-        containPackage(packagePatterns.toList())
+        resideInAPackage(packagePatterns.toList())
+
+    /**
+     * Deprecated alias for [resideInAPackage].
+     */
+    @Deprecated(
+        message = "Renamed for consistency with resideInAPackage across all scopes.",
+        replaceWith = ReplaceWith("resideInAPackage(packagePattern)"),
+        level = DeprecationLevel.WARNING,
+    )
+    public infix fun containPackage(packagePattern: String): ModulesRuleBuilder = resideInAPackage(packagePattern)
+
+    /**
+     * Deprecated alias for [resideInAPackage].
+     */
+    @Deprecated(
+        message = "Renamed for consistency with resideInAPackage across all scopes.",
+        replaceWith = ReplaceWith("resideInAPackage(packagePatterns)"),
+        level = DeprecationLevel.WARNING,
+    )
+    public infix fun containPackage(packagePatterns: List<String>): ModulesRuleBuilder =
+        resideInAPackage(packagePatterns)
+
+    /**
+     * Deprecated alias for [resideInAPackage].
+     */
+    @Deprecated(
+        message = "Renamed for consistency with resideInAPackage across all scopes.",
+        replaceWith = ReplaceWith("resideInAPackage(*packagePatterns)"),
+        level = DeprecationLevel.WARNING,
+    )
+    public fun containPackage(vararg packagePatterns: String): ModulesRuleBuilder = resideInAPackage(*packagePatterns)
 }
 
 internal fun Module.classesFor(sourceSets: SourceSetSelector?): List<ClassDeclaration> {

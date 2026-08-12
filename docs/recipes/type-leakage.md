@@ -50,7 +50,7 @@ class TypeLeakageTest {
 
         // 2. Query use cases and assert no leaked technical types exist
         projectScope.classes
-            .withNameEndingWith("UseCase")
+            .haveNameEndingWith("UseCase")
             .assertTrue("UseCase signature must be technical-agnostic") { cls ->
                 // Gather all types referenced in return types and parameters
                 val signatureTypes = cls.functions.flatMap { func ->
@@ -79,7 +79,7 @@ class ControllerResponseTest {
     @Test
     fun `controllers must not leak database entity signatures`() {
         Konture.scope.classes
-            .withNameEndingWith("Controller")
+            .haveNameEndingWith("Controller")
             .assertTrue("Controller return types must not be persistence entities") { cls ->
                 val returnTypes = cls.functions.map { it.returnType }
 

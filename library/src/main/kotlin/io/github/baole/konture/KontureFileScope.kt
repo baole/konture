@@ -101,16 +101,39 @@ public operator fun KontureFileScope.minus(other: KontureFileScope): KontureFile
 /**
  * Filters the list of file declarations to include only those whose names end with the specified suffix.
  */
-@JvmName("withFileNameEndingWith")
-public fun List<FileDeclaration>.withNameEndingWith(suffix: String): List<FileDeclaration> =
+@JvmName("haveFileNameEndingWith")
+public fun List<FileDeclaration>.haveNameEndingWith(suffix: String): List<FileDeclaration> =
     filter { it.name.endsWith(suffix) }
+
+/**
+ * Filters the list of file declarations to include only those whose names end with the specified suffix.
+ */
+@JvmName("withFileNameEndingWith")
+@Deprecated(
+    message = "Renamed for consistency across Konture DSL scopes.",
+    replaceWith = ReplaceWith("haveNameEndingWith(suffix)"),
+    level = DeprecationLevel.WARNING,
+)
+public fun List<FileDeclaration>.withNameEndingWith(suffix: String): List<FileDeclaration> = haveNameEndingWith(suffix)
+
+/**
+ * Filters the list of file declarations to include only those whose names start with the specified prefix.
+ */
+@JvmName("haveFileNameStartingWith")
+public fun List<FileDeclaration>.haveNameStartingWith(prefix: String): List<FileDeclaration> =
+    filter { it.name.startsWith(prefix) }
 
 /**
  * Filters the list of file declarations to include only those whose names start with the specified prefix.
  */
 @JvmName("withFileNameStartingWith")
+@Deprecated(
+    message = "Renamed for consistency across Konture DSL scopes.",
+    replaceWith = ReplaceWith("haveNameStartingWith(prefix)"),
+    level = DeprecationLevel.WARNING,
+)
 public fun List<FileDeclaration>.withNameStartingWith(prefix: String): List<FileDeclaration> =
-    filter { it.name.startsWith(prefix) }
+    haveNameStartingWith(prefix)
 
 /**
  * Filters the list of file declarations to include only those whose names match the specified glob pattern.
@@ -124,27 +147,64 @@ public fun List<FileDeclaration>.withNameMatching(pattern: String): List<FileDec
  * Filters the list of file declarations to include only those residing in packages matching the specified pattern.
  * Supports '..' wildcards.
  */
-@JvmName("withFilePackage")
-public fun List<FileDeclaration>.withPackage(packagePattern: String): List<FileDeclaration> =
+@JvmName("resideInFileAPackage")
+public fun List<FileDeclaration>.resideInAPackage(packagePattern: String): List<FileDeclaration> =
     filter { PatternMatchers.matchesPackage(packagePattern, it.packageName) }
+
+/**
+ * Filters the list of file declarations to include only those residing in packages matching the specified pattern.
+ * Supports '..' wildcards.
+ */
+@JvmName("withFilePackage")
+@Deprecated(
+    message = "Renamed for consistency across Konture DSL scopes.",
+    replaceWith = ReplaceWith("resideInAPackage(packagePattern)"),
+    level = DeprecationLevel.WARNING,
+)
+public fun List<FileDeclaration>.withPackage(packagePattern: String): List<FileDeclaration> =
+    resideInAPackage(packagePattern)
 
 // Scope-level delegation for KontureFileScope
 
+/** Filter or assertion criteria for have name ending with. */
+public fun KontureFileScope.haveNameEndingWith(suffix: String): KontureFileScope =
+    KontureFileScope(files.haveNameEndingWith(suffix))
+
 /** Filter or assertion criteria for with name ending with. */
-public fun KontureFileScope.withNameEndingWith(suffix: String): KontureFileScope =
-    KontureFileScope(files.withNameEndingWith(suffix))
+@Deprecated(
+    message = "Renamed for consistency across Konture DSL scopes.",
+    replaceWith = ReplaceWith("haveNameEndingWith(suffix)"),
+    level = DeprecationLevel.WARNING,
+)
+public fun KontureFileScope.withNameEndingWith(suffix: String): KontureFileScope = haveNameEndingWith(suffix)
+
+/** Filter or assertion criteria for have name starting with. */
+public fun KontureFileScope.haveNameStartingWith(prefix: String): KontureFileScope =
+    KontureFileScope(files.haveNameStartingWith(prefix))
 
 /** Filter or assertion criteria for with name starting with. */
-public fun KontureFileScope.withNameStartingWith(prefix: String): KontureFileScope =
-    KontureFileScope(files.withNameStartingWith(prefix))
+@Deprecated(
+    message = "Renamed for consistency across Konture DSL scopes.",
+    replaceWith = ReplaceWith("haveNameStartingWith(prefix)"),
+    level = DeprecationLevel.WARNING,
+)
+public fun KontureFileScope.withNameStartingWith(prefix: String): KontureFileScope = haveNameStartingWith(prefix)
 
 /** Filter or assertion criteria for with name matching. */
 public fun KontureFileScope.withNameMatching(pattern: String): KontureFileScope =
     KontureFileScope(files.withNameMatching(pattern))
 
+/** Filter or assertion criteria for reside in a package. */
+public fun KontureFileScope.resideInAPackage(packagePattern: String): KontureFileScope =
+    KontureFileScope(files.resideInAPackage(packagePattern))
+
 /** Filter or assertion criteria for with package. */
-public fun KontureFileScope.withPackage(packagePattern: String): KontureFileScope =
-    KontureFileScope(files.withPackage(packagePattern))
+@Deprecated(
+    message = "Renamed for consistency across Konture DSL scopes.",
+    replaceWith = ReplaceWith("resideInAPackage(packagePattern)"),
+    level = DeprecationLevel.WARNING,
+)
+public fun KontureFileScope.withPackage(packagePattern: String): KontureFileScope = resideInAPackage(packagePattern)
 
 /** Filter or assertion criteria for with module. */
 public fun KontureFileScope.withModule(

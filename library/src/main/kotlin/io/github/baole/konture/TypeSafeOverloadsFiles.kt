@@ -34,19 +34,27 @@ public inline fun <reified T : Annotation> FilesThat.notContainClassesWithAnnota
 /** Filters files that do not have an import of the type parameter [T]. */
 public inline fun <reified T : Any> FilesThat.notHaveImportOf(): FilesRuleBuilder = notHaveImportOf(T::class)
 
-/** Filters files annotated with the specified [annotation] class. */
+/** Filters files containing classes annotated with the specified [annotation] class. */
 public infix fun FilesThat.areAnnotatedWith(annotation: KClass<out Annotation>): FilesRuleBuilder =
-    haveAnnotationOf(annotation)
+    containClassesWithAnnotation(annotation)
 
-/** Filters files annotated with the annotation type parameter [T]. */
-public inline fun <reified T : Annotation> FilesThat.haveAnnotationOf(): FilesRuleBuilder = haveAnnotationOf(T::class)
+/** Filters files containing classes annotated with the annotation type parameter [T]. */
+@Deprecated(
+    message = "Renamed to containClassesWithAnnotation for consistency across file/module/slice scopes.",
+    replaceWith = ReplaceWith("containClassesWithAnnotation<T>()"),
+    level = DeprecationLevel.WARNING,
+)
+public inline fun <reified T : Annotation> FilesThat.haveAnnotationOf(): FilesRuleBuilder =
+    containClassesWithAnnotation(T::class)
 
-/** Filters files annotated with the annotation type parameter [T]. */
-public inline fun <reified T : Annotation> FilesThat.areAnnotatedWith(): FilesRuleBuilder = haveAnnotationOf(T::class)
+/** Filters files containing classes annotated with the annotation type parameter [T]. */
+public inline fun <reified T : Annotation> FilesThat.areAnnotatedWith(): FilesRuleBuilder =
+    containClassesWithAnnotation(T::class)
 
-/** Asserts that files are annotated with the specified [annotation] class. */
+/** Asserts that files contain classes annotated with the specified [annotation] class. */
 public infix fun FilesShould.beAnnotatedWith(annotation: KClass<out Annotation>): FilesRuleBuilder =
-    haveAnnotationOf(annotation)
+    containClassesWithAnnotation(annotation)
 
-/** Asserts that files are annotated with the annotation type parameter [T]. */
-public inline fun <reified T : Annotation> FilesShould.beAnnotatedWith(): FilesRuleBuilder = haveAnnotationOf(T::class)
+/** Asserts that files contain classes annotated with the annotation type parameter [T]. */
+public inline fun <reified T : Annotation> FilesShould.beAnnotatedWith(): FilesRuleBuilder =
+    containClassesWithAnnotation(T::class)

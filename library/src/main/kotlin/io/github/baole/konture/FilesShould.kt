@@ -13,13 +13,23 @@ public class FilesShould internal constructor(
     public override val builder: FilesRuleBuilder,
 ) : FilesShouldPathAssertions,
     FilesShouldContentAssertions,
-    FilesShouldCompositeAssertions
+    FilesShouldCompositeAssertions {
+    /** Asserts that files contain classes with annotation type parameter [T]. */
+    public inline fun <reified T : Annotation> containClassesWithAnnotation(): FilesRuleBuilder =
+        containClassesWithAnnotation(T::class)
+
+    /** Asserts that files are annotated with annotation type parameter [T]. */
+    @Deprecated(
+        message = "Renamed to containClassesWithAnnotation for consistency across file/module/slice scopes.",
+        replaceWith = ReplaceWith("containClassesWithAnnotation<T>()"),
+        level = DeprecationLevel.WARNING,
+    )
+    public inline fun <reified T : Annotation> haveAnnotationOf(): FilesRuleBuilder =
+        containClassesWithAnnotation(T::class)
+}
 
 /** Asserts that files do not call members of type parameter [T]. */
 public inline fun <reified T : Any> FilesShould.notCall(): FilesRuleBuilder = notCall(T::class)
 
 /** Asserts that files do not reference class type parameter [T]. */
 public inline fun <reified T : Any> FilesShould.notReferenceClass(): FilesRuleBuilder = notReferenceClass(T::class)
-
-/** Asserts that files are annotated with annotation type parameter [T]. */
-public inline fun <reified T : Annotation> FilesShould.haveAnnotationOf(): FilesRuleBuilder = haveAnnotationOf(T::class)

@@ -382,16 +382,7 @@ public class SlicesThat internal constructor(
     // Module location filters
 
     /** Filters slices residing in module [modulePath]. */
-    public infix fun resideInAModule(modulePath: String): SlicesRuleBuilder = resideInModule(modulePath)
-
-    /** Filter or assertion criteria for reside in a module. */
-    public infix fun resideInAModule(modulePaths: List<String>): SlicesRuleBuilder = resideInModules(modulePaths)
-
-    /** Filter or assertion criteria for reside in a module. */
-    public fun resideInAModule(vararg modulePaths: String): SlicesRuleBuilder = resideInModules(modulePaths.toList())
-
-    /** Filter or assertion criteria for reside in module. */
-    public infix fun resideInModule(modulePath: String): SlicesRuleBuilder {
+    public infix fun resideInAModule(modulePath: String): SlicesRuleBuilder {
         /** Filter or assertion criteria for clean name. */
         val cleanName = modulePath.removePrefix(":").removePrefix("/")
         builder.setThat { slice ->
@@ -403,8 +394,8 @@ public class SlicesThat internal constructor(
         return builder
     }
 
-    /** Filter or assertion criteria for reside in modules. */
-    public infix fun resideInModules(modulePaths: List<String>): SlicesRuleBuilder {
+    /** Filter or assertion criteria for reside in a module. */
+    public infix fun resideInAModule(modulePaths: List<String>): SlicesRuleBuilder {
         /** Filter or assertion criteria for clean names. */
         val cleanNames = modulePaths.map { it.removePrefix(":").removePrefix("/") }
         builder.setThat { slice ->
@@ -418,50 +409,69 @@ public class SlicesThat internal constructor(
         return builder
     }
 
+    /** Filter or assertion criteria for reside in a module. */
+    public fun resideInAModule(vararg modulePaths: String): SlicesRuleBuilder = resideInAModule(modulePaths.toList())
+
     /** Filter or assertion criteria for reside in modules. */
-    public fun resideInModules(vararg modulePaths: String): SlicesRuleBuilder = resideInModules(modulePaths.toList())
+    public infix fun resideInModules(modulePaths: List<String>): SlicesRuleBuilder = resideInAModule(modulePaths)
+
+    /** Filter or assertion criteria for reside in modules. */
+    public fun resideInModules(vararg modulePaths: String): SlicesRuleBuilder = resideInAModule(modulePaths.toList())
+
+    /** Filter or assertion criteria for reside in module. */
+    @Deprecated(
+        message = "Renamed for consistency with resideInAModule across all scopes.",
+        replaceWith = ReplaceWith("resideInAModule(modulePath)"),
+        level = DeprecationLevel.WARNING,
+    )
+    public infix fun resideInModule(modulePath: String): SlicesRuleBuilder = resideInAModule(modulePath)
 
     /** Filter or assertion criteria for not reside in a module. */
-    public infix fun notResideInAModule(modulePath: String): SlicesRuleBuilder = notResideInModule(modulePath)
+    public infix fun notResideInAModule(modulePath: String): SlicesRuleBuilder {
+        /** Filter or assertion criteria for clean name. */
+        val cleanName = modulePath.removePrefix(":").removePrefix("/")
+        builder.setThat { slice ->
+            slice.classes.none { cls ->
+                val normPath = cls.filePath.replace('\\', '/')
+                normPath.contains("/$cleanName/") || normPath.contains("$cleanName/")
+            }
+        }
+        return builder
+    }
 
     /** Filter or assertion criteria for not reside in a module. */
-    public infix fun notResideInAModule(modulePaths: List<String>): SlicesRuleBuilder = notResideInModules(modulePaths)
+    public infix fun notResideInAModule(modulePaths: List<String>): SlicesRuleBuilder {
+        /** Filter or assertion criteria for clean names. */
+        val cleanNames = modulePaths.map { it.removePrefix(":").removePrefix("/") }
+        builder.setThat { slice ->
+            slice.classes.none { cls ->
+                val normPath = cls.filePath.replace('\\', '/')
+                cleanNames.any { cleanName ->
+                    normPath.contains("/$cleanName/") || normPath.contains("$cleanName/")
+                }
+            }
+        }
+        return builder
+    }
 
     /** Filter or assertion criteria for not reside in a module. */
     public fun notResideInAModule(vararg modulePaths: String): SlicesRuleBuilder =
-        notResideInModules(modulePaths.toList())
-
-    /** Filter or assertion criteria for not reside in module. */
-    public infix fun notResideInModule(modulePath: String): SlicesRuleBuilder {
-        /** Filter or assertion criteria for clean name. */
-        val cleanName = modulePath.removePrefix(":").removePrefix("/")
-        builder.setThat { slice ->
-            slice.classes.none { cls ->
-                val normPath = cls.filePath.replace('\\', '/')
-                normPath.contains("/$cleanName/") || normPath.contains("$cleanName/")
-            }
-        }
-        return builder
-    }
+        notResideInAModule(modulePaths.toList())
 
     /** Filter or assertion criteria for not reside in modules. */
-    public infix fun notResideInModules(modulePaths: List<String>): SlicesRuleBuilder {
-        /** Filter or assertion criteria for clean names. */
-        val cleanNames = modulePaths.map { it.removePrefix(":").removePrefix("/") }
-        builder.setThat { slice ->
-            slice.classes.none { cls ->
-                val normPath = cls.filePath.replace('\\', '/')
-                cleanNames.any { cleanName ->
-                    normPath.contains("/$cleanName/") || normPath.contains("$cleanName/")
-                }
-            }
-        }
-        return builder
-    }
+    public infix fun notResideInModules(modulePaths: List<String>): SlicesRuleBuilder = notResideInAModule(modulePaths)
 
     /** Filter or assertion criteria for not reside in modules. */
     public fun notResideInModules(vararg modulePaths: String): SlicesRuleBuilder =
-        notResideInModules(modulePaths.toList())
+        notResideInAModule(modulePaths.toList())
+
+    /** Filter or assertion criteria for not reside in module. */
+    @Deprecated(
+        message = "Renamed for consistency with notResideInAModule across all scopes.",
+        replaceWith = ReplaceWith("notResideInAModule(modulePath)"),
+        level = DeprecationLevel.WARNING,
+    )
+    public infix fun notResideInModule(modulePath: String): SlicesRuleBuilder = notResideInAModule(modulePath)
 
     // Package location aliases
 

@@ -150,20 +150,47 @@ public operator fun KontureFunctionScope.minus(other: KontureFunctionScope): Kon
 // Filtering extensions
 
 /** Filters the list of functions to include only those whose names end with [suffix]. */
-public fun List<FunctionDeclarationContext>.withNameEndingWith(suffix: String): List<FunctionDeclarationContext> =
+public fun List<FunctionDeclarationContext>.haveNameEndingWith(suffix: String): List<FunctionDeclarationContext> =
     filter { it.declaration.name.endsWith(suffix) }
 
+/** Filters the list of functions to include only those whose names end with [suffix]. */
+@Deprecated(
+    message = "Renamed for consistency across Konture DSL scopes.",
+    replaceWith = ReplaceWith("haveNameEndingWith(suffix)"),
+    level = DeprecationLevel.WARNING,
+)
+public fun List<FunctionDeclarationContext>.withNameEndingWith(suffix: String): List<FunctionDeclarationContext> =
+    haveNameEndingWith(suffix)
+
 /** Filters the list of functions to include only those whose names start with [prefix]. */
-public fun List<FunctionDeclarationContext>.withNameStartingWith(prefix: String): List<FunctionDeclarationContext> =
+public fun List<FunctionDeclarationContext>.haveNameStartingWith(prefix: String): List<FunctionDeclarationContext> =
     filter { it.declaration.name.startsWith(prefix) }
+
+/** Filters the list of functions to include only those whose names start with [prefix]. */
+@Deprecated(
+    message = "Renamed for consistency across Konture DSL scopes.",
+    replaceWith = ReplaceWith("haveNameStartingWith(prefix)"),
+    level = DeprecationLevel.WARNING,
+)
+public fun List<FunctionDeclarationContext>.withNameStartingWith(prefix: String): List<FunctionDeclarationContext> =
+    haveNameStartingWith(prefix)
 
 /** Filters the list of functions to include only those matching the glob pattern [pattern]. */
 public fun List<FunctionDeclarationContext>.withNameMatching(pattern: String): List<FunctionDeclarationContext> =
     filter { PatternMatchers.matchesSimpleGlob(pattern, it.declaration.name) }
 
 /** Filters the list of functions to include only those residing in packages matching [packagePattern]. */
-public fun List<FunctionDeclarationContext>.withPackage(packagePattern: String): List<FunctionDeclarationContext> =
+public fun List<FunctionDeclarationContext>.resideInAPackage(packagePattern: String): List<FunctionDeclarationContext> =
     filter { PatternMatchers.matchesPackage(packagePattern, it.packageName) }
+
+/** Filters the list of functions to include only those residing in packages matching [packagePattern]. */
+@Deprecated(
+    message = "Renamed for consistency across Konture DSL scopes.",
+    replaceWith = ReplaceWith("resideInAPackage(packagePattern)"),
+    level = DeprecationLevel.WARNING,
+)
+public fun List<FunctionDeclarationContext>.withPackage(packagePattern: String): List<FunctionDeclarationContext> =
+    resideInAPackage(packagePattern)
 
 /** Filters the list of functions to include only member/class functions. */
 public fun List<FunctionDeclarationContext>.memberFunctions(): List<FunctionDeclarationContext> =
@@ -226,6 +253,44 @@ public fun KontureFunctionScope.withParameterOf(paramType: String): KontureFunct
 /** Filters functions in this scope to include only those with annotation [annotationName]. */
 public fun KontureFunctionScope.withAnnotationOf(annotationName: String): KontureFunctionScope =
     KontureFunctionScope(functions.filter { it.hasAnnotation(annotationName) })
+
+/** Filters functions in this scope ending with [suffix]. */
+public fun KontureFunctionScope.haveNameEndingWith(suffix: String): KontureFunctionScope =
+    KontureFunctionScope(functions.haveNameEndingWith(suffix))
+
+/** Filters functions in this scope ending with [suffix]. */
+@Deprecated(
+    message = "Renamed for consistency across Konture DSL scopes.",
+    replaceWith = ReplaceWith("haveNameEndingWith(suffix)"),
+    level = DeprecationLevel.WARNING,
+)
+public fun KontureFunctionScope.withNameEndingWith(suffix: String): KontureFunctionScope = haveNameEndingWith(suffix)
+
+/** Filters functions in this scope starting with [prefix]. */
+public fun KontureFunctionScope.haveNameStartingWith(prefix: String): KontureFunctionScope =
+    KontureFunctionScope(functions.haveNameStartingWith(prefix))
+
+/** Filters functions in this scope starting with [prefix]. */
+@Deprecated(
+    message = "Renamed for consistency across Konture DSL scopes.",
+    replaceWith = ReplaceWith("haveNameStartingWith(prefix)"),
+    level = DeprecationLevel.WARNING,
+)
+public fun KontureFunctionScope.withNameStartingWith(prefix: String): KontureFunctionScope =
+    haveNameStartingWith(prefix)
+
+/** Filters functions in this scope residing in packages matching [packagePattern]. */
+public fun KontureFunctionScope.resideInAPackage(packagePattern: String): KontureFunctionScope =
+    KontureFunctionScope(functions.resideInAPackage(packagePattern))
+
+/** Filters functions in this scope residing in packages matching [packagePattern]. */
+@Deprecated(
+    message = "Renamed for consistency across Konture DSL scopes.",
+    replaceWith = ReplaceWith("resideInAPackage(packagePattern)"),
+    level = DeprecationLevel.WARNING,
+)
+public fun KontureFunctionScope.withPackage(packagePattern: String): KontureFunctionScope =
+    resideInAPackage(packagePattern)
 
 /** Filters functions in this scope to include only those with visibility [visibility]. */
 public fun KontureFunctionScope.withVisibility(visibility: Visibility): KontureFunctionScope =

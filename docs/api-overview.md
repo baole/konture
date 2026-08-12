@@ -30,9 +30,9 @@ The table below outlines all available builder entry points, scoping utilities, 
 | **Baseline & Violation Ignoring** | ✅ `ignoreFailuresIn()` | ✅ `ignoreFailuresIn()` | ✅ `ignoreFailuresIn()` | ✅ `ignoreFailuresIn()` | ✅ `ignoreFailuresIn()` | ✅ `ignoreFailuresIn()` |
 | **Logical Chaining Operators** (`and`, `or`, `not`) | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
 | **Name / Path Filtering** (`that()`) | ✅ | ✅ | ✅ | ✅ (`havePath`, `haveName`) | ✅ (`matching`, `haveKey`) | ✅ |
-| **Module Filtering** (`resideInAModule`) | ✅ | ✅ | ✅ | ✅ `resideInAModule` | ✅ `resideInModule` | ✅ |
-| **Package Filtering** (`resideInAPackage`) | ✅ | ✅ | ✅ | ✅ `containPackage` / `resideInAPackage` | ✅ `resideInAPackage` | ✅ |
-| **Annotation Filtering / Assertions** | ✅ (`haveAnnotationOf`) | ✅ (`beAnnotatedWith`) | ✅ (`beAnnotatedWith`) | ✅ (`containClassesWithAnnotation`) | ✅ (`containClassesWithAnnotation`) | ✅ (`beAnnotatedWith`) |
+| **Module Filtering** (`resideInAModule`) | ✅ | ✅ | ✅ | ✅ `resideInAModule` | ✅ `resideInAModule` | ✅ |
+| **Package Filtering** (`resideInAPackage`) | ✅ | ✅ | ✅ | ✅ `resideInAPackage` | ✅ `resideInAPackage` | ✅ |
+| **Annotation Filtering / Assertions** | ✅ (`containClassesWithAnnotation`) | ✅ (`beAnnotatedWith`) | ✅ (`beAnnotatedWith`) | ✅ (`containClassesWithAnnotation`) | ✅ (`containClassesWithAnnotation`) | ✅ (`beAnnotatedWith`) |
 | **Visibility / Modifier Controls** | ➖ *(N/A)* | ✅ | ✅ | ➖ *(N/A)* | ➖ *(N/A)* | ✅ |
 | **Call / Reference Prohibitions** | ✅ `notCall`, `notReferenceClass` | ✅ `notCall`, `notReferenceClass` | ✅ `notCall`, `notReferenceClass` | ✅ `notCall`, `notReferenceClass` | ✅ `notCall`, `notReferenceClass` | ✅ `notCall`, `notReferenceClass` |
 | **Dependency Assertions** | ✅ `onlyDependOnPackages`, `notDependOnPackages`, `onlyDependOnModules`, `notDependOnModules` | ✅ `onlyDependOn*`, `notDependOn*` | ➖ | ✅ `onlyDependOnModules`, `notDependOnModules` | ✅ `onlyDependOnSlices`, `notDependOnSlice` | ➖ |

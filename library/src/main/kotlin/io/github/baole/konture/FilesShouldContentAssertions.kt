@@ -12,6 +12,7 @@ import io.github.baole.konture.impl.ViolationLocation
 import kotlin.reflect.KClass
 
 /** Content-based assertions for file rules. */
+@Suppress("ComplexInterface")
 public interface FilesShouldContentAssertions {
     /** Filter or assertion criteria for builder. */
     public val builder: FilesRuleBuilder
@@ -328,8 +329,8 @@ public interface FilesShouldContentAssertions {
         return builder
     }
 
-    /** Filter or assertion criteria for have annotation of. */
-    public infix fun haveAnnotationOf(annotationName: String): FilesRuleBuilder {
+    /** Filter or assertion criteria for contain classes with annotation. */
+    public infix fun containClassesWithAnnotation(annotationName: String): FilesRuleBuilder {
         builder.setShould { file, _, violations ->
             /** Filter or assertion criteria for has annotation. */
             val hasAnnotation =
@@ -343,9 +344,27 @@ public interface FilesShouldContentAssertions {
         return builder
     }
 
+    /** Filter or assertion criteria for contain classes with annotation. */
+    public infix fun containClassesWithAnnotation(annotation: KClass<out Annotation>): FilesRuleBuilder =
+        containClassesWithAnnotation(annotation.kontureQualifiedName())
+
     /** Filter or assertion criteria for have annotation of. */
+    @Deprecated(
+        message = "Renamed to containClassesWithAnnotation for consistency across file/module/slice scopes.",
+        replaceWith = ReplaceWith("containClassesWithAnnotation(annotationName)"),
+        level = DeprecationLevel.WARNING,
+    )
+    public infix fun haveAnnotationOf(annotationName: String): FilesRuleBuilder =
+        containClassesWithAnnotation(annotationName)
+
+    /** Filter or assertion criteria for have annotation of. */
+    @Deprecated(
+        message = "Renamed to containClassesWithAnnotation for consistency across file/module/slice scopes.",
+        replaceWith = ReplaceWith("containClassesWithAnnotation(annotation)"),
+        level = DeprecationLevel.WARNING,
+    )
     public infix fun haveAnnotationOf(annotation: KClass<out Annotation>): FilesRuleBuilder =
-        haveAnnotationOf(annotation.kontureQualifiedName())
+        containClassesWithAnnotation(annotation)
 
     /** Filter or assertion criteria for not contain top level properties. */
     public fun notContainTopLevelProperties(): FilesRuleBuilder {
