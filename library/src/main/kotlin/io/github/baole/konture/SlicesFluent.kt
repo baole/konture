@@ -29,7 +29,7 @@ public fun SlicesRuleBuilder.should(assertion: SliceShouldContext.() -> Any?): S
             val result = context.assertion()
             validateAssertionResult(result)
             if (result is Boolean && !result) {
-                violations.add("Slice rule assertion block evaluated to false")
+                violations.add(io.github.baole.konture.i18n.getMessage("slices.rule.evaluatedFalse"))
             }
         }
     }
@@ -60,7 +60,7 @@ public class SliceShouldContext internal constructor(
      */
     public fun check(
         condition: Boolean,
-        message: String = "Slice rule assertion condition failed",
+        message: String = io.github.baole.konture.i18n.getMessage("slices.rule.assertionConditionFailed"),
     ) {
         if (!condition) {
             addViolation(message)

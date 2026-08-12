@@ -218,7 +218,7 @@ public class SlicesRuleBuilder(
                     val temp = mutableListOf<String>()
                     assertion(graph, temp)
                     if (temp.isEmpty()) {
-                        violations.add("Slice rule negated assertion was satisfied")
+                        violations.add(getMessage("slices.rule.negatedSatisfied"))
                     }
                 }
                 fn
@@ -278,7 +278,7 @@ public class SlicesRuleBuilder(
 
         KontureLogger.log(
             LogLevel.DEBUG,
-            "Checking Slices Rules: pattern '$slicePattern' produced ${slices.size} slice(s).",
+            getMessage("debug.slices.ruleChecking", slicePattern, slices.size),
         )
         if (slices.isEmpty()) {
             if (!allowEmpty) {
@@ -286,7 +286,7 @@ public class SlicesRuleBuilder(
             } else {
                 KontureLogger.log(
                     LogLevel.WARNING,
-                    "No packages matched the slice pattern 'matching()'. Rule silently succeeded as allowEmpty is enabled.",
+                    getMessage("slices.rule.emptyAllowed"),
                 )
                 return
             }
