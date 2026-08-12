@@ -104,12 +104,10 @@ public data class ProjectGraph(
                     (cycle + cycle.first()).joinToString(" -> ") { "${it.buildId}${it.path}" }
                 }
             if (renderedCycles.size == 1) {
-                throw AssertionError("Circular dependency detected in project graph: ${renderedCycles.first()}")
+                throw AssertionError(getMessage("project.graph.circularDependency", renderedCycles.first()))
             } else {
-                throw AssertionError(
-                    "Circular dependencies detected in project graph:\n" +
-                        renderedCycles.joinToString("\n") { "  - $it" },
-                )
+                val details = renderedCycles.joinToString("\n") { "  - $it" }
+                throw AssertionError(getMessage("project.graph.circularDependencies", details))
             }
         }
     }

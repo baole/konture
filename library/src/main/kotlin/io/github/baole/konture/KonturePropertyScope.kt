@@ -6,6 +6,7 @@
 
 package io.github.baole.konture
 
+import io.github.baole.konture.i18n.getMessage
 import io.github.baole.konture.impl.PatternMatchers
 import io.github.baole.konture.impl.ViolationLocation
 
@@ -312,6 +313,6 @@ public fun KonturePropertyScope.assertTrue(
 
         /** Filter or assertion criteria for prefix. */
         val prefix = additionalMessage?.let { "$it\n" } ?: ""
-        throw AssertionError("${prefix}Properties failed assertion:\n - $details")
+        throw AssertionError(getMessage("property.scope.failedAssertionHeader", prefix, details))
     }
 }
