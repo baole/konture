@@ -11,6 +11,7 @@ import kotlin.reflect.KClass
 
 /** Filter builder for selecting property declarations matching specific conditions. */
 @KontureDsl
+@Suppress("TooManyFunctions")
 public class PropertiesThat internal constructor(
     private val builder: PropertiesRuleBuilder,
 ) {
@@ -710,4 +711,33 @@ public class PropertiesThat internal constructor(
     /** Filter or assertion criteria for not have import of. */
     public infix fun notHaveImportOf(type: KClass<*>): PropertiesRuleBuilder =
         notHaveImportOf(type.kontureQualifiedName())
+
+    /** Filters properties that depend on packages matching [patterns]. */
+    public infix fun dependOnPackages(patterns: List<String>): PropertiesRuleBuilder {
+        builder.setThat { property ->
+            val deps = property.collectDependencyPackages()
+            deps.any { pkg -> patterns.any { PatternMatchers.matchesPackage(it, pkg) } }
+        }
+        return builder
+    }
+
+    /** Filters properties that depend on packages matching [patterns]. */
+    public fun dependOnPackages(vararg patterns: String): PropertiesRuleBuilder = dependOnPackages(patterns.toList())
+
+    /** Filters properties that do not depend on packages matching [patterns]. */
+    public infix fun notDependOnPackages(patterns: List<String>): PropertiesRuleBuilder {
+        builder.setThat { property ->
+            val deps = property.collectDependencyPackages()
+            deps.none { pkg -> patterns.any { PatternMatchers.matchesPackage(it, pkg) } }
+        }
+        return builder
+    }
+
+    /** Filters properties that do not depend on packages matching [patterns]. */
+    public fun notDependOnPackages(vararg patterns: String): PropertiesRuleBuilder =
+        notDependOnPackages(patterns.toList())
+
+    /** Filters properties that depend on package containing [classes]. */
+    public fun dependOnPackageOf(vararg classes: KClass<*>): PropertiesRuleBuilder =
+        dependOnPackages(classes.map { it.konturePackageName() })
 }

@@ -135,6 +135,17 @@ internal class TypeSafeOverloadsCoverageTest : KontureScopeTestFixture() {
                 mapOf(":" to listOf(Module(":", ":app", "app", emptyList(), emptyList(), emptyList(), listOf(fileA)))),
             )
 
+        assertNotNull(FunctionsRuleBuilder(graph).that().notDependOnPackageOf(TestTypeSafeTarget::class))
+        assertNotNull(FunctionsRuleBuilder(graph).that().notDependOnPackageOf<TestTypeSafeTarget>())
+        assertNotNull(FunctionsRuleBuilder(graph).should().notDependOnPackageOf(TestTypeSafeTarget::class))
+        assertNotNull(FunctionsRuleBuilder(graph).should().notDependOnPackageOf<TestTypeSafeTarget>())
+
+        assertNotNull(PropertiesRuleBuilder(graph).that().notDependOnPackageOf(TestTypeSafeTarget::class))
+        assertNotNull(PropertiesRuleBuilder(graph).that().notDependOnPackageOf<TestTypeSafeTarget>())
+        assertNotNull(PropertiesRuleBuilder(graph).should().notDependOnPackageOf(TestTypeSafeTarget::class))
+        assertNotNull(PropertiesRuleBuilder(graph).should().notDependOnPackageOf<TestTypeSafeTarget>())
+
+        assertNotNull(FilesRuleBuilder(graph).should().notContainCycles())
         assertNotNull(FilesRuleBuilder(graph).that().resideInPackageOf(TestTypeSafeTarget::class))
         assertNotNull(FilesRuleBuilder(graph).that().resideInPackageOf<TestTypeSafeTarget>())
         assertNotNull(FilesRuleBuilder(graph).should().resideInPackageOf(TestTypeSafeTarget::class))

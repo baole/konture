@@ -15,4 +15,5 @@ public class FunctionsShould internal constructor(
     FunctionsShouldNameAssertions,
     FunctionsShouldModifierAssertions,
     FunctionsShouldSignatureAssertions,
+    FunctionsShouldDependencyAssertions,
     FunctionsShouldCompositeAssertions

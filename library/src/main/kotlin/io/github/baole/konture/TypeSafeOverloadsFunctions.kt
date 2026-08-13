@@ -132,3 +132,27 @@ public infix fun FunctionsShould.beAnnotatedWith(annotation: KClass<out Annotati
 /** Asserts that functions are annotated with the annotation specified by type parameter [T]. */
 public inline fun <reified T : Annotation> FunctionsShould.beAnnotatedWith(): FunctionsRuleBuilder =
     haveAnnotationOf(T::class)
+
+/** Filters functions depending on package of [T]. */
+public inline fun <reified T : Any> FunctionsThat.dependOnPackageOf(): FunctionsRuleBuilder =
+    dependOnPackageOf(T::class)
+
+/** Filters functions not depending on package of [type]. */
+public infix fun FunctionsThat.notDependOnPackageOf(type: KClass<*>): FunctionsRuleBuilder =
+    notDependOnPackages(type.konturePackageName())
+
+/** Filters functions not depending on package of [T]. */
+public inline fun <reified T : Any> FunctionsThat.notDependOnPackageOf(): FunctionsRuleBuilder =
+    notDependOnPackageOf(T::class)
+
+/** Asserts that functions depend on package of [T]. */
+public inline fun <reified T : Any> FunctionsShould.dependOnPackageOf(): FunctionsRuleBuilder =
+    dependOnPackageOf(T::class)
+
+/** Asserts that functions only depend on package of [T]. */
+public inline fun <reified T : Any> FunctionsShould.onlyDependOnPackageOf(): FunctionsRuleBuilder =
+    onlyDependOnPackageOf(T::class)
+
+/** Asserts that functions do not depend on package of [T]. */
+public inline fun <reified T : Any> FunctionsShould.notDependOnPackageOf(): FunctionsRuleBuilder =
+    notDependOnPackageOf(T::class)

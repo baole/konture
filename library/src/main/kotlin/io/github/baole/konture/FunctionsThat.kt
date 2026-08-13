@@ -17,6 +17,7 @@ public class FunctionsThat internal constructor(
     FunctionsThatNameFilter,
     FunctionsThatStructureFilter,
     FunctionsThatModifierFilter,
+    FunctionsThatDependencyFilter,
     FunctionsThatCompositeFilter {
     /** Filters functions having parameter of type parameter [T]. */
     public inline fun <reified T : Any> haveParameterOf(): FunctionsRuleBuilder =

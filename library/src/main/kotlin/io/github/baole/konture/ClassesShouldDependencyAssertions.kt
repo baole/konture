@@ -41,6 +41,12 @@ public interface ClassesShouldDependencyAssertions {
         return builder
     }
 
+    /**
+     * Asserts that selected classes do not contain dependency cycles.
+     * Alias for [beFreeOfCycles].
+     */
+    public fun notContainCycles(): ClassesRuleBuilder = beFreeOfCycles()
+
     /** Asserts that selected classes do not depend on the specified [classes]. */
     public fun notDependOnClasses(vararg classes: KClass<*>): ClassesRuleBuilder {
         classes.forEach { notReferenceClass(it) }

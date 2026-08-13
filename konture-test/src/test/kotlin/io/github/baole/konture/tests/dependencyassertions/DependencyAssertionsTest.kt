@@ -9,7 +9,9 @@ package io.github.baole.konture.tests.dependencyassertions
 import io.github.baole.konture.Konture
 import io.github.baole.konture.classes
 import io.github.baole.konture.files
+import io.github.baole.konture.functions
 import io.github.baole.konture.modules
+import io.github.baole.konture.properties
 import io.github.baole.konture.slices
 import org.junit.jupiter.api.Test
 
@@ -34,6 +36,42 @@ class DependencyAssertionsTest {
     }
 
     @Test
+    fun `functions dependency assertions and filters`() {
+        Konture.functions {
+            that().resideInAPackage(pkg).and().haveName("sampleDependencyFunction")
+            should().onlyDependOnPackages(pkg, "kotlin", "kotlin.jvm.internal").andShould().notDependOnPackages("nonExistentPackage")
+        }
+
+        Konture.functions {
+            that().resideInAPackage(pkg).and().haveName("sampleDependencyFunction").and().dependOnPackages("kotlin")
+            should().haveName("sampleDependencyFunction")
+        }
+
+        Konture.functions {
+            that().resideInAPackage(pkg).and().haveName("sampleDependencyFunction")
+            should().notDependOnPackages("nonExistentPackage")
+        }
+    }
+
+    @Test
+    fun `properties dependency assertions and filters`() {
+        Konture.properties {
+            that().resideInAPackage(pkg).and().haveName("sampleDependencyProperty")
+            should().onlyDependOnPackages(pkg, "kotlin").andShould().notDependOnPackages("nonExistentPackage")
+        }
+
+        Konture.properties {
+            that().resideInAPackage(pkg).and().dependOnPackages("kotlin")
+            should().haveName("sampleDependencyProperty")
+        }
+
+        Konture.properties {
+            that().resideInAPackage(pkg).and().notDependOnPackages("nonExistentPackage")
+            should().haveName("sampleDependencyProperty")
+        }
+    }
+
+    @Test
     fun `modules dependency assertions`() {
         Konture.modules {
             that().resideInAModule(":konture-test")
@@ -50,3 +88,4 @@ class DependencyAssertionsTest {
         }
     }
 }
+

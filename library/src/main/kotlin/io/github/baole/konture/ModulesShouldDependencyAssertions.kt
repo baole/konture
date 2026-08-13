@@ -454,6 +454,12 @@ public interface ModulesShouldDependencyAssertions {
         return builder
     }
 
+    /**
+     * Asserts that selected modules do not contain dependency cycles.
+     * Alias for [beFreeOfCycles].
+     */
+    public fun notContainCycles(): ModulesRuleBuilder = beFreeOfCycles()
+
     /** Filter or assertion criteria for depend on module api. */
     public infix fun dependOnModuleApi(targetPath: String): ModulesRuleBuilder =
         dependOnModuleViaConfiguration(targetPath, "api")
