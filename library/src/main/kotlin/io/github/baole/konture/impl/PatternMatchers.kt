@@ -253,7 +253,7 @@ internal object PatternMatchers {
         return false
     }
 
-    private fun extractPackage(fqName: String): String? {
+    internal fun extractPackage(fqName: String): String? {
         val clean = fqName.substringBefore("<").trim()
         if (!clean.contains('.')) return null
 

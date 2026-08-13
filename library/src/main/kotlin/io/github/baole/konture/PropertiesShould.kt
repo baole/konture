@@ -13,6 +13,7 @@ public class PropertiesShould internal constructor(
     public override val builder: PropertiesRuleBuilder,
 ) : PropertiesShouldModifierAssertions,
     PropertiesShouldTypeAssertions,
+    PropertiesShouldDependencyAssertions,
     PropertiesShouldCompositeAssertions
 
 /** Asserts that properties have type specified by type parameter [T]. */

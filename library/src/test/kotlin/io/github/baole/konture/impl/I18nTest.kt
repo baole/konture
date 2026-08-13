@@ -7,12 +7,14 @@
 package io.github.baole.konture.impl
 
 import io.github.baole.konture.Konture
+import io.github.baole.konture.i18n.SUPPORTED_LOCALES
 import io.github.baole.konture.i18n.getMessage
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.util.Locale
+import java.util.Properties
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.CyclicBarrier
 import java.util.concurrent.TimeUnit
@@ -126,6 +128,81 @@ class I18nTest {
         assertEquals(
             "模块 A 被 B 依赖，这是不被 desc 允许的。",
             getMessage("module.should.notBeDependedOnByModulesPredicate", "A", "B", "desc"),
+        )
+    }
+
+    @Test
+    fun testAllKeysExistInAllSupportedLocales() {
+        val resourcePathPrefix = "io/github/baole/konture/i18n"
+        val englishResourceName = "$resourcePathPrefix/messages.properties"
+        val englishStream =
+            javaClass.classLoader.getResourceAsStream(englishResourceName)
+                ?: fail("Could not find default English properties file: $englishResourceName")
+
+        val englishProps = Properties().apply { englishStream.use { load(it) } }
+        val englishKeys = englishProps.stringPropertyNames()
+        assertTrue(englishKeys.isNotEmpty(), "English properties file should contain string keys")
+
+        // Discover all supported language resource files on the classpath
+        val languageFiles = mutableSetOf<String>()
+        val englishUrl = javaClass.classLoader.getResource(englishResourceName)
+        if (englishUrl != null && englishUrl.protocol == "file") {
+            val parentDir = java.io.File(englishUrl.toURI()).parentFile
+            parentDir.listFiles()
+                ?.filter { it.isFile && it.name.startsWith("messages_") && it.name.endsWith(".properties") }
+                ?.mapTo(languageFiles) { it.name }
+        }
+
+        // Also ensure all non-English locales in SUPPORTED_LOCALES have their corresponding files checked
+        for (locale in SUPPORTED_LOCALES) {
+            if (locale == Locale.ENGLISH) continue
+            val localeFileName = "messages_$locale.properties"
+            languageFiles.add(localeFileName)
+        }
+
+        assertTrue(languageFiles.isNotEmpty(), "Should discover at least one supported language properties file")
+
+        val missingByFile = mutableMapOf<String, List<String>>()
+        val emptyByFile = mutableMapOf<String, List<String>>()
+
+        for (fileName in languageFiles.sorted()) {
+            val resourceName = "$resourcePathPrefix/$fileName"
+            val stream = javaClass.classLoader.getResourceAsStream(resourceName)
+            if (stream == null) {
+                missingByFile[fileName] = englishKeys.toList()
+                continue
+            }
+
+            val langProps = Properties().apply { stream.use { load(it) } }
+
+            val missing = englishKeys.filterNot { langProps.containsKey(it) }
+            if (missing.isNotEmpty()) {
+                missingByFile[fileName] = missing
+            }
+
+            val empty =
+                englishKeys.filter { key ->
+                    langProps.containsKey(key) && langProps.getProperty(key).isNullOrBlank()
+                }
+            if (empty.isNotEmpty()) {
+                emptyByFile[fileName] = empty
+            }
+        }
+
+        assertTrue(
+            missingByFile.isEmpty(),
+            "Missing English translation keys in supported language files:\n" +
+                missingByFile.entries.joinToString("\n") { (file, keys) ->
+                    "  $file (${keys.size} missing): ${keys.take(10)}${if (keys.size > 10) "..." else ""}"
+                },
+        )
+
+        assertTrue(
+            emptyByFile.isEmpty(),
+            "Empty translation values in supported language files:\n" +
+                emptyByFile.entries.joinToString("\n") { (file, keys) ->
+                    "  $file (${keys.size} empty): ${keys.take(10)}${if (keys.size > 10) "..." else ""}"
+                },
         )
     }
 

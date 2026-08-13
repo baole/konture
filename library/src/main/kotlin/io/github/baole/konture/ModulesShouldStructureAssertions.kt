@@ -12,6 +12,7 @@ import io.github.baole.konture.impl.normalizeModulePath
 import kotlin.reflect.KClass
 
 /** Structural assertions for Gradle module rules. */
+@Suppress("ComplexInterface")
 public interface ModulesShouldStructureAssertions {
     /** Filter or assertion criteria for builder. */
     public val builder: ModulesRuleBuilder
@@ -440,4 +441,78 @@ public interface ModulesShouldStructureAssertions {
     /** Filter or assertion criteria for not reference class. */
     public fun notReferenceClass(kClass: KClass<*>): ModulesRuleBuilder =
         notReferenceClass(kClass.kontureQualifiedName())
+
+    /** Asserts that all classes in matching modules have one of the specified [visibilities]. */
+    public fun containOnlyClassesWithVisibility(visibilities: List<Visibility>): ModulesRuleBuilder {
+        builder.setShould { module, _, violations ->
+            for (cls in module.classes) {
+                if (!visibilities.contains(cls.visibility)) {
+                    violations.add(
+                        getMessage(
+                            "module.should.containOnlyClassesWithVisibility",
+                            module.path,
+                            cls.name,
+                            cls.visibility.name.lowercase(),
+                            visibilities.joinToString { it.name.lowercase() },
+                        ),
+                    )
+                }
+            }
+        }
+        return builder
+    }
+
+    /** Asserts that all classes in matching modules have one of the specified [visibilities]. */
+    public fun containOnlyClassesWithVisibility(vararg visibilities: Visibility): ModulesRuleBuilder =
+        containOnlyClassesWithVisibility(visibilities.toList())
+
+    /** Asserts that all top-level functions in matching modules have one of the specified [visibilities]. */
+    public fun containOnlyFunctionsWithVisibility(visibilities: List<Visibility>): ModulesRuleBuilder {
+        builder.setShould { module, _, violations ->
+            val functions = module.files.flatMap { it.topLevelFunctions }
+            for (func in functions) {
+                if (!visibilities.contains(func.visibility)) {
+                    violations.add(
+                        getMessage(
+                            "module.should.containOnlyFunctionsWithVisibility",
+                            module.path,
+                            func.name,
+                            func.visibility.name.lowercase(),
+                            visibilities.joinToString { it.name.lowercase() },
+                        ),
+                    )
+                }
+            }
+        }
+        return builder
+    }
+
+    /** Asserts that all top-level functions in matching modules have one of the specified [visibilities]. */
+    public fun containOnlyFunctionsWithVisibility(vararg visibilities: Visibility): ModulesRuleBuilder =
+        containOnlyFunctionsWithVisibility(visibilities.toList())
+
+    /** Asserts that all top-level properties in matching modules have one of the specified [visibilities]. */
+    public fun containOnlyPropertiesWithVisibility(visibilities: List<Visibility>): ModulesRuleBuilder {
+        builder.setShould { module, _, violations ->
+            val properties = module.files.flatMap { it.topLevelProperties }
+            for (prop in properties) {
+                if (!visibilities.contains(prop.visibility)) {
+                    violations.add(
+                        getMessage(
+                            "module.should.containOnlyPropertiesWithVisibility",
+                            module.path,
+                            prop.name,
+                            prop.visibility.name.lowercase(),
+                            visibilities.joinToString { it.name.lowercase() },
+                        ),
+                    )
+                }
+            }
+        }
+        return builder
+    }
+
+    /** Asserts that all top-level properties in matching modules have one of the specified [visibilities]. */
+    public fun containOnlyPropertiesWithVisibility(vararg visibilities: Visibility): ModulesRuleBuilder =
+        containOnlyPropertiesWithVisibility(visibilities.toList())
 }

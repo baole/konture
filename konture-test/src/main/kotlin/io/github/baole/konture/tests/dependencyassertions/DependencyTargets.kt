@@ -8,8 +8,15 @@ package io.github.baole.konture.tests.dependencyassertions
 
 class DependencyClassA {
     fun funcA() {}
+    val sampleDependencyProperty: String = "test"
+
+    fun sampleDependencyFunction(): String {
+        return sampleDependencyProperty
+    }
 }
 
 class DependencyClassB {
     fun funcB() {}
 }
+
+

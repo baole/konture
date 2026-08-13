@@ -41,6 +41,8 @@ public data class PropertyDeclaration(
     public val resolvedType: String? = null,
     /** Filter or assertion criteria for source line. */
     public val sourceLine: Int = -1,
+    /** Filter or assertion criteria for receiver type. */
+    public val receiverType: String? = null,
 ) {
     /** Whether the property is mutable (`var`). */
     public val isVar: Boolean get() = !isVal

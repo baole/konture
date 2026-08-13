@@ -140,3 +140,27 @@ public infix fun PropertiesShould.beAnnotatedWith(annotation: KClass<out Annotat
 /** Asserts that properties are annotated with annotation type parameter [T]. */
 public inline fun <reified T : Annotation> PropertiesShould.beAnnotatedWith(): PropertiesRuleBuilder =
     haveAnnotationOf(T::class)
+
+/** Filters properties depending on package of [T]. */
+public inline fun <reified T : Any> PropertiesThat.dependOnPackageOf(): PropertiesRuleBuilder =
+    dependOnPackageOf(T::class)
+
+/** Filters properties not depending on package of [type]. */
+public infix fun PropertiesThat.notDependOnPackageOf(type: KClass<*>): PropertiesRuleBuilder =
+    notDependOnPackages(type.konturePackageName())
+
+/** Filters properties not depending on package of [T]. */
+public inline fun <reified T : Any> PropertiesThat.notDependOnPackageOf(): PropertiesRuleBuilder =
+    notDependOnPackageOf(T::class)
+
+/** Asserts that properties depend on package of [T]. */
+public inline fun <reified T : Any> PropertiesShould.dependOnPackageOf(): PropertiesRuleBuilder =
+    dependOnPackageOf(T::class)
+
+/** Asserts that properties only depend on package of [T]. */
+public inline fun <reified T : Any> PropertiesShould.onlyDependOnPackageOf(): PropertiesRuleBuilder =
+    onlyDependOnPackageOf(T::class)
+
+/** Asserts that properties do not depend on package of [T]. */
+public inline fun <reified T : Any> PropertiesShould.notDependOnPackageOf(): PropertiesRuleBuilder =
+    notDependOnPackageOf(T::class)

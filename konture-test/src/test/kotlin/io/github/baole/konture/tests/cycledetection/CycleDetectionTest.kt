@@ -8,6 +8,7 @@ package io.github.baole.konture.tests.cycledetection
 
 import io.github.baole.konture.Konture
 import io.github.baole.konture.classes
+import io.github.baole.konture.files
 import io.github.baole.konture.modules
 import io.github.baole.konture.slices
 import org.junit.jupiter.api.Test
@@ -23,6 +24,15 @@ class CycleDetectionTest {
             should().beFreeOfCycles()
         }
     }
+
+    @Test
+    fun `files beFreeOfCycles`() {
+        Konture.files {
+            that().resideInAPackage(pkg)
+            should().beFreeOfCycles()
+        }
+    }
+
 
     @Test
     fun `modules beFreeOfCycles`() {
