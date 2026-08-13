@@ -544,6 +544,104 @@ public class SlicesShould(private val builder: SlicesRuleBuilder) {
         notReferenceClass(
             kClass.kontureQualifiedName(),
         )
+
+    /** Asserts that all classes in matching slices have one of the specified [visibilities]. */
+    public fun containOnlyClassesWithVisibility(visibilities: List<Visibility>): SlicesRuleBuilder {
+        builder.addShouldAssertion { sliceGraph, violations ->
+            for (slice in sliceGraph.slices) {
+                for (cls in slice.classes) {
+                    if (!visibilities.contains(cls.visibility)) {
+                        violations.add(
+                            getMessage(
+                                "slice.should.containOnlyClassesWithVisibility",
+                                slice.key,
+                                cls.name,
+                                cls.visibility.name.lowercase(),
+                                visibilities.joinToString { it.name.lowercase() },
+                            ),
+                        )
+                    }
+                }
+            }
+        }
+        return builder
+    }
+
+    /** Asserts that all classes in matching slices have one of the specified [visibilities]. */
+    public fun containOnlyClassesWithVisibility(vararg visibilities: Visibility): SlicesRuleBuilder =
+        containOnlyClassesWithVisibility(visibilities.toList())
+
+    /** Asserts that all top-level functions in matching slices have one of the specified [visibilities]. */
+    public fun containOnlyFunctionsWithVisibility(visibilities: List<Visibility>): SlicesRuleBuilder {
+        builder.addShouldAssertion { sliceGraph, violations ->
+            val allFiles = builder.graph.getAllModules().flatMap { it.files }
+            for (slice in sliceGraph.slices) {
+                val sliceFiles =
+                    allFiles.filter { file ->
+                        slice.packages.any {
+                                pkg ->
+                            PatternMatchers.matchesPackage(pkg, file.packageName) || file.packageName == pkg
+                        }
+                    }
+                for (file in sliceFiles) {
+                    for (func in file.topLevelFunctions) {
+                        if (!visibilities.contains(func.visibility)) {
+                            violations.add(
+                                getMessage(
+                                    "slice.should.containOnlyFunctionsWithVisibility",
+                                    slice.key,
+                                    func.name,
+                                    func.visibility.name.lowercase(),
+                                    visibilities.joinToString { it.name.lowercase() },
+                                ),
+                            )
+                        }
+                    }
+                }
+            }
+        }
+        return builder
+    }
+
+    /** Asserts that all top-level functions in matching slices have one of the specified [visibilities]. */
+    public fun containOnlyFunctionsWithVisibility(vararg visibilities: Visibility): SlicesRuleBuilder =
+        containOnlyFunctionsWithVisibility(visibilities.toList())
+
+    /** Asserts that all top-level properties in matching slices have one of the specified [visibilities]. */
+    public fun containOnlyPropertiesWithVisibility(visibilities: List<Visibility>): SlicesRuleBuilder {
+        builder.addShouldAssertion { sliceGraph, violations ->
+            val allFiles = builder.graph.getAllModules().flatMap { it.files }
+            for (slice in sliceGraph.slices) {
+                val sliceFiles =
+                    allFiles.filter { file ->
+                        slice.packages.any {
+                                pkg ->
+                            PatternMatchers.matchesPackage(pkg, file.packageName) || file.packageName == pkg
+                        }
+                    }
+                for (file in sliceFiles) {
+                    for (prop in file.topLevelProperties) {
+                        if (!visibilities.contains(prop.visibility)) {
+                            violations.add(
+                                getMessage(
+                                    "slice.should.containOnlyPropertiesWithVisibility",
+                                    slice.key,
+                                    prop.name,
+                                    prop.visibility.name.lowercase(),
+                                    visibilities.joinToString { it.name.lowercase() },
+                                ),
+                            )
+                        }
+                    }
+                }
+            }
+        }
+        return builder
+    }
+
+    /** Asserts that all top-level properties in matching slices have one of the specified [visibilities]. */
+    public fun containOnlyPropertiesWithVisibility(vararg visibilities: Visibility): SlicesRuleBuilder =
+        containOnlyPropertiesWithVisibility(visibilities.toList())
 }
 
 /** Asserts that slices contain classes with annotation type parameter [T]. */

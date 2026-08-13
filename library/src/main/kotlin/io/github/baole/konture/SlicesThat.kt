@@ -370,14 +370,39 @@ public class SlicesThat internal constructor(
     /** Filter or assertion criteria for not have name. */
     public infix fun notHaveName(namePattern: String): SlicesRuleBuilder = notHaveKey(namePattern)
 
+    /** Filter or assertion criteria for not have name. */
+    public infix fun notHaveName(names: List<String>): SlicesRuleBuilder = notHaveKey(names)
+
+    /** Filter or assertion criteria for not have name. */
+    public fun notHaveName(vararg names: String): SlicesRuleBuilder = notHaveKey(*names)
+
     /** Filter or assertion criteria for not have name matching. */
     public infix fun notHaveNameMatching(pattern: String): SlicesRuleBuilder = notHaveKeyMatching(pattern)
+
+    /** Filter or assertion criteria for not have name matching. */
+    public infix fun notHaveNameMatching(patterns: List<String>): SlicesRuleBuilder = notHaveKeyMatching(patterns)
+
+    /** Filter or assertion criteria for not have name matching. */
+    public fun notHaveNameMatching(vararg patterns: String): SlicesRuleBuilder = notHaveKeyMatching(*patterns)
 
     /** Filter or assertion criteria for not have name starting with. */
     public infix fun notHaveNameStartingWith(prefix: String): SlicesRuleBuilder = notHaveKeyStartingWith(prefix)
 
+    /** Filter or assertion criteria for not have name starting with. */
+    public infix fun notHaveNameStartingWith(prefixes: List<String>): SlicesRuleBuilder =
+        notHaveKeyStartingWith(prefixes)
+
+    /** Filter or assertion criteria for not have name starting with. */
+    public fun notHaveNameStartingWith(vararg prefixes: String): SlicesRuleBuilder = notHaveKeyStartingWith(*prefixes)
+
     /** Filter or assertion criteria for not have name ending with. */
     public infix fun notHaveNameEndingWith(suffix: String): SlicesRuleBuilder = notHaveKeyEndingWith(suffix)
+
+    /** Filter or assertion criteria for not have name ending with. */
+    public infix fun notHaveNameEndingWith(suffixes: List<String>): SlicesRuleBuilder = notHaveKeyEndingWith(suffixes)
+
+    /** Filter or assertion criteria for not have name ending with. */
+    public fun notHaveNameEndingWith(vararg suffixes: String): SlicesRuleBuilder = notHaveKeyEndingWith(*suffixes)
 
     // Module location filters
 

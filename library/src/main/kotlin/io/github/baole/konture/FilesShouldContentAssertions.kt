@@ -552,4 +552,94 @@ public interface FilesShouldContentAssertions {
     /** Filter or assertion criteria for not depend on modules. */
     public fun notDependOnModules(vararg modulePaths: String): FilesRuleBuilder =
         notDependOnModules(modulePaths.toList())
+
+    /** Asserts that selected files do not form dependency cycles among themselves. */
+    public fun beFreeOfCycles(): FilesRuleBuilder {
+        builder.setShould { file, allFiles, violations ->
+            val cycles = io.github.baole.konture.impl.FileCycleDetector.findCycles(allFiles)
+            if (cycles.isNotEmpty()) {
+                val fileCycles = cycles.filter { it.contains(file.declaration.name) }
+                for (cycle in fileCycles) {
+                    val rendered = (cycle + cycle.first()).joinToString(" -> ")
+                    violations.add(getMessage("file.should.beFreeOfCycles", rendered))
+                }
+            }
+        }
+        return builder
+    }
+
+    /** Asserts that selected files do not form dependency cycles among themselves. */
+    public fun notContainCycles(): FilesRuleBuilder = beFreeOfCycles()
+
+    /** Asserts that all classes in matching files have one of the specified [visibilities]. */
+    public fun containOnlyClassesWithVisibility(visibilities: List<Visibility>): FilesRuleBuilder {
+        builder.setShould { file, _, violations ->
+            for (cls in file.declaration.classes) {
+                if (!visibilities.contains(cls.visibility)) {
+                    violations.add(
+                        getMessage(
+                            "file.should.containOnlyClassesWithVisibility",
+                            file.declaration.name,
+                            cls.name,
+                            cls.visibility.name.lowercase(),
+                            visibilities.joinToString { it.name.lowercase() },
+                        ),
+                    )
+                }
+            }
+        }
+        return builder
+    }
+
+    /** Asserts that all classes in matching files have one of the specified [visibilities]. */
+    public fun containOnlyClassesWithVisibility(vararg visibilities: Visibility): FilesRuleBuilder =
+        containOnlyClassesWithVisibility(visibilities.toList())
+
+    /** Asserts that all top-level functions in matching files have one of the specified [visibilities]. */
+    public fun containOnlyFunctionsWithVisibility(visibilities: List<Visibility>): FilesRuleBuilder {
+        builder.setShould { file, _, violations ->
+            for (func in file.declaration.topLevelFunctions) {
+                if (!visibilities.contains(func.visibility)) {
+                    violations.add(
+                        getMessage(
+                            "file.should.containOnlyFunctionsWithVisibility",
+                            file.declaration.name,
+                            func.name,
+                            func.visibility.name.lowercase(),
+                            visibilities.joinToString { it.name.lowercase() },
+                        ),
+                    )
+                }
+            }
+        }
+        return builder
+    }
+
+    /** Asserts that all top-level functions in matching files have one of the specified [visibilities]. */
+    public fun containOnlyFunctionsWithVisibility(vararg visibilities: Visibility): FilesRuleBuilder =
+        containOnlyFunctionsWithVisibility(visibilities.toList())
+
+    /** Asserts that all top-level properties in matching files have one of the specified [visibilities]. */
+    public fun containOnlyPropertiesWithVisibility(visibilities: List<Visibility>): FilesRuleBuilder {
+        builder.setShould { file, _, violations ->
+            for (prop in file.declaration.topLevelProperties) {
+                if (!visibilities.contains(prop.visibility)) {
+                    violations.add(
+                        getMessage(
+                            "file.should.containOnlyPropertiesWithVisibility",
+                            file.declaration.name,
+                            prop.name,
+                            prop.visibility.name.lowercase(),
+                            visibilities.joinToString { it.name.lowercase() },
+                        ),
+                    )
+                }
+            }
+        }
+        return builder
+    }
+
+    /** Asserts that all top-level properties in matching files have one of the specified [visibilities]. */
+    public fun containOnlyPropertiesWithVisibility(vararg visibilities: Visibility): FilesRuleBuilder =
+        containOnlyPropertiesWithVisibility(visibilities.toList())
 }

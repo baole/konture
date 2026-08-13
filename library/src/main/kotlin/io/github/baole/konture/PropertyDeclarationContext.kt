@@ -31,6 +31,8 @@ public data class PropertyDeclarationContext(
     public val filePath: String,
     /** Filter or assertion criteria for source set. */
     public val sourceSet: SourceSetId? = null,
+    /** Filter or assertion criteria for usages. */
+    public val usages: List<SourceUsage> = emptyList(),
 ) {
     /**
      * The fully-qualified name of the property, combining package, enclosing class (if any), and

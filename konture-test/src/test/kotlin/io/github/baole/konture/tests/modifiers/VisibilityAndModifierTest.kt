@@ -10,8 +10,11 @@ import io.github.baole.konture.Konture
 import io.github.baole.konture.Modifier
 import io.github.baole.konture.Visibility
 import io.github.baole.konture.classes
+import io.github.baole.konture.files
 import io.github.baole.konture.functions
+import io.github.baole.konture.modules
 import io.github.baole.konture.properties
+import io.github.baole.konture.slices
 import org.junit.jupiter.api.Test
 
 class VisibilityAndModifierTest {
@@ -66,4 +69,36 @@ class VisibilityAndModifierTest {
             should().beInternal().andShould().beVal()
         }
     }
+
+    @Test
+    fun `files contain visibility assertions`() {
+        Konture.files {
+            that().resideInAPackage(pkg)
+            should().containOnlyClassesWithVisibility(Visibility.PUBLIC, Visibility.INTERNAL)
+                .andShould().containOnlyFunctionsWithVisibility(Visibility.PUBLIC, Visibility.INTERNAL)
+                .andShould().containOnlyPropertiesWithVisibility(Visibility.PUBLIC, Visibility.INTERNAL)
+        }
+    }
+
+    @Test
+    fun `modules contain visibility assertions`() {
+        Konture.modules {
+            that().resideInAModule(":konture-test")
+            should().containOnlyClassesWithVisibility(Visibility.PUBLIC, Visibility.INTERNAL, Visibility.PROTECTED, Visibility.PRIVATE)
+                .andShould().containOnlyFunctionsWithVisibility(Visibility.PUBLIC, Visibility.INTERNAL, Visibility.PROTECTED, Visibility.PRIVATE)
+                .andShould().containOnlyPropertiesWithVisibility(Visibility.PUBLIC, Visibility.INTERNAL, Visibility.PROTECTED, Visibility.PRIVATE)
+        }
+    }
+
+    @Test
+    fun `slices contain visibility assertions`() {
+        Konture.slices {
+            matching("io.github.baole.konture.tests.(*)..")
+            that().haveName("modifiers")
+            should().containOnlyClassesWithVisibility(Visibility.PUBLIC, Visibility.INTERNAL)
+                .andShould().containOnlyFunctionsWithVisibility(Visibility.PUBLIC, Visibility.INTERNAL)
+                .andShould().containOnlyPropertiesWithVisibility(Visibility.PUBLIC, Visibility.INTERNAL)
+        }
+    }
 }
+

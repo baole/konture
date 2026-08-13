@@ -17,6 +17,7 @@ internal fun KClass<*>.kontureQualifiedName(): String =
  * Konture's library module currently targets the JVM. A future non-JVM target should replace this
  * with platform-specific package discovery rather than depending on [Class.getPackageName].
  */
+@PublishedApi
 internal fun KClass<*>.konturePackageName(): String = java.packageName
 
 internal data class KonturePackageReference(

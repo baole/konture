@@ -15,7 +15,7 @@ import java.util.concurrent.ConcurrentHashMap
 
 private const val BUNDLE_NAME = "io.github.baole.konture.i18n.messages"
 
-private val supportedLocales =
+internal val SUPPORTED_LOCALES =
     setOf(
         Locale.ENGLISH,
         Locale.FRENCH,
@@ -61,7 +61,7 @@ internal fun getMessage(
 
     val pattern = (resolvedPattern as ResolvedPattern.Found).value
     if (args.isEmpty()) {
-        return if (locale in supportedLocales) {
+        return if (locale in SUPPORTED_LOCALES) {
             cachedZeroArgumentMessages
                 .getOrPut(locale) { ConcurrentHashMap() }
                 .computeIfAbsent(key) { formatWithoutArguments(pattern, locale) }
@@ -72,7 +72,7 @@ internal fun getMessage(
 
     val formatter =
         try {
-            if (locale in supportedLocales) {
+            if (locale in SUPPORTED_LOCALES) {
                 cachedFormatters.get().getOrPut(locale) { mutableMapOf() }.getOrPut(key) {
                     MessageFormat(pattern, locale)
                 }
@@ -100,7 +100,7 @@ private fun resolvePattern(
     locale: Locale,
     key: String,
 ): ResolvedPattern {
-    if (locale !in supportedLocales) {
+    if (locale !in SUPPORTED_LOCALES) {
         return loadPattern(locale, key)
     }
     return cachedPatterns
