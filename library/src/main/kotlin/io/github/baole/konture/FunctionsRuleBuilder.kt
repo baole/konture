@@ -8,6 +8,11 @@ package io.github.baole.konture
 
 import io.github.baole.konture.core.KontureLogger
 import io.github.baole.konture.core.LogLevel
+import io.github.baole.konture.core.model.Severity
+import io.github.baole.konture.core.model.SourceLocation
+import io.github.baole.konture.core.model.Subject
+import io.github.baole.konture.core.model.Violation
+import io.github.baole.konture.core.model.ViolationReport
 import io.github.baole.konture.i18n.getMessage
 import io.github.baole.konture.impl.BaselineManager
 import io.github.baole.konture.impl.LogicalOperator
@@ -333,7 +338,7 @@ public class FunctionsRuleBuilder(
      * Executes the compiled function rules against the provided project graph.
      * Throws an [AssertionError] if any rule violations are detected.
      */
-    public fun check(g: ProjectGraph = graph) {
+    public fun check(g: ProjectGraph = graph): ViolationReport {
         /** Filter or assertion criteria for all functions. */
         val allFunctions =
             g.getAllModules().flatMap { module ->
@@ -404,23 +409,42 @@ public class FunctionsRuleBuilder(
             )
 
         /** Filter or assertion criteria for run check. */
-        val runCheck = { list: MutableList<String> ->
+        val runCheckReport = { list: MutableList<Violation> ->
             for (func in functionsToCheck) {
                 if (ignoredPredicates.any { it(func) }) continue
-                /** Filter or assertion criteria for start idx. */
-                val startIdx = list.size
-                assertion(func, allFunctions, list)
-                for (i in startIdx until list.size) {
-                    if (!list[i].contains(" (at ")) {
-                        list[i] = "${list[i]} (at ${ViolationLocation.format(func)})"
-                    }
+                val rawMessages = mutableListOf<String>()
+                assertion(func, allFunctions, rawMessages)
+                for (rawMsg in rawMessages) {
+                    val fullMsg =
+                        if (!rawMsg.contains(" (at ")) {
+                            "$rawMsg (at ${ViolationLocation.format(func)})"
+                        } else {
+                            rawMsg
+                        }
+                    val fqName =
+                        func.className?.let { "${func.packageName}.$it.${func.declaration.name}" }
+                            ?: "${func.packageName}.${func.declaration.name}"
+                    val subject =
+                        Subject.FunctionSubject(
+                            fqName = fqName,
+                            location = SourceLocation(filePath = func.filePath, line = func.declaration.sourceLine),
+                        )
+                    list.add(
+                        Violation(
+                            ruleId = "functions.rule",
+                            subject = subject,
+                            message = fullMsg,
+                            severity = Severity.ERROR,
+                        ),
+                    )
                 }
             }
         }
 
-        BaselineManager.checkRule(
-            getMessage("functions.rule.violationHeader"),
-            runCheck,
+        return BaselineManager.checkRuleReport(
+            ruleId = "functions.rule",
+            violationHeader = getMessage("functions.rule.violationHeader"),
+            runCheckReport = runCheckReport,
         )
     }
 }

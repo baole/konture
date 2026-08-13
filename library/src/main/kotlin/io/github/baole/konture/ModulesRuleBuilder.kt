@@ -8,6 +8,11 @@ package io.github.baole.konture
 
 import io.github.baole.konture.core.KontureLogger
 import io.github.baole.konture.core.LogLevel
+import io.github.baole.konture.core.model.Severity
+import io.github.baole.konture.core.model.SourceLocation
+import io.github.baole.konture.core.model.Subject
+import io.github.baole.konture.core.model.Violation
+import io.github.baole.konture.core.model.ViolationReport
 import io.github.baole.konture.i18n.getMessage
 import io.github.baole.konture.impl.BaselineManager
 import io.github.baole.konture.impl.LogicalOperator
@@ -288,7 +293,7 @@ public class ModulesRuleBuilder(
      * @param g The [ProjectGraph] to check. Defaults to the lazy-loaded project graph.
      * @throws AssertionError If any of the verified modules violate the assertion rules.
      */
-    public fun check(g: ProjectGraph = graph) {
+    public fun check(g: ProjectGraph = graph): ViolationReport {
         /** Filter or assertion criteria for all modules. */
         val allModules = g.getAllModules()
 
@@ -318,16 +323,33 @@ public class ModulesRuleBuilder(
             )
 
         /** Filter or assertion criteria for run check. */
-        val runCheck = { list: MutableList<String> ->
+        val runCheckReport = { list: MutableList<Violation> ->
             for (module in modulesToCheck) {
                 if (ignoredPredicates.any { it(module) }) continue
-                assertion(module, g, list)
+                val rawMessages = mutableListOf<String>()
+                assertion(module, g, rawMessages)
+                for (rawMsg in rawMessages) {
+                    val subject =
+                        Subject.ModuleSubject(
+                            path = module.path,
+                            location = SourceLocation(filePath = module.projectDir),
+                        )
+                    list.add(
+                        Violation(
+                            ruleId = "modules.rule",
+                            subject = subject,
+                            message = rawMsg,
+                            severity = Severity.ERROR,
+                        ),
+                    )
+                }
             }
         }
 
-        BaselineManager.checkRule(
-            getMessage("modules.rule.violationHeader"),
-            runCheck,
+        return BaselineManager.checkRuleReport(
+            ruleId = "modules.rule",
+            violationHeader = getMessage("modules.rule.violationHeader"),
+            runCheckReport = runCheckReport,
         )
     }
 }

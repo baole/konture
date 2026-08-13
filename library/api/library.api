@@ -137,8 +137,8 @@ public final class io/github/baole/konture/ClassesRuleBuilder {
 	public final fun allowEmpty ()Lio/github/baole/konture/ClassesRuleBuilder;
 	public final fun and ()Lio/github/baole/konture/ClassesThat;
 	public final fun andShould ()Lio/github/baole/konture/ClassesShould;
-	public final fun check (Lio/github/baole/konture/ProjectGraph;)V
-	public static synthetic fun check$default (Lio/github/baole/konture/ClassesRuleBuilder;Lio/github/baole/konture/ProjectGraph;ILjava/lang/Object;)V
+	public final fun check (Lio/github/baole/konture/ProjectGraph;)Lio/github/baole/konture/core/model/ViolationReport;
+	public static synthetic fun check$default (Lio/github/baole/konture/ClassesRuleBuilder;Lio/github/baole/konture/ProjectGraph;ILjava/lang/Object;)Lio/github/baole/konture/core/model/ViolationReport;
 	public final fun ignoreFailuresIn (Lkotlin/jvm/functions/Function1;)Lio/github/baole/konture/ClassesRuleBuilder;
 	public final fun ignoreFailuresIn ([Ljava/lang/String;)Lio/github/baole/konture/ClassesRuleBuilder;
 	public final fun not ()Lio/github/baole/konture/ClassesThat;
@@ -1260,8 +1260,8 @@ public final class io/github/baole/konture/FilesRuleBuilder {
 	public final fun allowEmpty ()Lio/github/baole/konture/FilesRuleBuilder;
 	public final fun and ()Lio/github/baole/konture/FilesThat;
 	public final fun andShould ()Lio/github/baole/konture/FilesShould;
-	public final fun check (Lio/github/baole/konture/ProjectGraph;)V
-	public static synthetic fun check$default (Lio/github/baole/konture/FilesRuleBuilder;Lio/github/baole/konture/ProjectGraph;ILjava/lang/Object;)V
+	public final fun check (Lio/github/baole/konture/ProjectGraph;)Lio/github/baole/konture/core/model/ViolationReport;
+	public static synthetic fun check$default (Lio/github/baole/konture/FilesRuleBuilder;Lio/github/baole/konture/ProjectGraph;ILjava/lang/Object;)Lio/github/baole/konture/core/model/ViolationReport;
 	public final fun ignoreFailuresIn (Lkotlin/jvm/functions/Function1;)Lio/github/baole/konture/FilesRuleBuilder;
 	public final fun ignoreFailuresIn ([Ljava/lang/String;)Lio/github/baole/konture/FilesRuleBuilder;
 	public final fun not ()Lio/github/baole/konture/FilesThat;
@@ -1917,8 +1917,8 @@ public final class io/github/baole/konture/FunctionsRuleBuilder {
 	public final fun allowEmpty ()Lio/github/baole/konture/FunctionsRuleBuilder;
 	public final fun and ()Lio/github/baole/konture/FunctionsThat;
 	public final fun andShould ()Lio/github/baole/konture/FunctionsShould;
-	public final fun check (Lio/github/baole/konture/ProjectGraph;)V
-	public static synthetic fun check$default (Lio/github/baole/konture/FunctionsRuleBuilder;Lio/github/baole/konture/ProjectGraph;ILjava/lang/Object;)V
+	public final fun check (Lio/github/baole/konture/ProjectGraph;)Lio/github/baole/konture/core/model/ViolationReport;
+	public static synthetic fun check$default (Lio/github/baole/konture/FunctionsRuleBuilder;Lio/github/baole/konture/ProjectGraph;ILjava/lang/Object;)Lio/github/baole/konture/core/model/ViolationReport;
 	public final fun ignoreFailuresIn (Lkotlin/jvm/functions/Function1;)Lio/github/baole/konture/FunctionsRuleBuilder;
 	public final fun ignoreFailuresIn ([Ljava/lang/String;)Lio/github/baole/konture/FunctionsRuleBuilder;
 	public final fun not ()Lio/github/baole/konture/FunctionsThat;
@@ -3277,8 +3277,8 @@ public final class io/github/baole/konture/ModulesRuleBuilder {
 	public final fun allowEmpty ()Lio/github/baole/konture/ModulesRuleBuilder;
 	public final fun and ()Lio/github/baole/konture/ModulesThat;
 	public final fun andShould ()Lio/github/baole/konture/ModulesShould;
-	public final fun check (Lio/github/baole/konture/ProjectGraph;)V
-	public static synthetic fun check$default (Lio/github/baole/konture/ModulesRuleBuilder;Lio/github/baole/konture/ProjectGraph;ILjava/lang/Object;)V
+	public final fun check (Lio/github/baole/konture/ProjectGraph;)Lio/github/baole/konture/core/model/ViolationReport;
+	public static synthetic fun check$default (Lio/github/baole/konture/ModulesRuleBuilder;Lio/github/baole/konture/ProjectGraph;ILjava/lang/Object;)Lio/github/baole/konture/core/model/ViolationReport;
 	public final fun ignoreFailuresIn (Lkotlin/jvm/functions/Function1;)Lio/github/baole/konture/ModulesRuleBuilder;
 	public final fun ignoreFailuresIn ([Ljava/lang/String;)Lio/github/baole/konture/ModulesRuleBuilder;
 	public final fun not ()Lio/github/baole/konture/ModulesThat;
@@ -3793,8 +3793,8 @@ public final class io/github/baole/konture/PropertiesRuleBuilder {
 	public final fun allowEmpty ()Lio/github/baole/konture/PropertiesRuleBuilder;
 	public final fun and ()Lio/github/baole/konture/PropertiesThat;
 	public final fun andShould ()Lio/github/baole/konture/PropertiesShould;
-	public final fun check (Lio/github/baole/konture/ProjectGraph;)V
-	public static synthetic fun check$default (Lio/github/baole/konture/PropertiesRuleBuilder;Lio/github/baole/konture/ProjectGraph;ILjava/lang/Object;)V
+	public final fun check (Lio/github/baole/konture/ProjectGraph;)Lio/github/baole/konture/core/model/ViolationReport;
+	public static synthetic fun check$default (Lio/github/baole/konture/PropertiesRuleBuilder;Lio/github/baole/konture/ProjectGraph;ILjava/lang/Object;)Lio/github/baole/konture/core/model/ViolationReport;
 	public final fun ignoreFailuresIn (Lkotlin/jvm/functions/Function1;)Lio/github/baole/konture/PropertiesRuleBuilder;
 	public final fun ignoreFailuresIn ([Ljava/lang/String;)Lio/github/baole/konture/PropertiesRuleBuilder;
 	public final fun not ()Lio/github/baole/konture/PropertiesThat;
@@ -4510,8 +4510,8 @@ public final class io/github/baole/konture/SlicesRuleBuilder {
 	public final fun allowEmpty ()Lio/github/baole/konture/SlicesRuleBuilder;
 	public final fun and ()Lio/github/baole/konture/SlicesThat;
 	public final fun andShould ()Lio/github/baole/konture/SlicesShould;
-	public final fun check (Lio/github/baole/konture/ProjectGraph;)V
-	public static synthetic fun check$default (Lio/github/baole/konture/SlicesRuleBuilder;Lio/github/baole/konture/ProjectGraph;ILjava/lang/Object;)V
+	public final fun check (Lio/github/baole/konture/ProjectGraph;)Lio/github/baole/konture/core/model/ViolationReport;
+	public static synthetic fun check$default (Lio/github/baole/konture/SlicesRuleBuilder;Lio/github/baole/konture/ProjectGraph;ILjava/lang/Object;)Lio/github/baole/konture/core/model/ViolationReport;
 	public final fun ignoreFailuresIn (Lkotlin/jvm/functions/Function1;)Lio/github/baole/konture/SlicesRuleBuilder;
 	public final fun ignoreFailuresIn ([Ljava/lang/String;)Lio/github/baole/konture/SlicesRuleBuilder;
 	public final fun matching (Ljava/lang/String;)Lio/github/baole/konture/SlicesRuleBuilder;

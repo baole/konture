@@ -8,6 +8,11 @@ package io.github.baole.konture
 
 import io.github.baole.konture.core.KontureLogger
 import io.github.baole.konture.core.LogLevel
+import io.github.baole.konture.core.model.Severity
+import io.github.baole.konture.core.model.SourceLocation
+import io.github.baole.konture.core.model.Subject
+import io.github.baole.konture.core.model.Violation
+import io.github.baole.konture.core.model.ViolationReport
 import io.github.baole.konture.i18n.getMessage
 import io.github.baole.konture.impl.BaselineManager
 import io.github.baole.konture.impl.LogicalOperator
@@ -300,7 +305,7 @@ public class ClassesRuleBuilder(
      * @param g The [ProjectGraph] to check. Defaults to the lazy-loaded project graph.
      * @throws AssertionError If any of the verified classes violate the assertion rules.
      */
-    public fun check(g: ProjectGraph = graph) {
+    public fun check(g: ProjectGraph = graph): ViolationReport {
         /** Filter or assertion criteria for located. */
         val located =
             g.getAllModules().flatMap { module ->
@@ -341,23 +346,40 @@ public class ClassesRuleBuilder(
             )
 
         /** Filter or assertion criteria for run check. */
-        val runCheck = { list: MutableList<String> ->
+        val runCheckReport = { list: MutableList<Violation> ->
             for ((cls, modulePath, sourceSetName) in classesToCheck) {
                 if (ignoredPredicates.any { it(cls) }) continue
-                /** Filter or assertion criteria for start idx. */
-                val startIdx = list.size
-                assertion(cls, allClasses, list)
-                for (i in startIdx until list.size) {
-                    if (!list[i].contains(" (at ")) {
-                        list[i] = "${list[i]} (at ${ViolationLocation.format(cls, modulePath, sourceSetName)})"
-                    }
+                val rawMessages = mutableListOf<String>()
+                assertion(cls, allClasses, rawMessages)
+                for (rawMsg in rawMessages) {
+                    val fullMsg =
+                        if (!rawMsg.contains(" (at ")) {
+                            "$rawMsg (at ${ViolationLocation.format(cls, modulePath, sourceSetName)})"
+                        } else {
+                            rawMsg
+                        }
+                    val subject =
+                        Subject.ClassSubject(
+                            fqName = cls.fqName,
+                            simpleName = cls.name,
+                            location = SourceLocation(filePath = cls.filePath, line = cls.sourceLine),
+                        )
+                    list.add(
+                        Violation(
+                            ruleId = "classes.rule",
+                            subject = subject,
+                            message = fullMsg,
+                            severity = Severity.ERROR,
+                        ),
+                    )
                 }
             }
         }
 
-        BaselineManager.checkRule(
-            getMessage("classes.rule.violationHeader"),
-            runCheck,
+        return BaselineManager.checkRuleReport(
+            ruleId = "classes.rule",
+            violationHeader = getMessage("classes.rule.violationHeader"),
+            runCheckReport = runCheckReport,
         )
     }
 }

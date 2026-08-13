@@ -11,6 +11,8 @@ import io.github.baole.konture.Module
 import io.github.baole.konture.ProjectGraph
 import io.github.baole.konture.core.KontureLogger
 import io.github.baole.konture.core.LogLevel
+import io.github.baole.konture.core.model.Violation
+import io.github.baole.konture.core.model.ViolationReport
 import io.github.baole.konture.i18n.getMessage
 import java.io.File
 import java.util.Locale
@@ -388,6 +390,46 @@ internal class BaselineManager {
         }
     }
 
+    fun checkRuleReport(
+        ruleId: String,
+        violationHeader: String,
+        runCheckReport: (MutableList<Violation>) -> Unit,
+    ): ViolationReport {
+        val userLocale = Konture.locale
+
+        val englishViolations = mutableListOf<Violation>()
+        Konture.locale = Locale.ENGLISH
+        try {
+            runCheckReport(englishViolations)
+        } finally {
+            Konture.locale = userLocale
+        }
+
+        val report = ViolationReport(ruleId = ruleId, violations = englishViolations)
+        if (englishViolations.isEmpty()) return report
+
+        val englishStrings = englishViolations.map { it.message }
+        val unmatchedIndices = getNewViolationIndices(englishStrings)
+
+        if (unmatchedIndices.isNotEmpty() || generateBaseline) {
+            if (generateBaseline) {
+                handleViolations(englishStrings, violationHeader)
+            } else {
+                val localizedViolations = mutableListOf<Violation>()
+                runCheckReport(localizedViolations)
+
+                val unmatchedLocalized =
+                    unmatchedIndices.map { index ->
+                        if (index < localizedViolations.size) localizedViolations[index].message else englishViolations[index].message
+                    }
+
+                throwNewViolations(unmatchedLocalized, violationHeader)
+            }
+        }
+
+        return report
+    }
+
     private fun getNewViolationIndices(violations: List<String>): List<Int> {
         captureContextSnapshot()
         if (violations.isEmpty()) return emptyList()
@@ -549,6 +591,18 @@ internal class BaselineManager {
             runCheck: (MutableList<String>) -> Unit,
         ) {
             KontureRuntimeStateProvider.currentState.baselineManager.checkRule(violationHeader, runCheck)
+        }
+
+        fun checkRuleReport(
+            ruleId: String,
+            violationHeader: String,
+            runCheckReport: (MutableList<Violation>) -> Unit,
+        ): ViolationReport {
+            return KontureRuntimeStateProvider.currentState.baselineManager.checkRuleReport(
+                ruleId,
+                violationHeader,
+                runCheckReport,
+            )
         }
 
         fun writeBaseline() {
