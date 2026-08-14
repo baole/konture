@@ -162,4 +162,69 @@ class HumanReadableViolationFormatterTest : RuleBuildersTestBase() {
         assertTrue(error.message!!.contains("1 violation(s) found:"))
         assertTrue(error.message!!.contains("Message:"))
     }
+
+    @Test
+    fun `format includes customHeader when provided`() {
+        val violation =
+            Violation(
+                ruleId = "domain.rule",
+                subject = Subject.ClassSubject("com.example.Foo", "Foo", location = null),
+                message = "Foo must be an interface",
+            )
+        val report = ViolationReport("domain.rule", listOf(violation))
+
+        val formatted = HumanReadableViolationFormatter.format(report, customHeader = "Custom Rule Description")
+        assertTrue(formatted.contains("✗ Rule: domain.rule\nCustom Rule Description"))
+    }
+
+    @Test
+    fun `format uses substringBeforeLast for location suffix removal`() {
+        val violation =
+            Violation(
+                ruleId = "test.rule",
+                subject = Subject.ClassSubject("com.example.Foo", "Foo", location = null),
+                message = "Error in function (at line 5) (at com/example/Foo.kt:10)",
+            )
+        val report = ViolationReport("test.rule", listOf(violation))
+
+        val formatted = HumanReadableViolationFormatter.format(report)
+        assertTrue(formatted.contains("Message: Error in function (at line 5)"))
+    }
+
+    @Test
+    fun `format handles location with null line without appending line number`() {
+        val violation =
+            Violation(
+                ruleId = "test.rule",
+                subject = Subject.ClassSubject("com.example.Foo", "Foo", location = SourceLocation("com/example/Foo.kt", line = null)),
+                message = "Error message",
+            )
+        val report = ViolationReport("test.rule", listOf(violation))
+
+        val formatted = HumanReadableViolationFormatter.format(report)
+        assertTrue(formatted.contains("File: com/example/Foo.kt"))
+        assertTrue(!formatted.contains("com/example/Foo.kt:"))
+    }
+
+    @Test
+    fun `format respects Konture locale setting for i18n messages`() {
+        val originalLocale = Konture.locale
+        try {
+            Konture.locale = java.util.Locale.FRENCH
+            val violation =
+                Violation(
+                    ruleId = "test.rule",
+                    subject = Subject.ClassSubject("com.example.Foo", "Foo", location = SourceLocation("com/example/Foo.kt", 12)),
+                    message = "Error message",
+                )
+            val report = ViolationReport("test.rule", listOf(violation))
+
+            val formatted = HumanReadableViolationFormatter.format(report)
+            assertTrue(formatted.contains("✗ Régal") || formatted.contains("✗ Règle : test.rule") || formatted.contains("Règle"))
+            assertTrue(formatted.contains("violation(s) trouvée(s)"))
+            assertTrue(formatted.contains("Fichier : com/example/Foo.kt:12"))
+        } finally {
+            Konture.locale = originalLocale
+        }
+    }
 }

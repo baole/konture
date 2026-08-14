@@ -434,7 +434,7 @@ internal class BaselineManager {
                         if (index < localizedViolations.size) localizedViolations[index] else englishViolations[index]
                     }
 
-                throwNewViolationsReport(ruleId, unmatchedLocalized)
+                throwNewViolationsReport(ruleId, unmatchedLocalized, violationHeader)
             }
         }
 
@@ -470,10 +470,11 @@ internal class BaselineManager {
     private fun throwNewViolationsReport(
         ruleId: String,
         unmatchedViolations: List<Violation>,
+        violationHeader: String? = null,
     ) {
         if (unmatchedViolations.isEmpty()) return
         val report = ViolationReport(ruleId = ruleId, violations = unmatchedViolations)
-        val message = HumanReadableViolationFormatter.format(report)
+        val message = HumanReadableViolationFormatter.format(report, customHeader = violationHeader)
         throw AssertionError(message)
     }
 

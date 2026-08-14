@@ -7,31 +7,44 @@
 package io.github.baole.konture
 
 import io.github.baole.konture.core.model.ViolationReport
+import io.github.baole.konture.i18n.getMessage
 
 /**
- * Formats a [ViolationReport] into a human-readable diagnostic error message.
+ * Formatter for building human-readable error messages from architecture violation reports.
  */
 public object HumanReadableViolationFormatter {
+
     /**
-     * Formats the given [report] into a structured, human-readable string.
+     * Formats a [ViolationReport] into a human-readable string suitable for test failure outputs.
      *
      * @param report The violation report to format.
-     * @return Formatted human-readable diagnostic message.
+     * @param customHeader Optional custom header or description to include below the rule header.
+     * @return Formatted human-readable string representation of the report.
      */
-    public fun format(report: ViolationReport): String {
+    @JvmOverloads
+    public fun format(report: ViolationReport, customHeader: String? = null): String {
         if (report.violations.isEmpty()) return ""
+
+        val metaDescription = report.violations.firstOrNull()?.metadata?.description
+        val header = customHeader?.takeIf { it.isNotBlank() } ?: metaDescription?.takeIf { it.isNotBlank() }
+
         return buildString {
-            appendLine("✗ Rule: ${report.ruleId}")
+            appendLine(getMessage("report.ruleHeader", report.ruleId))
+            if (header != null) {
+                appendLine(header)
+            }
             appendLine()
-            appendLine("${report.violations.size} violation(s) found:")
+            appendLine(getMessage("report.violationsFound", report.violations.size))
             appendLine()
             report.violations.forEachIndexed { index, v ->
                 appendLine("${index + 1}. ${v.subject.name}")
-                val cleanMessage = v.message.substringBefore(" (at ").trim()
-                appendLine("   Message: $cleanMessage")
+                val cleanMessage = v.message.substringBeforeLast(" (at ").trim()
+                appendLine("   ${getMessage("report.messageLabel", cleanMessage)}")
                 val loc = v.sourceLocation ?: v.subject.location
                 if (loc != null) {
-                    appendLine("   File: ${loc.filePath}:${loc.line ?: 1}")
+                    val lineSuffix = if (loc.line != null) ":${loc.line}" else ""
+                    val fileLocation = "${loc.filePath}$lineSuffix"
+                    appendLine("   ${getMessage("report.fileLabel", fileLocation)}")
                 }
                 if (index < report.violations.size - 1) {
                     appendLine()

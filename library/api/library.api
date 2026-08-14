@@ -2765,6 +2765,8 @@ public final class io/github/baole/konture/FunctionsThatStructureFilter$DefaultI
 public final class io/github/baole/konture/HumanReadableViolationFormatter {
 	public static final field INSTANCE Lio/github/baole/konture/HumanReadableViolationFormatter;
 	public final fun format (Lio/github/baole/konture/core/model/ViolationReport;)Ljava/lang/String;
+	public final fun format (Lio/github/baole/konture/core/model/ViolationReport;Ljava/lang/String;)Ljava/lang/String;
+	public static synthetic fun format$default (Lio/github/baole/konture/HumanReadableViolationFormatter;Lio/github/baole/konture/core/model/ViolationReport;Ljava/lang/String;ILjava/lang/Object;)Ljava/lang/String;
 }
 
 public final class io/github/baole/konture/Konture {
