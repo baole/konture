@@ -140,10 +140,8 @@ public final class io/github/baole/konture/ClassSelectorShould {
 	public final fun haveNameStartingWith ([Ljava/lang/String;)V
 	public final fun haveVisibility (Lio/github/baole/konture/Visibility;)V
 	public final fun notBeAccessedByAnyPackage ([Ljava/lang/String;)V
-	public final fun notDependOnPackages (Ljava/util/List;)V
 	public final fun notDependOnPackages ([Ljava/lang/String;)V
 	public final fun onlyBeAccessedByAnyPackage ([Ljava/lang/String;)V
-	public final fun onlyDependOnPackages (Ljava/util/List;)V
 	public final fun onlyDependOnPackages ([Ljava/lang/String;)V
 	public final fun resideInAPackage ([Ljava/lang/String;)V
 }

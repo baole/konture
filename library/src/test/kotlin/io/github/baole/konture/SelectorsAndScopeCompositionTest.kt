@@ -159,9 +159,7 @@ class SelectorsAndScopeCompositionTest {
         selector.should().haveNameStartingWith("User", "Order")
         selector.should().haveNameMatching("*Repository")
         selector.should().notDependOnPackages("..data..")
-        selector.should().notDependOnPackages(listOf("..data.."))
         selector.should().onlyDependOnPackages("..domain..", "..common..")
-        selector.should().onlyDependOnPackages(listOf("..domain..", "..common.."))
         selector.should().beAccessedBy("..")
         selector.should().onlyBeAccessedByAnyPackage("..")
         selector.should().notBeAccessedByAnyPackage("..forbidden..")
@@ -183,8 +181,10 @@ class SelectorsAndScopeCompositionTest {
         KontureScope(listOf(dataClass)).should().beData()
         KontureScope(listOf(inlineClass)).should().beInline()
 
-        val internalClass = mockClass("com.example.InternalClass", isPublic = false, visibility = Visibility.INTERNAL)
-        val privateClass = mockClass("com.example.PrivateClass", isPublic = false, visibility = Visibility.PRIVATE)
+        val internalClass =
+            mockClass("com.example.InternalClass", isPublic = false, visibility = Visibility.INTERNAL)
+        val privateClass =
+            mockClass("com.example.PrivateClass", isPublic = false, visibility = Visibility.PRIVATE)
         val protectedClass =
             mockClass("com.example.ProtectedClass", isPublic = false, visibility = Visibility.PROTECTED)
 
@@ -224,7 +224,7 @@ class SelectorsAndScopeCompositionTest {
     }
 
     @Test
-    fun `module selector fluent extensions and should assertions`() {
+    fun `module selector fluent extensions and should assertions with normalization and glob matching`() {
         val fileInDomain = mockFile("User.kt", "com.example.domain")
         val modA =
             mockModule(
@@ -244,15 +244,19 @@ class SelectorsAndScopeCompositionTest {
         val featureModule = selector.withName(":feature:*")
         assertEquals(1, featureModule.modules.size)
 
-        selector.should().notDependOnModules(":data:database")
-        selector.should().notDependOnModule(":data:database")
-        selector.should().onlyDependOnModules(":core:common", ":core:domain")
+        // Path normalization (without leading colon) and glob matching support
+        selector.should().notDependOnModules("data:database", ":data:*")
+        selector.should().notDependOnModule("*database*")
+        selector.should().onlyDependOnModules("core:common", "core:domain", ":core:*")
 
         KontureModuleScope(listOf(modA)).should().havePlugin("org.jetbrains.kotlin.jvm")
         KontureModuleScope(listOf(modA)).should().notHavePlugin("com.android.application")
 
         assertThrows<AssertionError> {
-            selector.should().notDependOnModules(":core:domain")
+            selector.should().notDependOnModules("core:domain")
+        }
+        assertThrows<AssertionError> {
+            selector.should().notDependOnModules(":core:*")
         }
         assertThrows<AssertionError> {
             KontureModuleScope(listOf(modA)).should().onlyDependOnModules(":none")

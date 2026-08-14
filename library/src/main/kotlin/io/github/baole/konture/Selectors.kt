@@ -6,6 +6,9 @@
 
 package io.github.baole.konture
 
+import io.github.baole.konture.impl.PatternMatchers
+import io.github.baole.konture.impl.SliceCycleDetector
+
 /** Typealias for class scope selector. */
 public typealias ClassSelector = KontureScope
 
@@ -38,12 +41,14 @@ public fun ClassSelector.withName(pattern: String): ClassSelector = withNameMatc
 
 /**
  * Filters this module selector to include modules residing in packages matching the specified pattern.
+ *
+ * Retains a [Module] if at least one source file in that module resides in a package matching [packagePattern].
  */
 public fun ModuleSelector.inPackage(packagePattern: String): ModuleSelector =
     ModuleSelector(
         modules.filter { module ->
             module.files.any { file ->
-                io.github.baole.konture.impl.PatternMatchers.matchesPackage(packagePattern, file.packageName)
+                PatternMatchers.matchesPackage(packagePattern, file.packageName)
             }
         },
     )
@@ -89,7 +94,7 @@ public fun PropertySelector.withName(pattern: String): PropertySelector = withNa
 public fun SliceSelector.withName(pattern: String): SliceSelector =
     SliceSelector(
         slices.filter { slice ->
-            io.github.baole.konture.impl.PatternMatchers.matchesSimpleGlob(pattern, slice.key)
+            PatternMatchers.matchesSimpleGlob(pattern, slice.key)
         },
     )
 
@@ -139,17 +144,9 @@ public class ClassSelectorShould internal constructor(
     public fun notDependOnPackages(vararg packagePatterns: String): Unit =
         selector.assertNotDependOnClassesInAnyPackage(*packagePatterns)
 
-    /** Asserts that all classes in the selector do not depend on classes in packages matching any of the specified patterns. */
-    public fun notDependOnPackages(packagePatterns: List<String>): Unit =
-        selector.assertNotDependOnClassesInAnyPackage(*packagePatterns.toTypedArray())
-
     /** Asserts that all classes in the selector depend only on classes in packages matching any of the specified patterns. */
     public fun onlyDependOnPackages(vararg packagePatterns: String): Unit =
         selector.assertOnlyDependOnClassesInAnyPackage(*packagePatterns)
-
-    /** Asserts that all classes in the selector depend only on classes in packages matching any of the specified patterns. */
-    public fun onlyDependOnPackages(packagePatterns: List<String>): Unit =
-        selector.assertOnlyDependOnClassesInAnyPackage(*packagePatterns.toTypedArray())
 
     /** Asserts that classes in the selector are only accessed by packages matching the specified patterns. */
     public fun beAccessedBy(vararg packagePatterns: String): Unit =
@@ -195,14 +192,19 @@ public fun ClassSelector.should(): ClassSelectorShould = ClassSelectorShould(thi
 public class ModuleSelectorShould internal constructor(
     public val selector: ModuleSelector,
 ) {
-    /** Asserts that no module in the selector depends on any of the specified module paths. */
-    public fun notDependOnModules(vararg modulePaths: String) {
+    /** Asserts that no module in the selector depends on any of the specified module paths or glob patterns. */
+    public fun notDependOnModules(vararg modulePatterns: String) {
         val failures = mutableListOf<String>()
         for (module in selector.modules) {
             val dependencies = module.dependencies.map { it.targetPath }
-            val forbidden = modulePaths.filter { forbiddenPath -> dependencies.contains(forbiddenPath) }
+            val forbidden =
+                dependencies.filter { depPath ->
+                    modulePatterns.any { pattern -> PatternMatchers.matchesModuleGlob(pattern, depPath) }
+                }
             if (forbidden.isNotEmpty()) {
-                failures.add("Module ${module.path} depends on forbidden module(s): ${forbidden.joinToString()}")
+                failures.add(
+                    "Module ${module.path} depends on forbidden module(s): ${forbidden.distinct().joinToString()}",
+                )
             }
         }
         if (failures.isNotEmpty()) {
@@ -210,18 +212,22 @@ public class ModuleSelectorShould internal constructor(
         }
     }
 
-    /** Asserts that no module in the selector depends on any of the specified module paths. */
-    public fun notDependOnModule(vararg modulePaths: String): Unit = notDependOnModules(*modulePaths)
+    /** Asserts that no module in the selector depends on any of the specified module paths or glob patterns. */
+    public fun notDependOnModule(vararg modulePatterns: String): Unit = notDependOnModules(*modulePatterns)
 
-    /** Asserts that modules in the selector depend only on the specified module paths. */
-    public fun onlyDependOnModules(vararg modulePaths: String) {
-        val allowedSet = modulePaths.toSet()
+    /** Asserts that modules in the selector depend only on the specified module paths or glob patterns. */
+    public fun onlyDependOnModules(vararg modulePatterns: String) {
         val failures = mutableListOf<String>()
         for (module in selector.modules) {
             val actual = module.dependencies.map { it.targetPath }
-            val unauthorized = actual.filterNot { allowedSet.contains(it) }
+            val unauthorized =
+                actual.filterNot { depPath ->
+                    modulePatterns.any { pattern -> PatternMatchers.matchesModuleGlob(pattern, depPath) }
+                }
             if (unauthorized.isNotEmpty()) {
-                failures.add("Module ${module.path} depends on unauthorized module(s): ${unauthorized.joinToString()}")
+                failures.add(
+                    "Module ${module.path} depends on unauthorized module(s): ${unauthorized.distinct().joinToString()}",
+                )
             }
         }
         if (failures.isNotEmpty()) {
@@ -358,7 +364,7 @@ public class FunctionSelectorShould internal constructor(
     /** Asserts that function names match any of the specified glob patterns. */
     public fun haveNameMatching(vararg patterns: String): Unit =
         selector.assertTrue("Functions must match name pattern(s)") { func ->
-            patterns.any { io.github.baole.konture.impl.PatternMatchers.matchesSimpleGlob(it, func.declaration.name) }
+            patterns.any { PatternMatchers.matchesSimpleGlob(it, func.declaration.name) }
         }
 
     /** Asserts that all functions have any of the specified annotations. */
@@ -425,7 +431,7 @@ public class PropertySelectorShould internal constructor(
     /** Asserts that property names match any of the specified glob patterns. */
     public fun haveNameMatching(vararg patterns: String): Unit =
         selector.assertTrue("Properties must match name pattern(s)") { prop ->
-            patterns.any { io.github.baole.konture.impl.PatternMatchers.matchesSimpleGlob(it, prop.declaration.name) }
+            patterns.any { PatternMatchers.matchesSimpleGlob(it, prop.declaration.name) }
         }
 
     /** Asserts that all properties have any of the specified annotations. */
@@ -457,13 +463,13 @@ public class SliceSelectorShould internal constructor(
             }
         }
         val sliceGraph =
-            io.github.baole.konture.impl.SliceCycleDetector.buildGraph(
+            SliceCycleDetector.buildGraph(
                 selector.slices,
                 packageToSlice,
                 allClasses,
                 "slice",
             )
-        val cycles = io.github.baole.konture.impl.SliceCycleDetector.findCycles(sliceGraph.adjacency)
+        val cycles = SliceCycleDetector.findCycles(sliceGraph.adjacency)
         if (cycles.isNotEmpty()) {
             throw AssertionError("Cyclic dependencies detected between slices:\n" + cycles.joinToString("\n"))
         }
