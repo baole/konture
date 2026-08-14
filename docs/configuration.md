@@ -104,6 +104,8 @@ Declare your plugin configurations inside the `<configuration>` block of the `ko
 | **`excludeConfigurations`** | `listOf("test", "benchmark", "profile")` | Excludes specific dependency configurations from being traversed.<br>• Supports simple glob matching (`*`). E.g., `test*` matches `testImplementation`. |
 | **`logLevel`** | `"INFO"` | Configures logging level of the Konture plugin execution.<br>• Supported levels: `"INFO"`, `"DEBUG"`, `"WARNING"`, `"TRACE"`. |
 | **`language`** | `"en"` | Configures translation language for architectural violation messages.<br>• Supported languages: `"en"` (English), `"fr"` (French), `"es"` (Spanish), `"it"` (Italian), `"vi"` (Vietnamese), `"zh"` / `"zh-CN"` (Simplified Chinese), `"zh-TW"` (Traditional Chinese). |
+| **`outputFormat`** | `"HUMAN"` | Configures output formatting for architectural rule violations.<br>• Supported formats: `"HUMAN"` (default multi-line format), `"PROBLEM_MATCHER"` (single-line IDE/CI problem matcher format `path:line:col: Konture [ruleId]: message`), `"HTML"` (semantic HTML snippet format and standalone HTML report file generation), `"JSON"`, `"SARIF"`. Can also be overridden via system property `-Dkonture.output.format=html` or programmatically via `Konture.outputFormat`. |
+| **`reportPath`** | `"build/reports/konture-report.html"` | Configures file path for standalone output report files when using `OutputFormat.HTML`.<br>• Can be overridden via system property `-Dkonture.report.path=build/reports/custom-report.html` or programmatically via `Konture.reportPath`. |
 
 ---
 

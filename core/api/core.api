@@ -135,11 +135,14 @@ public final class io/github/baole/konture/core/ExclusionsModel$Companion {
 
 public final class io/github/baole/konture/core/KontureConstants {
 	public static final field DEFAULT_BASELINE_FILENAME Ljava/lang/String;
+	public static final field DEFAULT_REPORT_PATH Ljava/lang/String;
 	public static final field INSTANCE Lio/github/baole/konture/core/KontureConstants;
 	public static final field PROPERTY_BASELINE_DIR Ljava/lang/String;
 	public static final field PROPERTY_BASELINE_GENERATE Ljava/lang/String;
 	public static final field PROPERTY_BASELINE_PATH Ljava/lang/String;
 	public static final field PROPERTY_LOCALE Ljava/lang/String;
+	public static final field PROPERTY_OUTPUT_FORMAT Ljava/lang/String;
+	public static final field PROPERTY_REPORT_PATH Ljava/lang/String;
 }
 
 public final class io/github/baole/konture/core/KontureLogger {

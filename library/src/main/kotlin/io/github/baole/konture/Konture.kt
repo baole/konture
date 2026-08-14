@@ -36,9 +36,37 @@ public object Konture {
     public const val PROPERTY_BASELINE_DIR: String = KontureConstants.PROPERTY_BASELINE_DIR
 
     /**
+     * System property key used to override the output format (e.g. human, problem_matcher).
+     */
+    public const val PROPERTY_OUTPUT_FORMAT: String = KontureConstants.PROPERTY_OUTPUT_FORMAT
+
+    /**
      * Default baseline filename fallback when no custom path is configured.
      */
     public const val DEFAULT_BASELINE_FILENAME: String = KontureConstants.DEFAULT_BASELINE_FILENAME
+
+    /**
+     * The output format used when formatting architecture violation reports upon failure.
+     * Can be configured via system property "konture.output.format" or programmatically.
+     * Backed by ThreadLocal state; safe under parallel test execution.
+     */
+    public var outputFormat: OutputFormat
+        get() {
+            val systemProp = System.getProperty(PROPERTY_OUTPUT_FORMAT)
+            return if (systemProp != null) {
+                try {
+                    OutputFormat.valueOf(systemProp.uppercase(Locale.ROOT))
+                } catch (_: IllegalArgumentException) {
+                    KontureRuntimeStateProvider.currentState.outputFormat
+                }
+            } else {
+                KontureRuntimeStateProvider.currentState.outputFormat
+            }
+        }
+        set(value) {
+            KontureRuntimeStateProvider.currentState =
+                KontureRuntimeStateProvider.currentState.copy(outputFormat = value)
+        }
 
     /**
      * The target translation locale for architectural guardrail messages.
@@ -91,6 +119,22 @@ public object Konture {
         get() = System.getProperty(PROPERTY_BASELINE_PATH) ?: KontureRuntimeStateProvider.currentState.baselinePath
         set(value) {
             KontureRuntimeStateProvider.currentState = KontureRuntimeStateProvider.currentState.copy(baselinePath = value)
+        }
+
+    /**
+     * System property key used to override the path of generated HTML/JSON/SARIF report files.
+     */
+    public const val PROPERTY_REPORT_PATH: String = KontureConstants.PROPERTY_REPORT_PATH
+
+    /**
+     * Target report output path relative to project build directory.
+     * Default value is obtained from system property "konture.report.path" or falls back to "build/reports/konture-report.html".
+     * Backed by ThreadLocal state; safe under parallel test execution.
+     */
+    public var reportPath: String
+        get() = System.getProperty(PROPERTY_REPORT_PATH) ?: KontureRuntimeStateProvider.currentState.reportPath
+        set(value) {
+            KontureRuntimeStateProvider.currentState = KontureRuntimeStateProvider.currentState.copy(reportPath = value)
         }
 
     /**
