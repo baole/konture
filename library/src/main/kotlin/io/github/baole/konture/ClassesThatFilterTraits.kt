@@ -22,52 +22,50 @@ public interface ClassesThatScope {
  */
 @Suppress("ComplexInterface")
 public interface ClassesThatPackageFilter : ClassesThatScope {
-    /** Specifies reside in a package criteria. */
-    public infix fun resideInAPackage(packagePattern: String): ClassesRuleBuilder {
+    /** Specifies in package criteria. */
+    public infix fun inPackage(packagePattern: String): ClassesRuleBuilder {
         builder.setThat { PatternMatchers.matchesPackage(packagePattern, it.packageName) }
         return builder
     }
 
-    /** Specifies reside in a package criteria. */
-    public infix fun resideInAPackage(packagePatterns: List<String>): ClassesRuleBuilder {
+    /** Specifies in package criteria. */
+    public infix fun inPackage(packagePatterns: List<String>): ClassesRuleBuilder {
         builder.setThat { context ->
             packagePatterns.any { PatternMatchers.matchesPackage(it, context.packageName) }
         }
         return builder
     }
 
-    /** Filter or assertion criteria for reside in a package. */
-    public fun resideInAPackage(vararg packagePatterns: String): ClassesRuleBuilder =
-        resideInAPackage(packagePatterns.toList())
+    /** Filter or assertion criteria for in package. */
+    public fun inPackage(vararg packagePatterns: String): ClassesRuleBuilder = inPackage(packagePatterns.toList())
 
-    /** Specifies reside in a package criteria. */
-    public infix fun resideInAPackage(predicate: (String) -> Boolean): ClassesRuleBuilder {
+    /** Specifies in package criteria. */
+    public infix fun inPackage(predicate: (String) -> Boolean): ClassesRuleBuilder {
         builder.setThat { predicate(it.packageName) }
         return builder
     }
 
-    /** Specifies reside in package of criteria. */
-    public infix fun resideInPackageOf(type: KClass<*>): ClassesRuleBuilder =
-        resideInAPackage(type.toKonturePackageReference().packageName)
+    /** Specifies in package of criteria. */
+    public infix fun inPackageOf(type: KClass<*>): ClassesRuleBuilder =
+        inPackage(type.toKonturePackageReference().packageName)
 
-    /** Specifies not reside in a package criteria. */
-    public infix fun notResideInAPackage(packagePattern: String): ClassesRuleBuilder {
+    /** Specifies not in package criteria. */
+    public infix fun notInPackage(packagePattern: String): ClassesRuleBuilder {
         builder.setThat { !PatternMatchers.matchesPackage(packagePattern, it.packageName) }
         return builder
     }
 
-    /** Specifies not reside in a package criteria. */
-    public infix fun notResideInAPackage(packagePatterns: List<String>): ClassesRuleBuilder {
+    /** Specifies not in package criteria. */
+    public infix fun notInPackage(packagePatterns: List<String>): ClassesRuleBuilder {
         builder.setThat { context -> packagePatterns.none { PatternMatchers.matchesPackage(it, context.packageName) } }
         return builder
     }
 
-    /** Filter or assertion criteria for not reside in a package. */
-    public fun notResideInAPackage(vararg packagePatterns: String): ClassesRuleBuilder =
-        notResideInAPackage(packagePatterns.toList())
+    /** Filter or assertion criteria for not in package. */
+    public fun notInPackage(vararg packagePatterns: String): ClassesRuleBuilder = notInPackage(packagePatterns.toList())
 
-    /** Specifies reside in a module criteria. */
-    public infix fun resideInAModule(modulePath: String): ClassesRuleBuilder {
+    /** Specifies in module criteria. */
+    public infix fun inModule(modulePath: String): ClassesRuleBuilder {
         /** Filter or assertion criteria for normalized. */
         val normalized =
             if (!modulePath.startsWith(":") && !modulePath.startsWith("**") && modulePath.isNotEmpty()) {
@@ -86,8 +84,8 @@ public interface ClassesThatPackageFilter : ClassesThatScope {
         return builder
     }
 
-    /** Specifies reside in a module criteria. */
-    public infix fun resideInAModule(modulePaths: List<String>): ClassesRuleBuilder {
+    /** Specifies in module criteria. */
+    public infix fun inModule(modulePaths: List<String>): ClassesRuleBuilder {
         /** Filter or assertion criteria for normalized paths. */
         val normalizedPaths =
             modulePaths.map { path ->
@@ -108,20 +106,17 @@ public interface ClassesThatPackageFilter : ClassesThatScope {
         return builder
     }
 
-    /** Filter or assertion criteria for reside in a module. */
-    public fun resideInAModule(vararg modulePaths: String): ClassesRuleBuilder = resideInAModule(modulePaths.toList())
+    /** Filter or assertion criteria for in module. */
+    public fun inModule(vararg modulePaths: String): ClassesRuleBuilder = inModule(modulePaths.toList())
 
-    /** Specifies reside in module criteria. */
-    public infix fun resideInModule(modulePath: String): ClassesRuleBuilder = resideInAModule(modulePath)
+    /** Specifies in modules criteria. */
+    public infix fun inModules(modulePaths: List<String>): ClassesRuleBuilder = inModule(modulePaths)
 
-    /** Specifies reside in modules criteria. */
-    public infix fun resideInModules(modulePaths: List<String>): ClassesRuleBuilder = resideInAModule(modulePaths)
+    /** Filter or assertion criteria for in modules. */
+    public fun inModules(vararg modulePaths: String): ClassesRuleBuilder = inModule(modulePaths.toList())
 
-    /** Filter or assertion criteria for reside in modules. */
-    public fun resideInModules(vararg modulePaths: String): ClassesRuleBuilder = resideInAModule(modulePaths.toList())
-
-    /** Specifies not reside in a module criteria. */
-    public infix fun notResideInAModule(modulePath: String): ClassesRuleBuilder {
+    /** Specifies not in module criteria. */
+    public infix fun notInModule(modulePath: String): ClassesRuleBuilder {
         /** Filter or assertion criteria for normalized. */
         val normalized =
             if (!modulePath.startsWith(":") && !modulePath.startsWith("**") && modulePath.isNotEmpty()) {
@@ -140,8 +135,8 @@ public interface ClassesThatPackageFilter : ClassesThatScope {
         return builder
     }
 
-    /** Specifies not reside in a module criteria. */
-    public infix fun notResideInAModule(modulePaths: List<String>): ClassesRuleBuilder {
+    /** Specifies not in module criteria. */
+    public infix fun notInModule(modulePaths: List<String>): ClassesRuleBuilder {
         /** Filter or assertion criteria for normalized. */
         val normalized =
             modulePaths.map {
@@ -161,19 +156,95 @@ public interface ClassesThatPackageFilter : ClassesThatScope {
         return builder
     }
 
-    /** Filter or assertion criteria for not reside in a module. */
-    public fun notResideInAModule(vararg modulePaths: String): ClassesRuleBuilder =
-        notResideInAModule(modulePaths.toList())
+    /** Filter or assertion criteria for not in module. */
+    public fun notInModule(vararg modulePaths: String): ClassesRuleBuilder = notInModule(modulePaths.toList())
 
-    /** Specifies not reside in module criteria. */
-    public infix fun notResideInModule(modulePath: String): ClassesRuleBuilder = notResideInAModule(modulePath)
+    /** Specifies not in modules criteria. */
+    public infix fun notInModules(modulePaths: List<String>): ClassesRuleBuilder = notInModule(modulePaths)
 
-    /** Specifies not reside in modules criteria. */
-    public infix fun notResideInModules(modulePaths: List<String>): ClassesRuleBuilder = notResideInAModule(modulePaths)
+    /** Filter or assertion criteria for not in modules. */
+    public fun notInModules(vararg modulePaths: String): ClassesRuleBuilder = notInModule(modulePaths.toList())
 
-    /** Filter or assertion criteria for not reside in modules. */
-    public fun notResideInModules(vararg modulePaths: String): ClassesRuleBuilder =
-        notResideInAModule(modulePaths.toList())
+    /** Legacy resideInAPackage method. */
+    @Deprecated("Use inPackage instead.", ReplaceWith("inPackage(packagePattern)"))
+    public infix fun resideInAPackage(packagePattern: String): ClassesRuleBuilder = inPackage(packagePattern)
+
+    /** Legacy resideInAPackage method. */
+    @Deprecated("Use inPackage instead.", ReplaceWith("inPackage(packagePatterns)"))
+    public infix fun resideInAPackage(packagePatterns: List<String>): ClassesRuleBuilder = inPackage(packagePatterns)
+
+    /** Legacy resideInAPackage method. */
+    @Deprecated("Use inPackage instead.", ReplaceWith("inPackage(*packagePatterns)"))
+    public fun resideInAPackage(vararg packagePatterns: String): ClassesRuleBuilder = inPackage(*packagePatterns)
+
+    /** Legacy resideInAPackage method. */
+    @Deprecated("Use inPackage instead.", ReplaceWith("inPackage(predicate)"))
+    public infix fun resideInAPackage(predicate: (String) -> Boolean): ClassesRuleBuilder = inPackage(predicate)
+
+    /** Legacy resideInPackageOf method. */
+    @Deprecated("Use inPackageOf instead.", ReplaceWith("inPackageOf(type)"))
+    public infix fun resideInPackageOf(type: KClass<*>): ClassesRuleBuilder = inPackageOf(type)
+
+    /** Legacy notResideInAPackage method. */
+    @Deprecated("Use notInPackage instead.", ReplaceWith("notInPackage(packagePattern)"))
+    public infix fun notResideInAPackage(packagePattern: String): ClassesRuleBuilder = notInPackage(packagePattern)
+
+    /** Legacy notResideInAPackage method. */
+    @Deprecated("Use notInPackage instead.", ReplaceWith("notInPackage(packagePatterns)"))
+    public infix fun notResideInAPackage(packagePatterns: List<String>): ClassesRuleBuilder =
+        notInPackage(packagePatterns)
+
+    /** Legacy notResideInAPackage method. */
+    @Deprecated("Use notInPackage instead.", ReplaceWith("notInPackage(*packagePatterns)"))
+    public fun notResideInAPackage(vararg packagePatterns: String): ClassesRuleBuilder = notInPackage(*packagePatterns)
+
+    /** Legacy resideInAModule method. */
+    @Deprecated("Use inModule instead.", ReplaceWith("inModule(modulePath)"))
+    public infix fun resideInAModule(modulePath: String): ClassesRuleBuilder = inModule(modulePath)
+
+    /** Legacy resideInAModule method. */
+    @Deprecated("Use inModule instead.", ReplaceWith("inModule(modulePaths)"))
+    public infix fun resideInAModule(modulePaths: List<String>): ClassesRuleBuilder = inModule(modulePaths)
+
+    /** Legacy resideInAModule method. */
+    @Deprecated("Use inModule instead.", ReplaceWith("inModule(*modulePaths)"))
+    public fun resideInAModule(vararg modulePaths: String): ClassesRuleBuilder = inModule(*modulePaths)
+
+    /** Legacy resideInModule method. */
+    @Deprecated("Use inModule instead.", ReplaceWith("inModule(modulePath)"))
+    public infix fun resideInModule(modulePath: String): ClassesRuleBuilder = inModule(modulePath)
+
+    /** Legacy resideInModules method. */
+    @Deprecated("Use inModules instead.", ReplaceWith("inModules(modulePaths)"))
+    public infix fun resideInModules(modulePaths: List<String>): ClassesRuleBuilder = inModules(modulePaths)
+
+    /** Legacy resideInModules method. */
+    @Deprecated("Use inModules instead.", ReplaceWith("inModules(*modulePaths)"))
+    public fun resideInModules(vararg modulePaths: String): ClassesRuleBuilder = inModules(*modulePaths)
+
+    /** Legacy notResideInAModule method. */
+    @Deprecated("Use notInModule instead.", ReplaceWith("notInModule(modulePath)"))
+    public infix fun notResideInAModule(modulePath: String): ClassesRuleBuilder = notInModule(modulePath)
+
+    /** Legacy notResideInAModule method. */
+    @Deprecated("Use notInModule instead.", ReplaceWith("notInModule(modulePaths)"))
+    public infix fun notResideInAModule(modulePaths: List<String>): ClassesRuleBuilder = notInModule(modulePaths)
+
+    /** Legacy notResideInAModule method. */
+    @Deprecated("Use notInModule instead.", ReplaceWith("notInModule(*modulePaths)"))
+    public fun notResideInAModule(vararg modulePaths: String): ClassesRuleBuilder = notInModule(*modulePaths)
+
+    /** Legacy notResideInModule method. */
+    @Deprecated("Use notInModule instead.", ReplaceWith("notInModule(modulePath)"))
+    public infix fun notResideInModule(modulePath: String): ClassesRuleBuilder = notInModule(modulePath)
+
+    /** Legacy notResideInModules method. */
+    @Deprecated("Use notInModules instead.", ReplaceWith("notInModules(modulePaths)"))
+    public infix fun notResideInModules(modulePaths: List<String>): ClassesRuleBuilder = notInModules(modulePaths)
+
+    /** Legacy notResideInModules method. */
+    @Deprecated("Use notInModules instead.", ReplaceWith("notInModules(*modulePaths)"))
+    public fun notResideInModules(vararg modulePaths: String): ClassesRuleBuilder = notInModules(*modulePaths)
 }
 
 /**
@@ -181,126 +252,123 @@ public interface ClassesThatPackageFilter : ClassesThatScope {
  */
 @Suppress("ComplexInterface")
 public interface ClassesThatNameFilter : ClassesThatScope {
-    /** Specifies have name criteria. */
-    public infix fun haveName(name: String): ClassesRuleBuilder {
+    /** Specifies named criteria. */
+    public infix fun named(name: String): ClassesRuleBuilder {
         builder.setThat { it.fqName == name || it.name == name }
         return builder
     }
 
-    /** Specifies have simple name criteria. */
-    public infix fun haveSimpleName(name: String): ClassesRuleBuilder {
+    /** Specifies simple named criteria. */
+    public infix fun simpleNamed(name: String): ClassesRuleBuilder {
         builder.setThat { it.name == name }
         return builder
     }
 
-    /** Specifies have name criteria. */
-    public infix fun haveName(names: List<String>): ClassesRuleBuilder {
+    /** Specifies named criteria. */
+    public infix fun named(names: List<String>): ClassesRuleBuilder {
         builder.setThat { names.contains(it.name) }
         return builder
     }
 
-    /** Filter or assertion criteria for have name. */
-    public fun haveName(vararg names: String): ClassesRuleBuilder = haveName(names.toList())
+    /** Filter or assertion criteria for named. */
+    public fun named(vararg names: String): ClassesRuleBuilder = named(names.toList())
 
-    /** Specifies not have name criteria. */
-    public infix fun notHaveName(name: String): ClassesRuleBuilder {
+    /** Specifies not named criteria. */
+    public infix fun notNamed(name: String): ClassesRuleBuilder {
         builder.setThat { it.name != name }
         return builder
     }
 
-    /** Specifies not have name criteria. */
-    public infix fun notHaveName(names: List<String>): ClassesRuleBuilder {
+    /** Specifies not named criteria. */
+    public infix fun notNamed(names: List<String>): ClassesRuleBuilder {
         builder.setThat { !names.contains(it.name) }
         return builder
     }
 
-    /** Filter or assertion criteria for not have name. */
-    public fun notHaveName(vararg names: String): ClassesRuleBuilder = notHaveName(names.toList())
+    /** Filter or assertion criteria for not named. */
+    public fun notNamed(vararg names: String): ClassesRuleBuilder = notNamed(names.toList())
 
-    /** Specifies not have name criteria. */
-    public infix fun notHaveName(predicate: (String) -> Boolean): ClassesRuleBuilder {
+    /** Specifies not named criteria. */
+    public infix fun notNamed(predicate: (String) -> Boolean): ClassesRuleBuilder {
         builder.setThat { !predicate(it.name) }
         return builder
     }
 
-    /** Specifies have name ending with criteria. */
-    public infix fun haveNameEndingWith(suffix: String): ClassesRuleBuilder {
+    /** Specifies name ends with criteria. */
+    public infix fun nameEndsWith(suffix: String): ClassesRuleBuilder {
         builder.setThat { it.name.endsWith(suffix) }
         return builder
     }
 
-    /** Specifies have name ending with criteria. */
-    public infix fun haveNameEndingWith(suffixes: List<String>): ClassesRuleBuilder {
+    /** Specifies name ends with criteria. */
+    public infix fun nameEndsWith(suffixes: List<String>): ClassesRuleBuilder {
         builder.setThat { context ->
             suffixes.any { context.name.endsWith(it) }
         }
         return builder
     }
 
-    /** Filter or assertion criteria for have name ending with. */
-    public fun haveNameEndingWith(vararg suffixes: String): ClassesRuleBuilder = haveNameEndingWith(suffixes.toList())
+    /** Filter or assertion criteria for name ends with. */
+    public fun nameEndsWith(vararg suffixes: String): ClassesRuleBuilder = nameEndsWith(suffixes.toList())
 
-    /** Specifies not have name ending with criteria. */
-    public infix fun notHaveNameEndingWith(suffix: String): ClassesRuleBuilder {
+    /** Specifies not name ends with criteria. */
+    public infix fun notNameEndsWith(suffix: String): ClassesRuleBuilder {
         builder.setThat { !it.name.endsWith(suffix) }
         return builder
     }
 
-    /** Specifies not have name ending with criteria. */
-    public infix fun notHaveNameEndingWith(suffixes: List<String>): ClassesRuleBuilder {
+    /** Specifies not name ends with criteria. */
+    public infix fun notNameEndsWith(suffixes: List<String>): ClassesRuleBuilder {
         builder.setThat { context ->
             !suffixes.any { context.name.endsWith(it) }
         }
         return builder
     }
 
-    /** Filter or assertion criteria for not have name ending with. */
-    public fun notHaveNameEndingWith(vararg suffixes: String): ClassesRuleBuilder =
-        notHaveNameEndingWith(suffixes.toList())
+    /** Filter or assertion criteria for not name ends with. */
+    public fun notNameEndsWith(vararg suffixes: String): ClassesRuleBuilder = notNameEndsWith(suffixes.toList())
 
-    /** Specifies have name starting with criteria. */
-    public infix fun haveNameStartingWith(prefix: String): ClassesRuleBuilder {
+    /** Specifies name starts with criteria. */
+    public infix fun nameStartsWith(prefix: String): ClassesRuleBuilder {
         builder.setThat { it.name.startsWith(prefix) }
         return builder
     }
 
-    /** Specifies have name starting with criteria. */
-    public infix fun haveNameStartingWith(prefixes: List<String>): ClassesRuleBuilder {
+    /** Specifies name starts with criteria. */
+    public infix fun nameStartsWith(prefixes: List<String>): ClassesRuleBuilder {
         builder.setThat { context ->
             prefixes.any { context.name.startsWith(it) }
         }
         return builder
     }
 
-    /** Filter or assertion criteria for have name starting with. */
-    public fun haveNameStartingWith(vararg prefixes: String): ClassesRuleBuilder =
-        haveNameStartingWith(prefixes.toList())
+    /** Filter or assertion criteria for name starts with. */
+    public fun nameStartsWith(vararg prefixes: String): ClassesRuleBuilder = nameStartsWith(prefixes.toList())
 
-    /** Specifies not have name starting with criteria. */
-    public infix fun notHaveNameStartingWith(prefix: String): ClassesRuleBuilder {
+    /** Specifies not name starts with criteria. */
+    public infix fun notNameStartsWith(prefix: String): ClassesRuleBuilder {
         builder.setThat { !it.name.startsWith(prefix) }
         return builder
     }
 
-    /** Specifies not have name starting with criteria. */
-    public infix fun notHaveNameStartingWith(prefixes: List<String>): ClassesRuleBuilder {
+    /** Specifies not name starts with criteria. */
+    public infix fun notNameStartsWith(prefixes: List<String>): ClassesRuleBuilder {
         builder.setThat { context ->
             !prefixes.any { context.name.startsWith(it) }
         }
         return builder
     }
 
-    /** Filter or assertion criteria for not have name starting with. */
-    public fun notHaveNameStartingWith(vararg prefixes: String): ClassesRuleBuilder =
-        notHaveNameStartingWith(prefixes.toList())
+    /** Filter or assertion criteria for not name starts with. */
+    public fun notNameStartsWith(vararg prefixes: String): ClassesRuleBuilder = notNameStartsWith(prefixes.toList())
 
-    /** Specifies have name criteria. */
-    public infix fun haveName(predicate: (String) -> Boolean): ClassesRuleBuilder =
-        haveName("custom name predicate", predicate)
+    /** Specifies named criteria. */
+    public infix fun named(predicate: (String) -> Boolean): ClassesRuleBuilder =
+        named("custom name predicate", predicate)
 
-    /** Filter or assertion criteria for have name. */
+    /** Filter or assertion criteria for named. */
     @Suppress("UnusedParameter")
-    public fun haveName(
+    public fun named(
         description: String,
         predicate: (String) -> Boolean,
     ): ClassesRuleBuilder {
@@ -308,39 +376,154 @@ public interface ClassesThatNameFilter : ClassesThatScope {
         return builder
     }
 
-    /** Specifies have name matching criteria. */
-    public infix fun haveNameMatching(pattern: String): ClassesRuleBuilder {
+    /** Specifies name matches criteria. */
+    public infix fun nameMatches(pattern: String): ClassesRuleBuilder {
         builder.setThat { PatternMatchers.matchesSimpleGlob(pattern, it.name) }
         return builder
     }
 
-    /** Specifies have name matching criteria. */
-    public infix fun haveNameMatching(patterns: List<String>): ClassesRuleBuilder {
+    /** Specifies name matches criteria. */
+    public infix fun nameMatches(patterns: List<String>): ClassesRuleBuilder {
         builder.setThat { context ->
             patterns.any { PatternMatchers.matchesSimpleGlob(it, context.name) }
         }
         return builder
     }
 
-    /** Filter or assertion criteria for have name matching. */
-    public fun haveNameMatching(vararg patterns: String): ClassesRuleBuilder = haveNameMatching(patterns.toList())
+    /** Filter or assertion criteria for name matches. */
+    public fun nameMatches(vararg patterns: String): ClassesRuleBuilder = nameMatches(patterns.toList())
 
-    /** Specifies not have name matching criteria. */
-    public infix fun notHaveNameMatching(pattern: String): ClassesRuleBuilder {
+    /** Specifies not name matches criteria. */
+    public infix fun notNameMatches(pattern: String): ClassesRuleBuilder {
         builder.setThat { !PatternMatchers.matchesSimpleGlob(pattern, it.name) }
         return builder
     }
 
-    /** Specifies not have name matching criteria. */
-    public infix fun notHaveNameMatching(patterns: List<String>): ClassesRuleBuilder {
+    /** Specifies not name matches criteria. */
+    public infix fun notNameMatches(patterns: List<String>): ClassesRuleBuilder {
         builder.setThat { context ->
             !patterns.any { PatternMatchers.matchesSimpleGlob(it, context.name) }
         }
         return builder
     }
 
-    /** Filter or assertion criteria for not have name matching. */
-    public fun notHaveNameMatching(vararg patterns: String): ClassesRuleBuilder = notHaveNameMatching(patterns.toList())
+    /** Filter or assertion criteria for not name matches. */
+    public fun notNameMatches(vararg patterns: String): ClassesRuleBuilder = notNameMatches(patterns.toList())
+
+    /** Legacy haveName method. */
+    @Deprecated("Use named instead.", ReplaceWith("named(name)"))
+    public infix fun haveName(name: String): ClassesRuleBuilder = named(name)
+
+    /** Legacy haveSimpleName method. */
+    @Deprecated("Use simpleNamed instead.", ReplaceWith("simpleNamed(name)"))
+    public infix fun haveSimpleName(name: String): ClassesRuleBuilder = simpleNamed(name)
+
+    /** Legacy haveName method. */
+    @Deprecated("Use named instead.", ReplaceWith("named(names)"))
+    public infix fun haveName(names: List<String>): ClassesRuleBuilder = named(names)
+
+    /** Legacy haveName method. */
+    @Deprecated("Use named instead.", ReplaceWith("named(*names)"))
+    public fun haveName(vararg names: String): ClassesRuleBuilder = named(*names)
+
+    /** Legacy notHaveName method. */
+    @Deprecated("Use notNamed instead.", ReplaceWith("notNamed(name)"))
+    public infix fun notHaveName(name: String): ClassesRuleBuilder = notNamed(name)
+
+    /** Legacy notHaveName method. */
+    @Deprecated("Use notNamed instead.", ReplaceWith("notNamed(names)"))
+    public infix fun notHaveName(names: List<String>): ClassesRuleBuilder = notNamed(names)
+
+    /** Legacy notHaveName method. */
+    @Deprecated("Use notNamed instead.", ReplaceWith("notNamed(*names)"))
+    public fun notHaveName(vararg names: String): ClassesRuleBuilder = notNamed(*names)
+
+    /** Legacy notHaveName method. */
+    @Deprecated("Use notNamed instead.", ReplaceWith("notNamed(predicate)"))
+    public infix fun notHaveName(predicate: (String) -> Boolean): ClassesRuleBuilder = notNamed(predicate)
+
+    /** Legacy haveNameEndingWith method. */
+    @Deprecated("Use nameEndsWith instead.", ReplaceWith("nameEndsWith(suffix)"))
+    public infix fun haveNameEndingWith(suffix: String): ClassesRuleBuilder = nameEndsWith(suffix)
+
+    /** Legacy haveNameEndingWith method. */
+    @Deprecated("Use nameEndsWith instead.", ReplaceWith("nameEndsWith(suffixes)"))
+    public infix fun haveNameEndingWith(suffixes: List<String>): ClassesRuleBuilder = nameEndsWith(suffixes)
+
+    /** Legacy haveNameEndingWith method. */
+    @Deprecated("Use nameEndsWith instead.", ReplaceWith("nameEndsWith(*suffixes)"))
+    public fun haveNameEndingWith(vararg suffixes: String): ClassesRuleBuilder = nameEndsWith(*suffixes)
+
+    /** Legacy notHaveNameEndingWith method. */
+    @Deprecated("Use notNameEndsWith instead.", ReplaceWith("notNameEndsWith(suffix)"))
+    public infix fun notHaveNameEndingWith(suffix: String): ClassesRuleBuilder = notNameEndsWith(suffix)
+
+    /** Legacy notHaveNameEndingWith method. */
+    @Deprecated("Use notNameEndsWith instead.", ReplaceWith("notNameEndsWith(suffixes)"))
+    public infix fun notHaveNameEndingWith(suffixes: List<String>): ClassesRuleBuilder = notNameEndsWith(suffixes)
+
+    /** Legacy notHaveNameEndingWith method. */
+    @Deprecated("Use notNameEndsWith instead.", ReplaceWith("notNameEndsWith(*suffixes)"))
+    public fun notHaveNameEndingWith(vararg suffixes: String): ClassesRuleBuilder = notNameEndsWith(*suffixes)
+
+    /** Legacy haveNameStartingWith method. */
+    @Deprecated("Use nameStartsWith instead.", ReplaceWith("nameStartsWith(prefix)"))
+    public infix fun haveNameStartingWith(prefix: String): ClassesRuleBuilder = nameStartsWith(prefix)
+
+    /** Legacy haveNameStartingWith method. */
+    @Deprecated("Use nameStartsWith instead.", ReplaceWith("nameStartsWith(prefixes)"))
+    public infix fun haveNameStartingWith(prefixes: List<String>): ClassesRuleBuilder = nameStartsWith(prefixes)
+
+    /** Legacy haveNameStartingWith method. */
+    @Deprecated("Use nameStartsWith instead.", ReplaceWith("nameStartsWith(*prefixes)"))
+    public fun haveNameStartingWith(vararg prefixes: String): ClassesRuleBuilder = nameStartsWith(*prefixes)
+
+    /** Legacy notHaveNameStartingWith method. */
+    @Deprecated("Use notNameStartsWith instead.", ReplaceWith("notNameStartsWith(prefix)"))
+    public infix fun notHaveNameStartingWith(prefix: String): ClassesRuleBuilder = notNameStartsWith(prefix)
+
+    /** Legacy notHaveNameStartingWith method. */
+    @Deprecated("Use notNameStartsWith instead.", ReplaceWith("notNameStartsWith(prefixes)"))
+    public infix fun notHaveNameStartingWith(prefixes: List<String>): ClassesRuleBuilder = notNameStartsWith(prefixes)
+
+    /** Legacy notHaveNameStartingWith method. */
+    @Deprecated("Use notNameStartsWith instead.", ReplaceWith("notNameStartsWith(*prefixes)"))
+    public fun notHaveNameStartingWith(vararg prefixes: String): ClassesRuleBuilder = notNameStartsWith(*prefixes)
+
+    /** Legacy haveName method. */
+    @Deprecated("Use named instead.", ReplaceWith("named(predicate)"))
+    public infix fun haveName(predicate: (String) -> Boolean): ClassesRuleBuilder = named(predicate)
+
+    /** Legacy haveName method. */
+    @Deprecated("Use named instead.", ReplaceWith("named(description, predicate)"))
+    public fun haveName(
+        description: String,
+        predicate: (String) -> Boolean,
+    ): ClassesRuleBuilder = named(description, predicate)
+
+    /** Legacy haveNameMatching method. */
+    @Deprecated("Use nameMatches instead.", ReplaceWith("nameMatches(pattern)"))
+    public infix fun haveNameMatching(pattern: String): ClassesRuleBuilder = nameMatches(pattern)
+
+    /** Legacy haveNameMatching method. */
+    @Deprecated("Use nameMatches instead.", ReplaceWith("nameMatches(patterns)"))
+    public infix fun haveNameMatching(patterns: List<String>): ClassesRuleBuilder = nameMatches(patterns)
+
+    /** Legacy haveNameMatching method. */
+    @Deprecated("Use nameMatches instead.", ReplaceWith("nameMatches(*patterns)"))
+    public fun haveNameMatching(vararg patterns: String): ClassesRuleBuilder = nameMatches(*patterns)
+
+    /** Legacy notHaveNameMatching method. */
+    @Deprecated("Use notNameMatches instead.", ReplaceWith("notNameMatches(pattern)"))
+    public infix fun notHaveNameMatching(pattern: String): ClassesRuleBuilder = notNameMatches(pattern)
+
+    /** Legacy notHaveNameMatching method. */
+    @Deprecated("Use notNameMatches instead.", ReplaceWith("notNameMatches(patterns)"))
+    public infix fun notHaveNameMatching(patterns: List<String>): ClassesRuleBuilder = notNameMatches(patterns)
+
+    /** Legacy notHaveNameMatching method. */
+    @Deprecated("Use notNameMatches instead.", ReplaceWith("notNameMatches(*patterns)"))
+    public fun notHaveNameMatching(vararg patterns: String): ClassesRuleBuilder = notNameMatches(*patterns)
 }
 
 /**
@@ -575,48 +758,83 @@ public interface ClassesThatStructureFilter : ClassesThatScope {
  */
 @Suppress("ComplexInterface")
 public interface ClassesThatMetadataFilter : ClassesThatScope {
-    /** Specifies have annotation of criteria. */
-    public infix fun haveAnnotationOf(annotationFqName: String): ClassesRuleBuilder {
+    /** Specifies annotated with criteria. */
+    public infix fun annotatedWith(annotationFqName: String): ClassesRuleBuilder {
         builder.setThat { cls ->
             cls.annotations.any { it.fqName == annotationFqName || it.name == annotationFqName }
         }
         return builder
     }
 
-    /** Specifies have annotation of criteria. */
-    public infix fun haveAnnotationOf(annotation: KClass<out Annotation>): ClassesRuleBuilder =
-        haveAnnotationOf(annotation.kontureQualifiedName())
+    /** Specifies annotated with criteria. */
+    public infix fun annotatedWith(annotation: KClass<out Annotation>): ClassesRuleBuilder =
+        annotatedWith(annotation.kontureQualifiedName())
 
-    /** Specifies are annotated with criteria. */
-    public infix fun areAnnotatedWith(annotationFqName: String): ClassesRuleBuilder = haveAnnotationOf(annotationFqName)
+    /** Specifies annotated with all of criteria. */
+    public infix fun annotatedWithAllOf(name: String): ClassesRuleBuilder = annotatedWithAllOf(listOf(name))
 
-    /** Specifies are annotated with criteria. */
-    public infix fun areAnnotatedWith(annotation: KClass<out Annotation>): ClassesRuleBuilder =
-        haveAnnotationOf(annotation)
-
-    /** Specifies have all annotations of criteria. */
-    public infix fun haveAllAnnotationsOf(name: String): ClassesRuleBuilder = haveAllAnnotationsOf(listOf(name))
-
-    /** Specifies have all annotations of criteria. */
-    public infix fun haveAllAnnotationsOf(names: List<String>): ClassesRuleBuilder {
+    /** Specifies annotated with all of criteria. */
+    public infix fun annotatedWithAllOf(names: List<String>): ClassesRuleBuilder {
         builder.setThat { it.hasAllAnnotations(names) }
         return builder
     }
 
-    /** Filter or assertion criteria for have all annotations of. */
-    public fun haveAllAnnotationsOf(vararg names: String): ClassesRuleBuilder = haveAllAnnotationsOf(names.asList())
+    /** Filter or assertion criteria for annotated with all of. */
+    public fun annotatedWithAllOf(vararg names: String): ClassesRuleBuilder = annotatedWithAllOf(names.asList())
 
-    /** Specifies have any annotation of criteria. */
-    public infix fun haveAnyAnnotationOf(name: String): ClassesRuleBuilder = haveAnyAnnotationOf(listOf(name))
+    /** Specifies annotated with any of criteria. */
+    public infix fun annotatedWithAnyOf(name: String): ClassesRuleBuilder = annotatedWithAnyOf(listOf(name))
 
-    /** Specifies have any annotation of criteria. */
-    public infix fun haveAnyAnnotationOf(names: List<String>): ClassesRuleBuilder {
+    /** Specifies annotated with any of criteria. */
+    public infix fun annotatedWithAnyOf(names: List<String>): ClassesRuleBuilder {
         builder.setThat { it.hasAnyAnnotation(names) }
         return builder
     }
 
-    /** Filter or assertion criteria for have any annotation of. */
-    public fun haveAnyAnnotationOf(vararg names: String): ClassesRuleBuilder = haveAnyAnnotationOf(names.asList())
+    /** Filter or assertion criteria for annotated with any of. */
+    public fun annotatedWithAnyOf(vararg names: String): ClassesRuleBuilder = annotatedWithAnyOf(names.asList())
+
+    /** Legacy haveAnnotationOf method. */
+    @Deprecated("Use annotatedWith instead.", ReplaceWith("annotatedWith(annotationFqName)"))
+    public infix fun haveAnnotationOf(annotationFqName: String): ClassesRuleBuilder = annotatedWith(annotationFqName)
+
+    /** Legacy haveAnnotationOf method. */
+    @Deprecated("Use annotatedWith instead.", ReplaceWith("annotatedWith(annotation)"))
+    public infix fun haveAnnotationOf(annotation: KClass<out Annotation>): ClassesRuleBuilder =
+        annotatedWith(annotation)
+
+    /** Legacy areAnnotatedWith method. */
+    @Deprecated("Use annotatedWith instead.", ReplaceWith("annotatedWith(annotationFqName)"))
+    public infix fun areAnnotatedWith(annotationFqName: String): ClassesRuleBuilder = annotatedWith(annotationFqName)
+
+    /** Legacy areAnnotatedWith method. */
+    @Deprecated("Use annotatedWith instead.", ReplaceWith("annotatedWith(annotation)"))
+    public infix fun areAnnotatedWith(annotation: KClass<out Annotation>): ClassesRuleBuilder =
+        annotatedWith(annotation)
+
+    /** Legacy haveAllAnnotationsOf method. */
+    @Deprecated("Use annotatedWithAllOf instead.", ReplaceWith("annotatedWithAllOf(name)"))
+    public infix fun haveAllAnnotationsOf(name: String): ClassesRuleBuilder = annotatedWithAllOf(name)
+
+    /** Legacy haveAllAnnotationsOf method. */
+    @Deprecated("Use annotatedWithAllOf instead.", ReplaceWith("annotatedWithAllOf(names)"))
+    public infix fun haveAllAnnotationsOf(names: List<String>): ClassesRuleBuilder = annotatedWithAllOf(names)
+
+    /** Legacy haveAllAnnotationsOf method. */
+    @Deprecated("Use annotatedWithAllOf instead.", ReplaceWith("annotatedWithAllOf(*names)"))
+    public fun haveAllAnnotationsOf(vararg names: String): ClassesRuleBuilder = annotatedWithAllOf(*names)
+
+    /** Legacy haveAnyAnnotationOf method. */
+    @Deprecated("Use annotatedWithAnyOf instead.", ReplaceWith("annotatedWithAnyOf(name)"))
+    public infix fun haveAnyAnnotationOf(name: String): ClassesRuleBuilder = annotatedWithAnyOf(name)
+
+    /** Legacy haveAnyAnnotationOf method. */
+    @Deprecated("Use annotatedWithAnyOf instead.", ReplaceWith("annotatedWithAnyOf(names)"))
+    public infix fun haveAnyAnnotationOf(names: List<String>): ClassesRuleBuilder = annotatedWithAnyOf(names)
+
+    /** Legacy haveAnyAnnotationOf method. */
+    @Deprecated("Use annotatedWithAnyOf instead.", ReplaceWith("annotatedWithAnyOf(*names)"))
+    public fun haveAnyAnnotationOf(vararg names: String): ClassesRuleBuilder = annotatedWithAnyOf(*names)
 
     /** Filter or assertion criteria for have annotation with argument. */
     public fun haveAnnotationWithArgument(

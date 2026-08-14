@@ -185,6 +185,13 @@ public final class io/github/baole/konture/ClassesShould : io/github/baole/kontu
 	public fun allFunctions (Lkotlin/jvm/functions/Function1;)Lio/github/baole/konture/ClassesRuleBuilder;
 	public fun allOf ([Lkotlin/jvm/functions/Function1;)Lio/github/baole/konture/ClassesRuleBuilder;
 	public fun allProperties (Lkotlin/jvm/functions/Function1;)Lio/github/baole/konture/ClassesRuleBuilder;
+	public fun annotatedWith (Ljava/lang/String;)Lio/github/baole/konture/ClassesRuleBuilder;
+	public fun annotatedWithAllOf (Ljava/lang/String;)Lio/github/baole/konture/ClassesRuleBuilder;
+	public fun annotatedWithAllOf (Ljava/util/List;)Lio/github/baole/konture/ClassesRuleBuilder;
+	public fun annotatedWithAllOf ([Ljava/lang/String;)Lio/github/baole/konture/ClassesRuleBuilder;
+	public fun annotatedWithAnyOf (Ljava/lang/String;)Lio/github/baole/konture/ClassesRuleBuilder;
+	public fun annotatedWithAnyOf (Ljava/util/List;)Lio/github/baole/konture/ClassesRuleBuilder;
+	public fun annotatedWithAnyOf ([Ljava/lang/String;)Lio/github/baole/konture/ClassesRuleBuilder;
 	public fun anyOf ([Lkotlin/jvm/functions/Function1;)Lio/github/baole/konture/ClassesRuleBuilder;
 	public fun beAbstract ()Lio/github/baole/konture/ClassesRuleBuilder;
 	public fun beAssignableFrom (Ljava/lang/String;)Lio/github/baole/konture/ClassesRuleBuilder;
@@ -253,7 +260,33 @@ public final class io/github/baole/konture/ClassesShould : io/github/baole/kontu
 	public fun haveNameStartingWith (Ljava/lang/String;)Lio/github/baole/konture/ClassesRuleBuilder;
 	public fun haveNameStartingWith (Ljava/util/List;)Lio/github/baole/konture/ClassesRuleBuilder;
 	public fun haveNameStartingWith ([Ljava/lang/String;)Lio/github/baole/konture/ClassesRuleBuilder;
+	public fun haveSimpleName (Ljava/lang/String;)Lio/github/baole/konture/ClassesRuleBuilder;
 	public fun haveVisibility (Lio/github/baole/konture/Visibility;)Lio/github/baole/konture/ClassesRuleBuilder;
+	public fun inModule (Ljava/lang/String;)Lio/github/baole/konture/ClassesRuleBuilder;
+	public fun inModule (Ljava/util/List;)Lio/github/baole/konture/ClassesRuleBuilder;
+	public fun inModule ([Ljava/lang/String;)Lio/github/baole/konture/ClassesRuleBuilder;
+	public fun inModules (Ljava/util/List;)Lio/github/baole/konture/ClassesRuleBuilder;
+	public fun inModules ([Ljava/lang/String;)Lio/github/baole/konture/ClassesRuleBuilder;
+	public fun inPackage (Ljava/lang/String;)Lio/github/baole/konture/ClassesRuleBuilder;
+	public fun inPackage (Ljava/lang/String;Lkotlin/jvm/functions/Function1;)Lio/github/baole/konture/ClassesRuleBuilder;
+	public fun inPackage (Ljava/util/List;)Lio/github/baole/konture/ClassesRuleBuilder;
+	public fun inPackage (Lkotlin/jvm/functions/Function1;)Lio/github/baole/konture/ClassesRuleBuilder;
+	public fun inPackage ([Ljava/lang/String;)Lio/github/baole/konture/ClassesRuleBuilder;
+	public fun inPackageOf (Lkotlin/reflect/KClass;)Lio/github/baole/konture/ClassesRuleBuilder;
+	public fun nameEndsWith (Ljava/lang/String;)Lio/github/baole/konture/ClassesRuleBuilder;
+	public fun nameEndsWith (Ljava/util/List;)Lio/github/baole/konture/ClassesRuleBuilder;
+	public fun nameEndsWith ([Ljava/lang/String;)Lio/github/baole/konture/ClassesRuleBuilder;
+	public fun nameMatches (Ljava/lang/String;)Lio/github/baole/konture/ClassesRuleBuilder;
+	public fun nameMatches (Ljava/util/List;)Lio/github/baole/konture/ClassesRuleBuilder;
+	public fun nameMatches ([Ljava/lang/String;)Lio/github/baole/konture/ClassesRuleBuilder;
+	public fun nameStartsWith (Ljava/lang/String;)Lio/github/baole/konture/ClassesRuleBuilder;
+	public fun nameStartsWith (Ljava/util/List;)Lio/github/baole/konture/ClassesRuleBuilder;
+	public fun nameStartsWith ([Ljava/lang/String;)Lio/github/baole/konture/ClassesRuleBuilder;
+	public fun named (Ljava/lang/String;)Lio/github/baole/konture/ClassesRuleBuilder;
+	public fun named (Ljava/lang/String;Lkotlin/jvm/functions/Function1;)Lio/github/baole/konture/ClassesRuleBuilder;
+	public fun named (Ljava/util/List;)Lio/github/baole/konture/ClassesRuleBuilder;
+	public fun named (Lkotlin/jvm/functions/Function1;)Lio/github/baole/konture/ClassesRuleBuilder;
+	public fun named ([Ljava/lang/String;)Lio/github/baole/konture/ClassesRuleBuilder;
 	public fun noneOf ([Lkotlin/jvm/functions/Function1;)Lio/github/baole/konture/ClassesRuleBuilder;
 	public fun notBeAbstract ()Lio/github/baole/konture/ClassesRuleBuilder;
 	public fun notBeAccessedByAnyPackage (Ljava/lang/String;)Lio/github/baole/konture/ClassesRuleBuilder;
@@ -301,6 +334,26 @@ public final class io/github/baole/konture/ClassesShould : io/github/baole/kontu
 	public fun notHaveSignaturesWithTypesAnnotatedWith (Ljava/lang/String;)Lio/github/baole/konture/ClassesRuleBuilder;
 	public fun notHaveSignaturesWithTypesAnnotatedWith (Ljava/util/List;)Lio/github/baole/konture/ClassesRuleBuilder;
 	public fun notHaveSignaturesWithTypesAnnotatedWith ([Ljava/lang/String;)Lio/github/baole/konture/ClassesRuleBuilder;
+	public fun notInModule (Ljava/lang/String;)Lio/github/baole/konture/ClassesRuleBuilder;
+	public fun notInModule (Ljava/util/List;)Lio/github/baole/konture/ClassesRuleBuilder;
+	public fun notInModule ([Ljava/lang/String;)Lio/github/baole/konture/ClassesRuleBuilder;
+	public fun notInModules (Ljava/util/List;)Lio/github/baole/konture/ClassesRuleBuilder;
+	public fun notInModules ([Ljava/lang/String;)Lio/github/baole/konture/ClassesRuleBuilder;
+	public fun notInPackage (Ljava/lang/String;)Lio/github/baole/konture/ClassesRuleBuilder;
+	public fun notInPackage (Ljava/util/List;)Lio/github/baole/konture/ClassesRuleBuilder;
+	public fun notInPackage ([Ljava/lang/String;)Lio/github/baole/konture/ClassesRuleBuilder;
+	public fun notNameEndsWith (Ljava/lang/String;)Lio/github/baole/konture/ClassesRuleBuilder;
+	public fun notNameEndsWith (Ljava/util/List;)Lio/github/baole/konture/ClassesRuleBuilder;
+	public fun notNameEndsWith ([Ljava/lang/String;)Lio/github/baole/konture/ClassesRuleBuilder;
+	public fun notNameMatches (Ljava/lang/String;)Lio/github/baole/konture/ClassesRuleBuilder;
+	public fun notNameMatches (Ljava/util/List;)Lio/github/baole/konture/ClassesRuleBuilder;
+	public fun notNameMatches ([Ljava/lang/String;)Lio/github/baole/konture/ClassesRuleBuilder;
+	public fun notNameStartsWith (Ljava/lang/String;)Lio/github/baole/konture/ClassesRuleBuilder;
+	public fun notNameStartsWith (Ljava/util/List;)Lio/github/baole/konture/ClassesRuleBuilder;
+	public fun notNameStartsWith ([Ljava/lang/String;)Lio/github/baole/konture/ClassesRuleBuilder;
+	public fun notNamed (Ljava/lang/String;)Lio/github/baole/konture/ClassesRuleBuilder;
+	public fun notNamed (Ljava/util/List;)Lio/github/baole/konture/ClassesRuleBuilder;
+	public fun notNamed ([Ljava/lang/String;)Lio/github/baole/konture/ClassesRuleBuilder;
 	public fun notReferenceClass (Ljava/lang/String;)Lio/github/baole/konture/ClassesRuleBuilder;
 	public fun notReferenceClass (Lkotlin/reflect/KClass;)Lio/github/baole/konture/ClassesRuleBuilder;
 	public fun notResideInAModule (Ljava/lang/String;)Lio/github/baole/konture/ClassesRuleBuilder;
@@ -332,9 +385,11 @@ public final class io/github/baole/konture/ClassesShould : io/github/baole/kontu
 	public fun resideInModule (Ljava/lang/String;)Lio/github/baole/konture/ClassesRuleBuilder;
 	public fun resideInModules (Ljava/util/List;)Lio/github/baole/konture/ClassesRuleBuilder;
 	public fun resideInModules ([Ljava/lang/String;)Lio/github/baole/konture/ClassesRuleBuilder;
+	public fun resideInPackageOf (Lkotlin/reflect/KClass;)Lio/github/baole/konture/ClassesRuleBuilder;
 	public fun satisfy (Ljava/lang/String;)Lio/github/baole/konture/ClassesRuleBuilder;
 	public fun satisfy (Lkotlin/jvm/functions/Function1;)Lio/github/baole/konture/ClassesRuleBuilder;
 	public fun satisfy (Lkotlin/jvm/functions/Function2;)Lio/github/baole/konture/ClassesRuleBuilder;
+	public fun simpleNamed (Ljava/lang/String;)Lio/github/baole/konture/ClassesRuleBuilder;
 }
 
 public abstract interface class io/github/baole/konture/ClassesShouldCompositeAssertions {
@@ -426,6 +481,13 @@ public final class io/github/baole/konture/ClassesShouldDependencyAssertions$Def
 }
 
 public abstract interface class io/github/baole/konture/ClassesShouldMetadataAssertions {
+	public fun annotatedWith (Ljava/lang/String;)Lio/github/baole/konture/ClassesRuleBuilder;
+	public fun annotatedWithAllOf (Ljava/lang/String;)Lio/github/baole/konture/ClassesRuleBuilder;
+	public fun annotatedWithAllOf (Ljava/util/List;)Lio/github/baole/konture/ClassesRuleBuilder;
+	public fun annotatedWithAllOf ([Ljava/lang/String;)Lio/github/baole/konture/ClassesRuleBuilder;
+	public fun annotatedWithAnyOf (Ljava/lang/String;)Lio/github/baole/konture/ClassesRuleBuilder;
+	public fun annotatedWithAnyOf (Ljava/util/List;)Lio/github/baole/konture/ClassesRuleBuilder;
+	public fun annotatedWithAnyOf ([Ljava/lang/String;)Lio/github/baole/konture/ClassesRuleBuilder;
 	public fun beAbstract ()Lio/github/baole/konture/ClassesRuleBuilder;
 	public fun beAssignableFrom (Ljava/lang/String;)Lio/github/baole/konture/ClassesRuleBuilder;
 	public fun beAssignableTo (Ljava/lang/String;)Lio/github/baole/konture/ClassesRuleBuilder;
@@ -499,6 +561,13 @@ public abstract interface class io/github/baole/konture/ClassesShouldMetadataAss
 }
 
 public final class io/github/baole/konture/ClassesShouldMetadataAssertions$DefaultImpls {
+	public static fun annotatedWith (Lio/github/baole/konture/ClassesShouldMetadataAssertions;Ljava/lang/String;)Lio/github/baole/konture/ClassesRuleBuilder;
+	public static fun annotatedWithAllOf (Lio/github/baole/konture/ClassesShouldMetadataAssertions;Ljava/lang/String;)Lio/github/baole/konture/ClassesRuleBuilder;
+	public static fun annotatedWithAllOf (Lio/github/baole/konture/ClassesShouldMetadataAssertions;Ljava/util/List;)Lio/github/baole/konture/ClassesRuleBuilder;
+	public static fun annotatedWithAllOf (Lio/github/baole/konture/ClassesShouldMetadataAssertions;[Ljava/lang/String;)Lio/github/baole/konture/ClassesRuleBuilder;
+	public static fun annotatedWithAnyOf (Lio/github/baole/konture/ClassesShouldMetadataAssertions;Ljava/lang/String;)Lio/github/baole/konture/ClassesRuleBuilder;
+	public static fun annotatedWithAnyOf (Lio/github/baole/konture/ClassesShouldMetadataAssertions;Ljava/util/List;)Lio/github/baole/konture/ClassesRuleBuilder;
+	public static fun annotatedWithAnyOf (Lio/github/baole/konture/ClassesShouldMetadataAssertions;[Ljava/lang/String;)Lio/github/baole/konture/ClassesRuleBuilder;
 	public static fun beAbstract (Lio/github/baole/konture/ClassesShouldMetadataAssertions;)Lio/github/baole/konture/ClassesRuleBuilder;
 	public static fun beAssignableFrom (Lio/github/baole/konture/ClassesShouldMetadataAssertions;Ljava/lang/String;)Lio/github/baole/konture/ClassesRuleBuilder;
 	public static fun beAssignableTo (Lio/github/baole/konture/ClassesShouldMetadataAssertions;Ljava/lang/String;)Lio/github/baole/konture/ClassesRuleBuilder;
@@ -586,6 +655,32 @@ public abstract interface class io/github/baole/konture/ClassesShouldPackageAsse
 	public fun haveNameStartingWith (Ljava/lang/String;)Lio/github/baole/konture/ClassesRuleBuilder;
 	public fun haveNameStartingWith (Ljava/util/List;)Lio/github/baole/konture/ClassesRuleBuilder;
 	public fun haveNameStartingWith ([Ljava/lang/String;)Lio/github/baole/konture/ClassesRuleBuilder;
+	public fun haveSimpleName (Ljava/lang/String;)Lio/github/baole/konture/ClassesRuleBuilder;
+	public fun inModule (Ljava/lang/String;)Lio/github/baole/konture/ClassesRuleBuilder;
+	public fun inModule (Ljava/util/List;)Lio/github/baole/konture/ClassesRuleBuilder;
+	public fun inModule ([Ljava/lang/String;)Lio/github/baole/konture/ClassesRuleBuilder;
+	public fun inModules (Ljava/util/List;)Lio/github/baole/konture/ClassesRuleBuilder;
+	public fun inModules ([Ljava/lang/String;)Lio/github/baole/konture/ClassesRuleBuilder;
+	public fun inPackage (Ljava/lang/String;)Lio/github/baole/konture/ClassesRuleBuilder;
+	public fun inPackage (Ljava/lang/String;Lkotlin/jvm/functions/Function1;)Lio/github/baole/konture/ClassesRuleBuilder;
+	public fun inPackage (Ljava/util/List;)Lio/github/baole/konture/ClassesRuleBuilder;
+	public fun inPackage (Lkotlin/jvm/functions/Function1;)Lio/github/baole/konture/ClassesRuleBuilder;
+	public fun inPackage ([Ljava/lang/String;)Lio/github/baole/konture/ClassesRuleBuilder;
+	public fun inPackageOf (Lkotlin/reflect/KClass;)Lio/github/baole/konture/ClassesRuleBuilder;
+	public fun nameEndsWith (Ljava/lang/String;)Lio/github/baole/konture/ClassesRuleBuilder;
+	public fun nameEndsWith (Ljava/util/List;)Lio/github/baole/konture/ClassesRuleBuilder;
+	public fun nameEndsWith ([Ljava/lang/String;)Lio/github/baole/konture/ClassesRuleBuilder;
+	public fun nameMatches (Ljava/lang/String;)Lio/github/baole/konture/ClassesRuleBuilder;
+	public fun nameMatches (Ljava/util/List;)Lio/github/baole/konture/ClassesRuleBuilder;
+	public fun nameMatches ([Ljava/lang/String;)Lio/github/baole/konture/ClassesRuleBuilder;
+	public fun nameStartsWith (Ljava/lang/String;)Lio/github/baole/konture/ClassesRuleBuilder;
+	public fun nameStartsWith (Ljava/util/List;)Lio/github/baole/konture/ClassesRuleBuilder;
+	public fun nameStartsWith ([Ljava/lang/String;)Lio/github/baole/konture/ClassesRuleBuilder;
+	public fun named (Ljava/lang/String;)Lio/github/baole/konture/ClassesRuleBuilder;
+	public fun named (Ljava/lang/String;Lkotlin/jvm/functions/Function1;)Lio/github/baole/konture/ClassesRuleBuilder;
+	public fun named (Ljava/util/List;)Lio/github/baole/konture/ClassesRuleBuilder;
+	public fun named (Lkotlin/jvm/functions/Function1;)Lio/github/baole/konture/ClassesRuleBuilder;
+	public fun named ([Ljava/lang/String;)Lio/github/baole/konture/ClassesRuleBuilder;
 	public fun notHaveName (Ljava/lang/String;)Lio/github/baole/konture/ClassesRuleBuilder;
 	public fun notHaveName (Ljava/util/List;)Lio/github/baole/konture/ClassesRuleBuilder;
 	public fun notHaveName ([Ljava/lang/String;)Lio/github/baole/konture/ClassesRuleBuilder;
@@ -598,6 +693,26 @@ public abstract interface class io/github/baole/konture/ClassesShouldPackageAsse
 	public fun notHaveNameStartingWith (Ljava/lang/String;)Lio/github/baole/konture/ClassesRuleBuilder;
 	public fun notHaveNameStartingWith (Ljava/util/List;)Lio/github/baole/konture/ClassesRuleBuilder;
 	public fun notHaveNameStartingWith ([Ljava/lang/String;)Lio/github/baole/konture/ClassesRuleBuilder;
+	public fun notInModule (Ljava/lang/String;)Lio/github/baole/konture/ClassesRuleBuilder;
+	public fun notInModule (Ljava/util/List;)Lio/github/baole/konture/ClassesRuleBuilder;
+	public fun notInModule ([Ljava/lang/String;)Lio/github/baole/konture/ClassesRuleBuilder;
+	public fun notInModules (Ljava/util/List;)Lio/github/baole/konture/ClassesRuleBuilder;
+	public fun notInModules ([Ljava/lang/String;)Lio/github/baole/konture/ClassesRuleBuilder;
+	public fun notInPackage (Ljava/lang/String;)Lio/github/baole/konture/ClassesRuleBuilder;
+	public fun notInPackage (Ljava/util/List;)Lio/github/baole/konture/ClassesRuleBuilder;
+	public fun notInPackage ([Ljava/lang/String;)Lio/github/baole/konture/ClassesRuleBuilder;
+	public fun notNameEndsWith (Ljava/lang/String;)Lio/github/baole/konture/ClassesRuleBuilder;
+	public fun notNameEndsWith (Ljava/util/List;)Lio/github/baole/konture/ClassesRuleBuilder;
+	public fun notNameEndsWith ([Ljava/lang/String;)Lio/github/baole/konture/ClassesRuleBuilder;
+	public fun notNameMatches (Ljava/lang/String;)Lio/github/baole/konture/ClassesRuleBuilder;
+	public fun notNameMatches (Ljava/util/List;)Lio/github/baole/konture/ClassesRuleBuilder;
+	public fun notNameMatches ([Ljava/lang/String;)Lio/github/baole/konture/ClassesRuleBuilder;
+	public fun notNameStartsWith (Ljava/lang/String;)Lio/github/baole/konture/ClassesRuleBuilder;
+	public fun notNameStartsWith (Ljava/util/List;)Lio/github/baole/konture/ClassesRuleBuilder;
+	public fun notNameStartsWith ([Ljava/lang/String;)Lio/github/baole/konture/ClassesRuleBuilder;
+	public fun notNamed (Ljava/lang/String;)Lio/github/baole/konture/ClassesRuleBuilder;
+	public fun notNamed (Ljava/util/List;)Lio/github/baole/konture/ClassesRuleBuilder;
+	public fun notNamed ([Ljava/lang/String;)Lio/github/baole/konture/ClassesRuleBuilder;
 	public fun notResideInAModule (Ljava/lang/String;)Lio/github/baole/konture/ClassesRuleBuilder;
 	public fun notResideInAModule (Ljava/util/List;)Lio/github/baole/konture/ClassesRuleBuilder;
 	public fun notResideInAModule ([Ljava/lang/String;)Lio/github/baole/konture/ClassesRuleBuilder;
@@ -618,6 +733,8 @@ public abstract interface class io/github/baole/konture/ClassesShouldPackageAsse
 	public fun resideInModule (Ljava/lang/String;)Lio/github/baole/konture/ClassesRuleBuilder;
 	public fun resideInModules (Ljava/util/List;)Lio/github/baole/konture/ClassesRuleBuilder;
 	public fun resideInModules ([Ljava/lang/String;)Lio/github/baole/konture/ClassesRuleBuilder;
+	public fun resideInPackageOf (Lkotlin/reflect/KClass;)Lio/github/baole/konture/ClassesRuleBuilder;
+	public fun simpleNamed (Ljava/lang/String;)Lio/github/baole/konture/ClassesRuleBuilder;
 }
 
 public final class io/github/baole/konture/ClassesShouldPackageAssertions$DefaultImpls {
@@ -635,6 +752,32 @@ public final class io/github/baole/konture/ClassesShouldPackageAssertions$Defaul
 	public static fun haveNameStartingWith (Lio/github/baole/konture/ClassesShouldPackageAssertions;Ljava/lang/String;)Lio/github/baole/konture/ClassesRuleBuilder;
 	public static fun haveNameStartingWith (Lio/github/baole/konture/ClassesShouldPackageAssertions;Ljava/util/List;)Lio/github/baole/konture/ClassesRuleBuilder;
 	public static fun haveNameStartingWith (Lio/github/baole/konture/ClassesShouldPackageAssertions;[Ljava/lang/String;)Lio/github/baole/konture/ClassesRuleBuilder;
+	public static fun haveSimpleName (Lio/github/baole/konture/ClassesShouldPackageAssertions;Ljava/lang/String;)Lio/github/baole/konture/ClassesRuleBuilder;
+	public static fun inModule (Lio/github/baole/konture/ClassesShouldPackageAssertions;Ljava/lang/String;)Lio/github/baole/konture/ClassesRuleBuilder;
+	public static fun inModule (Lio/github/baole/konture/ClassesShouldPackageAssertions;Ljava/util/List;)Lio/github/baole/konture/ClassesRuleBuilder;
+	public static fun inModule (Lio/github/baole/konture/ClassesShouldPackageAssertions;[Ljava/lang/String;)Lio/github/baole/konture/ClassesRuleBuilder;
+	public static fun inModules (Lio/github/baole/konture/ClassesShouldPackageAssertions;Ljava/util/List;)Lio/github/baole/konture/ClassesRuleBuilder;
+	public static fun inModules (Lio/github/baole/konture/ClassesShouldPackageAssertions;[Ljava/lang/String;)Lio/github/baole/konture/ClassesRuleBuilder;
+	public static fun inPackage (Lio/github/baole/konture/ClassesShouldPackageAssertions;Ljava/lang/String;)Lio/github/baole/konture/ClassesRuleBuilder;
+	public static fun inPackage (Lio/github/baole/konture/ClassesShouldPackageAssertions;Ljava/lang/String;Lkotlin/jvm/functions/Function1;)Lio/github/baole/konture/ClassesRuleBuilder;
+	public static fun inPackage (Lio/github/baole/konture/ClassesShouldPackageAssertions;Ljava/util/List;)Lio/github/baole/konture/ClassesRuleBuilder;
+	public static fun inPackage (Lio/github/baole/konture/ClassesShouldPackageAssertions;Lkotlin/jvm/functions/Function1;)Lio/github/baole/konture/ClassesRuleBuilder;
+	public static fun inPackage (Lio/github/baole/konture/ClassesShouldPackageAssertions;[Ljava/lang/String;)Lio/github/baole/konture/ClassesRuleBuilder;
+	public static fun inPackageOf (Lio/github/baole/konture/ClassesShouldPackageAssertions;Lkotlin/reflect/KClass;)Lio/github/baole/konture/ClassesRuleBuilder;
+	public static fun nameEndsWith (Lio/github/baole/konture/ClassesShouldPackageAssertions;Ljava/lang/String;)Lio/github/baole/konture/ClassesRuleBuilder;
+	public static fun nameEndsWith (Lio/github/baole/konture/ClassesShouldPackageAssertions;Ljava/util/List;)Lio/github/baole/konture/ClassesRuleBuilder;
+	public static fun nameEndsWith (Lio/github/baole/konture/ClassesShouldPackageAssertions;[Ljava/lang/String;)Lio/github/baole/konture/ClassesRuleBuilder;
+	public static fun nameMatches (Lio/github/baole/konture/ClassesShouldPackageAssertions;Ljava/lang/String;)Lio/github/baole/konture/ClassesRuleBuilder;
+	public static fun nameMatches (Lio/github/baole/konture/ClassesShouldPackageAssertions;Ljava/util/List;)Lio/github/baole/konture/ClassesRuleBuilder;
+	public static fun nameMatches (Lio/github/baole/konture/ClassesShouldPackageAssertions;[Ljava/lang/String;)Lio/github/baole/konture/ClassesRuleBuilder;
+	public static fun nameStartsWith (Lio/github/baole/konture/ClassesShouldPackageAssertions;Ljava/lang/String;)Lio/github/baole/konture/ClassesRuleBuilder;
+	public static fun nameStartsWith (Lio/github/baole/konture/ClassesShouldPackageAssertions;Ljava/util/List;)Lio/github/baole/konture/ClassesRuleBuilder;
+	public static fun nameStartsWith (Lio/github/baole/konture/ClassesShouldPackageAssertions;[Ljava/lang/String;)Lio/github/baole/konture/ClassesRuleBuilder;
+	public static fun named (Lio/github/baole/konture/ClassesShouldPackageAssertions;Ljava/lang/String;)Lio/github/baole/konture/ClassesRuleBuilder;
+	public static fun named (Lio/github/baole/konture/ClassesShouldPackageAssertions;Ljava/lang/String;Lkotlin/jvm/functions/Function1;)Lio/github/baole/konture/ClassesRuleBuilder;
+	public static fun named (Lio/github/baole/konture/ClassesShouldPackageAssertions;Ljava/util/List;)Lio/github/baole/konture/ClassesRuleBuilder;
+	public static fun named (Lio/github/baole/konture/ClassesShouldPackageAssertions;Lkotlin/jvm/functions/Function1;)Lio/github/baole/konture/ClassesRuleBuilder;
+	public static fun named (Lio/github/baole/konture/ClassesShouldPackageAssertions;[Ljava/lang/String;)Lio/github/baole/konture/ClassesRuleBuilder;
 	public static fun notHaveName (Lio/github/baole/konture/ClassesShouldPackageAssertions;Ljava/lang/String;)Lio/github/baole/konture/ClassesRuleBuilder;
 	public static fun notHaveName (Lio/github/baole/konture/ClassesShouldPackageAssertions;Ljava/util/List;)Lio/github/baole/konture/ClassesRuleBuilder;
 	public static fun notHaveName (Lio/github/baole/konture/ClassesShouldPackageAssertions;[Ljava/lang/String;)Lio/github/baole/konture/ClassesRuleBuilder;
@@ -647,6 +790,26 @@ public final class io/github/baole/konture/ClassesShouldPackageAssertions$Defaul
 	public static fun notHaveNameStartingWith (Lio/github/baole/konture/ClassesShouldPackageAssertions;Ljava/lang/String;)Lio/github/baole/konture/ClassesRuleBuilder;
 	public static fun notHaveNameStartingWith (Lio/github/baole/konture/ClassesShouldPackageAssertions;Ljava/util/List;)Lio/github/baole/konture/ClassesRuleBuilder;
 	public static fun notHaveNameStartingWith (Lio/github/baole/konture/ClassesShouldPackageAssertions;[Ljava/lang/String;)Lio/github/baole/konture/ClassesRuleBuilder;
+	public static fun notInModule (Lio/github/baole/konture/ClassesShouldPackageAssertions;Ljava/lang/String;)Lio/github/baole/konture/ClassesRuleBuilder;
+	public static fun notInModule (Lio/github/baole/konture/ClassesShouldPackageAssertions;Ljava/util/List;)Lio/github/baole/konture/ClassesRuleBuilder;
+	public static fun notInModule (Lio/github/baole/konture/ClassesShouldPackageAssertions;[Ljava/lang/String;)Lio/github/baole/konture/ClassesRuleBuilder;
+	public static fun notInModules (Lio/github/baole/konture/ClassesShouldPackageAssertions;Ljava/util/List;)Lio/github/baole/konture/ClassesRuleBuilder;
+	public static fun notInModules (Lio/github/baole/konture/ClassesShouldPackageAssertions;[Ljava/lang/String;)Lio/github/baole/konture/ClassesRuleBuilder;
+	public static fun notInPackage (Lio/github/baole/konture/ClassesShouldPackageAssertions;Ljava/lang/String;)Lio/github/baole/konture/ClassesRuleBuilder;
+	public static fun notInPackage (Lio/github/baole/konture/ClassesShouldPackageAssertions;Ljava/util/List;)Lio/github/baole/konture/ClassesRuleBuilder;
+	public static fun notInPackage (Lio/github/baole/konture/ClassesShouldPackageAssertions;[Ljava/lang/String;)Lio/github/baole/konture/ClassesRuleBuilder;
+	public static fun notNameEndsWith (Lio/github/baole/konture/ClassesShouldPackageAssertions;Ljava/lang/String;)Lio/github/baole/konture/ClassesRuleBuilder;
+	public static fun notNameEndsWith (Lio/github/baole/konture/ClassesShouldPackageAssertions;Ljava/util/List;)Lio/github/baole/konture/ClassesRuleBuilder;
+	public static fun notNameEndsWith (Lio/github/baole/konture/ClassesShouldPackageAssertions;[Ljava/lang/String;)Lio/github/baole/konture/ClassesRuleBuilder;
+	public static fun notNameMatches (Lio/github/baole/konture/ClassesShouldPackageAssertions;Ljava/lang/String;)Lio/github/baole/konture/ClassesRuleBuilder;
+	public static fun notNameMatches (Lio/github/baole/konture/ClassesShouldPackageAssertions;Ljava/util/List;)Lio/github/baole/konture/ClassesRuleBuilder;
+	public static fun notNameMatches (Lio/github/baole/konture/ClassesShouldPackageAssertions;[Ljava/lang/String;)Lio/github/baole/konture/ClassesRuleBuilder;
+	public static fun notNameStartsWith (Lio/github/baole/konture/ClassesShouldPackageAssertions;Ljava/lang/String;)Lio/github/baole/konture/ClassesRuleBuilder;
+	public static fun notNameStartsWith (Lio/github/baole/konture/ClassesShouldPackageAssertions;Ljava/util/List;)Lio/github/baole/konture/ClassesRuleBuilder;
+	public static fun notNameStartsWith (Lio/github/baole/konture/ClassesShouldPackageAssertions;[Ljava/lang/String;)Lio/github/baole/konture/ClassesRuleBuilder;
+	public static fun notNamed (Lio/github/baole/konture/ClassesShouldPackageAssertions;Ljava/lang/String;)Lio/github/baole/konture/ClassesRuleBuilder;
+	public static fun notNamed (Lio/github/baole/konture/ClassesShouldPackageAssertions;Ljava/util/List;)Lio/github/baole/konture/ClassesRuleBuilder;
+	public static fun notNamed (Lio/github/baole/konture/ClassesShouldPackageAssertions;[Ljava/lang/String;)Lio/github/baole/konture/ClassesRuleBuilder;
 	public static fun notResideInAModule (Lio/github/baole/konture/ClassesShouldPackageAssertions;Ljava/lang/String;)Lio/github/baole/konture/ClassesRuleBuilder;
 	public static fun notResideInAModule (Lio/github/baole/konture/ClassesShouldPackageAssertions;Ljava/util/List;)Lio/github/baole/konture/ClassesRuleBuilder;
 	public static fun notResideInAModule (Lio/github/baole/konture/ClassesShouldPackageAssertions;[Ljava/lang/String;)Lio/github/baole/konture/ClassesRuleBuilder;
@@ -667,10 +830,20 @@ public final class io/github/baole/konture/ClassesShouldPackageAssertions$Defaul
 	public static fun resideInModule (Lio/github/baole/konture/ClassesShouldPackageAssertions;Ljava/lang/String;)Lio/github/baole/konture/ClassesRuleBuilder;
 	public static fun resideInModules (Lio/github/baole/konture/ClassesShouldPackageAssertions;Ljava/util/List;)Lio/github/baole/konture/ClassesRuleBuilder;
 	public static fun resideInModules (Lio/github/baole/konture/ClassesShouldPackageAssertions;[Ljava/lang/String;)Lio/github/baole/konture/ClassesRuleBuilder;
+	public static fun resideInPackageOf (Lio/github/baole/konture/ClassesShouldPackageAssertions;Lkotlin/reflect/KClass;)Lio/github/baole/konture/ClassesRuleBuilder;
+	public static fun simpleNamed (Lio/github/baole/konture/ClassesShouldPackageAssertions;Ljava/lang/String;)Lio/github/baole/konture/ClassesRuleBuilder;
 }
 
 public final class io/github/baole/konture/ClassesThat : io/github/baole/konture/ClassesThatCompositeFilter, io/github/baole/konture/ClassesThatMetadataFilter, io/github/baole/konture/ClassesThatNameFilter, io/github/baole/konture/ClassesThatPackageFilter, io/github/baole/konture/ClassesThatStructureFilter {
 	public fun allOf ([Lkotlin/jvm/functions/Function1;)Lio/github/baole/konture/ClassesRuleBuilder;
+	public fun annotatedWith (Ljava/lang/String;)Lio/github/baole/konture/ClassesRuleBuilder;
+	public fun annotatedWith (Lkotlin/reflect/KClass;)Lio/github/baole/konture/ClassesRuleBuilder;
+	public fun annotatedWithAllOf (Ljava/lang/String;)Lio/github/baole/konture/ClassesRuleBuilder;
+	public fun annotatedWithAllOf (Ljava/util/List;)Lio/github/baole/konture/ClassesRuleBuilder;
+	public fun annotatedWithAllOf ([Ljava/lang/String;)Lio/github/baole/konture/ClassesRuleBuilder;
+	public fun annotatedWithAnyOf (Ljava/lang/String;)Lio/github/baole/konture/ClassesRuleBuilder;
+	public fun annotatedWithAnyOf (Ljava/util/List;)Lio/github/baole/konture/ClassesRuleBuilder;
+	public fun annotatedWithAnyOf ([Ljava/lang/String;)Lio/github/baole/konture/ClassesRuleBuilder;
 	public fun anyOf ([Lkotlin/jvm/functions/Function1;)Lio/github/baole/konture/ClassesRuleBuilder;
 	public fun areAbstract ()Lio/github/baole/konture/ClassesRuleBuilder;
 	public fun areAnnotatedWith (Ljava/lang/String;)Lio/github/baole/konture/ClassesRuleBuilder;
@@ -761,7 +934,31 @@ public final class io/github/baole/konture/ClassesThat : io/github/baole/konture
 	public fun havePrivatePrimaryConstructor ()Lio/github/baole/konture/ClassesRuleBuilder;
 	public fun haveSimpleName (Ljava/lang/String;)Lio/github/baole/konture/ClassesRuleBuilder;
 	public fun haveVisibility (Lio/github/baole/konture/Visibility;)Lio/github/baole/konture/ClassesRuleBuilder;
+	public fun inModule (Ljava/lang/String;)Lio/github/baole/konture/ClassesRuleBuilder;
+	public fun inModule (Ljava/util/List;)Lio/github/baole/konture/ClassesRuleBuilder;
+	public fun inModule ([Ljava/lang/String;)Lio/github/baole/konture/ClassesRuleBuilder;
+	public fun inModules (Ljava/util/List;)Lio/github/baole/konture/ClassesRuleBuilder;
+	public fun inModules ([Ljava/lang/String;)Lio/github/baole/konture/ClassesRuleBuilder;
+	public fun inPackage (Ljava/lang/String;)Lio/github/baole/konture/ClassesRuleBuilder;
+	public fun inPackage (Ljava/util/List;)Lio/github/baole/konture/ClassesRuleBuilder;
+	public fun inPackage (Lkotlin/jvm/functions/Function1;)Lio/github/baole/konture/ClassesRuleBuilder;
+	public fun inPackage ([Ljava/lang/String;)Lio/github/baole/konture/ClassesRuleBuilder;
+	public fun inPackageOf (Lkotlin/reflect/KClass;)Lio/github/baole/konture/ClassesRuleBuilder;
 	public fun matching (Lkotlin/jvm/functions/Function1;)Lio/github/baole/konture/ClassesRuleBuilder;
+	public fun nameEndsWith (Ljava/lang/String;)Lio/github/baole/konture/ClassesRuleBuilder;
+	public fun nameEndsWith (Ljava/util/List;)Lio/github/baole/konture/ClassesRuleBuilder;
+	public fun nameEndsWith ([Ljava/lang/String;)Lio/github/baole/konture/ClassesRuleBuilder;
+	public fun nameMatches (Ljava/lang/String;)Lio/github/baole/konture/ClassesRuleBuilder;
+	public fun nameMatches (Ljava/util/List;)Lio/github/baole/konture/ClassesRuleBuilder;
+	public fun nameMatches ([Ljava/lang/String;)Lio/github/baole/konture/ClassesRuleBuilder;
+	public fun nameStartsWith (Ljava/lang/String;)Lio/github/baole/konture/ClassesRuleBuilder;
+	public fun nameStartsWith (Ljava/util/List;)Lio/github/baole/konture/ClassesRuleBuilder;
+	public fun nameStartsWith ([Ljava/lang/String;)Lio/github/baole/konture/ClassesRuleBuilder;
+	public fun named (Ljava/lang/String;)Lio/github/baole/konture/ClassesRuleBuilder;
+	public fun named (Ljava/lang/String;Lkotlin/jvm/functions/Function1;)Lio/github/baole/konture/ClassesRuleBuilder;
+	public fun named (Ljava/util/List;)Lio/github/baole/konture/ClassesRuleBuilder;
+	public fun named (Lkotlin/jvm/functions/Function1;)Lio/github/baole/konture/ClassesRuleBuilder;
+	public fun named ([Ljava/lang/String;)Lio/github/baole/konture/ClassesRuleBuilder;
 	public fun noneOf ([Lkotlin/jvm/functions/Function1;)Lio/github/baole/konture/ClassesRuleBuilder;
 	public fun not ()Lio/github/baole/konture/ClassesThat;
 	public fun notHaveName (Ljava/lang/String;)Lio/github/baole/konture/ClassesRuleBuilder;
@@ -777,6 +974,27 @@ public final class io/github/baole/konture/ClassesThat : io/github/baole/konture
 	public fun notHaveNameStartingWith (Ljava/lang/String;)Lio/github/baole/konture/ClassesRuleBuilder;
 	public fun notHaveNameStartingWith (Ljava/util/List;)Lio/github/baole/konture/ClassesRuleBuilder;
 	public fun notHaveNameStartingWith ([Ljava/lang/String;)Lio/github/baole/konture/ClassesRuleBuilder;
+	public fun notInModule (Ljava/lang/String;)Lio/github/baole/konture/ClassesRuleBuilder;
+	public fun notInModule (Ljava/util/List;)Lio/github/baole/konture/ClassesRuleBuilder;
+	public fun notInModule ([Ljava/lang/String;)Lio/github/baole/konture/ClassesRuleBuilder;
+	public fun notInModules (Ljava/util/List;)Lio/github/baole/konture/ClassesRuleBuilder;
+	public fun notInModules ([Ljava/lang/String;)Lio/github/baole/konture/ClassesRuleBuilder;
+	public fun notInPackage (Ljava/lang/String;)Lio/github/baole/konture/ClassesRuleBuilder;
+	public fun notInPackage (Ljava/util/List;)Lio/github/baole/konture/ClassesRuleBuilder;
+	public fun notInPackage ([Ljava/lang/String;)Lio/github/baole/konture/ClassesRuleBuilder;
+	public fun notNameEndsWith (Ljava/lang/String;)Lio/github/baole/konture/ClassesRuleBuilder;
+	public fun notNameEndsWith (Ljava/util/List;)Lio/github/baole/konture/ClassesRuleBuilder;
+	public fun notNameEndsWith ([Ljava/lang/String;)Lio/github/baole/konture/ClassesRuleBuilder;
+	public fun notNameMatches (Ljava/lang/String;)Lio/github/baole/konture/ClassesRuleBuilder;
+	public fun notNameMatches (Ljava/util/List;)Lio/github/baole/konture/ClassesRuleBuilder;
+	public fun notNameMatches ([Ljava/lang/String;)Lio/github/baole/konture/ClassesRuleBuilder;
+	public fun notNameStartsWith (Ljava/lang/String;)Lio/github/baole/konture/ClassesRuleBuilder;
+	public fun notNameStartsWith (Ljava/util/List;)Lio/github/baole/konture/ClassesRuleBuilder;
+	public fun notNameStartsWith ([Ljava/lang/String;)Lio/github/baole/konture/ClassesRuleBuilder;
+	public fun notNamed (Ljava/lang/String;)Lio/github/baole/konture/ClassesRuleBuilder;
+	public fun notNamed (Ljava/util/List;)Lio/github/baole/konture/ClassesRuleBuilder;
+	public fun notNamed (Lkotlin/jvm/functions/Function1;)Lio/github/baole/konture/ClassesRuleBuilder;
+	public fun notNamed ([Ljava/lang/String;)Lio/github/baole/konture/ClassesRuleBuilder;
 	public fun notResideInAModule (Ljava/lang/String;)Lio/github/baole/konture/ClassesRuleBuilder;
 	public fun notResideInAModule (Ljava/util/List;)Lio/github/baole/konture/ClassesRuleBuilder;
 	public fun notResideInAModule ([Ljava/lang/String;)Lio/github/baole/konture/ClassesRuleBuilder;
@@ -798,6 +1016,7 @@ public final class io/github/baole/konture/ClassesThat : io/github/baole/konture
 	public fun resideInModules ([Ljava/lang/String;)Lio/github/baole/konture/ClassesRuleBuilder;
 	public fun resideInPackageOf (Lkotlin/reflect/KClass;)Lio/github/baole/konture/ClassesRuleBuilder;
 	public fun satisfy (Lkotlin/jvm/functions/Function1;)Lio/github/baole/konture/ClassesRuleBuilder;
+	public fun simpleNamed (Ljava/lang/String;)Lio/github/baole/konture/ClassesRuleBuilder;
 }
 
 public abstract interface class io/github/baole/konture/ClassesThatCompositeFilter : io/github/baole/konture/ClassesThatScope {
@@ -819,6 +1038,14 @@ public final class io/github/baole/konture/ClassesThatCompositeFilter$DefaultImp
 }
 
 public abstract interface class io/github/baole/konture/ClassesThatMetadataFilter : io/github/baole/konture/ClassesThatScope {
+	public fun annotatedWith (Ljava/lang/String;)Lio/github/baole/konture/ClassesRuleBuilder;
+	public fun annotatedWith (Lkotlin/reflect/KClass;)Lio/github/baole/konture/ClassesRuleBuilder;
+	public fun annotatedWithAllOf (Ljava/lang/String;)Lio/github/baole/konture/ClassesRuleBuilder;
+	public fun annotatedWithAllOf (Ljava/util/List;)Lio/github/baole/konture/ClassesRuleBuilder;
+	public fun annotatedWithAllOf ([Ljava/lang/String;)Lio/github/baole/konture/ClassesRuleBuilder;
+	public fun annotatedWithAnyOf (Ljava/lang/String;)Lio/github/baole/konture/ClassesRuleBuilder;
+	public fun annotatedWithAnyOf (Ljava/util/List;)Lio/github/baole/konture/ClassesRuleBuilder;
+	public fun annotatedWithAnyOf ([Ljava/lang/String;)Lio/github/baole/konture/ClassesRuleBuilder;
 	public fun areAbstract ()Lio/github/baole/konture/ClassesRuleBuilder;
 	public fun areAnnotatedWith (Ljava/lang/String;)Lio/github/baole/konture/ClassesRuleBuilder;
 	public fun areAnnotatedWith (Lkotlin/reflect/KClass;)Lio/github/baole/konture/ClassesRuleBuilder;
@@ -860,6 +1087,14 @@ public abstract interface class io/github/baole/konture/ClassesThatMetadataFilte
 }
 
 public final class io/github/baole/konture/ClassesThatMetadataFilter$DefaultImpls {
+	public static fun annotatedWith (Lio/github/baole/konture/ClassesThatMetadataFilter;Ljava/lang/String;)Lio/github/baole/konture/ClassesRuleBuilder;
+	public static fun annotatedWith (Lio/github/baole/konture/ClassesThatMetadataFilter;Lkotlin/reflect/KClass;)Lio/github/baole/konture/ClassesRuleBuilder;
+	public static fun annotatedWithAllOf (Lio/github/baole/konture/ClassesThatMetadataFilter;Ljava/lang/String;)Lio/github/baole/konture/ClassesRuleBuilder;
+	public static fun annotatedWithAllOf (Lio/github/baole/konture/ClassesThatMetadataFilter;Ljava/util/List;)Lio/github/baole/konture/ClassesRuleBuilder;
+	public static fun annotatedWithAllOf (Lio/github/baole/konture/ClassesThatMetadataFilter;[Ljava/lang/String;)Lio/github/baole/konture/ClassesRuleBuilder;
+	public static fun annotatedWithAnyOf (Lio/github/baole/konture/ClassesThatMetadataFilter;Ljava/lang/String;)Lio/github/baole/konture/ClassesRuleBuilder;
+	public static fun annotatedWithAnyOf (Lio/github/baole/konture/ClassesThatMetadataFilter;Ljava/util/List;)Lio/github/baole/konture/ClassesRuleBuilder;
+	public static fun annotatedWithAnyOf (Lio/github/baole/konture/ClassesThatMetadataFilter;[Ljava/lang/String;)Lio/github/baole/konture/ClassesRuleBuilder;
 	public static fun areAbstract (Lio/github/baole/konture/ClassesThatMetadataFilter;)Lio/github/baole/konture/ClassesRuleBuilder;
 	public static fun areAnnotatedWith (Lio/github/baole/konture/ClassesThatMetadataFilter;Ljava/lang/String;)Lio/github/baole/konture/ClassesRuleBuilder;
 	public static fun areAnnotatedWith (Lio/github/baole/konture/ClassesThatMetadataFilter;Lkotlin/reflect/KClass;)Lio/github/baole/konture/ClassesRuleBuilder;
@@ -916,6 +1151,20 @@ public abstract interface class io/github/baole/konture/ClassesThatNameFilter : 
 	public fun haveNameStartingWith (Ljava/util/List;)Lio/github/baole/konture/ClassesRuleBuilder;
 	public fun haveNameStartingWith ([Ljava/lang/String;)Lio/github/baole/konture/ClassesRuleBuilder;
 	public fun haveSimpleName (Ljava/lang/String;)Lio/github/baole/konture/ClassesRuleBuilder;
+	public fun nameEndsWith (Ljava/lang/String;)Lio/github/baole/konture/ClassesRuleBuilder;
+	public fun nameEndsWith (Ljava/util/List;)Lio/github/baole/konture/ClassesRuleBuilder;
+	public fun nameEndsWith ([Ljava/lang/String;)Lio/github/baole/konture/ClassesRuleBuilder;
+	public fun nameMatches (Ljava/lang/String;)Lio/github/baole/konture/ClassesRuleBuilder;
+	public fun nameMatches (Ljava/util/List;)Lio/github/baole/konture/ClassesRuleBuilder;
+	public fun nameMatches ([Ljava/lang/String;)Lio/github/baole/konture/ClassesRuleBuilder;
+	public fun nameStartsWith (Ljava/lang/String;)Lio/github/baole/konture/ClassesRuleBuilder;
+	public fun nameStartsWith (Ljava/util/List;)Lio/github/baole/konture/ClassesRuleBuilder;
+	public fun nameStartsWith ([Ljava/lang/String;)Lio/github/baole/konture/ClassesRuleBuilder;
+	public fun named (Ljava/lang/String;)Lio/github/baole/konture/ClassesRuleBuilder;
+	public fun named (Ljava/lang/String;Lkotlin/jvm/functions/Function1;)Lio/github/baole/konture/ClassesRuleBuilder;
+	public fun named (Ljava/util/List;)Lio/github/baole/konture/ClassesRuleBuilder;
+	public fun named (Lkotlin/jvm/functions/Function1;)Lio/github/baole/konture/ClassesRuleBuilder;
+	public fun named ([Ljava/lang/String;)Lio/github/baole/konture/ClassesRuleBuilder;
 	public fun notHaveName (Ljava/lang/String;)Lio/github/baole/konture/ClassesRuleBuilder;
 	public fun notHaveName (Ljava/util/List;)Lio/github/baole/konture/ClassesRuleBuilder;
 	public fun notHaveName (Lkotlin/jvm/functions/Function1;)Lio/github/baole/konture/ClassesRuleBuilder;
@@ -929,6 +1178,20 @@ public abstract interface class io/github/baole/konture/ClassesThatNameFilter : 
 	public fun notHaveNameStartingWith (Ljava/lang/String;)Lio/github/baole/konture/ClassesRuleBuilder;
 	public fun notHaveNameStartingWith (Ljava/util/List;)Lio/github/baole/konture/ClassesRuleBuilder;
 	public fun notHaveNameStartingWith ([Ljava/lang/String;)Lio/github/baole/konture/ClassesRuleBuilder;
+	public fun notNameEndsWith (Ljava/lang/String;)Lio/github/baole/konture/ClassesRuleBuilder;
+	public fun notNameEndsWith (Ljava/util/List;)Lio/github/baole/konture/ClassesRuleBuilder;
+	public fun notNameEndsWith ([Ljava/lang/String;)Lio/github/baole/konture/ClassesRuleBuilder;
+	public fun notNameMatches (Ljava/lang/String;)Lio/github/baole/konture/ClassesRuleBuilder;
+	public fun notNameMatches (Ljava/util/List;)Lio/github/baole/konture/ClassesRuleBuilder;
+	public fun notNameMatches ([Ljava/lang/String;)Lio/github/baole/konture/ClassesRuleBuilder;
+	public fun notNameStartsWith (Ljava/lang/String;)Lio/github/baole/konture/ClassesRuleBuilder;
+	public fun notNameStartsWith (Ljava/util/List;)Lio/github/baole/konture/ClassesRuleBuilder;
+	public fun notNameStartsWith ([Ljava/lang/String;)Lio/github/baole/konture/ClassesRuleBuilder;
+	public fun notNamed (Ljava/lang/String;)Lio/github/baole/konture/ClassesRuleBuilder;
+	public fun notNamed (Ljava/util/List;)Lio/github/baole/konture/ClassesRuleBuilder;
+	public fun notNamed (Lkotlin/jvm/functions/Function1;)Lio/github/baole/konture/ClassesRuleBuilder;
+	public fun notNamed ([Ljava/lang/String;)Lio/github/baole/konture/ClassesRuleBuilder;
+	public fun simpleNamed (Ljava/lang/String;)Lio/github/baole/konture/ClassesRuleBuilder;
 }
 
 public final class io/github/baole/konture/ClassesThatNameFilter$DefaultImpls {
@@ -947,6 +1210,20 @@ public final class io/github/baole/konture/ClassesThatNameFilter$DefaultImpls {
 	public static fun haveNameStartingWith (Lio/github/baole/konture/ClassesThatNameFilter;Ljava/util/List;)Lio/github/baole/konture/ClassesRuleBuilder;
 	public static fun haveNameStartingWith (Lio/github/baole/konture/ClassesThatNameFilter;[Ljava/lang/String;)Lio/github/baole/konture/ClassesRuleBuilder;
 	public static fun haveSimpleName (Lio/github/baole/konture/ClassesThatNameFilter;Ljava/lang/String;)Lio/github/baole/konture/ClassesRuleBuilder;
+	public static fun nameEndsWith (Lio/github/baole/konture/ClassesThatNameFilter;Ljava/lang/String;)Lio/github/baole/konture/ClassesRuleBuilder;
+	public static fun nameEndsWith (Lio/github/baole/konture/ClassesThatNameFilter;Ljava/util/List;)Lio/github/baole/konture/ClassesRuleBuilder;
+	public static fun nameEndsWith (Lio/github/baole/konture/ClassesThatNameFilter;[Ljava/lang/String;)Lio/github/baole/konture/ClassesRuleBuilder;
+	public static fun nameMatches (Lio/github/baole/konture/ClassesThatNameFilter;Ljava/lang/String;)Lio/github/baole/konture/ClassesRuleBuilder;
+	public static fun nameMatches (Lio/github/baole/konture/ClassesThatNameFilter;Ljava/util/List;)Lio/github/baole/konture/ClassesRuleBuilder;
+	public static fun nameMatches (Lio/github/baole/konture/ClassesThatNameFilter;[Ljava/lang/String;)Lio/github/baole/konture/ClassesRuleBuilder;
+	public static fun nameStartsWith (Lio/github/baole/konture/ClassesThatNameFilter;Ljava/lang/String;)Lio/github/baole/konture/ClassesRuleBuilder;
+	public static fun nameStartsWith (Lio/github/baole/konture/ClassesThatNameFilter;Ljava/util/List;)Lio/github/baole/konture/ClassesRuleBuilder;
+	public static fun nameStartsWith (Lio/github/baole/konture/ClassesThatNameFilter;[Ljava/lang/String;)Lio/github/baole/konture/ClassesRuleBuilder;
+	public static fun named (Lio/github/baole/konture/ClassesThatNameFilter;Ljava/lang/String;)Lio/github/baole/konture/ClassesRuleBuilder;
+	public static fun named (Lio/github/baole/konture/ClassesThatNameFilter;Ljava/lang/String;Lkotlin/jvm/functions/Function1;)Lio/github/baole/konture/ClassesRuleBuilder;
+	public static fun named (Lio/github/baole/konture/ClassesThatNameFilter;Ljava/util/List;)Lio/github/baole/konture/ClassesRuleBuilder;
+	public static fun named (Lio/github/baole/konture/ClassesThatNameFilter;Lkotlin/jvm/functions/Function1;)Lio/github/baole/konture/ClassesRuleBuilder;
+	public static fun named (Lio/github/baole/konture/ClassesThatNameFilter;[Ljava/lang/String;)Lio/github/baole/konture/ClassesRuleBuilder;
 	public static fun notHaveName (Lio/github/baole/konture/ClassesThatNameFilter;Ljava/lang/String;)Lio/github/baole/konture/ClassesRuleBuilder;
 	public static fun notHaveName (Lio/github/baole/konture/ClassesThatNameFilter;Ljava/util/List;)Lio/github/baole/konture/ClassesRuleBuilder;
 	public static fun notHaveName (Lio/github/baole/konture/ClassesThatNameFilter;Lkotlin/jvm/functions/Function1;)Lio/github/baole/konture/ClassesRuleBuilder;
@@ -960,9 +1237,41 @@ public final class io/github/baole/konture/ClassesThatNameFilter$DefaultImpls {
 	public static fun notHaveNameStartingWith (Lio/github/baole/konture/ClassesThatNameFilter;Ljava/lang/String;)Lio/github/baole/konture/ClassesRuleBuilder;
 	public static fun notHaveNameStartingWith (Lio/github/baole/konture/ClassesThatNameFilter;Ljava/util/List;)Lio/github/baole/konture/ClassesRuleBuilder;
 	public static fun notHaveNameStartingWith (Lio/github/baole/konture/ClassesThatNameFilter;[Ljava/lang/String;)Lio/github/baole/konture/ClassesRuleBuilder;
+	public static fun notNameEndsWith (Lio/github/baole/konture/ClassesThatNameFilter;Ljava/lang/String;)Lio/github/baole/konture/ClassesRuleBuilder;
+	public static fun notNameEndsWith (Lio/github/baole/konture/ClassesThatNameFilter;Ljava/util/List;)Lio/github/baole/konture/ClassesRuleBuilder;
+	public static fun notNameEndsWith (Lio/github/baole/konture/ClassesThatNameFilter;[Ljava/lang/String;)Lio/github/baole/konture/ClassesRuleBuilder;
+	public static fun notNameMatches (Lio/github/baole/konture/ClassesThatNameFilter;Ljava/lang/String;)Lio/github/baole/konture/ClassesRuleBuilder;
+	public static fun notNameMatches (Lio/github/baole/konture/ClassesThatNameFilter;Ljava/util/List;)Lio/github/baole/konture/ClassesRuleBuilder;
+	public static fun notNameMatches (Lio/github/baole/konture/ClassesThatNameFilter;[Ljava/lang/String;)Lio/github/baole/konture/ClassesRuleBuilder;
+	public static fun notNameStartsWith (Lio/github/baole/konture/ClassesThatNameFilter;Ljava/lang/String;)Lio/github/baole/konture/ClassesRuleBuilder;
+	public static fun notNameStartsWith (Lio/github/baole/konture/ClassesThatNameFilter;Ljava/util/List;)Lio/github/baole/konture/ClassesRuleBuilder;
+	public static fun notNameStartsWith (Lio/github/baole/konture/ClassesThatNameFilter;[Ljava/lang/String;)Lio/github/baole/konture/ClassesRuleBuilder;
+	public static fun notNamed (Lio/github/baole/konture/ClassesThatNameFilter;Ljava/lang/String;)Lio/github/baole/konture/ClassesRuleBuilder;
+	public static fun notNamed (Lio/github/baole/konture/ClassesThatNameFilter;Ljava/util/List;)Lio/github/baole/konture/ClassesRuleBuilder;
+	public static fun notNamed (Lio/github/baole/konture/ClassesThatNameFilter;Lkotlin/jvm/functions/Function1;)Lio/github/baole/konture/ClassesRuleBuilder;
+	public static fun notNamed (Lio/github/baole/konture/ClassesThatNameFilter;[Ljava/lang/String;)Lio/github/baole/konture/ClassesRuleBuilder;
+	public static fun simpleNamed (Lio/github/baole/konture/ClassesThatNameFilter;Ljava/lang/String;)Lio/github/baole/konture/ClassesRuleBuilder;
 }
 
 public abstract interface class io/github/baole/konture/ClassesThatPackageFilter : io/github/baole/konture/ClassesThatScope {
+	public fun inModule (Ljava/lang/String;)Lio/github/baole/konture/ClassesRuleBuilder;
+	public fun inModule (Ljava/util/List;)Lio/github/baole/konture/ClassesRuleBuilder;
+	public fun inModule ([Ljava/lang/String;)Lio/github/baole/konture/ClassesRuleBuilder;
+	public fun inModules (Ljava/util/List;)Lio/github/baole/konture/ClassesRuleBuilder;
+	public fun inModules ([Ljava/lang/String;)Lio/github/baole/konture/ClassesRuleBuilder;
+	public fun inPackage (Ljava/lang/String;)Lio/github/baole/konture/ClassesRuleBuilder;
+	public fun inPackage (Ljava/util/List;)Lio/github/baole/konture/ClassesRuleBuilder;
+	public fun inPackage (Lkotlin/jvm/functions/Function1;)Lio/github/baole/konture/ClassesRuleBuilder;
+	public fun inPackage ([Ljava/lang/String;)Lio/github/baole/konture/ClassesRuleBuilder;
+	public fun inPackageOf (Lkotlin/reflect/KClass;)Lio/github/baole/konture/ClassesRuleBuilder;
+	public fun notInModule (Ljava/lang/String;)Lio/github/baole/konture/ClassesRuleBuilder;
+	public fun notInModule (Ljava/util/List;)Lio/github/baole/konture/ClassesRuleBuilder;
+	public fun notInModule ([Ljava/lang/String;)Lio/github/baole/konture/ClassesRuleBuilder;
+	public fun notInModules (Ljava/util/List;)Lio/github/baole/konture/ClassesRuleBuilder;
+	public fun notInModules ([Ljava/lang/String;)Lio/github/baole/konture/ClassesRuleBuilder;
+	public fun notInPackage (Ljava/lang/String;)Lio/github/baole/konture/ClassesRuleBuilder;
+	public fun notInPackage (Ljava/util/List;)Lio/github/baole/konture/ClassesRuleBuilder;
+	public fun notInPackage ([Ljava/lang/String;)Lio/github/baole/konture/ClassesRuleBuilder;
 	public fun notResideInAModule (Ljava/lang/String;)Lio/github/baole/konture/ClassesRuleBuilder;
 	public fun notResideInAModule (Ljava/util/List;)Lio/github/baole/konture/ClassesRuleBuilder;
 	public fun notResideInAModule ([Ljava/lang/String;)Lio/github/baole/konture/ClassesRuleBuilder;
@@ -986,6 +1295,24 @@ public abstract interface class io/github/baole/konture/ClassesThatPackageFilter
 }
 
 public final class io/github/baole/konture/ClassesThatPackageFilter$DefaultImpls {
+	public static fun inModule (Lio/github/baole/konture/ClassesThatPackageFilter;Ljava/lang/String;)Lio/github/baole/konture/ClassesRuleBuilder;
+	public static fun inModule (Lio/github/baole/konture/ClassesThatPackageFilter;Ljava/util/List;)Lio/github/baole/konture/ClassesRuleBuilder;
+	public static fun inModule (Lio/github/baole/konture/ClassesThatPackageFilter;[Ljava/lang/String;)Lio/github/baole/konture/ClassesRuleBuilder;
+	public static fun inModules (Lio/github/baole/konture/ClassesThatPackageFilter;Ljava/util/List;)Lio/github/baole/konture/ClassesRuleBuilder;
+	public static fun inModules (Lio/github/baole/konture/ClassesThatPackageFilter;[Ljava/lang/String;)Lio/github/baole/konture/ClassesRuleBuilder;
+	public static fun inPackage (Lio/github/baole/konture/ClassesThatPackageFilter;Ljava/lang/String;)Lio/github/baole/konture/ClassesRuleBuilder;
+	public static fun inPackage (Lio/github/baole/konture/ClassesThatPackageFilter;Ljava/util/List;)Lio/github/baole/konture/ClassesRuleBuilder;
+	public static fun inPackage (Lio/github/baole/konture/ClassesThatPackageFilter;Lkotlin/jvm/functions/Function1;)Lio/github/baole/konture/ClassesRuleBuilder;
+	public static fun inPackage (Lio/github/baole/konture/ClassesThatPackageFilter;[Ljava/lang/String;)Lio/github/baole/konture/ClassesRuleBuilder;
+	public static fun inPackageOf (Lio/github/baole/konture/ClassesThatPackageFilter;Lkotlin/reflect/KClass;)Lio/github/baole/konture/ClassesRuleBuilder;
+	public static fun notInModule (Lio/github/baole/konture/ClassesThatPackageFilter;Ljava/lang/String;)Lio/github/baole/konture/ClassesRuleBuilder;
+	public static fun notInModule (Lio/github/baole/konture/ClassesThatPackageFilter;Ljava/util/List;)Lio/github/baole/konture/ClassesRuleBuilder;
+	public static fun notInModule (Lio/github/baole/konture/ClassesThatPackageFilter;[Ljava/lang/String;)Lio/github/baole/konture/ClassesRuleBuilder;
+	public static fun notInModules (Lio/github/baole/konture/ClassesThatPackageFilter;Ljava/util/List;)Lio/github/baole/konture/ClassesRuleBuilder;
+	public static fun notInModules (Lio/github/baole/konture/ClassesThatPackageFilter;[Ljava/lang/String;)Lio/github/baole/konture/ClassesRuleBuilder;
+	public static fun notInPackage (Lio/github/baole/konture/ClassesThatPackageFilter;Ljava/lang/String;)Lio/github/baole/konture/ClassesRuleBuilder;
+	public static fun notInPackage (Lio/github/baole/konture/ClassesThatPackageFilter;Ljava/util/List;)Lio/github/baole/konture/ClassesRuleBuilder;
+	public static fun notInPackage (Lio/github/baole/konture/ClassesThatPackageFilter;[Ljava/lang/String;)Lio/github/baole/konture/ClassesRuleBuilder;
 	public static fun notResideInAModule (Lio/github/baole/konture/ClassesThatPackageFilter;Ljava/lang/String;)Lio/github/baole/konture/ClassesRuleBuilder;
 	public static fun notResideInAModule (Lio/github/baole/konture/ClassesThatPackageFilter;Ljava/util/List;)Lio/github/baole/konture/ClassesRuleBuilder;
 	public static fun notResideInAModule (Lio/github/baole/konture/ClassesThatPackageFilter;[Ljava/lang/String;)Lio/github/baole/konture/ClassesRuleBuilder;
@@ -1365,6 +1692,26 @@ public final class io/github/baole/konture/FilesShould : io/github/baole/konture
 	public fun haveOnlyOneClassPerFile ()Lio/github/baole/konture/FilesRuleBuilder;
 	public fun haveTopLevelFunctions ()Lio/github/baole/konture/FilesRuleBuilder;
 	public fun haveTopLevelProperties ()Lio/github/baole/konture/FilesRuleBuilder;
+	public fun inModule (Ljava/lang/String;)Lio/github/baole/konture/FilesRuleBuilder;
+	public fun inModules (Ljava/util/List;)Lio/github/baole/konture/FilesRuleBuilder;
+	public fun inModules ([Ljava/lang/String;)Lio/github/baole/konture/FilesRuleBuilder;
+	public fun inPackage (Ljava/lang/String;)Lio/github/baole/konture/FilesRuleBuilder;
+	public fun inPackage (Ljava/util/List;)Lio/github/baole/konture/FilesRuleBuilder;
+	public fun inPackage (Lkotlin/jvm/functions/Function1;)Lio/github/baole/konture/FilesRuleBuilder;
+	public fun inPackage ([Ljava/lang/String;)Lio/github/baole/konture/FilesRuleBuilder;
+	public fun nameEndsWith (Ljava/lang/String;)Lio/github/baole/konture/FilesRuleBuilder;
+	public fun nameEndsWith (Ljava/util/List;)Lio/github/baole/konture/FilesRuleBuilder;
+	public fun nameEndsWith ([Ljava/lang/String;)Lio/github/baole/konture/FilesRuleBuilder;
+	public fun nameMatches (Ljava/lang/String;)Lio/github/baole/konture/FilesRuleBuilder;
+	public fun nameMatches (Ljava/util/List;)Lio/github/baole/konture/FilesRuleBuilder;
+	public fun nameMatches ([Ljava/lang/String;)Lio/github/baole/konture/FilesRuleBuilder;
+	public fun nameStartsWith (Ljava/lang/String;)Lio/github/baole/konture/FilesRuleBuilder;
+	public fun nameStartsWith (Ljava/util/List;)Lio/github/baole/konture/FilesRuleBuilder;
+	public fun nameStartsWith ([Ljava/lang/String;)Lio/github/baole/konture/FilesRuleBuilder;
+	public fun named (Ljava/lang/String;)Lio/github/baole/konture/FilesRuleBuilder;
+	public fun named (Ljava/util/List;)Lio/github/baole/konture/FilesRuleBuilder;
+	public fun named (Lkotlin/jvm/functions/Function1;)Lio/github/baole/konture/FilesRuleBuilder;
+	public fun named ([Ljava/lang/String;)Lio/github/baole/konture/FilesRuleBuilder;
 	public fun noneOf ([Lkotlin/jvm/functions/Function1;)Lio/github/baole/konture/FilesRuleBuilder;
 	public fun notCall (Ljava/lang/String;)Lio/github/baole/konture/FilesRuleBuilder;
 	public fun notCall (Lkotlin/reflect/KClass;)Lio/github/baole/konture/FilesRuleBuilder;
@@ -1401,6 +1748,24 @@ public final class io/github/baole/konture/FilesShould : io/github/baole/konture
 	public fun notHaveTopLevelFunctions ()Lio/github/baole/konture/FilesRuleBuilder;
 	public fun notHaveTopLevelProperties ()Lio/github/baole/konture/FilesRuleBuilder;
 	public fun notHaveWildcardImports ()Lio/github/baole/konture/FilesRuleBuilder;
+	public fun notInModule (Ljava/lang/String;)Lio/github/baole/konture/FilesRuleBuilder;
+	public fun notInModules (Ljava/util/List;)Lio/github/baole/konture/FilesRuleBuilder;
+	public fun notInModules ([Ljava/lang/String;)Lio/github/baole/konture/FilesRuleBuilder;
+	public fun notInPackage (Ljava/lang/String;)Lio/github/baole/konture/FilesRuleBuilder;
+	public fun notInPackage (Ljava/util/List;)Lio/github/baole/konture/FilesRuleBuilder;
+	public fun notInPackage ([Ljava/lang/String;)Lio/github/baole/konture/FilesRuleBuilder;
+	public fun notNameEndsWith (Ljava/lang/String;)Lio/github/baole/konture/FilesRuleBuilder;
+	public fun notNameEndsWith (Ljava/util/List;)Lio/github/baole/konture/FilesRuleBuilder;
+	public fun notNameEndsWith ([Ljava/lang/String;)Lio/github/baole/konture/FilesRuleBuilder;
+	public fun notNameMatches (Ljava/lang/String;)Lio/github/baole/konture/FilesRuleBuilder;
+	public fun notNameMatches (Ljava/util/List;)Lio/github/baole/konture/FilesRuleBuilder;
+	public fun notNameMatches ([Ljava/lang/String;)Lio/github/baole/konture/FilesRuleBuilder;
+	public fun notNameStartsWith (Ljava/lang/String;)Lio/github/baole/konture/FilesRuleBuilder;
+	public fun notNameStartsWith (Ljava/util/List;)Lio/github/baole/konture/FilesRuleBuilder;
+	public fun notNameStartsWith ([Ljava/lang/String;)Lio/github/baole/konture/FilesRuleBuilder;
+	public fun notNamed (Ljava/lang/String;)Lio/github/baole/konture/FilesRuleBuilder;
+	public fun notNamed (Ljava/util/List;)Lio/github/baole/konture/FilesRuleBuilder;
+	public fun notNamed ([Ljava/lang/String;)Lio/github/baole/konture/FilesRuleBuilder;
 	public fun notReferenceClass (Ljava/lang/String;)Lio/github/baole/konture/FilesRuleBuilder;
 	public fun notReferenceClass (Lkotlin/reflect/KClass;)Lio/github/baole/konture/FilesRuleBuilder;
 	public fun notResideInAModule (Ljava/lang/String;)Lio/github/baole/konture/FilesRuleBuilder;
@@ -1599,6 +1964,26 @@ public abstract interface class io/github/baole/konture/FilesShouldPathAssertion
 	public fun haveNameStartingWith (Ljava/lang/String;)Lio/github/baole/konture/FilesRuleBuilder;
 	public fun haveNameStartingWith (Ljava/util/List;)Lio/github/baole/konture/FilesRuleBuilder;
 	public fun haveNameStartingWith ([Ljava/lang/String;)Lio/github/baole/konture/FilesRuleBuilder;
+	public fun inModule (Ljava/lang/String;)Lio/github/baole/konture/FilesRuleBuilder;
+	public fun inModules (Ljava/util/List;)Lio/github/baole/konture/FilesRuleBuilder;
+	public fun inModules ([Ljava/lang/String;)Lio/github/baole/konture/FilesRuleBuilder;
+	public fun inPackage (Ljava/lang/String;)Lio/github/baole/konture/FilesRuleBuilder;
+	public fun inPackage (Ljava/util/List;)Lio/github/baole/konture/FilesRuleBuilder;
+	public fun inPackage (Lkotlin/jvm/functions/Function1;)Lio/github/baole/konture/FilesRuleBuilder;
+	public fun inPackage ([Ljava/lang/String;)Lio/github/baole/konture/FilesRuleBuilder;
+	public fun nameEndsWith (Ljava/lang/String;)Lio/github/baole/konture/FilesRuleBuilder;
+	public fun nameEndsWith (Ljava/util/List;)Lio/github/baole/konture/FilesRuleBuilder;
+	public fun nameEndsWith ([Ljava/lang/String;)Lio/github/baole/konture/FilesRuleBuilder;
+	public fun nameMatches (Ljava/lang/String;)Lio/github/baole/konture/FilesRuleBuilder;
+	public fun nameMatches (Ljava/util/List;)Lio/github/baole/konture/FilesRuleBuilder;
+	public fun nameMatches ([Ljava/lang/String;)Lio/github/baole/konture/FilesRuleBuilder;
+	public fun nameStartsWith (Ljava/lang/String;)Lio/github/baole/konture/FilesRuleBuilder;
+	public fun nameStartsWith (Ljava/util/List;)Lio/github/baole/konture/FilesRuleBuilder;
+	public fun nameStartsWith ([Ljava/lang/String;)Lio/github/baole/konture/FilesRuleBuilder;
+	public fun named (Ljava/lang/String;)Lio/github/baole/konture/FilesRuleBuilder;
+	public fun named (Ljava/util/List;)Lio/github/baole/konture/FilesRuleBuilder;
+	public fun named (Lkotlin/jvm/functions/Function1;)Lio/github/baole/konture/FilesRuleBuilder;
+	public fun named ([Ljava/lang/String;)Lio/github/baole/konture/FilesRuleBuilder;
 	public fun notHaveName (Ljava/lang/String;)Lio/github/baole/konture/FilesRuleBuilder;
 	public fun notHaveName (Ljava/util/List;)Lio/github/baole/konture/FilesRuleBuilder;
 	public fun notHaveName ([Ljava/lang/String;)Lio/github/baole/konture/FilesRuleBuilder;
@@ -1613,6 +1998,24 @@ public abstract interface class io/github/baole/konture/FilesShouldPathAssertion
 	public fun notHaveNameStartingWith (Ljava/lang/String;)Lio/github/baole/konture/FilesRuleBuilder;
 	public fun notHaveNameStartingWith (Ljava/util/List;)Lio/github/baole/konture/FilesRuleBuilder;
 	public fun notHaveNameStartingWith ([Ljava/lang/String;)Lio/github/baole/konture/FilesRuleBuilder;
+	public fun notInModule (Ljava/lang/String;)Lio/github/baole/konture/FilesRuleBuilder;
+	public fun notInModules (Ljava/util/List;)Lio/github/baole/konture/FilesRuleBuilder;
+	public fun notInModules ([Ljava/lang/String;)Lio/github/baole/konture/FilesRuleBuilder;
+	public fun notInPackage (Ljava/lang/String;)Lio/github/baole/konture/FilesRuleBuilder;
+	public fun notInPackage (Ljava/util/List;)Lio/github/baole/konture/FilesRuleBuilder;
+	public fun notInPackage ([Ljava/lang/String;)Lio/github/baole/konture/FilesRuleBuilder;
+	public fun notNameEndsWith (Ljava/lang/String;)Lio/github/baole/konture/FilesRuleBuilder;
+	public fun notNameEndsWith (Ljava/util/List;)Lio/github/baole/konture/FilesRuleBuilder;
+	public fun notNameEndsWith ([Ljava/lang/String;)Lio/github/baole/konture/FilesRuleBuilder;
+	public fun notNameMatches (Ljava/lang/String;)Lio/github/baole/konture/FilesRuleBuilder;
+	public fun notNameMatches (Ljava/util/List;)Lio/github/baole/konture/FilesRuleBuilder;
+	public fun notNameMatches ([Ljava/lang/String;)Lio/github/baole/konture/FilesRuleBuilder;
+	public fun notNameStartsWith (Ljava/lang/String;)Lio/github/baole/konture/FilesRuleBuilder;
+	public fun notNameStartsWith (Ljava/util/List;)Lio/github/baole/konture/FilesRuleBuilder;
+	public fun notNameStartsWith ([Ljava/lang/String;)Lio/github/baole/konture/FilesRuleBuilder;
+	public fun notNamed (Ljava/lang/String;)Lio/github/baole/konture/FilesRuleBuilder;
+	public fun notNamed (Ljava/util/List;)Lio/github/baole/konture/FilesRuleBuilder;
+	public fun notNamed ([Ljava/lang/String;)Lio/github/baole/konture/FilesRuleBuilder;
 	public fun notResideInAModule (Ljava/lang/String;)Lio/github/baole/konture/FilesRuleBuilder;
 	public fun notResideInAModule (Ljava/util/List;)Lio/github/baole/konture/FilesRuleBuilder;
 	public fun notResideInAModule ([Ljava/lang/String;)Lio/github/baole/konture/FilesRuleBuilder;
@@ -1657,6 +2060,26 @@ public final class io/github/baole/konture/FilesShouldPathAssertions$DefaultImpl
 	public static fun haveNameStartingWith (Lio/github/baole/konture/FilesShouldPathAssertions;Ljava/lang/String;)Lio/github/baole/konture/FilesRuleBuilder;
 	public static fun haveNameStartingWith (Lio/github/baole/konture/FilesShouldPathAssertions;Ljava/util/List;)Lio/github/baole/konture/FilesRuleBuilder;
 	public static fun haveNameStartingWith (Lio/github/baole/konture/FilesShouldPathAssertions;[Ljava/lang/String;)Lio/github/baole/konture/FilesRuleBuilder;
+	public static fun inModule (Lio/github/baole/konture/FilesShouldPathAssertions;Ljava/lang/String;)Lio/github/baole/konture/FilesRuleBuilder;
+	public static fun inModules (Lio/github/baole/konture/FilesShouldPathAssertions;Ljava/util/List;)Lio/github/baole/konture/FilesRuleBuilder;
+	public static fun inModules (Lio/github/baole/konture/FilesShouldPathAssertions;[Ljava/lang/String;)Lio/github/baole/konture/FilesRuleBuilder;
+	public static fun inPackage (Lio/github/baole/konture/FilesShouldPathAssertions;Ljava/lang/String;)Lio/github/baole/konture/FilesRuleBuilder;
+	public static fun inPackage (Lio/github/baole/konture/FilesShouldPathAssertions;Ljava/util/List;)Lio/github/baole/konture/FilesRuleBuilder;
+	public static fun inPackage (Lio/github/baole/konture/FilesShouldPathAssertions;Lkotlin/jvm/functions/Function1;)Lio/github/baole/konture/FilesRuleBuilder;
+	public static fun inPackage (Lio/github/baole/konture/FilesShouldPathAssertions;[Ljava/lang/String;)Lio/github/baole/konture/FilesRuleBuilder;
+	public static fun nameEndsWith (Lio/github/baole/konture/FilesShouldPathAssertions;Ljava/lang/String;)Lio/github/baole/konture/FilesRuleBuilder;
+	public static fun nameEndsWith (Lio/github/baole/konture/FilesShouldPathAssertions;Ljava/util/List;)Lio/github/baole/konture/FilesRuleBuilder;
+	public static fun nameEndsWith (Lio/github/baole/konture/FilesShouldPathAssertions;[Ljava/lang/String;)Lio/github/baole/konture/FilesRuleBuilder;
+	public static fun nameMatches (Lio/github/baole/konture/FilesShouldPathAssertions;Ljava/lang/String;)Lio/github/baole/konture/FilesRuleBuilder;
+	public static fun nameMatches (Lio/github/baole/konture/FilesShouldPathAssertions;Ljava/util/List;)Lio/github/baole/konture/FilesRuleBuilder;
+	public static fun nameMatches (Lio/github/baole/konture/FilesShouldPathAssertions;[Ljava/lang/String;)Lio/github/baole/konture/FilesRuleBuilder;
+	public static fun nameStartsWith (Lio/github/baole/konture/FilesShouldPathAssertions;Ljava/lang/String;)Lio/github/baole/konture/FilesRuleBuilder;
+	public static fun nameStartsWith (Lio/github/baole/konture/FilesShouldPathAssertions;Ljava/util/List;)Lio/github/baole/konture/FilesRuleBuilder;
+	public static fun nameStartsWith (Lio/github/baole/konture/FilesShouldPathAssertions;[Ljava/lang/String;)Lio/github/baole/konture/FilesRuleBuilder;
+	public static fun named (Lio/github/baole/konture/FilesShouldPathAssertions;Ljava/lang/String;)Lio/github/baole/konture/FilesRuleBuilder;
+	public static fun named (Lio/github/baole/konture/FilesShouldPathAssertions;Ljava/util/List;)Lio/github/baole/konture/FilesRuleBuilder;
+	public static fun named (Lio/github/baole/konture/FilesShouldPathAssertions;Lkotlin/jvm/functions/Function1;)Lio/github/baole/konture/FilesRuleBuilder;
+	public static fun named (Lio/github/baole/konture/FilesShouldPathAssertions;[Ljava/lang/String;)Lio/github/baole/konture/FilesRuleBuilder;
 	public static fun notHaveName (Lio/github/baole/konture/FilesShouldPathAssertions;Ljava/lang/String;)Lio/github/baole/konture/FilesRuleBuilder;
 	public static fun notHaveName (Lio/github/baole/konture/FilesShouldPathAssertions;Ljava/util/List;)Lio/github/baole/konture/FilesRuleBuilder;
 	public static fun notHaveName (Lio/github/baole/konture/FilesShouldPathAssertions;[Ljava/lang/String;)Lio/github/baole/konture/FilesRuleBuilder;
@@ -1671,6 +2094,24 @@ public final class io/github/baole/konture/FilesShouldPathAssertions$DefaultImpl
 	public static fun notHaveNameStartingWith (Lio/github/baole/konture/FilesShouldPathAssertions;Ljava/lang/String;)Lio/github/baole/konture/FilesRuleBuilder;
 	public static fun notHaveNameStartingWith (Lio/github/baole/konture/FilesShouldPathAssertions;Ljava/util/List;)Lio/github/baole/konture/FilesRuleBuilder;
 	public static fun notHaveNameStartingWith (Lio/github/baole/konture/FilesShouldPathAssertions;[Ljava/lang/String;)Lio/github/baole/konture/FilesRuleBuilder;
+	public static fun notInModule (Lio/github/baole/konture/FilesShouldPathAssertions;Ljava/lang/String;)Lio/github/baole/konture/FilesRuleBuilder;
+	public static fun notInModules (Lio/github/baole/konture/FilesShouldPathAssertions;Ljava/util/List;)Lio/github/baole/konture/FilesRuleBuilder;
+	public static fun notInModules (Lio/github/baole/konture/FilesShouldPathAssertions;[Ljava/lang/String;)Lio/github/baole/konture/FilesRuleBuilder;
+	public static fun notInPackage (Lio/github/baole/konture/FilesShouldPathAssertions;Ljava/lang/String;)Lio/github/baole/konture/FilesRuleBuilder;
+	public static fun notInPackage (Lio/github/baole/konture/FilesShouldPathAssertions;Ljava/util/List;)Lio/github/baole/konture/FilesRuleBuilder;
+	public static fun notInPackage (Lio/github/baole/konture/FilesShouldPathAssertions;[Ljava/lang/String;)Lio/github/baole/konture/FilesRuleBuilder;
+	public static fun notNameEndsWith (Lio/github/baole/konture/FilesShouldPathAssertions;Ljava/lang/String;)Lio/github/baole/konture/FilesRuleBuilder;
+	public static fun notNameEndsWith (Lio/github/baole/konture/FilesShouldPathAssertions;Ljava/util/List;)Lio/github/baole/konture/FilesRuleBuilder;
+	public static fun notNameEndsWith (Lio/github/baole/konture/FilesShouldPathAssertions;[Ljava/lang/String;)Lio/github/baole/konture/FilesRuleBuilder;
+	public static fun notNameMatches (Lio/github/baole/konture/FilesShouldPathAssertions;Ljava/lang/String;)Lio/github/baole/konture/FilesRuleBuilder;
+	public static fun notNameMatches (Lio/github/baole/konture/FilesShouldPathAssertions;Ljava/util/List;)Lio/github/baole/konture/FilesRuleBuilder;
+	public static fun notNameMatches (Lio/github/baole/konture/FilesShouldPathAssertions;[Ljava/lang/String;)Lio/github/baole/konture/FilesRuleBuilder;
+	public static fun notNameStartsWith (Lio/github/baole/konture/FilesShouldPathAssertions;Ljava/lang/String;)Lio/github/baole/konture/FilesRuleBuilder;
+	public static fun notNameStartsWith (Lio/github/baole/konture/FilesShouldPathAssertions;Ljava/util/List;)Lio/github/baole/konture/FilesRuleBuilder;
+	public static fun notNameStartsWith (Lio/github/baole/konture/FilesShouldPathAssertions;[Ljava/lang/String;)Lio/github/baole/konture/FilesRuleBuilder;
+	public static fun notNamed (Lio/github/baole/konture/FilesShouldPathAssertions;Ljava/lang/String;)Lio/github/baole/konture/FilesRuleBuilder;
+	public static fun notNamed (Lio/github/baole/konture/FilesShouldPathAssertions;Ljava/util/List;)Lio/github/baole/konture/FilesRuleBuilder;
+	public static fun notNamed (Lio/github/baole/konture/FilesShouldPathAssertions;[Ljava/lang/String;)Lio/github/baole/konture/FilesRuleBuilder;
 	public static fun notResideInAModule (Lio/github/baole/konture/FilesShouldPathAssertions;Ljava/lang/String;)Lio/github/baole/konture/FilesRuleBuilder;
 	public static fun notResideInAModule (Lio/github/baole/konture/FilesShouldPathAssertions;Ljava/util/List;)Lio/github/baole/konture/FilesRuleBuilder;
 	public static fun notResideInAModule (Lio/github/baole/konture/FilesShouldPathAssertions;[Ljava/lang/String;)Lio/github/baole/konture/FilesRuleBuilder;
@@ -1701,7 +2142,15 @@ public final class io/github/baole/konture/FilesShouldPathAssertions$DefaultImpl
 
 public final class io/github/baole/konture/FilesThat {
 	public final fun allOf ([Lkotlin/jvm/functions/Function1;)Lio/github/baole/konture/FilesRuleBuilder;
+	public final fun annotatedWith (Ljava/lang/String;)Lio/github/baole/konture/FilesRuleBuilder;
+	public final fun annotatedWith (Lkotlin/reflect/KClass;)Lio/github/baole/konture/FilesRuleBuilder;
+	public final fun annotatedWithAllOf (Ljava/util/List;)Lio/github/baole/konture/FilesRuleBuilder;
+	public final fun annotatedWithAllOf ([Ljava/lang/String;)Lio/github/baole/konture/FilesRuleBuilder;
+	public final fun annotatedWithAnyOf (Ljava/util/List;)Lio/github/baole/konture/FilesRuleBuilder;
+	public final fun annotatedWithAnyOf ([Ljava/lang/String;)Lio/github/baole/konture/FilesRuleBuilder;
 	public final fun anyOf ([Lkotlin/jvm/functions/Function1;)Lio/github/baole/konture/FilesRuleBuilder;
+	public final fun areAnnotatedWith (Ljava/lang/String;)Lio/github/baole/konture/FilesRuleBuilder;
+	public final fun areAnnotatedWith (Lkotlin/reflect/KClass;)Lio/github/baole/konture/FilesRuleBuilder;
 	public final fun containClass (Ljava/lang/String;)Lio/github/baole/konture/FilesRuleBuilder;
 	public final fun containClass (Ljava/util/List;)Lio/github/baole/konture/FilesRuleBuilder;
 	public final fun containClass (Lkotlin/reflect/KClass;)Lio/github/baole/konture/FilesRuleBuilder;
@@ -1737,6 +2186,28 @@ public final class io/github/baole/konture/FilesThat {
 	public final fun haveNameStartingWith (Ljava/lang/String;)Lio/github/baole/konture/FilesRuleBuilder;
 	public final fun haveNameStartingWith (Ljava/util/List;)Lio/github/baole/konture/FilesRuleBuilder;
 	public final fun haveNameStartingWith ([Ljava/lang/String;)Lio/github/baole/konture/FilesRuleBuilder;
+	public final fun inModule (Ljava/lang/String;)Lio/github/baole/konture/FilesRuleBuilder;
+	public final fun inModules (Ljava/util/List;)Lio/github/baole/konture/FilesRuleBuilder;
+	public final fun inModules ([Ljava/lang/String;)Lio/github/baole/konture/FilesRuleBuilder;
+	public final fun inPackage (Ljava/lang/String;)Lio/github/baole/konture/FilesRuleBuilder;
+	public final fun inPackage (Ljava/util/List;)Lio/github/baole/konture/FilesRuleBuilder;
+	public final fun inPackage (Lkotlin/jvm/functions/Function1;)Lio/github/baole/konture/FilesRuleBuilder;
+	public final fun inPackage ([Ljava/lang/String;)Lio/github/baole/konture/FilesRuleBuilder;
+	public final fun inPackageOf (Lkotlin/reflect/KClass;)Lio/github/baole/konture/FilesRuleBuilder;
+	public final fun nameEndsWith (Ljava/lang/String;)Lio/github/baole/konture/FilesRuleBuilder;
+	public final fun nameEndsWith (Ljava/util/List;)Lio/github/baole/konture/FilesRuleBuilder;
+	public final fun nameEndsWith ([Ljava/lang/String;)Lio/github/baole/konture/FilesRuleBuilder;
+	public final fun nameMatches (Ljava/lang/String;)Lio/github/baole/konture/FilesRuleBuilder;
+	public final fun nameMatches (Ljava/util/List;)Lio/github/baole/konture/FilesRuleBuilder;
+	public final fun nameMatches ([Ljava/lang/String;)Lio/github/baole/konture/FilesRuleBuilder;
+	public final fun nameStartsWith (Ljava/lang/String;)Lio/github/baole/konture/FilesRuleBuilder;
+	public final fun nameStartsWith (Ljava/util/List;)Lio/github/baole/konture/FilesRuleBuilder;
+	public final fun nameStartsWith ([Ljava/lang/String;)Lio/github/baole/konture/FilesRuleBuilder;
+	public final fun named (Ljava/lang/String;)Lio/github/baole/konture/FilesRuleBuilder;
+	public final fun named (Ljava/lang/String;Lkotlin/jvm/functions/Function1;)Lio/github/baole/konture/FilesRuleBuilder;
+	public final fun named (Ljava/util/List;)Lio/github/baole/konture/FilesRuleBuilder;
+	public final fun named (Lkotlin/jvm/functions/Function1;)Lio/github/baole/konture/FilesRuleBuilder;
+	public final fun named ([Ljava/lang/String;)Lio/github/baole/konture/FilesRuleBuilder;
 	public final fun noneOf ([Lkotlin/jvm/functions/Function1;)Lio/github/baole/konture/FilesRuleBuilder;
 	public final fun not ()Lio/github/baole/konture/FilesThat;
 	public final fun notContainClass (Ljava/lang/String;)Lio/github/baole/konture/FilesRuleBuilder;
@@ -1763,6 +2234,25 @@ public final class io/github/baole/konture/FilesThat {
 	public final fun notHaveNameStartingWith (Ljava/lang/String;)Lio/github/baole/konture/FilesRuleBuilder;
 	public final fun notHaveNameStartingWith (Ljava/util/List;)Lio/github/baole/konture/FilesRuleBuilder;
 	public final fun notHaveNameStartingWith ([Ljava/lang/String;)Lio/github/baole/konture/FilesRuleBuilder;
+	public final fun notInModule (Ljava/lang/String;)Lio/github/baole/konture/FilesRuleBuilder;
+	public final fun notInModules (Ljava/util/List;)Lio/github/baole/konture/FilesRuleBuilder;
+	public final fun notInModules ([Ljava/lang/String;)Lio/github/baole/konture/FilesRuleBuilder;
+	public final fun notInPackage (Ljava/lang/String;)Lio/github/baole/konture/FilesRuleBuilder;
+	public final fun notInPackage (Ljava/util/List;)Lio/github/baole/konture/FilesRuleBuilder;
+	public final fun notInPackage ([Ljava/lang/String;)Lio/github/baole/konture/FilesRuleBuilder;
+	public final fun notNameEndsWith (Ljava/lang/String;)Lio/github/baole/konture/FilesRuleBuilder;
+	public final fun notNameEndsWith (Ljava/util/List;)Lio/github/baole/konture/FilesRuleBuilder;
+	public final fun notNameEndsWith ([Ljava/lang/String;)Lio/github/baole/konture/FilesRuleBuilder;
+	public final fun notNameMatches (Ljava/lang/String;)Lio/github/baole/konture/FilesRuleBuilder;
+	public final fun notNameMatches (Ljava/util/List;)Lio/github/baole/konture/FilesRuleBuilder;
+	public final fun notNameMatches ([Ljava/lang/String;)Lio/github/baole/konture/FilesRuleBuilder;
+	public final fun notNameStartsWith (Ljava/lang/String;)Lio/github/baole/konture/FilesRuleBuilder;
+	public final fun notNameStartsWith (Ljava/util/List;)Lio/github/baole/konture/FilesRuleBuilder;
+	public final fun notNameStartsWith ([Ljava/lang/String;)Lio/github/baole/konture/FilesRuleBuilder;
+	public final fun notNamed (Ljava/lang/String;)Lio/github/baole/konture/FilesRuleBuilder;
+	public final fun notNamed (Ljava/util/List;)Lio/github/baole/konture/FilesRuleBuilder;
+	public final fun notNamed (Lkotlin/jvm/functions/Function1;)Lio/github/baole/konture/FilesRuleBuilder;
+	public final fun notNamed ([Ljava/lang/String;)Lio/github/baole/konture/FilesRuleBuilder;
 	public final fun notResideInAModule (Ljava/lang/String;)Lio/github/baole/konture/FilesRuleBuilder;
 	public final fun notResideInAModule (Ljava/util/List;)Lio/github/baole/konture/FilesRuleBuilder;
 	public final fun notResideInAModule ([Ljava/lang/String;)Lio/github/baole/konture/FilesRuleBuilder;
@@ -4979,6 +5469,12 @@ public final class io/github/baole/konture/SourceUsageKt {
 }
 
 public final class io/github/baole/konture/TypeSafeOverloadsClassesKt {
+	public static final fun annotatedWith (Lio/github/baole/konture/ClassesShould;Lkotlin/reflect/KClass;)Lio/github/baole/konture/ClassesRuleBuilder;
+	public static final fun annotatedWith (Lio/github/baole/konture/ClassesThat;Lkotlin/reflect/KClass;)Lio/github/baole/konture/ClassesRuleBuilder;
+	public static final fun annotatedWithAllOf (Lio/github/baole/konture/ClassesShould;[Lkotlin/reflect/KClass;)Lio/github/baole/konture/ClassesRuleBuilder;
+	public static final fun annotatedWithAllOf (Lio/github/baole/konture/ClassesThat;[Lkotlin/reflect/KClass;)Lio/github/baole/konture/ClassesRuleBuilder;
+	public static final fun annotatedWithAnyOf (Lio/github/baole/konture/ClassesShould;[Lkotlin/reflect/KClass;)Lio/github/baole/konture/ClassesRuleBuilder;
+	public static final fun annotatedWithAnyOf (Lio/github/baole/konture/ClassesThat;[Lkotlin/reflect/KClass;)Lio/github/baole/konture/ClassesRuleBuilder;
 	public static final fun areAssignableFrom (Lio/github/baole/konture/ClassesThat;Lkotlin/reflect/KClass;)Lio/github/baole/konture/ClassesRuleBuilder;
 	public static final fun areAssignableTo (Lio/github/baole/konture/ClassesThat;Lkotlin/reflect/KClass;)Lio/github/baole/konture/ClassesRuleBuilder;
 	public static final fun areAssignableToAllOf (Lio/github/baole/konture/ClassesThat;[Lkotlin/reflect/KClass;)Lio/github/baole/konture/ClassesRuleBuilder;
@@ -5003,6 +5499,8 @@ public final class io/github/baole/konture/TypeSafeOverloadsClassesKt {
 	public static final fun haveAnnotationWithArgument (Lio/github/baole/konture/ClassesThat;Lkotlin/reflect/KClass;Ljava/lang/String;Ljava/lang/String;)Lio/github/baole/konture/ClassesRuleBuilder;
 	public static final fun haveAnyAnnotationOf (Lio/github/baole/konture/ClassesShould;[Lkotlin/reflect/KClass;)Lio/github/baole/konture/ClassesRuleBuilder;
 	public static final fun haveAnyAnnotationOf (Lio/github/baole/konture/ClassesThat;[Lkotlin/reflect/KClass;)Lio/github/baole/konture/ClassesRuleBuilder;
+	public static final fun inPackageOf (Lio/github/baole/konture/ClassesShould;Lkotlin/reflect/KClass;)Lio/github/baole/konture/ClassesRuleBuilder;
+	public static final fun inPackageOf (Lio/github/baole/konture/ClassesThat;Lkotlin/reflect/KClass;)Lio/github/baole/konture/ClassesRuleBuilder;
 	public static final fun resideInPackageOf (Lio/github/baole/konture/ClassesShould;Lkotlin/reflect/KClass;)Lio/github/baole/konture/ClassesRuleBuilder;
 	public static final fun resideInPackageOf (Lio/github/baole/konture/ClassesThat;Lkotlin/reflect/KClass;)Lio/github/baole/konture/ClassesRuleBuilder;
 	public static final fun withAnnotationOf (Lio/github/baole/konture/KontureScope;Lkotlin/reflect/KClass;)Lio/github/baole/konture/KontureScope;
@@ -5014,8 +5512,12 @@ public final class io/github/baole/konture/TypeSafeOverloadsClassesKt {
 }
 
 public final class io/github/baole/konture/TypeSafeOverloadsFilesKt {
+	public static final fun annotatedWith (Lio/github/baole/konture/FilesShould;Lkotlin/reflect/KClass;)Lio/github/baole/konture/FilesRuleBuilder;
+	public static final fun annotatedWith (Lio/github/baole/konture/FilesThat;Lkotlin/reflect/KClass;)Lio/github/baole/konture/FilesRuleBuilder;
 	public static final fun areAnnotatedWith (Lio/github/baole/konture/FilesThat;Lkotlin/reflect/KClass;)Lio/github/baole/konture/FilesRuleBuilder;
 	public static final fun beAnnotatedWith (Lio/github/baole/konture/FilesShould;Lkotlin/reflect/KClass;)Lio/github/baole/konture/FilesRuleBuilder;
+	public static final fun inPackageOf (Lio/github/baole/konture/FilesShould;Lkotlin/reflect/KClass;)Lio/github/baole/konture/FilesRuleBuilder;
+	public static final fun inPackageOf (Lio/github/baole/konture/FilesThat;Lkotlin/reflect/KClass;)Lio/github/baole/konture/FilesRuleBuilder;
 	public static final fun resideInPackageOf (Lio/github/baole/konture/FilesShould;Lkotlin/reflect/KClass;)Lio/github/baole/konture/FilesRuleBuilder;
 	public static final fun resideInPackageOf (Lio/github/baole/konture/FilesThat;Lkotlin/reflect/KClass;)Lio/github/baole/konture/FilesRuleBuilder;
 }
