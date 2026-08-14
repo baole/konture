@@ -284,6 +284,10 @@ public fun KontureFunctionScope.withNameStartingWith(prefix: String): KontureFun
 public fun KontureFunctionScope.resideInAPackage(packagePattern: String): KontureFunctionScope =
     KontureFunctionScope(functions.resideInAPackage(packagePattern))
 
+/** Filters functions in this scope matching glob pattern [pattern]. */
+public fun KontureFunctionScope.withNameMatching(pattern: String): KontureFunctionScope =
+    KontureFunctionScope(functions.withNameMatching(pattern))
+
 /** Filters functions in this scope residing in packages matching [packagePattern]. */
 @Deprecated(
     message = "Renamed for consistency across Konture DSL scopes.",
