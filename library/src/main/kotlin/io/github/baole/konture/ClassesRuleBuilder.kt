@@ -15,6 +15,7 @@ import io.github.baole.konture.core.model.Violation
 import io.github.baole.konture.core.model.ViolationReport
 import io.github.baole.konture.i18n.getMessage
 import io.github.baole.konture.impl.BaselineManager
+import io.github.baole.konture.impl.KontureRuntimeStateProvider
 import io.github.baole.konture.impl.LogicalOperator
 import io.github.baole.konture.impl.ViolationLocation
 
@@ -346,6 +347,10 @@ public class ClassesRuleBuilder(
             )
 
         /** Filter or assertion criteria for run check. */
+        val currentMeta = KontureRuntimeStateProvider.currentState.currentRuleMetadata
+        val activeRuleId = currentMeta?.id ?: "classes.rule"
+        val activeSeverity = currentMeta?.severity ?: Severity.ERROR
+
         val runCheckReport = { list: MutableList<Violation> ->
             for ((cls, modulePath, sourceSetName) in classesToCheck) {
                 if (ignoredPredicates.any { it(cls) }) continue
@@ -366,10 +371,11 @@ public class ClassesRuleBuilder(
                         )
                     list.add(
                         Violation(
-                            ruleId = "classes.rule",
+                            ruleId = activeRuleId,
                             subject = subject,
                             message = fullMsg,
-                            severity = Severity.ERROR,
+                            severity = activeSeverity,
+                            metadata = currentMeta,
                         ),
                     )
                 }
@@ -377,8 +383,8 @@ public class ClassesRuleBuilder(
         }
 
         return BaselineManager.checkRuleReport(
-            ruleId = "classes.rule",
-            violationHeader = getMessage("classes.rule.violationHeader"),
+            ruleId = activeRuleId,
+            violationHeader = currentMeta?.description ?: getMessage("classes.rule.violationHeader"),
             runCheckReport = runCheckReport,
         )
     }

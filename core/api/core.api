@@ -323,6 +323,40 @@ public final class io/github/baole/konture/core/SourceSetModel$Companion {
 	public final fun serializer ()Lkotlinx/serialization/KSerializer;
 }
 
+public final class io/github/baole/konture/core/model/RuleMetadata {
+	public static final field Companion Lio/github/baole/konture/core/model/RuleMetadata$Companion;
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;Lio/github/baole/konture/core/model/Severity;Ljava/util/Set;)V
+	public synthetic fun <init> (Ljava/lang/String;Ljava/lang/String;Lio/github/baole/konture/core/model/Severity;Ljava/util/Set;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()Ljava/lang/String;
+	public final fun component3 ()Lio/github/baole/konture/core/model/Severity;
+	public final fun component4 ()Ljava/util/Set;
+	public final fun copy (Ljava/lang/String;Ljava/lang/String;Lio/github/baole/konture/core/model/Severity;Ljava/util/Set;)Lio/github/baole/konture/core/model/RuleMetadata;
+	public static synthetic fun copy$default (Lio/github/baole/konture/core/model/RuleMetadata;Ljava/lang/String;Ljava/lang/String;Lio/github/baole/konture/core/model/Severity;Ljava/util/Set;ILjava/lang/Object;)Lio/github/baole/konture/core/model/RuleMetadata;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getDescription ()Ljava/lang/String;
+	public final fun getId ()Ljava/lang/String;
+	public final fun getSeverity ()Lio/github/baole/konture/core/model/Severity;
+	public final fun getTags ()Ljava/util/Set;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final synthetic class io/github/baole/konture/core/model/RuleMetadata$$serializer : kotlinx/serialization/internal/GeneratedSerializer {
+	public static final field INSTANCE Lio/github/baole/konture/core/model/RuleMetadata$$serializer;
+	public final fun childSerializers ()[Lkotlinx/serialization/KSerializer;
+	public final fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Lio/github/baole/konture/core/model/RuleMetadata;
+	public synthetic fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Ljava/lang/Object;
+	public final fun getDescriptor ()Lkotlinx/serialization/descriptors/SerialDescriptor;
+	public final fun serialize (Lkotlinx/serialization/encoding/Encoder;Lio/github/baole/konture/core/model/RuleMetadata;)V
+	public synthetic fun serialize (Lkotlinx/serialization/encoding/Encoder;Ljava/lang/Object;)V
+	public fun typeParametersSerializers ()[Lkotlinx/serialization/KSerializer;
+}
+
+public final class io/github/baole/konture/core/model/RuleMetadata$Companion {
+	public final fun serializer ()Lkotlinx/serialization/KSerializer;
+}
+
 public final class io/github/baole/konture/core/model/Severity : java/lang/Enum {
 	public static final field Companion Lio/github/baole/konture/core/model/Severity$Companion;
 	public static final field ERROR Lio/github/baole/konture/core/model/Severity;
@@ -506,8 +540,8 @@ public final class io/github/baole/konture/core/model/Subject$ModuleSubject$Comp
 
 public final class io/github/baole/konture/core/model/Violation {
 	public static final field Companion Lio/github/baole/konture/core/model/Violation$Companion;
-	public fun <init> (Ljava/lang/String;Lio/github/baole/konture/core/model/Subject;Lio/github/baole/konture/core/model/Subject;Lio/github/baole/konture/core/model/SourceLocation;Ljava/util/List;Ljava/lang/String;Lio/github/baole/konture/core/model/Severity;)V
-	public synthetic fun <init> (Ljava/lang/String;Lio/github/baole/konture/core/model/Subject;Lio/github/baole/konture/core/model/Subject;Lio/github/baole/konture/core/model/SourceLocation;Ljava/util/List;Ljava/lang/String;Lio/github/baole/konture/core/model/Severity;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun <init> (Ljava/lang/String;Lio/github/baole/konture/core/model/Subject;Lio/github/baole/konture/core/model/Subject;Lio/github/baole/konture/core/model/SourceLocation;Ljava/util/List;Ljava/lang/String;Lio/github/baole/konture/core/model/Severity;Lio/github/baole/konture/core/model/RuleMetadata;)V
+	public synthetic fun <init> (Ljava/lang/String;Lio/github/baole/konture/core/model/Subject;Lio/github/baole/konture/core/model/Subject;Lio/github/baole/konture/core/model/SourceLocation;Ljava/util/List;Ljava/lang/String;Lio/github/baole/konture/core/model/Severity;Lio/github/baole/konture/core/model/RuleMetadata;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun component1 ()Ljava/lang/String;
 	public final fun component2 ()Lio/github/baole/konture/core/model/Subject;
 	public final fun component3 ()Lio/github/baole/konture/core/model/Subject;
@@ -515,11 +549,13 @@ public final class io/github/baole/konture/core/model/Violation {
 	public final fun component5 ()Ljava/util/List;
 	public final fun component6 ()Ljava/lang/String;
 	public final fun component7 ()Lio/github/baole/konture/core/model/Severity;
-	public final fun copy (Ljava/lang/String;Lio/github/baole/konture/core/model/Subject;Lio/github/baole/konture/core/model/Subject;Lio/github/baole/konture/core/model/SourceLocation;Ljava/util/List;Ljava/lang/String;Lio/github/baole/konture/core/model/Severity;)Lio/github/baole/konture/core/model/Violation;
-	public static synthetic fun copy$default (Lio/github/baole/konture/core/model/Violation;Ljava/lang/String;Lio/github/baole/konture/core/model/Subject;Lio/github/baole/konture/core/model/Subject;Lio/github/baole/konture/core/model/SourceLocation;Ljava/util/List;Ljava/lang/String;Lio/github/baole/konture/core/model/Severity;ILjava/lang/Object;)Lio/github/baole/konture/core/model/Violation;
+	public final fun component8 ()Lio/github/baole/konture/core/model/RuleMetadata;
+	public final fun copy (Ljava/lang/String;Lio/github/baole/konture/core/model/Subject;Lio/github/baole/konture/core/model/Subject;Lio/github/baole/konture/core/model/SourceLocation;Ljava/util/List;Ljava/lang/String;Lio/github/baole/konture/core/model/Severity;Lio/github/baole/konture/core/model/RuleMetadata;)Lio/github/baole/konture/core/model/Violation;
+	public static synthetic fun copy$default (Lio/github/baole/konture/core/model/Violation;Ljava/lang/String;Lio/github/baole/konture/core/model/Subject;Lio/github/baole/konture/core/model/Subject;Lio/github/baole/konture/core/model/SourceLocation;Ljava/util/List;Ljava/lang/String;Lio/github/baole/konture/core/model/Severity;Lio/github/baole/konture/core/model/RuleMetadata;ILjava/lang/Object;)Lio/github/baole/konture/core/model/Violation;
 	public fun equals (Ljava/lang/Object;)Z
 	public final fun getDependencyPath ()Ljava/util/List;
 	public final fun getMessage ()Ljava/lang/String;
+	public final fun getMetadata ()Lio/github/baole/konture/core/model/RuleMetadata;
 	public final fun getRuleId ()Ljava/lang/String;
 	public final fun getSeverity ()Lio/github/baole/konture/core/model/Severity;
 	public final fun getSourceLocation ()Lio/github/baole/konture/core/model/SourceLocation;

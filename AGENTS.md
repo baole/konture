@@ -12,6 +12,8 @@ Always use `-q`/`--quiet` when running `./gradlew` commands to avoid noisy outpu
 - **Run core tests**: `./gradlew -q :core:test`
 - **Run library tests**: `./gradlew -q :library:test`
 - **Run Gradle plugin tests**: `./gradlew -q :plugin-gradle:test`
+- **Check binary compatibility (ABI)**: `./gradlew -q checkKotlinAbi`
+- **Update binary compatibility dumps**: `./gradlew -q updateKotlinAbi`
 - **Apply Kotlin code formatting**: `./gradlew -q spotlessApply`
 - **Generate API documentation (Dokka)**: `./gradlew -q dokkaHtmlMultiModule`
 - **Validate Jekyll documentation metadata**: `python3 script/add_front_matter.py --validate`

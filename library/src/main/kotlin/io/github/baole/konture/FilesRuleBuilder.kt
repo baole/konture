@@ -15,6 +15,7 @@ import io.github.baole.konture.core.model.Violation
 import io.github.baole.konture.core.model.ViolationReport
 import io.github.baole.konture.i18n.getMessage
 import io.github.baole.konture.impl.BaselineManager
+import io.github.baole.konture.impl.KontureRuntimeStateProvider
 import io.github.baole.konture.impl.LogicalOperator
 import io.github.baole.konture.impl.ViolationLocation
 
@@ -366,6 +367,10 @@ public class FilesRuleBuilder(
             )
 
         /** Filter or assertion criteria for run check. */
+        val currentMeta = KontureRuntimeStateProvider.currentState.currentRuleMetadata
+        val activeRuleId = currentMeta?.id ?: "files.rule"
+        val activeSeverity = currentMeta?.severity ?: Severity.ERROR
+
         val runCheckReport = { list: MutableList<Violation> ->
             for (file in filesToCheck) {
                 if (ignoredPredicates.any { it(file) }) continue
@@ -389,10 +394,11 @@ public class FilesRuleBuilder(
                         )
                     list.add(
                         Violation(
-                            ruleId = "files.rule",
+                            ruleId = activeRuleId,
                             subject = subject,
                             message = fullMsg,
-                            severity = Severity.ERROR,
+                            severity = activeSeverity,
+                            metadata = currentMeta,
                         ),
                     )
                 }
@@ -400,8 +406,8 @@ public class FilesRuleBuilder(
         }
 
         return BaselineManager.checkRuleReport(
-            ruleId = "files.rule",
-            violationHeader = getMessage("files.rule.violationHeader"),
+            ruleId = activeRuleId,
+            violationHeader = currentMeta?.description ?: getMessage("files.rule.violationHeader"),
             runCheckReport = runCheckReport,
         )
     }

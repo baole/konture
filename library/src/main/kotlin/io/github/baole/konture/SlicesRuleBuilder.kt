@@ -14,6 +14,7 @@ import io.github.baole.konture.core.model.Violation
 import io.github.baole.konture.core.model.ViolationReport
 import io.github.baole.konture.i18n.getMessage
 import io.github.baole.konture.impl.BaselineManager
+import io.github.baole.konture.impl.KontureRuntimeStateProvider
 import io.github.baole.konture.impl.LogicalOperator
 import io.github.baole.konture.impl.PatternMatchers
 import io.github.baole.konture.impl.SliceCycleDetector
@@ -284,6 +285,10 @@ public class SlicesRuleBuilder(
             LogLevel.DEBUG,
             getMessage("debug.slices.ruleChecking", slicePattern, slices.size),
         )
+        val currentMeta = KontureRuntimeStateProvider.currentState.currentRuleMetadata
+        val activeRuleId = currentMeta?.id ?: "slices.rule"
+        val activeSeverity = currentMeta?.severity ?: Severity.ERROR
+
         if (slices.isEmpty()) {
             if (!allowEmpty) {
                 throw AssertionError(getMessage("slices.rule.emptySelect"))
@@ -292,7 +297,7 @@ public class SlicesRuleBuilder(
                     LogLevel.WARNING,
                     getMessage("slices.rule.emptyAllowed"),
                 )
-                return ViolationReport("slices.rule", emptyList())
+                return ViolationReport(activeRuleId, emptyList())
             }
         }
 
@@ -311,17 +316,18 @@ public class SlicesRuleBuilder(
                 val subject = Subject.CustomSubject(name = slicePattern)
                 list.add(
                     Violation(
-                        ruleId = "slices.rule",
+                        ruleId = activeRuleId,
                         subject = subject,
                         message = rawMsg,
-                        severity = Severity.ERROR,
+                        severity = activeSeverity,
+                        metadata = currentMeta,
                     ),
                 )
             }
         }
         return BaselineManager.checkRuleReport(
-            ruleId = "slices.rule",
-            violationHeader = getMessage("slices.rule.violationHeader"),
+            ruleId = activeRuleId,
+            violationHeader = currentMeta?.description ?: getMessage("slices.rule.violationHeader"),
             runCheckReport = runCheckReport,
         )
     }

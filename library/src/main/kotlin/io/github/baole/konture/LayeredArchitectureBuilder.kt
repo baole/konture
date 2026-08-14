@@ -6,7 +6,11 @@
 
 package io.github.baole.konture
 
+import io.github.baole.konture.core.model.Severity
+import io.github.baole.konture.core.model.Subject
+import io.github.baole.konture.core.model.Violation
 import io.github.baole.konture.impl.BaselineManager
+import io.github.baole.konture.impl.KontureRuntimeStateProvider
 import io.github.baole.konture.impl.LayerConstraint
 import io.github.baole.konture.impl.LayerDefinition
 import io.github.baole.konture.impl.PatternMatchers
@@ -378,15 +382,36 @@ public class LayeredArchitectureBuilder(
         val allClasses = g.getAllModules().flatMap { it.classes }
 
         /** Filter or assertion criteria for run check. */
-        val runCheck = { list: MutableList<String> ->
+        val currentMeta = KontureRuntimeStateProvider.currentState.currentRuleMetadata
+        val activeRuleId = currentMeta?.id ?: "layered.architecture.rule"
+        val activeSeverity = currentMeta?.severity ?: Severity.ERROR
+        val activeHeader =
+            currentMeta?.description
+                ?: io.github.baole.konture.i18n.getMessage("layered.architecture.violationHeader")
+
+        val runCheckReport = { list: MutableList<Violation> ->
+            val rawMessages = mutableListOf<String>()
             for (constraint in constraints) {
-                constraint.verify(layers, allClasses, list)
+                constraint.verify(layers, allClasses, rawMessages)
+            }
+            for (rawMsg in rawMessages) {
+                val subject = Subject.CustomSubject(name = "Layered Architecture")
+                list.add(
+                    Violation(
+                        ruleId = activeRuleId,
+                        subject = subject,
+                        message = rawMsg,
+                        severity = activeSeverity,
+                        metadata = currentMeta,
+                    ),
+                )
             }
         }
 
-        BaselineManager.checkRule(
-            io.github.baole.konture.i18n.getMessage("layered.architecture.violationHeader"),
-            runCheck,
+        BaselineManager.checkRuleReport(
+            ruleId = activeRuleId,
+            violationHeader = activeHeader,
+            runCheckReport = runCheckReport,
         )
     }
 }
