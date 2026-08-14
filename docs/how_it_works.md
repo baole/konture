@@ -171,3 +171,22 @@ Total: 1 violation(s)
 - **Location** names the module and source set as well as the file and line, which matters in multi-module and multiplatform projects; module rules embed the module path in the message itself. Composite `either/or` rules separate the sub-conditions of each branch with `; `.
 
 All message text is localized; see [Configuration](configuration.md) for selecting a language. Because baselines match on this text, changing it requires a one-time regeneration — see [Architecture Baselines](baseline.md).
+
+---
+
+## 6. Structured Violation Engine Model
+
+In addition to throwing formatted localized `AssertionError` text for unit test runners, Konture's internal evaluation pipeline constructs structured, serializable violation objects under `io.github.baole.konture.core.model`:
+
+- **`ViolationReport`**: Top-level container representing rule results (`ruleId`, `violations: List<Violation>`, `severity`).
+- **`Violation`**: Atomic violation record containing:
+  - `ruleId`: Unique string ID (e.g. `classes.rule`).
+  - `subject`: Domain subject element (`ModuleSubject`, `ClassSubject`, `FunctionSubject`, or `CustomSubject`).
+  - `target`: Optional target subject involved in relationship rules (such as forbidden dependency edges).
+  - `sourceLocation`: Precise source coordinates (`filePath`, `line`, `column`).
+  - `dependencyPath`: List of intermediate subjects for transitive cycle/dependency paths.
+  - `message`: Human-readable violation message.
+  - `severity`: Violation severity rating (`INFO`, `WARNING`, `ERROR`).
+
+Because all core violation models are annotated with `@Serializable` (`kotlinx.serialization`), they seamlessly serialize to JSON for IDE plugins, custom test reporters, or external CI quality dashboards.
+

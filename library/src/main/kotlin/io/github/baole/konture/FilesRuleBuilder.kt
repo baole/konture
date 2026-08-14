@@ -8,6 +8,11 @@ package io.github.baole.konture
 
 import io.github.baole.konture.core.KontureLogger
 import io.github.baole.konture.core.LogLevel
+import io.github.baole.konture.core.model.Severity
+import io.github.baole.konture.core.model.SourceLocation
+import io.github.baole.konture.core.model.Subject
+import io.github.baole.konture.core.model.Violation
+import io.github.baole.konture.core.model.ViolationReport
 import io.github.baole.konture.i18n.getMessage
 import io.github.baole.konture.impl.BaselineManager
 import io.github.baole.konture.impl.LogicalOperator
@@ -325,7 +330,7 @@ public class FilesRuleBuilder(
      * Executes the compiled file rules against the provided project graph.
      * Throws an [AssertionError] if any rule violations are detected.
      */
-    public fun check(g: ProjectGraph = graph) {
+    public fun check(g: ProjectGraph = graph): ViolationReport {
         /** Filter or assertion criteria for all files. */
         val allFiles =
             g.getAllModules().flatMap { module ->
@@ -361,23 +366,43 @@ public class FilesRuleBuilder(
             )
 
         /** Filter or assertion criteria for run check. */
-        val runCheck = { list: MutableList<String> ->
+        val runCheckReport = { list: MutableList<Violation> ->
             for (file in filesToCheck) {
                 if (ignoredPredicates.any { it(file) }) continue
-                /** Filter or assertion criteria for start idx. */
-                val startIdx = list.size
-                assertion(file, allFiles, list)
-                for (i in startIdx until list.size) {
-                    if (!list[i].contains(" (at ")) {
-                        list[i] = "${list[i]} (at ${ViolationLocation.format(file.declaration, file.modulePath, file.sourceSet?.name)})"
-                    }
+                val rawMessages = mutableListOf<String>()
+                assertion(file, allFiles, rawMessages)
+                for (rawMsg in rawMessages) {
+                    val fullMsg =
+                        if (!rawMsg.contains(" (at ")) {
+                            "$rawMsg (at ${ViolationLocation.format(
+                                file.declaration,
+                                file.modulePath,
+                                file.sourceSet?.name,
+                            )})"
+                        } else {
+                            rawMsg
+                        }
+                    val subject =
+                        Subject.CustomSubject(
+                            name = file.declaration.name,
+                            location = SourceLocation(filePath = file.declaration.filePath, line = 1),
+                        )
+                    list.add(
+                        Violation(
+                            ruleId = "files.rule",
+                            subject = subject,
+                            message = fullMsg,
+                            severity = Severity.ERROR,
+                        ),
+                    )
                 }
             }
         }
 
-        BaselineManager.checkRule(
-            getMessage("files.rule.violationHeader"),
-            runCheck,
+        return BaselineManager.checkRuleReport(
+            ruleId = "files.rule",
+            violationHeader = getMessage("files.rule.violationHeader"),
+            runCheckReport = runCheckReport,
         )
     }
 }

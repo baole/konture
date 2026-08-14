@@ -8,6 +8,10 @@ package io.github.baole.konture
 
 import io.github.baole.konture.core.KontureLogger
 import io.github.baole.konture.core.LogLevel
+import io.github.baole.konture.core.model.Severity
+import io.github.baole.konture.core.model.Subject
+import io.github.baole.konture.core.model.Violation
+import io.github.baole.konture.core.model.ViolationReport
 import io.github.baole.konture.i18n.getMessage
 import io.github.baole.konture.impl.BaselineManager
 import io.github.baole.konture.impl.LogicalOperator
@@ -236,7 +240,7 @@ public class SlicesRuleBuilder(
      * Executes the compiled slice rules against the provided project graph.
      * Throws an [AssertionError] if any rule violations are detected.
      */
-    public fun check(g: ProjectGraph = graph) {
+    public fun check(g: ProjectGraph = graph): ViolationReport {
         /** Filter or assertion criteria for slice pattern. */
         val slicePattern = pattern ?: throw AssertionError(getMessage("slices.rule.noPattern"))
 
@@ -288,7 +292,7 @@ public class SlicesRuleBuilder(
                     LogLevel.WARNING,
                     getMessage("slices.rule.emptyAllowed"),
                 )
-                return
+                return ViolationReport("slices.rule", emptyList())
             }
         }
 
@@ -300,7 +304,25 @@ public class SlicesRuleBuilder(
         val sliceGraph = SliceCycleDetector.buildGraph(activeSlices, packageToSlice, allClasses, slicePattern)
 
         /** Filter or assertion criteria for run check. */
-        val runCheck = { list: MutableList<String> -> assertions.forEach { it(sliceGraph, list) } }
-        BaselineManager.checkRule(getMessage("slices.rule.violationHeader"), runCheck)
+        val runCheckReport = { list: MutableList<Violation> ->
+            val rawMessages = mutableListOf<String>()
+            assertions.forEach { it(sliceGraph, rawMessages) }
+            for (rawMsg in rawMessages) {
+                val subject = Subject.CustomSubject(name = slicePattern)
+                list.add(
+                    Violation(
+                        ruleId = "slices.rule",
+                        subject = subject,
+                        message = rawMsg,
+                        severity = Severity.ERROR,
+                    ),
+                )
+            }
+        }
+        return BaselineManager.checkRuleReport(
+            ruleId = "slices.rule",
+            violationHeader = getMessage("slices.rule.violationHeader"),
+            runCheckReport = runCheckReport,
+        )
     }
 }

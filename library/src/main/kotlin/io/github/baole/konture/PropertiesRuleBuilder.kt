@@ -8,6 +8,11 @@ package io.github.baole.konture
 
 import io.github.baole.konture.core.KontureLogger
 import io.github.baole.konture.core.LogLevel
+import io.github.baole.konture.core.model.Severity
+import io.github.baole.konture.core.model.SourceLocation
+import io.github.baole.konture.core.model.Subject
+import io.github.baole.konture.core.model.Violation
+import io.github.baole.konture.core.model.ViolationReport
 import io.github.baole.konture.i18n.getMessage
 import io.github.baole.konture.impl.BaselineManager
 import io.github.baole.konture.impl.LogicalOperator
@@ -322,7 +327,7 @@ public class PropertiesRuleBuilder(
      * Executes the compiled property rules against the provided project graph.
      * Throws an [AssertionError] if any rule violations are detected.
      */
-    public fun check(g: ProjectGraph = graph) {
+    public fun check(g: ProjectGraph = graph): ViolationReport {
         /** Filter or assertion criteria for all properties. */
         val allProperties =
             g.getAllModules().flatMap { module ->
@@ -385,23 +390,42 @@ public class PropertiesRuleBuilder(
             )
 
         /** Filter or assertion criteria for run check. */
-        val runCheck = { list: MutableList<String> ->
+        val runCheckReport = { list: MutableList<Violation> ->
             for (prop in propertiesToCheck) {
                 if (ignoredPredicates.any { it(prop) }) continue
-                /** Filter or assertion criteria for start idx. */
-                val startIdx = list.size
-                assertion(prop, allProperties, list)
-                for (i in startIdx until list.size) {
-                    if (!list[i].contains(" (at ")) {
-                        list[i] = "${list[i]} (at ${ViolationLocation.format(prop)})"
-                    }
+                val rawMessages = mutableListOf<String>()
+                assertion(prop, allProperties, rawMessages)
+                for (rawMsg in rawMessages) {
+                    val fullMsg =
+                        if (!rawMsg.contains(" (at ")) {
+                            "$rawMsg (at ${ViolationLocation.format(prop)})"
+                        } else {
+                            rawMsg
+                        }
+                    val propName =
+                        prop.className?.let { "${prop.packageName}.$it.${prop.declaration.name}" }
+                            ?: "${prop.packageName}.${prop.declaration.name}"
+                    val subject =
+                        Subject.CustomSubject(
+                            name = propName,
+                            location = SourceLocation(filePath = prop.filePath, line = prop.declaration.sourceLine),
+                        )
+                    list.add(
+                        Violation(
+                            ruleId = "properties.rule",
+                            subject = subject,
+                            message = fullMsg,
+                            severity = Severity.ERROR,
+                        ),
+                    )
                 }
             }
         }
 
-        BaselineManager.checkRule(
-            getMessage("properties.rule.violationHeader"),
-            runCheck,
+        return BaselineManager.checkRuleReport(
+            ruleId = "properties.rule",
+            violationHeader = getMessage("properties.rule.violationHeader"),
+            runCheckReport = runCheckReport,
         )
     }
 }
