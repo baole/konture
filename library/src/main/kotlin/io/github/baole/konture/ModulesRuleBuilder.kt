@@ -354,7 +354,7 @@ public class ModulesRuleBuilder(
 
         return BaselineManager.checkRuleReport(
             ruleId = activeRuleId,
-            violationHeader = getMessage("modules.rule.violationHeader"),
+            violationHeader = currentMeta?.description ?: getMessage("modules.rule.violationHeader"),
             runCheckReport = runCheckReport,
         )
     }

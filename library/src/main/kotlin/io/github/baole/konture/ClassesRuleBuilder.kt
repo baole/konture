@@ -384,7 +384,7 @@ public class ClassesRuleBuilder(
 
         return BaselineManager.checkRuleReport(
             ruleId = activeRuleId,
-            violationHeader = getMessage("classes.rule.violationHeader"),
+            violationHeader = currentMeta?.description ?: getMessage("classes.rule.violationHeader"),
             runCheckReport = runCheckReport,
         )
     }

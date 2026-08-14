@@ -430,7 +430,7 @@ public class PropertiesRuleBuilder(
 
         return BaselineManager.checkRuleReport(
             ruleId = activeRuleId,
-            violationHeader = getMessage("properties.rule.violationHeader"),
+            violationHeader = currentMeta?.description ?: getMessage("properties.rule.violationHeader"),
             runCheckReport = runCheckReport,
         )
     }

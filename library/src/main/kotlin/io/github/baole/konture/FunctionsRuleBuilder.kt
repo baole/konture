@@ -449,7 +449,7 @@ public class FunctionsRuleBuilder(
 
         return BaselineManager.checkRuleReport(
             ruleId = activeRuleId,
-            violationHeader = getMessage("functions.rule.violationHeader"),
+            violationHeader = currentMeta?.description ?: getMessage("functions.rule.violationHeader"),
             runCheckReport = runCheckReport,
         )
     }

@@ -38,8 +38,9 @@ public class RuleDefinition internal constructor(
                 }
             }
             if (failures.isNotEmpty()) {
+                val headerDesc = metadata.description?.let { " - $it" } ?: ""
                 throw AssertionError(
-                    "Architecture rule '${metadata.id}' failed (${failures.size} violation suite(s)):\n\n" +
+                    "Architecture rule '${metadata.id}'$headerDesc failed (${failures.size} violation suite(s)):\n\n" +
                         failures.joinToString("\n\n"),
                 )
             }

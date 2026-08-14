@@ -84,15 +84,28 @@ architecture {
 
 ## 📊 Violation Reporting & Baselines
 
-When a named rule fails, its stable `id` and `severity` are attached to every generated `Violation` object and included in baseline reports (`konture-baseline.xml`):
+When a named rule fails, its stable `id` and `severity` are attached to every generated `Violation` object and recorded in JSON baseline files (`konture-baseline.json`):
 
-```xml
-<rule id="domain.repositories.must-be-interfaces">
-    <violation
-        subject="com.acme.domain.repository.UserRepositoryImpl"
-        message="Class UserRepositoryImpl must be an interface (at core/UserRepositoryImpl.kt:12)"
-        severity="ERROR" />
-</rule>
+```json
+{
+  "version": 1,
+  "testClasses": [
+    {
+      "name": "com.acme.ArchitectureTest",
+      "tests": [
+        {
+          "name": "domainRepositoriesMustBeInterfaces",
+          "violations": [
+            {
+              "message": "Class UserRepositoryImpl must be an interface (at core/UserRepositoryImpl.kt:12)",
+              "location": "com.acme.domain.repository.UserRepositoryImpl"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
 ```
 
 This ensures that baseline suppressions remain stable even if file line numbers shift over time.

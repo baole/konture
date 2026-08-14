@@ -327,7 +327,7 @@ public class SlicesRuleBuilder(
         }
         return BaselineManager.checkRuleReport(
             ruleId = activeRuleId,
-            violationHeader = getMessage("slices.rule.violationHeader"),
+            violationHeader = currentMeta?.description ?: getMessage("slices.rule.violationHeader"),
             runCheckReport = runCheckReport,
         )
     }

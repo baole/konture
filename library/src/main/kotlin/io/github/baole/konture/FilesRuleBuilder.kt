@@ -407,7 +407,7 @@ public class FilesRuleBuilder(
 
         return BaselineManager.checkRuleReport(
             ruleId = activeRuleId,
-            violationHeader = getMessage("files.rule.violationHeader"),
+            violationHeader = currentMeta?.description ?: getMessage("files.rule.violationHeader"),
             runCheckReport = runCheckReport,
         )
     }
