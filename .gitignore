@@ -36,5 +36,6 @@ _site/
 .jekyll-cache/
 .docs_temp/
 
-# Dokka API Docs
+# Dokka API Docs & Synced Skills
 docs/kdoc/
+docs/skills/
