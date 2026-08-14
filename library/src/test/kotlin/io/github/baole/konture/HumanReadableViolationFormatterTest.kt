@@ -196,7 +196,12 @@ class HumanReadableViolationFormatterTest : RuleBuildersTestBase() {
         val violation =
             Violation(
                 ruleId = "test.rule",
-                subject = Subject.ClassSubject("com.example.Foo", "Foo", location = SourceLocation("com/example/Foo.kt", line = null)),
+                subject =
+                    Subject.ClassSubject(
+                        "com.example.Foo",
+                        "Foo",
+                        location = SourceLocation("com/example/Foo.kt", line = null),
+                    ),
                 message = "Error message",
             )
         val report = ViolationReport("test.rule", listOf(violation))
@@ -214,13 +219,20 @@ class HumanReadableViolationFormatterTest : RuleBuildersTestBase() {
             val violation =
                 Violation(
                     ruleId = "test.rule",
-                    subject = Subject.ClassSubject("com.example.Foo", "Foo", location = SourceLocation("com/example/Foo.kt", 12)),
+                    subject =
+                        Subject.ClassSubject(
+                            "com.example.Foo",
+                            "Foo",
+                            location = SourceLocation("com/example/Foo.kt", 12),
+                        ),
                     message = "Error message",
                 )
             val report = ViolationReport("test.rule", listOf(violation))
 
             val formatted = HumanReadableViolationFormatter.format(report)
-            assertTrue(formatted.contains("✗ Régal") || formatted.contains("✗ Règle : test.rule") || formatted.contains("Règle"))
+            assertTrue(
+                formatted.contains("✗ Régal") || formatted.contains("✗ Règle : test.rule") || formatted.contains("Règle"),
+            )
             assertTrue(formatted.contains("violation(s) trouvée(s)"))
             assertTrue(formatted.contains("Fichier : com/example/Foo.kt:12"))
         } finally {

@@ -13,7 +13,6 @@ import io.github.baole.konture.i18n.getMessage
  * Formatter for building human-readable error messages from architecture violation reports.
  */
 public object HumanReadableViolationFormatter {
-
     /**
      * Formats a [ViolationReport] into a human-readable string suitable for test failure outputs.
      *
@@ -22,7 +21,10 @@ public object HumanReadableViolationFormatter {
      * @return Formatted human-readable string representation of the report.
      */
     @JvmOverloads
-    public fun format(report: ViolationReport, customHeader: String? = null): String {
+    public fun format(
+        report: ViolationReport,
+        customHeader: String? = null,
+    ): String {
         if (report.violations.isEmpty()) return ""
 
         val metaDescription = report.violations.firstOrNull()?.metadata?.description
