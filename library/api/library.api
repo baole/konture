@@ -2787,6 +2787,7 @@ public final class io/github/baole/konture/KontureContext {
 	public final fun layeredArchitecture (Lkotlin/jvm/functions/Function1;)V
 	public final fun modules (Lkotlin/jvm/functions/Function1;)V
 	public final fun properties (Lkotlin/jvm/functions/Function1;)V
+	public final fun rule (Ljava/lang/String;Lkotlin/jvm/functions/Function1;)Lio/github/baole/konture/RuleDefinition;
 	public final fun slices (Lkotlin/jvm/functions/Function1;)V
 }
 
@@ -4472,6 +4473,42 @@ public final class io/github/baole/konture/ResolutionConfidence : java/lang/Enum
 	public static fun getEntries ()Lkotlin/enums/EnumEntries;
 	public static fun valueOf (Ljava/lang/String;)Lio/github/baole/konture/ResolutionConfidence;
 	public static fun values ()[Lio/github/baole/konture/ResolutionConfidence;
+}
+
+public final class io/github/baole/konture/RuleBuilder {
+	public fun <init> (Ljava/lang/String;Lio/github/baole/konture/ProjectGraph;)V
+	public synthetic fun <init> (Ljava/lang/String;Lio/github/baole/konture/ProjectGraph;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun buildMetadata ()Lio/github/baole/konture/core/model/RuleMetadata;
+	public final fun classes (Lio/github/baole/konture/SourceSetSelector;Lkotlin/jvm/functions/Function1;)V
+	public final fun classes (Lkotlin/jvm/functions/Function1;)V
+	public final fun files (Lio/github/baole/konture/SourceSetSelector;Lkotlin/jvm/functions/Function1;)V
+	public final fun files (Lkotlin/jvm/functions/Function1;)V
+	public final fun functions (Lio/github/baole/konture/SourceSetSelector;Lkotlin/jvm/functions/Function1;)V
+	public final fun functions (Lkotlin/jvm/functions/Function1;)V
+	public final fun getDescription ()Ljava/lang/String;
+	public final fun getId ()Ljava/lang/String;
+	public final fun getSeverity ()Lio/github/baole/konture/core/model/Severity;
+	public final fun layered (Lkotlin/jvm/functions/Function1;)V
+	public final fun layeredArchitecture (Lkotlin/jvm/functions/Function1;)V
+	public final fun modules (Lio/github/baole/konture/SourceSetSelector;Lkotlin/jvm/functions/Function1;)V
+	public final fun modules (Lkotlin/jvm/functions/Function1;)V
+	public final fun properties (Lio/github/baole/konture/SourceSetSelector;Lkotlin/jvm/functions/Function1;)V
+	public final fun properties (Lkotlin/jvm/functions/Function1;)V
+	public final fun setDescription (Ljava/lang/String;)V
+	public final fun setSeverity (Lio/github/baole/konture/core/model/Severity;)V
+	public final fun slices (Lio/github/baole/konture/SourceSetSelector;Lkotlin/jvm/functions/Function1;)V
+	public final fun slices (Lkotlin/jvm/functions/Function1;)V
+	public final fun tag ([Ljava/lang/String;)V
+}
+
+public final class io/github/baole/konture/RuleDefinition {
+	public final fun check ()V
+	public final fun getMetadata ()Lio/github/baole/konture/core/model/RuleMetadata;
+	public final fun verify ()V
+}
+
+public final class io/github/baole/konture/RuleDslKt {
+	public static final fun rule (Ljava/lang/String;Lkotlin/jvm/functions/Function1;)Lio/github/baole/konture/RuleDefinition;
 }
 
 public final class io/github/baole/konture/Slice {

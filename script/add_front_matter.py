@@ -52,11 +52,16 @@ FRONT_MATTER_MAP = {
         "permalink": "/api-overview/"
     },
     "baseline.md": {
-
         "layout": "default",
         "title": "Architecture Baselines",
         "nav_order": 56,
         "permalink": "/baseline/"
+    },
+    "rule-metadata.md": {
+        "layout": "default",
+        "title": "Named Rules & Metadata",
+        "nav_order": 57,
+        "permalink": "/rule-metadata/"
     },
     "showcases.md": {
         "layout": "default",

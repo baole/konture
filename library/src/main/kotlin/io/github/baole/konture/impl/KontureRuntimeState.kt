@@ -7,6 +7,7 @@
 package io.github.baole.konture.impl
 
 import io.github.baole.konture.ProjectGraph
+import io.github.baole.konture.core.model.RuleMetadata
 import java.util.Locale
 
 @Suppress("LongParameterList")
@@ -17,6 +18,7 @@ internal class KontureRuntimeState(
     val baselineManager: BaselineManager = BaselineManager(),
     val locale: Locale = Locale.ENGLISH,
     val isLocaleOverridden: Boolean = false,
+    val currentRuleMetadata: RuleMetadata? = null,
 ) {
     val projectGraphLoader: ProjectGraphLoader = ProjectGraphLoader()
 
@@ -26,6 +28,7 @@ internal class KontureRuntimeState(
         projectGraph: ProjectGraph? = this.projectGraph,
         locale: Locale = this.locale,
         isLocaleOverridden: Boolean = this.isLocaleOverridden,
+        currentRuleMetadata: RuleMetadata? = this.currentRuleMetadata,
     ): KontureRuntimeState {
         return KontureRuntimeState(
             baselinePath = baselinePath,
@@ -34,6 +37,7 @@ internal class KontureRuntimeState(
             baselineManager = this.baselineManager,
             locale = locale,
             isLocaleOverridden = isLocaleOverridden,
+            currentRuleMetadata = currentRuleMetadata,
         )
     }
 }
