@@ -147,4 +147,29 @@ class ViolationModelTest {
         val decoded: ViolationReport = json.decodeFromString(encoded)
         assertEquals(reportWithErrors, decoded)
     }
+
+    @Test
+    fun testRuleMetadataAndViolationMetadata() {
+        val metadata =
+            RuleMetadata(
+                id = "domain.repositories.must-be-interfaces",
+                description = "Domain repositories must be interfaces to enforce DIP",
+                severity = Severity.ERROR,
+                tags = setOf("architecture", "domain"),
+            )
+        val subject = Subject.ClassSubject("com.example.Repo", "Repo")
+        val violation =
+            Violation(
+                ruleId = metadata.id,
+                subject = subject,
+                message = "Repo is not an interface",
+                severity = metadata.severity,
+                metadata = metadata,
+            )
+
+        assertEquals(metadata, violation.metadata)
+        val encoded = json.encodeToString(violation)
+        val decoded: Violation = json.decodeFromString(encoded)
+        assertEquals(violation, decoded)
+    }
 }

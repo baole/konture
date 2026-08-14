@@ -118,6 +118,24 @@ public class KontureContext(
         addSuite("layered") { dsl.verify() }
     }
 
+    /**
+     * Declares a named architecture rule with metadata and sub-rules inside this architecture validation context.
+     */
+    public fun rule(
+        id: String,
+        block: RuleBuilder.() -> Unit,
+    ): RuleDefinition {
+        val builder = RuleBuilder(id, projectGraph)
+        builder.apply(block)
+        val ruleDef =
+            RuleDefinition(
+                metadata = builder.buildMetadata(),
+                executionSuites = builder.executionSuites,
+            )
+        addSuite(id) { ruleDef.check() }
+        return ruleDef
+    }
+
     internal fun verifyAll() {
         /** Filter or assertion criteria for failures. */
         val failures = mutableListOf<String>()

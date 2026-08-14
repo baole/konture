@@ -7,6 +7,7 @@
 package io.github.baole.konture
 
 import io.github.baole.konture.impl.BaselineManager
+import io.github.baole.konture.impl.KontureRuntimeStateProvider
 import io.github.baole.konture.impl.LayerConstraint
 import io.github.baole.konture.impl.LayerDefinition
 import io.github.baole.konture.impl.PatternMatchers
@@ -378,6 +379,11 @@ public class LayeredArchitectureBuilder(
         val allClasses = g.getAllModules().flatMap { it.classes }
 
         /** Filter or assertion criteria for run check. */
+        val currentMeta = KontureRuntimeStateProvider.currentState.currentRuleMetadata
+        val activeHeader =
+            currentMeta?.description
+                ?: io.github.baole.konture.i18n.getMessage("layered.architecture.violationHeader")
+
         val runCheck = { list: MutableList<String> ->
             for (constraint in constraints) {
                 constraint.verify(layers, allClasses, list)
@@ -385,7 +391,7 @@ public class LayeredArchitectureBuilder(
         }
 
         BaselineManager.checkRule(
-            io.github.baole.konture.i18n.getMessage("layered.architecture.violationHeader"),
+            activeHeader,
             runCheck,
         )
     }
