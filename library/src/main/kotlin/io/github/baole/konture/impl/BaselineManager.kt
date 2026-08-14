@@ -390,6 +390,16 @@ internal class BaselineManager {
         }
     }
 
+    /**
+     * Executes a rule check function producing structured [Violation] instances, performs baseline
+     * suppression filtering, handles localized [AssertionError] throwing if un-baselined violations exist,
+     * and returns the aggregated [ViolationReport].
+     *
+     * @param ruleId The unique identifier of the rule being executed (e.g. `classes.rule`).
+     * @param violationHeader Localized failure header message displayed if violations are thrown.
+     * @param runCheckReport Callback lambda populating the provided list with structured [Violation] instances.
+     * @return The resulting [ViolationReport] containing all detected violations.
+     */
     fun checkRuleReport(
         ruleId: String,
         violationHeader: String,
@@ -593,6 +603,7 @@ internal class BaselineManager {
             KontureRuntimeStateProvider.currentState.baselineManager.checkRule(violationHeader, runCheck)
         }
 
+        /** Delegates [checkRuleReport] to current runtime state's [BaselineManager]. */
         fun checkRuleReport(
             ruleId: String,
             violationHeader: String,

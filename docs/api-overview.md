@@ -101,6 +101,20 @@ Konture.properties {
 
 ---
 
+## 🚨 Structured Violation Model
+
+When executing declarative rules with `.check()`, Konture returns a structured `ViolationReport`. The underlying core models are fully `@Serializable` using `kotlinx.serialization`, enabling custom test reporters, IDE plugins, or CI quality tools to consume structured diagnostic results:
+
+| Core Model | Description |
+| :--- | :--- |
+| **`ViolationReport`** | Contains `ruleId`, `violations: List<Violation>`, `severity: Severity`, and computed flags `hasErrors` / `hasWarnings`. |
+| **`Violation`** | Details an individual violation including `ruleId`, `subject: Subject`, `target: Subject?`, `sourceLocation: SourceLocation?`, `dependencyPath: List<Subject>`, `message`, and `severity`. |
+| **`Subject`** | Sealed hierarchy identifying the target element (`ModuleSubject`, `ClassSubject`, `FunctionSubject`, or `CustomSubject`). |
+| **`SourceLocation`** | Source location metadata containing build-root relative `filePath`, 1-based `line`, and optional `column`. |
+| **`Severity`** | Enum representing violation importance (`INFO`, `WARNING`, `ERROR`). |
+
+---
+
 ## 📚 KDoc API Reference
 
 For detailed KDoc function signatures and type specifications generated directly from source headers, see the [Dokka API Docs](api-docs.md).

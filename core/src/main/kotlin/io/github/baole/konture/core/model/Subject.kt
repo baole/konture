@@ -13,7 +13,10 @@ import kotlinx.serialization.Serializable
  */
 @Serializable
 public sealed interface Subject {
+    /** The human-readable name or identifier of the subject (e.g. FQCN, module path, function name). */
     public val name: String
+
+    /** The optional source location where the subject is declared in the codebase. */
     public val location: SourceLocation?
 
     /**

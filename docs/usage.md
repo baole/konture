@@ -109,6 +109,22 @@ class DeclarativeArchitectureTest {
 }
 ```
 
+#### Programmatic Inspection with `ViolationReport`
+
+When executing rules with `.check()`, Konture returns a structured `ViolationReport` containing detailed, serializable `Violation` entries (including `ruleId`, `subject`, `severity`, and `sourceLocation`). While `.check()` throws an `AssertionError` if unbaselined violations are present, it also returns the `ViolationReport` object so test harnesses or custom reporters can inspect results programmatically:
+
+```kotlin
+val report: ViolationReport = Konture.classes()
+    .that { name.endsWith("ViewModel") }
+    .should { bePublic() }
+    .check()
+
+println("Found ${report.violations.size} violations (hasErrors=${report.hasErrors})")
+for (violation in report.violations) {
+    println("[${violation.severity}] ${violation.subject.name}: ${violation.message}")
+}
+```
+
 ---
 
 ## 🏃 Running the Tests

@@ -21,6 +21,9 @@ public data class ViolationReport(
     val violations: List<Violation>,
     val severity: Severity = Severity.ERROR,
 ) {
+    /** Returns true if the report contains any violations with [Severity.ERROR]. */
     public val hasErrors: Boolean get() = violations.any { it.severity == Severity.ERROR }
+
+    /** Returns true if the report contains any violations with [Severity.WARNING]. */
     public val hasWarnings: Boolean get() = violations.any { it.severity == Severity.WARNING }
 }
