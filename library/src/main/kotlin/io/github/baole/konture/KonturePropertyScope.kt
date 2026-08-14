@@ -283,6 +283,10 @@ public fun KonturePropertyScope.withNameStartingWith(prefix: String): KonturePro
 public fun KonturePropertyScope.resideInAPackage(packagePattern: String): KonturePropertyScope =
     KonturePropertyScope(properties.resideInAPackage(packagePattern))
 
+/** Filters properties in this scope matching glob pattern [pattern]. */
+public fun KonturePropertyScope.withNameMatching(pattern: String): KonturePropertyScope =
+    KonturePropertyScope(properties.withNameMatching(pattern))
+
 /** Filters properties in this scope residing in packages matching [packagePattern]. */
 @Deprecated(
     message = "Renamed for consistency across Konture DSL scopes.",

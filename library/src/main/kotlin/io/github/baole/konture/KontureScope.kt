@@ -101,7 +101,8 @@ public class KontureScope(
 }
 
 /** Combines two [KontureScope] instances into a new scope containing classes from both. */
-public operator fun KontureScope.plus(other: KontureScope): KontureScope = KontureScope(this.classes + other.classes)
+public operator fun KontureScope.plus(other: KontureScope): KontureScope =
+    KontureScope((this.classes + other.classes).distinctBy { it.fqName })
 
 /** Subtracts classes present in [other] scope from this scope. */
 public operator fun KontureScope.minus(other: KontureScope): KontureScope {
@@ -798,6 +799,54 @@ public fun List<ClassDeclaration>.assertOnlyDependOnClassesInAnyPackage(
     }
 }
 
+/**
+ * Asserts that the selected classes do not depend on classes residing in packages matching the specified patterns.
+ *
+ * @param packagePatterns Package wildcard patterns representing forbidden dependency packages.
+ * @param allClasses The complete collection of class declarations used for dependency resolution. Defaults to all classes in the loaded project graph.
+ * @throws AssertionError if any target class depends on a forbidden package.
+ */
+public fun List<ClassDeclaration>.assertNotDependOnClassesInAnyPackage(
+    vararg packagePatterns: String,
+    allClasses: List<ClassDeclaration> = Konture.projectGraph.getAllModules().flatMap { it.classes },
+) {
+    /** Filter or assertion criteria for violations. */
+    val violations = mutableListOf<String>()
+
+    /** Filter or assertion criteria for standard exclusions. */
+    val standardExclusions = listOf("java", "javax", "kotlin")
+
+    for (cls in this) {
+        /** Filter or assertion criteria for dep packages. */
+        val depPackages =
+            cls.collectDependencyPackages(allClasses).filter { depPkg ->
+                depPkg != cls.packageName && standardExclusions.none { depPkg == it || depPkg.startsWith("$it.") }
+            }
+        for (depPkg in depPackages) {
+            /** Filter or assertion criteria for is forbidden. */
+            val isForbidden =
+                packagePatterns.any { pattern ->
+                    PatternMatchers.matchesPackage(pattern, depPkg)
+                }
+            if (isForbidden) {
+                violations.add(
+                    "Class ${cls.fqName} depends on forbidden package $depPkg matching pattern(s): ${packagePatterns.joinToString()} (at ${ViolationLocation.format(
+                        cls,
+                    )})",
+                )
+            }
+        }
+    }
+    if (violations.isNotEmpty()) {
+        throw AssertionError(
+            buildString {
+                appendLine("Assertion failed! The following classes violate dependency rules:")
+                violations.forEach { appendLine("  - $it") }
+            },
+        )
+    }
+}
+
 // --- KontureScope delegation assertions ---
 
 /**
@@ -970,3 +1019,15 @@ public fun KontureScope.assertOnlyDependOnClassesInAnyPackage(
     vararg packagePatterns: String,
     allClasses: List<ClassDeclaration> = Konture.projectGraph.getAllModules().flatMap { it.classes },
 ): Unit = classes.assertOnlyDependOnClassesInAnyPackage(*packagePatterns, allClasses = allClasses)
+
+/**
+ * Asserts that the selected classes in the scope do not depend on classes residing in packages matching the specified patterns.
+ *
+ * @param packagePatterns Package wildcard patterns representing forbidden dependency packages.
+ * @param allClasses The complete collection of class declarations used for dependency resolution. Defaults to all classes in the loaded project graph.
+ * @throws AssertionError if any target class depends on a class in the forbidden packages.
+ */
+public fun KontureScope.assertNotDependOnClassesInAnyPackage(
+    vararg packagePatterns: String,
+    allClasses: List<ClassDeclaration> = Konture.projectGraph.getAllModules().flatMap { it.classes },
+): Unit = classes.assertNotDependOnClassesInAnyPackage(*packagePatterns, allClasses = allClasses)

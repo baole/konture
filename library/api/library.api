@@ -120,6 +120,34 @@ public final class io/github/baole/konture/ClassDeclarationShouldContext {
 	public final fun isInterface ()Z
 }
 
+public final class io/github/baole/konture/ClassSelectorShould {
+	public final fun beAbstract ()V
+	public final fun beAccessedBy ([Ljava/lang/String;)V
+	public final fun beAssignableTo ([Ljava/lang/String;)V
+	public final fun beData ()V
+	public final fun beEnums ()V
+	public final fun beInline ()V
+	public final fun beInterfaces ()V
+	public final fun beInternal ()V
+	public final fun bePrivate ()V
+	public final fun beProtected ()V
+	public final fun bePublic ()V
+	public final fun beSealed ()V
+	public final fun getSelector ()Lio/github/baole/konture/KontureScope;
+	public final fun haveAnnotationOf ([Ljava/lang/String;)V
+	public final fun haveNameEndingWith ([Ljava/lang/String;)V
+	public final fun haveNameMatching ([Ljava/lang/String;)V
+	public final fun haveNameStartingWith ([Ljava/lang/String;)V
+	public final fun haveVisibility (Lio/github/baole/konture/Visibility;)V
+	public final fun notBeAccessedByAnyPackage ([Ljava/lang/String;)V
+	public final fun notDependOnPackages (Ljava/util/List;)V
+	public final fun notDependOnPackages ([Ljava/lang/String;)V
+	public final fun onlyBeAccessedByAnyPackage ([Ljava/lang/String;)V
+	public final fun onlyDependOnPackages (Ljava/util/List;)V
+	public final fun onlyDependOnPackages ([Ljava/lang/String;)V
+	public final fun resideInAPackage ([Ljava/lang/String;)V
+}
+
 public final class io/github/baole/konture/ClassesFluentKt {
 	public static final fun hasAllAnnotations (Lio/github/baole/konture/ClassDeclaration;Ljava/util/List;)Z
 	public static final fun hasAllAnnotations (Lio/github/baole/konture/ClassDeclaration;[Ljava/lang/String;)Z
@@ -1237,6 +1265,16 @@ public final class io/github/baole/konture/FileDeclarationShouldContext {
 	public final fun hasImportContaining ([Ljava/lang/String;)Z
 }
 
+public final class io/github/baole/konture/FileSelectorShould {
+	public final fun getSelector ()Lio/github/baole/konture/KontureFileScope;
+	public final fun haveNameEndingWith ([Ljava/lang/String;)V
+	public final fun haveNameMatching ([Ljava/lang/String;)V
+	public final fun haveNameStartingWith ([Ljava/lang/String;)V
+	public final fun haveNoWildcardImports ()V
+	public final fun haveOnlyOneClassPerFile ()V
+	public final fun resideInAPackage ([Ljava/lang/String;)V
+}
+
 public final class io/github/baole/konture/FilesFluentKt {
 	public static final fun containsClassWith (Lio/github/baole/konture/FileDeclarationContext;Lkotlin/jvm/functions/Function1;)Z
 	public static final fun getClasses (Lio/github/baole/konture/FileDeclarationContext;)Ljava/util/List;
@@ -1887,6 +1925,21 @@ public final class io/github/baole/konture/FunctionDeclarationShouldContext {
 	public final fun hasAnyAnnotation ([Ljava/lang/String;)Z
 	public final fun isExtension ()Z
 	public final fun noneParameterMatches (Ljava/lang/String;Lkotlin/jvm/functions/Function1;)V
+}
+
+public final class io/github/baole/konture/FunctionSelectorShould {
+	public final fun beInfix ()V
+	public final fun beInline ()V
+	public final fun beInternal ()V
+	public final fun beOperator ()V
+	public final fun beOverride ()V
+	public final fun bePrivate ()V
+	public final fun beProtected ()V
+	public final fun bePublic ()V
+	public final fun beSuspend ()V
+	public final fun getSelector ()Lio/github/baole/konture/KontureFunctionScope;
+	public final fun haveAnnotationOf ([Ljava/lang/String;)V
+	public final fun haveNameMatching ([Ljava/lang/String;)V
 }
 
 public final class io/github/baole/konture/FunctionsFluentKt {
@@ -2803,11 +2856,17 @@ public final class io/github/baole/konture/KontureContext {
 	public final fun classes (Lkotlin/jvm/functions/Function1;)V
 	public final fun files (Lkotlin/jvm/functions/Function1;)V
 	public final fun functions (Lkotlin/jvm/functions/Function1;)V
+	public final fun getClasses ()Lio/github/baole/konture/KontureScope;
+	public final fun getFiles ()Lio/github/baole/konture/KontureFileScope;
+	public final fun getFunctions ()Lio/github/baole/konture/KontureFunctionScope;
+	public final fun getModules ()Lio/github/baole/konture/KontureModuleScope;
+	public final fun getProperties ()Lio/github/baole/konture/KonturePropertyScope;
 	public final fun layered (Lkotlin/jvm/functions/Function1;)V
 	public final fun layeredArchitecture (Lkotlin/jvm/functions/Function1;)V
 	public final fun modules (Lkotlin/jvm/functions/Function1;)V
 	public final fun properties (Lkotlin/jvm/functions/Function1;)V
 	public final fun rule (Ljava/lang/String;Lkotlin/jvm/functions/Function1;)Lio/github/baole/konture/RuleDefinition;
+	public final fun slices (Ljava/lang/String;)Lio/github/baole/konture/KontureSliceScope;
 	public final fun slices (Lkotlin/jvm/functions/Function1;)V
 }
 
@@ -2929,6 +2988,7 @@ public final class io/github/baole/konture/KontureFunctionScopeKt {
 	public static final fun withModule (Ljava/util/List;Ljava/lang/String;)Ljava/util/List;
 	public static final fun withNameEndingWith (Lio/github/baole/konture/KontureFunctionScope;Ljava/lang/String;)Lio/github/baole/konture/KontureFunctionScope;
 	public static final fun withNameEndingWith (Ljava/util/List;Ljava/lang/String;)Ljava/util/List;
+	public static final fun withNameMatching (Lio/github/baole/konture/KontureFunctionScope;Ljava/lang/String;)Lio/github/baole/konture/KontureFunctionScope;
 	public static final fun withNameMatching (Ljava/util/List;Ljava/lang/String;)Ljava/util/List;
 	public static final fun withNameStartingWith (Lio/github/baole/konture/KontureFunctionScope;Ljava/lang/String;)Lio/github/baole/konture/KontureFunctionScope;
 	public static final fun withNameStartingWith (Ljava/util/List;Ljava/lang/String;)Ljava/util/List;
@@ -3003,6 +3063,7 @@ public final class io/github/baole/konture/KonturePropertyScopeKt {
 	public static final fun withModule (Ljava/util/List;Ljava/lang/String;)Ljava/util/List;
 	public static final fun withNameEndingWith (Lio/github/baole/konture/KonturePropertyScope;Ljava/lang/String;)Lio/github/baole/konture/KonturePropertyScope;
 	public static final fun withNameEndingWith (Ljava/util/List;Ljava/lang/String;)Ljava/util/List;
+	public static final fun withNameMatching (Lio/github/baole/konture/KonturePropertyScope;Ljava/lang/String;)Lio/github/baole/konture/KonturePropertyScope;
 	public static final fun withNameMatching (Ljava/util/List;Ljava/lang/String;)Ljava/util/List;
 	public static final fun withNameStartingWith (Lio/github/baole/konture/KonturePropertyScope;Ljava/lang/String;)Lio/github/baole/konture/KonturePropertyScope;
 	public static final fun withNameStartingWith (Ljava/util/List;Ljava/lang/String;)Ljava/util/List;
@@ -3070,6 +3131,10 @@ public final class io/github/baole/konture/KontureScopeKt {
 	public static final fun assertNotBeAccessedByAnyPackage (Ljava/util/List;[Ljava/lang/String;Ljava/util/List;)V
 	public static synthetic fun assertNotBeAccessedByAnyPackage$default (Lio/github/baole/konture/KontureScope;[Ljava/lang/String;Ljava/util/List;ILjava/lang/Object;)V
 	public static synthetic fun assertNotBeAccessedByAnyPackage$default (Ljava/util/List;[Ljava/lang/String;Ljava/util/List;ILjava/lang/Object;)V
+	public static final fun assertNotDependOnClassesInAnyPackage (Lio/github/baole/konture/KontureScope;[Ljava/lang/String;Ljava/util/List;)V
+	public static final fun assertNotDependOnClassesInAnyPackage (Ljava/util/List;[Ljava/lang/String;Ljava/util/List;)V
+	public static synthetic fun assertNotDependOnClassesInAnyPackage$default (Lio/github/baole/konture/KontureScope;[Ljava/lang/String;Ljava/util/List;ILjava/lang/Object;)V
+	public static synthetic fun assertNotDependOnClassesInAnyPackage$default (Ljava/util/List;[Ljava/lang/String;Ljava/util/List;ILjava/lang/Object;)V
 	public static final fun assertOnlyBeAccessedByAnyPackage (Lio/github/baole/konture/KontureScope;[Ljava/lang/String;Ljava/util/List;)V
 	public static final fun assertOnlyBeAccessedByAnyPackage (Ljava/util/List;[Ljava/lang/String;Ljava/util/List;)V
 	public static synthetic fun assertOnlyBeAccessedByAnyPackage$default (Lio/github/baole/konture/KontureScope;[Ljava/lang/String;Ljava/util/List;ILjava/lang/Object;)V
@@ -3266,6 +3331,15 @@ public final class io/github/baole/konture/Module {
 	public final fun getSourceSets ()Ljava/util/List;
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
+}
+
+public final class io/github/baole/konture/ModuleSelectorShould {
+	public final fun getSelector ()Lio/github/baole/konture/KontureModuleScope;
+	public final fun havePlugin ([Ljava/lang/String;)V
+	public final fun notDependOnModule ([Ljava/lang/String;)V
+	public final fun notDependOnModules ([Ljava/lang/String;)V
+	public final fun notHavePlugin ([Ljava/lang/String;)V
+	public final fun onlyDependOnModules ([Ljava/lang/String;)V
 }
 
 public final class io/github/baole/konture/ModuleShouldContext {
@@ -4502,6 +4576,20 @@ public final class io/github/baole/konture/PropertyDeclarationShouldContext {
 	public final fun isVar ()Z
 }
 
+public final class io/github/baole/konture/PropertySelectorShould {
+	public final fun beConst ()V
+	public final fun beInternal ()V
+	public final fun beLateinit ()V
+	public final fun bePrivate ()V
+	public final fun beProtected ()V
+	public final fun bePublic ()V
+	public final fun beVal ()V
+	public final fun beVar ()V
+	public final fun getSelector ()Lio/github/baole/konture/KonturePropertyScope;
+	public final fun haveAnnotationOf ([Ljava/lang/String;)V
+	public final fun haveNameMatching ([Ljava/lang/String;)V
+}
+
 public final class io/github/baole/konture/ResolutionConfidence : java/lang/Enum {
 	public static final field POSSIBLE Lio/github/baole/konture/ResolutionConfidence;
 	public static final field RESOLVED Lio/github/baole/konture/ResolutionConfidence;
@@ -4547,6 +4635,26 @@ public final class io/github/baole/konture/RuleDslKt {
 	public static final fun rule (Ljava/lang/String;Lkotlin/jvm/functions/Function1;)Lio/github/baole/konture/RuleDefinition;
 }
 
+public final class io/github/baole/konture/SelectorsKt {
+	public static final fun inPackage (Lio/github/baole/konture/KontureFileScope;Ljava/lang/String;)Lio/github/baole/konture/KontureFileScope;
+	public static final fun inPackage (Lio/github/baole/konture/KontureFunctionScope;Ljava/lang/String;)Lio/github/baole/konture/KontureFunctionScope;
+	public static final fun inPackage (Lio/github/baole/konture/KontureModuleScope;Ljava/lang/String;)Lio/github/baole/konture/KontureModuleScope;
+	public static final fun inPackage (Lio/github/baole/konture/KonturePropertyScope;Ljava/lang/String;)Lio/github/baole/konture/KonturePropertyScope;
+	public static final fun inPackage (Lio/github/baole/konture/KontureScope;Ljava/lang/String;)Lio/github/baole/konture/KontureScope;
+	public static final fun should (Lio/github/baole/konture/KontureFileScope;)Lio/github/baole/konture/FileSelectorShould;
+	public static final fun should (Lio/github/baole/konture/KontureFunctionScope;)Lio/github/baole/konture/FunctionSelectorShould;
+	public static final fun should (Lio/github/baole/konture/KontureModuleScope;)Lio/github/baole/konture/ModuleSelectorShould;
+	public static final fun should (Lio/github/baole/konture/KonturePropertyScope;)Lio/github/baole/konture/PropertySelectorShould;
+	public static final fun should (Lio/github/baole/konture/KontureScope;)Lio/github/baole/konture/ClassSelectorShould;
+	public static final fun should (Lio/github/baole/konture/KontureSliceScope;)Lio/github/baole/konture/SliceSelectorShould;
+	public static final fun withName (Lio/github/baole/konture/KontureFileScope;Ljava/lang/String;)Lio/github/baole/konture/KontureFileScope;
+	public static final fun withName (Lio/github/baole/konture/KontureFunctionScope;Ljava/lang/String;)Lio/github/baole/konture/KontureFunctionScope;
+	public static final fun withName (Lio/github/baole/konture/KontureModuleScope;Ljava/lang/String;)Lio/github/baole/konture/KontureModuleScope;
+	public static final fun withName (Lio/github/baole/konture/KonturePropertyScope;Ljava/lang/String;)Lio/github/baole/konture/KonturePropertyScope;
+	public static final fun withName (Lio/github/baole/konture/KontureScope;Ljava/lang/String;)Lio/github/baole/konture/KontureScope;
+	public static final fun withName (Lio/github/baole/konture/KontureSliceScope;Ljava/lang/String;)Lio/github/baole/konture/KontureSliceScope;
+}
+
 public final class io/github/baole/konture/Slice {
 	public fun <init> (Ljava/lang/String;Ljava/util/Set;Ljava/util/List;)V
 	public final fun component1 ()Ljava/lang/String;
@@ -4560,6 +4668,12 @@ public final class io/github/baole/konture/Slice {
 	public final fun getPackages ()Ljava/util/Set;
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
+}
+
+public final class io/github/baole/konture/SliceSelectorShould {
+	public final fun beFreeOfCycles ()V
+	public final fun getSelector ()Lio/github/baole/konture/KontureSliceScope;
+	public final fun notHaveCycles ()V
 }
 
 public final class io/github/baole/konture/SliceShouldContext {

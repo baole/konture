@@ -26,6 +26,24 @@ public class KontureContext(
 
     private val ruleSuites = mutableListOf<RuleSuite>()
 
+    /** Returns a [ClassSelector] for all classes in the project graph. */
+    public val classes: ClassSelector get() = KontureScope.fromProject(projectGraph)
+
+    /** Returns a [ModuleSelector] for all modules in the project graph. */
+    public val modules: ModuleSelector get() = KontureModuleScope.fromProject(projectGraph)
+
+    /** Returns a [FileSelector] for all files in the project graph. */
+    public val files: FileSelector get() = KontureFileScope.fromProject(projectGraph)
+
+    /** Returns a [FunctionSelector] for all functions in the project graph. */
+    public val functions: FunctionSelector get() = KontureFunctionScope.fromProject(projectGraph)
+
+    /** Returns a [PropertySelector] for all properties in the project graph. */
+    public val properties: PropertySelector get() = KonturePropertyScope.fromProject(projectGraph)
+
+    /** Returns a [SliceSelector] for packages matching [pattern] in the project graph. */
+    public fun slices(pattern: String): SliceSelector = KontureSliceScope.fromProject(pattern, projectGraph)
+
     private fun addSuite(
         label: String,
         block: () -> Unit,
