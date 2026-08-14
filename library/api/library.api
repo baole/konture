@@ -2762,6 +2762,11 @@ public final class io/github/baole/konture/FunctionsThatStructureFilter$DefaultI
 	public static fun notHaveReturnType (Lio/github/baole/konture/FunctionsThatStructureFilter;Lkotlin/reflect/KClass;)Lio/github/baole/konture/FunctionsRuleBuilder;
 }
 
+public final class io/github/baole/konture/HumanReadableViolationFormatter {
+	public static final field INSTANCE Lio/github/baole/konture/HumanReadableViolationFormatter;
+	public final fun format (Lio/github/baole/konture/core/model/ViolationReport;)Ljava/lang/String;
+}
+
 public final class io/github/baole/konture/Konture {
 	public static final field DEFAULT_BASELINE_FILENAME Ljava/lang/String;
 	public static final field INSTANCE Lio/github/baole/konture/Konture;

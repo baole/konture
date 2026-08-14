@@ -60,7 +60,7 @@ class SlicesRuleBuilderTest {
             assertThrows(AssertionError::class.java) {
                 SlicesRuleBuilder(graph).matching("com.app.(*)..").should().beFreeOfCycles().check()
             }
-        assertTrue(error.message!!.contains("Slice architecture violation(s) detected:"))
+        assertTrue(error.message!!.contains("violation(s) found:"))
         assertTrue(
             error.message!!.contains("a -> b -> a"),
             "Expected the cycle path rendered from its smallest key, got: ${error.message}",

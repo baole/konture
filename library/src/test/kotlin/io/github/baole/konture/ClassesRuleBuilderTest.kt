@@ -103,8 +103,12 @@ class ClassesRuleBuilderTest : RuleBuildersTestBase() {
                     .check()
             }
         assertTrue(
-            error.message!!.contains("(at :moduleA, main source set) (com.example.ClassA(ClassA.kt"),
-            "Expected uniform module + source set location, got: ${error.message}",
+            error.message!!.contains("Class com.example.ClassA should be an interface"),
+            "Expected class violation message, got: ${error.message}",
+        )
+        assertTrue(
+            error.message!!.contains("File: /src/ClassA.kt"),
+            "Expected source location file path, got: ${error.message}",
         )
     }
 
