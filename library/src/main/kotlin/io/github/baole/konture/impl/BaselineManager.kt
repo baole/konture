@@ -6,6 +6,7 @@
 
 package io.github.baole.konture.impl
 
+import io.github.baole.konture.HumanReadableViolationFormatter
 import io.github.baole.konture.Konture
 import io.github.baole.konture.Module
 import io.github.baole.konture.ProjectGraph
@@ -430,10 +431,10 @@ internal class BaselineManager {
 
                 val unmatchedLocalized =
                     unmatchedIndices.map { index ->
-                        if (index < localizedViolations.size) localizedViolations[index].message else englishViolations[index].message
+                        if (index < localizedViolations.size) localizedViolations[index] else englishViolations[index]
                     }
 
-                throwNewViolations(unmatchedLocalized, violationHeader)
+                throwNewViolationsReport(ruleId, unmatchedLocalized, violationHeader)
             }
         }
 
@@ -464,6 +465,17 @@ internal class BaselineManager {
             }
         }
         return indices
+    }
+
+    private fun throwNewViolationsReport(
+        ruleId: String,
+        unmatchedViolations: List<Violation>,
+        violationHeader: String? = null,
+    ) {
+        if (unmatchedViolations.isEmpty()) return
+        val report = ViolationReport(ruleId = ruleId, violations = unmatchedViolations)
+        val message = HumanReadableViolationFormatter.format(report, customHeader = violationHeader)
+        throw AssertionError(message)
     }
 
     private fun throwNewViolations(

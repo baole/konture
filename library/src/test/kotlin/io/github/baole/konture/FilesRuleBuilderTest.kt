@@ -31,7 +31,7 @@ class FilesRuleBuilderTest : RuleBuildersTestBase() {
                 FilesRuleBuilder(graph, SourceSets.tests()).should().notCall("io.mockk.spyk").check()
             }
         assertTrue(error.message!!.contains("spyk"))
-        assertTrue(error.message!!.contains("test source set"))
+        assertTrue(error.message!!.contains("File: /src/Test.kt"))
     }
 
     @Test
