@@ -21,13 +21,13 @@ public class FilesThat internal constructor(
      */
     public fun not(): FilesThat = builder.not()
 
-    /** Filter or assertion criteria for reside in a package. */
+    /** Filters files in a package matching [packagePattern]. */
     public infix fun inPackage(packagePattern: String): FilesRuleBuilder {
         builder.setThat { PatternMatchers.matchesPackage(packagePattern, it.declaration.packageName) }
         return builder
     }
 
-    /** Filter or assertion criteria for reside in a package. */
+    /** Filters files in packages matching [packagePatterns]. */
     public infix fun inPackage(packagePatterns: List<String>): FilesRuleBuilder {
         builder.setThat { context ->
             packagePatterns.any { PatternMatchers.matchesPackage(it, context.declaration.packageName) }
@@ -35,16 +35,16 @@ public class FilesThat internal constructor(
         return builder
     }
 
-    /** Filter or assertion criteria for reside in a package. */
+    /** Filters files in packages matching [packagePatterns]. */
     public fun inPackage(vararg packagePatterns: String): FilesRuleBuilder = inPackage(packagePatterns.toList())
 
-    /** Filter or assertion criteria for reside in a package. */
+    /** Filters files in a package matching [predicate]. */
     public infix fun inPackage(predicate: (String) -> Boolean): FilesRuleBuilder {
         builder.setThat { predicate(it.declaration.packageName) }
         return builder
     }
 
-    /** Filter or assertion criteria for reside in package of. */
+    /** Filters files in the package of type [type]. */
     public infix fun inPackageOf(type: kotlin.reflect.KClass<*>): FilesRuleBuilder =
         inPackage(type.toKonturePackageReference().packageName)
 
@@ -206,9 +206,8 @@ public class FilesThat internal constructor(
     @Deprecated("Use nameMatches instead.", ReplaceWith("nameMatches(*patterns)"))
     public fun haveNameMatching(vararg patterns: String): FilesRuleBuilder = nameMatches(*patterns)
 
-    /** Filter or assertion criteria for reside in a module. */
+    /** Filters files in a module matching [modulePath]. */
     public infix fun inModule(modulePath: String): FilesRuleBuilder {
-        /** Filter or assertion criteria for normalized. */
         val normalized =
             if (!modulePath.startsWith(":") && !modulePath.startsWith("**") && modulePath.isNotEmpty()) {
                 KontureLogger.log(
@@ -223,9 +222,8 @@ public class FilesThat internal constructor(
         return builder
     }
 
-    /** Filter or assertion criteria for reside in a module. */
+    /** Filters files in modules matching [modulePaths]. */
     public infix fun inModules(modulePaths: List<String>): FilesRuleBuilder {
-        /** Filter or assertion criteria for normalized paths. */
         val normalizedPaths =
             modulePaths.map { path ->
                 if (!path.startsWith(":") && !path.startsWith("**") && path.isNotEmpty()) {
@@ -244,7 +242,7 @@ public class FilesThat internal constructor(
         return builder
     }
 
-    /** Filter or assertion criteria for reside in a module. */
+    /** Filters files in modules matching [modulePaths]. */
     public fun inModules(vararg modulePaths: String): FilesRuleBuilder = inModules(modulePaths.toList())
 
     /** Legacy resideInAModule method. */
@@ -271,9 +269,8 @@ public class FilesThat internal constructor(
     @Deprecated("Use inModules instead.", ReplaceWith("inModules(*modulePaths)"))
     public fun resideInModules(vararg modulePaths: String): FilesRuleBuilder = inModules(*modulePaths)
 
-    /** Filter or assertion criteria for not reside in a module. */
+    /** Filters files not in a module matching [modulePath]. */
     public infix fun notInModule(modulePath: String): FilesRuleBuilder {
-        /** Filter or assertion criteria for normalized. */
         val normalized =
             if (!modulePath.startsWith(":") && !modulePath.startsWith("**") && modulePath.isNotEmpty()) {
                 ":$modulePath"
@@ -281,7 +278,6 @@ public class FilesThat internal constructor(
                 modulePath
             }
         builder.setThat { context ->
-            /** Filter or assertion criteria for match. */
             val match =
                 context.modulePath == normalized || PatternMatchers.matchesModuleGlob(normalized, context.modulePath)
             !match
@@ -289,15 +285,13 @@ public class FilesThat internal constructor(
         return builder
     }
 
-    /** Filter or assertion criteria for not reside in a module. */
+    /** Filters files not in modules matching [modulePaths]. */
     public infix fun notInModules(modulePaths: List<String>): FilesRuleBuilder {
-        /** Filter or assertion criteria for normalized. */
         val normalized =
             modulePaths.map {
                 if (!it.startsWith(":") && !it.startsWith("**") && it.isNotEmpty()) ":$it" else it
             }
         builder.setThat { context ->
-            /** Filter or assertion criteria for match. */
             val match =
                 normalized.any { target ->
                     context.modulePath == target || PatternMatchers.matchesModuleGlob(target, context.modulePath)
@@ -307,7 +301,7 @@ public class FilesThat internal constructor(
         return builder
     }
 
-    /** Filter or assertion criteria for not reside in a module. */
+    /** Filters files not in modules matching [modulePaths]. */
     public fun notInModules(vararg modulePaths: String): FilesRuleBuilder = notInModules(modulePaths.toList())
 
     /** Legacy notResideInAModule method. */

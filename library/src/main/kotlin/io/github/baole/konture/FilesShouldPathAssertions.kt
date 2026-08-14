@@ -15,7 +15,7 @@ public interface FilesShouldPathAssertions {
     /** Filter or assertion criteria for builder. */
     public val builder: FilesRuleBuilder
 
-    /** Filter or assertion criteria for reside in package. */
+    /** Asserts that files reside in a package matching [packagePattern]. */
     public infix fun inPackage(packagePattern: String): FilesRuleBuilder {
         builder.setShould { file, _, violations ->
             if (!PatternMatchers.matchesPackage(packagePattern, file.declaration.packageName)) {
@@ -32,10 +32,9 @@ public interface FilesShouldPathAssertions {
         return builder
     }
 
-    /** Filter or assertion criteria for reside in package. */
+    /** Asserts that files reside in packages matching [packagePatterns]. */
     public infix fun inPackage(packagePatterns: List<String>): FilesRuleBuilder {
         builder.setShould { file, _, violations ->
-            /** Filter or assertion criteria for matches. */
             val matches = packagePatterns.any { PatternMatchers.matchesPackage(it, file.declaration.packageName) }
             if (!matches) {
                 violations.add(
@@ -51,10 +50,10 @@ public interface FilesShouldPathAssertions {
         return builder
     }
 
-    /** Filter or assertion criteria for reside in package. */
+    /** Asserts that files reside in packages matching [packagePatterns]. */
     public fun inPackage(vararg packagePatterns: String): FilesRuleBuilder = inPackage(packagePatterns.toList())
 
-    /** Filter or assertion criteria for reside in package. */
+    /** Asserts that files reside in a package matching [predicate]. */
     public infix fun inPackage(predicate: (String) -> Boolean): FilesRuleBuilder {
         builder.setShould { file, _, violations ->
             if (!predicate(file.declaration.packageName)) {
@@ -102,7 +101,7 @@ public interface FilesShouldPathAssertions {
     @Deprecated("Use inPackage instead.", ReplaceWith("inPackage(predicate)"))
     public infix fun resideInAPackage(predicate: (String) -> Boolean): FilesRuleBuilder = inPackage(predicate)
 
-    /** Filter or assertion criteria for not reside in package. */
+    /** Asserts that files do not reside in a package matching [packagePattern]. */
     public infix fun notInPackage(packagePattern: String): FilesRuleBuilder {
         builder.setShould { file, _, violations ->
             if (PatternMatchers.matchesPackage(packagePattern, file.declaration.packageName)) {
@@ -114,7 +113,7 @@ public interface FilesShouldPathAssertions {
         return builder
     }
 
-    /** Filter or assertion criteria for not reside in package. */
+    /** Asserts that files do not reside in packages matching [packagePatterns]. */
     public infix fun notInPackage(packagePatterns: List<String>): FilesRuleBuilder {
         builder.setShould { file, _, violations ->
             if (packagePatterns.any { PatternMatchers.matchesPackage(it, file.declaration.packageName) }) {
@@ -130,7 +129,7 @@ public interface FilesShouldPathAssertions {
         return builder
     }
 
-    /** Filter or assertion criteria for not reside in package. */
+    /** Asserts that files do not reside in packages matching [packagePatterns]. */
     public fun notInPackage(vararg packagePatterns: String): FilesRuleBuilder = notInPackage(packagePatterns.toList())
 
     /** Legacy notResideInPackage method. */
@@ -158,7 +157,7 @@ public interface FilesShouldPathAssertions {
     @Deprecated("Use notInPackage instead.", ReplaceWith("notInPackage(*packagePatterns)"))
     public fun notResideInAPackage(vararg packagePatterns: String): FilesRuleBuilder = notInPackage(*packagePatterns)
 
-    /** Filter or assertion criteria for reside in module. */
+    /** Asserts that files reside in a module matching [modulePath]. */
     public infix fun inModule(modulePath: String): FilesRuleBuilder {
         builder.setShould { file, _, violations ->
             if (file.modulePath != modulePath && !PatternMatchers.matchesModuleGlob(modulePath, file.modulePath)) {
@@ -170,7 +169,7 @@ public interface FilesShouldPathAssertions {
         return builder
     }
 
-    /** Filter or assertion criteria for reside in modules. */
+    /** Asserts that files reside in modules matching [modulePaths]. */
     public infix fun inModules(modulePaths: List<String>): FilesRuleBuilder {
         builder.setShould { file, _, violations ->
             if (modulePaths.none { file.modulePath == it || PatternMatchers.matchesModuleGlob(it, file.modulePath) }) {
@@ -182,7 +181,7 @@ public interface FilesShouldPathAssertions {
         return builder
     }
 
-    /** Filter or assertion criteria for reside in modules. */
+    /** Asserts that files reside in modules matching [modulePaths]. */
     public fun inModules(vararg modulePaths: String): FilesRuleBuilder = inModules(modulePaths.toList())
 
     /** Legacy resideInModule method. */
@@ -209,7 +208,7 @@ public interface FilesShouldPathAssertions {
     @Deprecated("Use inModules instead.", ReplaceWith("inModules(*modulePaths)"))
     public fun resideInAModule(vararg modulePaths: String): FilesRuleBuilder = inModules(*modulePaths)
 
-    /** Filter or assertion criteria for not reside in module. */
+    /** Asserts that files do not reside in a module matching [modulePath]. */
     public infix fun notInModule(modulePath: String): FilesRuleBuilder {
         builder.setShould { file, _, violations ->
             if (file.modulePath == modulePath || PatternMatchers.matchesModuleGlob(modulePath, file.modulePath)) {
@@ -221,7 +220,7 @@ public interface FilesShouldPathAssertions {
         return builder
     }
 
-    /** Filter or assertion criteria for not reside in modules. */
+    /** Asserts that files do not reside in modules matching [modulePaths]. */
     public infix fun notInModules(modulePaths: List<String>): FilesRuleBuilder {
         builder.setShould { file, _, violations ->
             if (modulePaths.any { it == file.modulePath || PatternMatchers.matchesModuleGlob(it, file.modulePath) }) {
@@ -233,7 +232,7 @@ public interface FilesShouldPathAssertions {
         return builder
     }
 
-    /** Filter or assertion criteria for not reside in modules. */
+    /** Asserts that files do not reside in modules matching [modulePaths]. */
     public fun notInModules(vararg modulePaths: String): FilesRuleBuilder = notInModules(modulePaths.toList())
 
     /** Legacy notResideInModule method. */

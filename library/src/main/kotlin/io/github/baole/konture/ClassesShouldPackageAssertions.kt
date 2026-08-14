@@ -98,7 +98,12 @@ public interface ClassesShouldPackageAssertions {
     public infix fun inPackageOf(type: kotlin.reflect.KClass<*>): ClassesRuleBuilder =
         inPackage(type.toKonturePackageReference().packageName)
 
-    /** Filter or assertion criteria for not in package. */
+    /**
+     * Asserts that selected classes do not reside in packages matching the specified pattern.
+     * Supports `..` segment wildcards.
+     *
+     * @param packagePattern Package matching pattern.
+     */
     public infix fun notInPackage(packagePattern: String): ClassesRuleBuilder {
         builder.setShould { cls, _, violations ->
             if (PatternMatchers.matchesPackage(packagePattern, cls.packageName)) {
@@ -110,10 +115,14 @@ public interface ClassesShouldPackageAssertions {
         return builder
     }
 
-    /** Filter or assertion criteria for not in package. */
+    /**
+     * Asserts that selected classes do not reside in packages matching any of the specified patterns.
+     * Supports `..` segment wildcards.
+     *
+     * @param packagePatterns List of package matching patterns.
+     */
     public infix fun notInPackage(packagePatterns: List<String>): ClassesRuleBuilder {
         builder.setShould { cls, _, violations ->
-            /** Filter or assertion criteria for matches. */
             val matches = packagePatterns.any { PatternMatchers.matchesPackage(it, cls.packageName) }
             if (matches) {
                 violations.add(
@@ -129,12 +138,20 @@ public interface ClassesShouldPackageAssertions {
         return builder
     }
 
-    /** Filter or assertion criteria for not in package. */
+    /**
+     * Asserts that selected classes do not reside in packages matching any of the specified patterns.
+     * Supports `..` segment wildcards.
+     *
+     * @param packagePatterns Package matching patterns.
+     */
     public fun notInPackage(vararg packagePatterns: String): ClassesRuleBuilder = notInPackage(packagePatterns.toList())
 
-    /** Filter or assertion criteria for in module. */
+    /**
+     * Asserts that selected classes reside in a module matching the specified path.
+     *
+     * @param modulePath Module path.
+     */
     public infix fun inModule(modulePath: String): ClassesRuleBuilder {
-        /** Filter or assertion criteria for normalized. */
         val normalized =
             if (!modulePath.startsWith(":") && !modulePath.startsWith("**") && modulePath.isNotEmpty()) {
                 ":$modulePath"
@@ -142,7 +159,6 @@ public interface ClassesShouldPackageAssertions {
                 modulePath
             }
         builder.setShould { cls, _, violations ->
-            /** Filter or assertion criteria for module. */
             val module =
                 builder.graph.getAllModules().find { mod ->
                     mod.files.any { f -> f.classes.any { c -> c.fqName == cls.fqName } || f.filePath == cls.filePath }
@@ -156,9 +172,12 @@ public interface ClassesShouldPackageAssertions {
         return builder
     }
 
-    /** Filter or assertion criteria for in module. */
+    /**
+     * Asserts that selected classes reside in any module matching the specified paths.
+     *
+     * @param modulePaths List of module paths.
+     */
     public infix fun inModule(modulePaths: List<String>): ClassesRuleBuilder {
-        /** Filter or assertion criteria for normalized paths. */
         val normalizedPaths =
             modulePaths.map { path ->
                 if (!path.startsWith(":") && !path.startsWith("**") && path.isNotEmpty()) {
@@ -168,7 +187,6 @@ public interface ClassesShouldPackageAssertions {
                 }
             }
         builder.setShould { cls, _, violations ->
-            /** Filter or assertion criteria for module. */
             val module =
                 builder.graph.getAllModules().find { mod ->
                     mod.files.any { f -> f.classes.any { c -> c.fqName == cls.fqName } || f.filePath == cls.filePath }
@@ -187,18 +205,33 @@ public interface ClassesShouldPackageAssertions {
         return builder
     }
 
-    /** Filter or assertion criteria for in module. */
+    /**
+     * Asserts that selected classes reside in any module matching the specified paths.
+     *
+     * @param modulePaths Module paths.
+     */
     public fun inModule(vararg modulePaths: String): ClassesRuleBuilder = inModule(modulePaths.toList())
 
-    /** Filter or assertion criteria for in modules. */
+    /**
+     * Asserts that selected classes reside in any module matching the specified paths.
+     *
+     * @param modulePaths List of module paths.
+     */
     public infix fun inModules(modulePaths: List<String>): ClassesRuleBuilder = inModule(modulePaths)
 
-    /** Filter or assertion criteria for in modules. */
+    /**
+     * Asserts that selected classes reside in any module matching the specified paths.
+     *
+     * @param modulePaths Module paths.
+     */
     public fun inModules(vararg modulePaths: String): ClassesRuleBuilder = inModule(modulePaths.toList())
 
-    /** Filter or assertion criteria for not in module. */
+    /**
+     * Asserts that selected classes do not reside in a module matching the specified path.
+     *
+     * @param modulePath Module path.
+     */
     public infix fun notInModule(modulePath: String): ClassesRuleBuilder {
-        /** Filter or assertion criteria for normalized. */
         val normalized =
             if (!modulePath.startsWith(":") && !modulePath.startsWith("**") && modulePath.isNotEmpty()) {
                 ":$modulePath"
@@ -206,7 +239,6 @@ public interface ClassesShouldPackageAssertions {
                 modulePath
             }
         builder.setShould { cls, _, violations ->
-            /** Filter or assertion criteria for module. */
             val module =
                 builder.graph.getAllModules().find { mod ->
                     mod.files.any { f -> f.classes.any { c -> c.fqName == cls.fqName } || f.filePath == cls.filePath }
@@ -218,9 +250,12 @@ public interface ClassesShouldPackageAssertions {
         return builder
     }
 
-    /** Filter or assertion criteria for not in module. */
+    /**
+     * Asserts that selected classes do not reside in any module matching the specified paths.
+     *
+     * @param modulePaths List of module paths.
+     */
     public infix fun notInModule(modulePaths: List<String>): ClassesRuleBuilder {
-        /** Filter or assertion criteria for normalized paths. */
         val normalizedPaths =
             modulePaths.map { path ->
                 if (!path.startsWith(":") && !path.startsWith("**") && path.isNotEmpty()) {
@@ -230,7 +265,6 @@ public interface ClassesShouldPackageAssertions {
                 }
             }
         builder.setShould { cls, _, violations ->
-            /** Filter or assertion criteria for module. */
             val module =
                 builder.graph.getAllModules().find { mod ->
                     mod.files.any { f -> f.classes.any { c -> c.fqName == cls.fqName } || f.filePath == cls.filePath }
@@ -244,13 +278,25 @@ public interface ClassesShouldPackageAssertions {
         return builder
     }
 
-    /** Filter or assertion criteria for not in module. */
+    /**
+     * Asserts that selected classes do not reside in any module matching the specified paths.
+     *
+     * @param modulePaths Module paths.
+     */
     public fun notInModule(vararg modulePaths: String): ClassesRuleBuilder = notInModule(modulePaths.toList())
 
-    /** Filter or assertion criteria for not in modules. */
+    /**
+     * Asserts that selected classes do not reside in any module matching the specified paths.
+     *
+     * @param modulePaths List of module paths.
+     */
     public infix fun notInModules(modulePaths: List<String>): ClassesRuleBuilder = notInModule(modulePaths)
 
-    /** Filter or assertion criteria for not in modules. */
+    /**
+     * Asserts that selected classes do not reside in any module matching the specified paths.
+     *
+     * @param modulePaths Module paths.
+     */
     public fun notInModules(vararg modulePaths: String): ClassesRuleBuilder = notInModule(modulePaths.toList())
 
     /**

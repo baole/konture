@@ -64,13 +64,8 @@ public infix fun FilesThat.areAnnotatedWith(annotation: KClass<out Annotation>):
     annotatedWith(annotation)
 
 /** Legacy haveAnnotationOf method. */
-@Deprecated(
-    message = "Renamed to containClassesWithAnnotation for consistency across file/module/slice scopes.",
-    replaceWith = ReplaceWith("containClassesWithAnnotation<T>()"),
-    level = DeprecationLevel.WARNING,
-)
-public inline fun <reified T : Annotation> FilesThat.haveAnnotationOf(): FilesRuleBuilder =
-    containClassesWithAnnotation(T::class)
+@Deprecated("Use annotatedWith instead.", ReplaceWith("annotatedWith<T>()"))
+public inline fun <reified T : Annotation> FilesThat.haveAnnotationOf(): FilesRuleBuilder = annotatedWith<T>()
 
 /** Legacy areAnnotatedWith method. */
 @Deprecated("Use annotatedWith instead.", ReplaceWith("annotatedWith<T>()"))
