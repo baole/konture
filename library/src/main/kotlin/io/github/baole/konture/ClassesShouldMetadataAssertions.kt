@@ -22,7 +22,7 @@ public interface ClassesShouldMetadataAssertions {
      *
      * @param annotationFqName The annotation name or fully qualified name.
      */
-    public infix fun haveAnnotationOf(annotationFqName: String): ClassesRuleBuilder {
+    public infix fun annotatedWith(annotationFqName: String): ClassesRuleBuilder {
         builder.setShould { cls, _, violations ->
             /** Filter or assertion criteria for has annotation. */
             val hasAnnotation = cls.annotations.any { it.fqName == annotationFqName || it.name == annotationFqName }
@@ -37,12 +37,12 @@ public interface ClassesShouldMetadataAssertions {
      * Asserts that selected classes are annotated with the specified annotation.
      * Matches either simple names or FQNs.
      */
-    public infix fun haveAllAnnotationsOf(name: String): ClassesRuleBuilder = haveAllAnnotationsOf(listOf(name))
+    public infix fun annotatedWithAllOf(name: String): ClassesRuleBuilder = annotatedWithAllOf(listOf(name))
 
     /**
      * Asserts that selected classes are annotated with all of the specified annotations.
      */
-    public infix fun haveAllAnnotationsOf(names: List<String>): ClassesRuleBuilder {
+    public infix fun annotatedWithAllOf(names: List<String>): ClassesRuleBuilder {
         builder.setShould { cls, _, violations ->
             if (!cls.hasAllAnnotations(names)) {
                 violations.add(getMessage("class.should.haveAllAnnotations", cls.fqName, names.joinToString()))
@@ -54,18 +54,18 @@ public interface ClassesShouldMetadataAssertions {
     /**
      * Asserts that selected classes are annotated with all of the specified annotations.
      */
-    public fun haveAllAnnotationsOf(vararg names: String): ClassesRuleBuilder = haveAllAnnotationsOf(names.asList())
+    public fun annotatedWithAllOf(vararg names: String): ClassesRuleBuilder = annotatedWithAllOf(names.asList())
 
     /**
      * Asserts that selected classes are annotated with the specified annotation.
      * Matches either simple names or FQNs.
      */
-    public infix fun haveAnyAnnotationOf(name: String): ClassesRuleBuilder = haveAnyAnnotationOf(listOf(name))
+    public infix fun annotatedWithAnyOf(name: String): ClassesRuleBuilder = annotatedWithAnyOf(listOf(name))
 
     /**
      * Asserts that selected classes are annotated with any of the specified annotations.
      */
-    public infix fun haveAnyAnnotationOf(names: List<String>): ClassesRuleBuilder {
+    public infix fun annotatedWithAnyOf(names: List<String>): ClassesRuleBuilder {
         builder.setShould { cls, _, violations ->
             if (!cls.hasAnyAnnotation(names)) {
                 violations.add(getMessage("class.should.haveAtLeastOneAnnotationOf", cls.fqName, names.joinToString()))
@@ -77,7 +77,35 @@ public interface ClassesShouldMetadataAssertions {
     /**
      * Asserts that selected classes are annotated with any of the specified annotations.
      */
-    public fun haveAnyAnnotationOf(vararg names: String): ClassesRuleBuilder = haveAnyAnnotationOf(names.asList())
+    public fun annotatedWithAnyOf(vararg names: String): ClassesRuleBuilder = annotatedWithAnyOf(names.asList())
+
+    /** Legacy haveAnnotationOf method. */
+    @Deprecated("Use annotatedWith instead.", ReplaceWith("annotatedWith(annotationFqName)"))
+    public infix fun haveAnnotationOf(annotationFqName: String): ClassesRuleBuilder = annotatedWith(annotationFqName)
+
+    /** Legacy haveAllAnnotationsOf method. */
+    @Deprecated("Use annotatedWithAllOf instead.", ReplaceWith("annotatedWithAllOf(name)"))
+    public infix fun haveAllAnnotationsOf(name: String): ClassesRuleBuilder = annotatedWithAllOf(name)
+
+    /** Legacy haveAllAnnotationsOf method. */
+    @Deprecated("Use annotatedWithAllOf instead.", ReplaceWith("annotatedWithAllOf(names)"))
+    public infix fun haveAllAnnotationsOf(names: List<String>): ClassesRuleBuilder = annotatedWithAllOf(names)
+
+    /** Legacy haveAllAnnotationsOf method. */
+    @Deprecated("Use annotatedWithAllOf instead.", ReplaceWith("annotatedWithAllOf(*names)"))
+    public fun haveAllAnnotationsOf(vararg names: String): ClassesRuleBuilder = annotatedWithAllOf(*names)
+
+    /** Legacy haveAnyAnnotationOf method. */
+    @Deprecated("Use annotatedWithAnyOf instead.", ReplaceWith("annotatedWithAnyOf(name)"))
+    public infix fun haveAnyAnnotationOf(name: String): ClassesRuleBuilder = annotatedWithAnyOf(name)
+
+    /** Legacy haveAnyAnnotationOf method. */
+    @Deprecated("Use annotatedWithAnyOf instead.", ReplaceWith("annotatedWithAnyOf(names)"))
+    public infix fun haveAnyAnnotationOf(names: List<String>): ClassesRuleBuilder = annotatedWithAnyOf(names)
+
+    /** Legacy haveAnyAnnotationOf method. */
+    @Deprecated("Use annotatedWithAnyOf instead.", ReplaceWith("annotatedWithAnyOf(*names)"))
+    public fun haveAnyAnnotationOf(vararg names: String): ClassesRuleBuilder = annotatedWithAnyOf(*names)
 
     /**
      * Asserts that selected classes have the specified annotation with a matching argument name and value.

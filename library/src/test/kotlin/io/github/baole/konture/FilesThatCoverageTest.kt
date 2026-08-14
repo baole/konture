@@ -79,38 +79,74 @@ internal class FilesThatCoverageTest : KontureScopeTestFixture() {
         val pModSingle = FilesRuleBuilder(graph).that().resideInAModule("app").getThatPredicate()!!
         assertTrue(pModSingle(fileCtx))
 
+        val pModSingleStd = FilesRuleBuilder(graph).that().inModule("app").getThatPredicate()!!
+        assertTrue(pModSingleStd(fileCtx))
+
         val pModList = FilesRuleBuilder(graph).that().resideInModules(listOf(":app")).getThatPredicate()!!
         assertTrue(pModList(fileCtx))
+
+        val pModListStd = FilesRuleBuilder(graph).that().inModules(listOf(":app")).getThatPredicate()!!
+        assertTrue(pModListStd(fileCtx))
 
         val pModVararg = FilesRuleBuilder(graph).that().resideInModules(":app", ":core").getThatPredicate()!!
         assertTrue(pModVararg(fileCtx))
 
+        val pModVarargStd = FilesRuleBuilder(graph).that().inModules(":app", ":core").getThatPredicate()!!
+        assertTrue(pModVarargStd(fileCtx))
+
         val pNotModSingle = FilesRuleBuilder(graph).that().notResideInAModule("core").getThatPredicate()!!
         assertTrue(pNotModSingle(fileCtx))
+
+        val pNotModSingleStd = FilesRuleBuilder(graph).that().notInModule("core").getThatPredicate()!!
+        assertTrue(pNotModSingleStd(fileCtx))
 
         val pNotModList = FilesRuleBuilder(graph).that().notResideInModules(listOf(":core")).getThatPredicate()!!
         assertTrue(pNotModList(fileCtx))
 
+        val pNotModListStd = FilesRuleBuilder(graph).that().notInModules(listOf(":core")).getThatPredicate()!!
+        assertTrue(pNotModListStd(fileCtx))
+
         val pNotModVararg = FilesRuleBuilder(graph).that().notResideInModules(":core", ":feature").getThatPredicate()!!
         assertTrue(pNotModVararg(fileCtx))
+
+        val pNotModVarargStd = FilesRuleBuilder(graph).that().notInModules(":core", ":feature").getThatPredicate()!!
+        assertTrue(pNotModVarargStd(fileCtx))
 
         val pNotNameSingle = FilesRuleBuilder(graph).that().notHaveName("Other.kt").getThatPredicate()!!
         assertTrue(pNotNameSingle(fileCtx))
 
+        val pNotNameSingleStd = FilesRuleBuilder(graph).that().notNamed("Other.kt").getThatPredicate()!!
+        assertTrue(pNotNameSingleStd(fileCtx))
+
         val pNotNameList = FilesRuleBuilder(graph).that().notHaveName(listOf("Other.kt")).getThatPredicate()!!
         assertTrue(pNotNameList(fileCtx))
+
+        val pNotNameListStd = FilesRuleBuilder(graph).that().notNamed(listOf("Other.kt")).getThatPredicate()!!
+        assertTrue(pNotNameListStd(fileCtx))
 
         val pNotNameVararg = FilesRuleBuilder(graph).that().notHaveName("Other.kt", "Wrong.kt").getThatPredicate()!!
         assertTrue(pNotNameVararg(fileCtx))
 
+        val pNotNameVarargStd = FilesRuleBuilder(graph).that().notNamed("Other.kt", "Wrong.kt").getThatPredicate()!!
+        assertTrue(pNotNameVarargStd(fileCtx))
+
         val pNotNamePred = FilesRuleBuilder(graph).that().notHaveName { it.endsWith(".java") }.getThatPredicate()!!
         assertTrue(pNotNamePred(fileCtx))
+
+        val pNotNamePredStd = FilesRuleBuilder(graph).that().notNamed { it.endsWith(".java") }.getThatPredicate()!!
+        assertTrue(pNotNamePredStd(fileCtx))
 
         val pNotStartSingle = FilesRuleBuilder(graph).that().notHaveNameStartingWith("Wrong").getThatPredicate()!!
         assertTrue(pNotStartSingle(fileCtx))
 
+        val pNotStartSingleStd = FilesRuleBuilder(graph).that().notNameStartsWith("Wrong").getThatPredicate()!!
+        assertTrue(pNotStartSingleStd(fileCtx))
+
         val pNotStartList = FilesRuleBuilder(graph).that().notHaveNameStartingWith(listOf("Wrong")).getThatPredicate()!!
         assertTrue(pNotStartList(fileCtx))
+
+        val pNotStartListStd = FilesRuleBuilder(graph).that().notNameStartsWith(listOf("Wrong")).getThatPredicate()!!
+        assertTrue(pNotStartListStd(fileCtx))
 
         val pNotStartVararg =
             FilesRuleBuilder(
@@ -118,23 +154,47 @@ internal class FilesThatCoverageTest : KontureScopeTestFixture() {
             ).that().notHaveNameStartingWith("Wrong", "Bad").getThatPredicate()!!
         assertTrue(pNotStartVararg(fileCtx))
 
+        val pNotStartVarargStd =
+            FilesRuleBuilder(
+                graph,
+            ).that().notNameStartsWith("Wrong", "Bad").getThatPredicate()!!
+        assertTrue(pNotStartVarargStd(fileCtx))
+
         val pNotEndSingle = FilesRuleBuilder(graph).that().notHaveNameEndingWith(".java").getThatPredicate()!!
         assertTrue(pNotEndSingle(fileCtx))
+
+        val pNotEndSingleStd = FilesRuleBuilder(graph).that().notNameEndsWith(".java").getThatPredicate()!!
+        assertTrue(pNotEndSingleStd(fileCtx))
 
         val pNotEndList = FilesRuleBuilder(graph).that().notHaveNameEndingWith(listOf(".java")).getThatPredicate()!!
         assertTrue(pNotEndList(fileCtx))
 
+        val pNotEndListStd = FilesRuleBuilder(graph).that().notNameEndsWith(listOf(".java")).getThatPredicate()!!
+        assertTrue(pNotEndListStd(fileCtx))
+
         val pNotEndVararg = FilesRuleBuilder(graph).that().notHaveNameEndingWith(".java", ".txt").getThatPredicate()!!
         assertTrue(pNotEndVararg(fileCtx))
+
+        val pNotEndVarargStd = FilesRuleBuilder(graph).that().notNameEndsWith(".java", ".txt").getThatPredicate()!!
+        assertTrue(pNotEndVarargStd(fileCtx))
 
         val pNotMatchSingle = FilesRuleBuilder(graph).that().notHaveNameMatching("Wrong*").getThatPredicate()!!
         assertTrue(pNotMatchSingle(fileCtx))
 
+        val pNotMatchSingleStd = FilesRuleBuilder(graph).that().notNameMatches("Wrong*").getThatPredicate()!!
+        assertTrue(pNotMatchSingleStd(fileCtx))
+
         val pNotMatchList = FilesRuleBuilder(graph).that().notHaveNameMatching(listOf("Wrong*")).getThatPredicate()!!
         assertTrue(pNotMatchList(fileCtx))
 
+        val pNotMatchListStd = FilesRuleBuilder(graph).that().notNameMatches(listOf("Wrong*")).getThatPredicate()!!
+        assertTrue(pNotMatchListStd(fileCtx))
+
         val pNotMatchVararg = FilesRuleBuilder(graph).that().notHaveNameMatching("Wrong*", "Bad*").getThatPredicate()!!
         assertTrue(pNotMatchVararg(fileCtx))
+
+        val pNotMatchVarargStd = FilesRuleBuilder(graph).that().notNameMatches("Wrong*", "Bad*").getThatPredicate()!!
+        assertTrue(pNotMatchVarargStd(fileCtx))
     }
 
     @Test
