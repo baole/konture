@@ -29,19 +29,20 @@ public class RuleDefinition internal constructor(
         val newState = currentState.copy(currentRuleMetadata = metadata)
 
         KontureRuntimeStateProvider.runWithState(newState) {
-            val failures = mutableListOf<String>()
+            val failures = mutableListOf<AssertionError>()
             for (suite in executionSuites) {
                 try {
                     suite()
                 } catch (e: AssertionError) {
-                    failures.add(e.message ?: "Architectural violation in rule '${metadata.id}'")
+                    failures.add(e)
                 }
             }
-            if (failures.isNotEmpty()) {
-                val headerDesc = metadata.description?.let { " - $it" } ?: ""
+            if (failures.size == 1) {
+                throw failures.first()
+            } else if (failures.size > 1) {
                 throw AssertionError(
-                    "Architecture rule '${metadata.id}'$headerDesc failed (${failures.size} violation suite(s)):\n\n" +
-                        failures.joinToString("\n\n"),
+                    "Architecture rule '${metadata.id}' failed (${failures.size} violation suites):\n\n" +
+                        failures.joinToString("\n\n") { it.message ?: "Architectural violation" },
                 )
             }
         }

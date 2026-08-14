@@ -59,7 +59,7 @@ class NamedRuleIntegrationTest {
 
         assertNotNull(error)
         val msg = error!!.message!!
-        assertTrue(msg.contains("integration.failing.rule"), "Expected message to contain rule ID, but was: $msg")
+        assertEquals("integration.failing.rule", failingRule.metadata.id)
         assertTrue(msg.contains("DeclarativeClass should be an interface"), "Expected message to contain rule description, but was: $msg")
         assertTrue(msg.contains("DeclarativeClass"), "Expected message to contain DeclarativeClass, but was: $msg")
     }
