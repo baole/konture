@@ -2762,6 +2762,13 @@ public final class io/github/baole/konture/FunctionsThatStructureFilter$DefaultI
 	public static fun notHaveReturnType (Lio/github/baole/konture/FunctionsThatStructureFilter;Lkotlin/reflect/KClass;)Lio/github/baole/konture/FunctionsRuleBuilder;
 }
 
+public final class io/github/baole/konture/HtmlViolationFormatter {
+	public static final field INSTANCE Lio/github/baole/konture/HtmlViolationFormatter;
+	public final fun format (Lio/github/baole/konture/core/model/ViolationReport;)Ljava/lang/String;
+	public final fun format (Lio/github/baole/konture/core/model/ViolationReport;Ljava/lang/String;)Ljava/lang/String;
+	public static synthetic fun format$default (Lio/github/baole/konture/HtmlViolationFormatter;Lio/github/baole/konture/core/model/ViolationReport;Ljava/lang/String;ILjava/lang/Object;)Ljava/lang/String;
+}
+
 public final class io/github/baole/konture/HumanReadableViolationFormatter {
 	public static final field INSTANCE Lio/github/baole/konture/HumanReadableViolationFormatter;
 	public final fun format (Lio/github/baole/konture/core/model/ViolationReport;)Ljava/lang/String;
@@ -2776,13 +2783,19 @@ public final class io/github/baole/konture/Konture {
 	public static final field PROPERTY_BASELINE_GENERATE Ljava/lang/String;
 	public static final field PROPERTY_BASELINE_PATH Ljava/lang/String;
 	public static final field PROPERTY_LOCALE Ljava/lang/String;
+	public static final field PROPERTY_OUTPUT_FORMAT Ljava/lang/String;
+	public static final field PROPERTY_REPORT_PATH Ljava/lang/String;
 	public final fun getBaselinePath ()Ljava/lang/String;
 	public final fun getGenerateBaseline ()Z
 	public final fun getLocale ()Ljava/util/Locale;
+	public final fun getOutputFormat ()Lio/github/baole/konture/OutputFormat;
 	public final fun getProjectGraph ()Lio/github/baole/konture/ProjectGraph;
+	public final fun getReportPath ()Ljava/lang/String;
 	public final fun setBaselinePath (Ljava/lang/String;)V
 	public final fun setGenerateBaseline (Z)V
 	public final fun setLocale (Ljava/util/Locale;)V
+	public final fun setOutputFormat (Lio/github/baole/konture/OutputFormat;)V
+	public final fun setReportPath (Ljava/lang/String;)V
 }
 
 public final class io/github/baole/konture/KontureContext {
@@ -3730,6 +3743,17 @@ public abstract interface class io/github/baole/konture/ModulesThatScope {
 	public abstract fun getBuilder ()Lio/github/baole/konture/ModulesRuleBuilder;
 }
 
+public final class io/github/baole/konture/OutputFormat : java/lang/Enum {
+	public static final field HTML Lio/github/baole/konture/OutputFormat;
+	public static final field HUMAN Lio/github/baole/konture/OutputFormat;
+	public static final field JSON Lio/github/baole/konture/OutputFormat;
+	public static final field PROBLEM_MATCHER Lio/github/baole/konture/OutputFormat;
+	public static final field SARIF Lio/github/baole/konture/OutputFormat;
+	public static fun getEntries ()Lkotlin/enums/EnumEntries;
+	public static fun valueOf (Ljava/lang/String;)Lio/github/baole/konture/OutputFormat;
+	public static fun values ()[Lio/github/baole/konture/OutputFormat;
+}
+
 public final class io/github/baole/konture/ParameterDeclaration {
 	public fun <init> (Ljava/lang/String;Ljava/lang/String;ZLjava/util/List;Ljava/lang/String;)V
 	public synthetic fun <init> (Ljava/lang/String;Ljava/lang/String;ZLjava/util/List;Ljava/lang/String;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
@@ -3748,6 +3772,11 @@ public final class io/github/baole/konture/ParameterDeclaration {
 	public final fun getType ()Ljava/lang/String;
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
+}
+
+public final class io/github/baole/konture/ProblemMatcherViolationFormatter {
+	public static final field INSTANCE Lio/github/baole/konture/ProblemMatcherViolationFormatter;
+	public final fun format (Lio/github/baole/konture/core/model/ViolationReport;)Ljava/lang/String;
 }
 
 public final class io/github/baole/konture/ProjectGraph {

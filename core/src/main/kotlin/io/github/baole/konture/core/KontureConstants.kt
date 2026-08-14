@@ -31,6 +31,21 @@ public object KontureConstants {
     public const val PROPERTY_BASELINE_DIR: String = "konture.baseline.dir"
 
     /**
+     * System property key used to override the output format (e.g. human, problem_matcher).
+     */
+    public const val PROPERTY_OUTPUT_FORMAT: String = "konture.output.format"
+
+    /**
+     * System property key used to override the path of generated HTML/JSON/SARIF report files.
+     */
+    public const val PROPERTY_REPORT_PATH: String = "konture.report.path"
+
+    /**
+     * Default output report file path relative to project build directory.
+     */
+    public const val DEFAULT_REPORT_PATH: String = "build/reports/konture-report.html"
+
+    /**
      * Default baseline filename fallback when no custom path is configured.
      */
     public const val DEFAULT_BASELINE_FILENAME: String = "konture-baseline.json"

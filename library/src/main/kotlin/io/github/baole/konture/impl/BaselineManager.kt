@@ -6,9 +6,12 @@
 
 package io.github.baole.konture.impl
 
+import io.github.baole.konture.HtmlViolationFormatter
 import io.github.baole.konture.HumanReadableViolationFormatter
 import io.github.baole.konture.Konture
 import io.github.baole.konture.Module
+import io.github.baole.konture.OutputFormat
+import io.github.baole.konture.ProblemMatcherViolationFormatter
 import io.github.baole.konture.ProjectGraph
 import io.github.baole.konture.core.KontureLogger
 import io.github.baole.konture.core.LogLevel
@@ -474,7 +477,16 @@ internal class BaselineManager {
     ) {
         if (unmatchedViolations.isEmpty()) return
         val report = ViolationReport(ruleId = ruleId, violations = unmatchedViolations)
-        val message = HumanReadableViolationFormatter.format(report, customHeader = violationHeader)
+        val message =
+            when (Konture.outputFormat) {
+                OutputFormat.PROBLEM_MATCHER -> ProblemMatcherViolationFormatter.format(report)
+                OutputFormat.HTML -> {
+                    HtmlReportWriter.writeReport(report, customHeader = violationHeader)
+                    HtmlViolationFormatter.format(report, customHeader = violationHeader)
+                }
+                OutputFormat.HUMAN, OutputFormat.JSON, OutputFormat.SARIF ->
+                    HumanReadableViolationFormatter.format(report, customHeader = violationHeader)
+            }
         throw AssertionError(message)
     }
 

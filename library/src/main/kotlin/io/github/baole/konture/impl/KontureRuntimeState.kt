@@ -6,6 +6,7 @@
 
 package io.github.baole.konture.impl
 
+import io.github.baole.konture.OutputFormat
 import io.github.baole.konture.ProjectGraph
 import io.github.baole.konture.core.model.RuleMetadata
 import java.util.Locale
@@ -19,6 +20,8 @@ internal class KontureRuntimeState(
     val locale: Locale = Locale.ENGLISH,
     val isLocaleOverridden: Boolean = false,
     val currentRuleMetadata: RuleMetadata? = null,
+    val outputFormat: OutputFormat = OutputFormat.HUMAN,
+    val reportPath: String = "build/reports/konture-report.html",
 ) {
     val projectGraphLoader: ProjectGraphLoader = ProjectGraphLoader()
 
@@ -29,6 +32,8 @@ internal class KontureRuntimeState(
         locale: Locale = this.locale,
         isLocaleOverridden: Boolean = this.isLocaleOverridden,
         currentRuleMetadata: RuleMetadata? = this.currentRuleMetadata,
+        outputFormat: OutputFormat = this.outputFormat,
+        reportPath: String = this.reportPath,
     ): KontureRuntimeState {
         return KontureRuntimeState(
             baselinePath = baselinePath,
@@ -38,6 +43,8 @@ internal class KontureRuntimeState(
             locale = locale,
             isLocaleOverridden = isLocaleOverridden,
             currentRuleMetadata = currentRuleMetadata,
+            outputFormat = outputFormat,
+            reportPath = reportPath,
         )
     }
 }
