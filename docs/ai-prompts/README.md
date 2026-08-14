@@ -5,5 +5,5 @@
 
 ## 📐 Skills Catalog
 
-- [integrate-konture](../../skills/integrate-konture/SKILL.md)
-- [konture-architecture-tests](../../skills/konture-architecture-tests/SKILL.md)
+- [integrate-konture](../skills/integrate-konture/SKILL.md)
+- [konture-architecture-tests](../skills/konture-architecture-tests/SKILL.md)

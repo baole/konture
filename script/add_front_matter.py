@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 import os
+import shutil
 import sys
 
 FRONT_MATTER_MAP = {
@@ -163,6 +164,44 @@ FRONT_MATTER_MAP = {
         "parent": "AI Prompts & Skills",
         "nav_order": 3
     },
+    "skills/integrate-konture/SKILL.md": {
+        "layout": "default",
+        "title": "integrate-konture Skill",
+        "parent": "AI Prompts & Skills",
+        "nav_order": 10,
+        "permalink": "/skills/integrate-konture/"
+    },
+    "skills/integrate-konture/references/ci-integration.md": {
+        "layout": "default",
+        "title": "CI Integration",
+        "nav_exclude": True,
+        "permalink": "/skills/integrate-konture/references/ci-integration/"
+    },
+    "skills/integrate-konture/references/dependency-integration.md": {
+        "layout": "default",
+        "title": "Dependency Integration",
+        "nav_exclude": True,
+        "permalink": "/skills/integrate-konture/references/dependency-integration/"
+    },
+    "skills/konture-architecture-tests/SKILL.md": {
+        "layout": "default",
+        "title": "konture-architecture-tests Skill",
+        "parent": "AI Prompts & Skills",
+        "nav_order": 11,
+        "permalink": "/skills/konture-architecture-tests/"
+    },
+    "skills/konture-architecture-tests/references/dsl_verification.md": {
+        "layout": "default",
+        "title": "DSL Verification",
+        "nav_exclude": True,
+        "permalink": "/skills/konture-architecture-tests/references/dsl_verification/"
+    },
+    "skills/konture-architecture-tests/references/six_pillars.md": {
+        "layout": "default",
+        "title": "The Six Pillars of Architecture Testing",
+        "nav_exclude": True,
+        "permalink": "/skills/konture-architecture-tests/references/six_pillars/"
+    },
     "articles/README.md": {
         "layout": "default",
         "title": "Articles",
@@ -219,6 +258,15 @@ FRONT_MATTER_MAP = {
     }
 }
 
+def sync_skills_dir(base_dir):
+    repo_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    src_skills = os.path.join(repo_root, "skills")
+    dst_skills = os.path.join(base_dir, "skills")
+    if os.path.exists(src_skills) and os.path.abspath(src_skills) != os.path.abspath(dst_skills):
+        if os.path.exists(dst_skills):
+            shutil.rmtree(dst_skills)
+        shutil.copytree(src_skills, dst_skills)
+
 def find_markdown_files(base_dir):
     md_files = []
     for root, _, files in os.walk(base_dir):
@@ -272,12 +320,58 @@ def convert_files(files):
         modified_content = re.sub(alert_pattern, replace_alert, content, flags=re.M | re.I)
         if "{{KONTURE_VERSION}}" in modified_content:
             modified_content = modified_content.replace("{{KONTURE_VERSION}}", current_version)
+        modified_content = modified_content.replace("../../skills/", "../skills/")
 
         if rel_path in FRONT_MATTER_MAP:
             metadata = FRONT_MATTER_MAP[rel_path]
 
-            # Safeguard: if it already starts with front matter ---, check if alert was converted
+            # If it already starts with front matter ---, check if we need to insert/update metadata fields
             if content.startswith("---\n"):
+                end_fm_idx = modified_content.find("\n---\n", 4)
+                if end_fm_idx != -1:
+                    existing_fm = modified_content[4:end_fm_idx]
+                    body = modified_content[end_fm_idx + 5:]
+                    fm_lines = existing_fm.split("\n")
+
+                    updated_fm_lines = []
+                    keys_updated = set()
+                    for line in fm_lines:
+                        key = line.strip().split(":", 1)[0] if ":" in line else None
+                        if key and key in metadata:
+                            val = metadata[key]
+                            if isinstance(val, bool):
+                                updated_fm_lines.append(f"{key}: {str(val).lower()}")
+                            elif isinstance(val, int):
+                                updated_fm_lines.append(f"{key}: {val}")
+                            else:
+                                escaped_val = str(val).replace('"', '\\"')
+                                updated_fm_lines.append(f'{key}: "{escaped_val}"')
+                            keys_updated.add(key)
+                        elif key and key not in metadata and key in ("parent", "grand_parent", "nav_order", "nav_exclude"):
+                            # Skip obsolete front matter keys not present in target metadata dictionary
+                            continue
+                        else:
+                            updated_fm_lines.append(line)
+
+                    for key, val in metadata.items():
+                        if key not in keys_updated:
+                            if isinstance(val, bool):
+                                updated_fm_lines.append(f"{key}: {str(val).lower()}")
+                            elif isinstance(val, int):
+                                updated_fm_lines.append(f"{key}: {val}")
+                            else:
+                                escaped_val = str(val).replace('"', '\\"')
+                                updated_fm_lines.append(f'{key}: "{escaped_val}"')
+
+                    new_fm = "\n".join(updated_fm_lines)
+                    updated_content = "---\n" + new_fm + "\n---\n" + body
+                    if updated_content != content:
+                        with open(full_path, "w", encoding="utf-8") as f:
+                            f.write(updated_content)
+                        print(f"Updated front matter and converted GFM alerts in {rel_path}.")
+                        converted_count += 1
+                        continue
+
                 if modified_content != content:
                     with open(full_path, "w", encoding="utf-8") as f:
                         f.write(modified_content)
@@ -329,6 +423,8 @@ def main():
         print(f"Error: {base_dir} directory does not exist.")
         sys.exit(1)
 
+    sync_skills_dir(base_dir)
+
     validate_only = "--validate" in sys.argv
 
     files = find_markdown_files(base_dir)
@@ -354,3 +450,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+
