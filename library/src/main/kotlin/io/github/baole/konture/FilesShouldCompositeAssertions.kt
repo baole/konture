@@ -18,7 +18,7 @@ public interface FilesShouldCompositeAssertions {
         satisfy(id = "custom condition", description = "custom condition") { file -> assertion(file) }
 
     /** Asserts that selected files satisfy custom description [description]. */
-    public fun satisfy(description: String): FilesRuleBuilder =
+    public infix fun satisfy(description: String): FilesRuleBuilder =
         satisfy(id = description, description = description) { false }
 
     /** Asserts that selected files satisfy custom predicate [predicate] with [description]. */
@@ -61,7 +61,7 @@ public interface FilesShouldCompositeAssertions {
                 val initialCount = violations.size
                 val passed = context.predicate(file)
                 if (!passed && violations.size == initialCount) {
-                    val msg = description ?: getMessage("file.should.satisfyCustomCondition", id)
+                    val msg = getMessage("file.should.satisfyCustom", file.declaration.name, description ?: id)
                     violations.add(msg)
                 }
             }

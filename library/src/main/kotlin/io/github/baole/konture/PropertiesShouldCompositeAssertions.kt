@@ -33,7 +33,7 @@ public interface PropertiesShouldCompositeAssertions {
     }
 
     /** Asserts that selected properties satisfy custom description [description]. */
-    public fun satisfy(description: String): PropertiesRuleBuilder =
+    public infix fun satisfy(description: String): PropertiesRuleBuilder =
         satisfy(id = description, description = description) { false }
 
     /**
@@ -70,7 +70,7 @@ public interface PropertiesShouldCompositeAssertions {
                 val initialCount = violations.size
                 val passed = context.predicate(prop)
                 if (!passed && violations.size == initialCount) {
-                    val msg = description ?: getMessage("property.should.satisfyCustomCondition", id)
+                    val msg = getMessage("property.should.satisfyCustom", prop.qualifiedName, description ?: id)
                     violations.add(msg)
                 }
             }

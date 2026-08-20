@@ -298,7 +298,7 @@ public class SlicesShould(private val builder: SlicesRuleBuilder) {
     }
 
     /** Asserts that slices satisfy custom description [description]. */
-    public fun satisfy(description: String): SlicesRuleBuilder =
+    public infix fun satisfy(description: String): SlicesRuleBuilder =
         satisfy(id = description, description = description) { false }
 
     /**
@@ -335,7 +335,7 @@ public class SlicesShould(private val builder: SlicesRuleBuilder) {
                 val initialCount = violations.size
                 val passed = context.predicate(sliceGraph.slices)
                 if (!passed && violations.size == initialCount) {
-                    val msg = description ?: getMessage("slice.should.satisfyCustomCondition", id)
+                    val msg = getMessage("slice.should.satisfyCustom", description ?: id)
                     violations.add(msg)
                 }
             }

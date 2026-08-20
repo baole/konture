@@ -202,4 +202,54 @@ class StructuredSatisfyTest : RuleBuildersTestBase() {
 
         assertTrue(error.message!!.contains("Slice graph violates coupling limit"))
     }
+
+    @Test
+    fun `default fallback message formatting includes entity name when description is null`() {
+        val error =
+            assertThrows(AssertionError::class.java) {
+                ClassesRuleBuilder(projectGraph)
+                    .that().haveName("ClassA")
+                    .should().satisfy(
+                        id = "custom.id.only",
+                        description = null,
+                        predicate = { false },
+                    )
+                    .check()
+            }
+
+        assertTrue(error.message!!.contains("Class com.example.ClassA should satisfy: custom.id.only"))
+    }
+
+    @Test
+    fun `default fallback message formatting includes description when provided`() {
+        val error =
+            assertThrows(AssertionError::class.java) {
+                ClassesRuleBuilder(projectGraph)
+                    .that().haveName("ClassA")
+                    .should().satisfy(
+                        id = "custom.id",
+                        description = "Custom description text",
+                        predicate = { false },
+                    )
+                    .check()
+            }
+
+        assertTrue(error.message!!.contains("Class com.example.ClassA should satisfy: Custom description text"))
+    }
+
+    @Test
+    fun `infix satisfy with description string works`() {
+        val error =
+            assertThrows(AssertionError::class.java) {
+                val builder =
+                    ClassesRuleBuilder(projectGraph)
+                        .that().haveName("ClassA")
+                        .should() satisfy "Must satisfy infix custom condition"
+                builder.check()
+            }
+
+        assertTrue(
+            error.message!!.contains("Class com.example.ClassA should satisfy: Must satisfy infix custom condition"),
+        )
+    }
 }

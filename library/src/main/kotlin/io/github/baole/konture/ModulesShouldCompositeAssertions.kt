@@ -18,7 +18,7 @@ public interface ModulesShouldCompositeAssertions {
         satisfy("custom condition") { module, _ -> assertion(module) }
 
     /** Asserts that selected modules satisfy custom description [description]. */
-    public fun satisfy(description: String): ModulesRuleBuilder =
+    public infix fun satisfy(description: String): ModulesRuleBuilder =
         satisfy(id = description, description = description) { false }
 
     /** Asserts that selected modules satisfy a custom condition with description. */
@@ -70,7 +70,7 @@ public interface ModulesShouldCompositeAssertions {
                 val initialCount = violations.size
                 val passed = context.predicate(module)
                 if (!passed && violations.size == initialCount) {
-                    val msg = description ?: getMessage("module.should.satisfyCustomCondition", id)
+                    val msg = getMessage("module.should.satisfyCustom", module.path, description ?: id)
                     violations.add(msg)
                 }
             }

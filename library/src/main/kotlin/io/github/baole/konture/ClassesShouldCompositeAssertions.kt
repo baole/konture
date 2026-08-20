@@ -69,7 +69,7 @@ public interface ClassesShouldCompositeAssertions {
         satisfy(id = "custom condition", description = "custom condition") { cls -> assertion(cls) }
 
     /** Asserts that selected classes satisfy custom description [description]. */
-    public fun satisfy(description: String): ClassesRuleBuilder =
+    public infix fun satisfy(description: String): ClassesRuleBuilder =
         satisfy(id = description, description = description) { false }
 
     /** Asserts that selected classes satisfy custom predicate [predicate] with [description]. */
@@ -112,7 +112,7 @@ public interface ClassesShouldCompositeAssertions {
                 val initialCount = violations.size
                 val passed = context.predicate(cls)
                 if (!passed && violations.size == initialCount) {
-                    val msg = description ?: getMessage("class.should.satisfyCustom", cls.fqName, id)
+                    val msg = getMessage("class.should.satisfyCustom", cls.fqName, description ?: id)
                     violations.add(msg)
                 }
             }

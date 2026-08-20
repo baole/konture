@@ -35,7 +35,7 @@ public interface FunctionsShouldCompositeAssertions {
     }
 
     /** Asserts that selected functions satisfy custom description [description]. */
-    public fun satisfy(description: String): FunctionsRuleBuilder =
+    public infix fun satisfy(description: String): FunctionsRuleBuilder =
         satisfy(id = description, description = description) { false }
 
     /**
@@ -72,7 +72,7 @@ public interface FunctionsShouldCompositeAssertions {
                 val initialCount = violations.size
                 val passed = context.predicate(func)
                 if (!passed && violations.size == initialCount) {
-                    val msg = description ?: getMessage("function.should.satisfyCustomCondition", id)
+                    val msg = getMessage("function.should.satisfyCustom", func.qualifiedName, description ?: id)
                     violations.add(msg)
                 }
             }

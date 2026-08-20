@@ -11,6 +11,7 @@ package io.github.baole.konture
  *
  * @param T The type of subject being evaluated (e.g. [ClassDeclaration], [FileDeclarationContext]).
  */
+@KontureDsl
 public interface SatisfyContext<T> {
     /** The subject currently being evaluated. */
     public val subject: T
