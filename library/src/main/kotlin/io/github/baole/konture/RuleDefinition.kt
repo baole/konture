@@ -17,6 +17,7 @@ import io.github.baole.konture.impl.KontureRuntimeStateProvider
 public class RuleDefinition internal constructor(
     public val metadata: RuleMetadata,
     private val executionSuites: List<() -> Unit>,
+    internal val programmaticSuppressions: List<ProgrammaticSuppression> = emptyList(),
 ) {
     /**
      * Executes all assertions configured for this rule, propagating rule metadata
@@ -26,7 +27,11 @@ public class RuleDefinition internal constructor(
      */
     public fun check() {
         val currentState = KontureRuntimeStateProvider.currentState
-        val newState = currentState.copy(currentRuleMetadata = metadata)
+        val newState =
+            currentState.copy(
+                currentRuleMetadata = metadata,
+                activeProgrammaticSuppressions = programmaticSuppressions,
+            )
 
         KontureRuntimeStateProvider.runWithState(newState) {
             val failures = mutableListOf<AssertionError>()

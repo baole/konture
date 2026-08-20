@@ -27,7 +27,7 @@ The table below outlines all available builder entry points, scoping utilities, 
 | **Allow Empty Selection** (`allowEmpty()`) | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
 | **Debug Matched Printing** (`printMatched*()`) | ✅ `printMatchedFiles()` | ✅ `printMatchedClasses()` | ✅ `printMatchedFunctions()` | ✅ `printMatchedModules()` | ✅ `printMatchedSlices()` | ✅ `printMatchedProperties()` |
 | **Debug All Discovered Printing** (`printAll*()`) | ✅ `printAllFiles()` | ✅ `printAllClasses()` | ✅ `printAllFunctions()` | ✅ `printAllModules()` | ✅ `printAllSlices()` | ✅ `printAllProperties()` |
-| **Baseline & Violation Ignoring** | ✅ `ignoreFailuresIn()` | ✅ `ignoreFailuresIn()` | ✅ `ignoreFailuresIn()` | ✅ `ignoreFailuresIn()` | ✅ `ignoreFailuresIn()` | ✅ `ignoreFailuresIn()` |
+| **Baseline & Violation Suppression** | ✅ `suppress { ... }` | ✅ `suppress { ... }` | ✅ `suppress { ... }` | ✅ `suppress { ... }` | ✅ `suppress { ... }` | ✅ `suppress { ... }` |
 | **Logical Chaining Operators** (`and`, `or`, `not`) | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
 | **Name / Path Filtering** (`that()`) | ✅ | ✅ | ✅ | ✅ (`havePath`, `haveName`) | ✅ (`matching`, `haveKey`) | ✅ |
 | **Module Filtering** (`resideInAModule`) | ✅ | ✅ | ✅ | ✅ `resideInAModule` | ✅ `resideInAModule` | ✅ |

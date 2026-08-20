@@ -20,6 +20,7 @@ import io.github.baole.konture.impl.PatternMatchers
 import io.github.baole.konture.impl.SliceCycleDetector
 import io.github.baole.konture.impl.SliceGraph
 import io.github.baole.konture.impl.StructuredMessageList
+import io.github.baole.konture.impl.suppression.SuppressionEvaluator
 
 /**
  * A builder for compiling and verifying architectural rules on slices — groups of packages derived
@@ -91,6 +92,16 @@ public class SlicesRuleBuilder(
     }
 
     private val ignoredPredicates = mutableListOf<(Slice) -> Boolean>()
+    private val programmaticSuppressions = mutableListOf<ProgrammaticSuppression>()
+
+    /**
+     * Configures programmatic violation suppressions for this slice rule suite with mandatory audit rationale.
+     */
+    public fun suppress(block: RuleSuppressionBuilder.() -> Unit): SlicesRuleBuilder {
+        val builder = RuleSuppressionBuilder().apply(block)
+        programmaticSuppressions.addAll(builder.suppressions)
+        return this
+    }
 
     /**
      * Configures this builder to allow empty selections (if no packages match the slice pattern the
@@ -104,6 +115,10 @@ public class SlicesRuleBuilder(
     /**
      * Configures this builder to ignore failures for slices satisfying the given predicate.
      */
+    @Deprecated(
+        message = "Use suppress { ... } with mandatory audit reason instead",
+        replaceWith = ReplaceWith("suppress { ... }"),
+    )
     public fun ignoreFailuresIn(predicate: (Slice) -> Boolean): SlicesRuleBuilder {
         ignoredPredicates.add(predicate)
         return this
@@ -112,6 +127,10 @@ public class SlicesRuleBuilder(
     /**
      * Configures this builder to ignore failures for slices matching any of the specified slice keys or patterns.
      */
+    @Deprecated(
+        message = "Use suppress { ... } with mandatory audit reason instead",
+        replaceWith = ReplaceWith("suppress { ... }"),
+    )
     public fun ignoreFailuresIn(vararg sliceKeys: String): SlicesRuleBuilder {
         ignoredPredicates.add { slice ->
             sliceKeys.any { key ->
@@ -289,6 +308,8 @@ public class SlicesRuleBuilder(
         val currentMeta = KontureRuntimeStateProvider.currentState.currentRuleMetadata
         val activeRuleId = currentMeta?.id ?: "slices.rule"
         val activeSeverity = currentMeta?.severity ?: Severity.ERROR
+        val allProgrammatic =
+            KontureRuntimeStateProvider.currentState.activeProgrammaticSuppressions + programmaticSuppressions
 
         if (slices.isEmpty()) {
             if (!allowEmpty) {
@@ -318,6 +339,12 @@ public class SlicesRuleBuilder(
                 val ruleIdToUse = msgMeta?.id ?: activeRuleId
                 val severityToUse = msgMeta?.severity ?: activeSeverity
                 val subject = Subject.CustomSubject(name = slicePattern)
+                val suppression =
+                    SuppressionEvaluator.evaluateSliceSuppression(
+                        ruleId = ruleIdToUse,
+                        sliceKey = slicePattern,
+                        programmaticSuppressions = allProgrammatic,
+                    )
                 list.add(
                     Violation(
                         ruleId = ruleIdToUse,
@@ -325,6 +352,8 @@ public class SlicesRuleBuilder(
                         message = rawMsg,
                         severity = severityToUse,
                         metadata = msgMeta,
+                        isSuppressed = suppression != null,
+                        suppression = suppression,
                     ),
                 )
             }

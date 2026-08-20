@@ -15,6 +15,8 @@ import io.github.baole.konture.ProblemMatcherViolationFormatter
 import io.github.baole.konture.ProjectGraph
 import io.github.baole.konture.core.KontureLogger
 import io.github.baole.konture.core.LogLevel
+import io.github.baole.konture.core.model.SuppressionKind
+import io.github.baole.konture.core.model.SuppressionMetadata
 import io.github.baole.konture.core.model.Violation
 import io.github.baole.konture.core.model.ViolationReport
 import io.github.baole.konture.i18n.getMessage
@@ -430,10 +432,22 @@ internal class BaselineManager {
             suppressedViolations.addAll(englishViolations)
         } else {
             englishViolations.forEachIndexed { index, violation ->
-                if (unmatchedIndices.contains(index)) {
-                    unsuppressedViolations.add(violation)
-                } else {
+                if (violation.isSuppressed) {
                     suppressedViolations.add(violation)
+                } else if (!unmatchedIndices.contains(index)) {
+                    val baselineSuppression =
+                        SuppressionMetadata(
+                            kind = SuppressionKind.BASELINE,
+                            reason = "Suppressed by baseline entry",
+                        )
+                    suppressedViolations.add(
+                        violation.copy(
+                            isSuppressed = true,
+                            suppression = baselineSuppression,
+                        ),
+                    )
+                } else {
+                    unsuppressedViolations.add(violation)
                 }
             }
         }
@@ -447,19 +461,26 @@ internal class BaselineManager {
         )
         ReportAccumulator.writeReports(buildRoot)
 
-        if (unmatchedIndices.isNotEmpty() || generateBaseline) {
+        val failingIndices =
+            if (generateBaseline) {
+                emptyList()
+            } else {
+                unmatchedIndices.filter { index -> !englishViolations[index].isSuppressed }
+            }
+
+        if (failingIndices.isNotEmpty() || generateBaseline) {
             if (generateBaseline) {
                 handleViolations(englishStrings, violationHeader)
             } else {
                 val localizedViolations = mutableListOf<Violation>()
                 runCheckReport(localizedViolations)
 
-                val unmatchedLocalized =
-                    unmatchedIndices.map { index ->
+                val failingLocalized =
+                    failingIndices.map { index ->
                         if (index < localizedViolations.size) localizedViolations[index] else englishViolations[index]
                     }
 
-                throwNewViolationsReport(ruleId, unmatchedLocalized, violationHeader)
+                throwNewViolationsReport(ruleId, failingLocalized, violationHeader)
             }
         }
 

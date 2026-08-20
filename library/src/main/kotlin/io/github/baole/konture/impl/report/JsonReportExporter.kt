@@ -94,6 +94,8 @@ internal object JsonReportExporter {
                         sourceLocation = normalizeLocation(v.sourceLocation ?: v.subject.location, root),
                         dependencyPath = v.dependencyPath.map { normalizeSubject(it, root) },
                         isSuppressed = isSuppressed,
+                        suppressionReason = v.suppression?.reason,
+                        suppressionKind = v.suppression?.kind?.name?.lowercase(),
                     ),
                 )
             }

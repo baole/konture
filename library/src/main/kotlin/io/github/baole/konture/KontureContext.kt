@@ -149,6 +149,7 @@ public class KontureContext(
             RuleDefinition(
                 metadata = builder.buildMetadata(),
                 executionSuites = builder.executionSuites,
+                programmaticSuppressions = builder.programmaticSuppressions,
             )
         addSuite(id) { ruleDef.check() }
         return ruleDef

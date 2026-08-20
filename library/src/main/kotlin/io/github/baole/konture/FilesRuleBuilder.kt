@@ -19,6 +19,7 @@ import io.github.baole.konture.impl.KontureRuntimeStateProvider
 import io.github.baole.konture.impl.LogicalOperator
 import io.github.baole.konture.impl.StructuredMessageList
 import io.github.baole.konture.impl.ViolationLocation
+import io.github.baole.konture.impl.suppression.SuppressionEvaluator
 
 /**
  * A builder for compiling and verifying architectural rules on Kotlin source files.
@@ -103,6 +104,16 @@ public class FilesRuleBuilder(
         }
 
     private val ignoredPredicates = mutableListOf<(FileDeclarationContext) -> Boolean>()
+    private val programmaticSuppressions = mutableListOf<ProgrammaticSuppression>()
+
+    /**
+     * Configures programmatic violation suppressions for this file rule suite with mandatory audit rationale.
+     */
+    public fun suppress(block: RuleSuppressionBuilder.() -> Unit): FilesRuleBuilder {
+        val builder = RuleSuppressionBuilder().apply(block)
+        programmaticSuppressions.addAll(builder.suppressions)
+        return this
+    }
 
     /**
      * Configures this builder to allow empty selections (i.e. if no files match the `that()` filter,
@@ -116,6 +127,10 @@ public class FilesRuleBuilder(
     /**
      * Configures this builder to ignore failures for files satisfying the given predicate.
      */
+    @Deprecated(
+        message = "Use suppress { ... } with mandatory audit reason instead",
+        replaceWith = ReplaceWith("suppress { ... }"),
+    )
     public fun ignoreFailuresIn(predicate: (FileDeclarationContext) -> Boolean): FilesRuleBuilder {
         ignoredPredicates.add(predicate)
         return this
@@ -124,6 +139,10 @@ public class FilesRuleBuilder(
     /**
      * Configures this builder to ignore failures for files matching any of the specified names or patterns.
      */
+    @Deprecated(
+        message = "Use suppress { ... } with mandatory audit reason instead",
+        replaceWith = ReplaceWith("suppress { ... }"),
+    )
     public fun ignoreFailuresIn(vararg fileNames: String): FilesRuleBuilder {
         ignoredPredicates.add { ctx ->
             fileNames.any { name ->
@@ -371,6 +390,8 @@ public class FilesRuleBuilder(
         val currentMeta = KontureRuntimeStateProvider.currentState.currentRuleMetadata
         val activeRuleId = currentMeta?.id ?: "files.rule"
         val activeSeverity = currentMeta?.severity ?: Severity.ERROR
+        val allProgrammatic =
+            KontureRuntimeStateProvider.currentState.activeProgrammaticSuppressions + programmaticSuppressions
 
         val runCheckReport = { list: MutableList<Violation> ->
             for (file in filesToCheck) {
@@ -396,6 +417,12 @@ public class FilesRuleBuilder(
                             name = file.declaration.name,
                             location = SourceLocation(filePath = file.declaration.filePath, line = 1),
                         )
+                    val suppression =
+                        SuppressionEvaluator.evaluateFileSuppression(
+                            ruleId = ruleIdToUse,
+                            file = file.declaration,
+                            programmaticSuppressions = allProgrammatic,
+                        )
                     list.add(
                         Violation(
                             ruleId = ruleIdToUse,
@@ -403,6 +430,8 @@ public class FilesRuleBuilder(
                             message = fullMsg,
                             severity = severityToUse,
                             metadata = msgMeta,
+                            isSuppressed = suppression != null,
+                            suppression = suppression,
                         ),
                     )
                 }

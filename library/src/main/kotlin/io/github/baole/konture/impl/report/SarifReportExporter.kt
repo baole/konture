@@ -9,6 +9,7 @@ package io.github.baole.konture.impl.report
 import io.github.baole.konture.Konture
 import io.github.baole.konture.core.KontureConstants
 import io.github.baole.konture.core.model.Severity
+import io.github.baole.konture.core.model.SuppressionKind
 import io.github.baole.konture.core.model.Violation
 import io.github.baole.konture.core.report.sarif.SarifArtifactLocation
 import io.github.baole.konture.core.report.sarif.SarifCodeFlow
@@ -137,11 +138,18 @@ internal object SarifReportExporter {
 
                 val suppressions =
                     if (isSuppressed) {
+                        val kind =
+                            when (v.suppression?.kind) {
+                                SuppressionKind.IN_SOURCE -> "inSource"
+                                SuppressionKind.PROGRAMMATIC -> "external"
+                                SuppressionKind.BASELINE, null -> "external"
+                            }
+                        val justification = v.suppression?.reason ?: "Architecture baseline record"
                         listOf(
                             SarifSuppression(
-                                kind = "external",
+                                kind = kind,
                                 status = "accepted",
-                                justification = "Architecture baseline record",
+                                justification = justification,
                             ),
                         )
                     } else {

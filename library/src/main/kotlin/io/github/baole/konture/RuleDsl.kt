@@ -22,5 +22,6 @@ public fun rule(
     return RuleDefinition(
         metadata = builder.buildMetadata(),
         executionSuites = builder.executionSuites,
+        programmaticSuppressions = builder.programmaticSuppressions,
     )
 }
