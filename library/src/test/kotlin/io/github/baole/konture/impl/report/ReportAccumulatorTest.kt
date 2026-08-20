@@ -140,4 +140,25 @@ class ReportAccumulatorTest {
         val sarifContent = Files.readString(sarifReportFile.toPath())
         assertTrue(sarifContent.contains("\"version\": \"2.1.0\""))
     }
+
+    @Test
+    fun `setting programmatic report paths triggers export without system properties or format changes`() {
+        val customJsonFile = File(tempDir, "custom/programmatic.json")
+        val customSarifFile = File(tempDir, "custom/programmatic.sarif")
+
+        Konture.jsonReportPath = customJsonFile.absolutePath
+        Konture.sarifReportPath = customSarifFile.absolutePath
+
+        ReportAccumulator.recordEvaluation(
+            ruleId = "rule-programmatic",
+            metadata = null,
+            unsuppressedViolations = emptyList(),
+            suppressedViolations = emptyList(),
+        )
+
+        ReportAccumulator.writeReports(tempDir)
+
+        assertTrue(customJsonFile.exists())
+        assertTrue(customSarifFile.exists())
+    }
 }

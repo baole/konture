@@ -52,10 +52,11 @@ public data class ToolMetadata(
  * @property totalRules Total count of evaluated rules.
  * @property passedRules Count of rules that had 0 unsuppressed violations.
  * @property failedRules Count of rules with 1 or more unsuppressed violations.
- * @property totalViolations Total count of violations reported (unsuppressed + suppressed).
- * @property errorCount Count of violations with [Severity.ERROR].
- * @property warningCount Count of violations with [Severity.WARNING].
- * @property infoCount Count of violations with [Severity.INFO].
+ * @property totalViolations Total count of active (unsuppressed) violations reported.
+ * @property suppressedCount Count of violations suppressed by architecture baselines.
+ * @property errorCount Count of unsuppressed violations with [Severity.ERROR].
+ * @property warningCount Count of unsuppressed violations with [Severity.WARNING].
+ * @property infoCount Count of unsuppressed violations with [Severity.INFO].
  */
 @Serializable
 public data class ReportSummary(
@@ -63,6 +64,7 @@ public data class ReportSummary(
     val passedRules: Int,
     val failedRules: Int,
     val totalViolations: Int,
+    val suppressedCount: Int = 0,
     val errorCount: Int,
     val warningCount: Int,
     val infoCount: Int,

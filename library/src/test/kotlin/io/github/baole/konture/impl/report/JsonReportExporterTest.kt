@@ -56,10 +56,11 @@ class JsonReportExporterTest {
 
     @Test
     fun `generateReport converts evaluations into structured KontureJsonReport`() {
-        val buildRoot = File("/workspace/myproject")
+        val buildRoot = File(tempDir, "myproject")
         val originFile = File(buildRoot, "domain/src/Order.kt")
         val targetFile = File(buildRoot, "ui/src/OrderUi.kt")
 
+        val intermediateFile = File(buildRoot, "domain/src/Intermediate.kt")
         val unsuppressedViolation =
             Violation(
                 ruleId = "domain-rules",
@@ -76,6 +77,14 @@ class JsonReportExporterTest {
                         location = SourceLocation(filePath = targetFile.absolutePath, line = 40, column = 1),
                     ),
                 sourceLocation = SourceLocation(filePath = originFile.absolutePath, line = 15, column = 2),
+                dependencyPath =
+                    listOf(
+                        Subject.ClassSubject(
+                            fqName = "com.example.domain.Intermediate",
+                            simpleName = "Intermediate",
+                            location = SourceLocation(filePath = intermediateFile.absolutePath, line = 25, column = 1),
+                        ),
+                    ),
                 severity = Severity.ERROR,
                 message = "Domain layer cannot depend on UI layer",
             )
@@ -132,6 +141,7 @@ class JsonReportExporterTest {
         assertEquals(1, report.summary.passedRules)
         assertEquals(1, report.summary.failedRules)
         assertEquals(1, report.summary.totalViolations)
+        assertEquals(1, report.summary.suppressedCount)
         assertEquals(1, report.summary.errorCount)
         assertEquals(0, report.summary.warningCount)
         assertEquals(0, report.summary.infoCount)
@@ -148,6 +158,8 @@ class JsonReportExporterTest {
         assertEquals("domain/src/Order.kt", v0.sourceLocation?.filePath)
         assertEquals("domain/src/Order.kt", v0.subject.location?.filePath)
         assertEquals("ui/src/OrderUi.kt", v0.target?.location?.filePath)
+        assertEquals(1, v0.dependencyPath.size)
+        assertEquals("domain/src/Intermediate.kt", v0.dependencyPath[0].location?.filePath)
 
         val v1 = report.violations[1]
         assertTrue(v1.isSuppressed)
@@ -175,5 +187,32 @@ class JsonReportExporterTest {
         assertTrue(targetFile.exists())
         val content = Files.readString(targetFile.toPath())
         assertTrue(content.contains("\"totalRules\": 0"))
+    }
+
+    @Test
+    fun `generateReport falls back to suppressed violation severity when rule has no metadata and zero unsuppressed violations`() {
+        val suppressedWarning =
+            Violation(
+                ruleId = "suppressed-warning-rule",
+                subject =
+                    Subject.ClassSubject(
+                        fqName = "com.example.Suppressed",
+                        simpleName = "Suppressed",
+                    ),
+                severity = Severity.WARNING,
+                message = "Suppressed warning violation",
+            )
+
+        val eval =
+            ReportAccumulator.RuleEvaluation(
+                ruleId = "suppressed-warning-rule",
+                metadata = null,
+                unsuppressedViolations = emptyList(),
+                suppressedViolations = listOf(suppressedWarning),
+            )
+
+        val report = JsonReportExporter.generateReport(listOf(eval))
+        assertEquals(1, report.rules.size)
+        assertEquals(Severity.WARNING, report.rules[0].severity)
     }
 }

@@ -25,7 +25,7 @@ import kotlinx.serialization.json.Json
 /**
  * Exporter responsible for generating and writing native Konture JSON reports.
  */
-public object JsonReportExporter {
+internal object JsonReportExporter {
     private val json =
         Json {
             prettyPrint = true
@@ -36,12 +36,12 @@ public object JsonReportExporter {
     /**
      * Serializes a [KontureJsonReport] into a pretty-printed JSON string.
      */
-    public fun exportToString(report: KontureJsonReport): String = json.encodeToString(report)
+    fun exportToString(report: KontureJsonReport): String = json.encodeToString(report)
 
     /**
      * Generates a [KontureJsonReport] from accumulated rule evaluation results.
      */
-    public fun generateReport(
+    fun generateReport(
         evaluations: List<ReportAccumulator.RuleEvaluation>,
         buildRoot: File? = null,
     ): KontureJsonReport {
@@ -57,7 +57,11 @@ public object JsonReportExporter {
         evaluations.forEach { eval ->
             val meta = eval.metadata
             val ruleId = eval.ruleId
-            val severity = meta?.severity ?: eval.unsuppressedViolations.firstOrNull()?.severity ?: Severity.ERROR
+            val severity =
+                meta?.severity
+                    ?: eval.unsuppressedViolations.firstOrNull()?.severity
+                    ?: eval.suppressedViolations.firstOrNull()?.severity
+                    ?: Severity.ERROR
 
             if (!rulesMap.containsKey(ruleId)) {
                 rulesMap[ruleId] =
@@ -88,6 +92,7 @@ public object JsonReportExporter {
                         subject = normalizeSubject(v.subject, root),
                         target = v.target?.let { normalizeSubject(it, root) },
                         sourceLocation = normalizeLocation(v.sourceLocation ?: v.subject.location, root),
+                        dependencyPath = v.dependencyPath.map { normalizeSubject(it, root) },
                         isSuppressed = isSuppressed,
                     ),
                 )
@@ -107,6 +112,7 @@ public object JsonReportExporter {
                 passedRules = passedRules,
                 failedRules = failedRules,
                 totalViolations = reportViolations.count { !it.isSuppressed },
+                suppressedCount = reportViolations.count { it.isSuppressed },
                 errorCount = errorCount,
                 warningCount = warningCount,
                 infoCount = infoCount,
@@ -126,16 +132,11 @@ public object JsonReportExporter {
      * Writes the given [KontureJsonReport] to [targetFile].
      */
     @Suppress("TooGenericExceptionCaught")
-    public fun writeReport(
+    fun writeReport(
         report: KontureJsonReport,
         targetFile: File = File(Konture.jsonReportPath),
     ) {
-        try {
-            targetFile.parentFile?.mkdirs()
-            targetFile.writeText(exportToString(report))
-        } catch (_: Exception) {
-            // Ignore file write exceptions in restricted environments
-        }
+        ReportFileUtil.writeAtomically(targetFile, exportToString(report))
     }
 
     internal fun normalizeSubject(
@@ -168,7 +169,7 @@ public object JsonReportExporter {
         val relativePath =
             if (file.isAbsolute) {
                 try {
-                    file.relativeTo(root).path
+                    file.absoluteFile.relativeTo(root.absoluteFile).path
                 } catch (_: Exception) {
                     file.path
                 }

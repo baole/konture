@@ -256,11 +256,10 @@ When integrating architecture tests into large, established codebases, you will 
 
 Konture solves this with **Architecture Baselines**, allowing you to record all existing violations to localized, distributed files, ignore them in subsequent runs, and focus entirely on preventing new architectural erosion!
 
+> [!IMPORTANT]
 > **Dedicated Guide**: Because managing baselines is critical to scaling architecture tests in enterprise teams, we have split this feature into its own dedicated guide.
 >
 > 🏃 **[Read the Architecture Baselines Guide](baseline.md)** to learn about Distributed Baselines, recording existing technical debt, configuration references, and serialization schemas.
-{: .important }
-{: .important }
 # Layout generation
 
 Konture's current Gradle plugin generates `build/konture/layout_v2.json`. Architecture-test tasks generate and copy this file automatically through `processTestResources`; running `:konture-test:test` does not require a separate generation command. If the file is missing outside the Gradle test lifecycle, run `./gradlew generateArchitectureLayout`.

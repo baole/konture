@@ -22,14 +22,14 @@ class AllowEmptyTest {
     @Test
     fun `classes allowEmpty passes on zero matches and fails without allowEmpty`() {
         Konture.classes {
-            that().haveName("NonexistentClass")
+            that().named("NonexistentClass")
             allowEmpty()
             should().beInterfaces()
         }
 
         val error = violationsFound {
             Konture.classes {
-                that().haveName("NonexistentClass")
+                that().named("NonexistentClass")
                 should().beInterfaces()
             }
         }
@@ -39,14 +39,14 @@ class AllowEmptyTest {
     @Test
     fun `files allowEmpty passes on zero matches and fails without allowEmpty`() {
         Konture.files {
-            that().haveNameMatching("NonexistentFile.kt")
+            that().nameMatches("NonexistentFile.kt")
             allowEmpty()
             should().containClass(AllowEmptyClass::class)
         }
 
         val error = violationsFound {
             Konture.files {
-                that().haveNameMatching("NonexistentFile.kt")
+                that().nameMatches("NonexistentFile.kt")
                 should().containClass(AllowEmptyClass::class)
             }
         }

@@ -7,7 +7,9 @@
 package io.github.baole.konture.tests.annotationfiltering
 
 import io.github.baole.konture.Konture
-import io.github.baole.konture.areAnnotatedWith
+import io.github.baole.konture.annotatedWith
+import io.github.baole.konture.annotatedWithAllOf
+import io.github.baole.konture.annotatedWithAnyOf
 import io.github.baole.konture.beAnnotatedWith
 import io.github.baole.konture.classes
 import io.github.baole.konture.files
@@ -26,26 +28,26 @@ class AnnotationFilteringTest {
     @Test
     fun `classes annotation filtering and assertions`() {
         Konture.classes {
-            that().resideInAPackage(pkg).and().haveAnnotationOf<AnnMarkerA>()
-            should().beAnnotatedWith<AnnMarkerB>()
+            that().inPackage(pkg).and().annotatedWith<AnnMarkerA>()
+            should().annotatedWith<AnnMarkerB>()
         }
 
         Konture.classes {
-            that().resideInAPackage(pkg).and().areAnnotatedWith<AnnMarkerA>()
-            should().haveAnnotationOf<AnnMarkerB>()
+            that().inPackage(pkg).and().annotatedWith<AnnMarkerA>()
+            should().annotatedWith<AnnMarkerB>()
         }
 
         Konture.classes {
-            that().resideInAPackage(pkg).and().haveAllAnnotationsOf(
+            that().inPackage(pkg).and().annotatedWithAllOf(
                 "io.github.baole.konture.tests.annotationfiltering.AnnMarkerA",
                 "io.github.baole.konture.tests.annotationfiltering.AnnMarkerB",
             )
-            should().haveName("AnnotatedClass")
+            should().named("AnnotatedClass")
         }
 
         Konture.classes {
-            that().resideInAPackage(pkg).and().haveAnyAnnotationOf("io.github.baole.konture.tests.annotationfiltering.AnnMarkerA")
-            should().haveName("AnnotatedClass")
+            that().inPackage(pkg).and().annotatedWithAnyOf("io.github.baole.konture.tests.annotationfiltering.AnnMarkerA")
+            should().named("AnnotatedClass")
         }
     }
 
