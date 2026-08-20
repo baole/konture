@@ -52,11 +52,10 @@ internal object SuppressionEvaluator {
         ruleId: String,
     ): Boolean {
         val trimmed = token.trim()
-        if (trimmed == "*" || trimmed == "all" || trimmed == "konture:*" || trimmed == "konture:all" ||
-            trimmed == "konture" || trimmed == "konture:"
-        ) {
-            return true
+        when (trimmed) {
+            "*", "all", "konture", "konture:", "konture:*", "konture:all" -> return true
         }
+
         if (trimmed.startsWith("konture:")) {
             val target = trimmed.removePrefix("konture:")
             if (target == "*" || target == "all" || target.isEmpty()) return true
