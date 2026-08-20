@@ -14,56 +14,67 @@ import io.github.baole.konture.i18n.getMessage
 public sealed class ProgrammaticSuppression(
     public val reason: String,
 ) {
+    /** Programmatic suppression by class fully qualified name or glob pattern. */
     public class ClassFqName(
         public val pattern: String,
         reason: String,
     ) : ProgrammaticSuppression(reason)
 
+    /** Programmatic suppression by class predicate. */
     public class ClassPredicate(
         public val predicate: (ClassDeclaration) -> Boolean,
         reason: String,
     ) : ProgrammaticSuppression(reason)
 
+    /** Programmatic suppression by file path or glob pattern. */
     public class FilePath(
         public val pattern: String,
         reason: String,
     ) : ProgrammaticSuppression(reason)
 
+    /** Programmatic suppression by file predicate. */
     public class FilePredicate(
         public val predicate: (FileDeclaration) -> Boolean,
         reason: String,
     ) : ProgrammaticSuppression(reason)
 
+    /** Programmatic suppression by function name or pattern. */
     public class FunctionName(
         public val nameOrFqName: String,
         reason: String,
     ) : ProgrammaticSuppression(reason)
 
+    /** Programmatic suppression by function predicate. */
     public class FunctionPredicate(
         public val predicate: (FunctionDeclarationContext) -> Boolean,
         reason: String,
     ) : ProgrammaticSuppression(reason)
 
+    /** Programmatic suppression by property name or pattern. */
     public class PropertyName(
         public val nameOrFqName: String,
         reason: String,
     ) : ProgrammaticSuppression(reason)
 
+    /** Programmatic suppression by property predicate. */
     public class PropertyPredicate(
         public val predicate: (PropertyDeclarationContext) -> Boolean,
         reason: String,
     ) : ProgrammaticSuppression(reason)
 
+    /** Programmatic suppression by Gradle module path. */
     public class ModulePath(
         public val modulePath: String,
         reason: String,
     ) : ProgrammaticSuppression(reason)
 
+    /** Programmatic suppression by module predicate. */
     public class ModulePredicate(
         public val predicate: (Module) -> Boolean,
         reason: String,
     ) : ProgrammaticSuppression(reason)
 
+    /** Programmatic suppression by slice key pattern. */
     public class SliceKey(
         public val sliceKey: String,
         reason: String,

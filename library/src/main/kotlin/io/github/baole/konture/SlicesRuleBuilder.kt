@@ -343,6 +343,7 @@ public class SlicesRuleBuilder(
                     SuppressionEvaluator.evaluateSliceSuppression(
                         ruleId = ruleIdToUse,
                         sliceKey = slicePattern,
+                        candidateSliceKeys = activeSlices.map { it.key },
                         programmaticSuppressions = allProgrammatic,
                     )
                 list.add(

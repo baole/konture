@@ -163,16 +163,12 @@ internal object SuppressionEvaluator {
                 }
 
                 is ProgrammaticSuppression.FilePath -> {
-                    if (file != null &&
-                        (file.filePath == suppression.pattern || file.name == suppression.pattern ||
-                            PatternMatchers.matchesSimpleGlob(suppression.pattern, file.filePath) ||
-                            PatternMatchers.matchesSimpleGlob(suppression.pattern, file.name))
-                    ) {
+                    if (matchesFilePattern(file, suppression.pattern)) {
                         logSuppressed(ruleId, cls.fqName, suppression.reason)
                         return SuppressionMetadata(
                             kind = SuppressionKind.PROGRAMMATIC,
                             reason = suppression.reason,
-                            location = SourceLocation(filePath = file.filePath, line = 1),
+                            location = SourceLocation(filePath = file?.filePath ?: cls.filePath, line = 1),
                         )
                     }
                 }
@@ -269,16 +265,12 @@ internal object SuppressionEvaluator {
                 }
 
                 is ProgrammaticSuppression.FilePath -> {
-                    if (file != null &&
-                        (file.filePath == suppression.pattern || file.name == suppression.pattern ||
-                            PatternMatchers.matchesSimpleGlob(suppression.pattern, file.filePath) ||
-                            PatternMatchers.matchesSimpleGlob(suppression.pattern, file.name))
-                    ) {
+                    if (matchesFilePattern(file, suppression.pattern)) {
                         logSuppressed(ruleId, func.qualifiedName, suppression.reason)
                         return SuppressionMetadata(
                             kind = SuppressionKind.PROGRAMMATIC,
                             reason = suppression.reason,
-                            location = SourceLocation(filePath = file.filePath, line = 1),
+                            location = SourceLocation(filePath = file?.filePath ?: func.filePath, line = 1),
                         )
                     }
                 }
@@ -375,16 +367,12 @@ internal object SuppressionEvaluator {
                 }
 
                 is ProgrammaticSuppression.FilePath -> {
-                    if (file != null &&
-                        (file.filePath == suppression.pattern || file.name == suppression.pattern ||
-                            PatternMatchers.matchesSimpleGlob(suppression.pattern, file.filePath) ||
-                            PatternMatchers.matchesSimpleGlob(suppression.pattern, file.name))
-                    ) {
+                    if (matchesFilePattern(file, suppression.pattern)) {
                         logSuppressed(ruleId, prop.qualifiedName, suppression.reason)
                         return SuppressionMetadata(
                             kind = SuppressionKind.PROGRAMMATIC,
                             reason = suppression.reason,
-                            location = SourceLocation(filePath = file.filePath, line = 1),
+                            location = SourceLocation(filePath = file?.filePath ?: prop.filePath, line = 1),
                         )
                     }
                 }
@@ -494,11 +482,13 @@ internal object SuppressionEvaluator {
     fun evaluateSliceSuppression(
         ruleId: String,
         sliceKey: String,
+        candidateSliceKeys: List<String> = emptyList(),
         programmaticSuppressions: List<ProgrammaticSuppression> = emptyList(),
     ): SuppressionMetadata? {
+        val keys = (listOf(sliceKey) + candidateSliceKeys).toSet()
         for (suppression in programmaticSuppressions) {
-            if (suppression is ProgrammaticSuppression.SliceKey && suppression.sliceKey == sliceKey) {
-                logSuppressed(ruleId, sliceKey, suppression.reason)
+            if (suppression is ProgrammaticSuppression.SliceKey && suppression.sliceKey in keys) {
+                logSuppressed(ruleId, suppression.sliceKey, suppression.reason)
                 return SuppressionMetadata(
                     kind = SuppressionKind.PROGRAMMATIC,
                     reason = suppression.reason,
@@ -506,6 +496,17 @@ internal object SuppressionEvaluator {
             }
         }
         return null
+    }
+
+    private fun matchesFilePattern(
+        file: FileDeclaration?,
+        pattern: String,
+    ): Boolean {
+        if (file == null) return false
+        return file.filePath == pattern ||
+            file.name == pattern ||
+            PatternMatchers.matchesSimpleGlob(pattern, file.filePath) ||
+            PatternMatchers.matchesSimpleGlob(pattern, file.name)
     }
 
     private fun logSuppressed(
