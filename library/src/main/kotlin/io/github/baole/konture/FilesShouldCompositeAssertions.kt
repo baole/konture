@@ -15,18 +15,55 @@ public interface FilesShouldCompositeAssertions {
 
     /** Asserts that selected files satisfy a custom boolean condition. */
     public infix fun satisfy(assertion: (FileDeclarationContext) -> Boolean): FilesRuleBuilder =
-        satisfy("custom condition") { f, _ -> assertion(f) }
+        satisfy(id = "custom condition", description = "custom condition") { file -> assertion(file) }
 
-    /** Asserts that selected files satisfy a custom boolean condition with description. */
+    /** Asserts that selected files satisfy custom description [description]. */
+    public fun satisfy(description: String): FilesRuleBuilder =
+        satisfy(id = description, description = description) { false }
+
+    /** Asserts that selected files satisfy custom predicate [predicate] with [description]. */
     public fun satisfy(
         description: String,
-        assertion: (FileDeclarationContext, List<FileDeclarationContext>) -> Boolean,
+        predicate: (FileDeclarationContext) -> Boolean,
+    ): FilesRuleBuilder = satisfy(id = description, description = description) { file -> predicate(file) }
+
+    /**
+     * Asserts that selected files satisfy a custom predicate within a [SatisfyContext] block identified by [id] and optional [description].
+     */
+    public fun satisfy(
+        id: String,
+        description: String? = null,
+        predicate: SatisfyContext<FileDeclarationContext>.(FileDeclarationContext) -> Boolean,
     ): FilesRuleBuilder {
-        builder.setShould { file, allFiles, violations ->
-            if (!assertion(file, allFiles)) {
-                violations.add(
-                    getMessage("file.should.satisfyCustom", file.declaration.name, description),
+        builder.setShould { file, _, violations ->
+            val currentState = io.github.baole.konture.impl.KontureRuntimeStateProvider.currentState
+            val activeSeverity = currentState.currentRuleMetadata?.severity ?: io.github.baole.konture.core.model.Severity.ERROR
+            val activeTags = currentState.currentRuleMetadata?.tags ?: emptySet()
+            val overrideMeta =
+                io.github.baole.konture.core.model.RuleMetadata(
+                    id = id,
+                    description = description,
+                    severity = activeSeverity,
+                    tags = activeTags,
                 )
+
+            io.github.baole.konture.impl.KontureRuntimeStateProvider.runWithState(
+                currentState.copy(currentRuleMetadata = overrideMeta),
+            ) {
+                val context =
+                    SatisfyContextImpl(
+                        subject = file,
+                        id = id,
+                        description = description,
+                        graph = builder.graph,
+                        rawMessages = violations,
+                    )
+                val initialCount = violations.size
+                val passed = context.predicate(file)
+                if (!passed && violations.size == initialCount) {
+                    val msg = description ?: getMessage("file.should.satisfyCustomCondition", id)
+                    violations.add(msg)
+                }
             }
         }
         return builder

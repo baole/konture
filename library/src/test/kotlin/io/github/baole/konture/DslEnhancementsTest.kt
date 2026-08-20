@@ -137,8 +137,8 @@ class DslEnhancementsTest {
         builder.should().satisfy { sliceGraph, _ ->
             check(sliceGraph.slices.isNotEmpty())
         }
-        builder.should().satisfy("slice graph non-empty") { sliceGraph ->
-            sliceGraph.slices.isNotEmpty()
+        builder.should().satisfy("slice graph non-empty") { slices ->
+            slices.isNotEmpty()
         }
 
         builder.should().anyOf({ beFreeOfCycles() })

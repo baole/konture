@@ -64,21 +64,61 @@ public interface ClassesShouldCompositeAssertions {
     public infix fun notHaveSignaturesWithTypesAnnotatedWith(annotationNames: List<String>): ClassesRuleBuilder =
         notHaveSignaturesWithTypesAnnotatedWith(*annotationNames.toTypedArray())
 
-    /**
-     * Asserts that selected classes satisfy a custom condition.
-     *
-     * @param assertion Custom assertion checking the class.
-     */
+    /** Asserts that selected classes satisfy custom assertion [assertion]. */
     public infix fun satisfy(assertion: (ClassDeclaration) -> Boolean): ClassesRuleBuilder =
-        satisfy("custom condition") { cls, _ -> assertion(cls) }
+        satisfy(id = "custom condition", description = "custom condition") { cls -> assertion(cls) }
+
+    /** Asserts that selected classes satisfy custom description [description]. */
+    public fun satisfy(description: String): ClassesRuleBuilder =
+        satisfy(id = description, description = description) { false }
+
+    /** Asserts that selected classes satisfy custom predicate [predicate] with [description]. */
+    public fun satisfy(
+        description: String,
+        predicate: (ClassDeclaration) -> Boolean,
+    ): ClassesRuleBuilder = satisfy(id = description, description = description) { cls -> predicate(cls) }
 
     /**
-     * Asserts that selected classes satisfy a custom condition.
-     *
-     * @param description A descriptive string for the custom condition used in violations.
-     * @param assertion Custom assertion checking the class.
+     * Asserts that selected classes satisfy a custom predicate within a [SatisfyContext] block identified by [id] and optional [description].
      */
-    public infix fun satisfy(description: String): ClassesRuleBuilder = satisfy(description) { cls, _ -> false }
+    public fun satisfy(
+        id: String,
+        description: String? = null,
+        predicate: SatisfyContext<ClassDeclaration>.(ClassDeclaration) -> Boolean,
+    ): ClassesRuleBuilder {
+        builder.setShould { cls, _, violations ->
+            val currentState = io.github.baole.konture.impl.KontureRuntimeStateProvider.currentState
+            val activeSeverity = currentState.currentRuleMetadata?.severity ?: io.github.baole.konture.core.model.Severity.ERROR
+            val activeTags = currentState.currentRuleMetadata?.tags ?: emptySet()
+            val overrideMeta =
+                io.github.baole.konture.core.model.RuleMetadata(
+                    id = id,
+                    description = description,
+                    severity = activeSeverity,
+                    tags = activeTags,
+                )
+
+            io.github.baole.konture.impl.KontureRuntimeStateProvider.runWithState(
+                currentState.copy(currentRuleMetadata = overrideMeta),
+            ) {
+                val context =
+                    SatisfyContextImpl(
+                        subject = cls,
+                        id = id,
+                        description = description,
+                        graph = builder.graph,
+                        rawMessages = violations,
+                    )
+                val initialCount = violations.size
+                val passed = context.predicate(cls)
+                if (!passed && violations.size == initialCount) {
+                    val msg = description ?: getMessage("class.should.satisfyCustom", cls.fqName, id)
+                    violations.add(msg)
+                }
+            }
+        }
+        return builder
+    }
 
     private fun satisfy(
         description: String,

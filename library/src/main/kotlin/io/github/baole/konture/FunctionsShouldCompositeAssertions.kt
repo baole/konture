@@ -34,6 +34,52 @@ public interface FunctionsShouldCompositeAssertions {
         return builder
     }
 
+    /** Asserts that selected functions satisfy custom description [description]. */
+    public fun satisfy(description: String): FunctionsRuleBuilder =
+        satisfy(id = description, description = description) { false }
+
+    /**
+     * Asserts that selected functions satisfy a custom predicate within a [SatisfyContext] block identified by [id] and optional [description].
+     */
+    public fun satisfy(
+        id: String,
+        description: String? = null,
+        predicate: SatisfyContext<FunctionDeclarationContext>.(FunctionDeclarationContext) -> Boolean,
+    ): FunctionsRuleBuilder {
+        builder.setShould { func, _, violations ->
+            val currentState = io.github.baole.konture.impl.KontureRuntimeStateProvider.currentState
+            val activeSeverity = currentState.currentRuleMetadata?.severity ?: io.github.baole.konture.core.model.Severity.ERROR
+            val activeTags = currentState.currentRuleMetadata?.tags ?: emptySet()
+            val overrideMeta =
+                io.github.baole.konture.core.model.RuleMetadata(
+                    id = id,
+                    description = description,
+                    severity = activeSeverity,
+                    tags = activeTags,
+                )
+
+            io.github.baole.konture.impl.KontureRuntimeStateProvider.runWithState(
+                currentState.copy(currentRuleMetadata = overrideMeta),
+            ) {
+                val context =
+                    SatisfyContextImpl(
+                        subject = func,
+                        id = id,
+                        description = description,
+                        graph = builder.graph,
+                        rawMessages = violations,
+                    )
+                val initialCount = violations.size
+                val passed = context.predicate(func)
+                if (!passed && violations.size == initialCount) {
+                    val msg = description ?: getMessage("function.should.satisfyCustomCondition", id)
+                    violations.add(msg)
+                }
+            }
+        }
+        return builder
+    }
+
     /** Asserts that selected functions satisfy a custom violation-collecting assertion. */
     public fun satisfy(assertion: (FunctionDeclarationContext, MutableList<String>) -> Unit): FunctionsRuleBuilder {
         builder.setShould { func, _, violations -> assertion(func, violations) }

@@ -14,6 +14,7 @@ import io.github.baole.konture.impl.SliceCycleDetector
  * Assertions that the slices derived by [SlicesRuleBuilder] must satisfy.
  */
 @KontureDsl
+@Suppress("LargeClass")
 public class SlicesShould(private val builder: SlicesRuleBuilder) {
     /**
      * Asserts that the slices have no cyclic dependencies between them. Each detected cycle is
@@ -296,23 +297,51 @@ public class SlicesShould(private val builder: SlicesRuleBuilder) {
         return builder
     }
 
+    /** Asserts that slices satisfy custom description [description]. */
+    public fun satisfy(description: String): SlicesRuleBuilder =
+        satisfy(id = description, description = description) { false }
+
     /**
-     * Asserts that the derived slices satisfy a custom Boolean predicate.
+     * Asserts that the derived slices satisfy a custom predicate within a [SatisfyContext] block identified by [id] and optional [description].
      */
-    internal fun satisfy(
-        description: String,
-        predicate: (io.github.baole.konture.impl.SliceGraph) -> Boolean,
+    public fun satisfy(
+        id: String,
+        description: String? = null,
+        predicate: SatisfyContext<List<Slice>>.(List<Slice>) -> Boolean,
     ): SlicesRuleBuilder {
         builder.addShouldAssertion { sliceGraph, violations ->
-            if (!predicate(sliceGraph)) {
-                violations.add(getMessage("slice.should.satisfyCustomCondition", description))
+            val currentState = io.github.baole.konture.impl.KontureRuntimeStateProvider.currentState
+            val activeSeverity = currentState.currentRuleMetadata?.severity ?: io.github.baole.konture.core.model.Severity.ERROR
+            val activeTags = currentState.currentRuleMetadata?.tags ?: emptySet()
+            val overrideMeta =
+                io.github.baole.konture.core.model.RuleMetadata(
+                    id = id,
+                    description = description,
+                    severity = activeSeverity,
+                    tags = activeTags,
+                )
+
+            io.github.baole.konture.impl.KontureRuntimeStateProvider.runWithState(
+                currentState.copy(currentRuleMetadata = overrideMeta),
+            ) {
+                val context =
+                    SatisfyContextImpl(
+                        subject = sliceGraph.slices,
+                        id = id,
+                        description = description,
+                        graph = builder.graph,
+                        rawMessages = violations,
+                    )
+                val initialCount = violations.size
+                val passed = context.predicate(sliceGraph.slices)
+                if (!passed && violations.size == initialCount) {
+                    val msg = description ?: getMessage("slice.should.satisfyCustomCondition", id)
+                    violations.add(msg)
+                }
             }
         }
         return builder
     }
-
-    /** Asserts that slices satisfy custom description [description]. */
-    public fun satisfy(description: String): SlicesRuleBuilder = satisfy(description) { true }
 
     /** Asserts that slices satisfy at least one assertion block in [blocks]. */
     public fun anyOf(vararg blocks: SlicesShould.() -> Unit): SlicesRuleBuilder {

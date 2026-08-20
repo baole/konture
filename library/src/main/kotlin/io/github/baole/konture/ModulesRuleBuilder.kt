@@ -17,6 +17,7 @@ import io.github.baole.konture.i18n.getMessage
 import io.github.baole.konture.impl.BaselineManager
 import io.github.baole.konture.impl.KontureRuntimeStateProvider
 import io.github.baole.konture.impl.LogicalOperator
+import io.github.baole.konture.impl.StructuredMessageList
 
 /**
  * A builder for compiling and verifying architectural rules on project modules.
@@ -331,9 +332,12 @@ public class ModulesRuleBuilder(
         val runCheckReport = { list: MutableList<Violation> ->
             for (module in modulesToCheck) {
                 if (ignoredPredicates.any { it(module) }) continue
-                val rawMessages = mutableListOf<String>()
+                val rawMessages = StructuredMessageList()
                 assertion(module, g, rawMessages)
-                for (rawMsg in rawMessages) {
+                for ((index, rawMsg) in rawMessages.withIndex()) {
+                    val msgMeta = rawMessages.messageMetadataMap[index] ?: currentMeta
+                    val ruleIdToUse = msgMeta?.id ?: activeRuleId
+                    val severityToUse = msgMeta?.severity ?: activeSeverity
                     val subject =
                         Subject.ModuleSubject(
                             path = module.path,
@@ -341,11 +345,11 @@ public class ModulesRuleBuilder(
                         )
                     list.add(
                         Violation(
-                            ruleId = activeRuleId,
+                            ruleId = ruleIdToUse,
                             subject = subject,
                             message = rawMsg,
-                            severity = activeSeverity,
-                            metadata = currentMeta,
+                            severity = severityToUse,
+                            metadata = msgMeta,
                         ),
                     )
                 }
