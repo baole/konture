@@ -176,6 +176,7 @@ public final class io/github/baole/konture/ClassesRuleBuilder {
 	public final fun printMatchedClasses (Lkotlin/jvm/functions/Function1;)Lio/github/baole/konture/ClassesRuleBuilder;
 	public static synthetic fun printMatchedClasses$default (Lio/github/baole/konture/ClassesRuleBuilder;Lkotlin/jvm/functions/Function1;ILjava/lang/Object;)Lio/github/baole/konture/ClassesRuleBuilder;
 	public final fun should ()Lio/github/baole/konture/ClassesShould;
+	public final fun suppress (Lkotlin/jvm/functions/Function1;)Lio/github/baole/konture/ClassesRuleBuilder;
 	public final fun that ()Lio/github/baole/konture/ClassesThat;
 	public final fun xor ()Lio/github/baole/konture/ClassesThat;
 	public final fun xorShould ()Lio/github/baole/konture/ClassesShould;
@@ -1527,11 +1528,12 @@ public final class io/github/baole/konture/ExtensionsKt {
 }
 
 public final class io/github/baole/konture/FileDeclaration {
-	public fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/util/List;Ljava/util/List;Ljava/util/List;Ljava/util/List;Ljava/lang/String;Ljava/lang/String;Ljava/util/Map;Ljava/util/List;Ljava/util/List;)V
-	public synthetic fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/util/List;Ljava/util/List;Ljava/util/List;Ljava/util/List;Ljava/lang/String;Ljava/lang/String;Ljava/util/Map;Ljava/util/List;Ljava/util/List;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/util/List;Ljava/util/List;Ljava/util/List;Ljava/util/List;Ljava/lang/String;Ljava/lang/String;Ljava/util/Map;Ljava/util/List;Ljava/util/List;Ljava/util/List;)V
+	public synthetic fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/util/List;Ljava/util/List;Ljava/util/List;Ljava/util/List;Ljava/lang/String;Ljava/lang/String;Ljava/util/Map;Ljava/util/List;Ljava/util/List;Ljava/util/List;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun component1 ()Ljava/lang/String;
 	public final fun component10 ()Ljava/util/List;
 	public final fun component11 ()Ljava/util/List;
+	public final fun component12 ()Ljava/util/List;
 	public final fun component2 ()Ljava/lang/String;
 	public final fun component3 ()Ljava/util/List;
 	public final fun component4 ()Ljava/util/List;
@@ -1540,9 +1542,10 @@ public final class io/github/baole/konture/FileDeclaration {
 	public final fun component7 ()Ljava/lang/String;
 	public final fun component8 ()Ljava/lang/String;
 	public final fun component9 ()Ljava/util/Map;
-	public final fun copy (Ljava/lang/String;Ljava/lang/String;Ljava/util/List;Ljava/util/List;Ljava/util/List;Ljava/util/List;Ljava/lang/String;Ljava/lang/String;Ljava/util/Map;Ljava/util/List;Ljava/util/List;)Lio/github/baole/konture/FileDeclaration;
-	public static synthetic fun copy$default (Lio/github/baole/konture/FileDeclaration;Ljava/lang/String;Ljava/lang/String;Ljava/util/List;Ljava/util/List;Ljava/util/List;Ljava/util/List;Ljava/lang/String;Ljava/lang/String;Ljava/util/Map;Ljava/util/List;Ljava/util/List;ILjava/lang/Object;)Lio/github/baole/konture/FileDeclaration;
+	public final fun copy (Ljava/lang/String;Ljava/lang/String;Ljava/util/List;Ljava/util/List;Ljava/util/List;Ljava/util/List;Ljava/lang/String;Ljava/lang/String;Ljava/util/Map;Ljava/util/List;Ljava/util/List;Ljava/util/List;)Lio/github/baole/konture/FileDeclaration;
+	public static synthetic fun copy$default (Lio/github/baole/konture/FileDeclaration;Ljava/lang/String;Ljava/lang/String;Ljava/util/List;Ljava/util/List;Ljava/util/List;Ljava/util/List;Ljava/lang/String;Ljava/lang/String;Ljava/util/Map;Ljava/util/List;Ljava/util/List;Ljava/util/List;ILjava/lang/Object;)Lio/github/baole/konture/FileDeclaration;
 	public fun equals (Ljava/lang/Object;)Z
+	public final fun getAnnotations ()Ljava/util/List;
 	public final fun getClasses ()Ljava/util/List;
 	public final fun getFilePath ()Ljava/lang/String;
 	public final fun getImportAliases ()Ljava/util/Map;
@@ -1644,6 +1647,7 @@ public final class io/github/baole/konture/FilesRuleBuilder {
 	public final fun printMatchedFiles (Lkotlin/jvm/functions/Function1;)Lio/github/baole/konture/FilesRuleBuilder;
 	public static synthetic fun printMatchedFiles$default (Lio/github/baole/konture/FilesRuleBuilder;Lkotlin/jvm/functions/Function1;ILjava/lang/Object;)Lio/github/baole/konture/FilesRuleBuilder;
 	public final fun should ()Lio/github/baole/konture/FilesShould;
+	public final fun suppress (Lkotlin/jvm/functions/Function1;)Lio/github/baole/konture/FilesRuleBuilder;
 	public final fun that ()Lio/github/baole/konture/FilesThat;
 	public final fun xor ()Lio/github/baole/konture/FilesThat;
 	public final fun xorShould ()Lio/github/baole/konture/FilesShould;
@@ -2487,6 +2491,7 @@ public final class io/github/baole/konture/FunctionsRuleBuilder {
 	public final fun printMatchedFunctions (Lkotlin/jvm/functions/Function1;)Lio/github/baole/konture/FunctionsRuleBuilder;
 	public static synthetic fun printMatchedFunctions$default (Lio/github/baole/konture/FunctionsRuleBuilder;Lkotlin/jvm/functions/Function1;ILjava/lang/Object;)Lio/github/baole/konture/FunctionsRuleBuilder;
 	public final fun should ()Lio/github/baole/konture/FunctionsShould;
+	public final fun suppress (Lkotlin/jvm/functions/Function1;)Lio/github/baole/konture/FunctionsRuleBuilder;
 	public final fun that ()Lio/github/baole/konture/FunctionsThat;
 	public final fun xor ()Lio/github/baole/konture/FunctionsThat;
 	public final fun xorShould ()Lio/github/baole/konture/FunctionsShould;
@@ -3909,6 +3914,7 @@ public final class io/github/baole/konture/ModulesRuleBuilder {
 	public final fun printMatchedModules (Lkotlin/jvm/functions/Function1;)Lio/github/baole/konture/ModulesRuleBuilder;
 	public static synthetic fun printMatchedModules$default (Lio/github/baole/konture/ModulesRuleBuilder;Lkotlin/jvm/functions/Function1;ILjava/lang/Object;)Lio/github/baole/konture/ModulesRuleBuilder;
 	public final fun should ()Lio/github/baole/konture/ModulesShould;
+	public final fun suppress (Lkotlin/jvm/functions/Function1;)Lio/github/baole/konture/ModulesRuleBuilder;
 	public final fun that ()Lio/github/baole/konture/ModulesThat;
 	public final fun xor ()Lio/github/baole/konture/ModulesThat;
 	public final fun xorShould ()Lio/github/baole/konture/ModulesShould;
@@ -4382,6 +4388,66 @@ public final class io/github/baole/konture/ProblemMatcherViolationFormatter {
 	public final fun format (Lio/github/baole/konture/core/model/ViolationReport;)Ljava/lang/String;
 }
 
+public abstract class io/github/baole/konture/ProgrammaticSuppression {
+	public synthetic fun <init> (Ljava/lang/String;Lkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun getReason ()Ljava/lang/String;
+}
+
+public final class io/github/baole/konture/ProgrammaticSuppression$ClassFqName : io/github/baole/konture/ProgrammaticSuppression {
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;)V
+	public final fun getPattern ()Ljava/lang/String;
+}
+
+public final class io/github/baole/konture/ProgrammaticSuppression$ClassPredicate : io/github/baole/konture/ProgrammaticSuppression {
+	public fun <init> (Lkotlin/jvm/functions/Function1;Ljava/lang/String;)V
+	public final fun getPredicate ()Lkotlin/jvm/functions/Function1;
+}
+
+public final class io/github/baole/konture/ProgrammaticSuppression$FilePath : io/github/baole/konture/ProgrammaticSuppression {
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;)V
+	public final fun getPattern ()Ljava/lang/String;
+}
+
+public final class io/github/baole/konture/ProgrammaticSuppression$FilePredicate : io/github/baole/konture/ProgrammaticSuppression {
+	public fun <init> (Lkotlin/jvm/functions/Function1;Ljava/lang/String;)V
+	public final fun getPredicate ()Lkotlin/jvm/functions/Function1;
+}
+
+public final class io/github/baole/konture/ProgrammaticSuppression$FunctionName : io/github/baole/konture/ProgrammaticSuppression {
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;)V
+	public final fun getNameOrFqName ()Ljava/lang/String;
+}
+
+public final class io/github/baole/konture/ProgrammaticSuppression$FunctionPredicate : io/github/baole/konture/ProgrammaticSuppression {
+	public fun <init> (Lkotlin/jvm/functions/Function1;Ljava/lang/String;)V
+	public final fun getPredicate ()Lkotlin/jvm/functions/Function1;
+}
+
+public final class io/github/baole/konture/ProgrammaticSuppression$ModulePath : io/github/baole/konture/ProgrammaticSuppression {
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;)V
+	public final fun getModulePath ()Ljava/lang/String;
+}
+
+public final class io/github/baole/konture/ProgrammaticSuppression$ModulePredicate : io/github/baole/konture/ProgrammaticSuppression {
+	public fun <init> (Lkotlin/jvm/functions/Function1;Ljava/lang/String;)V
+	public final fun getPredicate ()Lkotlin/jvm/functions/Function1;
+}
+
+public final class io/github/baole/konture/ProgrammaticSuppression$PropertyName : io/github/baole/konture/ProgrammaticSuppression {
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;)V
+	public final fun getNameOrFqName ()Ljava/lang/String;
+}
+
+public final class io/github/baole/konture/ProgrammaticSuppression$PropertyPredicate : io/github/baole/konture/ProgrammaticSuppression {
+	public fun <init> (Lkotlin/jvm/functions/Function1;Ljava/lang/String;)V
+	public final fun getPredicate ()Lkotlin/jvm/functions/Function1;
+}
+
+public final class io/github/baole/konture/ProgrammaticSuppression$SliceKey : io/github/baole/konture/ProgrammaticSuppression {
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;)V
+	public final fun getSliceKey ()Ljava/lang/String;
+}
+
 public final class io/github/baole/konture/ProjectGraph {
 	public static final field Companion Lio/github/baole/konture/ProjectGraph$Companion;
 	public fun <init> (Ljava/util/Map;Lkotlin/jvm/functions/Function0;)V
@@ -4446,6 +4512,7 @@ public final class io/github/baole/konture/PropertiesRuleBuilder {
 	public final fun printMatchedProperties (Lkotlin/jvm/functions/Function1;)Lio/github/baole/konture/PropertiesRuleBuilder;
 	public static synthetic fun printMatchedProperties$default (Lio/github/baole/konture/PropertiesRuleBuilder;Lkotlin/jvm/functions/Function1;ILjava/lang/Object;)Lio/github/baole/konture/PropertiesRuleBuilder;
 	public final fun should ()Lio/github/baole/konture/PropertiesShould;
+	public final fun suppress (Lkotlin/jvm/functions/Function1;)Lio/github/baole/konture/PropertiesRuleBuilder;
 	public final fun that ()Lio/github/baole/konture/PropertiesThat;
 	public final fun xor ()Lio/github/baole/konture/PropertiesThat;
 	public final fun xorShould ()Lio/github/baole/konture/PropertiesShould;
@@ -5159,6 +5226,7 @@ public final class io/github/baole/konture/RuleBuilder {
 	public final fun setSeverity (Lio/github/baole/konture/core/model/Severity;)V
 	public final fun slices (Lio/github/baole/konture/SourceSetSelector;Lkotlin/jvm/functions/Function1;)V
 	public final fun slices (Lkotlin/jvm/functions/Function1;)V
+	public final fun suppress (Lkotlin/jvm/functions/Function1;)V
 	public final fun tag ([Ljava/lang/String;)V
 }
 
@@ -5170,6 +5238,26 @@ public final class io/github/baole/konture/RuleDefinition {
 
 public final class io/github/baole/konture/RuleDslKt {
 	public static final fun rule (Ljava/lang/String;Lkotlin/jvm/functions/Function1;)Lio/github/baole/konture/RuleDefinition;
+}
+
+public final class io/github/baole/konture/RuleSuppressionBuilder {
+	public fun <init> ()V
+	public final fun classFqName (Ljava/lang/String;Ljava/lang/String;)V
+	public final fun classes (Ljava/lang/String;Lkotlin/jvm/functions/Function1;)V
+	public final fun classes (Lkotlin/jvm/functions/Function1;Ljava/lang/String;)V
+	public final fun file (Ljava/lang/String;Ljava/lang/String;)V
+	public final fun files (Ljava/lang/String;Lkotlin/jvm/functions/Function1;)V
+	public final fun files (Lkotlin/jvm/functions/Function1;Ljava/lang/String;)V
+	public final fun function (Ljava/lang/String;Ljava/lang/String;)V
+	public final fun functions (Ljava/lang/String;Lkotlin/jvm/functions/Function1;)V
+	public final fun functions (Lkotlin/jvm/functions/Function1;Ljava/lang/String;)V
+	public final fun module (Ljava/lang/String;Ljava/lang/String;)V
+	public final fun modules (Ljava/lang/String;Lkotlin/jvm/functions/Function1;)V
+	public final fun modules (Lkotlin/jvm/functions/Function1;Ljava/lang/String;)V
+	public final fun properties (Ljava/lang/String;Lkotlin/jvm/functions/Function1;)V
+	public final fun properties (Lkotlin/jvm/functions/Function1;Ljava/lang/String;)V
+	public final fun property (Ljava/lang/String;Ljava/lang/String;)V
+	public final fun slice (Ljava/lang/String;Ljava/lang/String;)V
 }
 
 public abstract interface class io/github/baole/konture/SatisfyContext {
@@ -5256,6 +5344,7 @@ public final class io/github/baole/konture/SlicesRuleBuilder {
 	public final fun printMatchedSlices (Lkotlin/jvm/functions/Function1;)Lio/github/baole/konture/SlicesRuleBuilder;
 	public static synthetic fun printMatchedSlices$default (Lio/github/baole/konture/SlicesRuleBuilder;Lkotlin/jvm/functions/Function1;ILjava/lang/Object;)Lio/github/baole/konture/SlicesRuleBuilder;
 	public final fun should ()Lio/github/baole/konture/SlicesShould;
+	public final fun suppress (Lkotlin/jvm/functions/Function1;)Lio/github/baole/konture/SlicesRuleBuilder;
 	public final fun that ()Lio/github/baole/konture/SlicesThat;
 	public final fun xor ()Lio/github/baole/konture/SlicesThat;
 	public final fun xorShould ()Lio/github/baole/konture/SlicesShould;

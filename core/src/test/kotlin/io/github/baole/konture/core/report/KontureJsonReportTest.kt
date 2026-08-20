@@ -90,6 +90,8 @@ class KontureJsonReportTest {
                                     simpleName = "LegacyHelper",
                                 ),
                             isSuppressed = true,
+                            suppressionReason = "Legacy component exception",
+                            suppressionKind = "in_source",
                         ),
                     ),
             )
@@ -98,6 +100,8 @@ class KontureJsonReportTest {
         assertTrue(encoded.contains("\"schemaVersion\": \"1.0.0\""))
         assertTrue(encoded.contains("\"totalViolations\": 2"))
         assertTrue(encoded.contains("\"isSuppressed\": true"))
+        assertTrue(encoded.contains("\"suppressionReason\": \"Legacy component exception\""))
+        assertTrue(encoded.contains("\"suppressionKind\": \"in_source\""))
 
         val decoded = json.decodeFromString<KontureJsonReport>(encoded)
         assertEquals(report.schemaVersion, decoded.schemaVersion)
@@ -105,6 +109,8 @@ class KontureJsonReportTest {
         assertEquals(2, decoded.summary.totalViolations)
         assertEquals(2, decoded.violations.size)
         assertEquals(true, decoded.violations[1].isSuppressed)
+        assertEquals("Legacy component exception", decoded.violations[1].suppressionReason)
+        assertEquals("in_source", decoded.violations[1].suppressionKind)
     }
 
     @Test

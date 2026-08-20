@@ -18,7 +18,8 @@ import kotlinx.serialization.Serializable
  * @property dependencyPath Sequence of subjects representing the dependency path leading to the violation.
  * @property message Descriptive violation explanation message.
  * @property severity Severity level of the violation (defaults to [Severity.ERROR]).
- * @property metadata Optional structured rule metadata associated with this violation.
+ * @property isSuppressed Whether this violation has been suppressed (e.g. via @Suppress, programmatic config, or baseline).
+ * @property suppression Optional structured metadata explaining why and how this violation was suppressed.
  */
 @Serializable
 public data class Violation(
@@ -30,4 +31,6 @@ public data class Violation(
     val message: String,
     val severity: Severity = Severity.ERROR,
     val metadata: RuleMetadata? = null,
+    val isSuppressed: Boolean = false,
+    val suppression: SuppressionMetadata? = null,
 )

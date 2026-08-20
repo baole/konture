@@ -19,6 +19,7 @@ import io.github.baole.konture.impl.KontureRuntimeStateProvider
 import io.github.baole.konture.impl.LogicalOperator
 import io.github.baole.konture.impl.StructuredMessageList
 import io.github.baole.konture.impl.ViolationLocation
+import io.github.baole.konture.impl.suppression.SuppressionEvaluator
 
 /**
  * A builder for compiling and verifying architectural rules on Kotlin property declarations.
@@ -98,6 +99,16 @@ public class PropertiesRuleBuilder(
         }
 
     private val ignoredPredicates = mutableListOf<(PropertyDeclarationContext) -> Boolean>()
+    private val programmaticSuppressions = mutableListOf<ProgrammaticSuppression>()
+
+    /**
+     * Configures programmatic violation suppressions for this property rule suite with mandatory audit rationale.
+     */
+    public fun suppress(block: RuleSuppressionBuilder.() -> Unit): PropertiesRuleBuilder {
+        val builder = RuleSuppressionBuilder().apply(block)
+        programmaticSuppressions.addAll(builder.suppressions)
+        return this
+    }
 
     /**
      * Configures this builder to allow empty selections (i.e. if no properties match the `that()` filter,
@@ -111,6 +122,10 @@ public class PropertiesRuleBuilder(
     /**
      * Configures this builder to ignore failures for properties satisfying the given predicate.
      */
+    @Deprecated(
+        message = "Use suppress { ... } with mandatory audit reason instead",
+        replaceWith = ReplaceWith("suppress { ... }"),
+    )
     public fun ignoreFailuresIn(predicate: (PropertyDeclarationContext) -> Boolean): PropertiesRuleBuilder {
         ignoredPredicates.add(predicate)
         return this
@@ -119,6 +134,10 @@ public class PropertiesRuleBuilder(
     /**
      * Configures this builder to ignore failures for properties matching any of the specified names or patterns.
      */
+    @Deprecated(
+        message = "Use suppress { ... } with mandatory audit reason instead",
+        replaceWith = ReplaceWith("suppress { ... }"),
+    )
     public fun ignoreFailuresIn(vararg propertyNames: String): PropertiesRuleBuilder {
         ignoredPredicates.add { ctx ->
             propertyNames.any { name ->
@@ -395,6 +414,10 @@ public class PropertiesRuleBuilder(
         val currentMeta = KontureRuntimeStateProvider.currentState.currentRuleMetadata
         val activeRuleId = currentMeta?.id ?: "properties.rule"
         val activeSeverity = currentMeta?.severity ?: Severity.ERROR
+        val allProgrammatic =
+            KontureRuntimeStateProvider.currentState.activeProgrammaticSuppressions + programmaticSuppressions
+        val fileMap = graph.fileMap
+        val classMap = graph.classMap
 
         val runCheckReport = { list: MutableList<Violation> ->
             for (prop in propertiesToCheck) {
@@ -419,6 +442,15 @@ public class PropertiesRuleBuilder(
                             name = propName,
                             location = SourceLocation(filePath = prop.filePath, line = prop.declaration.sourceLine),
                         )
+                    val enclosingClass = prop.className?.let { classMap["${prop.packageName}.$it"] }
+                    val suppression =
+                        SuppressionEvaluator.evaluatePropertySuppression(
+                            ruleId = ruleIdToUse,
+                            prop = prop,
+                            file = fileMap[prop.filePath],
+                            enclosingClass = enclosingClass,
+                            programmaticSuppressions = allProgrammatic,
+                        )
                     list.add(
                         Violation(
                             ruleId = ruleIdToUse,
@@ -426,6 +458,8 @@ public class PropertiesRuleBuilder(
                             message = fullMsg,
                             severity = severityToUse,
                             metadata = msgMeta,
+                            isSuppressed = suppression != null,
+                            suppression = suppression,
                         ),
                     )
                 }

@@ -19,6 +19,7 @@ import io.github.baole.konture.impl.KontureRuntimeStateProvider
 import io.github.baole.konture.impl.LogicalOperator
 import io.github.baole.konture.impl.StructuredMessageList
 import io.github.baole.konture.impl.ViolationLocation
+import io.github.baole.konture.impl.suppression.SuppressionEvaluator
 
 /**
  * A builder for compiling and verifying architectural rules on Kotlin function declarations.
@@ -109,6 +110,16 @@ public class FunctionsRuleBuilder(
         }
 
     private val ignoredPredicates = mutableListOf<(FunctionDeclarationContext) -> Boolean>()
+    private val programmaticSuppressions = mutableListOf<ProgrammaticSuppression>()
+
+    /**
+     * Configures programmatic violation suppressions for this function rule suite with mandatory audit rationale.
+     */
+    public fun suppress(block: RuleSuppressionBuilder.() -> Unit): FunctionsRuleBuilder {
+        val builder = RuleSuppressionBuilder().apply(block)
+        programmaticSuppressions.addAll(builder.suppressions)
+        return this
+    }
 
     /**
      * Configures this builder to allow empty selections (i.e. if no functions match the `that()` filter,
@@ -122,6 +133,10 @@ public class FunctionsRuleBuilder(
     /**
      * Configures this builder to ignore failures for functions satisfying the given predicate.
      */
+    @Deprecated(
+        message = "Use suppress { ... } with mandatory audit reason instead",
+        replaceWith = ReplaceWith("suppress { ... }"),
+    )
     public fun ignoreFailuresIn(predicate: (FunctionDeclarationContext) -> Boolean): FunctionsRuleBuilder {
         ignoredPredicates.add(predicate)
         return this
@@ -130,6 +145,10 @@ public class FunctionsRuleBuilder(
     /**
      * Configures this builder to ignore failures for functions matching any of the specified names or patterns.
      */
+    @Deprecated(
+        message = "Use suppress { ... } with mandatory audit reason instead",
+        replaceWith = ReplaceWith("suppress { ... }"),
+    )
     public fun ignoreFailuresIn(vararg functionNames: String): FunctionsRuleBuilder {
         ignoredPredicates.add { ctx ->
             functionNames.any { name ->
@@ -414,6 +433,10 @@ public class FunctionsRuleBuilder(
         val currentMeta = KontureRuntimeStateProvider.currentState.currentRuleMetadata
         val activeRuleId = currentMeta?.id ?: "functions.rule"
         val activeSeverity = currentMeta?.severity ?: Severity.ERROR
+        val allProgrammatic =
+            KontureRuntimeStateProvider.currentState.activeProgrammaticSuppressions + programmaticSuppressions
+        val fileMap = graph.fileMap
+        val classMap = graph.classMap
 
         val runCheckReport = { list: MutableList<Violation> ->
             for (func in functionsToCheck) {
@@ -438,6 +461,15 @@ public class FunctionsRuleBuilder(
                             fqName = fqName,
                             location = SourceLocation(filePath = func.filePath, line = func.declaration.sourceLine),
                         )
+                    val enclosingClass = func.className?.let { classMap["${func.packageName}.$it"] }
+                    val suppression =
+                        SuppressionEvaluator.evaluateFunctionSuppression(
+                            ruleId = ruleIdToUse,
+                            func = func,
+                            file = fileMap[func.filePath],
+                            enclosingClass = enclosingClass,
+                            programmaticSuppressions = allProgrammatic,
+                        )
                     list.add(
                         Violation(
                             ruleId = ruleIdToUse,
@@ -445,6 +477,8 @@ public class FunctionsRuleBuilder(
                             message = fullMsg,
                             severity = severityToUse,
                             metadata = msgMeta,
+                            isSuppressed = suppression != null,
+                            suppression = suppression,
                         ),
                     )
                 }

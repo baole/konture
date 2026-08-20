@@ -172,4 +172,43 @@ class ViolationModelTest {
         val decoded: Violation = json.decodeFromString(encoded)
         assertEquals(violation, decoded)
     }
+
+    @Test
+    fun testSuppressionMetadataAndKind() {
+        assertEquals(3, SuppressionKind.entries.size)
+        assertEquals(SuppressionKind.IN_SOURCE, SuppressionKind.valueOf("IN_SOURCE"))
+        assertEquals(SuppressionKind.PROGRAMMATIC, SuppressionKind.valueOf("PROGRAMMATIC"))
+        assertEquals(SuppressionKind.BASELINE, SuppressionKind.valueOf("BASELINE"))
+
+        val loc = SourceLocation(filePath = "src/Test.kt", line = 5)
+        val metadata =
+            SuppressionMetadata(
+                kind = SuppressionKind.IN_SOURCE,
+                reason = "Intentional architecture exception",
+                location = loc,
+            )
+        assertEquals(SuppressionKind.IN_SOURCE, metadata.kind)
+        assertEquals("Intentional architecture exception", metadata.reason)
+        assertEquals(loc, metadata.location)
+
+        val encoded = json.encodeToString(metadata)
+        val decoded: SuppressionMetadata = json.decodeFromString(encoded)
+        assertEquals(metadata, decoded)
+
+        val violation =
+            Violation(
+                ruleId = "rule.suppressed",
+                subject = Subject.ClassSubject("com.example.Suppressed", "Suppressed"),
+                message = "Violation message",
+                severity = Severity.WARNING,
+                isSuppressed = true,
+                suppression = metadata,
+            )
+        assertTrue(violation.isSuppressed)
+        assertEquals(metadata, violation.suppression)
+
+        val violationEncoded = json.encodeToString(violation)
+        val violationDecoded: Violation = json.decodeFromString(violationEncoded)
+        assertEquals(violation, violationDecoded)
+    }
 }

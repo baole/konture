@@ -18,6 +18,7 @@ import io.github.baole.konture.impl.BaselineManager
 import io.github.baole.konture.impl.KontureRuntimeStateProvider
 import io.github.baole.konture.impl.LogicalOperator
 import io.github.baole.konture.impl.StructuredMessageList
+import io.github.baole.konture.impl.suppression.SuppressionEvaluator
 
 /**
  * A builder for compiling and verifying architectural rules on project modules.
@@ -71,6 +72,16 @@ public class ModulesRuleBuilder(
         }
 
     private val ignoredPredicates = mutableListOf<(Module) -> Boolean>()
+    private val programmaticSuppressions = mutableListOf<ProgrammaticSuppression>()
+
+    /**
+     * Configures programmatic violation suppressions for this module rule suite with mandatory audit rationale.
+     */
+    public fun suppress(block: RuleSuppressionBuilder.() -> Unit): ModulesRuleBuilder {
+        val builder = RuleSuppressionBuilder().apply(block)
+        programmaticSuppressions.addAll(builder.suppressions)
+        return this
+    }
 
     /**
      * Configures this builder to allow empty selections (i.e. if no modules match the `that()` filter,
@@ -84,6 +95,10 @@ public class ModulesRuleBuilder(
     /**
      * Configures this builder to ignore failures for modules satisfying the given predicate.
      */
+    @Deprecated(
+        message = "Use suppress { ... } with mandatory audit reason instead",
+        replaceWith = ReplaceWith("suppress { ... }"),
+    )
     public fun ignoreFailuresIn(predicate: (Module) -> Boolean): ModulesRuleBuilder {
         ignoredPredicates.add(predicate)
         return this
@@ -92,6 +107,10 @@ public class ModulesRuleBuilder(
     /**
      * Configures this builder to ignore failures for modules matching any of the specified paths or patterns.
      */
+    @Deprecated(
+        message = "Use suppress { ... } with mandatory audit reason instead",
+        replaceWith = ReplaceWith("suppress { ... }"),
+    )
     public fun ignoreFailuresIn(vararg modulePaths: String): ModulesRuleBuilder {
         ignoredPredicates.add { module ->
             modulePaths.any { path ->
@@ -328,6 +347,8 @@ public class ModulesRuleBuilder(
         val currentMeta = KontureRuntimeStateProvider.currentState.currentRuleMetadata
         val activeRuleId = currentMeta?.id ?: "modules.rule"
         val activeSeverity = currentMeta?.severity ?: Severity.ERROR
+        val allProgrammatic =
+            KontureRuntimeStateProvider.currentState.activeProgrammaticSuppressions + programmaticSuppressions
 
         val runCheckReport = { list: MutableList<Violation> ->
             for (module in modulesToCheck) {
@@ -343,6 +364,12 @@ public class ModulesRuleBuilder(
                             path = module.path,
                             location = SourceLocation(filePath = module.projectDir),
                         )
+                    val suppression =
+                        SuppressionEvaluator.evaluateModuleSuppression(
+                            ruleId = ruleIdToUse,
+                            module = module,
+                            programmaticSuppressions = allProgrammatic,
+                        )
                     list.add(
                         Violation(
                             ruleId = ruleIdToUse,
@@ -350,6 +377,8 @@ public class ModulesRuleBuilder(
                             message = rawMsg,
                             severity = severityToUse,
                             metadata = msgMeta,
+                            isSuppressed = suppression != null,
+                            suppression = suppression,
                         ),
                     )
                 }

@@ -19,6 +19,7 @@ import io.github.baole.konture.impl.KontureRuntimeStateProvider
 import io.github.baole.konture.impl.LogicalOperator
 import io.github.baole.konture.impl.StructuredMessageList
 import io.github.baole.konture.impl.ViolationLocation
+import io.github.baole.konture.impl.suppression.SuppressionEvaluator
 
 /**
  * A builder for compiling and verifying architectural rules on Kotlin classes.
@@ -79,8 +80,6 @@ public class ClassesRuleBuilder(
             }.distinctBy { it.fqName }.forEach(logger)
         }
 
-    private val ignoredPredicates = mutableListOf<(ClassDeclaration) -> Boolean>()
-
     /**
      * Configures this builder to allow empty selections (i.e. if no classes match the `that()` filter,
      * the rule will pass instead of throwing an AssertionError).
@@ -90,9 +89,25 @@ public class ClassesRuleBuilder(
         return this
     }
 
+    private val ignoredPredicates = mutableListOf<(ClassDeclaration) -> Boolean>()
+    private val programmaticSuppressions = mutableListOf<ProgrammaticSuppression>()
+
+    /**
+     * Configures programmatic violation suppressions for this class rule suite with mandatory audit rationale.
+     */
+    public fun suppress(block: RuleSuppressionBuilder.() -> Unit): ClassesRuleBuilder {
+        val builder = RuleSuppressionBuilder().apply(block)
+        programmaticSuppressions.addAll(builder.suppressions)
+        return this
+    }
+
     /**
      * Configures this builder to ignore failures for classes satisfying the given predicate.
      */
+    @Deprecated(
+        message = "Use suppress { ... } with mandatory audit reason instead",
+        replaceWith = ReplaceWith("suppress { ... }"),
+    )
     public fun ignoreFailuresIn(predicate: (ClassDeclaration) -> Boolean): ClassesRuleBuilder {
         ignoredPredicates.add(predicate)
         return this
@@ -101,6 +116,10 @@ public class ClassesRuleBuilder(
     /**
      * Configures this builder to ignore failures for classes matching any of the specified names or patterns.
      */
+    @Deprecated(
+        message = "Use suppress { ... } with mandatory audit reason instead",
+        replaceWith = ReplaceWith("suppress { ... }"),
+    )
     public fun ignoreFailuresIn(vararg classNames: String): ClassesRuleBuilder {
         ignoredPredicates.add { cls ->
             classNames.any { name ->
@@ -351,6 +370,10 @@ public class ClassesRuleBuilder(
         val currentMeta = KontureRuntimeStateProvider.currentState.currentRuleMetadata
         val activeRuleId = currentMeta?.id ?: "classes.rule"
         val activeSeverity = currentMeta?.severity ?: Severity.ERROR
+        val allProgrammatic =
+            KontureRuntimeStateProvider.currentState.activeProgrammaticSuppressions + programmaticSuppressions
+        val fileMap = graph.fileMap
+        val classMap = graph.classMap
 
         val runCheckReport = { list: MutableList<Violation> ->
             for ((cls, modulePath, sourceSetName) in classesToCheck) {
@@ -373,6 +396,20 @@ public class ClassesRuleBuilder(
                             simpleName = cls.name,
                             location = SourceLocation(filePath = cls.filePath, line = cls.sourceLine),
                         )
+                    val enclosingClass =
+                        if (cls.fqName.contains('.')) {
+                            classMap[cls.fqName.substringBeforeLast('.')]
+                        } else {
+                            null
+                        }
+                    val suppression =
+                        SuppressionEvaluator.evaluateClassSuppression(
+                            ruleId = ruleIdToUse,
+                            cls = cls,
+                            file = fileMap[cls.filePath],
+                            enclosingClass = enclosingClass,
+                            programmaticSuppressions = allProgrammatic,
+                        )
                     list.add(
                         Violation(
                             ruleId = ruleIdToUse,
@@ -380,6 +417,8 @@ public class ClassesRuleBuilder(
                             message = fullMsg,
                             severity = severityToUse,
                             metadata = msgMeta,
+                            isSuppressed = suppression != null,
+                            suppression = suppression,
                         ),
                     )
                 }

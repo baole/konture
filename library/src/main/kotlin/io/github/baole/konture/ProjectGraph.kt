@@ -68,6 +68,14 @@ public data class ProjectGraph(
      */
     public fun getAllModules(): List<Module> = moduleMap.values.toList()
 
+    internal val fileMap: Map<String, FileDeclaration> by lazy {
+        getAllModules().flatMap { it.files }.associateBy { it.filePath }
+    }
+
+    internal val classMap: Map<String, ClassDeclaration> by lazy {
+        getAllModules().flatMap { it.classes }.associateBy { it.fqName }
+    }
+
     /**
      * Detects dependency cycles in the module graph and throws an [AssertionError] if any cycle is found.
      * The verification is performed using a Depth-First Search (DFS) traversal over module dependency edges.

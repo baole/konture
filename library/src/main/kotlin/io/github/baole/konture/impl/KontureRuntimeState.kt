@@ -7,6 +7,7 @@
 package io.github.baole.konture.impl
 
 import io.github.baole.konture.OutputFormat
+import io.github.baole.konture.ProgrammaticSuppression
 import io.github.baole.konture.ProjectGraph
 import io.github.baole.konture.core.KontureConstants
 import io.github.baole.konture.core.model.RuleMetadata
@@ -27,6 +28,7 @@ internal class KontureRuntimeState(
     val jsonReportPath: String = KontureConstants.DEFAULT_JSON_REPORT_PATH,
     val sarifReportPath: String = KontureConstants.DEFAULT_SARIF_REPORT_PATH,
     val htmlReportPath: String = KontureConstants.DEFAULT_HTML_REPORT_PATH,
+    val activeProgrammaticSuppressions: List<ProgrammaticSuppression> = emptyList(),
 ) {
     val projectGraphLoader: ProjectGraphLoader = ProjectGraphLoader()
 
@@ -42,6 +44,7 @@ internal class KontureRuntimeState(
         jsonReportPath: String = this.jsonReportPath,
         sarifReportPath: String = this.sarifReportPath,
         htmlReportPath: String = this.htmlReportPath,
+        activeProgrammaticSuppressions: List<ProgrammaticSuppression> = this.activeProgrammaticSuppressions,
     ): KontureRuntimeState {
         return KontureRuntimeState(
             baselinePath = baselinePath,
@@ -56,6 +59,7 @@ internal class KontureRuntimeState(
             jsonReportPath = jsonReportPath,
             sarifReportPath = sarifReportPath,
             htmlReportPath = htmlReportPath,
+            activeProgrammaticSuppressions = activeProgrammaticSuppressions,
         )
     }
 }

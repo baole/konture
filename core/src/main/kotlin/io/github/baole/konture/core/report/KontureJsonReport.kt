@@ -96,7 +96,9 @@ public data class ReportRule(
  * @property target Optional target subject involved in the violation.
  * @property sourceLocation Optional source file location of the subject.
  * @property dependencyPath Sequence of subjects representing the dependency or invocation path.
- * @property isSuppressed True if this violation was matched against an architecture baseline.
+ * @property isSuppressed True if this violation was suppressed (e.g. via @Suppress, programmatic config, or baseline).
+ * @property suppressionReason Optional rationale or reason why this violation was suppressed.
+ * @property suppressionKind Optional category of suppression mechanism (inSource, programmatic, baseline).
  */
 @Serializable
 public data class ReportViolation(
@@ -108,4 +110,6 @@ public data class ReportViolation(
     val sourceLocation: SourceLocation? = null,
     val dependencyPath: List<Subject> = emptyList(),
     val isSuppressed: Boolean = false,
+    val suppressionReason: String? = null,
+    val suppressionKind: String? = null,
 )

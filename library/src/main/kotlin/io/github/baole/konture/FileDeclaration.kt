@@ -30,4 +30,6 @@ public data class FileDeclaration(
     public val sourceSets: List<SourceSetId> = emptyList(),
     /** Filter or assertion criteria for usages. */
     public val usages: List<SourceUsage> = emptyList(),
+    /** Filter or assertion criteria for file-level annotations. */
+    public val annotations: List<AnnotationDeclaration> = emptyList(),
 )

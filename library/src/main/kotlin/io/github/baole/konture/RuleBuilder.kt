@@ -26,12 +26,21 @@ public class RuleBuilder(
     private val tags = mutableSetOf<String>()
 
     internal val executionSuites = mutableListOf<() -> Unit>()
+    internal val programmaticSuppressions = mutableListOf<ProgrammaticSuppression>()
 
     /**
      * Tag this rule with one or more arbitrary string labels.
      */
     public fun tag(vararg tagNames: String) {
         tags.addAll(tagNames)
+    }
+
+    /**
+     * Configures programmatic violation suppressions for this rule with mandatory audit rationale.
+     */
+    public fun suppress(block: RuleSuppressionBuilder.() -> Unit) {
+        val builder = RuleSuppressionBuilder().apply(block)
+        programmaticSuppressions.addAll(builder.suppressions)
     }
 
     /**
