@@ -498,7 +498,12 @@ internal class BaselineManager {
 
                 for (index in subThresholdIndices) {
                     val v = if (index < localizedViolations.size) localizedViolations[index] else englishViolations[index]
-                    val logLevel = if (v.severity == Severity.WARNING) LogLevel.WARNING else LogLevel.INFO
+                    val logLevel =
+                        when (v.severity) {
+                            Severity.ERROR -> LogLevel.ERROR
+                            Severity.WARNING -> LogLevel.WARNING
+                            Severity.INFO -> LogLevel.INFO
+                        }
                     val activeRuleId = v.ruleId.ifBlank { ruleId }
                     val logMessage =
                         getMessage("diagnostic.subThresholdViolation", v.severity.name, activeRuleId, v.message)

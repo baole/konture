@@ -259,6 +259,11 @@ class SeverityBuildGateTest : RuleBuildersTestBase() {
 
         assertTrue(
             loggedMessages.any { (level, msg) ->
+                level == LogLevel.ERROR && msg.contains("classes.error.rule")
+            },
+        )
+        assertTrue(
+            loggedMessages.any { (level, msg) ->
                 level == LogLevel.WARNING && msg.contains("classes.warning.rule")
             },
         )
