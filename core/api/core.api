@@ -143,6 +143,7 @@ public final class io/github/baole/konture/core/KontureConstants {
 	public static final field PROPERTY_BASELINE_DIR Ljava/lang/String;
 	public static final field PROPERTY_BASELINE_GENERATE Ljava/lang/String;
 	public static final field PROPERTY_BASELINE_PATH Ljava/lang/String;
+	public static final field PROPERTY_FAIL_ON_SEVERITY Ljava/lang/String;
 	public static final field PROPERTY_LOCALE Ljava/lang/String;
 	public static final field PROPERTY_OUTPUT_FORMAT Ljava/lang/String;
 	public static final field PROPERTY_REPORT_HTML_PATH Ljava/lang/String;

@@ -3355,6 +3355,7 @@ public final class io/github/baole/konture/Konture {
 	public static final field PROPERTY_BASELINE_DIR Ljava/lang/String;
 	public static final field PROPERTY_BASELINE_GENERATE Ljava/lang/String;
 	public static final field PROPERTY_BASELINE_PATH Ljava/lang/String;
+	public static final field PROPERTY_FAIL_ON_SEVERITY Ljava/lang/String;
 	public static final field PROPERTY_LOCALE Ljava/lang/String;
 	public static final field PROPERTY_OUTPUT_FORMAT Ljava/lang/String;
 	public static final field PROPERTY_REPORT_HTML_PATH Ljava/lang/String;
@@ -3362,6 +3363,7 @@ public final class io/github/baole/konture/Konture {
 	public static final field PROPERTY_REPORT_PATH Ljava/lang/String;
 	public static final field PROPERTY_REPORT_SARIF_PATH Ljava/lang/String;
 	public final fun getBaselinePath ()Ljava/lang/String;
+	public final fun getFailOnSeverity ()Lio/github/baole/konture/core/model/Severity;
 	public final fun getGenerateBaseline ()Z
 	public final fun getHtmlReportPath ()Ljava/lang/String;
 	public final fun getJsonReportPath ()Ljava/lang/String;
@@ -3370,7 +3372,9 @@ public final class io/github/baole/konture/Konture {
 	public final fun getProjectGraph ()Lio/github/baole/konture/ProjectGraph;
 	public final fun getReportPath ()Ljava/lang/String;
 	public final fun getSarifReportPath ()Ljava/lang/String;
+	public final fun reset ()V
 	public final fun setBaselinePath (Ljava/lang/String;)V
+	public final fun setFailOnSeverity (Lio/github/baole/konture/core/model/Severity;)V
 	public final fun setGenerateBaseline (Z)V
 	public final fun setHtmlReportPath (Ljava/lang/String;)V
 	public final fun setJsonReportPath (Ljava/lang/String;)V

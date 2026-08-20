@@ -15,6 +15,7 @@ import io.github.baole.konture.ProblemMatcherViolationFormatter
 import io.github.baole.konture.ProjectGraph
 import io.github.baole.konture.core.KontureLogger
 import io.github.baole.konture.core.LogLevel
+import io.github.baole.konture.core.model.Severity
 import io.github.baole.konture.core.model.SuppressionKind
 import io.github.baole.konture.core.model.SuppressionMetadata
 import io.github.baole.konture.core.model.Violation
@@ -461,14 +462,33 @@ internal class BaselineManager {
         )
         ReportAccumulator.writeReports(buildRoot)
 
-        val failingIndices =
+        val failThreshold = Konture.failOnSeverity
+        val nonSuppressedUnmatchedIndices =
             if (generateBaseline) {
                 emptyList()
             } else {
                 unmatchedIndices.filter { index -> !englishViolations[index].isSuppressed }
             }
 
-        if (failingIndices.isNotEmpty() || generateBaseline) {
+        val failingIndices =
+            if (failThreshold == null) {
+                emptyList()
+            } else {
+                nonSuppressedUnmatchedIndices.filter { index ->
+                    englishViolations[index].severity.ordinal >= failThreshold.ordinal
+                }
+            }
+
+        val subThresholdIndices =
+            if (generateBaseline) {
+                emptyList()
+            } else {
+                nonSuppressedUnmatchedIndices.filter { index ->
+                    failThreshold == null || englishViolations[index].severity.ordinal < failThreshold.ordinal
+                }
+            }
+
+        if (failingIndices.isNotEmpty() || subThresholdIndices.isNotEmpty() || generateBaseline) {
             if (generateBaseline) {
                 val unsuppressedEnglish = englishViolations.filter { !it.isSuppressed }.map { it.message }
                 handleViolations(unsuppressedEnglish, violationHeader)
@@ -476,12 +496,23 @@ internal class BaselineManager {
                 val localizedViolations = mutableListOf<Violation>()
                 runCheckReport(localizedViolations)
 
-                val failingLocalized =
-                    failingIndices.map { index ->
-                        if (index < localizedViolations.size) localizedViolations[index] else englishViolations[index]
-                    }
+                for (index in subThresholdIndices) {
+                    val v = if (index < localizedViolations.size) localizedViolations[index] else englishViolations[index]
+                    val logLevel = if (v.severity == Severity.WARNING) LogLevel.WARNING else LogLevel.INFO
+                    val activeRuleId = v.ruleId.ifBlank { ruleId }
+                    val logMessage =
+                        getMessage("diagnostic.subThresholdViolation", v.severity.name, activeRuleId, v.message)
+                    KontureLogger.log(logLevel, logMessage)
+                }
 
-                throwNewViolationsReport(ruleId, failingLocalized, violationHeader)
+                if (failingIndices.isNotEmpty()) {
+                    val failingLocalized =
+                        failingIndices.map { index ->
+                            if (index < localizedViolations.size) localizedViolations[index] else englishViolations[index]
+                        }
+
+                    throwNewViolationsReport(ruleId, failingLocalized, violationHeader)
+                }
             }
         }
 

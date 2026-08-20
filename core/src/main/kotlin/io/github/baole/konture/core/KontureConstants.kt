@@ -85,4 +85,9 @@ public object KontureConstants {
      * Default baseline filename fallback when no custom path is configured.
      */
     public const val DEFAULT_BASELINE_FILENAME: String = "konture-baseline.json"
+
+    /**
+     * System property key used to override the minimum severity failure threshold.
+     */
+    public const val PROPERTY_FAIL_ON_SEVERITY: String = "konture.fail.on.severity"
 }
