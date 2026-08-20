@@ -38,7 +38,11 @@ class SeverityBuildGateTest : RuleBuildersTestBase() {
             loggedMessages.add(level to message)
         }
         System.clearProperty(Konture.PROPERTY_FAIL_ON_SEVERITY)
+        System.clearProperty(Konture.PROPERTY_REPORT_JSON_PATH)
+        System.clearProperty(Konture.PROPERTY_REPORT_PATH)
+        System.clearProperty(Konture.PROPERTY_BASELINE_PATH)
         KontureRuntimeStateProvider.reset()
+        ProjectGraph.setDefault(projectGraph)
         ReportAccumulator.clear()
     }
 
@@ -47,6 +51,9 @@ class SeverityBuildGateTest : RuleBuildersTestBase() {
         KontureLogger.logger = originalLogger
         KontureLogger.minLevel = originalMinLevel
         System.clearProperty(Konture.PROPERTY_FAIL_ON_SEVERITY)
+        System.clearProperty(Konture.PROPERTY_REPORT_JSON_PATH)
+        System.clearProperty(Konture.PROPERTY_REPORT_PATH)
+        System.clearProperty(Konture.PROPERTY_BASELINE_PATH)
         KontureRuntimeStateProvider.reset()
         ReportAccumulator.clear()
     }
@@ -321,6 +328,8 @@ class SeverityBuildGateTest : RuleBuildersTestBase() {
     fun `test report accumulator records sub-threshold violations in JSON report`(
         @TempDir tempDir: Path,
     ) {
+        ReportAccumulator.clear()
+        ProjectGraph.setDefault(projectGraph)
         val jsonReportFile = File(tempDir.toFile(), "konture-report.json")
         Konture.jsonReportPath = jsonReportFile.absolutePath
         Konture.failOnSeverity = Severity.ERROR

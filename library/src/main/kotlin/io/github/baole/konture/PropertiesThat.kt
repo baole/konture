@@ -539,7 +539,12 @@ public class PropertiesThat internal constructor(
             prop.declaration.annotations.any { ann ->
                 (ann.name == annotationName || ann.fqName == annotationName) &&
                     ann.arguments.any { arg ->
-                        (argName == null || arg.name == argName) && arg.value == argValue
+                        (argName == null || arg.name == argName) &&
+                            (
+                                arg.value == argValue ||
+                                    arg.value.removeSurrounding("\"") == argValue ||
+                                    arg.value.removeSurrounding("'") == argValue
+                            )
                     }
             }
         }

@@ -122,7 +122,12 @@ public interface FunctionsShouldSignatureAssertions {
                 func.declaration.annotations.any { ann ->
                     (ann.name == annotationName || ann.fqName == annotationName) &&
                         ann.arguments.any { arg ->
-                            (argName == null || arg.name == argName) && arg.value == argValue
+                            (argName == null || arg.name == argName) &&
+                                (
+                                    arg.value == argValue ||
+                                        arg.value.removeSurrounding("\"") == argValue ||
+                                        arg.value.removeSurrounding("'") == argValue
+                                )
                         }
                 }
             if (!matches) {
@@ -189,7 +194,10 @@ public interface FunctionsShouldSignatureAssertions {
             val match =
                 func.declaration.parameters.size == types.size &&
                     func.declaration.parameters.zip(types).all { (param, expectedType) ->
-                        param.type == expectedType || param.type.endsWith(".$expectedType")
+                        param.type == expectedType ||
+                            param.type.endsWith(".$expectedType") ||
+                            expectedType.endsWith(".${param.type}") ||
+                            param.resolvedType == expectedType
                     }
             if (!match) {
                 /** Filter or assertion criteria for current types. */
@@ -256,7 +264,10 @@ public interface FunctionsShouldSignatureAssertions {
             val hasAny =
                 func.declaration.parameters.any { param ->
                     types.any { expectedType ->
-                        param.type == expectedType || param.type.endsWith(".$expectedType")
+                        param.type == expectedType ||
+                            param.type.endsWith(".$expectedType") ||
+                            expectedType.endsWith(".${param.type}") ||
+                            param.resolvedType == expectedType
                     }
                 }
             if (!hasAny) {
