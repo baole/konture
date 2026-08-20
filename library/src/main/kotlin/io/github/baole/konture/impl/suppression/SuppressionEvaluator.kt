@@ -52,12 +52,14 @@ internal object SuppressionEvaluator {
         ruleId: String,
     ): Boolean {
         val trimmed = token.trim()
-        if (trimmed == "*" || trimmed == "konture:*" || trimmed == "konture") {
+        if (trimmed == "*" || trimmed == "all" || trimmed == "konture:*" || trimmed == "konture:all" ||
+            trimmed == "konture" || trimmed == "konture:"
+        ) {
             return true
         }
         if (trimmed.startsWith("konture:")) {
             val target = trimmed.removePrefix("konture:")
-            if (target == "*" || target.isEmpty()) return true
+            if (target == "*" || target == "all" || target.isEmpty()) return true
             if (target.endsWith(".*")) {
                 val prefix = target.removeSuffix(".*")
                 return ruleId.startsWith("$prefix.") || ruleId == prefix
@@ -487,12 +489,19 @@ internal object SuppressionEvaluator {
     ): SuppressionMetadata? {
         val keys = (listOf(sliceKey) + candidateSliceKeys).toSet()
         for (suppression in programmaticSuppressions) {
-            if (suppression is ProgrammaticSuppression.SliceKey && suppression.sliceKey in keys) {
-                logSuppressed(ruleId, suppression.sliceKey, suppression.reason)
-                return SuppressionMetadata(
-                    kind = SuppressionKind.PROGRAMMATIC,
-                    reason = suppression.reason,
-                )
+            if (suppression is ProgrammaticSuppression.SliceKey) {
+                val matches =
+                    keys.any { key ->
+                        key == suppression.sliceKey ||
+                            PatternMatchers.matchesSimpleGlob(suppression.sliceKey, key)
+                    }
+                if (matches) {
+                    logSuppressed(ruleId, suppression.sliceKey, suppression.reason)
+                    return SuppressionMetadata(
+                        kind = SuppressionKind.PROGRAMMATIC,
+                        reason = suppression.reason,
+                    )
+                }
             }
         }
         return null

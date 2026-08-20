@@ -435,8 +435,8 @@ public class FunctionsRuleBuilder(
         val activeSeverity = currentMeta?.severity ?: Severity.ERROR
         val allProgrammatic =
             KontureRuntimeStateProvider.currentState.activeProgrammaticSuppressions + programmaticSuppressions
-        val fileMap = graph.getAllModules().flatMap { it.files }.associateBy { it.filePath }
-        val classMap = graph.getAllModules().flatMap { it.classes }.associateBy { it.fqName }
+        val fileMap = graph.fileMap
+        val classMap = graph.classMap
 
         val runCheckReport = { list: MutableList<Violation> ->
             for (func in functionsToCheck) {

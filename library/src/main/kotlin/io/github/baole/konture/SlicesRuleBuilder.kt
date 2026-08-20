@@ -339,11 +339,16 @@ public class SlicesRuleBuilder(
                 val ruleIdToUse = msgMeta?.id ?: activeRuleId
                 val severityToUse = msgMeta?.severity ?: activeSeverity
                 val subject = Subject.CustomSubject(name = slicePattern)
+                val candidateKeys =
+                    activeSlices
+                        .map { it.key }
+                        .filter { key -> rawMsg.contains(key) }
+                        .ifEmpty { activeSlices.map { it.key } }
                 val suppression =
                     SuppressionEvaluator.evaluateSliceSuppression(
                         ruleId = ruleIdToUse,
                         sliceKey = slicePattern,
-                        candidateSliceKeys = activeSlices.map { it.key },
+                        candidateSliceKeys = candidateKeys,
                         programmaticSuppressions = allProgrammatic,
                     )
                 list.add(

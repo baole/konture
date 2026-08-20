@@ -518,6 +518,16 @@ class SuppressionEvaluatorTest {
         assertNotNull(metaSlice)
         assertEquals("Slice reason", metaSlice?.reason)
 
+        val metaSliceGlob =
+            SuppressionEvaluator.evaluateSliceSuppression(
+                ruleId = "slice.rule",
+                sliceKey = "com.example.(*)..",
+                candidateSliceKeys = listOf("feature-checkout"),
+                programmaticSuppressions = listOf(ProgrammaticSuppression.SliceKey("feature-*", "Slice glob reason")),
+            )
+        assertNotNull(metaSliceGlob)
+        assertEquals("Slice glob reason", metaSliceGlob?.reason)
+
         assertNull(
             SuppressionEvaluator.evaluateModuleSuppression(
                 ruleId = "module.rule",
@@ -532,5 +542,15 @@ class SuppressionEvaluatorTest {
                 programmaticSuppressions = listOf(ProgrammaticSuppression.SliceKey("other", "Other")),
             ),
         )
+    }
+
+    @Test
+    fun `test matchesRule with universal wildcards`() {
+        assertTrue(SuppressionEvaluator.matchesRule("all", "any.rule"))
+        assertTrue(SuppressionEvaluator.matchesRule("konture:all", "any.rule"))
+        assertTrue(SuppressionEvaluator.matchesRule("konture:", "any.rule"))
+        assertTrue(SuppressionEvaluator.matchesRule("konture:*", "any.rule"))
+        assertTrue(SuppressionEvaluator.matchesRule("*", "any.rule"))
+        assertTrue(SuppressionEvaluator.matchesRule("konture", "any.rule"))
     }
 }

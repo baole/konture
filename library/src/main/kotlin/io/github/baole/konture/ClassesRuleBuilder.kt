@@ -372,7 +372,8 @@ public class ClassesRuleBuilder(
         val activeSeverity = currentMeta?.severity ?: Severity.ERROR
         val allProgrammatic =
             KontureRuntimeStateProvider.currentState.activeProgrammaticSuppressions + programmaticSuppressions
-        val fileMap = graph.getAllModules().flatMap { it.files }.associateBy { it.filePath }
+        val fileMap = graph.fileMap
+        val classMap = graph.classMap
 
         val runCheckReport = { list: MutableList<Violation> ->
             for ((cls, modulePath, sourceSetName) in classesToCheck) {
@@ -395,12 +396,18 @@ public class ClassesRuleBuilder(
                             simpleName = cls.name,
                             location = SourceLocation(filePath = cls.filePath, line = cls.sourceLine),
                         )
+                    val enclosingClass =
+                        if (cls.fqName.contains('.')) {
+                            classMap[cls.fqName.substringBeforeLast('.')]
+                        } else {
+                            null
+                        }
                     val suppression =
                         SuppressionEvaluator.evaluateClassSuppression(
                             ruleId = ruleIdToUse,
                             cls = cls,
                             file = fileMap[cls.filePath],
-                            enclosingClass = null,
+                            enclosingClass = enclosingClass,
                             programmaticSuppressions = allProgrammatic,
                         )
                     list.add(

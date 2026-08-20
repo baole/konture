@@ -470,7 +470,8 @@ internal class BaselineManager {
 
         if (failingIndices.isNotEmpty() || generateBaseline) {
             if (generateBaseline) {
-                handleViolations(englishStrings, violationHeader)
+                val unsuppressedEnglish = englishViolations.filter { !it.isSuppressed }.map { it.message }
+                handleViolations(unsuppressedEnglish, violationHeader)
             } else {
                 val localizedViolations = mutableListOf<Violation>()
                 runCheckReport(localizedViolations)

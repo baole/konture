@@ -11,6 +11,8 @@ import io.github.baole.konture.core.model.Subject
 import io.github.baole.konture.core.model.SuppressionKind
 import io.github.baole.konture.core.model.SuppressionMetadata
 import io.github.baole.konture.core.model.Violation
+import io.github.baole.konture.impl.BaselineManager
+import io.github.baole.konture.impl.KontureRuntimeStateProvider
 import io.github.baole.konture.impl.report.JsonReportExporter
 import io.github.baole.konture.impl.report.ReportAccumulator
 import io.github.baole.konture.impl.report.SarifReportExporter
@@ -419,5 +421,214 @@ class SuppressionTest : RuleBuildersTestBase() {
         val sarifContent = SarifReportExporter.exportToString(sarifReport)
         assertTrue(sarifContent.contains("\"kind\": \"inSource\""))
         assertTrue(sarifContent.contains("\"kind\": \"external\""))
+    }
+
+    @Test
+    fun `test nested class inherits enclosing class in-source suppression in classes rule`() {
+        val outerClass =
+            ClassDeclaration(
+                name = "Outer",
+                fqName = "com.example.Outer",
+                packageName = "com.example",
+                isInterface = false,
+                isAbstract = false,
+                annotations =
+                    listOf(
+                        AnnotationDeclaration(
+                            name = "Suppress",
+                            fqName = "kotlin.Suppress",
+                            arguments = listOf(AnnotationArgumentDeclaration(null, "\"konture:classes.rule\"")),
+                        ),
+                    ),
+                imports = emptyList(),
+                referencedTypes = emptySet(),
+                filePath = "/src/Outer.kt",
+            )
+        val innerClass =
+            ClassDeclaration(
+                name = "Inner",
+                fqName = "com.example.Outer.Inner",
+                packageName = "com.example",
+                isInterface = false,
+                isAbstract = false,
+                annotations = emptyList(),
+                imports = emptyList(),
+                referencedTypes = emptySet(),
+                filePath = "/src/Outer.kt",
+            )
+        val fileDecl =
+            FileDeclaration(
+                "Outer.kt",
+                "com.example",
+                filePath = "/src/Outer.kt",
+                classes = listOf(outerClass, innerClass),
+            )
+        val mod =
+            Module(
+                buildId = ":",
+                path = ":testModule",
+                projectDir = "testModule",
+                appliedPlugins = emptyList(),
+                sourceSets = emptyList(),
+                dependencies = emptyList(),
+                files = listOf(fileDecl),
+            )
+        val graph = ProjectGraph(builds = mapOf(":" to listOf(mod)))
+
+        ClassesRuleBuilder(graph)
+            .that()
+            .haveName("Inner")
+            .should()
+            .beInterfaces()
+            .check()
+    }
+
+    @Test
+    fun `test slice granular suppression does not suppress unrelated cycle`() {
+        val classA =
+            ClassDeclaration(
+                name = "ServiceA",
+                fqName = "com.example.featureA.ServiceA",
+                packageName = "com.example.featureA",
+                isInterface = false,
+                isAbstract = false,
+                annotations = emptyList(),
+                imports = emptyList(),
+                referencedTypes = setOf("com.example.featureB.ServiceB"),
+                filePath = "/src/ServiceA.kt",
+            )
+        val classB =
+            ClassDeclaration(
+                name = "ServiceB",
+                fqName = "com.example.featureB.ServiceB",
+                packageName = "com.example.featureB",
+                isInterface = false,
+                isAbstract = false,
+                annotations = emptyList(),
+                imports = emptyList(),
+                referencedTypes = setOf("com.example.featureA.ServiceA"),
+                filePath = "/src/ServiceB.kt",
+            )
+        val fileA =
+            FileDeclaration(
+                "ServiceA.kt",
+                "com.example.featureA",
+                filePath = "/src/ServiceA.kt",
+                classes = listOf(classA),
+            )
+        val fileB =
+            FileDeclaration(
+                "ServiceB.kt",
+                "com.example.featureB",
+                filePath = "/src/ServiceB.kt",
+                classes = listOf(classB),
+            )
+        val mod =
+            Module(
+                buildId = ":",
+                path = ":testModule",
+                projectDir = "testModule",
+                appliedPlugins = emptyList(),
+                sourceSets = emptyList(),
+                dependencies = emptyList(),
+                files = listOf(fileA, fileB),
+            )
+        val graph = ProjectGraph(builds = mapOf(":" to listOf(mod)))
+
+        assertThrows(AssertionError::class.java) {
+            SlicesRuleBuilder(graph)
+                .matching("com.example.(*)..")
+                .suppress {
+                    slice("other", reason = "Mute unrelated slice")
+                }
+                .should()
+                .beFreeOfCycles()
+                .check()
+        }
+
+        SlicesRuleBuilder(graph)
+            .matching("com.example.(*)..")
+            .suppress {
+                slice("featureA", reason = "Mute featureA")
+            }
+            .should()
+            .beFreeOfCycles()
+            .check()
+    }
+
+    @Test
+    fun `test baseline generation excludes already suppressed violations`() {
+        val suppressedClass =
+            ClassDeclaration(
+                name = "SuppressedClass",
+                fqName = "com.example.SuppressedClass",
+                packageName = "com.example",
+                isInterface = false,
+                isAbstract = false,
+                annotations =
+                    listOf(
+                        AnnotationDeclaration(
+                            name = "Suppress",
+                            fqName = "kotlin.Suppress",
+                            arguments = listOf(AnnotationArgumentDeclaration(null, "\"konture:classes.rule\"")),
+                        ),
+                    ),
+                imports = emptyList(),
+                referencedTypes = emptySet(),
+                filePath = "/src/SuppressedClass.kt",
+            )
+        val unsuppressedClass =
+            ClassDeclaration(
+                name = "UnsuppressedClass",
+                fqName = "com.example.UnsuppressedClass",
+                packageName = "com.example",
+                isInterface = false,
+                isAbstract = false,
+                annotations = emptyList(),
+                imports = emptyList(),
+                referencedTypes = emptySet(),
+                filePath = "/src/UnsuppressedClass.kt",
+            )
+        val fileDecl =
+            FileDeclaration(
+                "Classes.kt",
+                "com.example",
+                filePath = "/src/Classes.kt",
+                classes = listOf(suppressedClass, unsuppressedClass),
+            )
+        val mod =
+            Module(
+                buildId = ":",
+                path = ":testModule",
+                projectDir = "testModule",
+                appliedPlugins = emptyList(),
+                sourceSets = emptyList(),
+                dependencies = emptyList(),
+                files = listOf(fileDecl),
+            )
+        val graph = ProjectGraph(builds = mapOf(":" to listOf(mod)))
+
+        val tempDir = java.nio.file.Files.createTempDirectory("konture_suppression_baseline_test").toFile()
+        tempDir.deleteOnExit()
+        System.setProperty(Konture.PROPERTY_BASELINE_DIR, tempDir.absolutePath)
+        System.setProperty(Konture.PROPERTY_BASELINE_GENERATE, "true")
+        try {
+            BaselineManager.resetForTest()
+            ClassesRuleBuilder(graph)
+                .that()
+                .resideInAPackage("com.example")
+                .should()
+                .beInterfaces()
+                .check()
+
+            val recorded = KontureRuntimeStateProvider.currentState.baselineManager.recordedViolations
+            org.junit.jupiter.api.Assertions.assertEquals(1, recorded.size)
+            assertTrue(recorded.first().message.contains("UnsuppressedClass"))
+            assertTrue(!recorded.first().message.contains("SuppressedClass"))
+        } finally {
+            System.clearProperty(Konture.PROPERTY_BASELINE_DIR)
+            System.clearProperty(Konture.PROPERTY_BASELINE_GENERATE)
+            BaselineManager.resetForTest()
+        }
     }
 }
