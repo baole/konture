@@ -15,11 +15,11 @@ internal object HtmlReportWriter {
     @Suppress("TooGenericExceptionCaught")
     fun writeReport(
         report: ViolationReport,
+        targetFile: File = File(Konture.htmlReportPath),
         customHeader: String? = null,
     ) {
         try {
-            val reportFile = File(Konture.reportPath)
-            reportFile.parentFile?.mkdirs()
+            targetFile.parentFile?.mkdirs()
 
             val htmlSnippet = HtmlViolationFormatter.format(report, customHeader)
 
@@ -52,7 +52,7 @@ internal object HtmlReportWriter {
                 </html>
                 """.trimIndent()
 
-            reportFile.writeText(fullDocument)
+            targetFile.writeText(fullDocument)
         } catch (_: Exception) {
             // Ignore file write exceptions in test environment
         }

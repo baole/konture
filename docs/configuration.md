@@ -104,8 +104,52 @@ Declare your plugin configurations inside the `<configuration>` block of the `ko
 | **`excludeConfigurations`** | `listOf("test", "benchmark", "profile")` | Excludes specific dependency configurations from being traversed.<br>• Supports simple glob matching (`*`). E.g., `test*` matches `testImplementation`. |
 | **`logLevel`** | `"INFO"` | Configures logging level of the Konture plugin execution.<br>• Supported levels: `"INFO"`, `"DEBUG"`, `"WARNING"`, `"TRACE"`. |
 | **`language`** | `"en"` | Configures translation language for architectural violation messages.<br>• Supported languages: `"en"` (English), `"fr"` (French), `"es"` (Spanish), `"it"` (Italian), `"vi"` (Vietnamese), `"zh"` / `"zh-CN"` (Simplified Chinese), `"zh-TW"` (Traditional Chinese). |
-| **`outputFormat`** | `"HUMAN"` | Configures output formatting for architectural rule violations.<br>• Supported formats: `"HUMAN"` (default multi-line format), `"PROBLEM_MATCHER"` (single-line IDE/CI problem matcher format `path:line:col: Konture [ruleId]: message`), `"HTML"` (semantic HTML snippet format and standalone HTML report file generation), `"JSON"`, `"SARIF"`. Can also be overridden via system property `-Dkonture.output.format=html` or programmatically via `Konture.outputFormat`. |
-| **`reportPath`** | `"build/reports/konture-report.html"` | Configures file path for standalone output report files when using `OutputFormat.HTML`.<br>• Can be overridden via system property `-Dkonture.report.path=build/reports/custom-report.html` or programmatically via `Konture.reportPath`. |
+| **`outputFormat`** | `"HUMAN"` | Configures output formatting for architectural rule violations.<br>• Supported formats: `"HUMAN"` (default multi-line console output), `"PROBLEM_MATCHER"` (single-line IDE/CI problem matcher format `path:line:col: Konture [ruleId]: message`), `"HTML"` (standalone HTML report), `"JSON"` (schema-validated JSON report), `"SARIF"` (OASIS SARIF v2.1.0 standard for GitHub Code Scanning / SonarQube). Can also be overridden via system property `-Dkonture.output.format=json` or programmatically via `Konture.outputFormat`. |
+| **`reportPath`** | `"build/reports/konture/konture-report.html"` | Configures destination file path for standalone output report files.<br>• Can be overridden via system property `-Dkonture.report.path=build/reports/custom-report.html` or programmatically via `Konture.reportPath`. Format-specific paths can also be set via `konture.report.html.path`, `konture.report.json.path`, or `konture.report.sarif.path`. |
+
+---
+
+## 📊 Machine-Readable Reports (JSON & SARIF)
+
+Konture exports comprehensive reports of architecture evaluations, including rule metadata, violation details, source locations, and baseline suppressions.
+
+### Supported Output Formats
+
+1. **JSON (`OutputFormat.JSON`)**:
+   - Default path: `build/reports/konture/konture-report.json`
+   - Configurable via `-Dkonture.report.json.path=path/to/report.json` or `Konture.jsonReportPath`
+   - Includes full tool info, summary statistics, evaluations, and violations with suppressed flags.
+
+2. **SARIF v2.1.0 (`OutputFormat.SARIF`)**:
+   - Default path: `build/reports/konture/konture-report.sarif`
+   - Configurable via `-Dkonture.report.sarif.path=path/to/report.sarif` or `Konture.sarifReportPath`
+   - Compatible with GitHub Code Scanning (`github/codeql-action/upload-sarif`), SonarQube, and GitLab SAST.
+   - Suppressed baseline violations are encoded with SARIF suppression objects (`kind: "external"`, `status: "accepted"`).
+
+3. **HTML (`OutputFormat.HTML`)**:
+   - Default path: `build/reports/konture/konture-report.html`
+   - Configurable via `-Dkonture.report.html.path=path/to/report.html` or `Konture.htmlReportPath`
+
+### Generating Reports in CI
+
+You can enable machine-readable reports during CI test runs using system properties:
+
+```bash
+./gradlew test -Dkonture.output.format=sarif
+```
+
+In GitHub Actions, you can upload the resulting SARIF file directly to GitHub Code Scanning:
+
+```yaml
+- name: Run Architecture Tests
+  run: ./gradlew test -Dkonture.output.format=sarif
+
+- name: Upload SARIF to GitHub Code Scanning
+  uses: github/codeql-action/upload-sarif@v3
+  if: always()
+  with:
+    sarif_file: build/reports/konture/konture-report.sarif
+```
 
 ---
 

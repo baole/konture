@@ -127,15 +127,119 @@ public object Konture {
     public const val PROPERTY_REPORT_PATH: String = KontureConstants.PROPERTY_REPORT_PATH
 
     /**
+     * System property key used to override the path of generated JSON report files.
+     */
+    public const val PROPERTY_REPORT_JSON_PATH: String = KontureConstants.PROPERTY_REPORT_JSON_PATH
+
+    /**
+     * System property key used to override the path of generated SARIF report files.
+     */
+    public const val PROPERTY_REPORT_SARIF_PATH: String = KontureConstants.PROPERTY_REPORT_SARIF_PATH
+
+    /**
+     * System property key used to override the path of generated HTML report files.
+     */
+    public const val PROPERTY_REPORT_HTML_PATH: String = KontureConstants.PROPERTY_REPORT_HTML_PATH
+
+    /**
+     * Default JSON report path.
+     */
+    public const val DEFAULT_JSON_REPORT_PATH: String = KontureConstants.DEFAULT_JSON_REPORT_PATH
+
+    /**
+     * Default SARIF report path.
+     */
+    public const val DEFAULT_SARIF_REPORT_PATH: String = KontureConstants.DEFAULT_SARIF_REPORT_PATH
+
+    /**
+     * Default HTML report path.
+     */
+    public const val DEFAULT_HTML_REPORT_PATH: String = KontureConstants.DEFAULT_HTML_REPORT_PATH
+
+    /**
      * Target report output path relative to project build directory.
-     * Default value is obtained from system property "konture.report.path" or falls back to "build/reports/konture-report.html".
+     * Default value is obtained from system property "konture.report.path" or falls back to "build/reports/konture/konture-report.html".
      * Backed by ThreadLocal state; safe under parallel test execution.
      */
     public var reportPath: String
         get() = System.getProperty(PROPERTY_REPORT_PATH) ?: KontureRuntimeStateProvider.currentState.reportPath
         set(value) {
-            KontureRuntimeStateProvider.currentState = KontureRuntimeStateProvider.currentState.copy(reportPath = value)
+            val state = KontureRuntimeStateProvider.currentState
+            KontureRuntimeStateProvider.currentState =
+                state.copy(
+                    reportPath = value,
+                    htmlReportPath = if (value.endsWith(".html")) value else state.htmlReportPath,
+                    jsonReportPath = if (value.endsWith(".json")) value else state.jsonReportPath,
+                    sarifReportPath = if (value.endsWith(".sarif")) value else state.sarifReportPath,
+                )
         }
+
+    /**
+     * Target JSON report output path relative to project build directory.
+     * Default value is obtained from system property "konture.report.json.path" or falls back to "build/reports/konture/konture-report.json".
+     * Backed by ThreadLocal state; safe under parallel test execution.
+     */
+    public var jsonReportPath: String
+        get() =
+            System.getProperty(PROPERTY_REPORT_JSON_PATH)
+                ?: System.getProperty(PROPERTY_REPORT_PATH)?.takeIf { it.endsWith(".json") }
+                ?: if (KontureRuntimeStateProvider.currentState.jsonReportPath != DEFAULT_JSON_REPORT_PATH) {
+                    KontureRuntimeStateProvider.currentState.jsonReportPath
+                } else if (KontureRuntimeStateProvider.currentState.reportPath.endsWith(".json")) {
+                    KontureRuntimeStateProvider.currentState.reportPath
+                } else {
+                    KontureRuntimeStateProvider.currentState.jsonReportPath
+                }
+        set(value) {
+            KontureRuntimeStateProvider.currentState =
+                KontureRuntimeStateProvider.currentState.copy(jsonReportPath = value)
+        }
+
+    /**
+     * Target SARIF report output path relative to project build directory.
+     * Default value is obtained from system property "konture.report.sarif.path" or falls back to "build/reports/konture/konture-report.sarif".
+     * Backed by ThreadLocal state; safe under parallel test execution.
+     */
+    public var sarifReportPath: String
+        get() =
+            System.getProperty(PROPERTY_REPORT_SARIF_PATH)
+                ?: System.getProperty(PROPERTY_REPORT_PATH)?.takeIf { it.endsWith(".sarif") }
+                ?: if (KontureRuntimeStateProvider.currentState.sarifReportPath != DEFAULT_SARIF_REPORT_PATH) {
+                    KontureRuntimeStateProvider.currentState.sarifReportPath
+                } else if (KontureRuntimeStateProvider.currentState.reportPath.endsWith(".sarif")) {
+                    KontureRuntimeStateProvider.currentState.reportPath
+                } else {
+                    KontureRuntimeStateProvider.currentState.sarifReportPath
+                }
+        set(value) {
+            KontureRuntimeStateProvider.currentState =
+                KontureRuntimeStateProvider.currentState.copy(sarifReportPath = value)
+        }
+
+    /**
+     * Target HTML report output path relative to project build directory.
+     * Default value is obtained from system property "konture.report.html.path" or falls back to "build/reports/konture/konture-report.html".
+     * Backed by ThreadLocal state; safe under parallel test execution.
+     */
+    public var htmlReportPath: String
+        get() =
+            System.getProperty(PROPERTY_REPORT_HTML_PATH)
+                ?: System.getProperty(PROPERTY_REPORT_PATH)?.takeIf { it.endsWith(".html") }
+                ?: if (KontureRuntimeStateProvider.currentState.htmlReportPath != DEFAULT_HTML_REPORT_PATH) {
+                    KontureRuntimeStateProvider.currentState.htmlReportPath
+                } else {
+                    KontureRuntimeStateProvider.currentState.reportPath
+                }
+        set(value) {
+            KontureRuntimeStateProvider.currentState =
+                KontureRuntimeStateProvider.currentState.copy(htmlReportPath = value)
+        }
+
+    /**
+     * Access to the global architectural rule evaluations accumulator.
+     */
+    public val accumulator: io.github.baole.konture.impl.report.ReportAccumulator
+        get() = io.github.baole.konture.impl.report.ReportAccumulator.getInstance()
 
     /**
      * Flag indicating whether to generate violations into the baseline file rather than throwing [AssertionError].
