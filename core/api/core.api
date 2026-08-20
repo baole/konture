@@ -135,14 +135,21 @@ public final class io/github/baole/konture/core/ExclusionsModel$Companion {
 
 public final class io/github/baole/konture/core/KontureConstants {
 	public static final field DEFAULT_BASELINE_FILENAME Ljava/lang/String;
+	public static final field DEFAULT_HTML_REPORT_PATH Ljava/lang/String;
+	public static final field DEFAULT_JSON_REPORT_PATH Ljava/lang/String;
 	public static final field DEFAULT_REPORT_PATH Ljava/lang/String;
+	public static final field DEFAULT_SARIF_REPORT_PATH Ljava/lang/String;
 	public static final field INSTANCE Lio/github/baole/konture/core/KontureConstants;
 	public static final field PROPERTY_BASELINE_DIR Ljava/lang/String;
 	public static final field PROPERTY_BASELINE_GENERATE Ljava/lang/String;
 	public static final field PROPERTY_BASELINE_PATH Ljava/lang/String;
 	public static final field PROPERTY_LOCALE Ljava/lang/String;
 	public static final field PROPERTY_OUTPUT_FORMAT Ljava/lang/String;
+	public static final field PROPERTY_REPORT_HTML_PATH Ljava/lang/String;
+	public static final field PROPERTY_REPORT_JSON_PATH Ljava/lang/String;
 	public static final field PROPERTY_REPORT_PATH Ljava/lang/String;
+	public static final field PROPERTY_REPORT_SARIF_PATH Ljava/lang/String;
+	public static final field VERSION Ljava/lang/String;
 }
 
 public final class io/github/baole/konture/core/KontureLogger {
@@ -614,6 +621,727 @@ public final synthetic class io/github/baole/konture/core/model/ViolationReport$
 }
 
 public final class io/github/baole/konture/core/model/ViolationReport$Companion {
+	public final fun serializer ()Lkotlinx/serialization/KSerializer;
+}
+
+public final class io/github/baole/konture/core/report/KontureJsonReport {
+	public static final field Companion Lio/github/baole/konture/core/report/KontureJsonReport$Companion;
+	public fun <init> (Ljava/lang/String;Lio/github/baole/konture/core/report/ToolMetadata;Ljava/lang/String;Lio/github/baole/konture/core/report/ReportSummary;Ljava/util/List;Ljava/util/List;)V
+	public synthetic fun <init> (Ljava/lang/String;Lio/github/baole/konture/core/report/ToolMetadata;Ljava/lang/String;Lio/github/baole/konture/core/report/ReportSummary;Ljava/util/List;Ljava/util/List;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()Lio/github/baole/konture/core/report/ToolMetadata;
+	public final fun component3 ()Ljava/lang/String;
+	public final fun component4 ()Lio/github/baole/konture/core/report/ReportSummary;
+	public final fun component5 ()Ljava/util/List;
+	public final fun component6 ()Ljava/util/List;
+	public final fun copy (Ljava/lang/String;Lio/github/baole/konture/core/report/ToolMetadata;Ljava/lang/String;Lio/github/baole/konture/core/report/ReportSummary;Ljava/util/List;Ljava/util/List;)Lio/github/baole/konture/core/report/KontureJsonReport;
+	public static synthetic fun copy$default (Lio/github/baole/konture/core/report/KontureJsonReport;Ljava/lang/String;Lio/github/baole/konture/core/report/ToolMetadata;Ljava/lang/String;Lio/github/baole/konture/core/report/ReportSummary;Ljava/util/List;Ljava/util/List;ILjava/lang/Object;)Lio/github/baole/konture/core/report/KontureJsonReport;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getRules ()Ljava/util/List;
+	public final fun getSchemaVersion ()Ljava/lang/String;
+	public final fun getSummary ()Lio/github/baole/konture/core/report/ReportSummary;
+	public final fun getTimestamp ()Ljava/lang/String;
+	public final fun getTool ()Lio/github/baole/konture/core/report/ToolMetadata;
+	public final fun getViolations ()Ljava/util/List;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final synthetic class io/github/baole/konture/core/report/KontureJsonReport$$serializer : kotlinx/serialization/internal/GeneratedSerializer {
+	public static final field INSTANCE Lio/github/baole/konture/core/report/KontureJsonReport$$serializer;
+	public final fun childSerializers ()[Lkotlinx/serialization/KSerializer;
+	public final fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Lio/github/baole/konture/core/report/KontureJsonReport;
+	public synthetic fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Ljava/lang/Object;
+	public final fun getDescriptor ()Lkotlinx/serialization/descriptors/SerialDescriptor;
+	public final fun serialize (Lkotlinx/serialization/encoding/Encoder;Lio/github/baole/konture/core/report/KontureJsonReport;)V
+	public synthetic fun serialize (Lkotlinx/serialization/encoding/Encoder;Ljava/lang/Object;)V
+	public fun typeParametersSerializers ()[Lkotlinx/serialization/KSerializer;
+}
+
+public final class io/github/baole/konture/core/report/KontureJsonReport$Companion {
+	public final fun serializer ()Lkotlinx/serialization/KSerializer;
+}
+
+public final class io/github/baole/konture/core/report/ReportRule {
+	public static final field Companion Lio/github/baole/konture/core/report/ReportRule$Companion;
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;Lio/github/baole/konture/core/model/Severity;Ljava/util/Set;)V
+	public synthetic fun <init> (Ljava/lang/String;Ljava/lang/String;Lio/github/baole/konture/core/model/Severity;Ljava/util/Set;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()Ljava/lang/String;
+	public final fun component3 ()Lio/github/baole/konture/core/model/Severity;
+	public final fun component4 ()Ljava/util/Set;
+	public final fun copy (Ljava/lang/String;Ljava/lang/String;Lio/github/baole/konture/core/model/Severity;Ljava/util/Set;)Lio/github/baole/konture/core/report/ReportRule;
+	public static synthetic fun copy$default (Lio/github/baole/konture/core/report/ReportRule;Ljava/lang/String;Ljava/lang/String;Lio/github/baole/konture/core/model/Severity;Ljava/util/Set;ILjava/lang/Object;)Lio/github/baole/konture/core/report/ReportRule;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getDescription ()Ljava/lang/String;
+	public final fun getId ()Ljava/lang/String;
+	public final fun getSeverity ()Lio/github/baole/konture/core/model/Severity;
+	public final fun getTags ()Ljava/util/Set;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final synthetic class io/github/baole/konture/core/report/ReportRule$$serializer : kotlinx/serialization/internal/GeneratedSerializer {
+	public static final field INSTANCE Lio/github/baole/konture/core/report/ReportRule$$serializer;
+	public final fun childSerializers ()[Lkotlinx/serialization/KSerializer;
+	public final fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Lio/github/baole/konture/core/report/ReportRule;
+	public synthetic fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Ljava/lang/Object;
+	public final fun getDescriptor ()Lkotlinx/serialization/descriptors/SerialDescriptor;
+	public final fun serialize (Lkotlinx/serialization/encoding/Encoder;Lio/github/baole/konture/core/report/ReportRule;)V
+	public synthetic fun serialize (Lkotlinx/serialization/encoding/Encoder;Ljava/lang/Object;)V
+	public fun typeParametersSerializers ()[Lkotlinx/serialization/KSerializer;
+}
+
+public final class io/github/baole/konture/core/report/ReportRule$Companion {
+	public final fun serializer ()Lkotlinx/serialization/KSerializer;
+}
+
+public final class io/github/baole/konture/core/report/ReportSummary {
+	public static final field Companion Lio/github/baole/konture/core/report/ReportSummary$Companion;
+	public fun <init> (IIIIIIII)V
+	public synthetic fun <init> (IIIIIIIIILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()I
+	public final fun component2 ()I
+	public final fun component3 ()I
+	public final fun component4 ()I
+	public final fun component5 ()I
+	public final fun component6 ()I
+	public final fun component7 ()I
+	public final fun component8 ()I
+	public final fun copy (IIIIIIII)Lio/github/baole/konture/core/report/ReportSummary;
+	public static synthetic fun copy$default (Lio/github/baole/konture/core/report/ReportSummary;IIIIIIIIILjava/lang/Object;)Lio/github/baole/konture/core/report/ReportSummary;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getErrorCount ()I
+	public final fun getFailedRules ()I
+	public final fun getInfoCount ()I
+	public final fun getPassedRules ()I
+	public final fun getSuppressedCount ()I
+	public final fun getTotalRules ()I
+	public final fun getTotalViolations ()I
+	public final fun getWarningCount ()I
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final synthetic class io/github/baole/konture/core/report/ReportSummary$$serializer : kotlinx/serialization/internal/GeneratedSerializer {
+	public static final field INSTANCE Lio/github/baole/konture/core/report/ReportSummary$$serializer;
+	public final fun childSerializers ()[Lkotlinx/serialization/KSerializer;
+	public final fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Lio/github/baole/konture/core/report/ReportSummary;
+	public synthetic fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Ljava/lang/Object;
+	public final fun getDescriptor ()Lkotlinx/serialization/descriptors/SerialDescriptor;
+	public final fun serialize (Lkotlinx/serialization/encoding/Encoder;Lio/github/baole/konture/core/report/ReportSummary;)V
+	public synthetic fun serialize (Lkotlinx/serialization/encoding/Encoder;Ljava/lang/Object;)V
+	public fun typeParametersSerializers ()[Lkotlinx/serialization/KSerializer;
+}
+
+public final class io/github/baole/konture/core/report/ReportSummary$Companion {
+	public final fun serializer ()Lkotlinx/serialization/KSerializer;
+}
+
+public final class io/github/baole/konture/core/report/ReportViolation {
+	public static final field Companion Lio/github/baole/konture/core/report/ReportViolation$Companion;
+	public fun <init> (Ljava/lang/String;Lio/github/baole/konture/core/model/Severity;Ljava/lang/String;Lio/github/baole/konture/core/model/Subject;Lio/github/baole/konture/core/model/Subject;Lio/github/baole/konture/core/model/SourceLocation;Ljava/util/List;Z)V
+	public synthetic fun <init> (Ljava/lang/String;Lio/github/baole/konture/core/model/Severity;Ljava/lang/String;Lio/github/baole/konture/core/model/Subject;Lio/github/baole/konture/core/model/Subject;Lio/github/baole/konture/core/model/SourceLocation;Ljava/util/List;ZILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()Lio/github/baole/konture/core/model/Severity;
+	public final fun component3 ()Ljava/lang/String;
+	public final fun component4 ()Lio/github/baole/konture/core/model/Subject;
+	public final fun component5 ()Lio/github/baole/konture/core/model/Subject;
+	public final fun component6 ()Lio/github/baole/konture/core/model/SourceLocation;
+	public final fun component7 ()Ljava/util/List;
+	public final fun component8 ()Z
+	public final fun copy (Ljava/lang/String;Lio/github/baole/konture/core/model/Severity;Ljava/lang/String;Lio/github/baole/konture/core/model/Subject;Lio/github/baole/konture/core/model/Subject;Lio/github/baole/konture/core/model/SourceLocation;Ljava/util/List;Z)Lio/github/baole/konture/core/report/ReportViolation;
+	public static synthetic fun copy$default (Lio/github/baole/konture/core/report/ReportViolation;Ljava/lang/String;Lio/github/baole/konture/core/model/Severity;Ljava/lang/String;Lio/github/baole/konture/core/model/Subject;Lio/github/baole/konture/core/model/Subject;Lio/github/baole/konture/core/model/SourceLocation;Ljava/util/List;ZILjava/lang/Object;)Lio/github/baole/konture/core/report/ReportViolation;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getDependencyPath ()Ljava/util/List;
+	public final fun getMessage ()Ljava/lang/String;
+	public final fun getRuleId ()Ljava/lang/String;
+	public final fun getSeverity ()Lio/github/baole/konture/core/model/Severity;
+	public final fun getSourceLocation ()Lio/github/baole/konture/core/model/SourceLocation;
+	public final fun getSubject ()Lio/github/baole/konture/core/model/Subject;
+	public final fun getTarget ()Lio/github/baole/konture/core/model/Subject;
+	public fun hashCode ()I
+	public final fun isSuppressed ()Z
+	public fun toString ()Ljava/lang/String;
+}
+
+public final synthetic class io/github/baole/konture/core/report/ReportViolation$$serializer : kotlinx/serialization/internal/GeneratedSerializer {
+	public static final field INSTANCE Lio/github/baole/konture/core/report/ReportViolation$$serializer;
+	public final fun childSerializers ()[Lkotlinx/serialization/KSerializer;
+	public final fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Lio/github/baole/konture/core/report/ReportViolation;
+	public synthetic fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Ljava/lang/Object;
+	public final fun getDescriptor ()Lkotlinx/serialization/descriptors/SerialDescriptor;
+	public final fun serialize (Lkotlinx/serialization/encoding/Encoder;Lio/github/baole/konture/core/report/ReportViolation;)V
+	public synthetic fun serialize (Lkotlinx/serialization/encoding/Encoder;Ljava/lang/Object;)V
+	public fun typeParametersSerializers ()[Lkotlinx/serialization/KSerializer;
+}
+
+public final class io/github/baole/konture/core/report/ReportViolation$Companion {
+	public final fun serializer ()Lkotlinx/serialization/KSerializer;
+}
+
+public final class io/github/baole/konture/core/report/ToolMetadata {
+	public static final field Companion Lio/github/baole/konture/core/report/ToolMetadata$Companion;
+	public fun <init> ()V
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V
+	public synthetic fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()Ljava/lang/String;
+	public final fun component3 ()Ljava/lang/String;
+	public final fun copy (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)Lio/github/baole/konture/core/report/ToolMetadata;
+	public static synthetic fun copy$default (Lio/github/baole/konture/core/report/ToolMetadata;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ILjava/lang/Object;)Lio/github/baole/konture/core/report/ToolMetadata;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getInformationUri ()Ljava/lang/String;
+	public final fun getName ()Ljava/lang/String;
+	public final fun getVersion ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final synthetic class io/github/baole/konture/core/report/ToolMetadata$$serializer : kotlinx/serialization/internal/GeneratedSerializer {
+	public static final field INSTANCE Lio/github/baole/konture/core/report/ToolMetadata$$serializer;
+	public final fun childSerializers ()[Lkotlinx/serialization/KSerializer;
+	public final fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Lio/github/baole/konture/core/report/ToolMetadata;
+	public synthetic fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Ljava/lang/Object;
+	public final fun getDescriptor ()Lkotlinx/serialization/descriptors/SerialDescriptor;
+	public final fun serialize (Lkotlinx/serialization/encoding/Encoder;Lio/github/baole/konture/core/report/ToolMetadata;)V
+	public synthetic fun serialize (Lkotlinx/serialization/encoding/Encoder;Ljava/lang/Object;)V
+	public fun typeParametersSerializers ()[Lkotlinx/serialization/KSerializer;
+}
+
+public final class io/github/baole/konture/core/report/ToolMetadata$Companion {
+	public final fun serializer ()Lkotlinx/serialization/KSerializer;
+}
+
+public final class io/github/baole/konture/core/report/sarif/SarifArtifactLocation {
+	public static final field Companion Lio/github/baole/konture/core/report/sarif/SarifArtifactLocation$Companion;
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;)V
+	public synthetic fun <init> (Ljava/lang/String;Ljava/lang/String;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()Ljava/lang/String;
+	public final fun copy (Ljava/lang/String;Ljava/lang/String;)Lio/github/baole/konture/core/report/sarif/SarifArtifactLocation;
+	public static synthetic fun copy$default (Lio/github/baole/konture/core/report/sarif/SarifArtifactLocation;Ljava/lang/String;Ljava/lang/String;ILjava/lang/Object;)Lio/github/baole/konture/core/report/sarif/SarifArtifactLocation;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getUri ()Ljava/lang/String;
+	public final fun getUriBaseId ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final synthetic class io/github/baole/konture/core/report/sarif/SarifArtifactLocation$$serializer : kotlinx/serialization/internal/GeneratedSerializer {
+	public static final field INSTANCE Lio/github/baole/konture/core/report/sarif/SarifArtifactLocation$$serializer;
+	public final fun childSerializers ()[Lkotlinx/serialization/KSerializer;
+	public final fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Lio/github/baole/konture/core/report/sarif/SarifArtifactLocation;
+	public synthetic fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Ljava/lang/Object;
+	public final fun getDescriptor ()Lkotlinx/serialization/descriptors/SerialDescriptor;
+	public final fun serialize (Lkotlinx/serialization/encoding/Encoder;Lio/github/baole/konture/core/report/sarif/SarifArtifactLocation;)V
+	public synthetic fun serialize (Lkotlinx/serialization/encoding/Encoder;Ljava/lang/Object;)V
+	public fun typeParametersSerializers ()[Lkotlinx/serialization/KSerializer;
+}
+
+public final class io/github/baole/konture/core/report/sarif/SarifArtifactLocation$Companion {
+	public final fun serializer ()Lkotlinx/serialization/KSerializer;
+}
+
+public final class io/github/baole/konture/core/report/sarif/SarifCodeFlow {
+	public static final field Companion Lio/github/baole/konture/core/report/sarif/SarifCodeFlow$Companion;
+	public fun <init> ()V
+	public fun <init> (Ljava/util/List;)V
+	public synthetic fun <init> (Ljava/util/List;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Ljava/util/List;
+	public final fun copy (Ljava/util/List;)Lio/github/baole/konture/core/report/sarif/SarifCodeFlow;
+	public static synthetic fun copy$default (Lio/github/baole/konture/core/report/sarif/SarifCodeFlow;Ljava/util/List;ILjava/lang/Object;)Lio/github/baole/konture/core/report/sarif/SarifCodeFlow;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getThreadFlows ()Ljava/util/List;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final synthetic class io/github/baole/konture/core/report/sarif/SarifCodeFlow$$serializer : kotlinx/serialization/internal/GeneratedSerializer {
+	public static final field INSTANCE Lio/github/baole/konture/core/report/sarif/SarifCodeFlow$$serializer;
+	public final fun childSerializers ()[Lkotlinx/serialization/KSerializer;
+	public final fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Lio/github/baole/konture/core/report/sarif/SarifCodeFlow;
+	public synthetic fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Ljava/lang/Object;
+	public final fun getDescriptor ()Lkotlinx/serialization/descriptors/SerialDescriptor;
+	public final fun serialize (Lkotlinx/serialization/encoding/Encoder;Lio/github/baole/konture/core/report/sarif/SarifCodeFlow;)V
+	public synthetic fun serialize (Lkotlinx/serialization/encoding/Encoder;Ljava/lang/Object;)V
+	public fun typeParametersSerializers ()[Lkotlinx/serialization/KSerializer;
+}
+
+public final class io/github/baole/konture/core/report/sarif/SarifCodeFlow$Companion {
+	public final fun serializer ()Lkotlinx/serialization/KSerializer;
+}
+
+public final class io/github/baole/konture/core/report/sarif/SarifDriver {
+	public static final field Companion Lio/github/baole/konture/core/report/sarif/SarifDriver$Companion;
+	public fun <init> ()V
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/util/List;)V
+	public synthetic fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/util/List;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()Ljava/lang/String;
+	public final fun component3 ()Ljava/lang/String;
+	public final fun component4 ()Ljava/util/List;
+	public final fun copy (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/util/List;)Lio/github/baole/konture/core/report/sarif/SarifDriver;
+	public static synthetic fun copy$default (Lio/github/baole/konture/core/report/sarif/SarifDriver;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/util/List;ILjava/lang/Object;)Lio/github/baole/konture/core/report/sarif/SarifDriver;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getInformationUri ()Ljava/lang/String;
+	public final fun getName ()Ljava/lang/String;
+	public final fun getRules ()Ljava/util/List;
+	public final fun getVersion ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final synthetic class io/github/baole/konture/core/report/sarif/SarifDriver$$serializer : kotlinx/serialization/internal/GeneratedSerializer {
+	public static final field INSTANCE Lio/github/baole/konture/core/report/sarif/SarifDriver$$serializer;
+	public final fun childSerializers ()[Lkotlinx/serialization/KSerializer;
+	public final fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Lio/github/baole/konture/core/report/sarif/SarifDriver;
+	public synthetic fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Ljava/lang/Object;
+	public final fun getDescriptor ()Lkotlinx/serialization/descriptors/SerialDescriptor;
+	public final fun serialize (Lkotlinx/serialization/encoding/Encoder;Lio/github/baole/konture/core/report/sarif/SarifDriver;)V
+	public synthetic fun serialize (Lkotlinx/serialization/encoding/Encoder;Ljava/lang/Object;)V
+	public fun typeParametersSerializers ()[Lkotlinx/serialization/KSerializer;
+}
+
+public final class io/github/baole/konture/core/report/sarif/SarifDriver$Companion {
+	public final fun serializer ()Lkotlinx/serialization/KSerializer;
+}
+
+public final class io/github/baole/konture/core/report/sarif/SarifLocation {
+	public static final field Companion Lio/github/baole/konture/core/report/sarif/SarifLocation$Companion;
+	public fun <init> (Lio/github/baole/konture/core/report/sarif/SarifPhysicalLocation;Lio/github/baole/konture/core/report/sarif/SarifMessage;)V
+	public synthetic fun <init> (Lio/github/baole/konture/core/report/sarif/SarifPhysicalLocation;Lio/github/baole/konture/core/report/sarif/SarifMessage;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Lio/github/baole/konture/core/report/sarif/SarifPhysicalLocation;
+	public final fun component2 ()Lio/github/baole/konture/core/report/sarif/SarifMessage;
+	public final fun copy (Lio/github/baole/konture/core/report/sarif/SarifPhysicalLocation;Lio/github/baole/konture/core/report/sarif/SarifMessage;)Lio/github/baole/konture/core/report/sarif/SarifLocation;
+	public static synthetic fun copy$default (Lio/github/baole/konture/core/report/sarif/SarifLocation;Lio/github/baole/konture/core/report/sarif/SarifPhysicalLocation;Lio/github/baole/konture/core/report/sarif/SarifMessage;ILjava/lang/Object;)Lio/github/baole/konture/core/report/sarif/SarifLocation;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getMessage ()Lio/github/baole/konture/core/report/sarif/SarifMessage;
+	public final fun getPhysicalLocation ()Lio/github/baole/konture/core/report/sarif/SarifPhysicalLocation;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final synthetic class io/github/baole/konture/core/report/sarif/SarifLocation$$serializer : kotlinx/serialization/internal/GeneratedSerializer {
+	public static final field INSTANCE Lio/github/baole/konture/core/report/sarif/SarifLocation$$serializer;
+	public final fun childSerializers ()[Lkotlinx/serialization/KSerializer;
+	public final fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Lio/github/baole/konture/core/report/sarif/SarifLocation;
+	public synthetic fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Ljava/lang/Object;
+	public final fun getDescriptor ()Lkotlinx/serialization/descriptors/SerialDescriptor;
+	public final fun serialize (Lkotlinx/serialization/encoding/Encoder;Lio/github/baole/konture/core/report/sarif/SarifLocation;)V
+	public synthetic fun serialize (Lkotlinx/serialization/encoding/Encoder;Ljava/lang/Object;)V
+	public fun typeParametersSerializers ()[Lkotlinx/serialization/KSerializer;
+}
+
+public final class io/github/baole/konture/core/report/sarif/SarifLocation$Companion {
+	public final fun serializer ()Lkotlinx/serialization/KSerializer;
+}
+
+public final class io/github/baole/konture/core/report/sarif/SarifMessage {
+	public static final field Companion Lio/github/baole/konture/core/report/sarif/SarifMessage$Companion;
+	public fun <init> (Ljava/lang/String;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun copy (Ljava/lang/String;)Lio/github/baole/konture/core/report/sarif/SarifMessage;
+	public static synthetic fun copy$default (Lio/github/baole/konture/core/report/sarif/SarifMessage;Ljava/lang/String;ILjava/lang/Object;)Lio/github/baole/konture/core/report/sarif/SarifMessage;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getText ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final synthetic class io/github/baole/konture/core/report/sarif/SarifMessage$$serializer : kotlinx/serialization/internal/GeneratedSerializer {
+	public static final field INSTANCE Lio/github/baole/konture/core/report/sarif/SarifMessage$$serializer;
+	public final fun childSerializers ()[Lkotlinx/serialization/KSerializer;
+	public final fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Lio/github/baole/konture/core/report/sarif/SarifMessage;
+	public synthetic fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Ljava/lang/Object;
+	public final fun getDescriptor ()Lkotlinx/serialization/descriptors/SerialDescriptor;
+	public final fun serialize (Lkotlinx/serialization/encoding/Encoder;Lio/github/baole/konture/core/report/sarif/SarifMessage;)V
+	public synthetic fun serialize (Lkotlinx/serialization/encoding/Encoder;Ljava/lang/Object;)V
+	public fun typeParametersSerializers ()[Lkotlinx/serialization/KSerializer;
+}
+
+public final class io/github/baole/konture/core/report/sarif/SarifMessage$Companion {
+	public final fun serializer ()Lkotlinx/serialization/KSerializer;
+}
+
+public final class io/github/baole/konture/core/report/sarif/SarifPhysicalLocation {
+	public static final field Companion Lio/github/baole/konture/core/report/sarif/SarifPhysicalLocation$Companion;
+	public fun <init> (Lio/github/baole/konture/core/report/sarif/SarifArtifactLocation;Lio/github/baole/konture/core/report/sarif/SarifRegion;)V
+	public synthetic fun <init> (Lio/github/baole/konture/core/report/sarif/SarifArtifactLocation;Lio/github/baole/konture/core/report/sarif/SarifRegion;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Lio/github/baole/konture/core/report/sarif/SarifArtifactLocation;
+	public final fun component2 ()Lio/github/baole/konture/core/report/sarif/SarifRegion;
+	public final fun copy (Lio/github/baole/konture/core/report/sarif/SarifArtifactLocation;Lio/github/baole/konture/core/report/sarif/SarifRegion;)Lio/github/baole/konture/core/report/sarif/SarifPhysicalLocation;
+	public static synthetic fun copy$default (Lio/github/baole/konture/core/report/sarif/SarifPhysicalLocation;Lio/github/baole/konture/core/report/sarif/SarifArtifactLocation;Lio/github/baole/konture/core/report/sarif/SarifRegion;ILjava/lang/Object;)Lio/github/baole/konture/core/report/sarif/SarifPhysicalLocation;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getArtifactLocation ()Lio/github/baole/konture/core/report/sarif/SarifArtifactLocation;
+	public final fun getRegion ()Lio/github/baole/konture/core/report/sarif/SarifRegion;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final synthetic class io/github/baole/konture/core/report/sarif/SarifPhysicalLocation$$serializer : kotlinx/serialization/internal/GeneratedSerializer {
+	public static final field INSTANCE Lio/github/baole/konture/core/report/sarif/SarifPhysicalLocation$$serializer;
+	public final fun childSerializers ()[Lkotlinx/serialization/KSerializer;
+	public final fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Lio/github/baole/konture/core/report/sarif/SarifPhysicalLocation;
+	public synthetic fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Ljava/lang/Object;
+	public final fun getDescriptor ()Lkotlinx/serialization/descriptors/SerialDescriptor;
+	public final fun serialize (Lkotlinx/serialization/encoding/Encoder;Lio/github/baole/konture/core/report/sarif/SarifPhysicalLocation;)V
+	public synthetic fun serialize (Lkotlinx/serialization/encoding/Encoder;Ljava/lang/Object;)V
+	public fun typeParametersSerializers ()[Lkotlinx/serialization/KSerializer;
+}
+
+public final class io/github/baole/konture/core/report/sarif/SarifPhysicalLocation$Companion {
+	public final fun serializer ()Lkotlinx/serialization/KSerializer;
+}
+
+public final class io/github/baole/konture/core/report/sarif/SarifRegion {
+	public static final field Companion Lio/github/baole/konture/core/report/sarif/SarifRegion$Companion;
+	public fun <init> ()V
+	public fun <init> (Ljava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Integer;)V
+	public synthetic fun <init> (Ljava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Integer;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Ljava/lang/Integer;
+	public final fun component2 ()Ljava/lang/Integer;
+	public final fun component3 ()Ljava/lang/Integer;
+	public final fun component4 ()Ljava/lang/Integer;
+	public final fun copy (Ljava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Integer;)Lio/github/baole/konture/core/report/sarif/SarifRegion;
+	public static synthetic fun copy$default (Lio/github/baole/konture/core/report/sarif/SarifRegion;Ljava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Integer;ILjava/lang/Object;)Lio/github/baole/konture/core/report/sarif/SarifRegion;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getEndColumn ()Ljava/lang/Integer;
+	public final fun getEndLine ()Ljava/lang/Integer;
+	public final fun getStartColumn ()Ljava/lang/Integer;
+	public final fun getStartLine ()Ljava/lang/Integer;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final synthetic class io/github/baole/konture/core/report/sarif/SarifRegion$$serializer : kotlinx/serialization/internal/GeneratedSerializer {
+	public static final field INSTANCE Lio/github/baole/konture/core/report/sarif/SarifRegion$$serializer;
+	public final fun childSerializers ()[Lkotlinx/serialization/KSerializer;
+	public final fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Lio/github/baole/konture/core/report/sarif/SarifRegion;
+	public synthetic fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Ljava/lang/Object;
+	public final fun getDescriptor ()Lkotlinx/serialization/descriptors/SerialDescriptor;
+	public final fun serialize (Lkotlinx/serialization/encoding/Encoder;Lio/github/baole/konture/core/report/sarif/SarifRegion;)V
+	public synthetic fun serialize (Lkotlinx/serialization/encoding/Encoder;Ljava/lang/Object;)V
+	public fun typeParametersSerializers ()[Lkotlinx/serialization/KSerializer;
+}
+
+public final class io/github/baole/konture/core/report/sarif/SarifRegion$Companion {
+	public final fun serializer ()Lkotlinx/serialization/KSerializer;
+}
+
+public final class io/github/baole/konture/core/report/sarif/SarifReport {
+	public static final field Companion Lio/github/baole/konture/core/report/sarif/SarifReport$Companion;
+	public fun <init> ()V
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/util/List;)V
+	public synthetic fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/util/List;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()Ljava/lang/String;
+	public final fun component3 ()Ljava/util/List;
+	public final fun copy (Ljava/lang/String;Ljava/lang/String;Ljava/util/List;)Lio/github/baole/konture/core/report/sarif/SarifReport;
+	public static synthetic fun copy$default (Lio/github/baole/konture/core/report/sarif/SarifReport;Ljava/lang/String;Ljava/lang/String;Ljava/util/List;ILjava/lang/Object;)Lio/github/baole/konture/core/report/sarif/SarifReport;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getRuns ()Ljava/util/List;
+	public final fun getSchema ()Ljava/lang/String;
+	public final fun getVersion ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final synthetic class io/github/baole/konture/core/report/sarif/SarifReport$$serializer : kotlinx/serialization/internal/GeneratedSerializer {
+	public static final field INSTANCE Lio/github/baole/konture/core/report/sarif/SarifReport$$serializer;
+	public final fun childSerializers ()[Lkotlinx/serialization/KSerializer;
+	public final fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Lio/github/baole/konture/core/report/sarif/SarifReport;
+	public synthetic fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Ljava/lang/Object;
+	public final fun getDescriptor ()Lkotlinx/serialization/descriptors/SerialDescriptor;
+	public final fun serialize (Lkotlinx/serialization/encoding/Encoder;Lio/github/baole/konture/core/report/sarif/SarifReport;)V
+	public synthetic fun serialize (Lkotlinx/serialization/encoding/Encoder;Ljava/lang/Object;)V
+	public fun typeParametersSerializers ()[Lkotlinx/serialization/KSerializer;
+}
+
+public final class io/github/baole/konture/core/report/sarif/SarifReport$Companion {
+	public final fun serializer ()Lkotlinx/serialization/KSerializer;
+}
+
+public final class io/github/baole/konture/core/report/sarif/SarifReportingConfiguration {
+	public static final field Companion Lio/github/baole/konture/core/report/sarif/SarifReportingConfiguration$Companion;
+	public fun <init> ()V
+	public fun <init> (Ljava/lang/String;)V
+	public synthetic fun <init> (Ljava/lang/String;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun copy (Ljava/lang/String;)Lio/github/baole/konture/core/report/sarif/SarifReportingConfiguration;
+	public static synthetic fun copy$default (Lio/github/baole/konture/core/report/sarif/SarifReportingConfiguration;Ljava/lang/String;ILjava/lang/Object;)Lio/github/baole/konture/core/report/sarif/SarifReportingConfiguration;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getLevel ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final synthetic class io/github/baole/konture/core/report/sarif/SarifReportingConfiguration$$serializer : kotlinx/serialization/internal/GeneratedSerializer {
+	public static final field INSTANCE Lio/github/baole/konture/core/report/sarif/SarifReportingConfiguration$$serializer;
+	public final fun childSerializers ()[Lkotlinx/serialization/KSerializer;
+	public final fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Lio/github/baole/konture/core/report/sarif/SarifReportingConfiguration;
+	public synthetic fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Ljava/lang/Object;
+	public final fun getDescriptor ()Lkotlinx/serialization/descriptors/SerialDescriptor;
+	public final fun serialize (Lkotlinx/serialization/encoding/Encoder;Lio/github/baole/konture/core/report/sarif/SarifReportingConfiguration;)V
+	public synthetic fun serialize (Lkotlinx/serialization/encoding/Encoder;Ljava/lang/Object;)V
+	public fun typeParametersSerializers ()[Lkotlinx/serialization/KSerializer;
+}
+
+public final class io/github/baole/konture/core/report/sarif/SarifReportingConfiguration$Companion {
+	public final fun serializer ()Lkotlinx/serialization/KSerializer;
+}
+
+public final class io/github/baole/konture/core/report/sarif/SarifResult {
+	public static final field Companion Lio/github/baole/konture/core/report/sarif/SarifResult$Companion;
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;Lio/github/baole/konture/core/report/sarif/SarifMessage;Ljava/util/List;Ljava/util/List;Ljava/util/List;)V
+	public synthetic fun <init> (Ljava/lang/String;Ljava/lang/String;Lio/github/baole/konture/core/report/sarif/SarifMessage;Ljava/util/List;Ljava/util/List;Ljava/util/List;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()Ljava/lang/String;
+	public final fun component3 ()Lio/github/baole/konture/core/report/sarif/SarifMessage;
+	public final fun component4 ()Ljava/util/List;
+	public final fun component5 ()Ljava/util/List;
+	public final fun component6 ()Ljava/util/List;
+	public final fun copy (Ljava/lang/String;Ljava/lang/String;Lio/github/baole/konture/core/report/sarif/SarifMessage;Ljava/util/List;Ljava/util/List;Ljava/util/List;)Lio/github/baole/konture/core/report/sarif/SarifResult;
+	public static synthetic fun copy$default (Lio/github/baole/konture/core/report/sarif/SarifResult;Ljava/lang/String;Ljava/lang/String;Lio/github/baole/konture/core/report/sarif/SarifMessage;Ljava/util/List;Ljava/util/List;Ljava/util/List;ILjava/lang/Object;)Lio/github/baole/konture/core/report/sarif/SarifResult;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getCodeFlows ()Ljava/util/List;
+	public final fun getLevel ()Ljava/lang/String;
+	public final fun getLocations ()Ljava/util/List;
+	public final fun getMessage ()Lio/github/baole/konture/core/report/sarif/SarifMessage;
+	public final fun getRuleId ()Ljava/lang/String;
+	public final fun getSuppressions ()Ljava/util/List;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final synthetic class io/github/baole/konture/core/report/sarif/SarifResult$$serializer : kotlinx/serialization/internal/GeneratedSerializer {
+	public static final field INSTANCE Lio/github/baole/konture/core/report/sarif/SarifResult$$serializer;
+	public final fun childSerializers ()[Lkotlinx/serialization/KSerializer;
+	public final fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Lio/github/baole/konture/core/report/sarif/SarifResult;
+	public synthetic fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Ljava/lang/Object;
+	public final fun getDescriptor ()Lkotlinx/serialization/descriptors/SerialDescriptor;
+	public final fun serialize (Lkotlinx/serialization/encoding/Encoder;Lio/github/baole/konture/core/report/sarif/SarifResult;)V
+	public synthetic fun serialize (Lkotlinx/serialization/encoding/Encoder;Ljava/lang/Object;)V
+	public fun typeParametersSerializers ()[Lkotlinx/serialization/KSerializer;
+}
+
+public final class io/github/baole/konture/core/report/sarif/SarifResult$Companion {
+	public final fun serializer ()Lkotlinx/serialization/KSerializer;
+}
+
+public final class io/github/baole/konture/core/report/sarif/SarifRule {
+	public static final field Companion Lio/github/baole/konture/core/report/sarif/SarifRule$Companion;
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;Lio/github/baole/konture/core/report/sarif/SarifMessage;Lio/github/baole/konture/core/report/sarif/SarifMessage;Lio/github/baole/konture/core/report/sarif/SarifReportingConfiguration;Lio/github/baole/konture/core/report/sarif/SarifRuleProperties;)V
+	public synthetic fun <init> (Ljava/lang/String;Ljava/lang/String;Lio/github/baole/konture/core/report/sarif/SarifMessage;Lio/github/baole/konture/core/report/sarif/SarifMessage;Lio/github/baole/konture/core/report/sarif/SarifReportingConfiguration;Lio/github/baole/konture/core/report/sarif/SarifRuleProperties;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()Ljava/lang/String;
+	public final fun component3 ()Lio/github/baole/konture/core/report/sarif/SarifMessage;
+	public final fun component4 ()Lio/github/baole/konture/core/report/sarif/SarifMessage;
+	public final fun component5 ()Lio/github/baole/konture/core/report/sarif/SarifReportingConfiguration;
+	public final fun component6 ()Lio/github/baole/konture/core/report/sarif/SarifRuleProperties;
+	public final fun copy (Ljava/lang/String;Ljava/lang/String;Lio/github/baole/konture/core/report/sarif/SarifMessage;Lio/github/baole/konture/core/report/sarif/SarifMessage;Lio/github/baole/konture/core/report/sarif/SarifReportingConfiguration;Lio/github/baole/konture/core/report/sarif/SarifRuleProperties;)Lio/github/baole/konture/core/report/sarif/SarifRule;
+	public static synthetic fun copy$default (Lio/github/baole/konture/core/report/sarif/SarifRule;Ljava/lang/String;Ljava/lang/String;Lio/github/baole/konture/core/report/sarif/SarifMessage;Lio/github/baole/konture/core/report/sarif/SarifMessage;Lio/github/baole/konture/core/report/sarif/SarifReportingConfiguration;Lio/github/baole/konture/core/report/sarif/SarifRuleProperties;ILjava/lang/Object;)Lio/github/baole/konture/core/report/sarif/SarifRule;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getDefaultConfiguration ()Lio/github/baole/konture/core/report/sarif/SarifReportingConfiguration;
+	public final fun getFullDescription ()Lio/github/baole/konture/core/report/sarif/SarifMessage;
+	public final fun getId ()Ljava/lang/String;
+	public final fun getName ()Ljava/lang/String;
+	public final fun getProperties ()Lio/github/baole/konture/core/report/sarif/SarifRuleProperties;
+	public final fun getShortDescription ()Lio/github/baole/konture/core/report/sarif/SarifMessage;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final synthetic class io/github/baole/konture/core/report/sarif/SarifRule$$serializer : kotlinx/serialization/internal/GeneratedSerializer {
+	public static final field INSTANCE Lio/github/baole/konture/core/report/sarif/SarifRule$$serializer;
+	public final fun childSerializers ()[Lkotlinx/serialization/KSerializer;
+	public final fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Lio/github/baole/konture/core/report/sarif/SarifRule;
+	public synthetic fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Ljava/lang/Object;
+	public final fun getDescriptor ()Lkotlinx/serialization/descriptors/SerialDescriptor;
+	public final fun serialize (Lkotlinx/serialization/encoding/Encoder;Lio/github/baole/konture/core/report/sarif/SarifRule;)V
+	public synthetic fun serialize (Lkotlinx/serialization/encoding/Encoder;Ljava/lang/Object;)V
+	public fun typeParametersSerializers ()[Lkotlinx/serialization/KSerializer;
+}
+
+public final class io/github/baole/konture/core/report/sarif/SarifRule$Companion {
+	public final fun serializer ()Lkotlinx/serialization/KSerializer;
+}
+
+public final class io/github/baole/konture/core/report/sarif/SarifRuleProperties {
+	public static final field Companion Lio/github/baole/konture/core/report/sarif/SarifRuleProperties$Companion;
+	public fun <init> ()V
+	public fun <init> (Ljava/util/List;)V
+	public synthetic fun <init> (Ljava/util/List;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Ljava/util/List;
+	public final fun copy (Ljava/util/List;)Lio/github/baole/konture/core/report/sarif/SarifRuleProperties;
+	public static synthetic fun copy$default (Lio/github/baole/konture/core/report/sarif/SarifRuleProperties;Ljava/util/List;ILjava/lang/Object;)Lio/github/baole/konture/core/report/sarif/SarifRuleProperties;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getTags ()Ljava/util/List;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final synthetic class io/github/baole/konture/core/report/sarif/SarifRuleProperties$$serializer : kotlinx/serialization/internal/GeneratedSerializer {
+	public static final field INSTANCE Lio/github/baole/konture/core/report/sarif/SarifRuleProperties$$serializer;
+	public final fun childSerializers ()[Lkotlinx/serialization/KSerializer;
+	public final fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Lio/github/baole/konture/core/report/sarif/SarifRuleProperties;
+	public synthetic fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Ljava/lang/Object;
+	public final fun getDescriptor ()Lkotlinx/serialization/descriptors/SerialDescriptor;
+	public final fun serialize (Lkotlinx/serialization/encoding/Encoder;Lio/github/baole/konture/core/report/sarif/SarifRuleProperties;)V
+	public synthetic fun serialize (Lkotlinx/serialization/encoding/Encoder;Ljava/lang/Object;)V
+	public fun typeParametersSerializers ()[Lkotlinx/serialization/KSerializer;
+}
+
+public final class io/github/baole/konture/core/report/sarif/SarifRuleProperties$Companion {
+	public final fun serializer ()Lkotlinx/serialization/KSerializer;
+}
+
+public final class io/github/baole/konture/core/report/sarif/SarifRun {
+	public static final field Companion Lio/github/baole/konture/core/report/sarif/SarifRun$Companion;
+	public fun <init> (Lio/github/baole/konture/core/report/sarif/SarifTool;Ljava/util/List;)V
+	public synthetic fun <init> (Lio/github/baole/konture/core/report/sarif/SarifTool;Ljava/util/List;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Lio/github/baole/konture/core/report/sarif/SarifTool;
+	public final fun component2 ()Ljava/util/List;
+	public final fun copy (Lio/github/baole/konture/core/report/sarif/SarifTool;Ljava/util/List;)Lio/github/baole/konture/core/report/sarif/SarifRun;
+	public static synthetic fun copy$default (Lio/github/baole/konture/core/report/sarif/SarifRun;Lio/github/baole/konture/core/report/sarif/SarifTool;Ljava/util/List;ILjava/lang/Object;)Lio/github/baole/konture/core/report/sarif/SarifRun;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getResults ()Ljava/util/List;
+	public final fun getTool ()Lio/github/baole/konture/core/report/sarif/SarifTool;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final synthetic class io/github/baole/konture/core/report/sarif/SarifRun$$serializer : kotlinx/serialization/internal/GeneratedSerializer {
+	public static final field INSTANCE Lio/github/baole/konture/core/report/sarif/SarifRun$$serializer;
+	public final fun childSerializers ()[Lkotlinx/serialization/KSerializer;
+	public final fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Lio/github/baole/konture/core/report/sarif/SarifRun;
+	public synthetic fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Ljava/lang/Object;
+	public final fun getDescriptor ()Lkotlinx/serialization/descriptors/SerialDescriptor;
+	public final fun serialize (Lkotlinx/serialization/encoding/Encoder;Lio/github/baole/konture/core/report/sarif/SarifRun;)V
+	public synthetic fun serialize (Lkotlinx/serialization/encoding/Encoder;Ljava/lang/Object;)V
+	public fun typeParametersSerializers ()[Lkotlinx/serialization/KSerializer;
+}
+
+public final class io/github/baole/konture/core/report/sarif/SarifRun$Companion {
+	public final fun serializer ()Lkotlinx/serialization/KSerializer;
+}
+
+public final class io/github/baole/konture/core/report/sarif/SarifSuppression {
+	public static final field Companion Lio/github/baole/konture/core/report/sarif/SarifSuppression$Companion;
+	public fun <init> ()V
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V
+	public synthetic fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()Ljava/lang/String;
+	public final fun component3 ()Ljava/lang/String;
+	public final fun copy (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)Lio/github/baole/konture/core/report/sarif/SarifSuppression;
+	public static synthetic fun copy$default (Lio/github/baole/konture/core/report/sarif/SarifSuppression;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ILjava/lang/Object;)Lio/github/baole/konture/core/report/sarif/SarifSuppression;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getJustification ()Ljava/lang/String;
+	public final fun getKind ()Ljava/lang/String;
+	public final fun getStatus ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final synthetic class io/github/baole/konture/core/report/sarif/SarifSuppression$$serializer : kotlinx/serialization/internal/GeneratedSerializer {
+	public static final field INSTANCE Lio/github/baole/konture/core/report/sarif/SarifSuppression$$serializer;
+	public final fun childSerializers ()[Lkotlinx/serialization/KSerializer;
+	public final fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Lio/github/baole/konture/core/report/sarif/SarifSuppression;
+	public synthetic fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Ljava/lang/Object;
+	public final fun getDescriptor ()Lkotlinx/serialization/descriptors/SerialDescriptor;
+	public final fun serialize (Lkotlinx/serialization/encoding/Encoder;Lio/github/baole/konture/core/report/sarif/SarifSuppression;)V
+	public synthetic fun serialize (Lkotlinx/serialization/encoding/Encoder;Ljava/lang/Object;)V
+	public fun typeParametersSerializers ()[Lkotlinx/serialization/KSerializer;
+}
+
+public final class io/github/baole/konture/core/report/sarif/SarifSuppression$Companion {
+	public final fun serializer ()Lkotlinx/serialization/KSerializer;
+}
+
+public final class io/github/baole/konture/core/report/sarif/SarifThreadFlow {
+	public static final field Companion Lio/github/baole/konture/core/report/sarif/SarifThreadFlow$Companion;
+	public fun <init> ()V
+	public fun <init> (Ljava/util/List;)V
+	public synthetic fun <init> (Ljava/util/List;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Ljava/util/List;
+	public final fun copy (Ljava/util/List;)Lio/github/baole/konture/core/report/sarif/SarifThreadFlow;
+	public static synthetic fun copy$default (Lio/github/baole/konture/core/report/sarif/SarifThreadFlow;Ljava/util/List;ILjava/lang/Object;)Lio/github/baole/konture/core/report/sarif/SarifThreadFlow;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getLocations ()Ljava/util/List;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final synthetic class io/github/baole/konture/core/report/sarif/SarifThreadFlow$$serializer : kotlinx/serialization/internal/GeneratedSerializer {
+	public static final field INSTANCE Lio/github/baole/konture/core/report/sarif/SarifThreadFlow$$serializer;
+	public final fun childSerializers ()[Lkotlinx/serialization/KSerializer;
+	public final fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Lio/github/baole/konture/core/report/sarif/SarifThreadFlow;
+	public synthetic fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Ljava/lang/Object;
+	public final fun getDescriptor ()Lkotlinx/serialization/descriptors/SerialDescriptor;
+	public final fun serialize (Lkotlinx/serialization/encoding/Encoder;Lio/github/baole/konture/core/report/sarif/SarifThreadFlow;)V
+	public synthetic fun serialize (Lkotlinx/serialization/encoding/Encoder;Ljava/lang/Object;)V
+	public fun typeParametersSerializers ()[Lkotlinx/serialization/KSerializer;
+}
+
+public final class io/github/baole/konture/core/report/sarif/SarifThreadFlow$Companion {
+	public final fun serializer ()Lkotlinx/serialization/KSerializer;
+}
+
+public final class io/github/baole/konture/core/report/sarif/SarifThreadFlowLocation {
+	public static final field Companion Lio/github/baole/konture/core/report/sarif/SarifThreadFlowLocation$Companion;
+	public fun <init> (Lio/github/baole/konture/core/report/sarif/SarifLocation;Ljava/lang/String;)V
+	public synthetic fun <init> (Lio/github/baole/konture/core/report/sarif/SarifLocation;Ljava/lang/String;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Lio/github/baole/konture/core/report/sarif/SarifLocation;
+	public final fun component2 ()Ljava/lang/String;
+	public final fun copy (Lio/github/baole/konture/core/report/sarif/SarifLocation;Ljava/lang/String;)Lio/github/baole/konture/core/report/sarif/SarifThreadFlowLocation;
+	public static synthetic fun copy$default (Lio/github/baole/konture/core/report/sarif/SarifThreadFlowLocation;Lio/github/baole/konture/core/report/sarif/SarifLocation;Ljava/lang/String;ILjava/lang/Object;)Lio/github/baole/konture/core/report/sarif/SarifThreadFlowLocation;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getImportance ()Ljava/lang/String;
+	public final fun getLocation ()Lio/github/baole/konture/core/report/sarif/SarifLocation;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final synthetic class io/github/baole/konture/core/report/sarif/SarifThreadFlowLocation$$serializer : kotlinx/serialization/internal/GeneratedSerializer {
+	public static final field INSTANCE Lio/github/baole/konture/core/report/sarif/SarifThreadFlowLocation$$serializer;
+	public final fun childSerializers ()[Lkotlinx/serialization/KSerializer;
+	public final fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Lio/github/baole/konture/core/report/sarif/SarifThreadFlowLocation;
+	public synthetic fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Ljava/lang/Object;
+	public final fun getDescriptor ()Lkotlinx/serialization/descriptors/SerialDescriptor;
+	public final fun serialize (Lkotlinx/serialization/encoding/Encoder;Lio/github/baole/konture/core/report/sarif/SarifThreadFlowLocation;)V
+	public synthetic fun serialize (Lkotlinx/serialization/encoding/Encoder;Ljava/lang/Object;)V
+	public fun typeParametersSerializers ()[Lkotlinx/serialization/KSerializer;
+}
+
+public final class io/github/baole/konture/core/report/sarif/SarifThreadFlowLocation$Companion {
+	public final fun serializer ()Lkotlinx/serialization/KSerializer;
+}
+
+public final class io/github/baole/konture/core/report/sarif/SarifTool {
+	public static final field Companion Lio/github/baole/konture/core/report/sarif/SarifTool$Companion;
+	public fun <init> (Lio/github/baole/konture/core/report/sarif/SarifDriver;)V
+	public final fun component1 ()Lio/github/baole/konture/core/report/sarif/SarifDriver;
+	public final fun copy (Lio/github/baole/konture/core/report/sarif/SarifDriver;)Lio/github/baole/konture/core/report/sarif/SarifTool;
+	public static synthetic fun copy$default (Lio/github/baole/konture/core/report/sarif/SarifTool;Lio/github/baole/konture/core/report/sarif/SarifDriver;ILjava/lang/Object;)Lio/github/baole/konture/core/report/sarif/SarifTool;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getDriver ()Lio/github/baole/konture/core/report/sarif/SarifDriver;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final synthetic class io/github/baole/konture/core/report/sarif/SarifTool$$serializer : kotlinx/serialization/internal/GeneratedSerializer {
+	public static final field INSTANCE Lio/github/baole/konture/core/report/sarif/SarifTool$$serializer;
+	public final fun childSerializers ()[Lkotlinx/serialization/KSerializer;
+	public final fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Lio/github/baole/konture/core/report/sarif/SarifTool;
+	public synthetic fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Ljava/lang/Object;
+	public final fun getDescriptor ()Lkotlinx/serialization/descriptors/SerialDescriptor;
+	public final fun serialize (Lkotlinx/serialization/encoding/Encoder;Lio/github/baole/konture/core/report/sarif/SarifTool;)V
+	public synthetic fun serialize (Lkotlinx/serialization/encoding/Encoder;Ljava/lang/Object;)V
+	public fun typeParametersSerializers ()[Lkotlinx/serialization/KSerializer;
+}
+
+public final class io/github/baole/konture/core/report/sarif/SarifTool$Companion {
 	public final fun serializer ()Lkotlinx/serialization/KSerializer;
 }
 

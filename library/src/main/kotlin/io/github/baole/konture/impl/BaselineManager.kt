@@ -18,6 +18,7 @@ import io.github.baole.konture.core.LogLevel
 import io.github.baole.konture.core.model.Violation
 import io.github.baole.konture.core.model.ViolationReport
 import io.github.baole.konture.i18n.getMessage
+import io.github.baole.konture.impl.report.ReportAccumulator
 import java.io.File
 import java.util.Locale
 import java.util.concurrent.ConcurrentHashMap
@@ -420,10 +421,31 @@ internal class BaselineManager {
         }
 
         val report = ViolationReport(ruleId = ruleId, violations = englishViolations)
-        if (englishViolations.isEmpty()) return report
-
         val englishStrings = englishViolations.map { it.message }
         val unmatchedIndices = getNewViolationIndices(englishStrings)
+
+        val unsuppressedViolations = mutableListOf<Violation>()
+        val suppressedViolations = mutableListOf<Violation>()
+        if (generateBaseline) {
+            suppressedViolations.addAll(englishViolations)
+        } else {
+            englishViolations.forEachIndexed { index, violation ->
+                if (unmatchedIndices.contains(index)) {
+                    unsuppressedViolations.add(violation)
+                } else {
+                    suppressedViolations.add(violation)
+                }
+            }
+        }
+
+        val ruleMetadata = KontureRuntimeStateProvider.currentState.currentRuleMetadata
+        ReportAccumulator.recordEvaluation(
+            ruleId = ruleId,
+            metadata = ruleMetadata,
+            unsuppressedViolations = unsuppressedViolations,
+            suppressedViolations = suppressedViolations,
+        )
+        ReportAccumulator.writeReports(buildRoot)
 
         if (unmatchedIndices.isNotEmpty() || generateBaseline) {
             if (generateBaseline) {
@@ -480,10 +502,7 @@ internal class BaselineManager {
         val message =
             when (Konture.outputFormat) {
                 OutputFormat.PROBLEM_MATCHER -> ProblemMatcherViolationFormatter.format(report)
-                OutputFormat.HTML -> {
-                    HtmlReportWriter.writeReport(report, customHeader = violationHeader)
-                    HtmlViolationFormatter.format(report, customHeader = violationHeader)
-                }
+                OutputFormat.HTML -> HtmlViolationFormatter.format(report, customHeader = violationHeader)
                 OutputFormat.HUMAN, OutputFormat.JSON, OutputFormat.SARIF ->
                     HumanReadableViolationFormatter.format(report, customHeader = violationHeader)
             }

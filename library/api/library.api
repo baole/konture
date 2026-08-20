@@ -3343,24 +3343,36 @@ public final class io/github/baole/konture/HumanReadableViolationFormatter {
 
 public final class io/github/baole/konture/Konture {
 	public static final field DEFAULT_BASELINE_FILENAME Ljava/lang/String;
+	public static final field DEFAULT_HTML_REPORT_PATH Ljava/lang/String;
+	public static final field DEFAULT_JSON_REPORT_PATH Ljava/lang/String;
+	public static final field DEFAULT_SARIF_REPORT_PATH Ljava/lang/String;
 	public static final field INSTANCE Lio/github/baole/konture/Konture;
 	public static final field PROPERTY_BASELINE_DIR Ljava/lang/String;
 	public static final field PROPERTY_BASELINE_GENERATE Ljava/lang/String;
 	public static final field PROPERTY_BASELINE_PATH Ljava/lang/String;
 	public static final field PROPERTY_LOCALE Ljava/lang/String;
 	public static final field PROPERTY_OUTPUT_FORMAT Ljava/lang/String;
+	public static final field PROPERTY_REPORT_HTML_PATH Ljava/lang/String;
+	public static final field PROPERTY_REPORT_JSON_PATH Ljava/lang/String;
 	public static final field PROPERTY_REPORT_PATH Ljava/lang/String;
+	public static final field PROPERTY_REPORT_SARIF_PATH Ljava/lang/String;
 	public final fun getBaselinePath ()Ljava/lang/String;
 	public final fun getGenerateBaseline ()Z
+	public final fun getHtmlReportPath ()Ljava/lang/String;
+	public final fun getJsonReportPath ()Ljava/lang/String;
 	public final fun getLocale ()Ljava/util/Locale;
 	public final fun getOutputFormat ()Lio/github/baole/konture/OutputFormat;
 	public final fun getProjectGraph ()Lio/github/baole/konture/ProjectGraph;
 	public final fun getReportPath ()Ljava/lang/String;
+	public final fun getSarifReportPath ()Ljava/lang/String;
 	public final fun setBaselinePath (Ljava/lang/String;)V
 	public final fun setGenerateBaseline (Z)V
+	public final fun setHtmlReportPath (Ljava/lang/String;)V
+	public final fun setJsonReportPath (Ljava/lang/String;)V
 	public final fun setLocale (Ljava/util/Locale;)V
 	public final fun setOutputFormat (Lio/github/baole/konture/OutputFormat;)V
 	public final fun setReportPath (Ljava/lang/String;)V
+	public final fun setSarifReportPath (Ljava/lang/String;)V
 }
 
 public final class io/github/baole/konture/KontureContext {
