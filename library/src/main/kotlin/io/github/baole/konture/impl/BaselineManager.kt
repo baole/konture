@@ -502,10 +502,7 @@ internal class BaselineManager {
         val message =
             when (Konture.outputFormat) {
                 OutputFormat.PROBLEM_MATCHER -> ProblemMatcherViolationFormatter.format(report)
-                OutputFormat.HTML -> {
-                    HtmlReportWriter.writeReport(report, customHeader = violationHeader)
-                    HtmlViolationFormatter.format(report, customHeader = violationHeader)
-                }
+                OutputFormat.HTML -> HtmlViolationFormatter.format(report, customHeader = violationHeader)
                 OutputFormat.HUMAN, OutputFormat.JSON, OutputFormat.SARIF ->
                     HumanReadableViolationFormatter.format(report, customHeader = violationHeader)
             }

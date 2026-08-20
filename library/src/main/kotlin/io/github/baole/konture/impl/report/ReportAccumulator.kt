@@ -17,12 +17,15 @@ import java.util.concurrent.ConcurrentLinkedQueue
 
 /**
  * Thread-safe accumulator for architectural rule evaluations and multi-sink report writer.
+ *
+ * Evaluations are accumulated across test executions. In parallel test runners,
+ * calling [clear] should be reserved for isolated test suite setup/teardown.
  */
-public class ReportAccumulator {
+internal class ReportAccumulator {
     /**
      * Data class capturing the result of a single architecture rule evaluation.
      */
-    public data class RuleEvaluation(
+    data class RuleEvaluation(
         val ruleId: String,
         val metadata: RuleMetadata?,
         val unsuppressedViolations: List<Violation>,
@@ -35,7 +38,7 @@ public class ReportAccumulator {
     /**
      * Records a single rule evaluation.
      */
-    public fun recordEvaluation(
+    fun recordEvaluation(
         ruleId: String,
         metadata: RuleMetadata?,
         unsuppressedViolations: List<Violation>,
@@ -54,19 +57,19 @@ public class ReportAccumulator {
     /**
      * Returns a snapshot list of all accumulated rule evaluations.
      */
-    public fun getAllEvaluations(): List<RuleEvaluation> = evaluations.toList()
+    fun getAllEvaluations(): List<RuleEvaluation> = evaluations.toList()
 
     /**
      * Clears all accumulated evaluations.
      */
-    public fun clear() {
+    fun clear() {
         evaluations.clear()
     }
 
     /**
      * Generates and writes configured reports (JSON, SARIF, HTML) based on output format and system properties.
      */
-    public fun writeReports(buildRoot: File? = null) {
+    fun writeReports(buildRoot: File? = null) {
         val currentEvaluations = getAllEvaluations()
         val currentFormat = Konture.outputFormat
 
@@ -103,12 +106,12 @@ public class ReportAccumulator {
         }
     }
 
-    public companion object {
+    companion object {
         private val globalInstance = ReportAccumulator()
 
-        public fun getInstance(): ReportAccumulator = globalInstance
+        fun getInstance(): ReportAccumulator = globalInstance
 
-        public fun recordEvaluation(
+        fun recordEvaluation(
             ruleId: String,
             metadata: RuleMetadata?,
             unsuppressedViolations: List<Violation>,
@@ -117,13 +120,13 @@ public class ReportAccumulator {
             globalInstance.recordEvaluation(ruleId, metadata, unsuppressedViolations, suppressedViolations)
         }
 
-        public fun getAllEvaluations(): List<RuleEvaluation> = globalInstance.getAllEvaluations()
+        fun getAllEvaluations(): List<RuleEvaluation> = globalInstance.getAllEvaluations()
 
-        public fun clear() {
+        fun clear() {
             globalInstance.clear()
         }
 
-        public fun writeReports(buildRoot: File? = null) {
+        fun writeReports(buildRoot: File? = null) {
             globalInstance.writeReports(buildRoot)
         }
     }

@@ -227,19 +227,15 @@ public object Konture {
                 ?: System.getProperty(PROPERTY_REPORT_PATH)?.takeIf { it.endsWith(".html") }
                 ?: if (KontureRuntimeStateProvider.currentState.htmlReportPath != DEFAULT_HTML_REPORT_PATH) {
                     KontureRuntimeStateProvider.currentState.htmlReportPath
-                } else {
+                } else if (KontureRuntimeStateProvider.currentState.reportPath.endsWith(".html")) {
                     KontureRuntimeStateProvider.currentState.reportPath
+                } else {
+                    KontureRuntimeStateProvider.currentState.htmlReportPath
                 }
         set(value) {
             KontureRuntimeStateProvider.currentState =
                 KontureRuntimeStateProvider.currentState.copy(htmlReportPath = value)
         }
-
-    /**
-     * Access to the global architectural rule evaluations accumulator.
-     */
-    public val accumulator: io.github.baole.konture.impl.report.ReportAccumulator
-        get() = io.github.baole.konture.impl.report.ReportAccumulator.getInstance()
 
     /**
      * Flag indicating whether to generate violations into the baseline file rather than throwing [AssertionError].

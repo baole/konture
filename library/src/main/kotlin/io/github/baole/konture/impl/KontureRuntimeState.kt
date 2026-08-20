@@ -69,6 +69,10 @@ internal object KontureRuntimeStateProvider {
             threadLocalState.set(value)
         }
 
+    /**
+     * Resets the current thread-local state to default values and clears the shared report accumulator.
+     * Note: This method is intended for test harness setup and teardown.
+     */
     @Suppress("TooGenericExceptionCaught", "SwallowedException")
     fun reset() {
         try {

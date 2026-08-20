@@ -34,7 +34,7 @@ import kotlinx.serialization.json.Json
 /**
  * Exporter responsible for generating and writing SARIF v2.1.0 static analysis reports.
  */
-public object SarifReportExporter {
+internal object SarifReportExporter {
     private val json =
         Json {
             prettyPrint = true
@@ -45,12 +45,12 @@ public object SarifReportExporter {
     /**
      * Serializes a [SarifReport] into a pretty-printed JSON string.
      */
-    public fun exportToString(report: SarifReport): String = json.encodeToString(report)
+    fun exportToString(report: SarifReport): String = json.encodeToString(report)
 
     /**
      * Generates a [SarifReport] from accumulated rule evaluation results.
      */
-    public fun generateReport(
+    fun generateReport(
         evaluations: List<ReportAccumulator.RuleEvaluation>,
         buildRoot: File? = null,
     ): SarifReport {
@@ -108,78 +108,22 @@ public object SarifReportExporter {
                         null
                     }
 
+                val flowLocations = mutableListOf<SarifThreadFlowLocation>()
+                buildThreadFlowLocation(v.subject, "Origin", loc, root)?.let { flowLocations.add(it) }
+                v.dependencyPath.forEach { step ->
+                    buildThreadFlowLocation(step, "Step", step.location, root)?.let { flowLocations.add(it) }
+                }
+                v.target?.let { target ->
+                    buildThreadFlowLocation(target, "Target", target.location, root)?.let { flowLocations.add(it) }
+                }
+
                 val codeFlows =
-                    if (v.target != null && v.target?.location != null && loc != null) {
-                        val targetLoc = v.target?.location!!
-                        val normalizedTarget = JsonReportExporter.normalizePathString(targetLoc.filePath, root)
+                    if (flowLocations.size >= 2) {
                         listOf(
                             SarifCodeFlow(
                                 threadFlows =
                                     listOf(
-                                        SarifThreadFlow(
-                                            locations =
-                                                listOf(
-                                                    SarifThreadFlowLocation(
-                                                        location =
-                                                            SarifLocation(
-                                                                physicalLocation =
-                                                                    SarifPhysicalLocation(
-                                                                        artifactLocation =
-                                                                            SarifArtifactLocation(
-                                                                                uri =
-                                                                                    JsonReportExporter
-                                                                                        .normalizePathString(
-                                                                                            loc.filePath,
-                                                                                            root,
-                                                                                        ),
-                                                                                uriBaseId = "%SRCROOT%",
-                                                                            ),
-                                                                        region =
-                                                                            if (loc.line != null) {
-                                                                                SarifRegion(
-                                                                                    startLine = loc.line,
-                                                                                    startColumn = loc.column,
-                                                                                )
-                                                                            } else {
-                                                                                null
-                                                                            },
-                                                                    ),
-                                                                message =
-                                                                    SarifMessage(
-                                                                        text = "Origin: ${v.subject.name}",
-                                                                    ),
-                                                            ),
-                                                        importance = "essential",
-                                                    ),
-                                                    SarifThreadFlowLocation(
-                                                        location =
-                                                            SarifLocation(
-                                                                physicalLocation =
-                                                                    SarifPhysicalLocation(
-                                                                        artifactLocation =
-                                                                            SarifArtifactLocation(
-                                                                                uri = normalizedTarget,
-                                                                                uriBaseId = "%SRCROOT%",
-                                                                            ),
-                                                                        region =
-                                                                            if (targetLoc.line != null) {
-                                                                                SarifRegion(
-                                                                                    startLine = targetLoc.line,
-                                                                                    startColumn = targetLoc.column,
-                                                                                )
-                                                                            } else {
-                                                                                null
-                                                                            },
-                                                                    ),
-                                                                message =
-                                                                    SarifMessage(
-                                                                        text = "Target: ${v.target?.name}",
-                                                                    ),
-                                                            ),
-                                                        importance = "essential",
-                                                    ),
-                                                ),
-                                        ),
+                                        SarifThreadFlow(locations = flowLocations),
                                     ),
                             ),
                         )
@@ -238,11 +182,45 @@ public object SarifReportExporter {
         )
     }
 
+    private fun buildThreadFlowLocation(
+        subject: io.github.baole.konture.core.model.Subject,
+        labelPrefix: String,
+        location: io.github.baole.konture.core.model.SourceLocation?,
+        root: File,
+    ): SarifThreadFlowLocation? {
+        val targetLoc = location ?: subject.location ?: return null
+        val normalizedUri = JsonReportExporter.normalizePathString(targetLoc.filePath, root)
+        return SarifThreadFlowLocation(
+            location =
+                SarifLocation(
+                    physicalLocation =
+                        SarifPhysicalLocation(
+                            artifactLocation =
+                                SarifArtifactLocation(
+                                    uri = normalizedUri,
+                                    uriBaseId = "%SRCROOT%",
+                                ),
+                            region =
+                                if (targetLoc.line != null) {
+                                    SarifRegion(
+                                        startLine = targetLoc.line,
+                                        startColumn = targetLoc.column,
+                                    )
+                                } else {
+                                    null
+                                },
+                        ),
+                    message = SarifMessage(text = "$labelPrefix: ${subject.name}"),
+                ),
+            importance = "essential",
+        )
+    }
+
     /**
      * Writes the given [SarifReport] to [targetFile].
      */
     @Suppress("TooGenericExceptionCaught")
-    public fun writeReport(
+    fun writeReport(
         report: SarifReport,
         targetFile: File = File(Konture.sarifReportPath),
     ) {

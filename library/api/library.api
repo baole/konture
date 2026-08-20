@@ -3356,7 +3356,6 @@ public final class io/github/baole/konture/Konture {
 	public static final field PROPERTY_REPORT_JSON_PATH Ljava/lang/String;
 	public static final field PROPERTY_REPORT_PATH Ljava/lang/String;
 	public static final field PROPERTY_REPORT_SARIF_PATH Ljava/lang/String;
-	public final fun getAccumulator ()Lio/github/baole/konture/impl/report/ReportAccumulator;
 	public final fun getBaselinePath ()Ljava/lang/String;
 	public final fun getGenerateBaseline ()Z
 	public final fun getHtmlReportPath ()Ljava/lang/String;
@@ -5647,62 +5646,5 @@ public final class io/github/baole/konture/Visibility : java/lang/Enum {
 public final class io/github/baole/konture/impl/ProjectGraphLoaderKt {
 	public static final fun fromResource (Lio/github/baole/konture/ProjectGraph$Companion;Ljava/lang/String;)Lio/github/baole/konture/ProjectGraph;
 	public static synthetic fun fromResource$default (Lio/github/baole/konture/ProjectGraph$Companion;Ljava/lang/String;ILjava/lang/Object;)Lio/github/baole/konture/ProjectGraph;
-}
-
-public final class io/github/baole/konture/impl/report/JsonReportExporter {
-	public static final field INSTANCE Lio/github/baole/konture/impl/report/JsonReportExporter;
-	public final fun exportToString (Lio/github/baole/konture/core/report/KontureJsonReport;)Ljava/lang/String;
-	public final fun generateReport (Ljava/util/List;Ljava/io/File;)Lio/github/baole/konture/core/report/KontureJsonReport;
-	public static synthetic fun generateReport$default (Lio/github/baole/konture/impl/report/JsonReportExporter;Ljava/util/List;Ljava/io/File;ILjava/lang/Object;)Lio/github/baole/konture/core/report/KontureJsonReport;
-	public final fun writeReport (Lio/github/baole/konture/core/report/KontureJsonReport;Ljava/io/File;)V
-	public static synthetic fun writeReport$default (Lio/github/baole/konture/impl/report/JsonReportExporter;Lio/github/baole/konture/core/report/KontureJsonReport;Ljava/io/File;ILjava/lang/Object;)V
-}
-
-public final class io/github/baole/konture/impl/report/ReportAccumulator {
-	public static final field Companion Lio/github/baole/konture/impl/report/ReportAccumulator$Companion;
-	public fun <init> ()V
-	public final fun clear ()V
-	public final fun getAllEvaluations ()Ljava/util/List;
-	public final fun recordEvaluation (Ljava/lang/String;Lio/github/baole/konture/core/model/RuleMetadata;Ljava/util/List;Ljava/util/List;)V
-	public final fun writeReports (Ljava/io/File;)V
-	public static synthetic fun writeReports$default (Lio/github/baole/konture/impl/report/ReportAccumulator;Ljava/io/File;ILjava/lang/Object;)V
-}
-
-public final class io/github/baole/konture/impl/report/ReportAccumulator$Companion {
-	public final fun clear ()V
-	public final fun getAllEvaluations ()Ljava/util/List;
-	public final fun getInstance ()Lio/github/baole/konture/impl/report/ReportAccumulator;
-	public final fun recordEvaluation (Ljava/lang/String;Lio/github/baole/konture/core/model/RuleMetadata;Ljava/util/List;Ljava/util/List;)V
-	public final fun writeReports (Ljava/io/File;)V
-	public static synthetic fun writeReports$default (Lio/github/baole/konture/impl/report/ReportAccumulator$Companion;Ljava/io/File;ILjava/lang/Object;)V
-}
-
-public final class io/github/baole/konture/impl/report/ReportAccumulator$RuleEvaluation {
-	public fun <init> (Ljava/lang/String;Lio/github/baole/konture/core/model/RuleMetadata;Ljava/util/List;Ljava/util/List;Z)V
-	public synthetic fun <init> (Ljava/lang/String;Lio/github/baole/konture/core/model/RuleMetadata;Ljava/util/List;Ljava/util/List;ZILkotlin/jvm/internal/DefaultConstructorMarker;)V
-	public final fun component1 ()Ljava/lang/String;
-	public final fun component2 ()Lio/github/baole/konture/core/model/RuleMetadata;
-	public final fun component3 ()Ljava/util/List;
-	public final fun component4 ()Ljava/util/List;
-	public final fun component5 ()Z
-	public final fun copy (Ljava/lang/String;Lio/github/baole/konture/core/model/RuleMetadata;Ljava/util/List;Ljava/util/List;Z)Lio/github/baole/konture/impl/report/ReportAccumulator$RuleEvaluation;
-	public static synthetic fun copy$default (Lio/github/baole/konture/impl/report/ReportAccumulator$RuleEvaluation;Ljava/lang/String;Lio/github/baole/konture/core/model/RuleMetadata;Ljava/util/List;Ljava/util/List;ZILjava/lang/Object;)Lio/github/baole/konture/impl/report/ReportAccumulator$RuleEvaluation;
-	public fun equals (Ljava/lang/Object;)Z
-	public final fun getMetadata ()Lio/github/baole/konture/core/model/RuleMetadata;
-	public final fun getPassed ()Z
-	public final fun getRuleId ()Ljava/lang/String;
-	public final fun getSuppressedViolations ()Ljava/util/List;
-	public final fun getUnsuppressedViolations ()Ljava/util/List;
-	public fun hashCode ()I
-	public fun toString ()Ljava/lang/String;
-}
-
-public final class io/github/baole/konture/impl/report/SarifReportExporter {
-	public static final field INSTANCE Lio/github/baole/konture/impl/report/SarifReportExporter;
-	public final fun exportToString (Lio/github/baole/konture/core/report/sarif/SarifReport;)Ljava/lang/String;
-	public final fun generateReport (Ljava/util/List;Ljava/io/File;)Lio/github/baole/konture/core/report/sarif/SarifReport;
-	public static synthetic fun generateReport$default (Lio/github/baole/konture/impl/report/SarifReportExporter;Ljava/util/List;Ljava/io/File;ILjava/lang/Object;)Lio/github/baole/konture/core/report/sarif/SarifReport;
-	public final fun writeReport (Lio/github/baole/konture/core/report/sarif/SarifReport;Ljava/io/File;)V
-	public static synthetic fun writeReport$default (Lio/github/baole/konture/impl/report/SarifReportExporter;Lio/github/baole/konture/core/report/sarif/SarifReport;Ljava/io/File;ILjava/lang/Object;)V
 }
 

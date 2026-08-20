@@ -55,10 +55,11 @@ class SarifReportExporterTest {
 
     @Test
     fun `generateReport converts evaluations into standard SARIF v2_1_0 model`() {
-        val buildRoot = File("/workspace/app")
+        val buildRoot = File(tempDir, "app")
         val originFile = File(buildRoot, "feature/src/Feature.kt")
         val targetFile = File(buildRoot, "internal/src/Internal.kt")
 
+        val hopFile = File(buildRoot, "intermediate/src/Bridge.kt")
         val unsuppressedViolation =
             Violation(
                 ruleId = "feature-isolation",
@@ -75,6 +76,14 @@ class SarifReportExporterTest {
                         location = SourceLocation(filePath = targetFile.absolutePath, line = 5, column = 1),
                     ),
                 sourceLocation = SourceLocation(filePath = originFile.absolutePath, line = 25, column = 10),
+                dependencyPath =
+                    listOf(
+                        Subject.ClassSubject(
+                            fqName = "com.example.intermediate.Bridge",
+                            simpleName = "Bridge",
+                            location = SourceLocation(filePath = hopFile.absolutePath, line = 12, column = 4),
+                        ),
+                    ),
                 severity = Severity.ERROR,
                 message = "Access to internal engine forbidden",
             )
@@ -88,15 +97,15 @@ class SarifReportExporterTest {
                         simpleName = "LegacyView",
                     ),
                 severity = Severity.WARNING,
-                message = "Legacy warning",
+                message = "Legacy debt",
             )
 
         val metadata =
             RuleMetadata(
                 id = "feature-isolation",
-                description = "Feature modules must not access internal packages",
+                description = "Isolate internal packages",
                 severity = Severity.ERROR,
-                tags = setOf("architecture", "security"),
+                tags = setOf("modularization", "security"),
             )
 
         val evaluation =
@@ -140,9 +149,13 @@ class SarifReportExporterTest {
 
         assertNotNull(r0.codeFlows)
         val threadFlow = r0.codeFlows!!.first().threadFlows.first()
-        assertEquals(2, threadFlow.locations.size)
+        assertEquals(3, threadFlow.locations.size)
         assertEquals("feature/src/Feature.kt", threadFlow.locations[0].location.physicalLocation.artifactLocation.uri)
-        assertEquals("internal/src/Internal.kt", threadFlow.locations[1].location.physicalLocation.artifactLocation.uri)
+        assertEquals(
+            "intermediate/src/Bridge.kt",
+            threadFlow.locations[1].location.physicalLocation.artifactLocation.uri,
+        )
+        assertEquals("internal/src/Internal.kt", threadFlow.locations[2].location.physicalLocation.artifactLocation.uri)
 
         val r1 = run.results[1]
         assertEquals("warning", r1.level)
