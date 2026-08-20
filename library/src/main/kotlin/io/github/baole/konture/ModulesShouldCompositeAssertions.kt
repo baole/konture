@@ -17,8 +17,9 @@ public interface ModulesShouldCompositeAssertions {
     public infix fun satisfy(assertion: (Module) -> Boolean): ModulesRuleBuilder =
         satisfy("custom condition") { module, _ -> assertion(module) }
 
-    /** Asserts that selected modules satisfy a custom condition described by [description]. */
-    public infix fun satisfy(description: String): ModulesRuleBuilder = satisfy(description) { _, _ -> false }
+    /** Asserts that selected modules satisfy custom description [description]. */
+    public infix fun satisfy(description: String): ModulesRuleBuilder =
+        satisfy(id = description, description = description) { false }
 
     /** Asserts that selected modules satisfy a custom condition with description. */
     public fun satisfy(
@@ -30,6 +31,48 @@ public interface ModulesShouldCompositeAssertions {
                 violations.add(
                     getMessage("module.should.satisfyCustom", module.path, description),
                 )
+            }
+        }
+        return builder
+    }
+
+    /**
+     * Asserts that selected modules satisfy a custom predicate within a [SatisfyContext] block identified by [id] and optional [description].
+     */
+    public fun satisfy(
+        id: String,
+        description: String? = null,
+        predicate: SatisfyContext<Module>.(Module) -> Boolean,
+    ): ModulesRuleBuilder {
+        builder.setShould { module, _, violations ->
+            val currentState = io.github.baole.konture.impl.KontureRuntimeStateProvider.currentState
+            val activeSeverity = currentState.currentRuleMetadata?.severity ?: io.github.baole.konture.core.model.Severity.ERROR
+            val activeTags = currentState.currentRuleMetadata?.tags ?: emptySet()
+            val overrideMeta =
+                io.github.baole.konture.core.model.RuleMetadata(
+                    id = id,
+                    description = description,
+                    severity = activeSeverity,
+                    tags = activeTags,
+                )
+
+            io.github.baole.konture.impl.KontureRuntimeStateProvider.runWithState(
+                currentState.copy(currentRuleMetadata = overrideMeta),
+            ) {
+                val context =
+                    SatisfyContextImpl(
+                        subject = module,
+                        id = id,
+                        description = description,
+                        graph = builder.graph,
+                        rawMessages = violations,
+                    )
+                val initialCount = violations.size
+                val passed = context.predicate(module)
+                if (!passed && violations.size == initialCount) {
+                    val msg = getMessage("module.should.satisfyCustom", module.path, description ?: id)
+                    violations.add(msg)
+                }
             }
         }
         return builder

@@ -19,6 +19,7 @@ import io.github.baole.konture.impl.LogicalOperator
 import io.github.baole.konture.impl.PatternMatchers
 import io.github.baole.konture.impl.SliceCycleDetector
 import io.github.baole.konture.impl.SliceGraph
+import io.github.baole.konture.impl.StructuredMessageList
 
 /**
  * A builder for compiling and verifying architectural rules on slices — groups of packages derived
@@ -310,17 +311,20 @@ public class SlicesRuleBuilder(
 
         /** Filter or assertion criteria for run check. */
         val runCheckReport = { list: MutableList<Violation> ->
-            val rawMessages = mutableListOf<String>()
+            val rawMessages = StructuredMessageList()
             assertions.forEach { it(sliceGraph, rawMessages) }
-            for (rawMsg in rawMessages) {
+            for ((index, rawMsg) in rawMessages.withIndex()) {
+                val msgMeta = rawMessages.messageMetadataMap[index] ?: currentMeta
+                val ruleIdToUse = msgMeta?.id ?: activeRuleId
+                val severityToUse = msgMeta?.severity ?: activeSeverity
                 val subject = Subject.CustomSubject(name = slicePattern)
                 list.add(
                     Violation(
-                        ruleId = activeRuleId,
+                        ruleId = ruleIdToUse,
                         subject = subject,
                         message = rawMsg,
-                        severity = activeSeverity,
-                        metadata = currentMeta,
+                        severity = severityToUse,
+                        metadata = msgMeta,
                     ),
                 )
             }

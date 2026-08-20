@@ -17,6 +17,7 @@ import io.github.baole.konture.i18n.getMessage
 import io.github.baole.konture.impl.BaselineManager
 import io.github.baole.konture.impl.KontureRuntimeStateProvider
 import io.github.baole.konture.impl.LogicalOperator
+import io.github.baole.konture.impl.StructuredMessageList
 import io.github.baole.konture.impl.ViolationLocation
 
 /**
@@ -398,9 +399,12 @@ public class PropertiesRuleBuilder(
         val runCheckReport = { list: MutableList<Violation> ->
             for (prop in propertiesToCheck) {
                 if (ignoredPredicates.any { it(prop) }) continue
-                val rawMessages = mutableListOf<String>()
+                val rawMessages = StructuredMessageList()
                 assertion(prop, allProperties, rawMessages)
-                for (rawMsg in rawMessages) {
+                for ((index, rawMsg) in rawMessages.withIndex()) {
+                    val msgMeta = rawMessages.messageMetadataMap[index] ?: currentMeta
+                    val ruleIdToUse = msgMeta?.id ?: activeRuleId
+                    val severityToUse = msgMeta?.severity ?: activeSeverity
                     val fullMsg =
                         if (!rawMsg.contains(" (at ")) {
                             "$rawMsg (at ${ViolationLocation.format(prop)})"
@@ -417,11 +421,11 @@ public class PropertiesRuleBuilder(
                         )
                     list.add(
                         Violation(
-                            ruleId = activeRuleId,
+                            ruleId = ruleIdToUse,
                             subject = subject,
                             message = fullMsg,
-                            severity = activeSeverity,
-                            metadata = currentMeta,
+                            severity = severityToUse,
+                            metadata = msgMeta,
                         ),
                     )
                 }
