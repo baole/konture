@@ -20,6 +20,7 @@ cd "$SCRIPT_DIR/.."
 
 # Step 1: Run unified Gradle checks (KtLint, Detekt, Tests, Coverage Thresholds)
 echo -e "\n${BLUE}[1/4] Running unified Gradle checks (lint, detekt, tests, coverage)...${NC}"
+rm -rf .gradle/configuration-cache
 if ./gradlew -q check --continue; then
     echo -e "${GREEN}[SUCCESS] All Gradle quality and coverage verification checks passed!${NC}"
 else

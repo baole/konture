@@ -53,12 +53,14 @@ class NameAndPathFilteringTest {
     @Test
     fun `functions name filtering`() {
         Konture.functions {
-            that().haveName("targetFunc")
+            that().resideInAPackage("io.github.baole.konture.tests.namepathfiltering")
+                .and().haveName("targetFunc")
             should().haveAnnotationOfType<NamePathMarker>()
         }
 
         Konture.functions {
-            that().haveNameMatching("target*")
+            that().resideInAPackage("io.github.baole.konture.tests.namepathfiltering")
+                .and().haveNameMatching("target*")
             should().haveAnnotationOfType<NamePathMarker>()
         }
     }
@@ -66,12 +68,14 @@ class NameAndPathFilteringTest {
     @Test
     fun `properties name filtering`() {
         Konture.properties {
-            that().haveName("targetProp")
+            that().resideInAPackage("io.github.baole.konture.tests.namepathfiltering")
+                .and().haveName("targetProp")
             should().haveAnnotationOfType<NamePathMarker>()
         }
 
         Konture.properties {
-            that().haveNameMatching("target*")
+            that().resideInAPackage("io.github.baole.konture.tests.namepathfiltering")
+                .and().haveNameMatching("target*")
             should().haveAnnotationOfType<NamePathMarker>()
         }
     }

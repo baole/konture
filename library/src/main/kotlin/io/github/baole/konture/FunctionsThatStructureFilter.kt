@@ -141,7 +141,10 @@ public interface FunctionsThatStructureFilter : FunctionsThatScope {
         builder.setThat { func ->
             func.declaration.parameters.size == types.size &&
                 func.declaration.parameters.zip(types).all { (param, expectedType) ->
-                    param.type == expectedType || param.type.endsWith(".$expectedType")
+                    param.type == expectedType ||
+                        param.type.endsWith(".$expectedType") ||
+                        expectedType.endsWith(".${param.type}") ||
+                        param.resolvedType == expectedType
                 }
         }
         return builder
@@ -170,7 +173,10 @@ public interface FunctionsThatStructureFilter : FunctionsThatScope {
         builder.setThat { func ->
             func.declaration.parameters.any { param ->
                 types.any { expectedType ->
-                    param.type == expectedType || param.type.endsWith(".$expectedType")
+                    param.type == expectedType ||
+                        param.type.endsWith(".$expectedType") ||
+                        expectedType.endsWith(".${param.type}") ||
+                        param.resolvedType == expectedType
                 }
             }
         }

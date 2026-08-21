@@ -7,6 +7,7 @@
 package io.github.baole.konture
 
 import io.github.baole.konture.core.KontureConstants
+import io.github.baole.konture.core.model.Severity
 import io.github.baole.konture.impl.KontureRuntimeStateProvider
 import java.util.Locale
 
@@ -15,6 +16,11 @@ import java.util.Locale
  * and graph configurations are extended from or accessible through this object.
  */
 public object Konture {
+    /**
+     * System property key used to override the minimum severity failure threshold.
+     */
+    public const val PROPERTY_FAIL_ON_SEVERITY: String = KontureConstants.PROPERTY_FAIL_ON_SEVERITY
+
     /**
      * System property key used to override the path of baseline files.
      */
@@ -66,6 +72,38 @@ public object Konture {
         set(value) {
             KontureRuntimeStateProvider.currentState =
                 KontureRuntimeStateProvider.currentState.copy(outputFormat = value)
+        }
+
+    /**
+     * The minimum severity threshold required for rule violations to trigger test failure.
+     * When null, Konture runs in audit / dry-run mode (no violations cause test failure).
+     * Can be configured via system property "konture.fail.on.severity" or programmatically.
+     * Backed by ThreadLocal state; safe under parallel test execution.
+     */
+    public var failOnSeverity: Severity?
+        get() {
+            if (KontureRuntimeStateProvider.currentState.isFailOnSeverityOverridden) {
+                return KontureRuntimeStateProvider.currentState.failOnSeverity
+            }
+            val systemProp = System.getProperty(PROPERTY_FAIL_ON_SEVERITY)
+            return if (systemProp != null) {
+                when (systemProp.trim().lowercase(Locale.ROOT)) {
+                    "none" -> null
+                    "info" -> Severity.INFO
+                    "warning" -> Severity.WARNING
+                    "error" -> Severity.ERROR
+                    else -> KontureRuntimeStateProvider.currentState.failOnSeverity
+                }
+            } else {
+                KontureRuntimeStateProvider.currentState.failOnSeverity
+            }
+        }
+        set(value) {
+            KontureRuntimeStateProvider.currentState =
+                KontureRuntimeStateProvider.currentState.copy(
+                    failOnSeverity = value,
+                    isFailOnSeverityOverridden = true,
+                )
         }
 
     /**
@@ -247,4 +285,12 @@ public object Konture {
         set(value) {
             KontureRuntimeStateProvider.currentState = KontureRuntimeStateProvider.currentState.copy(generateBaseline = value)
         }
+
+    /**
+     * Resets the current thread-local runtime state to default values and clears the shared report accumulator.
+     * Note: This method is intended for test harness setup and teardown.
+     */
+    public fun reset() {
+        KontureRuntimeStateProvider.reset()
+    }
 }

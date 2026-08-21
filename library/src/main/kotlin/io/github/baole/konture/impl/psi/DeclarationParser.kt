@@ -131,13 +131,40 @@ internal object DeclarationParser {
                     classContext,
                 )
             }
+        val constructorProperties =
+            (classOrObject as? KtClass)?.primaryConstructorParameters
+                ?.filter { it.hasValOrVar() }
+                ?.map { param ->
+                    val name = param.name ?: ""
+                    val visibility = param.extractVisibility()
+                    val modifiers = param.extractModifiers()
+                    val type = param.typeReference?.text ?: ""
+                    val resolvedType = TypeResolver.resolveRawType(type, classContext)
+                    val isVal = !param.isMutable
+                    val annotations = parseAnnotations(param.annotationEntries, classContext)
+                    val kdocText = param.extractKDoc()
+                    PropertyDeclaration(
+                        name = name,
+                        visibility = visibility,
+                        modifiers = modifiers,
+                        type = type,
+                        isVal = isVal,
+                        annotations = annotations,
+                        kdocText = kdocText,
+                        isExtension = false,
+                        resolvedType = resolvedType,
+                        sourceLine = lineOf(param),
+                    )
+                } ?: emptyList()
+
         val properties =
-            classOrObject.declarations.filterIsInstance<KtProperty>().map {
-                parseProperty(
-                    it,
-                    classContext,
-                )
-            }
+            constructorProperties +
+                classOrObject.declarations.filterIsInstance<KtProperty>().map {
+                    parseProperty(
+                        it,
+                        classContext,
+                    )
+                }
 
         val companionObject =
             classOrObject.companionObjects.firstOrNull()?.let { companion ->
@@ -351,6 +378,9 @@ internal object DeclarationParser {
         ) {
             modifiers.add(Modifier.LATEINIT)
         }
+        if (modifierList.hasModifier(KtTokens.INFIX_KEYWORD)) modifiers.add(Modifier.INFIX)
+        if (modifierList.hasModifier(KtTokens.OPERATOR_KEYWORD)) modifiers.add(Modifier.OPERATOR)
+        if (modifierList.hasModifier(KtTokens.OVERRIDE_KEYWORD)) modifiers.add(Modifier.OVERRIDE)
         return modifiers
     }
 

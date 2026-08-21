@@ -58,7 +58,7 @@ class RuleMetadataTest : RuleBuildersTestBase() {
             architecture {
                 rule("app.classes.must-have-suffix") {
                     description = "All classes in com.other must be interfaces"
-                    severity = Severity.WARNING
+                    severity = Severity.ERROR
                     tag("documentation")
 
                     classes {

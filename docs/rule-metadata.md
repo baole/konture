@@ -82,6 +82,60 @@ architecture {
 
 ---
 
+## 🚦 Configurable Severity & Build Gate Enforcement
+
+Konture provides a configurable build gate threshold via `Konture.failOnSeverity`, allowing teams to progressively enforce architecture guardrails in CI pipelines.
+
+### Severity Hierarchy
+
+1. **`Severity.ERROR`** (Highest): Critical architectural violations (e.g., circular module dependencies, domain boundary leaks).
+2. **`Severity.WARNING`**: Non-critical convention drifts or deprecation warnings (e.g., missing class name suffixes, forbidden utility usages).
+3. **`Severity.INFO`** (Lowest): Informational findings, statistics, or upcoming rule previews.
+
+### Threshold Evaluation Logic
+
+When rules are evaluated, Konture compares each rule's `severity` against the active `failOnSeverity` threshold:
+
+* **Default (`failOnSeverity = Severity.ERROR`)**: Only `ERROR` violations fail tests with an `AssertionError`. `WARNING` and `INFO` violations are logged to the console as non-blocking diagnostics.
+* **`failOnSeverity = Severity.WARNING`**: Both `ERROR` and `WARNING` violations fail the build.
+* **`failOnSeverity = Severity.INFO`**: All violations (`ERROR`, `WARNING`, `INFO`) fail the build.
+* **Audit / Dry-Run Mode (`failOnSeverity = null`)**: **No** violations fail tests with `AssertionError`. All rule evaluations run, violations are logged as diagnostics, and full statistics are recorded into JSON/SARIF/HTML reports.
+
+### ⚙️ Configuring the Build Gate Threshold
+
+#### 1. Via CI System Property
+You can toggle strictness or enable audit mode in CI environments without modifying source code:
+```bash
+# Strict mode: fail on both ERROR and WARNING
+./gradlew test -Dkonture.fail.on.severity=warning
+
+# Audit / Dry-Run mode: log all violations and export reports without failing the build
+./gradlew test -Dkonture.fail.on.severity=none -Dkonture.output.format=sarif
+```
+
+#### 2. Programmatically (Thread-Isolated)
+```kotlin
+import io.github.baole.konture.Konture
+import io.github.baole.konture.core.model.Severity
+import org.junit.jupiter.api.BeforeEach
+
+class ArchitectureAuditTest {
+    @BeforeEach
+    fun setUp() {
+        // Run this test suite in audit mode
+        Konture.failOnSeverity = null
+    }
+}
+```
+
+### 📈 Full Accumulation in Reports & Baselines
+
+Sub-threshold violations are **never ignored** in reporting:
+* **JSON & SARIF reports**: Contain all violations across all severities with accurate `errorCount`, `warningCount`, and `infoCount`.
+* **Architecture Baselines**: In baseline generation mode (`Konture.generateBaseline = true`), violations across all severity levels are captured to `konture-baseline.json`.
+
+---
+
 ## 📊 Violation Reporting & Baselines
 
 When a named rule fails, its stable `id` and `severity` are attached to every generated `Violation` object and recorded in JSON baseline files (`konture-baseline.json`):
