@@ -35,7 +35,7 @@ class SeverityBuildGateIntegrationTest {
                 severity = Severity.WARNING
 
                 classes {
-                    that().haveName("DeclarativeClass")
+                    that().named("DeclarativeClass")
                     should().beInterfaces()
                 }
             }
@@ -46,7 +46,7 @@ class SeverityBuildGateIntegrationTest {
                 severity = Severity.INFO
 
                 classes {
-                    that().haveName("DeclarativeClass")
+                    that().named("DeclarativeClass")
                     should().beInterfaces()
                 }
             }
@@ -63,7 +63,7 @@ class SeverityBuildGateIntegrationTest {
                 severity = Severity.ERROR
 
                 classes {
-                    that().haveName("DeclarativeClass")
+                    that().named("DeclarativeClass")
                     should().beInterfaces()
                 }
             }
@@ -87,7 +87,7 @@ class SeverityBuildGateIntegrationTest {
                 severity = Severity.INFO
 
                 classes {
-                    that().haveName("DeclarativeClass")
+                    that().named("DeclarativeClass")
                     should().beInterfaces()
                 }
             }
@@ -98,7 +98,7 @@ class SeverityBuildGateIntegrationTest {
                 severity = Severity.WARNING
 
                 classes {
-                    that().haveName("DeclarativeClass")
+                    that().named("DeclarativeClass")
                     should().beInterfaces()
                 }
             }
@@ -121,7 +121,7 @@ class SeverityBuildGateIntegrationTest {
                 severity = Severity.INFO
 
                 classes {
-                    that().haveName("DeclarativeClass")
+                    that().named("DeclarativeClass")
                     should().beInterfaces()
                 }
             }
@@ -142,7 +142,7 @@ class SeverityBuildGateIntegrationTest {
                 severity = Severity.ERROR
 
                 classes {
-                    that().haveName("DeclarativeClass")
+                    that().named("DeclarativeClass")
                     should().beInterfaces()
                 }
             }
@@ -163,7 +163,7 @@ class SeverityBuildGateIntegrationTest {
                     severity = Severity.WARNING
 
                     classes {
-                        that().haveName("DeclarativeClass")
+                        that().named("DeclarativeClass")
                         should().beInterfaces()
                     }
                 }
@@ -178,7 +178,7 @@ class SeverityBuildGateIntegrationTest {
                     severity = Severity.ERROR
 
                     classes {
-                        that().haveName("DeclarativeClass")
+                        that().named("DeclarativeClass")
                         should().beInterfaces()
                     }
                 }
@@ -195,7 +195,7 @@ class SeverityBuildGateIntegrationTest {
                     severity = Severity.ERROR
 
                     classes {
-                        that().haveName("DeclarativeClass")
+                        that().named("DeclarativeClass")
                         should().beInterfaces()
                     }
                 }
@@ -211,7 +211,7 @@ class SeverityBuildGateIntegrationTest {
                 severity = Severity.WARNING
 
                 classes {
-                    that().haveName("DeclarativeClass")
+                    that().named("DeclarativeClass")
                     should().beInterfaces()
                 }
             }
@@ -222,7 +222,7 @@ class SeverityBuildGateIntegrationTest {
                 severity = Severity.ERROR
 
                 classes {
-                    that().haveName("DeclarativeClass")
+                    that().named("DeclarativeClass")
                     should().beInterfaces()
                 }
             }

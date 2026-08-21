@@ -23,8 +23,9 @@ class BaselineForkedJvmTest {
     private fun getJavaExecutable(): String {
         val javaHome = System.getProperty("java.home")
         val isWindows = System.getProperty("os.name").lowercase().contains("win")
-        val exe = if (isWindows) "bin/java.exe" else "bin/java"
-        return File(javaHome, exe).absolutePath
+        val binDir = File(javaHome, "bin")
+        val exe = if (isWindows) "java.exe" else "java"
+        return File(binDir, exe).absolutePath
     }
 
     @Test

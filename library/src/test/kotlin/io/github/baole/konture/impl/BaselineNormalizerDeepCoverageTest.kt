@@ -16,28 +16,30 @@ import java.io.File
 internal class BaselineNormalizerDeepCoverageTest {
     @Test
     fun `test BaselineNormalizer normalize variations`() {
-        val root = File("/workspace/root")
-        val v1 = "Error in /workspace/root/app/src/File.kt (at /workspace/root/app/src/File.kt:10)"
+        val root = File("build/tmp/test-root").canonicalFile
+        val rootStr = root.canonicalPath.replace("\\", "/")
+        val v1 = "Error in $rootStr/app/src/File.kt (at $rootStr/app/src/File.kt:10)"
         val norm1 = BaselineNormalizer.normalize(v1, root)
         assertEquals("Error in <root>/app/src/File.kt (at <root>/app/src/File.kt:10)", norm1)
 
-        val vNullRoot = "Error in /workspace/root/File.kt"
+        val vNullRoot = "Error in $rootStr/File.kt"
         val normNull = BaselineNormalizer.normalize(vNullRoot, null)
         assertEquals(vNullRoot, normNull)
     }
 
     @Test
     fun `test parseLocationAndMessage with at suffix and prefixes`() {
-        val root = File("/workspace/root")
+        val root = File("build/tmp/test-root").canonicalFile
+        val rootStr = root.canonicalPath.replace("\\", "/")
 
         // 1. (at /path) suffix
-        val msgWithAt = "Class com.example.Foo violates rule (at /workspace/root/app/src/Foo.kt)"
+        val msgWithAt = "Class com.example.Foo violates rule (at $rootStr/app/src/Foo.kt)"
         val pairAt = BaselineNormalizer.parseLocationAndMessage(msgWithAt, root)
         assertEquals("app/src/Foo.kt", pairAt.first)
         assertEquals("Class com.example.Foo violates rule", pairAt.second)
 
         // 2. Structured with ) (
-        val msgStructured = "Class violates rule (at :app, main source set) (/workspace/root/app/src/Foo.kt)"
+        val msgStructured = "Class violates rule (at :app, main source set) ($rootStr/app/src/Foo.kt)"
         val pairStruct = BaselineNormalizer.parseLocationAndMessage(msgStructured, root)
         assertEquals(":app, main source set) (app/src/Foo.kt", pairStruct.first)
 
@@ -74,8 +76,10 @@ internal class BaselineNormalizerDeepCoverageTest {
 
     @Test
     fun `test findModuleForViolation and getModuleDir variations`() {
-        val root = File("/workspace/root")
-        val modApp = Module(":", ":app", "/workspace/root/app", emptyList(), emptyList(), emptyList(), emptyList())
+        val root = File("build/tmp/test-root").canonicalFile
+        val rootStr = root.canonicalPath.replace("\\", "/")
+        val modApp =
+            Module(":", ":app", File(root, "app").canonicalPath, emptyList(), emptyList(), emptyList(), emptyList())
         val modLib = Module(":", ":lib", "lib", emptyList(), emptyList(), emptyList(), emptyList())
         val modRoot = Module(":", ":", "", emptyList(), emptyList(), emptyList(), emptyList())
         val graph = ProjectGraph(mapOf(":" to listOf(modApp, modLib, modRoot)))
@@ -103,13 +107,13 @@ internal class BaselineNormalizerDeepCoverageTest {
             FlatBaselineViolation(
                 "TestClass",
                 "testMethod",
-                ":app, main source set, /workspace/root/app/src/Foo.kt",
+                ":app, main source set, $rootStr/app/src/Foo.kt",
                 "msg",
             )
         assertEquals(modApp, BaselineNormalizer.findModuleForViolation(vModLegacy, graph, root))
 
         // File path matching absolute
-        val vFileAbs = FlatBaselineViolation("TestClass", "testMethod", "/workspace/root/app/src/Foo.kt", "msg")
+        val vFileAbs = FlatBaselineViolation("TestClass", "testMethod", "$rootStr/app/src/Foo.kt", "msg")
         assertEquals(modApp, BaselineNormalizer.findModuleForViolation(vFileAbs, graph, root))
 
         // Relative path matching
@@ -118,7 +122,7 @@ internal class BaselineNormalizerDeepCoverageTest {
 
         // getModuleDir
         val dirAbs = BaselineNormalizer.getModuleDir(root, modApp)
-        assertEquals(File("/workspace/root/app").canonicalFile, dirAbs)
+        assertEquals(File(root, "app").canonicalFile, dirAbs)
 
         val dirRel = BaselineNormalizer.getModuleDir(root, modLib)
         assertEquals(File(root, "lib").canonicalFile, dirRel)
