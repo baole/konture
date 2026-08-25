@@ -31,6 +31,19 @@ public final class io/github/baole/konture/ArchitectureKt {
 	public static final fun architecture (Lkotlin/jvm/functions/Function1;)V
 }
 
+public final class io/github/baole/konture/ArchitectureLayerPolicy {
+	public final fun getName ()Ljava/lang/String;
+	public final fun mayBeAccessedBy (Ljava/util/List;)V
+	public final fun mayBeAccessedBy ([Ljava/lang/String;)V
+	public final fun mayDependOn (Ljava/util/List;)V
+	public final fun mayDependOn ([Ljava/lang/String;)V
+	public final fun mustNotBeAccessedBy (Ljava/util/List;)V
+	public final fun mustNotBeAccessedBy ([Ljava/lang/String;)V
+	public final fun mustNotDependOn (Ljava/util/List;)V
+	public final fun mustNotDependOn ([Ljava/lang/String;)V
+	public final fun selector (Lkotlin/jvm/functions/Function1;)V
+}
+
 public final class io/github/baole/konture/ClassDeclaration {
 	public fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ZZLjava/util/List;Ljava/util/List;Ljava/util/Set;Ljava/lang/String;Lio/github/baole/konture/Visibility;Ljava/util/Set;Ljava/util/List;Lio/github/baole/konture/ConstructorDeclaration;Ljava/util/List;Ljava/util/List;Ljava/util/List;Lio/github/baole/konture/ClassDeclaration;Ljava/lang/String;Ljava/util/Map;ZI)V
 	public synthetic fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ZZLjava/util/List;Ljava/util/List;Ljava/util/Set;Ljava/lang/String;Lio/github/baole/konture/Visibility;Ljava/util/Set;Ljava/util/List;Lio/github/baole/konture/ConstructorDeclaration;Ljava/util/List;Ljava/util/List;Ljava/util/List;Lio/github/baole/konture/ClassDeclaration;Ljava/lang/String;Ljava/util/Map;ZIILkotlin/jvm/internal/DefaultConstructorMarker;)V
@@ -3394,6 +3407,7 @@ public final class io/github/baole/konture/KontureContext {
 	public final fun getFunctions ()Lio/github/baole/konture/KontureFunctionScope;
 	public final fun getModules ()Lio/github/baole/konture/KontureModuleScope;
 	public final fun getProperties ()Lio/github/baole/konture/KonturePropertyScope;
+	public final fun layer (Ljava/lang/String;Lkotlin/jvm/functions/Function1;)V
 	public final fun layered (Lkotlin/jvm/functions/Function1;)V
 	public final fun layeredArchitecture (Lkotlin/jvm/functions/Function1;)V
 	public final fun modules (Lkotlin/jvm/functions/Function1;)V
@@ -3757,6 +3771,13 @@ public final class io/github/baole/konture/KontureSliceScopeKt {
 
 public final class io/github/baole/konture/KontureTypeReferenceKt {
 	public static final fun konturePackageName (Lkotlin/reflect/KClass;)Ljava/lang/String;
+}
+
+public final class io/github/baole/konture/LayerSelectorDsl {
+	public final fun modules (Ljava/util/List;)V
+	public final fun modules ([Ljava/lang/String;)V
+	public final fun packages (Ljava/util/List;)V
+	public final fun packages ([Ljava/lang/String;)V
 }
 
 public final class io/github/baole/konture/LayeredArchitectureBuilder {

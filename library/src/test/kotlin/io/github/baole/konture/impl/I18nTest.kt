@@ -1,6 +1,6 @@
 /*
  * Copyright 2026 The Konture Contributors
- * Contributors: Bao Le Duc (@baole)
+ * Contributors: Bao Le Duc (@baole), Octavio Calleya Garcia (@octaviospain)
  * SPDX-License-Identifier: Apache-2.0
  */
 
@@ -203,6 +203,82 @@ class I18nTest {
                 emptyByFile.entries.joinToString("\n") { (file, keys) ->
                     "  $file (${keys.size} empty): ${keys.take(10)}${if (keys.size > 10) "..." else ""}"
                 },
+        )
+    }
+
+    @Test
+    fun testArchitectureLayerPolicyTranslationsInAllLocales() {
+        val spyLayer = "feature"
+        val allowed = "core, domain"
+        val sourceClass = "com.example.Presenter"
+        val targetClass = "com.domain.Widget"
+        val targetLayer = "domain"
+        val at = "Presenter.kt:10"
+
+        // Arg lists per key must match getMessage(...) call signatures in ArchitectureLayerPolicy.
+        val argsByKey: Map<String, Array<Any?>> =
+            mapOf(
+                "architecture.policy.violationHeader" to arrayOf(),
+                "architecture.policy.mayDependOn" to arrayOf(spyLayer, allowed, sourceClass, targetClass, targetLayer, at),
+                "architecture.policy.mustNotDependOn" to arrayOf(spyLayer, allowed, sourceClass, targetClass, targetLayer, at),
+                "architecture.policy.mayBeAccessedBy" to arrayOf(spyLayer, allowed, sourceClass, targetLayer, targetClass, at),
+                "architecture.policy.mustNotBeAccessedBy" to arrayOf(spyLayer, allowed, sourceClass, targetLayer, targetClass, at),
+                "architecture.policy.noSelector" to arrayOf(spyLayer),
+                "architecture.policy.undefinedLayer" to arrayOf("typoLayer"),
+            )
+
+        for (locale in SUPPORTED_LOCALES) {
+            Konture.locale = locale
+            for ((key, args) in argsByKey) {
+                val rendered = getMessage(key, *args)
+                assertFalse(
+                    rendered.startsWith("[$key"),
+                    "$key resolved to fallback placeholder in ${locale.language}: '$rendered'",
+                )
+                if (args.isNotEmpty()) {
+                    assertTrue(
+                        rendered.contains(args.first().toString()),
+                        "$key lost its arguments in ${locale.language}: '$rendered'",
+                    )
+                }
+            }
+        }
+    }
+
+    @Test
+    fun testArchitectureLayerPolicyTranslationsWording() {
+        val args =
+            arrayOf(
+                "feature",
+                "core, domain",
+                "com.example.Presenter",
+                "com.domain.Widget",
+                "domain",
+                "Presenter.kt:10",
+            )
+
+        // Spanish
+        Konture.locale = Locale.forLanguageTag("es")
+        assertEquals(
+            "La capa feature solo puede depender de las capas [core, domain], pero la clase " +
+                "com.example.Presenter depende de com.domain.Widget en la(s) capa(s) [domain] (en Presenter.kt:10)",
+            getMessage("architecture.policy.mayDependOn", *args),
+        )
+
+        // French
+        Konture.locale = Locale.FRENCH
+        assertEquals(
+            "La couche feature ne peut dépendre que des couches [core, domain], mais la classe " +
+                "com.example.Presenter dépend de com.domain.Widget dans la/les couche(s) [domain] (à Presenter.kt:10)",
+            getMessage("architecture.policy.mayDependOn", *args),
+        )
+
+        // Italian
+        Konture.locale = Locale.ITALIAN
+        assertEquals(
+            "Lo strato feature può dipendere solo dagli strati [core, domain], ma la classe " +
+                "com.example.Presenter dipende da com.domain.Widget nello/gli strato/i [domain] (a Presenter.kt:10)",
+            getMessage("architecture.policy.mayDependOn", *args),
         )
     }
 

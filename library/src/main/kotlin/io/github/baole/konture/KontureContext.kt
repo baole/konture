@@ -26,6 +26,8 @@ public class KontureContext(
 
     private val ruleSuites = mutableListOf<RuleSuite>()
 
+    private val layerPolicies = mutableListOf<ArchitectureLayerPolicy>()
+
     /** Returns a [ClassSelector] for all classes in the project graph. */
     public val classes: ClassSelector get() = KontureScope.fromProject(projectGraph)
 
@@ -127,6 +129,21 @@ public class KontureContext(
     }
 
     /**
+     * Declares a first-class architectural layer with module/package selectors and
+     * explicit dependency boundaries inside this architecture validation context.
+     *
+     * @param name The unique, human-readable name of the layer.
+     * @param block Declarative layer policy scoped to [ArchitectureLayerPolicy].
+     */
+    public fun layer(
+        name: String,
+        block: ArchitectureLayerPolicy.() -> Unit,
+    ) {
+        val policy = ArchitectureLayerPolicy(name).apply(block)
+        layerPolicies.add(policy)
+    }
+
+    /**
      * Declares a nested, type-safe layered-architecture specification inside this architecture validation context.
      */
     public fun layered(block: LayeredArchitectureDsl.() -> Unit) {
@@ -157,6 +174,9 @@ public class KontureContext(
 
     internal fun verifyAll() {
         /** Filter or assertion criteria for failures. */
+        if (layerPolicies.isNotEmpty()) {
+            addSuite("layers") { checkLayerPolicies(layerPolicies, projectGraph) }
+        }
         val failures = mutableListOf<String>()
         for (suite in ruleSuites) {
             try {
