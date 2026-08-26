@@ -27,6 +27,24 @@ class PatternMatchersTest {
     }
 
     @Test
+    fun `haveNameMatching with double-star should not match the root project`() {
+        // ":**" is the common pattern for "all modules". The root project path is just ":" and
+        // should never be selected by this pattern, since it has no path segment after the colon.
+        assertFalse(PatternMatchers.matchesModuleGlob(":**", ":"))
+
+        // Real submodule paths must still match.
+        assertTrue(PatternMatchers.matchesModuleGlob(":**", ":app"))
+        assertTrue(PatternMatchers.matchesModuleGlob(":**", ":core"))
+        assertTrue(PatternMatchers.matchesModuleGlob(":**", ":feature:login"))
+        assertTrue(PatternMatchers.matchesModuleGlob(":**", ":a:b:c"))
+
+        // Nested wildcard — root must not match, but nested paths must.
+        assertFalse(PatternMatchers.matchesModuleGlob(":feature:**", ":feature:"))
+        assertTrue(PatternMatchers.matchesModuleGlob(":feature:**", ":feature:profile"))
+        assertTrue(PatternMatchers.matchesModuleGlob(":feature:**", ":feature:profile:detail"))
+    }
+
+    @Test
     fun testPackagePatternMatching() {
         // Double dot matches anywhere
         assertTrue(PatternMatchers.matchesPackage("..domain..", "domain"))

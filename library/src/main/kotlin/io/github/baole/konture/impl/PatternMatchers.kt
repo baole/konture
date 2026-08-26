@@ -37,7 +37,11 @@ internal object PatternMatchers {
         var i = 0
         while (i < normalizedPattern.length) {
             if (normalizedPattern.startsWith("**", i)) {
-                builder.append(".*")
+                // When ** follows a ':' separator, at least one character must be present to
+                // form a valid path segment. This prevents ":**" from matching the bare root
+                // project path ":". Use ".+" (one-or-more) instead of ".*" (zero-or-more).
+                val precededByColon = i > 0 && normalizedPattern[i - 1] == ':'
+                builder.append(if (precededByColon) ".+" else ".*")
                 i += 2
             } else if (normalizedPattern.startsWith("*", i)) {
                 builder.append("[^:]*")
