@@ -29,7 +29,10 @@ internal object AgpInspector {
         proj: Project,
         list: MutableList<SourceSetData>,
     ) {
-        val androidExt = proj.extensions.findByName("android") ?: return
+        val androidExt =
+            proj.extensions.findByName("android")
+                ?: proj.extensions.findByName("androidLibrary")
+                ?: return
         val plugin = KonturePlugin()
         val sourceSets = (androidExt.invokeMethod("getSourceSets") as? Iterable<*>) ?: return
         for (sourceSet in sourceSets) {
@@ -71,7 +74,10 @@ internal object AgpInspector {
         proj: Project,
         list: MutableList<File>,
     ) {
-        val androidExt = proj.extensions.findByName("android") ?: return
+        val androidExt =
+            proj.extensions.findByName("android")
+                ?: proj.extensions.findByName("androidLibrary")
+                ?: return
         val sourceSets = (androidExt.invokeMethod("getSourceSets") as? Iterable<*>)?.filterNotNull() ?: return
         for (sourceSet in sourceSets) {
             val javaDirSet = sourceSet.invokeMethod("getJava")

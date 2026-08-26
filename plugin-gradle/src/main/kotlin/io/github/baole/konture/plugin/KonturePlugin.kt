@@ -136,106 +136,112 @@ public class KonturePlugin : Plugin<Project> {
                     task.excludeClasses.convention(extension.excludeClasses)
                     task.excludeConfigurations.convention(extension.excludeConfigurations)
                     task.logLevel.convention(extension.logLevel)
+                    task.sourceFiles.from(
+                        project.provider {
+                            KonturePluginConfigurer.collectAllSourceDirs(project)
+                        },
+                    )
+                    task.modules.set(
+                        project.provider {
+                            project.rootProject.allprojects.map { sub ->
+                                KonturePluginConfigurer.collectModuleDataForProject(sub)
+                            }
+                        },
+                    )
                 }
 
             val generateDepsTask =
                 project.tasks.register(TASK_GENERATE_DEPS, GenerateDependencyGraph::class.java) { task ->
                     task.outputFile.convention(project.layout.buildDirectory.file(PATH_DEPENDENCIES))
+                    task.buildFiles.from(
+                        project.provider {
+                            val buildFilesList =
+                                project.rootProject.allprojects.mapNotNull { sub ->
+                                    val dir = sub.projectDir
+                                    File(dir, "build.gradle.kts").takeIf { it.exists() }
+                                        ?: File(dir, "build.gradle").takeIf { it.exists() }
+                                }
+                            val filesCollection = project.files(buildFilesList)
+                            val settingsFile =
+                                project.rootProject.file(FILE_SETTINGS_KTS).takeIf { it.exists() }
+                                    ?: project.rootProject.file(FILE_SETTINGS_GROOVY).takeIf { it.exists() }
+                            if (settingsFile != null) {
+                                filesCollection.from(settingsFile)
+                            }
+                            val versionCatalog =
+                                project.rootProject.file(
+                                    FILE_LIBS_VERSIONS_TOML,
+                                ).takeIf { it.exists() }
+                            if (versionCatalog != null) {
+                                filesCollection.from(versionCatalog)
+                            }
+                            filesCollection
+                        },
+                    )
+
+                    task.declaredDependencies.set(
+                        project.provider {
+                            val declaredMap = mutableMapOf<String, List<String>>()
+                            val resolvableConfigs =
+                                project.configurations.filter { config ->
+                                    config.isCanBeResolved && isKontureDependencyConfiguration(config.name)
+                                }
+                            resolvableConfigs.forEach { config ->
+                                val key = "${project.path}:${config.name}"
+                                val declared =
+                                    config.dependencies.mapNotNull { dep ->
+                                        val g = dep.group
+                                        val n = dep.name
+                                        if (g != null) "$g:$n" else null
+                                    }
+                                declaredMap[key] = declared
+                            }
+                            declaredMap
+                        },
+                    )
+
+                    task.resolvedDependencies.set(
+                        project.provider {
+                            val resolvedMap = mutableMapOf<String, List<String>>()
+                            val resolvableConfigs =
+                                project.configurations.filter { config ->
+                                    config.isCanBeResolved && isKontureDependencyConfiguration(config.name)
+                                }
+                            resolvableConfigs.forEach { config ->
+                                val key = "${project.path}:${config.name}"
+                                resolvedMap[key] =
+                                    config.dependencies.mapNotNull { dependency ->
+                                        val group = dependency.group ?: return@mapNotNull null
+                                        val version = dependency.version ?: return@mapNotNull null
+                                        "$group:${dependency.name}:$version"
+                                    }
+                            }
+                            resolvedMap
+                        },
+                    )
                 }
+
             val detectExternalDependencyRules =
                 project.tasks.register(TASK_DETECT_RULES, DetectExternalDependencyRules::class.java) { task ->
                     task.resultFile.convention(project.layout.buildDirectory.file(PATH_EXTERNAL_RULES))
-                    val testFiles =
-                        project.rootProject.allprojects.flatMap { sub ->
-                            val srcDir = File(sub.projectDir, DIR_SRC)
-                            if (srcDir.exists()) {
-                                project.fileTree(srcDir) { pattern -> pattern.include(GLOB_KT) }.files
-                            } else {
-                                emptyList()
+                    task.testSources.from(
+                        project.provider {
+                            project.rootProject.allprojects.flatMap { sub ->
+                                val srcDir = File(sub.projectDir, DIR_SRC)
+                                if (srcDir.exists()) {
+                                    project.fileTree(srcDir) { pattern -> pattern.include(GLOB_KT) }.files
+                                } else {
+                                    emptyList()
+                                }
                             }
-                        }
-                    task.testSources.from(testFiles)
+                        },
+                    )
                 }
             val dependencyGraphRequired = detectExternalDependencyRules.flatMap { it.resultFile }
             generateDepsTask.configure { task ->
                 task.dependsOn(detectExternalDependencyRules)
                 task.inputs.file(dependencyGraphRequired)
                 task.onlyIf { dependencyGraphRequired.get().asFile.readText().trim().toBoolean() }
-            }
-
-            val configureTasksAction =
-                Runnable {
-                    generateTask.configure { task ->
-                        val allSourceDirs = KonturePluginConfigurer.collectAllSourceDirs(project)
-                        task.sourceFiles.from(allSourceDirs)
-
-                        val modulesList =
-                            project.rootProject.allprojects.map { sub ->
-                                KonturePluginConfigurer.collectModuleDataForProject(sub)
-                            }
-                        task.modules.set(modulesList)
-                    }
-
-                    generateDepsTask.configure { task ->
-                        val buildFilesList =
-                            project.rootProject.allprojects.mapNotNull { sub ->
-                                val dir = sub.projectDir
-                                File(dir, "build.gradle.kts").takeIf { it.exists() }
-                                    ?: File(dir, "build.gradle").takeIf { it.exists() }
-                            }
-                        val filesCollection = project.files(buildFilesList)
-                        val settingsFile =
-                            project.rootProject.file(FILE_SETTINGS_KTS).takeIf { it.exists() }
-                                ?: project.rootProject.file(FILE_SETTINGS_GROOVY).takeIf { it.exists() }
-                        if (settingsFile != null) {
-                            filesCollection.from(settingsFile)
-                        }
-                        val versionCatalog = project.rootProject.file(FILE_LIBS_VERSIONS_TOML).takeIf { it.exists() }
-                        if (versionCatalog != null) {
-                            filesCollection.from(versionCatalog)
-                        }
-
-                        task.buildFiles.from(filesCollection)
-
-                        val declaredMap = mutableMapOf<String, List<String>>()
-                        val resolvedMap = mutableMapOf<String, List<String>>()
-
-                        val resolvableConfigs =
-                            project.configurations.filter { config ->
-                                config.isCanBeResolved && isKontureDependencyConfiguration(config.name)
-                            }
-                        resolvableConfigs.forEach { config ->
-                            val key = "${project.path}:${config.name}"
-                            val declared =
-                                config.dependencies.mapNotNull { dep ->
-                                    val g = dep.group
-                                    val n = dep.name
-                                    if (g != null) "$g:$n" else null
-                                }
-                            declaredMap[key] = declared
-
-                            resolvedMap[key] =
-                                config.dependencies.mapNotNull { dependency ->
-                                    val group = dependency.group ?: return@mapNotNull null
-                                    val version = dependency.version ?: return@mapNotNull null
-                                    "$group:${dependency.name}:$version"
-                                }
-                        }
-
-                        task.declaredDependencies.set(declaredMap)
-                        task.resolvedDependencies.set(resolvedMap)
-                    }
-                }
-
-            if (project.state.executed) {
-                configureTasksAction.run()
-            } else {
-                project.afterEvaluate {
-                    configureTasksAction.run()
-                }
-                project.gradle.projectsEvaluated {
-                    configureTasksAction.run()
-                }
             }
 
             project.configurations.create(CONFIG_LAYOUT_ELEMENTS) { config ->

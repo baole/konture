@@ -594,4 +594,54 @@ class KontureLayoutGenerationTest {
         val srcDirInModel = subModuleModel.sourceSets.first().srcDirs.first()
         assertTrue(srcDirInModel.contains("outside-src"))
     }
+
+    @Test
+    fun `testLazyTaskConfigurationCapturesLateEvaluatedChildPlugins`() {
+        val rootProject = ProjectBuilder.builder().withName("root").build()
+
+        // Apply konture to root first and evaluate root project
+        rootProject.plugins.apply("io.github.baole.konture.internal")
+        (rootProject as ProjectInternal).evaluate()
+
+        // Simulate child project applying plugins during its own subsequent evaluation phase
+        val child =
+            ProjectBuilder
+                .builder()
+                .withName("child-late")
+                .withParent(rootProject)
+                .build()
+        child.plugins.apply("org.jetbrains.kotlin.jvm")
+
+        val srcDir = File(child.projectDir, "src/main/kotlin/com/example")
+        srcDir.mkdirs()
+        File(srcDir, "LateClass.kt").writeText("package com.example\nclass LateClass")
+
+        (child as ProjectInternal).evaluate()
+
+        // Execute layout task
+        val task = rootProject.tasks.getByName("generateArchitectureLayout") as GenerateArchitectureLayout
+        task.outputFile.get().asFile.parentFile.mkdirs()
+        task.generate()
+
+        val jsonText = task.outputFile.get().asFile.readText()
+        val layoutModel = Json.decodeFromString(LayoutModel.serializer(), jsonText)
+
+        val childModule = layoutModel.builds.first().modules.firstOrNull { it.path == ":child-late" }
+        assertNotNull(childModule)
+        assertTrue(childModule?.appliedPlugins?.contains("kotlin-jvm") == true)
+        val mainSourceSet = childModule?.sourceSets?.firstOrNull { it.name == "main" }
+        assertNotNull(mainSourceSet)
+        assertTrue(mainSourceSet?.srcDirs?.any { it.endsWith("src/main/kotlin") } == true)
+    }
+
+    @Test
+    fun `testAgp9KmpLibraryExtensionSupport`() {
+        val project = ProjectBuilder.builder().withName("kmp-android-lib").build()
+
+        open class DummyAndroidLibraryExtension
+        project.extensions.create("androidLibrary", DummyAndroidLibraryExtension::class.java)
+
+        val moduleData = KonturePluginConfigurer.collectModuleDataForProject(project)
+        assertTrue(moduleData.appliedPlugins.contains("android-kmp-library"))
+    }
 }
