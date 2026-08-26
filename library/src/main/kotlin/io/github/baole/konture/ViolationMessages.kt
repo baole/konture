@@ -29,4 +29,3 @@ internal fun toSourceLocation(
         line = line.takeIf { it > 0 },
         column = column.takeIf { it > 0 },
     )
-

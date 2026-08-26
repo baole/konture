@@ -426,7 +426,15 @@ public interface ClassesShouldDependencyAssertions {
                     /** Filter or assertion criteria for unresolved. */
                     val unresolved = if (usage.unresolvedPossibleUsage) "unresolved possible " else ""
                     violations.addViolationMessage(
-                        message = getMessage("usage.notCall", unresolved, fqName, usage.rawExpression, usage.line, usage.column),
+                        message =
+                            getMessage(
+                                "usage.notCall",
+                                unresolved,
+                                fqName,
+                                usage.rawExpression,
+                                usage.line,
+                                usage.column,
+                            ),
                         sourceLocation = toSourceLocation(usage.filePath, usage.line, usage.column),
                     )
                 }
@@ -454,7 +462,14 @@ public interface ClassesShouldDependencyAssertions {
                         (usage.targetFqName == fqName || usage.targetFqName.endsWith(".$fqName") || fqName.endsWith("." + usage.targetFqName) || usage.rawExpression == fqName || fqName in usage.possibleTargetFqNames)
                 }.forEach { usage ->
                     violations.addViolationMessage(
-                        message = getMessage("usage.notReferenceClass", fqName, usage.rawExpression, usage.line, usage.column),
+                        message =
+                            getMessage(
+                                "usage.notReferenceClass",
+                                fqName,
+                                usage.rawExpression,
+                                usage.line,
+                                usage.column,
+                            ),
                         sourceLocation = toSourceLocation(usage.filePath, usage.line, usage.column),
                     )
                 }

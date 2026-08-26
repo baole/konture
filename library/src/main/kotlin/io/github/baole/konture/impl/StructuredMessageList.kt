@@ -6,8 +6,8 @@
 
 package io.github.baole.konture.impl
 
-import io.github.baole.konture.core.model.SourceLocation
 import io.github.baole.konture.core.model.RuleMetadata
+import io.github.baole.konture.core.model.SourceLocation
 
 /**
  * Custom [ArrayList] that associates active [RuleMetadata] with added raw message entries.
