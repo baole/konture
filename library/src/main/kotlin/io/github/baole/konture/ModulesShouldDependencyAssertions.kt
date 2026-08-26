@@ -180,7 +180,7 @@ public interface ModulesShouldDependencyAssertions {
             /** Filter or assertion criteria for dependents. */
             val dependents =
                 graph.getAllModules().filter { other ->
-                    other.dependencies.any { dep -> dep.targetPath == module.path }
+                    other.dependencies.any { dep -> !dep.isTestConfiguration() && dep.targetPath == module.path }
                 }
             for (dep in dependents) {
                 /** Filter or assertion criteria for is allowed. */
@@ -215,7 +215,7 @@ public interface ModulesShouldDependencyAssertions {
             /** Filter or assertion criteria for dependents. */
             val dependents =
                 graph.getAllModules().filter { other ->
-                    other.dependencies.any { dep -> dep.targetPath == module.path }
+                    other.dependencies.any { dep -> !dep.isTestConfiguration() && dep.targetPath == module.path }
                 }
             for (dep in dependents) {
                 if (!predicate(dep.path)) {

@@ -85,6 +85,21 @@ class ModulesShouldCoverageTest : RuleBuildersTestBase() {
         ModulesRuleBuilder(graph).should().onlyBeDependedOnBy { it == ":moduleC" }
             .getShouldAssertion()!!(moduleB, graph, v3)
         assertEquals(1, v3.size)
+
+        // Verify test configurations like testImplementation or test scope are ignored
+        val testDep = Dependency("testImplementation", ":", ":moduleB")
+        val modWithTestDep = moduleA.copy(dependencies = listOf(testDep))
+        val graphWithTestDepOnly = ProjectGraph(mapOf(":" to listOf(modWithTestDep, moduleB)))
+
+        val v4 = mutableListOf<String>()
+        ModulesRuleBuilder(graphWithTestDepOnly).should().onlyBeDependedOnBy(":moduleC")
+            .getShouldAssertion()!!(moduleB, graphWithTestDepOnly, v4)
+        assertTrue(v4.isEmpty(), "Test-only dependency should not trigger onlyBeDependedOnBy violation")
+
+        val v5 = mutableListOf<String>()
+        ModulesRuleBuilder(graphWithTestDepOnly).should().onlyBeDependedOnBy { it == ":moduleC" }
+            .getShouldAssertion()!!(moduleB, graphWithTestDepOnly, v5)
+        assertTrue(v5.isEmpty(), "Test-only dependency should not trigger onlyBeDependedOnBy predicate violation")
     }
 
     @Test
