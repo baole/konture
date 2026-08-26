@@ -50,7 +50,7 @@ class CoreModelsTest {
         assertTrue(exclusions.excludeModules.isEmpty())
         assertTrue(exclusions.excludePackages.isEmpty())
         assertTrue(exclusions.excludeClasses.isEmpty())
-        assertEquals(listOf("test", "benchmark", "profile", "testedapks"), exclusions.excludeConfigurations)
+        assertEquals(listOf("test*", "benchmark*", "profile", "testedapks"), exclusions.excludeConfigurations)
 
         val customExclusions =
             ExclusionsModel(

@@ -110,7 +110,11 @@ internal class ReportAccumulator {
                     ruleId = currentEvaluations.lastOrNull()?.ruleId ?: "konture",
                     violations = unsuppressed,
                 )
-            HtmlReportWriter.writeReport(htmlViolationReport, targetFile = File(Konture.htmlReportPath))
+            HtmlReportWriter.writeReport(
+                htmlViolationReport,
+                targetFile = File(Konture.htmlReportPath),
+                projectRoot = buildRoot,
+            )
         }
     }
 

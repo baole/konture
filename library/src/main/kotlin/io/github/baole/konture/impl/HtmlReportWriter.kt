@@ -9,17 +9,23 @@ package io.github.baole.konture.impl
 import io.github.baole.konture.HtmlViolationFormatter
 import io.github.baole.konture.Konture
 import io.github.baole.konture.core.model.ViolationReport
+import io.github.baole.konture.i18n.getMessage
 import io.github.baole.konture.impl.report.ReportFileUtil
 import java.io.File
 
 internal object HtmlReportWriter {
+    private const val KONTURE_GITHUB_URL = "https://github.com/baole/konture"
+
     @Suppress("TooGenericExceptionCaught")
     fun writeReport(
         report: ViolationReport,
         targetFile: File = File(Konture.htmlReportPath),
         customHeader: String? = null,
+        projectRoot: File? = null,
     ) {
         val htmlSnippet = HtmlViolationFormatter.format(report, customHeader)
+        val projectSignature = HtmlReportProjectSignatureResolver.resolve(projectRoot, targetFile)
+        val projectSignatureFooter = buildProjectSignatureFooterHtml(projectSignature)
 
         val fullDocument =
             """
@@ -42,14 +48,81 @@ internal object HtmlReportWriter {
                     .konture-location code { background-color: #e9ecef; padding: 0.2rem 0.5rem; border-radius: 4px; font-family: SFMono-Regular, Consolas, "Liberation Mono", Menlo, monospace; font-size: 0.875rem; color: #495057; transition: all 0.15s ease-in-out; }
                     a.konture-file-link { text-decoration: none; color: inherit; }
                     a.konture-file-link:hover code { background-color: #0d6efd; color: #ffffff; }
+                    .konture-report-footer { max-width: 860px; margin: 1rem auto 0; color: #6c757d; font-size: 0.95rem; text-align: center; }
+                    .konture-project-signature { display: inline-flex; flex-direction: column; align-items: center; justify-content: center; gap: 0.35rem; }
+                    .konture-project-signature-item { display: inline-flex; align-items: center; justify-content: center; gap: 0.35rem; flex-wrap: wrap; }
+                    .konture-project-signature-label { font-weight: 600; color: #495057; }
+                    a.konture-signature-link { color: #0d6efd; text-decoration: none; word-break: break-all; }
+                    a.konture-signature-link:hover { text-decoration: underline; }
                 </style>
             </head>
             <body>
                 $htmlSnippet
+                $projectSignatureFooter
             </body>
             </html>
             """.trimIndent()
 
         ReportFileUtil.writeAtomically(targetFile, fullDocument)
+    }
+
+    private fun buildProjectSignatureFooterHtml(projectSignature: String?): String {
+        val footerItems =
+            buildList {
+                if (!projectSignature.isNullOrBlank()) {
+                    add(
+                        buildSignatureItemHtml(
+                            label = getMessage("report.projectSignatureLabel"),
+                            signature = projectSignature,
+                        ),
+                    )
+                }
+                add(
+                    buildSignatureItemHtml(
+                        label = getMessage("report.kontureSignatureLabel"),
+                        signature = KONTURE_GITHUB_URL,
+                    ),
+                )
+            }
+
+        return """
+            <footer class="konture-report-footer">
+                <div class="konture-project-signature">
+                    ${footerItems.joinToString("\n")}
+                </div>
+            </footer>
+            """.trimIndent()
+    }
+
+    private fun buildSignatureItemHtml(
+        label: String,
+        signature: String,
+    ): String {
+        val escapedLabel = escapeHtml(label)
+        val escapedSignature = escapeHtml(signature)
+        val signatureContent =
+            if (signature.isHttpUrl()) {
+                "<a href=\"$escapedSignature\" class=\"konture-signature-link\" target=\"_blank\" rel=\"noopener noreferrer\">$escapedSignature</a>"
+            } else {
+                "<span>$escapedSignature</span>"
+            }
+
+        return """
+            <div class="konture-project-signature-item">
+                <span class="konture-project-signature-label">$escapedLabel</span>
+                $signatureContent
+            </div>
+            """.trimIndent()
+    }
+
+    private fun String.isHttpUrl(): Boolean = startsWith("https://") || startsWith("http://")
+
+    private fun escapeHtml(text: String): String {
+        return text
+            .replace("&", "&amp;")
+            .replace("<", "&lt;")
+            .replace(">", "&gt;")
+            .replace("\"", "&quot;")
+            .replace("'", "&#39;")
     }
 }

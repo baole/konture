@@ -417,6 +417,7 @@ public class FilesRuleBuilder(
                             name = file.declaration.name,
                             location = SourceLocation(filePath = file.declaration.filePath, line = 1),
                         )
+                    val sourceLocation = rawMessages.messageSourceLocationMap[index] ?: subject.location
                     val suppression =
                         SuppressionEvaluator.evaluateFileSuppression(
                             ruleId = ruleIdToUse,
@@ -427,6 +428,7 @@ public class FilesRuleBuilder(
                         Violation(
                             ruleId = ruleIdToUse,
                             subject = subject,
+                            sourceLocation = sourceLocation,
                             message = fullMsg,
                             severity = severityToUse,
                             metadata = msgMeta,

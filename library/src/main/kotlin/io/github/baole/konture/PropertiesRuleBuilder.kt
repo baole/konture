@@ -442,6 +442,7 @@ public class PropertiesRuleBuilder(
                             name = propName,
                             location = SourceLocation(filePath = prop.filePath, line = prop.declaration.sourceLine),
                         )
+                    val sourceLocation = rawMessages.messageSourceLocationMap[index] ?: subject.location
                     val enclosingClass = prop.className?.let { classMap["${prop.packageName}.$it"] }
                     val suppression =
                         SuppressionEvaluator.evaluatePropertySuppression(
@@ -455,6 +456,7 @@ public class PropertiesRuleBuilder(
                         Violation(
                             ruleId = ruleIdToUse,
                             subject = subject,
+                            sourceLocation = sourceLocation,
                             message = fullMsg,
                             severity = severityToUse,
                             metadata = msgMeta,

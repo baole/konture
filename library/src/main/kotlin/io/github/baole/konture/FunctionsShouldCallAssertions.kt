@@ -24,9 +24,11 @@ public interface FunctionsShouldCallAssertions {
                 .forEach { usage ->
                     /** Filter or assertion criteria for unresolved. */
                     val unresolved = if (usage.unresolvedPossibleUsage) "unresolved possible " else ""
-                    violations.add(
-                        "${getMessage("usage.notCall", unresolved, fqName, usage.rawExpression, usage.line, usage.column)} " +
-                            "(at ${ViolationLocation.format(usage.filePath, usage.line, usage.column, function.modulePath, function.sourceSet?.name, fqName = function.className?.let { "${function.packageName}.$it" } ?: function.packageName, packageName = function.packageName)})",
+                    violations.addViolationMessage(
+                        message =
+                            "${getMessage("usage.notCall", unresolved, fqName, usage.rawExpression, usage.line, usage.column)} " +
+                                "(at ${ViolationLocation.format(usage.filePath, usage.line, usage.column, function.modulePath, function.sourceSet?.name, fqName = function.className?.let { "${function.packageName}.$it" } ?: function.packageName, packageName = function.packageName)})",
+                        sourceLocation = toSourceLocation(usage.filePath, usage.line, usage.column),
                     )
                 }
         }
@@ -44,9 +46,11 @@ public interface FunctionsShouldCallAssertions {
                     usage.kind == UsageKind.CLASS_REFERENCE &&
                         (usage.targetFqName == fqName || usage.targetFqName.endsWith(".$fqName") || fqName.endsWith("." + usage.targetFqName) || usage.rawExpression == fqName || fqName in usage.possibleTargetFqNames)
                 }.forEach { usage ->
-                    violations.add(
-                        "${getMessage("usage.notReferenceClass", fqName, usage.rawExpression, usage.line, usage.column)} " +
-                            "(at ${ViolationLocation.format(usage.filePath, usage.line, usage.column, function.modulePath, function.sourceSet?.name, fqName = function.className?.let { "${function.packageName}.$it" } ?: function.packageName, packageName = function.packageName)})",
+                    violations.addViolationMessage(
+                        message =
+                            "${getMessage("usage.notReferenceClass", fqName, usage.rawExpression, usage.line, usage.column)} " +
+                                "(at ${ViolationLocation.format(usage.filePath, usage.line, usage.column, function.modulePath, function.sourceSet?.name, fqName = function.className?.let { "${function.packageName}.$it" } ?: function.packageName, packageName = function.packageName)})",
+                        sourceLocation = toSourceLocation(usage.filePath, usage.line, usage.column),
                     )
                 }
         }

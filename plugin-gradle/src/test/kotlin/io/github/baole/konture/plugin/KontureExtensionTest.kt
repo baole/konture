@@ -19,7 +19,7 @@ class KontureExtensionTest {
         assertEquals(emptyList<String>(), extension.excludeModules.get())
         assertEquals(emptyList<String>(), extension.excludePackages.get())
         assertEquals(emptyList<String>(), extension.excludeClasses.get())
-        assertEquals(listOf("test", "benchmark", "profile", "testedapks"), extension.excludeConfigurations.get())
+        assertEquals(listOf("test*", "benchmark*", "testedapks"), extension.excludeConfigurations.get())
         assertEquals("INFO", extension.logLevel.get())
         assertEquals("konture-baseline.json", extension.baselinePath.get())
         assertEquals("en", extension.language.get())

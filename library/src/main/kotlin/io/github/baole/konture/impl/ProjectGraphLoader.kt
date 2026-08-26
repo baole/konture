@@ -355,16 +355,16 @@ internal class ProjectGraphLoader {
                                 dependencies =
                                     moduleModel.dependencies
                                         .filter { dep ->
-                                            val lowerConf = dep.configuration.lowercase()
-                                            val isConfExcluded =
-                                                exclusions.excludeConfigurations.any { pattern ->
-                                                    val lowerPattern = pattern.lowercase()
-                                                    lowerConf.contains(lowerPattern) ||
-                                                        PatternMatchers.matchesSimpleGlob(lowerPattern, lowerConf)
-                                                }
+                                            // Only structural filters are applied here — configuration-based
+                                            // filtering (excludeConfigurations) is intentionally NOT done at
+                                            // the data-loading level.  Filtering deps by configuration here
+                                            // was the root cause of notDependOnModule() silently missing
+                                            // testImplementation / testRuntimeOnly violations.  Rules that are
+                                            // concerned only with production-configuration edges (e.g.
+                                            // onlyDependOnModules) apply their own configuration filter at the
+                                            // assertion level.
                                             !isModuleExcluded(dep.targetPath) &&
-                                                dep.targetPath != moduleModel.path &&
-                                                !isConfExcluded
+                                                dep.targetPath != moduleModel.path
                                         }.map { dep ->
                                             Dependency(
                                                 configuration = dep.configuration,

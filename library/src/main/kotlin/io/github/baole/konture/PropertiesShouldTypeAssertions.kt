@@ -698,9 +698,11 @@ public interface PropertiesShouldTypeAssertions {
                 .forEach { usage ->
                     /** Filter or assertion criteria for unresolved. */
                     val unresolved = if (usage.unresolvedPossibleUsage) "unresolved possible " else ""
-                    violations.add(
-                        "${getMessage("usage.notCall", unresolved, fqName, usage.rawExpression, usage.line, usage.column)} " +
-                            "(at ${ViolationLocation.format(prop.filePath, usage.line, usage.column, prop.modulePath, prop.sourceSet?.name, fqName = prop.className?.let { "${prop.packageName}.$it" } ?: prop.packageName, packageName = prop.packageName)})",
+                    violations.addViolationMessage(
+                        message =
+                            "${getMessage("usage.notCall", unresolved, fqName, usage.rawExpression, usage.line, usage.column)} " +
+                                "(at ${ViolationLocation.format(prop.filePath, usage.line, usage.column, prop.modulePath, prop.sourceSet?.name, fqName = prop.className?.let { "${prop.packageName}.$it" } ?: prop.packageName, packageName = prop.packageName)})",
+                        sourceLocation = toSourceLocation(usage.filePath, usage.line, usage.column),
                     )
                 }
         }
@@ -735,9 +737,11 @@ public interface PropertiesShouldTypeAssertions {
                     usage.kind == UsageKind.CLASS_REFERENCE &&
                         (usage.targetFqName == fqName || usage.targetFqName.endsWith(".$fqName") || fqName.endsWith("." + usage.targetFqName) || usage.rawExpression == fqName || fqName in usage.possibleTargetFqNames)
                 }.forEach { usage ->
-                    violations.add(
-                        "${getMessage("usage.notReferenceClass", fqName, usage.rawExpression, usage.line, usage.column)} " +
-                            "(at ${ViolationLocation.format(prop.filePath, usage.line, usage.column, prop.modulePath, prop.sourceSet?.name, fqName = prop.className?.let { "${prop.packageName}.$it" } ?: prop.packageName, packageName = prop.packageName)})",
+                    violations.addViolationMessage(
+                        message =
+                            "${getMessage("usage.notReferenceClass", fqName, usage.rawExpression, usage.line, usage.column)} " +
+                                "(at ${ViolationLocation.format(prop.filePath, usage.line, usage.column, prop.modulePath, prop.sourceSet?.name, fqName = prop.className?.let { "${prop.packageName}.$it" } ?: prop.packageName, packageName = prop.packageName)})",
+                        sourceLocation = toSourceLocation(usage.filePath, usage.line, usage.column),
                     )
                 }
         }

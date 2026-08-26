@@ -9,6 +9,7 @@ package io.github.baole.konture
 import io.github.baole.konture.i18n.getMessage
 import io.github.baole.konture.impl.PatternMatchers
 import io.github.baole.konture.impl.SliceCycleDetector
+import io.github.baole.konture.impl.isTestConfiguration
 import io.github.baole.konture.impl.normalizeModulePath
 
 /** Dependency assertions for Gradle module rules. */
@@ -111,6 +112,11 @@ public interface ModulesShouldDependencyAssertions {
         val normalizedPatterns = allowedPatterns.map { normalizeModulePath(it) }
         builder.setShould { module, _, violations ->
             for (dep in module.dependencies) {
+                // "Only depend on X" is a production-architecture rule.  Test-configuration edges
+                // (testImplementation, testRuntimeOnly, androidTestImplementation, …) are expected
+                // to pull in test frameworks and fixtures and are intentionally excluded from this
+                // allowlist check.  Use notDependOnModule() to enforce bans across all configurations.
+                if (dep.isTestConfiguration()) continue
                 /** Filter or assertion criteria for is allowed. */
                 val isAllowed =
                     normalizedPatterns.any { pattern ->
@@ -146,6 +152,7 @@ public interface ModulesShouldDependencyAssertions {
     ): ModulesRuleBuilder {
         builder.setShould { module, _, violations ->
             for (dep in module.dependencies) {
+                if (dep.isTestConfiguration()) continue
                 if (!predicate(dep.targetPath)) {
                     violations.add(
                         getMessage(
@@ -173,7 +180,7 @@ public interface ModulesShouldDependencyAssertions {
             /** Filter or assertion criteria for dependents. */
             val dependents =
                 graph.getAllModules().filter { other ->
-                    other.dependencies.any { dep -> dep.targetPath == module.path }
+                    other.dependencies.any { dep -> !dep.isTestConfiguration() && dep.targetPath == module.path }
                 }
             for (dep in dependents) {
                 /** Filter or assertion criteria for is allowed. */
@@ -208,7 +215,7 @@ public interface ModulesShouldDependencyAssertions {
             /** Filter or assertion criteria for dependents. */
             val dependents =
                 graph.getAllModules().filter { other ->
-                    other.dependencies.any { dep -> dep.targetPath == module.path }
+                    other.dependencies.any { dep -> !dep.isTestConfiguration() && dep.targetPath == module.path }
                 }
             for (dep in dependents) {
                 if (!predicate(dep.path)) {

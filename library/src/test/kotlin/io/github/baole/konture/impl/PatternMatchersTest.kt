@@ -27,6 +27,24 @@ class PatternMatchersTest {
     }
 
     @Test
+    fun `haveNameMatching with double-star should not match the root project`() {
+        // ":**" is the common pattern for "all modules". The root project path is just ":" and
+        // should never be selected by this pattern, since it has no path segment after the colon.
+        assertFalse(PatternMatchers.matchesModuleGlob(":**", ":"))
+
+        // Real submodule paths must still match.
+        assertTrue(PatternMatchers.matchesModuleGlob(":**", ":app"))
+        assertTrue(PatternMatchers.matchesModuleGlob(":**", ":core"))
+        assertTrue(PatternMatchers.matchesModuleGlob(":**", ":feature:login"))
+        assertTrue(PatternMatchers.matchesModuleGlob(":**", ":a:b:c"))
+
+        // Nested wildcard — root must not match, but nested paths must.
+        assertFalse(PatternMatchers.matchesModuleGlob(":feature:**", ":feature:"))
+        assertTrue(PatternMatchers.matchesModuleGlob(":feature:**", ":feature:profile"))
+        assertTrue(PatternMatchers.matchesModuleGlob(":feature:**", ":feature:profile:detail"))
+    }
+
+    @Test
     fun testPackagePatternMatching() {
         // Double dot matches anywhere
         assertTrue(PatternMatchers.matchesPackage("..domain..", "domain"))
@@ -88,5 +106,28 @@ class PatternMatchersTest {
 
         // Mismatched package should return false
         assertFalse(PatternMatchers.isCallUsageMatch(usage, "io.github.baole.konture.testsx.BannedApi.legacyLog"))
+    }
+
+    @Test
+    fun testIsCallUsageMatchDoesNotTreatBareCalleeAsAnyQualifiedMethod() {
+        val usage =
+            io.github.baole.konture.SourceUsage(
+                kind = io.github.baole.konture.UsageKind.CALL,
+                targetFqName = "android.content.Context.getString",
+                rawExpression = "context.getString",
+                possibleTargetFqNames =
+                    listOf(
+                        "getString",
+                        "context.getString",
+                        "android.content.Context.getString",
+                    ),
+                filePath = "/src/Helper.kt",
+                line = 26,
+                column = 21,
+                unresolvedPossibleUsage = true,
+            )
+
+        assertTrue(PatternMatchers.isCallUsageMatch(usage, "android.content.Context.getString"))
+        assertFalse(PatternMatchers.isCallUsageMatch(usage, "org.jetbrains.compose.resources.getString"))
     }
 }

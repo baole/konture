@@ -101,22 +101,24 @@ public interface FilesShouldContentAssertions {
                 .forEach { usage ->
                     /** Filter or assertion criteria for unresolved. */
                     val unresolved = if (usage.unresolvedPossibleUsage) "unresolved possible " else ""
-                    violations.add(
-                        "${getMessage(
-                            "usage.notCall",
-                            unresolved,
-                            fqName,
-                            usage.rawExpression,
-                            usage.line,
-                            usage.column,
-                        )} (at ${ViolationLocation.format(
-                            filePath = usage.filePath,
-                            line = usage.line,
-                            column = usage.column,
-                            modulePath = file.modulePath,
-                            sourceSetName = file.sourceSet?.name,
-                            packageName = file.declaration.packageName,
-                        )})",
+                    violations.addViolationMessage(
+                        message =
+                            "${getMessage(
+                                "usage.notCall",
+                                unresolved,
+                                fqName,
+                                usage.rawExpression,
+                                usage.line,
+                                usage.column,
+                            )} (at ${ViolationLocation.format(
+                                filePath = usage.filePath,
+                                line = usage.line,
+                                column = usage.column,
+                                modulePath = file.modulePath,
+                                sourceSetName = file.sourceSet?.name,
+                                packageName = file.declaration.packageName,
+                            )})",
+                        sourceLocation = toSourceLocation(usage.filePath, usage.line, usage.column),
                     )
                 }
         }
@@ -132,21 +134,23 @@ public interface FilesShouldContentAssertions {
             file.declaration.usages
                 .filter { it.kind == UsageKind.CLASS_REFERENCE && it.targetFqName == fqName }
                 .forEach { usage ->
-                    violations.add(
-                        "${getMessage(
-                            "usage.notReferenceClass",
-                            fqName,
-                            usage.rawExpression,
-                            usage.line,
-                            usage.column,
-                        )} (at ${ViolationLocation.format(
-                            filePath = usage.filePath,
-                            line = usage.line,
-                            column = usage.column,
-                            modulePath = file.modulePath,
-                            sourceSetName = file.sourceSet?.name,
-                            packageName = file.declaration.packageName,
-                        )})",
+                    violations.addViolationMessage(
+                        message =
+                            "${getMessage(
+                                "usage.notReferenceClass",
+                                fqName,
+                                usage.rawExpression,
+                                usage.line,
+                                usage.column,
+                            )} (at ${ViolationLocation.format(
+                                filePath = usage.filePath,
+                                line = usage.line,
+                                column = usage.column,
+                                modulePath = file.modulePath,
+                                sourceSetName = file.sourceSet?.name,
+                                packageName = file.declaration.packageName,
+                            )})",
+                        sourceLocation = toSourceLocation(usage.filePath, usage.line, usage.column),
                     )
                 }
         }
