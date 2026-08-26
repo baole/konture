@@ -154,11 +154,25 @@ internal object KonturePluginConfigurer {
 
     fun collectSourceSets(proj: Project): List<SourceSetData> {
         val list = mutableListOf<SourceSetData>()
-        if (proj.hasAndroidPlugin()) {
-            AgpInspector.collectAndroidSourceSets(proj, list)
-        }
-        if (list.isEmpty() && proj.hasKotlinPlugin()) {
+        val isKmp =
+            proj.pluginManager.hasPlugin(ID_KOTLIN_MULTIPLATFORM) ||
+                proj.extensions.findByName("kotlin")?.javaClass?.name?.contains("Multiplatform") == true
+
+        if (isKmp) {
             KgpInspector.collectKotlinSourceSets(proj, list)
+            if (proj.hasAndroidPlugin()) {
+                val androidList = mutableListOf<SourceSetData>()
+                AgpInspector.collectAndroidSourceSets(proj, androidList)
+                val existingNames = list.map { it.name }.toSet()
+                list.addAll(androidList.filter { it.name !in existingNames })
+            }
+        } else {
+            if (proj.hasAndroidPlugin()) {
+                AgpInspector.collectAndroidSourceSets(proj, list)
+            }
+            if (list.isEmpty() && proj.hasKotlinPlugin()) {
+                KgpInspector.collectKotlinSourceSets(proj, list)
+            }
         }
 
         if (list.isEmpty()) {

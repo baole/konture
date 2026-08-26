@@ -644,4 +644,17 @@ class KontureLayoutGenerationTest {
         val moduleData = KonturePluginConfigurer.collectModuleDataForProject(project)
         assertTrue(moduleData.appliedPlugins.contains("android-kmp-library"))
     }
+
+    @Test
+    fun `testKmpWithAndroidSourceSetCollection`() {
+        val project = ProjectBuilder.builder().withName("kmp-android-coexistence").build()
+        project.plugins.apply("org.jetbrains.kotlin.multiplatform")
+
+        open class DummyAndroidLibraryExtension
+        project.extensions.create("androidLibrary", DummyAndroidLibraryExtension::class.java)
+
+        val moduleData = KonturePluginConfigurer.collectModuleDataForProject(project)
+        assertTrue(moduleData.appliedPlugins.contains("android-kmp-library"))
+        assertTrue(moduleData.appliedPlugins.contains("kotlin-multiplatform"))
+    }
 }
