@@ -461,6 +461,7 @@ public class FunctionsRuleBuilder(
                             fqName = fqName,
                             location = SourceLocation(filePath = func.filePath, line = func.declaration.sourceLine),
                         )
+                    val sourceLocation = rawMessages.messageSourceLocationMap[index] ?: subject.location
                     val enclosingClass = func.className?.let { classMap["${func.packageName}.$it"] }
                     val suppression =
                         SuppressionEvaluator.evaluateFunctionSuppression(
@@ -474,6 +475,7 @@ public class FunctionsRuleBuilder(
                         Violation(
                             ruleId = ruleIdToUse,
                             subject = subject,
+                            sourceLocation = sourceLocation,
                             message = fullMsg,
                             severity = severityToUse,
                             metadata = msgMeta,

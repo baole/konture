@@ -6,6 +6,7 @@
 
 package io.github.baole.konture.impl
 
+import io.github.baole.konture.core.model.SourceLocation
 import io.github.baole.konture.core.model.RuleMetadata
 
 /**
@@ -13,6 +14,7 @@ import io.github.baole.konture.core.model.RuleMetadata
  */
 internal class StructuredMessageList : ArrayList<String>() {
     val messageMetadataMap: MutableMap<Int, RuleMetadata> = mutableMapOf()
+    val messageSourceLocationMap: MutableMap<Int, SourceLocation> = mutableMapOf()
 
     override fun add(element: String): Boolean {
         val currentMeta = KontureRuntimeStateProvider.currentState.currentRuleMetadata

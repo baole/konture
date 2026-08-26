@@ -396,6 +396,7 @@ public class ClassesRuleBuilder(
                             simpleName = cls.name,
                             location = SourceLocation(filePath = cls.filePath, line = cls.sourceLine),
                         )
+                    val sourceLocation = rawMessages.messageSourceLocationMap[index] ?: subject.location
                     val enclosingClass =
                         if (cls.fqName.contains('.')) {
                             classMap[cls.fqName.substringBeforeLast('.')]
@@ -414,6 +415,7 @@ public class ClassesRuleBuilder(
                         Violation(
                             ruleId = ruleIdToUse,
                             subject = subject,
+                            sourceLocation = sourceLocation,
                             message = fullMsg,
                             severity = severityToUse,
                             metadata = msgMeta,
