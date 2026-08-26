@@ -127,6 +127,12 @@ internal object KonturePluginConfigurer {
         ) {
             plugins.add(PLUGIN_ANDROID_TEST)
         }
+        if (proj.pluginManager.hasPlugin(ID_ANDROID_KOTLIN_MULTIPLATFORM_LIBRARY) ||
+            proj.plugins.any { it.javaClass.simpleName.contains("AndroidKotlinMultiplatformLibrary") } ||
+            proj.extensions.findByName("androidLibrary") != null
+        ) {
+            plugins.add(PLUGIN_ANDROID_KMP_LIB)
+        }
         if (proj.pluginManager.hasPlugin(ID_KOTLIN_MULTIPLATFORM)) plugins.add(PLUGIN_KOTLIN_KMP)
 
         val sourceSets = collectSourceSets(proj)
@@ -148,11 +154,25 @@ internal object KonturePluginConfigurer {
 
     fun collectSourceSets(proj: Project): List<SourceSetData> {
         val list = mutableListOf<SourceSetData>()
-        if (proj.hasAndroidPlugin()) {
-            AgpInspector.collectAndroidSourceSets(proj, list)
-        }
-        if (list.isEmpty() && proj.hasKotlinPlugin()) {
+        val isKmp =
+            proj.pluginManager.hasPlugin(ID_KOTLIN_MULTIPLATFORM) ||
+                proj.extensions.findByName("kotlin")?.javaClass?.name?.contains("Multiplatform") == true
+
+        if (isKmp) {
             KgpInspector.collectKotlinSourceSets(proj, list)
+            if (proj.hasAndroidPlugin()) {
+                val androidList = mutableListOf<SourceSetData>()
+                AgpInspector.collectAndroidSourceSets(proj, androidList)
+                val existingNames = list.map { it.name }.toSet()
+                list.addAll(androidList.filter { it.name !in existingNames })
+            }
+        } else {
+            if (proj.hasAndroidPlugin()) {
+                AgpInspector.collectAndroidSourceSets(proj, list)
+            }
+            if (list.isEmpty() && proj.hasKotlinPlugin()) {
+                KgpInspector.collectKotlinSourceSets(proj, list)
+            }
         }
 
         if (list.isEmpty()) {
@@ -305,7 +325,10 @@ internal object KonturePluginConfigurer {
         pluginManager.hasPlugin(ID_ANDROID_APPLICATION) ||
             pluginManager.hasPlugin(ID_ANDROID_LIBRARY) ||
             pluginManager.hasPlugin(ID_ANDROID_TEST) ||
-            pluginManager.hasPlugin(ID_ANDROID_DYNAMIC_FEATURE)
+            pluginManager.hasPlugin(ID_ANDROID_DYNAMIC_FEATURE) ||
+            pluginManager.hasPlugin(ID_ANDROID_KOTLIN_MULTIPLATFORM_LIBRARY) ||
+            extensions.findByName("android") != null ||
+            extensions.findByName("androidLibrary") != null
 
     private fun Project.hasKotlinPlugin(): Boolean =
         pluginManager.hasPlugin(ID_KOTLIN_JVM) ||
@@ -341,6 +364,7 @@ internal object KonturePluginConfigurer {
     private const val PLUGIN_ANDROID_LIB = "android-library"
     private const val PLUGIN_ANDROID_FEATURE = "android-dynamic-feature"
     private const val PLUGIN_ANDROID_TEST = "android-test"
+    private const val PLUGIN_ANDROID_KMP_LIB = "android-kmp-library"
     private const val PLUGIN_KOTLIN_KMP = "kotlin-multiplatform"
 
     private const val ID_KOTLIN_JVM = "org.jetbrains.kotlin.jvm"
@@ -348,6 +372,7 @@ internal object KonturePluginConfigurer {
     private const val ID_ANDROID_LIBRARY = "com.android.library"
     private const val ID_ANDROID_DYNAMIC_FEATURE = "com.android.dynamic-feature"
     private const val ID_ANDROID_TEST = "com.android.test"
+    private const val ID_ANDROID_KOTLIN_MULTIPLATFORM_LIBRARY = "com.android.kotlin.multiplatform.library"
     private const val ID_KOTLIN_MULTIPLATFORM = "org.jetbrains.kotlin.multiplatform"
 
     internal const val KIND_JVM = "KOTLIN_JVM"

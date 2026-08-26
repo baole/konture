@@ -55,7 +55,6 @@ internal object KgpInspector {
         val kmpExtension = if (kotlinExt.javaClass.name.contains("Multiplatform")) kotlinExt else null
         val isKmp = kmpExtension != null
         val kind = if (isKmp) KIND_KMP else KIND_JVM
-        val plugin = KonturePlugin()
 
         val metadata = extractKmpMetadata(kmpExtension)
 
@@ -65,7 +64,7 @@ internal object KgpInspector {
         associateConfigurationsToSourceSets(proj, sourceSetNames, metadata.sourceSetDependencyConfigurations)
 
         for (sourceSet in sourceSets) {
-            val data = createSourceSetData(proj, plugin, sourceSet, isKmp, kind, metadata) ?: continue
+            val data = createSourceSetData(proj, sourceSet, isKmp, kind, metadata) ?: continue
             list.add(data)
         }
     }
@@ -171,7 +170,6 @@ internal object KgpInspector {
 
     private fun createSourceSetData(
         proj: Project,
-        plugin: KonturePlugin,
         sourceSet: Any,
         isKmp: Boolean,
         kind: String,
@@ -215,7 +213,7 @@ internal object KgpInspector {
             name = name,
             kind = kind,
             production = isProduction,
-            srcDirs = srcDirs.map { plugin.toRelPath(proj, it) },
+            srcDirs = srcDirs.map { KonturePluginConfigurer.toRelPath(proj, it) },
             platforms = platforms,
             targetNames = if (isKmp) metadata.sourceSetTargets[name]?.toList() ?: emptyList() else emptyList(),
             dependsOnSourceSets =
@@ -226,7 +224,7 @@ internal object KgpInspector {
                 },
             dependencyConfigurations =
                 if (isKmp) metadata.sourceSetDependencyConfigurations[name]?.toList() ?: emptyList() else emptyList(),
-            compileClasspath = plugin.compilationClasspath(proj, name),
+            compileClasspath = KonturePluginConfigurer.compilationClasspath(proj, name),
         )
     }
 

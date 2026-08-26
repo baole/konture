@@ -29,18 +29,19 @@ internal object AgpInspector {
         proj: Project,
         list: MutableList<SourceSetData>,
     ) {
-        val androidExt = proj.extensions.findByName("android") ?: return
-        val plugin = KonturePlugin()
+        val androidExt =
+            proj.extensions.findByName("android")
+                ?: proj.extensions.findByName("androidLibrary")
+                ?: return
         val sourceSets = (androidExt.invokeMethod("getSourceSets") as? Iterable<*>) ?: return
         for (sourceSet in sourceSets) {
-            val data = parseAndroidSourceSet(proj, plugin, sourceSet) ?: continue
+            val data = parseAndroidSourceSet(proj, sourceSet) ?: continue
             list.add(data)
         }
     }
 
     private fun parseAndroidSourceSet(
         proj: Project,
-        plugin: KonturePlugin,
         sourceSet: Any?,
     ): SourceSetData? {
         if (sourceSet == null) return null
@@ -61,9 +62,9 @@ internal object AgpInspector {
             name = name,
             kind = KIND_ANDROID,
             production = !name.lowercase().contains(SUBSTRING_TEST_LOWERCASE),
-            srcDirs = srcDirs.map { plugin.toRelPath(proj, File(it)) },
+            srcDirs = srcDirs.map { KonturePluginConfigurer.toRelPath(proj, File(it)) },
             platforms = listOf(PLATFORM_ANDROID),
-            compileClasspath = plugin.compilationClasspath(proj, name),
+            compileClasspath = KonturePluginConfigurer.compilationClasspath(proj, name),
         )
     }
 
@@ -71,7 +72,10 @@ internal object AgpInspector {
         proj: Project,
         list: MutableList<File>,
     ) {
-        val androidExt = proj.extensions.findByName("android") ?: return
+        val androidExt =
+            proj.extensions.findByName("android")
+                ?: proj.extensions.findByName("androidLibrary")
+                ?: return
         val sourceSets = (androidExt.invokeMethod("getSourceSets") as? Iterable<*>)?.filterNotNull() ?: return
         for (sourceSet in sourceSets) {
             val javaDirSet = sourceSet.invokeMethod("getJava")
