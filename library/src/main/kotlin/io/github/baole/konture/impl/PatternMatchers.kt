@@ -246,7 +246,6 @@ internal object PatternMatchers {
             if (candidate == fqName) return true
             if (candidate.endsWith(".$fqName")) return true
             if (candidate.startsWith("$fqName.")) return true
-            if (fqName.endsWith(".$candidate")) return true
             if (candidate.contains(".$fqName.")) return true
         }
 

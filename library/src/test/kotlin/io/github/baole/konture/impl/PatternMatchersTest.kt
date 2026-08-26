@@ -89,4 +89,27 @@ class PatternMatchersTest {
         // Mismatched package should return false
         assertFalse(PatternMatchers.isCallUsageMatch(usage, "io.github.baole.konture.testsx.BannedApi.legacyLog"))
     }
+
+    @Test
+    fun testIsCallUsageMatchDoesNotTreatBareCalleeAsAnyQualifiedMethod() {
+        val usage =
+            io.github.baole.konture.SourceUsage(
+                kind = io.github.baole.konture.UsageKind.CALL,
+                targetFqName = "android.content.Context.getString",
+                rawExpression = "context.getString",
+                possibleTargetFqNames =
+                    listOf(
+                        "getString",
+                        "context.getString",
+                        "android.content.Context.getString",
+                    ),
+                filePath = "/src/Helper.kt",
+                line = 26,
+                column = 21,
+                unresolvedPossibleUsage = true,
+            )
+
+        assertTrue(PatternMatchers.isCallUsageMatch(usage, "android.content.Context.getString"))
+        assertFalse(PatternMatchers.isCallUsageMatch(usage, "org.jetbrains.compose.resources.getString"))
+    }
 }
