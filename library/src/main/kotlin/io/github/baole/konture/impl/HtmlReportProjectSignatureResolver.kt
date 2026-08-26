@@ -14,7 +14,7 @@ internal object HtmlReportProjectSignatureResolver {
     private val remoteSectionRegex = Regex("""\[remote\s+\"([^\"]+)\"\]""")
     private val remoteUrlRegex = Regex("""url\s*=\s*(.+)""")
 
-    @Suppress("TooGenericExceptionCaught")
+    @Suppress("TooGenericExceptionCaught", "LoopWithTooManyJumpStatements")
     fun resolve(
         projectRoot: File?,
         targetFile: File,
@@ -105,7 +105,11 @@ internal object HtmlReportProjectSignatureResolver {
     private fun normalizeScpStyleRemote(remoteUrl: String): String {
         val withoutUser = remoteUrl.substringAfter('@')
         val host = withoutUser.substringBefore(':').ifBlank { return remoteUrl.removeSuffix(".git") }
-        val path = withoutUser.substringAfter(':', missingDelimiterValue = "").removePrefix("/").removeSuffix(".git").trimEnd('/')
+        val path =
+            withoutUser.substringAfter(
+                ':',
+                missingDelimiterValue = "",
+            ).removePrefix("/").removeSuffix(".git").trimEnd('/')
         return if (path.isBlank()) {
             "https://$host"
         } else {
@@ -128,5 +132,3 @@ internal object HtmlReportProjectSignatureResolver {
         }
     }
 }
-
-

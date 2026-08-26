@@ -198,7 +198,10 @@ class ProjectGraphLoaderExclusionTest {
     }
 
     @Test
-    fun `test ProjectGraphLoader simple glob class exclusion and configurations exclusion`() {
+    fun `test ProjectGraphLoader loads all dependency edges regardless of excludeConfigurations`() {
+        // Verifies that excludeConfigurations no longer silently drops dependency edges at load
+        // time. All edges must survive into Module.dependencies so that assertion rules like
+        // notDependOnModule() can catch testImplementation violations.
         // 1. Create temporary files
         val moduleDir = File(tempDir, "module-glob").apply { mkdirs() }
 
@@ -300,14 +303,18 @@ class ProjectGraphLoaderExclusionTest {
         assertEquals(1, allModules.size)
         val loadedModule = allModules.first()
 
-        // Assert classes: MyHelper and MyTest should be excluded, leaving only MyController
+        // Assert classes: MyHelper and MyTest should still be excluded (class exclusions still work)
         val classes = loadedModule.classes
         assertEquals(1, classes.size)
         assertEquals("MyController", classes.first().name)
 
-        // Assert dependencies: testImplementation and myCustomConfiguration should be excluded, leaving only implementation
+        // Assert dependencies: ALL three edges are present — excludeConfigurations no longer
+        // filters dep edges at load time.  Rules like notDependOnModule() need to see
+        // testImplementation edges to report violations correctly.
         val loadedDeps = loadedModule.dependencies
-        assertEquals(1, loadedDeps.size)
-        assertEquals("implementation", loadedDeps.first().configuration)
+        assertEquals(3, loadedDeps.size)
+        assertTrue(loadedDeps.any { it.configuration == "implementation" })
+        assertTrue(loadedDeps.any { it.configuration == "testImplementation" })
+        assertTrue(loadedDeps.any { it.configuration == "myCustomConfiguration" })
     }
 }

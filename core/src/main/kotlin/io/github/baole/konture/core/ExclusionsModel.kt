@@ -21,5 +21,8 @@ public data class ExclusionsModel(
     val excludeModules: List<String> = emptyList(),
     val excludePackages: List<String> = emptyList(),
     val excludeClasses: List<String> = emptyList(),
-    val excludeConfigurations: List<String> = listOf("test", "benchmark", "profile", "testedapks"),
+    // Patterns use simple glob syntax (* = any chars). "test*" matches "testImplementation",
+    // "testRuntimeOnly", etc. The old default "test" used a substring-contains fallback
+    // that has been removed; explicit wildcards make the intent unambiguous.
+    val excludeConfigurations: List<String> = listOf("test*", "benchmark*", "profile", "testedapks"),
 )

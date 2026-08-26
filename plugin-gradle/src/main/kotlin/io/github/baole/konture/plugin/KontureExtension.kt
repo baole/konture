@@ -40,7 +40,7 @@ public open class KontureExtension(
     public val excludeConfigurations: ListProperty<String> =
         project.objects
             .listProperty(String::class.java)
-            .convention(listOf("test", "benchmark", "profile", "testedapks"))
+            .convention(listOf("test*", "benchmark*", "testedapks"))
 
     /** Diagnostic log level string. */
     public val logLevel: Property<String> = project.objects.property(String::class.java).convention("INFO")

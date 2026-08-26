@@ -10,6 +10,7 @@ import io.github.baole.konture.core.DependencyGraphModel
 import io.github.baole.konture.i18n.getMessage
 import io.github.baole.konture.impl.KontureRuntimeStateProvider
 import io.github.baole.konture.impl.ModuleKey
+import io.github.baole.konture.impl.isTestConfiguration
 import kotlin.jvm.JvmOverloads
 
 /**
@@ -118,31 +119,6 @@ public data class ProjectGraph(
                 throw AssertionError(getMessage("project.graph.circularDependencies", details))
             }
         }
-    }
-
-    private fun Dependency.isTestConfiguration(): Boolean {
-        /** Filter or assertion criteria for name. */
-        val name = configuration
-        var start = 0
-        while (true) {
-            /** Filter or assertion criteria for index. */
-            val index = name.indexOf("test", start, ignoreCase = true)
-            if (index == -1) break
-            /** Filter or assertion criteria for end. */
-            val end = index + 4
-
-            // Check Left Boundary (starts the string, is an uppercase letter, or is preceded by a non-alphanumeric character)
-            val leftOk = index == 0 || name[index].isUpperCase() || !name[index - 1].isLetterOrDigit()
-
-            // Check Right Boundary (ends the string, is followed by an uppercase letter, or is followed by a non-alphanumeric character)
-            val rightOk = end == name.length || name[end].isUpperCase() || !name[end].isLetterOrDigit()
-
-            if (leftOk && rightOk) {
-                return true
-            }
-            start = index + 1
-        }
-        return false
     }
 
     @Suppress("NestedBlockDepth")
