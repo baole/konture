@@ -52,6 +52,15 @@ class ReportAccumulatorTest {
         val jsonReportFile = File(tempDir, "out/report.json")
         val sarifReportFile = File(tempDir, "out/report.sarif")
         val htmlReportFile = File(tempDir, "out/report.html")
+        File(tempDir, ".git/config").apply {
+            parentFile.mkdirs()
+            writeText(
+                """
+                [remote "origin"]
+                    url = https://github.com/example/konture-sample.git
+                """.trimIndent(),
+            )
+        }
 
         Konture.jsonReportPath = jsonReportFile.absolutePath
         Konture.sarifReportPath = sarifReportFile.absolutePath
@@ -99,6 +108,10 @@ class ReportAccumulatorTest {
 
         val htmlContent = Files.readString(htmlReportFile.toPath())
         assertTrue(htmlContent.contains("Architecture violation in Service"))
+        assertTrue(htmlContent.contains("Project:"))
+        assertTrue(htmlContent.contains("https://github.com/example/konture-sample"))
+        assertTrue(htmlContent.contains("Konture:"))
+        assertTrue(htmlContent.contains("https://github.com/baole/konture"))
     }
 
     @Test
