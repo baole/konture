@@ -237,6 +237,12 @@ internal class BaselineManager {
             return violations
         }
 
+    // Thread-safe set of newly recorded violations
+    val recordedViolations = ConcurrentHashMap.newKeySet<FlatBaselineViolation>()
+
+    // Thread-safe set of all evaluated violations in the current JVM session
+    val evaluatedViolations = ConcurrentHashMap.newKeySet<FlatBaselineViolation>()
+
     private var shutdownHook: Thread? = null
 
     @Suppress("TooGenericExceptionCaught", "SwallowedException")
@@ -249,6 +255,7 @@ internal class BaselineManager {
         capturedBuildRoot = null
         hasCapturedBuildRoot = false
         recordedViolations.clear()
+        evaluatedViolations.clear()
         shutdownHook?.let {
             try {
                 Runtime.getRuntime().removeShutdownHook(it)
@@ -259,28 +266,78 @@ internal class BaselineManager {
         }
     }
 
-    // Thread-safe set of newly recorded violations
-    val recordedViolations = ConcurrentHashMap.newKeySet<FlatBaselineViolation>()
-
     init {
         registerShutdownHook()
     }
 
     @Suppress("TooGenericExceptionCaught")
     private fun registerShutdownHook() {
-        // Register shutdown hook to write baseline when JVM exits (if in recording mode)
+        // Register shutdown hook to write baseline or verify ratchet when JVM exits
         try {
             val hook =
                 Thread {
                     isShutdownRunning = true
                     if (generateBaseline && recordedViolations.isNotEmpty()) {
                         writeBaseline()
+                    } else if (!generateBaseline) {
+                        val resolved = getResolvedViolations()
+                        if (resolved.isNotEmpty()) {
+                            if (Konture.reportResolvedViolations) {
+                                KontureLogger.log(LogLevel.INFO, getMessage("baseline.resolved.info", resolved.size))
+                            }
+                            if (Konture.failOnResolvedViolations) {
+                                KontureLogger.log(LogLevel.ERROR, getMessage("baseline.resolved.ratchetError", resolved.size))
+                            }
+                        }
                     }
                 }
             Runtime.getRuntime().addShutdownHook(hook)
             shutdownHook = hook
         } catch (e: Exception) {
             KontureLogger.log(LogLevel.WARNING, "Failed to register baseline shutdown hook: ${e.message}")
+        }
+    }
+
+    /**
+     * Returns the set of violations present in the baseline that were not observed during execution.
+     */
+    fun getResolvedViolations(): Set<FlatBaselineViolation> {
+        val existing = existingViolations
+        val evaluated = evaluatedViolations
+        return existing.filter { !evaluated.contains(it) }.toSet()
+    }
+
+    /**
+     * Returns the set of violations present in both the baseline and evaluated rules (active suppressed debt).
+     */
+    fun getActiveBaselineViolations(): Set<FlatBaselineViolation> {
+        val existing = existingViolations
+        val evaluated = evaluatedViolations
+        return existing.filter { evaluated.contains(it) }.toSet()
+    }
+
+    /**
+     * Returns the set of violations observed during execution that are not in the baseline.
+     */
+    fun getNewViolations(): Set<FlatBaselineViolation> {
+        val existing = existingViolations
+        val evaluated = evaluatedViolations
+        return evaluated.filter { !existing.contains(it) }.toSet()
+    }
+
+    /**
+     * Checks if any baseline violations have been resolved and throws an [AssertionError] if
+     * [Konture.failOnResolvedViolations] is enabled.
+     */
+    fun checkRatchet() {
+        val resolved = getResolvedViolations()
+        if (resolved.isNotEmpty()) {
+            if (Konture.reportResolvedViolations) {
+                KontureLogger.log(LogLevel.INFO, getMessage("baseline.resolved.info", resolved.size))
+            }
+            if (Konture.failOnResolvedViolations) {
+                throw AssertionError(getMessage("baseline.resolved.ratchetError", resolved.size))
+            }
         }
     }
 
@@ -327,6 +384,8 @@ internal class BaselineManager {
                     normMsg,
                 )
             }
+
+        evaluatedViolations.addAll(normalizedViolations.map { it.first })
 
         if (generateBaseline) {
             recordedViolations.addAll(normalizedViolations.map { it.first })
@@ -543,6 +602,7 @@ internal class BaselineManager {
                     location = location,
                     message = cleanMsg,
                 )
+            evaluatedViolations.add(norm)
             if (!existingViolations.contains(norm)) {
                 indices.add(index)
             }
@@ -590,7 +650,8 @@ internal class BaselineManager {
     }
 
     /**
-     * Writes the combined baseline (existing + newly recorded) to file.
+     * Writes the baseline to file. When [generateBaseline] is active, only the live recorded
+     * violations are written (pruning resolved technical debt).
      */
     @Suppress("NestedBlockDepth", "TooGenericExceptionCaught", "SwallowedException")
     internal fun writeBaseline() {
@@ -619,14 +680,15 @@ internal class BaselineManager {
                     }
                 }
 
+        val targetViolations = if (generateBaseline) recordedViolations else (existingViolations + recordedViolations)
+
         if (graph != null && root != null && !isCustomDir) {
             KontureLogger.log(LogLevel.INFO, "Distributing recorded violations to per-module baselines...")
-            val combined = (existingViolations + recordedViolations)
 
             val moduleViolationsMap = mutableMapOf<Module, MutableList<FlatBaselineViolation>>()
             val orphanedViolations = mutableListOf<FlatBaselineViolation>()
 
-            for (v in combined) {
+            for (v in targetViolations) {
                 val module = BaselineNormalizer.findModuleForViolation(v, graph, root)
                 if (module != null) {
                     moduleViolationsMap.getOrPut(module) { mutableListOf() }.add(v)
@@ -666,8 +728,19 @@ internal class BaselineManager {
             }
         } else {
             // Fallback to single baseline file
-            val combined = (existingViolations + recordedViolations)
-            BaselineSerializer.writeViolationsToFile(baselineFile, combined.toList())
+            if (targetViolations.isNotEmpty()) {
+                BaselineSerializer.writeViolationsToFile(baselineFile, targetViolations.toList())
+            } else if (baselineFile.exists()) {
+                try {
+                    baselineFile.delete()
+                    KontureLogger.log(LogLevel.INFO, "Deleted empty baseline file: ${baselineFile.absolutePath}")
+                } catch (e: Exception) {
+                    KontureLogger.log(
+                        LogLevel.WARNING,
+                        "Failed to delete empty baseline file ${baselineFile.absolutePath}: ${e.message}",
+                    )
+                }
+            }
         }
     }
 
@@ -719,6 +792,23 @@ internal class BaselineManager {
 
         fun writeBaseline() {
             KontureRuntimeStateProvider.currentState.baselineManager.writeBaseline()
+        }
+
+        /** Returns the set of violations present in the baseline that were not observed during execution. */
+        fun getResolvedViolations(): Set<FlatBaselineViolation> =
+            KontureRuntimeStateProvider.currentState.baselineManager.getResolvedViolations()
+
+        /** Returns the set of violations present in both the baseline and evaluated rules. */
+        fun getActiveBaselineViolations(): Set<FlatBaselineViolation> =
+            KontureRuntimeStateProvider.currentState.baselineManager.getActiveBaselineViolations()
+
+        /** Returns the set of violations observed during execution that are not in the baseline. */
+        fun getNewViolations(): Set<FlatBaselineViolation> =
+            KontureRuntimeStateProvider.currentState.baselineManager.getNewViolations()
+
+        /** Checks ratchet status and fails if resolved violations exist with ratchet mode enabled. */
+        fun checkRatchet() {
+            KontureRuntimeStateProvider.currentState.baselineManager.checkRatchet()
         }
     }
 }

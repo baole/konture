@@ -84,15 +84,58 @@ You can customize baseline behavior either programmatically on the `Konture` run
 | Programmatic Property | System Property | Default Value | Description |
 | :--- | :--- | :--- | :--- |
 | **`Konture.baselinePath`** | `konture.baseline.path` | `"konture-baseline.json"` | Path of the baseline files. Can also be set in Gradle via the `konture { baselinePath("custom.json") }` block. If relative, and a Gradle/Maven graph is present, it writes distributed baseline files in submodules. |
-| **`Konture.generateBaseline`** | `konture.baseline.generate` | `false` | When `true`, enables generate mode to write or update baseline files. |
+| **`Konture.generateBaseline`** | `konture.baseline.generate` | `false` | When `true`, enables generate mode to write or update baseline files, pruning resolved violations and deleting empty baseline files. |
+| **`Konture.reportResolvedViolations`** | `konture.reportResolvedViolations` | `true` | When `true`, logs an informational message during test execution if baseline violations have been resolved. |
+| **`Konture.failOnResolvedViolations`** | `konture.failOnResolvedViolations` | `false` | **Ratchet Mode**. When `true`, fails test execution if any previously baselined violation is resolved, prompting developers to regenerate the baseline. |
 | *N/A* | `konture.baseline.dir` | *System property* | Overrides the target output directory for baseline files (see below for absolute-path check behavior). |
 
-### 🔍 Absolute-Path Check & Directory Override Behavior
+---
 
-When Konture runs inside a multi-project Gradle workspace, the output directory resolves as follows:
-- **Distributed Baseline Mode**: If `konture.baseline.dir` is NOT specified, or matches a project submodule directory, Konture executes in distributed mode, organizing baseline files inside the corresponding submodules.
-- **Single Baseline Mode**: If `konture.baseline.dir` is overridden to a directory that does NOT correspond to any project module directory (e.g. an arbitrary absolute path or any other non-module directory), Konture automatically disables distributed baseline mode and falls back to saving a single unified baseline file using that specified directory.
-- **Absolute File Path**: If `Konture.baselinePath` or `konture.baseline.path` is set to an absolute file path, distributed baseline mode is automatically disabled, and the baseline is read/written to that exact absolute path.
+## 📈 Technical Debt Tracking & Delta Baselines
+
+Konture computes violation deltas during test execution:
+- **Active Baseline Violations**: Violations present in both the baseline and current codebase ($V_{\text{evaluated}} \cap V_{\text{baseline}}$).
+- **New Violations**: Newly introduced violations that are not in the baseline ($V_{\text{evaluated}} \setminus V_{\text{baseline}}$). These fail your build.
+- **Resolved Violations**: Violations that were in the baseline but are now fixed in the codebase ($V_{\text{baseline}} \setminus V_{\text{evaluated}}$).
+
+Technical debt metrics are automatically included in test summary logs and JSON/HTML/SARIF reports under `reportSummary`:
+```json
+{
+  "summary": {
+    "totalViolations": 1,
+    "activeBaselineCount": 1,
+    "resolvedCount": 2,
+    "newViolationsCount": 0
+  }
+}
+```
+
+---
+
+## 🔒 Ratchet Mode (Prevent Regression of Fixed Debt)
+
+When a developer refactors code and resolves existing architectural debt, you want to make sure new violations can never re-introduce that debt.
+
+Enable **Ratchet Mode** to ensure baselines only shrink:
+
+### Gradle Configuration
+```kotlin
+konture {
+    failOnResolvedViolations = true
+}
+```
+
+### CLI / CI Flag
+```bash
+./gradlew test -Dkonture.failOnResolvedViolations=true
+```
+
+When Ratchet Mode is enabled and resolved violations are detected, Konture fails the build with an actionable error:
+```text
+Baseline contains 3 resolved violation(s) but failOnResolvedViolations is enabled. Please update baseline using ./gradlew generateKontureBaseline.
+```
+
+When you re-run `./gradlew generateKontureBaseline`, Konture automatically prunes the fixed violations and deletes any now-empty `konture-baseline.json` files!
 
 ---
 

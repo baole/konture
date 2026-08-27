@@ -50,15 +50,19 @@ public class io/github/baole/konture/plugin/KontureExtension {
 	public final fun excludeConfigurations ([Ljava/lang/String;)V
 	public final fun excludeModules ([Ljava/lang/String;)V
 	public final fun excludePackages ([Ljava/lang/String;)V
+	public final fun failOnResolvedViolations (Z)V
 	public final fun getBaselinePath ()Lorg/gradle/api/provider/Property;
 	public final fun getExcludeClasses ()Lorg/gradle/api/provider/ListProperty;
 	public final fun getExcludeConfigurations ()Lorg/gradle/api/provider/ListProperty;
 	public final fun getExcludeModules ()Lorg/gradle/api/provider/ListProperty;
 	public final fun getExcludePackages ()Lorg/gradle/api/provider/ListProperty;
+	public final fun getFailOnResolvedViolations ()Lorg/gradle/api/provider/Property;
 	public final fun getLanguage ()Lorg/gradle/api/provider/Property;
 	public final fun getLogLevel ()Lorg/gradle/api/provider/Property;
+	public final fun getReportResolvedViolations ()Lorg/gradle/api/provider/Property;
 	public final fun language (Ljava/lang/String;)V
 	public final fun logLevel (Ljava/lang/String;)V
+	public final fun reportResolvedViolations (Z)V
 }
 
 public final class io/github/baole/konture/plugin/KonturePlugin : org/gradle/api/Plugin {
