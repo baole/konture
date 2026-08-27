@@ -14,6 +14,8 @@ public class ModulesShould internal constructor(
     /** Filter or assertion criteria for builder. */
     public override val builder: ModulesRuleBuilder,
 ) : ModulesShouldDependencyAssertions,
+    ModulesShouldInboundDependencyAssertions,
+    ModulesShouldExternalDependencyAssertions,
     ModulesShouldStructureAssertions,
     ModulesShouldCompositeAssertions
 
