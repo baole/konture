@@ -135,7 +135,18 @@ When Ratchet Mode is enabled and resolved violations are detected, Konture fails
 Baseline contains 3 resolved violation(s) but failOnResolvedViolations is enabled. Please update baseline using ./gradlew generateKontureBaseline.
 ```
 
-When you re-run `./gradlew generateKontureBaseline`, Konture automatically prunes the fixed violations and deletes any now-empty `konture-baseline.json` files!
+### Programmatic Ratchet Verification in Tests
+You can also invoke `Konture.checkRatchet()` directly within test suites (such as in a `@AfterAll` or test lifecycle listener) to fail the test suite immediately if resolved technical debt is detected:
+
+```kotlin
+@AfterAll
+fun verifyRatchet() {
+    Konture.checkRatchet()
+}
+```
+
+> [!NOTE]
+> **Baseline Regeneration & Test Filtering**: When regenerating baselines (`-Dkonture.baseline.generate=true` or `./gradlew generateKontureBaseline`), ensure the full test suite runs without `--tests` filtering so all architecture rules across the project are evaluated before resolved violations are pruned.
 
 ---
 

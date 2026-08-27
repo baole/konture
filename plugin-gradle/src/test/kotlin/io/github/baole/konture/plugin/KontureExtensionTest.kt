@@ -23,7 +23,7 @@ class KontureExtensionTest {
         assertEquals("INFO", extension.logLevel.get())
         assertEquals("konture-baseline.json", extension.baselinePath.get())
         assertEquals("en", extension.language.get())
-        assertEquals(false, extension.reportResolvedViolations.get())
+        assertEquals(true, extension.reportResolvedViolations.get())
         assertEquals(false, extension.failOnResolvedViolations.get())
     }
 

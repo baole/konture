@@ -16,6 +16,7 @@ import io.github.baole.konture.core.model.ViolationReport
 import io.github.baole.konture.i18n.getMessage
 import java.io.File
 import java.util.concurrent.ConcurrentHashMap
+import java.util.concurrent.atomic.AtomicBoolean
 
 internal class BaselineManager {
     private val state: KontureRuntimeState
@@ -39,23 +40,39 @@ internal class BaselineManager {
     private var hasCapturedBuildRoot = false
 
     @Volatile
-    private var isShutdownRunning = false
+    internal var isShutdownRunning = false
 
     @Suppress("TooGenericExceptionCaught", "SwallowedException")
     internal fun captureContextSnapshot() {
         if (isShutdownRunning) return
         try {
             val ctx = state
-            capturedGenerateBaseline = ctx.generateBaseline
-            capturedBaselinePath = ctx.baselinePath
-            capturedProjectGraph = ctx.projectGraph
-            capturedBuildRoot =
+            val gen = ctx.generateBaseline
+            if (gen) {
+                capturedGenerateBaseline = true
+                globalGenerateBaseline = true
+            }
+            val path = ctx.baselinePath
+            if (path != "konture-baseline.json") {
+                capturedBaselinePath = path
+                globalBaselinePath = path
+            }
+            val graph = ctx.projectGraph
+            if (graph != null) {
+                capturedProjectGraph = graph
+                globalProjectGraph = graph
+            }
+            val root =
                 try {
                     ctx.projectGraphLoader.findBuildRoot()
                 } catch (e: Exception) {
                     null
                 }
-            hasCapturedBuildRoot = true
+            if (root != null) {
+                capturedBuildRoot = root
+                hasCapturedBuildRoot = true
+                globalBuildRoot = root
+            }
         } catch (e: Exception) {
             // Ignore
         }
@@ -65,11 +82,8 @@ internal class BaselineManager {
     val generateBaseline: Boolean
         get() {
             val sysProp = System.getProperty(Konture.PROPERTY_BASELINE_GENERATE)?.toBoolean()
-            if (sysProp != null) {
-                capturedGenerateBaseline = sysProp
-                return sysProp
-            }
-            if (isShutdownRunning) return capturedGenerateBaseline ?: false
+            if (sysProp != null) return sysProp
+            if (isShutdownRunning) return globalGenerateBaseline ?: capturedGenerateBaseline ?: false
             val ctxVal =
                 try {
                     state.generateBaseline
@@ -78,20 +92,18 @@ internal class BaselineManager {
                 }
             if (ctxVal == true) {
                 capturedGenerateBaseline = true
+                globalGenerateBaseline = true
                 return true
             }
-            return capturedGenerateBaseline ?: ctxVal ?: false
+            return globalGenerateBaseline ?: capturedGenerateBaseline ?: ctxVal ?: false
         }
 
     @get:Suppress("TooGenericExceptionCaught", "SwallowedException")
     val baselinePath: String
         get() {
             val sysProp = System.getProperty(Konture.PROPERTY_BASELINE_PATH)
-            if (sysProp != null) {
-                capturedBaselinePath = sysProp
-                return sysProp
-            }
-            if (isShutdownRunning) return capturedBaselinePath ?: "konture-baseline.json"
+            if (sysProp != null) return sysProp
+            if (isShutdownRunning) return globalBaselinePath ?: capturedBaselinePath ?: "konture-baseline.json"
             val ctxVal =
                 try {
                     state.baselinePath
@@ -100,15 +112,16 @@ internal class BaselineManager {
                 }
             if (ctxVal != null && ctxVal != "konture-baseline.json") {
                 capturedBaselinePath = ctxVal
+                globalBaselinePath = ctxVal
                 return ctxVal
             }
-            return capturedBaselinePath ?: ctxVal ?: "konture-baseline.json"
+            return globalBaselinePath ?: capturedBaselinePath ?: ctxVal ?: "konture-baseline.json"
         }
 
     @get:Suppress("TooGenericExceptionCaught", "SwallowedException")
     val projectGraph: ProjectGraph?
         get() {
-            if (isShutdownRunning) return capturedProjectGraph
+            if (isShutdownRunning) return globalProjectGraph ?: capturedProjectGraph
             val ctxVal =
                 try {
                     state.projectGraph
@@ -117,9 +130,10 @@ internal class BaselineManager {
                 }
             if (ctxVal != null) {
                 capturedProjectGraph = ctxVal
+                globalProjectGraph = ctxVal
                 return ctxVal
             }
-            return capturedProjectGraph
+            return globalProjectGraph ?: capturedProjectGraph
         }
 
     val baselineDir: File
@@ -131,16 +145,17 @@ internal class BaselineManager {
     @get:Suppress("TooGenericExceptionCaught", "SwallowedException")
     val buildRoot: File?
         get() {
-            if (isShutdownRunning) return capturedBuildRoot
+            if (isShutdownRunning) return globalBuildRoot ?: capturedBuildRoot
             if (hasCapturedBuildRoot) return capturedBuildRoot
             return try {
                 state.projectGraphLoader.findBuildRoot().also {
                     capturedBuildRoot = it
+                    globalBuildRoot = it
                     hasCapturedBuildRoot = true
                 }
             } catch (e: Exception) {
                 hasCapturedBuildRoot = true
-                null
+                globalBuildRoot
             }
         }
 
@@ -190,15 +205,14 @@ internal class BaselineManager {
             return violations
         }
 
-    // Thread-safe set of newly recorded violations
-    val recordedViolations = ConcurrentHashMap.newKeySet<FlatBaselineViolation>()
+    // Thread-safe set of newly recorded violations (shared across parallel test threads)
+    val recordedViolations: MutableSet<FlatBaselineViolation>
+        get() = globalRecordedViolations
 
-    // Thread-safe set of all evaluated violations in the current JVM session
-    val evaluatedViolations = ConcurrentHashMap.newKeySet<FlatBaselineViolation>()
+    // Thread-safe set of all evaluated violations in the current JVM session (shared across parallel test threads)
+    val evaluatedViolations: MutableSet<FlatBaselineViolation>
+        get() = globalEvaluatedViolations
 
-    private var shutdownHook: Thread? = null
-
-    @Suppress("TooGenericExceptionCaught", "SwallowedException")
     fun resetForTest() {
         loadedViolations = null
         loadedCacheKey = null
@@ -207,51 +221,16 @@ internal class BaselineManager {
         capturedProjectGraph = null
         capturedBuildRoot = null
         hasCapturedBuildRoot = false
-        recordedViolations.clear()
-        evaluatedViolations.clear()
-        shutdownHook?.let {
-            try {
-                Runtime.getRuntime().removeShutdownHook(it)
-            } catch (e: Exception) {
-                // Ignore (e.g. if shutdown is already in progress)
-            }
-            shutdownHook = null
-        }
+        globalRecordedViolations.clear()
+        globalEvaluatedViolations.clear()
+        globalGenerateBaseline = null
+        globalBaselinePath = null
+        globalProjectGraph = null
+        globalBuildRoot = null
     }
 
     init {
-        registerShutdownHook()
-    }
-
-    @Suppress("TooGenericExceptionCaught")
-    private fun registerShutdownHook() {
-        // Register shutdown hook to write baseline or verify ratchet when JVM exits
-        try {
-            val hook =
-                Thread {
-                    isShutdownRunning = true
-                    if (generateBaseline && recordedViolations.isNotEmpty()) {
-                        writeBaseline()
-                    } else if (!generateBaseline) {
-                        val resolved = getResolvedViolations()
-                        if (resolved.isNotEmpty()) {
-                            if (Konture.reportResolvedViolations) {
-                                KontureLogger.log(LogLevel.INFO, getMessage("baseline.resolved.info", resolved.size))
-                            }
-                            if (Konture.failOnResolvedViolations) {
-                                KontureLogger.log(
-                                    LogLevel.ERROR,
-                                    getMessage("baseline.resolved.ratchetError", resolved.size),
-                                )
-                            }
-                        }
-                    }
-                }
-            Runtime.getRuntime().addShutdownHook(hook)
-            shutdownHook = hook
-        } catch (e: Exception) {
-            KontureLogger.log(LogLevel.WARNING, "Failed to register baseline shutdown hook: ${e.message}")
-        }
+        ensureShutdownHookRegistered()
     }
 
     /**
@@ -367,6 +346,59 @@ internal class BaselineManager {
     }
 
     companion object {
+        private val globalRecordedViolations = ConcurrentHashMap.newKeySet<FlatBaselineViolation>()
+        private val globalEvaluatedViolations = ConcurrentHashMap.newKeySet<FlatBaselineViolation>()
+        private val shutdownHookRegistered = AtomicBoolean(false)
+        private var globalShutdownHook: Thread? = null
+
+        @Volatile
+        private var globalGenerateBaseline: Boolean? = null
+
+        @Volatile
+        private var globalBaselinePath: String? = null
+
+        @Volatile
+        private var globalProjectGraph: ProjectGraph? = null
+
+        @Volatile
+        private var globalBuildRoot: File? = null
+
+        @Suppress("TooGenericExceptionCaught")
+        private fun ensureShutdownHookRegistered() {
+            if (shutdownHookRegistered.compareAndSet(false, true)) {
+                try {
+                    val hook =
+                        Thread {
+                            val activeManager = KontureRuntimeStateProvider.currentState.baselineManager
+                            activeManager.isShutdownRunning = true
+                            if (activeManager.generateBaseline && globalRecordedViolations.isNotEmpty()) {
+                                activeManager.writeBaseline()
+                            } else if (!activeManager.generateBaseline) {
+                                val resolved = activeManager.getResolvedViolations()
+                                if (resolved.isNotEmpty()) {
+                                    if (Konture.reportResolvedViolations) {
+                                        KontureLogger.log(
+                                            LogLevel.INFO,
+                                            getMessage("baseline.resolved.info", resolved.size),
+                                        )
+                                    }
+                                    if (Konture.failOnResolvedViolations) {
+                                        KontureLogger.log(
+                                            LogLevel.ERROR,
+                                            getMessage("baseline.resolved.ratchetError", resolved.size),
+                                        )
+                                    }
+                                }
+                            }
+                        }
+                    Runtime.getRuntime().addShutdownHook(hook)
+                    globalShutdownHook = hook
+                } catch (e: Exception) {
+                    KontureLogger.log(LogLevel.WARNING, "Failed to register baseline shutdown hook: ${e.message}")
+                }
+            }
+        }
+
         fun resetForTest() {
             KontureRuntimeStateProvider.currentState.baselineManager.resetForTest()
         }

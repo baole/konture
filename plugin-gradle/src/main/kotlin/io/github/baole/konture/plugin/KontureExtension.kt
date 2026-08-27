@@ -6,6 +6,7 @@
 
 package io.github.baole.konture.plugin
 
+import io.github.baole.konture.core.KontureConstants
 import org.gradle.api.Project
 import org.gradle.api.provider.ListProperty
 import org.gradle.api.provider.Property
@@ -56,7 +57,9 @@ public open class KontureExtension(
 
     /** Whether to log informational messages when resolved violations exist in baseline. */
     public val reportResolvedViolations: Property<Boolean> =
-        project.objects.property(Boolean::class.javaObjectType).convention(false)
+        project.objects.property(
+            Boolean::class.javaObjectType,
+        ).convention(KontureConstants.DEFAULT_REPORT_RESOLVED_VIOLATIONS)
 
     /** Whether to fail test execution if resolved violations exist in baseline (ratchet mode). */
     public val failOnResolvedViolations: Property<Boolean> =
