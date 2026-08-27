@@ -6,6 +6,7 @@
 
 package io.github.baole.konture.plugin
 
+import io.github.baole.konture.core.KontureConstants
 import org.gradle.api.Project
 import org.gradle.api.provider.ListProperty
 import org.gradle.api.provider.Property
@@ -54,6 +55,16 @@ public open class KontureExtension(
     /** Locale string for error and assertion message internationalization. */
     public val language: Property<String> = project.objects.property(String::class.java).convention("en")
 
+    /** Whether to log informational messages when resolved violations exist in baseline. */
+    public val reportResolvedViolations: Property<Boolean> =
+        project.objects.property(
+            Boolean::class.javaObjectType,
+        ).convention(KontureConstants.DEFAULT_REPORT_RESOLVED_VIOLATIONS)
+
+    /** Whether to fail test execution if resolved violations exist in baseline (ratchet mode). */
+    public val failOnResolvedViolations: Property<Boolean> =
+        project.objects.property(Boolean::class.javaObjectType).convention(false)
+
     /** Sets the diagnostic [level]. */
     public fun logLevel(level: String) {
         logLevel.set(level)
@@ -67,6 +78,16 @@ public open class KontureExtension(
     /** Sets the message locale [lang]. */
     public fun language(lang: String) {
         language.set(lang)
+    }
+
+    /** Configures whether to log informational messages when resolved violations exist in baseline. */
+    public fun reportResolvedViolations(enabled: Boolean) {
+        reportResolvedViolations.set(enabled)
+    }
+
+    /** Configures whether to fail test execution if resolved violations exist in baseline (ratchet mode). */
+    public fun failOnResolvedViolations(enabled: Boolean) {
+        failOnResolvedViolations.set(enabled)
     }
 
     /** Adds [modules] to the excluded modules list. */

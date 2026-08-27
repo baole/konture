@@ -90,4 +90,24 @@ public object KontureConstants {
      * System property key used to override the minimum severity failure threshold.
      */
     public const val PROPERTY_FAIL_ON_SEVERITY: String = "konture.fail.on.severity"
+
+    /**
+     * System property key used to enable reporting of resolved baseline violations.
+     */
+    public const val PROPERTY_REPORT_RESOLVED_VIOLATIONS: String = "konture.reportResolvedViolations"
+
+    /**
+     * System property key used to fail the build when resolved baseline violations are detected.
+     */
+    public const val PROPERTY_FAIL_ON_RESOLVED_VIOLATIONS: String = "konture.failOnResolvedViolations"
+
+    /**
+     * Default value for reporting resolved baseline violations.
+     */
+    public const val DEFAULT_REPORT_RESOLVED_VIOLATIONS: Boolean = true
+
+    /**
+     * Default value for failing on resolved baseline violations.
+     */
+    public const val DEFAULT_FAIL_ON_RESOLVED_VIOLATIONS: Boolean = false
 }

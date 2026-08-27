@@ -57,6 +57,9 @@ public data class ToolMetadata(
  * @property errorCount Count of unsuppressed violations with [Severity.ERROR].
  * @property warningCount Count of unsuppressed violations with [Severity.WARNING].
  * @property infoCount Count of unsuppressed violations with [Severity.INFO].
+ * @property resolvedCount Count of resolved baseline entries no longer observed in code.
+ * @property activeBaselineCount Count of baseline entries currently suppressing active debt.
+ * @property newViolationsCount Count of newly introduced unbaselined violations.
  */
 @Serializable
 public data class ReportSummary(
@@ -68,6 +71,9 @@ public data class ReportSummary(
     val errorCount: Int,
     val warningCount: Int,
     val infoCount: Int,
+    val resolvedCount: Int = 0,
+    val activeBaselineCount: Int = 0,
+    val newViolationsCount: Int = 0,
 )
 
 /**

@@ -68,10 +68,26 @@ public class KonturePlugin : Plugin<Project> {
                 }
             val effectiveLanguage =
                 if (rootExtension != null) extension.language.orElse(rootExtension.language) else extension.language
+            val effectiveReportResolved =
+                if (rootExtension != null) {
+                    extension.reportResolvedViolations.orElse(rootExtension.reportResolvedViolations)
+                } else {
+                    extension.reportResolvedViolations
+                }
+            val effectiveFailOnResolved =
+                if (rootExtension != null) {
+                    extension.failOnResolvedViolations.orElse(rootExtension.failOnResolvedViolations)
+                } else {
+                    extension.failOnResolvedViolations
+                }
 
             val cliBaselinePath = project.providers.systemProperty(KontureConstants.PROPERTY_BASELINE_PATH).orNull
             val cliBaselineDir = project.providers.systemProperty(KontureConstants.PROPERTY_BASELINE_DIR).orNull
             val cliLanguage = project.providers.systemProperty(KontureConstants.PROPERTY_LOCALE).orNull
+            val cliReportResolved =
+                project.providers.systemProperty(KontureConstants.PROPERTY_REPORT_RESOLVED_VIOLATIONS).orNull
+            val cliFailOnResolved =
+                project.providers.systemProperty(KontureConstants.PROPERTY_FAIL_ON_RESOLVED_VIOLATIONS).orNull
 
             if (cliBaselineDir != null) {
                 testTask.systemProperty(KontureConstants.PROPERTY_BASELINE_DIR, cliBaselineDir)
@@ -90,6 +106,22 @@ public class KonturePlugin : Plugin<Project> {
                 testTask.systemProperty(
                     KontureConstants.PROPERTY_LOCALE,
                     effectiveLanguage.getOrElse(""),
+                )
+            }
+            if (cliReportResolved != null) {
+                testTask.systemProperty(KontureConstants.PROPERTY_REPORT_RESOLVED_VIOLATIONS, cliReportResolved)
+            } else {
+                testTask.systemProperty(
+                    KontureConstants.PROPERTY_REPORT_RESOLVED_VIOLATIONS,
+                    effectiveReportResolved.getOrElse(false).toString(),
+                )
+            }
+            if (cliFailOnResolved != null) {
+                testTask.systemProperty(KontureConstants.PROPERTY_FAIL_ON_RESOLVED_VIOLATIONS, cliFailOnResolved)
+            } else {
+                testTask.systemProperty(
+                    KontureConstants.PROPERTY_FAIL_ON_RESOLVED_VIOLATIONS,
+                    effectiveFailOnResolved.getOrElse(false).toString(),
                 )
             }
             val isRecordProperty =

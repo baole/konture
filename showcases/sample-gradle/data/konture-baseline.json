@@ -20,15 +20,6 @@
                             "message": "Function getUser should have name ending with 'fetchUser'"
                         }
                     ]
-                },
-                {
-                    "name": "unified architecture DSL context containing multiple rule types",
-                    "violations": [
-                        {
-                            "location": ":data",
-                            "message": "should not depend on :domain, but a dependency was found."
-                        }
-                    ]
                 }
             ]
         }

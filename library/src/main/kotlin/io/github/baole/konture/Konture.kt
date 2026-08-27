@@ -8,6 +8,7 @@ package io.github.baole.konture
 
 import io.github.baole.konture.core.KontureConstants
 import io.github.baole.konture.core.model.Severity
+import io.github.baole.konture.impl.BaselineManager
 import io.github.baole.konture.impl.KontureRuntimeStateProvider
 import java.util.Locale
 
@@ -285,6 +286,78 @@ public object Konture {
         set(value) {
             KontureRuntimeStateProvider.currentState = KontureRuntimeStateProvider.currentState.copy(generateBaseline = value)
         }
+
+    /**
+     * System property key used to enable reporting of resolved baseline violations.
+     */
+    public const val PROPERTY_REPORT_RESOLVED_VIOLATIONS: String = KontureConstants.PROPERTY_REPORT_RESOLVED_VIOLATIONS
+
+    /**
+     * System property key used to fail the build when resolved baseline violations are detected.
+     */
+    public const val PROPERTY_FAIL_ON_RESOLVED_VIOLATIONS: String = KontureConstants.PROPERTY_FAIL_ON_RESOLVED_VIOLATIONS
+
+    /**
+     * Default value for reporting resolved baseline violations.
+     */
+    public const val DEFAULT_REPORT_RESOLVED_VIOLATIONS: Boolean = KontureConstants.DEFAULT_REPORT_RESOLVED_VIOLATIONS
+
+    /**
+     * Default value for failing on resolved baseline violations.
+     */
+    public const val DEFAULT_FAIL_ON_RESOLVED_VIOLATIONS: Boolean = KontureConstants.DEFAULT_FAIL_ON_RESOLVED_VIOLATIONS
+
+    /**
+     * Whether to log and report baseline violations that have been resolved (fixed in code).
+     * Backed by ThreadLocal state; safe under parallel test execution.
+     */
+    public var reportResolvedViolations: Boolean
+        get() {
+            if (KontureRuntimeStateProvider.currentState.isReportResolvedViolationsOverridden) {
+                return KontureRuntimeStateProvider.currentState.reportResolvedViolations
+            }
+            val prop =
+                System.getProperty(PROPERTY_REPORT_RESOLVED_VIOLATIONS)
+                    ?: System.getProperty("konture.baseline.report.resolved")
+            return prop?.toBoolean() ?: KontureRuntimeStateProvider.currentState.reportResolvedViolations
+        }
+        set(value) {
+            KontureRuntimeStateProvider.currentState =
+                KontureRuntimeStateProvider.currentState.copy(
+                    reportResolvedViolations = value,
+                    isReportResolvedViolationsOverridden = true,
+                )
+        }
+
+    /**
+     * Whether to fail the test execution if resolved violations exist in the baseline (ratchet mode).
+     * Backed by ThreadLocal state; safe under parallel test execution.
+     */
+    public var failOnResolvedViolations: Boolean
+        get() {
+            if (KontureRuntimeStateProvider.currentState.isFailOnResolvedViolationsOverridden) {
+                return KontureRuntimeStateProvider.currentState.failOnResolvedViolations
+            }
+            val prop =
+                System.getProperty(PROPERTY_FAIL_ON_RESOLVED_VIOLATIONS)
+                    ?: System.getProperty("konture.baseline.fail.on.resolved")
+            return prop?.toBoolean() ?: KontureRuntimeStateProvider.currentState.failOnResolvedViolations
+        }
+        set(value) {
+            KontureRuntimeStateProvider.currentState =
+                KontureRuntimeStateProvider.currentState.copy(
+                    failOnResolvedViolations = value,
+                    isFailOnResolvedViolationsOverridden = true,
+                )
+        }
+
+    /**
+     * Checks ratchet status and throws an [AssertionError] if resolved violations exist
+     * in the baseline and [failOnResolvedViolations] is enabled.
+     */
+    public fun checkRatchet() {
+        BaselineManager.checkRatchet()
+    }
 
     /**
      * Resets the current thread-local runtime state to default values and clears the shared report accumulator.

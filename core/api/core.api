@@ -135,20 +135,24 @@ public final class io/github/baole/konture/core/ExclusionsModel$Companion {
 
 public final class io/github/baole/konture/core/KontureConstants {
 	public static final field DEFAULT_BASELINE_FILENAME Ljava/lang/String;
+	public static final field DEFAULT_FAIL_ON_RESOLVED_VIOLATIONS Z
 	public static final field DEFAULT_HTML_REPORT_PATH Ljava/lang/String;
 	public static final field DEFAULT_JSON_REPORT_PATH Ljava/lang/String;
 	public static final field DEFAULT_REPORT_PATH Ljava/lang/String;
+	public static final field DEFAULT_REPORT_RESOLVED_VIOLATIONS Z
 	public static final field DEFAULT_SARIF_REPORT_PATH Ljava/lang/String;
 	public static final field INSTANCE Lio/github/baole/konture/core/KontureConstants;
 	public static final field PROPERTY_BASELINE_DIR Ljava/lang/String;
 	public static final field PROPERTY_BASELINE_GENERATE Ljava/lang/String;
 	public static final field PROPERTY_BASELINE_PATH Ljava/lang/String;
+	public static final field PROPERTY_FAIL_ON_RESOLVED_VIOLATIONS Ljava/lang/String;
 	public static final field PROPERTY_FAIL_ON_SEVERITY Ljava/lang/String;
 	public static final field PROPERTY_LOCALE Ljava/lang/String;
 	public static final field PROPERTY_OUTPUT_FORMAT Ljava/lang/String;
 	public static final field PROPERTY_REPORT_HTML_PATH Ljava/lang/String;
 	public static final field PROPERTY_REPORT_JSON_PATH Ljava/lang/String;
 	public static final field PROPERTY_REPORT_PATH Ljava/lang/String;
+	public static final field PROPERTY_REPORT_RESOLVED_VIOLATIONS Ljava/lang/String;
 	public static final field PROPERTY_REPORT_SARIF_PATH Ljava/lang/String;
 	public static final field VERSION Ljava/lang/String;
 }
@@ -749,9 +753,11 @@ public final class io/github/baole/konture/core/report/ReportRule$Companion {
 
 public final class io/github/baole/konture/core/report/ReportSummary {
 	public static final field Companion Lio/github/baole/konture/core/report/ReportSummary$Companion;
-	public fun <init> (IIIIIIII)V
-	public synthetic fun <init> (IIIIIIIIILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun <init> (IIIIIIIIIII)V
+	public synthetic fun <init> (IIIIIIIIIIIILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun component1 ()I
+	public final fun component10 ()I
+	public final fun component11 ()I
 	public final fun component2 ()I
 	public final fun component3 ()I
 	public final fun component4 ()I
@@ -759,13 +765,17 @@ public final class io/github/baole/konture/core/report/ReportSummary {
 	public final fun component6 ()I
 	public final fun component7 ()I
 	public final fun component8 ()I
-	public final fun copy (IIIIIIII)Lio/github/baole/konture/core/report/ReportSummary;
-	public static synthetic fun copy$default (Lio/github/baole/konture/core/report/ReportSummary;IIIIIIIIILjava/lang/Object;)Lio/github/baole/konture/core/report/ReportSummary;
+	public final fun component9 ()I
+	public final fun copy (IIIIIIIIIII)Lio/github/baole/konture/core/report/ReportSummary;
+	public static synthetic fun copy$default (Lio/github/baole/konture/core/report/ReportSummary;IIIIIIIIIIIILjava/lang/Object;)Lio/github/baole/konture/core/report/ReportSummary;
 	public fun equals (Ljava/lang/Object;)Z
+	public final fun getActiveBaselineCount ()I
 	public final fun getErrorCount ()I
 	public final fun getFailedRules ()I
 	public final fun getInfoCount ()I
+	public final fun getNewViolationsCount ()I
 	public final fun getPassedRules ()I
+	public final fun getResolvedCount ()I
 	public final fun getSuppressedCount ()I
 	public final fun getTotalRules ()I
 	public final fun getTotalViolations ()I

@@ -50,7 +50,7 @@ class DslArchitectureTest {
         Konture.architecture {
             modules {
                 that().haveNamePath(":data")
-                should().notDependOnModule(":domain")
+                should().notDependOnModule(":app")
             }
 
             classes {

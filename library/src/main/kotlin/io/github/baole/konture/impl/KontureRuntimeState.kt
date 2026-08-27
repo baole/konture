@@ -32,6 +32,10 @@ internal class KontureRuntimeState(
     val activeProgrammaticSuppressions: List<ProgrammaticSuppression> = emptyList(),
     val failOnSeverity: Severity? = Severity.ERROR,
     val isFailOnSeverityOverridden: Boolean = false,
+    val reportResolvedViolations: Boolean = KontureConstants.DEFAULT_REPORT_RESOLVED_VIOLATIONS,
+    val isReportResolvedViolationsOverridden: Boolean = false,
+    val failOnResolvedViolations: Boolean = KontureConstants.DEFAULT_FAIL_ON_RESOLVED_VIOLATIONS,
+    val isFailOnResolvedViolationsOverridden: Boolean = false,
 ) {
     val projectGraphLoader: ProjectGraphLoader = ProjectGraphLoader()
 
@@ -50,6 +54,10 @@ internal class KontureRuntimeState(
         activeProgrammaticSuppressions: List<ProgrammaticSuppression> = this.activeProgrammaticSuppressions,
         failOnSeverity: Severity? = this.failOnSeverity,
         isFailOnSeverityOverridden: Boolean = this.isFailOnSeverityOverridden,
+        reportResolvedViolations: Boolean = this.reportResolvedViolations,
+        isReportResolvedViolationsOverridden: Boolean = this.isReportResolvedViolationsOverridden,
+        failOnResolvedViolations: Boolean = this.failOnResolvedViolations,
+        isFailOnResolvedViolationsOverridden: Boolean = this.isFailOnResolvedViolationsOverridden,
     ): KontureRuntimeState {
         return KontureRuntimeState(
             baselinePath = baselinePath,
@@ -67,6 +75,10 @@ internal class KontureRuntimeState(
             activeProgrammaticSuppressions = activeProgrammaticSuppressions,
             failOnSeverity = failOnSeverity,
             isFailOnSeverityOverridden = isFailOnSeverityOverridden,
+            reportResolvedViolations = reportResolvedViolations,
+            isReportResolvedViolationsOverridden = isReportResolvedViolationsOverridden,
+            failOnResolvedViolations = failOnResolvedViolations,
+            isFailOnResolvedViolationsOverridden = isFailOnResolvedViolationsOverridden,
         )
     }
 }

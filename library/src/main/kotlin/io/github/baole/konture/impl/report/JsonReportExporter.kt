@@ -108,16 +108,24 @@ internal object JsonReportExporter {
         val failedRules = evaluations.count { !it.passed }
         val passedRules = totalRules - failedRules
 
+        val baselineMgr = io.github.baole.konture.impl.KontureRuntimeStateProvider.currentState.baselineManager
+        val resolvedCount = baselineMgr.getResolvedViolations().size
+        val activeBaselineCount = baselineMgr.getActiveBaselineViolations().size
+        val newViolationsCount = reportViolations.count { !it.isSuppressed }
+
         val summary =
             ReportSummary(
                 totalRules = totalRules,
                 passedRules = passedRules,
                 failedRules = failedRules,
-                totalViolations = reportViolations.count { !it.isSuppressed },
+                totalViolations = newViolationsCount,
                 suppressedCount = reportViolations.count { it.isSuppressed },
                 errorCount = errorCount,
                 warningCount = warningCount,
                 infoCount = infoCount,
+                resolvedCount = resolvedCount,
+                activeBaselineCount = activeBaselineCount,
+                newViolationsCount = newViolationsCount,
             )
 
         return KontureJsonReport(

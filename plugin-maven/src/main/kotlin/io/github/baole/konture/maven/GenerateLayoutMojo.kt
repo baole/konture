@@ -173,7 +173,7 @@ class GenerateLayoutMojo : AbstractMojo() {
                     name = "main",
                     kind = SourceSetKind.KOTLIN_JVM,
                     production = true,
-                    srcDirs = srcDirs.map { it.canonicalPath }
+                    srcDirs = srcDirs.map { it.canonicalPath }.distinct(),
                 )
             )
         } else {

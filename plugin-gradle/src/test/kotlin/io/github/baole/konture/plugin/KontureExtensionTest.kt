@@ -23,6 +23,8 @@ class KontureExtensionTest {
         assertEquals("INFO", extension.logLevel.get())
         assertEquals("konture-baseline.json", extension.baselinePath.get())
         assertEquals("en", extension.language.get())
+        assertEquals(true, extension.reportResolvedViolations.get())
+        assertEquals(false, extension.failOnResolvedViolations.get())
     }
 
     @Test
@@ -38,6 +40,12 @@ class KontureExtensionTest {
 
         extension.language("de")
         assertEquals("de", extension.language.get())
+
+        extension.reportResolvedViolations(true)
+        assertEquals(true, extension.reportResolvedViolations.get())
+
+        extension.failOnResolvedViolations(true)
+        assertEquals(true, extension.failOnResolvedViolations.get())
 
         extension.excludeConfigurations("customConfig1", "customConfig2")
         assertEquals(
