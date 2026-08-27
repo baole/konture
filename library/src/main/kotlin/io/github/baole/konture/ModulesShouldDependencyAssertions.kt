@@ -12,37 +12,38 @@ import io.github.baole.konture.impl.SliceCycleDetector
 import io.github.baole.konture.impl.isTestConfiguration
 import io.github.baole.konture.impl.normalizeModulePath
 
-/** Dependency assertions for Gradle module rules. */
+/** Outbound dependency assertions for Gradle module rules. */
 public interface ModulesShouldDependencyAssertions {
     /** Filter or assertion criteria for builder. */
     public val builder: ModulesRuleBuilder
 
-    /** Filter or assertion criteria for not depend on module. */
-    public infix fun notDependOnModule(targetPath: String): ModulesRuleBuilder {
-        /** Filter or assertion criteria for normalized target. */
+    /** Filter or assertion criteria for must not depend on module. */
+    public infix fun mustNotDependOn(targetPath: String): ModulesRuleBuilder {
         val normalizedTarget = normalizeModulePath(targetPath)
         builder.setShould { module, _, violations ->
-            /** Filter or assertion criteria for depends on target. */
-            val dependsOnTarget =
-                module.dependencies.any { dep ->
+            val offending =
+                module.dependencies.filter { dep ->
                     dep.targetPath == normalizedTarget ||
                         PatternMatchers.matchesModuleGlob(normalizedTarget, dep.targetPath)
                 }
-            if (dependsOnTarget) {
+            if (offending.isNotEmpty()) {
                 violations.add(
-                    getMessage("module.should.notDependOnModule", module.path, normalizedTarget),
+                    getMessage(
+                        "module.should.mustNotDependOn",
+                        module.path,
+                        normalizedTarget,
+                        offending.joinToString { it.targetPath },
+                    ),
                 )
             }
         }
         return builder
     }
 
-    /** Filter or assertion criteria for not depend on module. */
-    public infix fun notDependOnModule(targetPaths: List<String>): ModulesRuleBuilder {
-        /** Filter or assertion criteria for normalized targets. */
+    /** Filter or assertion criteria for must not depend on module. */
+    public infix fun mustNotDependOn(targetPaths: List<String>): ModulesRuleBuilder {
         val normalizedTargets = targetPaths.map { normalizeModulePath(it) }
         builder.setShould { module, _, violations ->
-            /** Filter or assertion criteria for offending. */
             val offending =
                 module.dependencies.filter { dep ->
                     normalizedTargets.any { targetPath ->
@@ -52,7 +53,7 @@ public interface ModulesShouldDependencyAssertions {
             if (offending.isNotEmpty()) {
                 violations.add(
                     getMessage(
-                        "module.should.notDependOnModuleAny",
+                        "module.should.mustNotDependOn",
                         module.path,
                         normalizedTargets.joinToString(),
                         offending.joinToString { it.targetPath },
@@ -63,61 +64,96 @@ public interface ModulesShouldDependencyAssertions {
         return builder
     }
 
-    /** Filter or assertion criteria for not depend on module. */
-    public fun notDependOnModule(vararg targetPaths: String): ModulesRuleBuilder =
-        notDependOnModule(targetPaths.asList())
+    /** Filter or assertion criteria for must not depend on module. */
+    public fun mustNotDependOn(vararg targetPaths: String): ModulesRuleBuilder = mustNotDependOn(targetPaths.asList())
 
-    @Deprecated("Use notDependOnModule instead.", ReplaceWith("notDependOnModule(targetPath)"))
-    /** Filter or assertion criteria for not depend on modules. */
-    public infix fun notDependOnModules(targetPath: String): ModulesRuleBuilder = notDependOnModule(targetPath)
+    /** Filter or assertion criteria for must not depend on module. */
+    public infix fun mustNotDependOn(predicate: (String) -> Boolean): ModulesRuleBuilder =
+        mustNotDependOn("custom predicate", predicate)
 
-    @Deprecated("Use notDependOnModule instead.", ReplaceWith("notDependOnModule(targetPaths)"))
-    /** Filter or assertion criteria for not depend on modules. */
-    public infix fun notDependOnModules(targetPaths: List<String>): ModulesRuleBuilder = notDependOnModule(targetPaths)
-
-    /** Filter or assertion criteria for not depend on modules. */
-    @Deprecated("Use notDependOnModule instead.", ReplaceWith("notDependOnModule(*targetPaths)"))
-    public fun notDependOnModules(vararg targetPaths: String): ModulesRuleBuilder = notDependOnModule(*targetPaths)
-
-    /** Filter or assertion criteria for not depend on module. */
-    public infix fun notDependOnModule(predicate: (String) -> Boolean): ModulesRuleBuilder =
-        notDependOnModule("custom predicate", predicate)
-
-    /** Filter or assertion criteria for not depend on module. */
-    public fun notDependOnModule(
+    /** Filter or assertion criteria for must not depend on module. */
+    public fun mustNotDependOn(
         description: String,
         predicate: (String) -> Boolean,
     ): ModulesRuleBuilder {
         builder.setShould { module, _, violations ->
-            /** Filter or assertion criteria for offending deps. */
-            val offendingDeps = module.dependencies.filter { dep -> predicate(dep.targetPath) }
-            if (offendingDeps.isNotEmpty()) {
-                /** Filter or assertion criteria for paths. */
-                val paths = offendingDeps.joinToString { it.targetPath }
+            val offending = module.dependencies.filter { dep -> predicate(dep.targetPath) }
+            if (offending.isNotEmpty()) {
                 violations.add(
-                    getMessage("module.should.notDependOnModulePredicate", module.path, description, paths),
+                    getMessage(
+                        "module.should.mustNotDependOn",
+                        module.path,
+                        description,
+                        offending.joinToString { it.targetPath },
+                    ),
                 )
             }
         }
         return builder
     }
 
-    /** Filter or assertion criteria for only depend on modules. */
-    public infix fun onlyDependOnModules(allowedPattern: String): ModulesRuleBuilder =
-        onlyDependOnModules(listOf(allowedPattern))
+    /** Filter or assertion criteria for not depend on module. */
+    public infix fun notDependOn(targetPath: String): ModulesRuleBuilder = mustNotDependOn(targetPath)
 
-    /** Filter or assertion criteria for only depend on modules. */
-    public infix fun onlyDependOnModules(allowedPatterns: List<String>): ModulesRuleBuilder {
-        /** Filter or assertion criteria for normalized patterns. */
-        val normalizedPatterns = allowedPatterns.map { normalizeModulePath(it) }
+    /** Filter or assertion criteria for not depend on module. */
+    public infix fun notDependOn(targetPaths: List<String>): ModulesRuleBuilder = mustNotDependOn(targetPaths)
+
+    /** Filter or assertion criteria for not depend on module. */
+    public fun notDependOn(vararg targetPaths: String): ModulesRuleBuilder = mustNotDependOn(*targetPaths)
+
+    /** Filter or assertion criteria for not depend on module. */
+    public infix fun notDependOn(predicate: (String) -> Boolean): ModulesRuleBuilder = mustNotDependOn(predicate)
+
+    /** Filter or assertion criteria for not depend on module. */
+    public fun notDependOn(
+        description: String,
+        predicate: (String) -> Boolean,
+    ): ModulesRuleBuilder = mustNotDependOn(description, predicate)
+
+    @Deprecated("Use mustNotDependOn instead.", ReplaceWith("mustNotDependOn(targetPath)"))
+    /** Filter or assertion criteria for not depend on module. */
+    public infix fun notDependOnModule(targetPath: String): ModulesRuleBuilder = mustNotDependOn(targetPath)
+
+    @Deprecated("Use mustNotDependOn instead.", ReplaceWith("mustNotDependOn(targetPaths)"))
+    /** Filter or assertion criteria for not depend on module. */
+    public infix fun notDependOnModule(targetPaths: List<String>): ModulesRuleBuilder = mustNotDependOn(targetPaths)
+
+    @Deprecated("Use mustNotDependOn instead.", ReplaceWith("mustNotDependOn(*targetPaths)"))
+    /** Filter or assertion criteria for not depend on module. */
+    public fun notDependOnModule(vararg targetPaths: String): ModulesRuleBuilder = mustNotDependOn(*targetPaths)
+
+    @Deprecated("Use mustNotDependOn instead.", ReplaceWith("mustNotDependOn(predicate)"))
+    /** Filter or assertion criteria for not depend on module. */
+    public infix fun notDependOnModule(predicate: (String) -> Boolean): ModulesRuleBuilder = mustNotDependOn(predicate)
+
+    @Deprecated("Use mustNotDependOn instead.", ReplaceWith("mustNotDependOn(description, predicate)"))
+    /** Filter or assertion criteria for not depend on module. */
+    public fun notDependOnModule(
+        description: String,
+        predicate: (String) -> Boolean,
+    ): ModulesRuleBuilder = mustNotDependOn(description, predicate)
+
+    @Deprecated("Use mustNotDependOn instead.", ReplaceWith("mustNotDependOn(targetPath)"))
+    /** Filter or assertion criteria for not depend on modules. */
+    public infix fun notDependOnModules(targetPath: String): ModulesRuleBuilder = mustNotDependOn(targetPath)
+
+    @Deprecated("Use mustNotDependOn instead.", ReplaceWith("mustNotDependOn(targetPaths)"))
+    /** Filter or assertion criteria for not depend on modules. */
+    public infix fun notDependOnModules(targetPaths: List<String>): ModulesRuleBuilder = mustNotDependOn(targetPaths)
+
+    @Deprecated("Use mustNotDependOn instead.", ReplaceWith("mustNotDependOn(*targetPaths)"))
+    /** Filter or assertion criteria for not depend on modules. */
+    public fun notDependOnModules(vararg targetPaths: String): ModulesRuleBuilder = mustNotDependOn(*targetPaths)
+
+    /** Filter or assertion criteria for may depend on module. */
+    public infix fun mayDependOn(targetPath: String): ModulesRuleBuilder = mayDependOn(listOf(targetPath))
+
+    /** Filter or assertion criteria for may depend on module. */
+    public infix fun mayDependOn(targetPaths: List<String>): ModulesRuleBuilder {
+        val normalizedPatterns = targetPaths.map { normalizeModulePath(it) }
         builder.setShould { module, _, violations ->
             for (dep in module.dependencies) {
-                // "Only depend on X" is a production-architecture rule.  Test-configuration edges
-                // (testImplementation, testRuntimeOnly, androidTestImplementation, …) are expected
-                // to pull in test frameworks and fixtures and are intentionally excluded from this
-                // allowlist check.  Use notDependOnModule() to enforce bans across all configurations.
                 if (dep.isTestConfiguration()) continue
-                /** Filter or assertion criteria for is allowed. */
                 val isAllowed =
                     normalizedPatterns.any { pattern ->
                         dep.targetPath == pattern || PatternMatchers.matchesModuleGlob(pattern, dep.targetPath)
@@ -125,10 +161,10 @@ public interface ModulesShouldDependencyAssertions {
                 if (!isAllowed) {
                     violations.add(
                         getMessage(
-                            "module.should.onlyDependOnModulesPattern",
+                            "module.should.mayDependOn",
                             module.path,
-                            dep.targetPath,
                             normalizedPatterns.joinToString(),
+                            dep.targetPath,
                         ),
                     )
                 }
@@ -137,16 +173,15 @@ public interface ModulesShouldDependencyAssertions {
         return builder
     }
 
-    /** Filter or assertion criteria for only depend on modules. */
-    public fun onlyDependOnModules(vararg allowedPatterns: String): ModulesRuleBuilder =
-        onlyDependOnModules(allowedPatterns.asList())
+    /** Filter or assertion criteria for may depend on module. */
+    public fun mayDependOn(vararg targetPaths: String): ModulesRuleBuilder = mayDependOn(targetPaths.asList())
 
-    /** Filter or assertion criteria for only depend on modules. */
-    public infix fun onlyDependOnModules(predicate: (String) -> Boolean): ModulesRuleBuilder =
-        onlyDependOnModules("custom predicate", predicate)
+    /** Filter or assertion criteria for may depend on module. */
+    public infix fun mayDependOn(predicate: (String) -> Boolean): ModulesRuleBuilder =
+        mayDependOn("custom predicate", predicate)
 
-    /** Filter or assertion criteria for only depend on modules. */
-    public fun onlyDependOnModules(
+    /** Filter or assertion criteria for may depend on module. */
+    public fun mayDependOn(
         description: String,
         predicate: (String) -> Boolean,
     ): ModulesRuleBuilder {
@@ -156,10 +191,10 @@ public interface ModulesShouldDependencyAssertions {
                 if (!predicate(dep.targetPath)) {
                     violations.add(
                         getMessage(
-                            "module.should.onlyDependOnModulesPredicate",
+                            "module.should.mayDependOn",
                             module.path,
-                            dep.targetPath,
                             description,
+                            dep.targetPath,
                         ),
                     )
                 }
@@ -168,63 +203,26 @@ public interface ModulesShouldDependencyAssertions {
         return builder
     }
 
-    /** Filter or assertion criteria for only be depended on by. */
-    public infix fun onlyBeDependedOnBy(allowedPattern: String): ModulesRuleBuilder =
-        onlyBeDependedOnBy(listOf(allowedPattern))
+    /** Filter or assertion criteria for only depend on module. */
+    public infix fun onlyDependOn(targetPath: String): ModulesRuleBuilder = onlyDependOn(listOf(targetPath))
 
-    /** Filter or assertion criteria for only be depended on by. */
-    public infix fun onlyBeDependedOnBy(allowedPatterns: List<String>): ModulesRuleBuilder {
-        /** Filter or assertion criteria for normalized patterns. */
-        val normalizedPatterns = allowedPatterns.map { normalizeModulePath(it) }
-        builder.setShould { module, graph, violations ->
-            /** Filter or assertion criteria for dependents. */
-            val dependents =
-                graph.getAllModules().filter { other ->
-                    other.dependencies.any { dep -> !dep.isTestConfiguration() && dep.targetPath == module.path }
-                }
-            for (dep in dependents) {
-                /** Filter or assertion criteria for is allowed. */
+    /** Filter or assertion criteria for only depend on module. */
+    public infix fun onlyDependOn(targetPaths: List<String>): ModulesRuleBuilder {
+        val normalizedPatterns = targetPaths.map { normalizeModulePath(it) }
+        builder.setShould { module, _, violations ->
+            for (dep in module.dependencies) {
+                if (dep.isTestConfiguration()) continue
                 val isAllowed =
                     normalizedPatterns.any { pattern ->
-                        dep.path == pattern || PatternMatchers.matchesModuleGlob(pattern, dep.path)
+                        dep.targetPath == pattern || PatternMatchers.matchesModuleGlob(pattern, dep.targetPath)
                     }
                 if (!isAllowed) {
                     violations.add(
-                        getMessage("module.should.notBeDependedOnByModules", module.path, dep.path),
-                    )
-                }
-            }
-        }
-        return builder
-    }
-
-    /** Filter or assertion criteria for only be depended on by. */
-    public fun onlyBeDependedOnBy(vararg allowedPatterns: String): ModulesRuleBuilder =
-        onlyBeDependedOnBy(allowedPatterns.asList())
-
-    /** Filter or assertion criteria for only be depended on by. */
-    public infix fun onlyBeDependedOnBy(predicate: (String) -> Boolean): ModulesRuleBuilder =
-        onlyBeDependedOnBy("custom predicate", predicate)
-
-    /** Filter or assertion criteria for only be depended on by. */
-    public fun onlyBeDependedOnBy(
-        description: String,
-        predicate: (String) -> Boolean,
-    ): ModulesRuleBuilder {
-        builder.setShould { module, graph, violations ->
-            /** Filter or assertion criteria for dependents. */
-            val dependents =
-                graph.getAllModules().filter { other ->
-                    other.dependencies.any { dep -> !dep.isTestConfiguration() && dep.targetPath == module.path }
-                }
-            for (dep in dependents) {
-                if (!predicate(dep.path)) {
-                    violations.add(
                         getMessage(
-                            "module.should.notBeDependedOnByModulesPredicate",
+                            "module.should.onlyDependOn",
                             module.path,
-                            dep.path,
-                            description,
+                            normalizedPatterns.joinToString(),
+                            dep.targetPath,
                         ),
                     )
                 }
@@ -233,182 +231,58 @@ public interface ModulesShouldDependencyAssertions {
         return builder
     }
 
-    /** Filter or assertion criteria for not depend on external libraries. */
-    public fun notDependOnExternalLibraries(
-        vararg coordinates: String,
-        includeTransitive: Boolean = true,
-    ): ModulesRuleBuilder {
-        builder.setShould { module, graph, violations ->
-            /** Filter or assertion criteria for resolved deps. */
-            val resolvedDeps = graph.requireExternalDependencies().modules[module.path] ?: emptyList()
+    /** Filter or assertion criteria for only depend on module. */
+    public fun onlyDependOn(vararg targetPaths: String): ModulesRuleBuilder = onlyDependOn(targetPaths.asList())
 
-            /** Filter or assertion criteria for offending. */
-            val offending =
-                resolvedDeps.filter { dep ->
-                    if (!includeTransitive && dep.isTransitive) return@filter false
-                    coordinates.any { pattern ->
-                        if (pattern.contains(":")) {
-                            PatternMatchers.matchesSimpleGlob(pattern, "${dep.group}:${dep.name}")
-                        } else {
-                            PatternMatchers.matchesSimpleGlob(pattern, dep.group) ||
-                                PatternMatchers.matchesSimpleGlob(pattern, dep.name)
-                        }
-                    }
+    /** Filter or assertion criteria for only depend on module. */
+    public infix fun onlyDependOn(predicate: (String) -> Boolean): ModulesRuleBuilder =
+        onlyDependOn("custom predicate", predicate)
+
+    /** Filter or assertion criteria for only depend on module. */
+    public fun onlyDependOn(
+        description: String,
+        predicate: (String) -> Boolean,
+    ): ModulesRuleBuilder {
+        builder.setShould { module, _, violations ->
+            for (dep in module.dependencies) {
+                if (dep.isTestConfiguration()) continue
+                if (!predicate(dep.targetPath)) {
+                    violations.add(
+                        getMessage(
+                            "module.should.onlyDependOn",
+                            module.path,
+                            description,
+                            dep.targetPath,
+                        ),
+                    )
                 }
-            if (offending.isNotEmpty()) {
-                /** Filter or assertion criteria for coords. */
-                val coords =
-                    offending.joinToString {
-                        "${it.group}:${it.name}:${it.version}${if (it.isTransitive) " (transitive)" else ""}"
-                    }
-                violations.add(
-                    getMessage(
-                        "module.should.notDependOnExternalLibraries",
-                        module.path,
-                        coordinates.joinToString(),
-                        coords,
-                    ),
-                )
             }
         }
         return builder
     }
 
-    /** Filter or assertion criteria for only depend on external libraries. */
-    public fun onlyDependOnExternalLibraries(
-        vararg coordinates: String,
-        includeTransitive: Boolean = true,
-    ): ModulesRuleBuilder {
-        builder.setShould { module, graph, violations ->
-            /** Filter or assertion criteria for resolved deps. */
-            val resolvedDeps = graph.requireExternalDependencies().modules[module.path] ?: emptyList()
+    @Deprecated("Use onlyDependOn instead.", ReplaceWith("onlyDependOn(allowedPattern)"))
+    /** Filter or assertion criteria for only depend on modules. */
+    public infix fun onlyDependOnModules(allowedPattern: String): ModulesRuleBuilder = onlyDependOn(allowedPattern)
 
-            /** Filter or assertion criteria for offending. */
-            val offending =
-                resolvedDeps.filter { dep ->
-                    if (!includeTransitive && dep.isTransitive) return@filter false
-                    coordinates.none { pattern ->
-                        if (pattern.contains(":")) {
-                            PatternMatchers.matchesSimpleGlob(pattern, "${dep.group}:${dep.name}")
-                        } else {
-                            PatternMatchers.matchesSimpleGlob(pattern, dep.group) ||
-                                PatternMatchers.matchesSimpleGlob(pattern, dep.name)
-                        }
-                    }
-                }
-            if (offending.isNotEmpty()) {
-                /** Filter or assertion criteria for coords. */
-                val coords =
-                    offending.joinToString {
-                        "${it.group}:${it.name}:${it.version}${if (it.isTransitive) " (transitive)" else ""}"
-                    }
-                violations.add(
-                    getMessage(
-                        "module.should.onlyDependOnExternalLibraries",
-                        module.path,
-                        coordinates.joinToString(),
-                        coords,
-                    ),
-                )
-            }
-        }
-        return builder
-    }
+    @Deprecated("Use onlyDependOn instead.", ReplaceWith("onlyDependOn(allowedPatterns)"))
+    /** Filter or assertion criteria for only depend on modules. */
+    public infix fun onlyDependOnModules(allowedPatterns: List<String>): ModulesRuleBuilder = onlyDependOn(allowedPatterns)
 
-    /** Filter or assertion criteria for not depend on external libraries. */
-    public fun notDependOnExternalLibraries(
-        coordinates: List<String>,
-        includeTransitive: Boolean = true,
-    ): ModulesRuleBuilder =
-        notDependOnExternalLibraries(
-            *coordinates.toTypedArray(),
-            includeTransitive = includeTransitive,
-        )
+    @Deprecated("Use onlyDependOn instead.", ReplaceWith("onlyDependOn(*allowedPatterns)"))
+    /** Filter or assertion criteria for only depend on modules. */
+    public fun onlyDependOnModules(vararg allowedPatterns: String): ModulesRuleBuilder = onlyDependOn(*allowedPatterns)
 
-    /** Filter or assertion criteria for only depend on external libraries. */
-    public fun onlyDependOnExternalLibraries(
-        coordinates: List<String>,
-        includeTransitive: Boolean = true,
-    ): ModulesRuleBuilder =
-        onlyDependOnExternalLibraries(
-            *coordinates.toTypedArray(),
-            includeTransitive = includeTransitive,
-        )
+    @Deprecated("Use onlyDependOn instead.", ReplaceWith("onlyDependOn(predicate)"))
+    /** Filter or assertion criteria for only depend on modules. */
+    public infix fun onlyDependOnModules(predicate: (String) -> Boolean): ModulesRuleBuilder = onlyDependOn(predicate)
 
-    /** Filter or assertion criteria for depend on external library. */
-    public fun dependOnExternalLibrary(
-        coordinate: String,
-        includeTransitive: Boolean = true,
-    ): ModulesRuleBuilder = dependOnExternalLibraries(coordinate, includeTransitive = includeTransitive)
-
-    /** Filter or assertion criteria for have dependency. */
-    public fun haveDependency(
-        coordinate: String,
-        includeTransitive: Boolean = true,
-    ): ModulesRuleBuilder = dependOnExternalLibrary(coordinate, includeTransitive = includeTransitive)
-
-    /** Filter or assertion criteria for have dependencies. */
-    public fun haveDependencies(
-        vararg coordinates: String,
-        includeTransitive: Boolean = true,
-    ): ModulesRuleBuilder = dependOnExternalLibraries(*coordinates, includeTransitive = includeTransitive)
-
-    /** Filter or assertion criteria for not have dependency. */
-    public fun notHaveDependency(
-        coordinate: String,
-        includeTransitive: Boolean = true,
-    ): ModulesRuleBuilder = notDependOnExternalLibraries(coordinate, includeTransitive = includeTransitive)
-
-    /** Filter or assertion criteria for not have dependencies. */
-    public fun notHaveDependencies(
-        vararg coordinates: String,
-        includeTransitive: Boolean = true,
-    ): ModulesRuleBuilder = notDependOnExternalLibraries(*coordinates, includeTransitive = includeTransitive)
-
-    /** Filter or assertion criteria for depend on external libraries. */
-    public fun dependOnExternalLibraries(
-        vararg coordinates: String,
-        includeTransitive: Boolean = true,
-    ): ModulesRuleBuilder {
-        builder.setShould { module, graph, violations ->
-            /** Filter or assertion criteria for resolved deps. */
-            val resolvedDeps = graph.requireExternalDependencies().modules[module.path] ?: emptyList()
-
-            /** Filter or assertion criteria for matched. */
-            val matched =
-                resolvedDeps.any { dep ->
-                    if (!includeTransitive && dep.isTransitive) return@any false
-                    coordinates.any { pattern ->
-                        if (pattern.contains(":")) {
-                            PatternMatchers.matchesSimpleGlob(pattern, "${dep.group}:${dep.name}")
-                        } else {
-                            PatternMatchers.matchesSimpleGlob(pattern, dep.group) ||
-                                PatternMatchers.matchesSimpleGlob(pattern, dep.name)
-                        }
-                    }
-                }
-            if (!matched) {
-                violations.add(
-                    getMessage(
-                        "module.should.dependOnExternalLibraries",
-                        module.path,
-                        coordinates.joinToString(),
-                    ),
-                )
-            }
-        }
-        return builder
-    }
-
-    /** Filter or assertion criteria for depend on external libraries. */
-    public fun dependOnExternalLibraries(
-        coordinates: List<String>,
-        includeTransitive: Boolean = true,
-    ): ModulesRuleBuilder =
-        dependOnExternalLibraries(
-            *coordinates.toTypedArray(),
-            includeTransitive = includeTransitive,
-        )
+    @Deprecated("Use onlyDependOn instead.", ReplaceWith("onlyDependOn(description, predicate)"))
+    /** Filter or assertion criteria for only depend on modules. */
+    public fun onlyDependOnModules(
+        description: String,
+        predicate: (String) -> Boolean,
+    ): ModulesRuleBuilder = onlyDependOn(description, predicate)
 
     /** Filter or assertion criteria for depend on module. */
     public infix fun dependOnModule(targetPath: String): ModulesRuleBuilder {

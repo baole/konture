@@ -3954,7 +3954,7 @@ public final class io/github/baole/konture/ModulesRuleBuilder {
 	public final fun xorShould ()Lio/github/baole/konture/ModulesShould;
 }
 
-public final class io/github/baole/konture/ModulesShould : io/github/baole/konture/ModulesShouldCompositeAssertions, io/github/baole/konture/ModulesShouldDependencyAssertions, io/github/baole/konture/ModulesShouldStructureAssertions {
+public final class io/github/baole/konture/ModulesShould : io/github/baole/konture/ModulesShouldCompositeAssertions, io/github/baole/konture/ModulesShouldDependencyAssertions, io/github/baole/konture/ModulesShouldExternalDependencyAssertions, io/github/baole/konture/ModulesShouldInboundDependencyAssertions, io/github/baole/konture/ModulesShouldStructureAssertions {
 	public fun allOf ([Lkotlin/jvm/functions/Function1;)Lio/github/baole/konture/ModulesRuleBuilder;
 	public fun anyOf ([Lkotlin/jvm/functions/Function1;)Lio/github/baole/konture/ModulesRuleBuilder;
 	public fun applyPlugin (Ljava/lang/String;)Lio/github/baole/konture/ModulesRuleBuilder;
@@ -3996,6 +3996,26 @@ public final class io/github/baole/konture/ModulesShould : io/github/baole/kontu
 	public fun haveSourceSet (Ljava/lang/String;)Lio/github/baole/konture/ModulesRuleBuilder;
 	public fun haveSourceSets (Ljava/util/List;)Lio/github/baole/konture/ModulesRuleBuilder;
 	public fun haveSourceSets ([Ljava/lang/String;)Lio/github/baole/konture/ModulesRuleBuilder;
+	public fun mayBeDependedOnBy (Ljava/lang/String;)Lio/github/baole/konture/ModulesRuleBuilder;
+	public fun mayBeDependedOnBy (Ljava/lang/String;Lkotlin/jvm/functions/Function1;)Lio/github/baole/konture/ModulesRuleBuilder;
+	public fun mayBeDependedOnBy (Ljava/util/List;)Lio/github/baole/konture/ModulesRuleBuilder;
+	public fun mayBeDependedOnBy (Lkotlin/jvm/functions/Function1;)Lio/github/baole/konture/ModulesRuleBuilder;
+	public fun mayBeDependedOnBy ([Ljava/lang/String;)Lio/github/baole/konture/ModulesRuleBuilder;
+	public fun mayDependOn (Ljava/lang/String;)Lio/github/baole/konture/ModulesRuleBuilder;
+	public fun mayDependOn (Ljava/lang/String;Lkotlin/jvm/functions/Function1;)Lio/github/baole/konture/ModulesRuleBuilder;
+	public fun mayDependOn (Ljava/util/List;)Lio/github/baole/konture/ModulesRuleBuilder;
+	public fun mayDependOn (Lkotlin/jvm/functions/Function1;)Lio/github/baole/konture/ModulesRuleBuilder;
+	public fun mayDependOn ([Ljava/lang/String;)Lio/github/baole/konture/ModulesRuleBuilder;
+	public fun mustNotBeDependedOnBy (Ljava/lang/String;)Lio/github/baole/konture/ModulesRuleBuilder;
+	public fun mustNotBeDependedOnBy (Ljava/lang/String;Lkotlin/jvm/functions/Function1;)Lio/github/baole/konture/ModulesRuleBuilder;
+	public fun mustNotBeDependedOnBy (Ljava/util/List;)Lio/github/baole/konture/ModulesRuleBuilder;
+	public fun mustNotBeDependedOnBy (Lkotlin/jvm/functions/Function1;)Lio/github/baole/konture/ModulesRuleBuilder;
+	public fun mustNotBeDependedOnBy ([Ljava/lang/String;)Lio/github/baole/konture/ModulesRuleBuilder;
+	public fun mustNotDependOn (Ljava/lang/String;)Lio/github/baole/konture/ModulesRuleBuilder;
+	public fun mustNotDependOn (Ljava/lang/String;Lkotlin/jvm/functions/Function1;)Lio/github/baole/konture/ModulesRuleBuilder;
+	public fun mustNotDependOn (Ljava/util/List;)Lio/github/baole/konture/ModulesRuleBuilder;
+	public fun mustNotDependOn (Lkotlin/jvm/functions/Function1;)Lio/github/baole/konture/ModulesRuleBuilder;
+	public fun mustNotDependOn ([Ljava/lang/String;)Lio/github/baole/konture/ModulesRuleBuilder;
 	public fun noneOf ([Lkotlin/jvm/functions/Function1;)Lio/github/baole/konture/ModulesRuleBuilder;
 	public fun notApplyPlugin (Ljava/lang/String;)Lio/github/baole/konture/ModulesRuleBuilder;
 	public fun notCall (Ljava/lang/String;)Lio/github/baole/konture/ModulesRuleBuilder;
@@ -4007,6 +4027,11 @@ public final class io/github/baole/konture/ModulesShould : io/github/baole/kontu
 	public fun notContainClassesWithAnnotation (Ljava/lang/String;)Lio/github/baole/konture/ModulesRuleBuilder;
 	public fun notContainClassesWithAnnotation (Lkotlin/reflect/KClass;)Lio/github/baole/konture/ModulesRuleBuilder;
 	public fun notContainCycles ()Lio/github/baole/konture/ModulesRuleBuilder;
+	public fun notDependOn (Ljava/lang/String;)Lio/github/baole/konture/ModulesRuleBuilder;
+	public fun notDependOn (Ljava/lang/String;Lkotlin/jvm/functions/Function1;)Lio/github/baole/konture/ModulesRuleBuilder;
+	public fun notDependOn (Ljava/util/List;)Lio/github/baole/konture/ModulesRuleBuilder;
+	public fun notDependOn (Lkotlin/jvm/functions/Function1;)Lio/github/baole/konture/ModulesRuleBuilder;
+	public fun notDependOn ([Ljava/lang/String;)Lio/github/baole/konture/ModulesRuleBuilder;
 	public fun notDependOnExternalLibraries (Ljava/util/List;Z)Lio/github/baole/konture/ModulesRuleBuilder;
 	public fun notDependOnExternalLibraries ([Ljava/lang/String;Z)Lio/github/baole/konture/ModulesRuleBuilder;
 	public fun notDependOnModule (Ljava/lang/String;)Lio/github/baole/konture/ModulesRuleBuilder;
@@ -4045,6 +4070,11 @@ public final class io/github/baole/konture/ModulesShould : io/github/baole/kontu
 	public fun onlyBeDependedOnBy (Ljava/util/List;)Lio/github/baole/konture/ModulesRuleBuilder;
 	public fun onlyBeDependedOnBy (Lkotlin/jvm/functions/Function1;)Lio/github/baole/konture/ModulesRuleBuilder;
 	public fun onlyBeDependedOnBy ([Ljava/lang/String;)Lio/github/baole/konture/ModulesRuleBuilder;
+	public fun onlyDependOn (Ljava/lang/String;)Lio/github/baole/konture/ModulesRuleBuilder;
+	public fun onlyDependOn (Ljava/lang/String;Lkotlin/jvm/functions/Function1;)Lio/github/baole/konture/ModulesRuleBuilder;
+	public fun onlyDependOn (Ljava/util/List;)Lio/github/baole/konture/ModulesRuleBuilder;
+	public fun onlyDependOn (Lkotlin/jvm/functions/Function1;)Lio/github/baole/konture/ModulesRuleBuilder;
+	public fun onlyDependOn ([Ljava/lang/String;)Lio/github/baole/konture/ModulesRuleBuilder;
 	public fun onlyDependOnExternalLibraries (Ljava/util/List;Z)Lio/github/baole/konture/ModulesRuleBuilder;
 	public fun onlyDependOnExternalLibraries ([Ljava/lang/String;Z)Lio/github/baole/konture/ModulesRuleBuilder;
 	public fun onlyDependOnModules (Ljava/lang/String;)Lio/github/baole/konture/ModulesRuleBuilder;
@@ -4088,12 +4118,6 @@ public abstract interface class io/github/baole/konture/ModulesShouldDependencyA
 	public fun beFreeOfCycles ()Lio/github/baole/konture/ModulesRuleBuilder;
 	public fun beLeafModule ()Lio/github/baole/konture/ModulesRuleBuilder;
 	public fun beStandalone ()Lio/github/baole/konture/ModulesRuleBuilder;
-	public fun dependOnExternalLibraries (Ljava/util/List;Z)Lio/github/baole/konture/ModulesRuleBuilder;
-	public fun dependOnExternalLibraries ([Ljava/lang/String;Z)Lio/github/baole/konture/ModulesRuleBuilder;
-	public static synthetic fun dependOnExternalLibraries$default (Lio/github/baole/konture/ModulesShouldDependencyAssertions;Ljava/util/List;ZILjava/lang/Object;)Lio/github/baole/konture/ModulesRuleBuilder;
-	public static synthetic fun dependOnExternalLibraries$default (Lio/github/baole/konture/ModulesShouldDependencyAssertions;[Ljava/lang/String;ZILjava/lang/Object;)Lio/github/baole/konture/ModulesRuleBuilder;
-	public fun dependOnExternalLibrary (Ljava/lang/String;Z)Lio/github/baole/konture/ModulesRuleBuilder;
-	public static synthetic fun dependOnExternalLibrary$default (Lio/github/baole/konture/ModulesShouldDependencyAssertions;Ljava/lang/String;ZILjava/lang/Object;)Lio/github/baole/konture/ModulesRuleBuilder;
 	public fun dependOnModule (Ljava/lang/String;)Lio/github/baole/konture/ModulesRuleBuilder;
 	public fun dependOnModuleApi (Ljava/lang/String;)Lio/github/baole/konture/ModulesRuleBuilder;
 	public fun dependOnModuleImplementation (Ljava/lang/String;)Lio/github/baole/konture/ModulesRuleBuilder;
@@ -4102,15 +4126,22 @@ public abstract interface class io/github/baole/konture/ModulesShouldDependencyA
 	public fun dependOnModules (Ljava/util/List;)Lio/github/baole/konture/ModulesRuleBuilder;
 	public fun dependOnModules ([Ljava/lang/String;)Lio/github/baole/konture/ModulesRuleBuilder;
 	public abstract fun getBuilder ()Lio/github/baole/konture/ModulesRuleBuilder;
-	public fun haveDependencies ([Ljava/lang/String;Z)Lio/github/baole/konture/ModulesRuleBuilder;
-	public static synthetic fun haveDependencies$default (Lio/github/baole/konture/ModulesShouldDependencyAssertions;[Ljava/lang/String;ZILjava/lang/Object;)Lio/github/baole/konture/ModulesRuleBuilder;
-	public fun haveDependency (Ljava/lang/String;Z)Lio/github/baole/konture/ModulesRuleBuilder;
-	public static synthetic fun haveDependency$default (Lio/github/baole/konture/ModulesShouldDependencyAssertions;Ljava/lang/String;ZILjava/lang/Object;)Lio/github/baole/konture/ModulesRuleBuilder;
+	public fun mayDependOn (Ljava/lang/String;)Lio/github/baole/konture/ModulesRuleBuilder;
+	public fun mayDependOn (Ljava/lang/String;Lkotlin/jvm/functions/Function1;)Lio/github/baole/konture/ModulesRuleBuilder;
+	public fun mayDependOn (Ljava/util/List;)Lio/github/baole/konture/ModulesRuleBuilder;
+	public fun mayDependOn (Lkotlin/jvm/functions/Function1;)Lio/github/baole/konture/ModulesRuleBuilder;
+	public fun mayDependOn ([Ljava/lang/String;)Lio/github/baole/konture/ModulesRuleBuilder;
+	public fun mustNotDependOn (Ljava/lang/String;)Lio/github/baole/konture/ModulesRuleBuilder;
+	public fun mustNotDependOn (Ljava/lang/String;Lkotlin/jvm/functions/Function1;)Lio/github/baole/konture/ModulesRuleBuilder;
+	public fun mustNotDependOn (Ljava/util/List;)Lio/github/baole/konture/ModulesRuleBuilder;
+	public fun mustNotDependOn (Lkotlin/jvm/functions/Function1;)Lio/github/baole/konture/ModulesRuleBuilder;
+	public fun mustNotDependOn ([Ljava/lang/String;)Lio/github/baole/konture/ModulesRuleBuilder;
 	public fun notContainCycles ()Lio/github/baole/konture/ModulesRuleBuilder;
-	public fun notDependOnExternalLibraries (Ljava/util/List;Z)Lio/github/baole/konture/ModulesRuleBuilder;
-	public fun notDependOnExternalLibraries ([Ljava/lang/String;Z)Lio/github/baole/konture/ModulesRuleBuilder;
-	public static synthetic fun notDependOnExternalLibraries$default (Lio/github/baole/konture/ModulesShouldDependencyAssertions;Ljava/util/List;ZILjava/lang/Object;)Lio/github/baole/konture/ModulesRuleBuilder;
-	public static synthetic fun notDependOnExternalLibraries$default (Lio/github/baole/konture/ModulesShouldDependencyAssertions;[Ljava/lang/String;ZILjava/lang/Object;)Lio/github/baole/konture/ModulesRuleBuilder;
+	public fun notDependOn (Ljava/lang/String;)Lio/github/baole/konture/ModulesRuleBuilder;
+	public fun notDependOn (Ljava/lang/String;Lkotlin/jvm/functions/Function1;)Lio/github/baole/konture/ModulesRuleBuilder;
+	public fun notDependOn (Ljava/util/List;)Lio/github/baole/konture/ModulesRuleBuilder;
+	public fun notDependOn (Lkotlin/jvm/functions/Function1;)Lio/github/baole/konture/ModulesRuleBuilder;
+	public fun notDependOn ([Ljava/lang/String;)Lio/github/baole/konture/ModulesRuleBuilder;
 	public fun notDependOnModule (Ljava/lang/String;)Lio/github/baole/konture/ModulesRuleBuilder;
 	public fun notDependOnModule (Ljava/lang/String;Lkotlin/jvm/functions/Function1;)Lio/github/baole/konture/ModulesRuleBuilder;
 	public fun notDependOnModule (Ljava/util/List;)Lio/github/baole/konture/ModulesRuleBuilder;
@@ -4121,19 +4152,11 @@ public abstract interface class io/github/baole/konture/ModulesShouldDependencyA
 	public fun notDependOnModules (Ljava/lang/String;)Lio/github/baole/konture/ModulesRuleBuilder;
 	public fun notDependOnModules (Ljava/util/List;)Lio/github/baole/konture/ModulesRuleBuilder;
 	public fun notDependOnModules ([Ljava/lang/String;)Lio/github/baole/konture/ModulesRuleBuilder;
-	public fun notHaveDependencies ([Ljava/lang/String;Z)Lio/github/baole/konture/ModulesRuleBuilder;
-	public static synthetic fun notHaveDependencies$default (Lio/github/baole/konture/ModulesShouldDependencyAssertions;[Ljava/lang/String;ZILjava/lang/Object;)Lio/github/baole/konture/ModulesRuleBuilder;
-	public fun notHaveDependency (Ljava/lang/String;Z)Lio/github/baole/konture/ModulesRuleBuilder;
-	public static synthetic fun notHaveDependency$default (Lio/github/baole/konture/ModulesShouldDependencyAssertions;Ljava/lang/String;ZILjava/lang/Object;)Lio/github/baole/konture/ModulesRuleBuilder;
-	public fun onlyBeDependedOnBy (Ljava/lang/String;)Lio/github/baole/konture/ModulesRuleBuilder;
-	public fun onlyBeDependedOnBy (Ljava/lang/String;Lkotlin/jvm/functions/Function1;)Lio/github/baole/konture/ModulesRuleBuilder;
-	public fun onlyBeDependedOnBy (Ljava/util/List;)Lio/github/baole/konture/ModulesRuleBuilder;
-	public fun onlyBeDependedOnBy (Lkotlin/jvm/functions/Function1;)Lio/github/baole/konture/ModulesRuleBuilder;
-	public fun onlyBeDependedOnBy ([Ljava/lang/String;)Lio/github/baole/konture/ModulesRuleBuilder;
-	public fun onlyDependOnExternalLibraries (Ljava/util/List;Z)Lio/github/baole/konture/ModulesRuleBuilder;
-	public fun onlyDependOnExternalLibraries ([Ljava/lang/String;Z)Lio/github/baole/konture/ModulesRuleBuilder;
-	public static synthetic fun onlyDependOnExternalLibraries$default (Lio/github/baole/konture/ModulesShouldDependencyAssertions;Ljava/util/List;ZILjava/lang/Object;)Lio/github/baole/konture/ModulesRuleBuilder;
-	public static synthetic fun onlyDependOnExternalLibraries$default (Lio/github/baole/konture/ModulesShouldDependencyAssertions;[Ljava/lang/String;ZILjava/lang/Object;)Lio/github/baole/konture/ModulesRuleBuilder;
+	public fun onlyDependOn (Ljava/lang/String;)Lio/github/baole/konture/ModulesRuleBuilder;
+	public fun onlyDependOn (Ljava/lang/String;Lkotlin/jvm/functions/Function1;)Lio/github/baole/konture/ModulesRuleBuilder;
+	public fun onlyDependOn (Ljava/util/List;)Lio/github/baole/konture/ModulesRuleBuilder;
+	public fun onlyDependOn (Lkotlin/jvm/functions/Function1;)Lio/github/baole/konture/ModulesRuleBuilder;
+	public fun onlyDependOn ([Ljava/lang/String;)Lio/github/baole/konture/ModulesRuleBuilder;
 	public fun onlyDependOnModules (Ljava/lang/String;)Lio/github/baole/konture/ModulesRuleBuilder;
 	public fun onlyDependOnModules (Ljava/lang/String;Lkotlin/jvm/functions/Function1;)Lio/github/baole/konture/ModulesRuleBuilder;
 	public fun onlyDependOnModules (Ljava/util/List;)Lio/github/baole/konture/ModulesRuleBuilder;
@@ -4145,12 +4168,6 @@ public final class io/github/baole/konture/ModulesShouldDependencyAssertions$Def
 	public static fun beFreeOfCycles (Lio/github/baole/konture/ModulesShouldDependencyAssertions;)Lio/github/baole/konture/ModulesRuleBuilder;
 	public static fun beLeafModule (Lio/github/baole/konture/ModulesShouldDependencyAssertions;)Lio/github/baole/konture/ModulesRuleBuilder;
 	public static fun beStandalone (Lio/github/baole/konture/ModulesShouldDependencyAssertions;)Lio/github/baole/konture/ModulesRuleBuilder;
-	public static fun dependOnExternalLibraries (Lio/github/baole/konture/ModulesShouldDependencyAssertions;Ljava/util/List;Z)Lio/github/baole/konture/ModulesRuleBuilder;
-	public static fun dependOnExternalLibraries (Lio/github/baole/konture/ModulesShouldDependencyAssertions;[Ljava/lang/String;Z)Lio/github/baole/konture/ModulesRuleBuilder;
-	public static synthetic fun dependOnExternalLibraries$default (Lio/github/baole/konture/ModulesShouldDependencyAssertions;Ljava/util/List;ZILjava/lang/Object;)Lio/github/baole/konture/ModulesRuleBuilder;
-	public static synthetic fun dependOnExternalLibraries$default (Lio/github/baole/konture/ModulesShouldDependencyAssertions;[Ljava/lang/String;ZILjava/lang/Object;)Lio/github/baole/konture/ModulesRuleBuilder;
-	public static fun dependOnExternalLibrary (Lio/github/baole/konture/ModulesShouldDependencyAssertions;Ljava/lang/String;Z)Lio/github/baole/konture/ModulesRuleBuilder;
-	public static synthetic fun dependOnExternalLibrary$default (Lio/github/baole/konture/ModulesShouldDependencyAssertions;Ljava/lang/String;ZILjava/lang/Object;)Lio/github/baole/konture/ModulesRuleBuilder;
 	public static fun dependOnModule (Lio/github/baole/konture/ModulesShouldDependencyAssertions;Ljava/lang/String;)Lio/github/baole/konture/ModulesRuleBuilder;
 	public static fun dependOnModuleApi (Lio/github/baole/konture/ModulesShouldDependencyAssertions;Ljava/lang/String;)Lio/github/baole/konture/ModulesRuleBuilder;
 	public static fun dependOnModuleImplementation (Lio/github/baole/konture/ModulesShouldDependencyAssertions;Ljava/lang/String;)Lio/github/baole/konture/ModulesRuleBuilder;
@@ -4158,15 +4175,22 @@ public final class io/github/baole/konture/ModulesShouldDependencyAssertions$Def
 	public static fun dependOnModuleViaConfiguration (Lio/github/baole/konture/ModulesShouldDependencyAssertions;Ljava/lang/String;Ljava/lang/String;)Lio/github/baole/konture/ModulesRuleBuilder;
 	public static fun dependOnModules (Lio/github/baole/konture/ModulesShouldDependencyAssertions;Ljava/util/List;)Lio/github/baole/konture/ModulesRuleBuilder;
 	public static fun dependOnModules (Lio/github/baole/konture/ModulesShouldDependencyAssertions;[Ljava/lang/String;)Lio/github/baole/konture/ModulesRuleBuilder;
-	public static fun haveDependencies (Lio/github/baole/konture/ModulesShouldDependencyAssertions;[Ljava/lang/String;Z)Lio/github/baole/konture/ModulesRuleBuilder;
-	public static synthetic fun haveDependencies$default (Lio/github/baole/konture/ModulesShouldDependencyAssertions;[Ljava/lang/String;ZILjava/lang/Object;)Lio/github/baole/konture/ModulesRuleBuilder;
-	public static fun haveDependency (Lio/github/baole/konture/ModulesShouldDependencyAssertions;Ljava/lang/String;Z)Lio/github/baole/konture/ModulesRuleBuilder;
-	public static synthetic fun haveDependency$default (Lio/github/baole/konture/ModulesShouldDependencyAssertions;Ljava/lang/String;ZILjava/lang/Object;)Lio/github/baole/konture/ModulesRuleBuilder;
+	public static fun mayDependOn (Lio/github/baole/konture/ModulesShouldDependencyAssertions;Ljava/lang/String;)Lio/github/baole/konture/ModulesRuleBuilder;
+	public static fun mayDependOn (Lio/github/baole/konture/ModulesShouldDependencyAssertions;Ljava/lang/String;Lkotlin/jvm/functions/Function1;)Lio/github/baole/konture/ModulesRuleBuilder;
+	public static fun mayDependOn (Lio/github/baole/konture/ModulesShouldDependencyAssertions;Ljava/util/List;)Lio/github/baole/konture/ModulesRuleBuilder;
+	public static fun mayDependOn (Lio/github/baole/konture/ModulesShouldDependencyAssertions;Lkotlin/jvm/functions/Function1;)Lio/github/baole/konture/ModulesRuleBuilder;
+	public static fun mayDependOn (Lio/github/baole/konture/ModulesShouldDependencyAssertions;[Ljava/lang/String;)Lio/github/baole/konture/ModulesRuleBuilder;
+	public static fun mustNotDependOn (Lio/github/baole/konture/ModulesShouldDependencyAssertions;Ljava/lang/String;)Lio/github/baole/konture/ModulesRuleBuilder;
+	public static fun mustNotDependOn (Lio/github/baole/konture/ModulesShouldDependencyAssertions;Ljava/lang/String;Lkotlin/jvm/functions/Function1;)Lio/github/baole/konture/ModulesRuleBuilder;
+	public static fun mustNotDependOn (Lio/github/baole/konture/ModulesShouldDependencyAssertions;Ljava/util/List;)Lio/github/baole/konture/ModulesRuleBuilder;
+	public static fun mustNotDependOn (Lio/github/baole/konture/ModulesShouldDependencyAssertions;Lkotlin/jvm/functions/Function1;)Lio/github/baole/konture/ModulesRuleBuilder;
+	public static fun mustNotDependOn (Lio/github/baole/konture/ModulesShouldDependencyAssertions;[Ljava/lang/String;)Lio/github/baole/konture/ModulesRuleBuilder;
 	public static fun notContainCycles (Lio/github/baole/konture/ModulesShouldDependencyAssertions;)Lio/github/baole/konture/ModulesRuleBuilder;
-	public static fun notDependOnExternalLibraries (Lio/github/baole/konture/ModulesShouldDependencyAssertions;Ljava/util/List;Z)Lio/github/baole/konture/ModulesRuleBuilder;
-	public static fun notDependOnExternalLibraries (Lio/github/baole/konture/ModulesShouldDependencyAssertions;[Ljava/lang/String;Z)Lio/github/baole/konture/ModulesRuleBuilder;
-	public static synthetic fun notDependOnExternalLibraries$default (Lio/github/baole/konture/ModulesShouldDependencyAssertions;Ljava/util/List;ZILjava/lang/Object;)Lio/github/baole/konture/ModulesRuleBuilder;
-	public static synthetic fun notDependOnExternalLibraries$default (Lio/github/baole/konture/ModulesShouldDependencyAssertions;[Ljava/lang/String;ZILjava/lang/Object;)Lio/github/baole/konture/ModulesRuleBuilder;
+	public static fun notDependOn (Lio/github/baole/konture/ModulesShouldDependencyAssertions;Ljava/lang/String;)Lio/github/baole/konture/ModulesRuleBuilder;
+	public static fun notDependOn (Lio/github/baole/konture/ModulesShouldDependencyAssertions;Ljava/lang/String;Lkotlin/jvm/functions/Function1;)Lio/github/baole/konture/ModulesRuleBuilder;
+	public static fun notDependOn (Lio/github/baole/konture/ModulesShouldDependencyAssertions;Ljava/util/List;)Lio/github/baole/konture/ModulesRuleBuilder;
+	public static fun notDependOn (Lio/github/baole/konture/ModulesShouldDependencyAssertions;Lkotlin/jvm/functions/Function1;)Lio/github/baole/konture/ModulesRuleBuilder;
+	public static fun notDependOn (Lio/github/baole/konture/ModulesShouldDependencyAssertions;[Ljava/lang/String;)Lio/github/baole/konture/ModulesRuleBuilder;
 	public static fun notDependOnModule (Lio/github/baole/konture/ModulesShouldDependencyAssertions;Ljava/lang/String;)Lio/github/baole/konture/ModulesRuleBuilder;
 	public static fun notDependOnModule (Lio/github/baole/konture/ModulesShouldDependencyAssertions;Ljava/lang/String;Lkotlin/jvm/functions/Function1;)Lio/github/baole/konture/ModulesRuleBuilder;
 	public static fun notDependOnModule (Lio/github/baole/konture/ModulesShouldDependencyAssertions;Ljava/util/List;)Lio/github/baole/konture/ModulesRuleBuilder;
@@ -4177,24 +4201,104 @@ public final class io/github/baole/konture/ModulesShouldDependencyAssertions$Def
 	public static fun notDependOnModules (Lio/github/baole/konture/ModulesShouldDependencyAssertions;Ljava/lang/String;)Lio/github/baole/konture/ModulesRuleBuilder;
 	public static fun notDependOnModules (Lio/github/baole/konture/ModulesShouldDependencyAssertions;Ljava/util/List;)Lio/github/baole/konture/ModulesRuleBuilder;
 	public static fun notDependOnModules (Lio/github/baole/konture/ModulesShouldDependencyAssertions;[Ljava/lang/String;)Lio/github/baole/konture/ModulesRuleBuilder;
-	public static fun notHaveDependencies (Lio/github/baole/konture/ModulesShouldDependencyAssertions;[Ljava/lang/String;Z)Lio/github/baole/konture/ModulesRuleBuilder;
-	public static synthetic fun notHaveDependencies$default (Lio/github/baole/konture/ModulesShouldDependencyAssertions;[Ljava/lang/String;ZILjava/lang/Object;)Lio/github/baole/konture/ModulesRuleBuilder;
-	public static fun notHaveDependency (Lio/github/baole/konture/ModulesShouldDependencyAssertions;Ljava/lang/String;Z)Lio/github/baole/konture/ModulesRuleBuilder;
-	public static synthetic fun notHaveDependency$default (Lio/github/baole/konture/ModulesShouldDependencyAssertions;Ljava/lang/String;ZILjava/lang/Object;)Lio/github/baole/konture/ModulesRuleBuilder;
-	public static fun onlyBeDependedOnBy (Lio/github/baole/konture/ModulesShouldDependencyAssertions;Ljava/lang/String;)Lio/github/baole/konture/ModulesRuleBuilder;
-	public static fun onlyBeDependedOnBy (Lio/github/baole/konture/ModulesShouldDependencyAssertions;Ljava/lang/String;Lkotlin/jvm/functions/Function1;)Lio/github/baole/konture/ModulesRuleBuilder;
-	public static fun onlyBeDependedOnBy (Lio/github/baole/konture/ModulesShouldDependencyAssertions;Ljava/util/List;)Lio/github/baole/konture/ModulesRuleBuilder;
-	public static fun onlyBeDependedOnBy (Lio/github/baole/konture/ModulesShouldDependencyAssertions;Lkotlin/jvm/functions/Function1;)Lio/github/baole/konture/ModulesRuleBuilder;
-	public static fun onlyBeDependedOnBy (Lio/github/baole/konture/ModulesShouldDependencyAssertions;[Ljava/lang/String;)Lio/github/baole/konture/ModulesRuleBuilder;
-	public static fun onlyDependOnExternalLibraries (Lio/github/baole/konture/ModulesShouldDependencyAssertions;Ljava/util/List;Z)Lio/github/baole/konture/ModulesRuleBuilder;
-	public static fun onlyDependOnExternalLibraries (Lio/github/baole/konture/ModulesShouldDependencyAssertions;[Ljava/lang/String;Z)Lio/github/baole/konture/ModulesRuleBuilder;
-	public static synthetic fun onlyDependOnExternalLibraries$default (Lio/github/baole/konture/ModulesShouldDependencyAssertions;Ljava/util/List;ZILjava/lang/Object;)Lio/github/baole/konture/ModulesRuleBuilder;
-	public static synthetic fun onlyDependOnExternalLibraries$default (Lio/github/baole/konture/ModulesShouldDependencyAssertions;[Ljava/lang/String;ZILjava/lang/Object;)Lio/github/baole/konture/ModulesRuleBuilder;
+	public static fun onlyDependOn (Lio/github/baole/konture/ModulesShouldDependencyAssertions;Ljava/lang/String;)Lio/github/baole/konture/ModulesRuleBuilder;
+	public static fun onlyDependOn (Lio/github/baole/konture/ModulesShouldDependencyAssertions;Ljava/lang/String;Lkotlin/jvm/functions/Function1;)Lio/github/baole/konture/ModulesRuleBuilder;
+	public static fun onlyDependOn (Lio/github/baole/konture/ModulesShouldDependencyAssertions;Ljava/util/List;)Lio/github/baole/konture/ModulesRuleBuilder;
+	public static fun onlyDependOn (Lio/github/baole/konture/ModulesShouldDependencyAssertions;Lkotlin/jvm/functions/Function1;)Lio/github/baole/konture/ModulesRuleBuilder;
+	public static fun onlyDependOn (Lio/github/baole/konture/ModulesShouldDependencyAssertions;[Ljava/lang/String;)Lio/github/baole/konture/ModulesRuleBuilder;
 	public static fun onlyDependOnModules (Lio/github/baole/konture/ModulesShouldDependencyAssertions;Ljava/lang/String;)Lio/github/baole/konture/ModulesRuleBuilder;
 	public static fun onlyDependOnModules (Lio/github/baole/konture/ModulesShouldDependencyAssertions;Ljava/lang/String;Lkotlin/jvm/functions/Function1;)Lio/github/baole/konture/ModulesRuleBuilder;
 	public static fun onlyDependOnModules (Lio/github/baole/konture/ModulesShouldDependencyAssertions;Ljava/util/List;)Lio/github/baole/konture/ModulesRuleBuilder;
 	public static fun onlyDependOnModules (Lio/github/baole/konture/ModulesShouldDependencyAssertions;Lkotlin/jvm/functions/Function1;)Lio/github/baole/konture/ModulesRuleBuilder;
 	public static fun onlyDependOnModules (Lio/github/baole/konture/ModulesShouldDependencyAssertions;[Ljava/lang/String;)Lio/github/baole/konture/ModulesRuleBuilder;
+}
+
+public abstract interface class io/github/baole/konture/ModulesShouldExternalDependencyAssertions {
+	public fun dependOnExternalLibraries (Ljava/util/List;Z)Lio/github/baole/konture/ModulesRuleBuilder;
+	public fun dependOnExternalLibraries ([Ljava/lang/String;Z)Lio/github/baole/konture/ModulesRuleBuilder;
+	public static synthetic fun dependOnExternalLibraries$default (Lio/github/baole/konture/ModulesShouldExternalDependencyAssertions;Ljava/util/List;ZILjava/lang/Object;)Lio/github/baole/konture/ModulesRuleBuilder;
+	public static synthetic fun dependOnExternalLibraries$default (Lio/github/baole/konture/ModulesShouldExternalDependencyAssertions;[Ljava/lang/String;ZILjava/lang/Object;)Lio/github/baole/konture/ModulesRuleBuilder;
+	public fun dependOnExternalLibrary (Ljava/lang/String;Z)Lio/github/baole/konture/ModulesRuleBuilder;
+	public static synthetic fun dependOnExternalLibrary$default (Lio/github/baole/konture/ModulesShouldExternalDependencyAssertions;Ljava/lang/String;ZILjava/lang/Object;)Lio/github/baole/konture/ModulesRuleBuilder;
+	public abstract fun getBuilder ()Lio/github/baole/konture/ModulesRuleBuilder;
+	public fun haveDependencies ([Ljava/lang/String;Z)Lio/github/baole/konture/ModulesRuleBuilder;
+	public static synthetic fun haveDependencies$default (Lio/github/baole/konture/ModulesShouldExternalDependencyAssertions;[Ljava/lang/String;ZILjava/lang/Object;)Lio/github/baole/konture/ModulesRuleBuilder;
+	public fun haveDependency (Ljava/lang/String;Z)Lio/github/baole/konture/ModulesRuleBuilder;
+	public static synthetic fun haveDependency$default (Lio/github/baole/konture/ModulesShouldExternalDependencyAssertions;Ljava/lang/String;ZILjava/lang/Object;)Lio/github/baole/konture/ModulesRuleBuilder;
+	public fun notDependOnExternalLibraries (Ljava/util/List;Z)Lio/github/baole/konture/ModulesRuleBuilder;
+	public fun notDependOnExternalLibraries ([Ljava/lang/String;Z)Lio/github/baole/konture/ModulesRuleBuilder;
+	public static synthetic fun notDependOnExternalLibraries$default (Lio/github/baole/konture/ModulesShouldExternalDependencyAssertions;Ljava/util/List;ZILjava/lang/Object;)Lio/github/baole/konture/ModulesRuleBuilder;
+	public static synthetic fun notDependOnExternalLibraries$default (Lio/github/baole/konture/ModulesShouldExternalDependencyAssertions;[Ljava/lang/String;ZILjava/lang/Object;)Lio/github/baole/konture/ModulesRuleBuilder;
+	public fun notHaveDependencies ([Ljava/lang/String;Z)Lio/github/baole/konture/ModulesRuleBuilder;
+	public static synthetic fun notHaveDependencies$default (Lio/github/baole/konture/ModulesShouldExternalDependencyAssertions;[Ljava/lang/String;ZILjava/lang/Object;)Lio/github/baole/konture/ModulesRuleBuilder;
+	public fun notHaveDependency (Ljava/lang/String;Z)Lio/github/baole/konture/ModulesRuleBuilder;
+	public static synthetic fun notHaveDependency$default (Lio/github/baole/konture/ModulesShouldExternalDependencyAssertions;Ljava/lang/String;ZILjava/lang/Object;)Lio/github/baole/konture/ModulesRuleBuilder;
+	public fun onlyDependOnExternalLibraries (Ljava/util/List;Z)Lio/github/baole/konture/ModulesRuleBuilder;
+	public fun onlyDependOnExternalLibraries ([Ljava/lang/String;Z)Lio/github/baole/konture/ModulesRuleBuilder;
+	public static synthetic fun onlyDependOnExternalLibraries$default (Lio/github/baole/konture/ModulesShouldExternalDependencyAssertions;Ljava/util/List;ZILjava/lang/Object;)Lio/github/baole/konture/ModulesRuleBuilder;
+	public static synthetic fun onlyDependOnExternalLibraries$default (Lio/github/baole/konture/ModulesShouldExternalDependencyAssertions;[Ljava/lang/String;ZILjava/lang/Object;)Lio/github/baole/konture/ModulesRuleBuilder;
+}
+
+public final class io/github/baole/konture/ModulesShouldExternalDependencyAssertions$DefaultImpls {
+	public static fun dependOnExternalLibraries (Lio/github/baole/konture/ModulesShouldExternalDependencyAssertions;Ljava/util/List;Z)Lio/github/baole/konture/ModulesRuleBuilder;
+	public static fun dependOnExternalLibraries (Lio/github/baole/konture/ModulesShouldExternalDependencyAssertions;[Ljava/lang/String;Z)Lio/github/baole/konture/ModulesRuleBuilder;
+	public static synthetic fun dependOnExternalLibraries$default (Lio/github/baole/konture/ModulesShouldExternalDependencyAssertions;Ljava/util/List;ZILjava/lang/Object;)Lio/github/baole/konture/ModulesRuleBuilder;
+	public static synthetic fun dependOnExternalLibraries$default (Lio/github/baole/konture/ModulesShouldExternalDependencyAssertions;[Ljava/lang/String;ZILjava/lang/Object;)Lio/github/baole/konture/ModulesRuleBuilder;
+	public static fun dependOnExternalLibrary (Lio/github/baole/konture/ModulesShouldExternalDependencyAssertions;Ljava/lang/String;Z)Lio/github/baole/konture/ModulesRuleBuilder;
+	public static synthetic fun dependOnExternalLibrary$default (Lio/github/baole/konture/ModulesShouldExternalDependencyAssertions;Ljava/lang/String;ZILjava/lang/Object;)Lio/github/baole/konture/ModulesRuleBuilder;
+	public static fun haveDependencies (Lio/github/baole/konture/ModulesShouldExternalDependencyAssertions;[Ljava/lang/String;Z)Lio/github/baole/konture/ModulesRuleBuilder;
+	public static synthetic fun haveDependencies$default (Lio/github/baole/konture/ModulesShouldExternalDependencyAssertions;[Ljava/lang/String;ZILjava/lang/Object;)Lio/github/baole/konture/ModulesRuleBuilder;
+	public static fun haveDependency (Lio/github/baole/konture/ModulesShouldExternalDependencyAssertions;Ljava/lang/String;Z)Lio/github/baole/konture/ModulesRuleBuilder;
+	public static synthetic fun haveDependency$default (Lio/github/baole/konture/ModulesShouldExternalDependencyAssertions;Ljava/lang/String;ZILjava/lang/Object;)Lio/github/baole/konture/ModulesRuleBuilder;
+	public static fun notDependOnExternalLibraries (Lio/github/baole/konture/ModulesShouldExternalDependencyAssertions;Ljava/util/List;Z)Lio/github/baole/konture/ModulesRuleBuilder;
+	public static fun notDependOnExternalLibraries (Lio/github/baole/konture/ModulesShouldExternalDependencyAssertions;[Ljava/lang/String;Z)Lio/github/baole/konture/ModulesRuleBuilder;
+	public static synthetic fun notDependOnExternalLibraries$default (Lio/github/baole/konture/ModulesShouldExternalDependencyAssertions;Ljava/util/List;ZILjava/lang/Object;)Lio/github/baole/konture/ModulesRuleBuilder;
+	public static synthetic fun notDependOnExternalLibraries$default (Lio/github/baole/konture/ModulesShouldExternalDependencyAssertions;[Ljava/lang/String;ZILjava/lang/Object;)Lio/github/baole/konture/ModulesRuleBuilder;
+	public static fun notHaveDependencies (Lio/github/baole/konture/ModulesShouldExternalDependencyAssertions;[Ljava/lang/String;Z)Lio/github/baole/konture/ModulesRuleBuilder;
+	public static synthetic fun notHaveDependencies$default (Lio/github/baole/konture/ModulesShouldExternalDependencyAssertions;[Ljava/lang/String;ZILjava/lang/Object;)Lio/github/baole/konture/ModulesRuleBuilder;
+	public static fun notHaveDependency (Lio/github/baole/konture/ModulesShouldExternalDependencyAssertions;Ljava/lang/String;Z)Lio/github/baole/konture/ModulesRuleBuilder;
+	public static synthetic fun notHaveDependency$default (Lio/github/baole/konture/ModulesShouldExternalDependencyAssertions;Ljava/lang/String;ZILjava/lang/Object;)Lio/github/baole/konture/ModulesRuleBuilder;
+	public static fun onlyDependOnExternalLibraries (Lio/github/baole/konture/ModulesShouldExternalDependencyAssertions;Ljava/util/List;Z)Lio/github/baole/konture/ModulesRuleBuilder;
+	public static fun onlyDependOnExternalLibraries (Lio/github/baole/konture/ModulesShouldExternalDependencyAssertions;[Ljava/lang/String;Z)Lio/github/baole/konture/ModulesRuleBuilder;
+	public static synthetic fun onlyDependOnExternalLibraries$default (Lio/github/baole/konture/ModulesShouldExternalDependencyAssertions;Ljava/util/List;ZILjava/lang/Object;)Lio/github/baole/konture/ModulesRuleBuilder;
+	public static synthetic fun onlyDependOnExternalLibraries$default (Lio/github/baole/konture/ModulesShouldExternalDependencyAssertions;[Ljava/lang/String;ZILjava/lang/Object;)Lio/github/baole/konture/ModulesRuleBuilder;
+}
+
+public abstract interface class io/github/baole/konture/ModulesShouldInboundDependencyAssertions {
+	public abstract fun getBuilder ()Lio/github/baole/konture/ModulesRuleBuilder;
+	public fun mayBeDependedOnBy (Ljava/lang/String;)Lio/github/baole/konture/ModulesRuleBuilder;
+	public fun mayBeDependedOnBy (Ljava/lang/String;Lkotlin/jvm/functions/Function1;)Lio/github/baole/konture/ModulesRuleBuilder;
+	public fun mayBeDependedOnBy (Ljava/util/List;)Lio/github/baole/konture/ModulesRuleBuilder;
+	public fun mayBeDependedOnBy (Lkotlin/jvm/functions/Function1;)Lio/github/baole/konture/ModulesRuleBuilder;
+	public fun mayBeDependedOnBy ([Ljava/lang/String;)Lio/github/baole/konture/ModulesRuleBuilder;
+	public fun mustNotBeDependedOnBy (Ljava/lang/String;)Lio/github/baole/konture/ModulesRuleBuilder;
+	public fun mustNotBeDependedOnBy (Ljava/lang/String;Lkotlin/jvm/functions/Function1;)Lio/github/baole/konture/ModulesRuleBuilder;
+	public fun mustNotBeDependedOnBy (Ljava/util/List;)Lio/github/baole/konture/ModulesRuleBuilder;
+	public fun mustNotBeDependedOnBy (Lkotlin/jvm/functions/Function1;)Lio/github/baole/konture/ModulesRuleBuilder;
+	public fun mustNotBeDependedOnBy ([Ljava/lang/String;)Lio/github/baole/konture/ModulesRuleBuilder;
+	public fun onlyBeDependedOnBy (Ljava/lang/String;)Lio/github/baole/konture/ModulesRuleBuilder;
+	public fun onlyBeDependedOnBy (Ljava/lang/String;Lkotlin/jvm/functions/Function1;)Lio/github/baole/konture/ModulesRuleBuilder;
+	public fun onlyBeDependedOnBy (Ljava/util/List;)Lio/github/baole/konture/ModulesRuleBuilder;
+	public fun onlyBeDependedOnBy (Lkotlin/jvm/functions/Function1;)Lio/github/baole/konture/ModulesRuleBuilder;
+	public fun onlyBeDependedOnBy ([Ljava/lang/String;)Lio/github/baole/konture/ModulesRuleBuilder;
+}
+
+public final class io/github/baole/konture/ModulesShouldInboundDependencyAssertions$DefaultImpls {
+	public static fun mayBeDependedOnBy (Lio/github/baole/konture/ModulesShouldInboundDependencyAssertions;Ljava/lang/String;)Lio/github/baole/konture/ModulesRuleBuilder;
+	public static fun mayBeDependedOnBy (Lio/github/baole/konture/ModulesShouldInboundDependencyAssertions;Ljava/lang/String;Lkotlin/jvm/functions/Function1;)Lio/github/baole/konture/ModulesRuleBuilder;
+	public static fun mayBeDependedOnBy (Lio/github/baole/konture/ModulesShouldInboundDependencyAssertions;Ljava/util/List;)Lio/github/baole/konture/ModulesRuleBuilder;
+	public static fun mayBeDependedOnBy (Lio/github/baole/konture/ModulesShouldInboundDependencyAssertions;Lkotlin/jvm/functions/Function1;)Lio/github/baole/konture/ModulesRuleBuilder;
+	public static fun mayBeDependedOnBy (Lio/github/baole/konture/ModulesShouldInboundDependencyAssertions;[Ljava/lang/String;)Lio/github/baole/konture/ModulesRuleBuilder;
+	public static fun mustNotBeDependedOnBy (Lio/github/baole/konture/ModulesShouldInboundDependencyAssertions;Ljava/lang/String;)Lio/github/baole/konture/ModulesRuleBuilder;
+	public static fun mustNotBeDependedOnBy (Lio/github/baole/konture/ModulesShouldInboundDependencyAssertions;Ljava/lang/String;Lkotlin/jvm/functions/Function1;)Lio/github/baole/konture/ModulesRuleBuilder;
+	public static fun mustNotBeDependedOnBy (Lio/github/baole/konture/ModulesShouldInboundDependencyAssertions;Ljava/util/List;)Lio/github/baole/konture/ModulesRuleBuilder;
+	public static fun mustNotBeDependedOnBy (Lio/github/baole/konture/ModulesShouldInboundDependencyAssertions;Lkotlin/jvm/functions/Function1;)Lio/github/baole/konture/ModulesRuleBuilder;
+	public static fun mustNotBeDependedOnBy (Lio/github/baole/konture/ModulesShouldInboundDependencyAssertions;[Ljava/lang/String;)Lio/github/baole/konture/ModulesRuleBuilder;
+	public static fun onlyBeDependedOnBy (Lio/github/baole/konture/ModulesShouldInboundDependencyAssertions;Ljava/lang/String;)Lio/github/baole/konture/ModulesRuleBuilder;
+	public static fun onlyBeDependedOnBy (Lio/github/baole/konture/ModulesShouldInboundDependencyAssertions;Ljava/lang/String;Lkotlin/jvm/functions/Function1;)Lio/github/baole/konture/ModulesRuleBuilder;
+	public static fun onlyBeDependedOnBy (Lio/github/baole/konture/ModulesShouldInboundDependencyAssertions;Ljava/util/List;)Lio/github/baole/konture/ModulesRuleBuilder;
+	public static fun onlyBeDependedOnBy (Lio/github/baole/konture/ModulesShouldInboundDependencyAssertions;Lkotlin/jvm/functions/Function1;)Lio/github/baole/konture/ModulesRuleBuilder;
+	public static fun onlyBeDependedOnBy (Lio/github/baole/konture/ModulesShouldInboundDependencyAssertions;[Ljava/lang/String;)Lio/github/baole/konture/ModulesRuleBuilder;
 }
 
 public abstract interface class io/github/baole/konture/ModulesShouldStructureAssertions {
