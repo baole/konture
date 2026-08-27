@@ -6,29 +6,22 @@
 
 package io.github.baole.konture.impl
 
-import io.github.baole.konture.HtmlViolationFormatter
-import io.github.baole.konture.HumanReadableViolationFormatter
 import io.github.baole.konture.Konture
 import io.github.baole.konture.Module
-import io.github.baole.konture.OutputFormat
-import io.github.baole.konture.ProblemMatcherViolationFormatter
 import io.github.baole.konture.ProjectGraph
 import io.github.baole.konture.core.KontureLogger
 import io.github.baole.konture.core.LogLevel
-import io.github.baole.konture.core.model.Severity
-import io.github.baole.konture.core.model.SuppressionKind
-import io.github.baole.konture.core.model.SuppressionMetadata
 import io.github.baole.konture.core.model.Violation
 import io.github.baole.konture.core.model.ViolationReport
 import io.github.baole.konture.i18n.getMessage
-import io.github.baole.konture.impl.report.ReportAccumulator
 import java.io.File
-import java.util.Locale
 import java.util.concurrent.ConcurrentHashMap
 
 internal class BaselineManager {
     private val state: KontureRuntimeState
         get() = KontureRuntimeStateProvider.currentState
+
+    private val evaluator = BaselineRuleEvaluator(this)
 
     @Volatile
     private var capturedBaselinePath: String? = null
@@ -49,7 +42,7 @@ internal class BaselineManager {
     private var isShutdownRunning = false
 
     @Suppress("TooGenericExceptionCaught", "SwallowedException")
-    private fun captureContextSnapshot() {
+    internal fun captureContextSnapshot() {
         if (isShutdownRunning) return
         try {
             val ctx = state
@@ -185,53 +178,13 @@ internal class BaselineManager {
                 return loaded
             }
 
-            val violations = mutableSetOf<FlatBaselineViolation>()
-            val root = buildRoot
-            val isCustomDir =
-                File(currentPath).isAbsolute ||
-                    run {
-                        if (currentDirProp == null) {
-                            false
-                        } else if (currentGraph == null || root == null) {
-                            true
-                        } else {
-                            val customDir = File(currentDirProp).canonicalFile
-                            val isProjectModuleDir =
-                                currentGraph.getAllModules().any { module ->
-                                    try {
-                                        val moduleDir = BaselineNormalizer.getModuleDir(root, module)
-                                        moduleDir == customDir
-                                    } catch (e: Exception) {
-                                        false
-                                    }
-                                }
-                            !isProjectModuleDir
-                        }
-                    }
-
-            if (currentGraph != null && root != null && !isCustomDir) {
-                KontureLogger.log(LogLevel.INFO, "Loading per-module architecture baselines from project graph...")
-                for (module in currentGraph.getAllModules()) {
-                    val moduleDir = BaselineNormalizer.getModuleDir(root, module)
-                    val file = File(moduleDir, currentPath)
-                    if (file.exists()) {
-                        violations.addAll(BaselineSerializer.loadViolationsFromFile(file))
-                    }
-                }
-            } else {
-                // Standalone fallback
-                val file =
-                    if (File(currentPath).isAbsolute) {
-                        File(currentPath).canonicalFile
-                    } else {
-                        val dir = File(currentDirProp ?: System.getProperty("user.dir")).canonicalFile
-                        File(dir, currentPath).canonicalFile
-                    }
-                if (file.exists()) {
-                    violations.addAll(BaselineSerializer.loadViolationsFromFile(file))
-                }
-            }
-
+            val violations =
+                BaselineStorage.loadExistingViolations(
+                    currentPath,
+                    currentDirProp,
+                    currentGraph,
+                    buildRoot,
+                )
             loadedCacheKey = cacheKey
             loadedViolations = violations
             return violations
@@ -286,7 +239,10 @@ internal class BaselineManager {
                                 KontureLogger.log(LogLevel.INFO, getMessage("baseline.resolved.info", resolved.size))
                             }
                             if (Konture.failOnResolvedViolations) {
-                                KontureLogger.log(LogLevel.ERROR, getMessage("baseline.resolved.ratchetError", resolved.size))
+                                KontureLogger.log(
+                                    LogLevel.ERROR,
+                                    getMessage("baseline.resolved.ratchetError", resolved.size),
+                                )
                             }
                         }
                     }
@@ -363,385 +319,51 @@ internal class BaselineManager {
         violations: List<String>,
         header: String,
     ) {
-        captureContextSnapshot()
-        if (violations.isEmpty()) return
-
-        val testLoc = TestLocationFinder.findTestLocation()
-        val testClass = testLoc?.className ?: "UnknownTest"
-        val testMethod = testLoc?.methodName ?: "unknownMethod"
-
-        val normalizedViolations =
-            violations.map {
-                val normMsg = BaselineNormalizer.normalize(it, buildRoot)
-                val (location, cleanMsg) = BaselineNormalizer.parseLocationAndMessage(normMsg, buildRoot)
-                Pair(
-                    FlatBaselineViolation(
-                        testClass = testClass,
-                        testMethod = testMethod,
-                        location = location,
-                        message = cleanMsg,
-                    ),
-                    normMsg,
-                )
-            }
-
-        evaluatedViolations.addAll(normalizedViolations.map { it.first })
-
-        if (generateBaseline) {
-            recordedViolations.addAll(normalizedViolations.map { it.first })
-            KontureLogger.log(
-                LogLevel.INFO,
-                "Recorded ${violations.size} violations to baseline (current total recorded in JVM: ${recordedViolations.size})",
-            )
-            return
-        }
-
-        // Filter out violations that are already baselined by matching testClass, testMethod, location, and message
-        val newViolations =
-            normalizedViolations.filter { (norm, _) ->
-                !existingViolations.contains(norm)
-            }.map { it.first }
-
-        if (newViolations.isNotEmpty()) {
-            val message =
-                buildString {
-                    appendLine(header)
-                    newViolations.forEach {
-                        if (it.location != null) {
-                            appendLine("  - ${it.message} (at ${it.location})")
-                        } else {
-                            appendLine("  - ${it.message}")
-                        }
-                    }
-                    append(getMessage("rule.violationCount", newViolations.size))
-                }
-            throw AssertionError(message)
-        }
+        evaluator.handleViolations(violations, header)
     }
 
     fun checkRule(
         violationHeader: String,
         runCheck: (MutableList<String>) -> Unit,
     ) {
-        val userLocale = Konture.locale
-
-        // 1. Run in English to get English violations for baseline matching
-        val englishViolations = mutableListOf<String>()
-        Konture.locale = Locale.ENGLISH
-        try {
-            runCheck(englishViolations)
-        } finally {
-            Konture.locale = userLocale
-        }
-
-        if (englishViolations.isEmpty()) return
-
-        // 2. Filter using baseline
-        val unmatchedIndices = getNewViolationIndices(englishViolations)
-
-        if (unmatchedIndices.isNotEmpty() || generateBaseline) {
-            if (generateBaseline) {
-                handleViolations(englishViolations, violationHeader)
-            } else {
-                // Run in user locale to get localized violations for throwing AssertionError
-                val localizedViolations = mutableListOf<String>()
-                runCheck(localizedViolations)
-
-                val unmatchedLocalized =
-                    unmatchedIndices.map { index ->
-                        if (index < localizedViolations.size) localizedViolations[index] else englishViolations[index]
-                    }
-
-                throwNewViolations(unmatchedLocalized, violationHeader)
-            }
-        }
+        evaluator.checkRule(violationHeader, runCheck)
     }
 
     /**
      * Executes a rule check function producing structured [Violation] instances, performs baseline
      * suppression filtering, handles localized [AssertionError] throwing if un-baselined violations exist,
      * and returns the aggregated [ViolationReport].
-     *
-     * @param ruleId The unique identifier of the rule being executed (e.g. `classes.rule`).
-     * @param violationHeader Localized failure header message displayed if violations are thrown.
-     * @param runCheckReport Callback lambda populating the provided list with structured [Violation] instances.
-     * @return The resulting [ViolationReport] containing all detected violations.
      */
     fun checkRuleReport(
         ruleId: String,
         violationHeader: String,
         runCheckReport: (MutableList<Violation>) -> Unit,
-    ): ViolationReport {
-        val userLocale = Konture.locale
-
-        val englishViolations = mutableListOf<Violation>()
-        Konture.locale = Locale.ENGLISH
-        try {
-            runCheckReport(englishViolations)
-        } finally {
-            Konture.locale = userLocale
-        }
-
-        val report = ViolationReport(ruleId = ruleId, violations = englishViolations)
-        val englishStrings = englishViolations.map { it.message }
-        val unmatchedIndices = getNewViolationIndices(englishStrings)
-
-        val unsuppressedViolations = mutableListOf<Violation>()
-        val suppressedViolations = mutableListOf<Violation>()
-        if (generateBaseline) {
-            suppressedViolations.addAll(englishViolations)
-        } else {
-            englishViolations.forEachIndexed { index, violation ->
-                if (violation.isSuppressed) {
-                    suppressedViolations.add(violation)
-                } else if (!unmatchedIndices.contains(index)) {
-                    val baselineSuppression =
-                        SuppressionMetadata(
-                            kind = SuppressionKind.BASELINE,
-                            reason = "Suppressed by baseline entry",
-                        )
-                    suppressedViolations.add(
-                        violation.copy(
-                            isSuppressed = true,
-                            suppression = baselineSuppression,
-                        ),
-                    )
-                } else {
-                    unsuppressedViolations.add(violation)
-                }
-            }
-        }
-
-        val ruleMetadata = KontureRuntimeStateProvider.currentState.currentRuleMetadata
-        ReportAccumulator.recordEvaluation(
-            ruleId = ruleId,
-            metadata = ruleMetadata,
-            unsuppressedViolations = unsuppressedViolations,
-            suppressedViolations = suppressedViolations,
-        )
-        ReportAccumulator.writeReports(buildRoot)
-
-        val failThreshold = Konture.failOnSeverity
-        val nonSuppressedUnmatchedIndices =
-            if (generateBaseline) {
-                emptyList()
-            } else {
-                unmatchedIndices.filter { index -> !englishViolations[index].isSuppressed }
-            }
-
-        val failingIndices =
-            if (failThreshold == null) {
-                emptyList()
-            } else {
-                nonSuppressedUnmatchedIndices.filter { index ->
-                    englishViolations[index].severity.ordinal >= failThreshold.ordinal
-                }
-            }
-
-        val subThresholdIndices =
-            if (generateBaseline) {
-                emptyList()
-            } else {
-                nonSuppressedUnmatchedIndices.filter { index ->
-                    failThreshold == null || englishViolations[index].severity.ordinal < failThreshold.ordinal
-                }
-            }
-
-        if (failingIndices.isNotEmpty() || subThresholdIndices.isNotEmpty() || generateBaseline) {
-            if (generateBaseline) {
-                val unsuppressedEnglish = englishViolations.filter { !it.isSuppressed }.map { it.message }
-                handleViolations(unsuppressedEnglish, violationHeader)
-            } else {
-                val localizedViolations = mutableListOf<Violation>()
-                runCheckReport(localizedViolations)
-
-                for (index in subThresholdIndices) {
-                    val v = if (index < localizedViolations.size) localizedViolations[index] else englishViolations[index]
-                    val logLevel =
-                        when (v.severity) {
-                            Severity.ERROR -> LogLevel.ERROR
-                            Severity.WARNING -> LogLevel.WARNING
-                            Severity.INFO -> LogLevel.INFO
-                        }
-                    val activeRuleId = v.ruleId.ifBlank { ruleId }
-                    val logMessage =
-                        getMessage("diagnostic.subThresholdViolation", v.severity.name, activeRuleId, v.message)
-                    KontureLogger.log(logLevel, logMessage)
-                }
-
-                if (failingIndices.isNotEmpty()) {
-                    val failingLocalized =
-                        failingIndices.map { index ->
-                            if (index < localizedViolations.size) localizedViolations[index] else englishViolations[index]
-                        }
-
-                    throwNewViolationsReport(ruleId, failingLocalized, violationHeader)
-                }
-            }
-        }
-
-        return report
-    }
-
-    private fun getNewViolationIndices(violations: List<String>): List<Int> {
-        captureContextSnapshot()
-        if (violations.isEmpty()) return emptyList()
-
-        val testLoc = TestLocationFinder.findTestLocation()
-        val testClass = testLoc?.className ?: "UnknownTest"
-        val testMethod = testLoc?.methodName ?: "unknownMethod"
-
-        val indices = mutableListOf<Int>()
-        violations.forEachIndexed { index, violation ->
-            val normMsg = BaselineNormalizer.normalize(violation, buildRoot)
-            val (location, cleanMsg) = BaselineNormalizer.parseLocationAndMessage(normMsg, buildRoot)
-            val norm =
-                FlatBaselineViolation(
-                    testClass = testClass,
-                    testMethod = testMethod,
-                    location = location,
-                    message = cleanMsg,
-                )
-            evaluatedViolations.add(norm)
-            if (!existingViolations.contains(norm)) {
-                indices.add(index)
-            }
-        }
-        return indices
-    }
-
-    private fun throwNewViolationsReport(
-        ruleId: String,
-        unmatchedViolations: List<Violation>,
-        violationHeader: String? = null,
-    ) {
-        if (unmatchedViolations.isEmpty()) return
-        val report = ViolationReport(ruleId = ruleId, violations = unmatchedViolations)
-        val message =
-            when (Konture.outputFormat) {
-                OutputFormat.PROBLEM_MATCHER -> ProblemMatcherViolationFormatter.format(report)
-                OutputFormat.HTML -> HtmlViolationFormatter.format(report, customHeader = violationHeader)
-                OutputFormat.HUMAN, OutputFormat.JSON, OutputFormat.SARIF ->
-                    HumanReadableViolationFormatter.format(report, customHeader = violationHeader)
-            }
-        throw AssertionError(message)
-    }
-
-    private fun throwNewViolations(
-        unmatchedLocalized: List<String>,
-        header: String,
-    ) {
-        if (unmatchedLocalized.isEmpty()) return
-        val message =
-            buildString {
-                appendLine(header)
-                unmatchedLocalized.forEach { rawViolation ->
-                    val normMsg = BaselineNormalizer.normalize(rawViolation, buildRoot)
-                    val (location, cleanMsg) = BaselineNormalizer.parseLocationAndMessage(normMsg, buildRoot)
-                    if (location != null) {
-                        appendLine("  - $cleanMsg (at $location)")
-                    } else {
-                        appendLine("  - $cleanMsg")
-                    }
-                }
-                append(getMessage("rule.violationCount", unmatchedLocalized.size))
-            }
-        throw AssertionError(message)
-    }
+    ): ViolationReport = evaluator.checkRuleReport(ruleId, violationHeader, runCheckReport)
 
     /**
      * Writes the baseline to file. When [generateBaseline] is active, only the live recorded
      * violations are written (pruning resolved technical debt).
      */
-    @Suppress("NestedBlockDepth", "TooGenericExceptionCaught", "SwallowedException")
     internal fun writeBaseline() {
         val graph = projectGraph
         val root = buildRoot
         val isCustomDir =
-            File(baselinePath).isAbsolute ||
-                run {
-                    val customDirProp = System.getProperty(Konture.PROPERTY_BASELINE_DIR)
-                    if (customDirProp == null) {
-                        false
-                    } else if (graph == null || root == null) {
-                        true
-                    } else {
-                        val customDir = File(customDirProp).canonicalFile
-                        val isProjectModuleDir =
-                            graph.getAllModules().any { module ->
-                                try {
-                                    val moduleDir = BaselineNormalizer.getModuleDir(root, module)
-                                    moduleDir == customDir
-                                } catch (e: Exception) {
-                                    false
-                                }
-                            }
-                        !isProjectModuleDir
-                    }
-                }
-
+            BaselineStorage.isCustomDirectory(
+                baselinePath = baselinePath,
+                customDirProp = System.getProperty(Konture.PROPERTY_BASELINE_DIR),
+                graph = graph,
+                root = root,
+            )
         val targetViolations = if (generateBaseline) recordedViolations else (existingViolations + recordedViolations)
 
-        if (graph != null && root != null && !isCustomDir) {
-            KontureLogger.log(LogLevel.INFO, "Distributing recorded violations to per-module baselines...")
-
-            val moduleViolationsMap = mutableMapOf<Module, MutableList<FlatBaselineViolation>>()
-            val orphanedViolations = mutableListOf<FlatBaselineViolation>()
-
-            for (v in targetViolations) {
-                val module = BaselineNormalizer.findModuleForViolation(v, graph, root)
-                if (module != null) {
-                    moduleViolationsMap.getOrPut(module) { mutableListOf() }.add(v)
-                } else {
-                    orphanedViolations.add(v)
-                }
-            }
-
-            for (module in graph.getAllModules()) {
-                val moduleDir = BaselineNormalizer.getModuleDir(root, module)
-                val file = File(moduleDir, baselinePath)
-                val mViolations = moduleViolationsMap[module] ?: emptyList()
-
-                if (mViolations.isNotEmpty()) {
-                    BaselineSerializer.writeViolationsToFile(file, mViolations)
-                } else {
-                    if (file.exists()) {
-                        try {
-                            file.delete()
-                            KontureLogger.log(LogLevel.INFO, "Deleted empty baseline file: ${file.absolutePath}")
-                        } catch (e: Exception) {
-                            KontureLogger.log(
-                                LogLevel.WARNING,
-                                "Failed to delete empty baseline file ${file.absolutePath}: ${e.message}",
-                            )
-                        }
-                    }
-                }
-            }
-
-            if (orphanedViolations.isNotEmpty()) {
-                KontureLogger.log(
-                    LogLevel.WARNING,
-                    "Found ${orphanedViolations.size} violations that could not be mapped to any module. Writing to fallback baseline file...",
-                )
-                BaselineSerializer.writeViolationsToFile(baselineFile, orphanedViolations)
-            }
-        } else {
-            // Fallback to single baseline file
-            if (targetViolations.isNotEmpty()) {
-                BaselineSerializer.writeViolationsToFile(baselineFile, targetViolations.toList())
-            } else if (baselineFile.exists()) {
-                try {
-                    baselineFile.delete()
-                    KontureLogger.log(LogLevel.INFO, "Deleted empty baseline file: ${baselineFile.absolutePath}")
-                } catch (e: Exception) {
-                    KontureLogger.log(
-                        LogLevel.WARNING,
-                        "Failed to delete empty baseline file ${baselineFile.absolutePath}: ${e.message}",
-                    )
-                }
-            }
-        }
+        BaselineStorage.writeBaseline(
+            baselinePath = baselinePath,
+            fallbackBaselineFile = baselineFile,
+            graph = graph,
+            root = root,
+            isCustomDir = isCustomDir,
+            targetViolations = targetViolations,
+        )
     }
 
     companion object {
