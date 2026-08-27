@@ -1,5 +1,6 @@
 /*
- * Copyright 2026 Bao Le Duc
+ * Copyright 2026 The Konture Contributors
+ * Contributors: Bao Le Duc (@baole)
  * SPDX-License-Identifier: Apache-2.0
  */
 
@@ -16,17 +17,26 @@ internal object TestLocationFinder {
             "io.github.baole.konture.impl.BaselineManager",
             "io.github.baole.konture.impl.BaselineNormalizer",
             "io.github.baole.konture.impl.BaselineSerializer",
+            "io.github.baole.konture.impl.BaselineStorage",
+            "io.github.baole.konture.impl.BaselineRuleEvaluator",
         )
 
     private val frameworkPackages =
         listOf(
+            "java.",
+            "javax.",
+            "jdk.",
+            "sun.",
+            "com.sun.",
+            "kotlin.",
+            "kotlinx.",
             "org.junit.",
             "junit.",
             "org.testng.",
             "org.gradle.",
             "org.apache.maven.",
-            "sun.reflect.",
-            "java.lang.reflect.",
+            "org.opentest4j.",
+            "org.apache.commons.",
         )
 
     private val rootPackage =
