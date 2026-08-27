@@ -385,10 +385,8 @@ class KontureLayoutGenerationTest {
     }
 
     @Test
-    fun `testCompositeBuildAndDynamicDependenciesHeuristic`() {
+    fun `testCollectDependenciesOnlyIncludesProjectDependencies`() {
         val rootProject = ProjectBuilder.builder().withName("root").build()
-        rootProject.group = "io.github.baole.konture"
-
         val child =
             ProjectBuilder
                 .builder()
@@ -397,9 +395,25 @@ class KontureLayoutGenerationTest {
                 .build()
         child.plugins.apply("org.jetbrains.kotlin.jvm")
 
-        // Add a mock external/composite dependency belonging to the same group prefix
+        val uiChild =
+            ProjectBuilder
+                .builder()
+                .withName("ui")
+                .withParent(rootProject)
+                .build()
+        uiChild.plugins.apply("org.jetbrains.kotlin.jvm")
+
+        // Add a project dependency on :ui
         child.configurations.getByName("implementation").dependencies.add(
-            rootProject.dependencies.create("io.github.baole.konture:composite-dep:1.0.0"),
+            child.dependencies.project(mapOf("path" to ":ui")),
+        )
+        // Add an external library dependency whose artifact name matches subproject name "ui"
+        child.configurations.getByName("implementation").dependencies.add(
+            rootProject.dependencies.create("org.jetbrains.compose.ui:ui:1.7.0"),
+        )
+        // Add an external library dependency with another group
+        child.configurations.getByName("implementation").dependencies.add(
+            rootProject.dependencies.create("io.github.baole.konture:external-dep:1.0.0"),
         )
 
         val plugin = KonturePlugin()
@@ -412,7 +426,8 @@ class KontureLayoutGenerationTest {
         @Suppress("UNCHECKED_CAST")
         val dependencies = collectDepsMethod.invoke(plugin, child) as List<DependencyData>
 
-        assertTrue(dependencies.any { it.targetPath == ":composite-dep" })
+        assertEquals(1, dependencies.size)
+        assertEquals(":ui", dependencies.first().targetPath)
     }
 
     @Test
