@@ -226,20 +226,6 @@ internal object KonturePluginConfigurer {
 
     fun collectDependencies(proj: Project): List<DependencyData> {
         val deps = mutableListOf<DependencyData>()
-        val localNames =
-            proj.rootProject.allprojects
-                .map { it.name }
-                .filter { it.isNotEmpty() }
-                .toSet()
-        val includedBuildGroups =
-            try {
-                proj.gradle.includedBuilds
-                    .map { it.name }
-                    .toSet()
-            } catch (_: Exception) {
-                emptySet()
-            }
-
         proj.configurations.forEach { config ->
             if (config.name == CONFIG_LAYOUT_INCOMING || config.name == CONFIG_DEPS_INCOMING) return@forEach
             config.dependencies.forEach { dep ->
@@ -251,22 +237,6 @@ internal object KonturePluginConfigurer {
                             targetPath = dep.path,
                         ),
                     )
-                } else {
-                    val depGroup = dep.group
-                    val depName = dep.name
-                    if (depGroup != null) {
-                        if (depName in localNames || depGroup in includedBuildGroups ||
-                            depGroup.startsWith(GROUP_PREFIX_KONTURE)
-                        ) {
-                            deps.add(
-                                DependencyData(
-                                    configuration = config.name,
-                                    targetBuildId = ":",
-                                    targetPath = ":$depName",
-                                ),
-                            )
-                        }
-                    }
                 }
             }
         }
@@ -382,8 +352,6 @@ internal object KonturePluginConfigurer {
 
     private const val SUFFIX_COMPILE_CLASSPATH_CAMEL = "CompileClasspath"
     private const val CONFIG_COMPILE_CLASSPATH_LOWER = "compileClasspath"
-
-    private const val GROUP_PREFIX_KONTURE = "io.github.baole"
 
     private const val DIR_SRC = "src"
 }
