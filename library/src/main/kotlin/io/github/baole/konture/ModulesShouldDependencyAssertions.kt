@@ -267,7 +267,10 @@ public interface ModulesShouldDependencyAssertions {
 
     @Deprecated("Use onlyDependOn instead.", ReplaceWith("onlyDependOn(allowedPatterns)"))
     /** Filter or assertion criteria for only depend on modules. */
-    public infix fun onlyDependOnModules(allowedPatterns: List<String>): ModulesRuleBuilder = onlyDependOn(allowedPatterns)
+    public infix fun onlyDependOnModules(allowedPatterns: List<String>): ModulesRuleBuilder =
+        onlyDependOn(
+            allowedPatterns,
+        )
 
     @Deprecated("Use onlyDependOn instead.", ReplaceWith("onlyDependOn(*allowedPatterns)"))
     /** Filter or assertion criteria for only depend on modules. */
