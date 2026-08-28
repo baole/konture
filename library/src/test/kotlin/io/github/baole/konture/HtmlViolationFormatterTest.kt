@@ -89,4 +89,30 @@ class HtmlViolationFormatterTest {
         System.setProperty(Konture.PROPERTY_OUTPUT_FORMAT, "html")
         assertEquals(OutputFormat.HTML, Konture.outputFormat)
     }
+
+    @Test
+    fun `format renders dependency path list when present`() {
+        val violation =
+            Violation(
+                ruleId = "module.dependency.check",
+                subject = Subject.ModuleSubject(":app"),
+                target = Subject.ModuleSubject(":core:database"),
+                dependencyPath =
+                    listOf(
+                        Subject.ModuleSubject(":app"),
+                        Subject.ModuleSubject(":feature:login"),
+                        Subject.ModuleSubject(":core:database"),
+                    ),
+                message = "Module :app cannot depend on :core:database",
+            )
+        val report = ViolationReport("module.dependency.check", listOf(violation))
+
+        val html = HtmlViolationFormatter.format(report)
+
+        assertTrue(html.contains("<div class=\"konture-dependency-path-header\">Found illegal dependency path:</div>"))
+        assertTrue(html.contains("<ul class=\"konture-dependency-path\">"))
+        assertTrue(html.contains("<li class=\"konture-path-step\">:app</li>"))
+        assertTrue(html.contains("<li class=\"konture-path-step\">→ :feature:login</li>"))
+        assertTrue(html.contains("<li class=\"konture-path-step\">→ :core:database</li>"))
+    }
 }

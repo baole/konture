@@ -6,9 +6,12 @@
 
 package io.github.baole.konture
 
+import io.github.baole.konture.core.model.Subject
 import io.github.baole.konture.i18n.getMessage
 import io.github.baole.konture.impl.PatternMatchers
+import io.github.baole.konture.impl.ShortestPathFinder
 import io.github.baole.konture.impl.SliceCycleDetector
+import io.github.baole.konture.impl.StructuredMessageList
 import io.github.baole.konture.impl.isTestConfiguration
 import io.github.baole.konture.impl.normalizeModulePath
 
@@ -27,14 +30,20 @@ public interface ModulesShouldDependencyAssertions {
                         PatternMatchers.matchesModuleGlob(normalizedTarget, dep.targetPath)
                 }
             if (offending.isNotEmpty()) {
-                violations.add(
+                val msg =
                     getMessage(
                         "module.should.mustNotDependOn",
                         module.path,
                         normalizedTarget,
                         offending.joinToString { it.targetPath },
-                    ),
-                )
+                    )
+                val targetSubject = Subject.ModuleSubject(offending.first().targetPath)
+                val dependencyPath = listOf(Subject.ModuleSubject(module.path), targetSubject)
+                if (violations is StructuredMessageList) {
+                    violations.add(msg, target = targetSubject, dependencyPath = dependencyPath)
+                } else {
+                    violations.add(msg)
+                }
             }
         }
         return builder
@@ -51,14 +60,20 @@ public interface ModulesShouldDependencyAssertions {
                     }
                 }
             if (offending.isNotEmpty()) {
-                violations.add(
+                val msg =
                     getMessage(
                         "module.should.mustNotDependOn",
                         module.path,
                         normalizedTargets.joinToString(),
                         offending.joinToString { it.targetPath },
-                    ),
-                )
+                    )
+                val targetSubject = Subject.ModuleSubject(offending.first().targetPath)
+                val dependencyPath = listOf(Subject.ModuleSubject(module.path), targetSubject)
+                if (violations is StructuredMessageList) {
+                    violations.add(msg, target = targetSubject, dependencyPath = dependencyPath)
+                } else {
+                    violations.add(msg)
+                }
             }
         }
         return builder
@@ -79,14 +94,20 @@ public interface ModulesShouldDependencyAssertions {
         builder.setShould { module, _, violations ->
             val offending = module.dependencies.filter { dep -> predicate(dep.targetPath) }
             if (offending.isNotEmpty()) {
-                violations.add(
+                val msg =
                     getMessage(
                         "module.should.mustNotDependOn",
                         module.path,
                         description,
                         offending.joinToString { it.targetPath },
-                    ),
-                )
+                    )
+                val targetSubject = Subject.ModuleSubject(offending.first().targetPath)
+                val dependencyPath = listOf(Subject.ModuleSubject(module.path), targetSubject)
+                if (violations is StructuredMessageList) {
+                    violations.add(msg, target = targetSubject, dependencyPath = dependencyPath)
+                } else {
+                    violations.add(msg)
+                }
             }
         }
         return builder
@@ -159,14 +180,20 @@ public interface ModulesShouldDependencyAssertions {
                         dep.targetPath == pattern || PatternMatchers.matchesModuleGlob(pattern, dep.targetPath)
                     }
                 if (!isAllowed) {
-                    violations.add(
+                    val msg =
                         getMessage(
                             "module.should.mayDependOn",
                             module.path,
                             normalizedPatterns.joinToString(),
                             dep.targetPath,
-                        ),
-                    )
+                        )
+                    val targetSubject = Subject.ModuleSubject(dep.targetPath)
+                    val dependencyPath = listOf(Subject.ModuleSubject(module.path), targetSubject)
+                    if (violations is StructuredMessageList) {
+                        violations.add(msg, target = targetSubject, dependencyPath = dependencyPath)
+                    } else {
+                        violations.add(msg)
+                    }
                 }
             }
         }
@@ -189,14 +216,20 @@ public interface ModulesShouldDependencyAssertions {
             for (dep in module.dependencies) {
                 if (dep.isTestConfiguration()) continue
                 if (!predicate(dep.targetPath)) {
-                    violations.add(
+                    val msg =
                         getMessage(
                             "module.should.mayDependOn",
                             module.path,
                             description,
                             dep.targetPath,
-                        ),
-                    )
+                        )
+                    val targetSubject = Subject.ModuleSubject(dep.targetPath)
+                    val dependencyPath = listOf(Subject.ModuleSubject(module.path), targetSubject)
+                    if (violations is StructuredMessageList) {
+                        violations.add(msg, target = targetSubject, dependencyPath = dependencyPath)
+                    } else {
+                        violations.add(msg)
+                    }
                 }
             }
         }
@@ -217,14 +250,20 @@ public interface ModulesShouldDependencyAssertions {
                         dep.targetPath == pattern || PatternMatchers.matchesModuleGlob(pattern, dep.targetPath)
                     }
                 if (!isAllowed) {
-                    violations.add(
+                    val msg =
                         getMessage(
                             "module.should.onlyDependOn",
                             module.path,
                             normalizedPatterns.joinToString(),
                             dep.targetPath,
-                        ),
-                    )
+                        )
+                    val targetSubject = Subject.ModuleSubject(dep.targetPath)
+                    val dependencyPath = listOf(Subject.ModuleSubject(module.path), targetSubject)
+                    if (violations is StructuredMessageList) {
+                        violations.add(msg, target = targetSubject, dependencyPath = dependencyPath)
+                    } else {
+                        violations.add(msg)
+                    }
                 }
             }
         }
@@ -247,14 +286,20 @@ public interface ModulesShouldDependencyAssertions {
             for (dep in module.dependencies) {
                 if (dep.isTestConfiguration()) continue
                 if (!predicate(dep.targetPath)) {
-                    violations.add(
+                    val msg =
                         getMessage(
                             "module.should.onlyDependOn",
                             module.path,
                             description,
                             dep.targetPath,
-                        ),
-                    )
+                        )
+                    val targetSubject = Subject.ModuleSubject(dep.targetPath)
+                    val dependencyPath = listOf(Subject.ModuleSubject(module.path), targetSubject)
+                    if (violations is StructuredMessageList) {
+                        violations.add(msg, target = targetSubject, dependencyPath = dependencyPath)
+                    } else {
+                        violations.add(msg)
+                    }
                 }
             }
         }
@@ -289,19 +334,21 @@ public interface ModulesShouldDependencyAssertions {
 
     /** Filter or assertion criteria for depend on module. */
     public infix fun dependOnModule(targetPath: String): ModulesRuleBuilder {
-        /** Filter or assertion criteria for normalized target. */
         val normalizedTarget = normalizeModulePath(targetPath)
         builder.setShould { module, _, violations ->
-            /** Filter or assertion criteria for depends on target. */
             val dependsOnTarget =
                 module.dependencies.any { dep ->
                     dep.targetPath == normalizedTarget ||
                         PatternMatchers.matchesModuleGlob(normalizedTarget, dep.targetPath)
                 }
             if (!dependsOnTarget) {
-                violations.add(
-                    getMessage("module.should.dependOnModule", module.path, normalizedTarget),
-                )
+                val msg = getMessage("module.should.dependOnModule", module.path, normalizedTarget)
+                val targetSubject = Subject.ModuleSubject(normalizedTarget)
+                if (violations is StructuredMessageList) {
+                    violations.add(msg, target = targetSubject)
+                } else {
+                    violations.add(msg)
+                }
             }
         }
         return builder
@@ -319,19 +366,26 @@ public interface ModulesShouldDependencyAssertions {
     /** Filter or assertion criteria for be free of cycles. */
     public fun beFreeOfCycles(): ModulesRuleBuilder {
         builder.setShould { _, graph, violations ->
-            /** Filter or assertion criteria for adjacency. */
             val adjacency =
                 graph.getAllModules().associate { module ->
                     module.path to module.dependencies.map { it.targetPath }.toSet()
                 }
 
-            /** Filter or assertion criteria for cycles. */
             val cycles = SliceCycleDetector.findCycles(adjacency)
             if (cycles.isNotEmpty()) {
                 for (cycle in cycles) {
-                    /** Filter or assertion criteria for rendered. */
                     val rendered = (cycle + cycle.first()).joinToString(" -> ")
-                    violations.add(getMessage("module.should.beFreeOfCycles", rendered))
+                    val cyclePath = (cycle + cycle.first()).map { Subject.ModuleSubject(it) }
+                    val msg = getMessage("module.should.beFreeOfCycles", rendered)
+                    if (violations is StructuredMessageList) {
+                        violations.add(
+                            msg,
+                            target = Subject.ModuleSubject(cycle.first()),
+                            dependencyPath = cyclePath,
+                        )
+                    } else {
+                        violations.add(msg)
+                    }
                 }
             }
         }
@@ -357,19 +411,22 @@ public interface ModulesShouldDependencyAssertions {
         targetPath: String,
         configuration: String,
     ): ModulesRuleBuilder {
-        /** Filter or assertion criteria for normalized target. */
         val normalizedTarget = normalizeModulePath(targetPath)
         builder.setShould { module, _, violations ->
-            /** Filter or assertion criteria for matches. */
             val matches =
                 module.dependencies.any { dep ->
                     (dep.targetPath == normalizedTarget || PatternMatchers.matchesModuleGlob(normalizedTarget, dep.targetPath)) &&
                         dep.configuration.equals(configuration, ignoreCase = true)
                 }
             if (!matches) {
-                violations.add(
-                    getMessage("module.should.dependOnModuleViaConfig", module.path, normalizedTarget, configuration),
-                )
+                val msg =
+                    getMessage("module.should.dependOnModuleViaConfig", module.path, normalizedTarget, configuration)
+                val targetSubject = Subject.ModuleSubject(normalizedTarget)
+                if (violations is StructuredMessageList) {
+                    violations.add(msg, target = targetSubject)
+                } else {
+                    violations.add(msg)
+                }
             }
         }
         return builder
@@ -380,24 +437,28 @@ public interface ModulesShouldDependencyAssertions {
         targetPath: String,
         configuration: String,
     ): ModulesRuleBuilder {
-        /** Filter or assertion criteria for normalized target. */
         val normalizedTarget = normalizeModulePath(targetPath)
         builder.setShould { module, _, violations ->
-            /** Filter or assertion criteria for matches. */
             val matches =
                 module.dependencies.any { dep ->
                     (dep.targetPath == normalizedTarget || PatternMatchers.matchesModuleGlob(normalizedTarget, dep.targetPath)) &&
                         dep.configuration.equals(configuration, ignoreCase = true)
                 }
             if (matches) {
-                violations.add(
+                val msg =
                     getMessage(
                         "module.should.notDependOnModuleViaConfig",
                         module.path,
                         normalizedTarget,
                         configuration,
-                    ),
-                )
+                    )
+                val targetSubject = Subject.ModuleSubject(normalizedTarget)
+                val dependencyPath = listOf(Subject.ModuleSubject(module.path), targetSubject)
+                if (violations is StructuredMessageList) {
+                    violations.add(msg, target = targetSubject, dependencyPath = dependencyPath)
+                } else {
+                    violations.add(msg)
+                }
             }
         }
         return builder
@@ -405,33 +466,22 @@ public interface ModulesShouldDependencyAssertions {
 
     /** Filter or assertion criteria for depend on module transitively. */
     public infix fun dependOnModuleTransitively(targetPath: String): ModulesRuleBuilder {
-        /** Filter or assertion criteria for normalized target. */
         val normalizedTarget = normalizeModulePath(targetPath)
         builder.setShould { module, graph, violations ->
-            /** Filter or assertion criteria for visited. */
-            val visited = mutableSetOf<String>()
-
-            /** Filter or assertion criteria for queue. */
-            val queue = ArrayDeque<String>()
-            queue.addAll(module.dependencies.map { it.targetPath })
-            var found = false
-            while (queue.isNotEmpty()) {
-                /** Filter or assertion criteria for current. */
-                val current = queue.removeFirst()
-                if (current == normalizedTarget || PatternMatchers.matchesModuleGlob(normalizedTarget, current)) {
-                    found = true
-                    break
+            val path =
+                ShortestPathFinder.findShortestModulePathMatching(
+                    graph = graph,
+                    startModule = module,
+                    targetPredicate = { it.path == normalizedTarget || PatternMatchers.matchesModuleGlob(normalizedTarget, it.path) },
+                )
+            if (path == null) {
+                val msg = getMessage("module.should.transitiveDependOn", module.path, normalizedTarget)
+                val targetSubject = Subject.ModuleSubject(normalizedTarget)
+                if (violations is StructuredMessageList) {
+                    violations.add(msg, target = targetSubject)
+                } else {
+                    violations.add(msg)
                 }
-                if (visited.add(current)) {
-                    /** Filter or assertion criteria for current mod. */
-                    val currentMod = graph.getAllModules().find { it.path == current }
-                    if (currentMod != null) {
-                        queue.addAll(currentMod.dependencies.map { it.targetPath })
-                    }
-                }
-            }
-            if (!found) {
-                violations.add(getMessage("module.should.transitiveDependOn", module.path, normalizedTarget))
             }
         }
         return builder
@@ -439,33 +489,23 @@ public interface ModulesShouldDependencyAssertions {
 
     /** Filter or assertion criteria for not depend on module transitively. */
     public infix fun notDependOnModuleTransitively(targetPath: String): ModulesRuleBuilder {
-        /** Filter or assertion criteria for normalized target. */
         val normalizedTarget = normalizeModulePath(targetPath)
         builder.setShould { module, graph, violations ->
-            /** Filter or assertion criteria for visited. */
-            val visited = mutableSetOf<String>()
-
-            /** Filter or assertion criteria for queue. */
-            val queue = ArrayDeque<String>()
-            queue.addAll(module.dependencies.map { it.targetPath })
-            var found = false
-            while (queue.isNotEmpty()) {
-                /** Filter or assertion criteria for current. */
-                val current = queue.removeFirst()
-                if (current == normalizedTarget || PatternMatchers.matchesModuleGlob(normalizedTarget, current)) {
-                    found = true
-                    break
+            val path =
+                ShortestPathFinder.findShortestModulePathMatching(
+                    graph = graph,
+                    startModule = module,
+                    targetPredicate = { it.path == normalizedTarget || PatternMatchers.matchesModuleGlob(normalizedTarget, it.path) },
+                )
+            if (path != null && path.size >= 2) {
+                val msg = getMessage("module.should.notTransitiveDependOn", module.path, normalizedTarget)
+                val targetSubject = Subject.ModuleSubject(path.last())
+                val dependencyPath = path.map { Subject.ModuleSubject(it) }
+                if (violations is StructuredMessageList) {
+                    violations.add(msg, target = targetSubject, dependencyPath = dependencyPath)
+                } else {
+                    violations.add(msg)
                 }
-                if (visited.add(current)) {
-                    /** Filter or assertion criteria for current mod. */
-                    val currentMod = graph.getAllModules().find { it.path == current }
-                    if (currentMod != null) {
-                        queue.addAll(currentMod.dependencies.map { it.targetPath })
-                    }
-                }
-            }
-            if (found) {
-                violations.add(getMessage("module.should.notTransitiveDependOn", module.path, normalizedTarget))
             }
         }
         return builder
@@ -475,13 +515,24 @@ public interface ModulesShouldDependencyAssertions {
     public fun beStandalone(): ModulesRuleBuilder {
         builder.setShould { module, _, violations ->
             if (module.dependencies.isNotEmpty()) {
-                violations.add(
+                val msg =
                     getMessage(
                         "module.should.beStandalone",
                         module.path,
                         module.dependencies.map { it.targetPath }.toString(),
-                    ),
-                )
+                    )
+                val targetSubject = module.dependencies.firstOrNull()?.let { Subject.ModuleSubject(it.targetPath) }
+                val dependencyPath =
+                    if (targetSubject != null) {
+                        listOf(Subject.ModuleSubject(module.path), targetSubject)
+                    } else {
+                        emptyList()
+                    }
+                if (violations is StructuredMessageList) {
+                    violations.add(msg, target = targetSubject, dependencyPath = dependencyPath)
+                } else {
+                    violations.add(msg)
+                }
             }
         }
         return builder

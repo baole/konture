@@ -7,6 +7,7 @@
 package io.github.baole.konture
 
 import io.github.baole.konture.core.model.Severity
+import io.github.baole.konture.core.model.SourceLocation
 import io.github.baole.konture.core.model.Subject
 import io.github.baole.konture.core.model.Violation
 import io.github.baole.konture.i18n.getMessage
@@ -291,7 +292,9 @@ internal class ArchitectureLayerRegistry(
         if (illegal.isEmpty()) return
         out.add(
             newViolation(
-                "architecture.policy.mayDependOn",
+                source = source,
+                target = target,
+                messageKey = "architecture.policy.mayDependOn",
                 name,
                 allowed.joinToString(),
                 source.fqName,
@@ -312,7 +315,9 @@ internal class ArchitectureLayerRegistry(
         if (!hit) return
         out.add(
             newViolation(
-                "architecture.policy.mustNotDependOn",
+                source = source,
+                target = target,
+                messageKey = "architecture.policy.mustNotDependOn",
                 name,
                 forbidden.joinToString(),
                 source.fqName,
@@ -333,7 +338,9 @@ internal class ArchitectureLayerRegistry(
         if (illegal.isEmpty()) return
         out.add(
             newViolation(
-                "architecture.policy.mayBeAccessedBy",
+                source = caller,
+                target = target,
+                messageKey = "architecture.policy.mayBeAccessedBy",
                 name,
                 allowed.joinToString(),
                 caller.fqName,
@@ -354,7 +361,9 @@ internal class ArchitectureLayerRegistry(
         if (!hit) return
         out.add(
             newViolation(
-                "architecture.policy.mustNotBeAccessedBy",
+                source = caller,
+                target = target,
+                messageKey = "architecture.policy.mustNotBeAccessedBy",
                 name,
                 forbidden.joinToString(),
                 caller.fqName,
@@ -368,13 +377,40 @@ internal class ArchitectureLayerRegistry(
     private fun targetLayers(cls: ClassDeclaration): Set<String> = layersByClassFqName[cls.fqName].orEmpty()
 
     private fun newViolation(
+        source: ClassDeclaration? = null,
+        target: ClassDeclaration? = null,
         messageKey: String,
         vararg args: Any?,
     ): Violation {
         val currentMeta = KontureRuntimeStateProvider.currentState.currentRuleMetadata
+        val sourceSubject =
+            source?.let {
+                Subject.ClassSubject(
+                    fqName = it.fqName,
+                    simpleName = it.name,
+                    location = SourceLocation(filePath = it.filePath),
+                )
+            } ?: Subject.CustomSubject(name = "Architecture Policy")
+        val targetSubject =
+            target?.let {
+                Subject.ClassSubject(
+                    fqName = it.fqName,
+                    simpleName = it.name,
+                    location = SourceLocation(filePath = it.filePath),
+                )
+            }
+        val dependencyPath =
+            if (sourceSubject != null && targetSubject != null) {
+                listOf(sourceSubject, targetSubject)
+            } else {
+                emptyList()
+            }
         return Violation(
             ruleId = currentMeta?.id ?: "architecture.policy",
-            subject = Subject.CustomSubject(name = "Architecture Policy"),
+            subject = sourceSubject,
+            target = targetSubject,
+            dependencyPath = dependencyPath,
+            sourceLocation = source?.let { SourceLocation(filePath = it.filePath) },
             message = getMessage(messageKey, *args),
             severity = currentMeta?.severity ?: Severity.ERROR,
             metadata = currentMeta,

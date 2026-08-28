@@ -114,12 +114,25 @@ internal object SarifReportExporter {
                     }
 
                 val flowLocations = mutableListOf<SarifThreadFlowLocation>()
-                buildThreadFlowLocation(v.subject, "Origin", loc, root)?.let { flowLocations.add(it) }
-                v.dependencyPath.forEach { step ->
-                    buildThreadFlowLocation(step, "Step", step.location, root)?.let { flowLocations.add(it) }
-                }
-                v.target?.let { target ->
-                    buildThreadFlowLocation(target, "Target", target.location, root)?.let { flowLocations.add(it) }
+                if (v.dependencyPath.size >= 2) {
+                    v.dependencyPath.forEachIndexed { stepIdx, step ->
+                        val label =
+                            when (stepIdx) {
+                                0 -> "Origin"
+                                v.dependencyPath.size - 1 -> "Target"
+                                else -> "Step"
+                            }
+                        val stepLoc = if (stepIdx == 0) (loc ?: step.location) else step.location
+                        buildThreadFlowLocation(step, label, stepLoc, root)?.let { flowLocations.add(it) }
+                    }
+                } else {
+                    buildThreadFlowLocation(v.subject, "Origin", loc, root)?.let { flowLocations.add(it) }
+                    v.dependencyPath.forEach { step ->
+                        buildThreadFlowLocation(step, "Step", step.location, root)?.let { flowLocations.add(it) }
+                    }
+                    v.target?.let { target ->
+                        buildThreadFlowLocation(target, "Target", target.location, root)?.let { flowLocations.add(it) }
+                    }
                 }
 
                 val codeFlows =

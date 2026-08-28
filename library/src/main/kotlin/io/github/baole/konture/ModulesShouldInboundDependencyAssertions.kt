@@ -6,8 +6,10 @@
 
 package io.github.baole.konture
 
+import io.github.baole.konture.core.model.Subject
 import io.github.baole.konture.i18n.getMessage
 import io.github.baole.konture.impl.PatternMatchers
+import io.github.baole.konture.impl.StructuredMessageList
 import io.github.baole.konture.impl.isTestConfiguration
 import io.github.baole.konture.impl.normalizeModulePath
 
@@ -34,14 +36,21 @@ public interface ModulesShouldInboundDependencyAssertions {
                         dep.path == pattern || PatternMatchers.matchesModuleGlob(pattern, dep.path)
                     }
                 if (!isAllowed) {
-                    violations.add(
+                    val msg =
                         getMessage(
                             "module.should.mayBeDependedOnBy",
                             module.path,
                             normalizedPatterns.joinToString(),
                             dep.path,
-                        ),
-                    )
+                        )
+                    val targetSubject = Subject.ModuleSubject(module.path)
+                    val sourceSubject = Subject.ModuleSubject(dep.path)
+                    val dependencyPath = listOf(sourceSubject, targetSubject)
+                    if (violations is StructuredMessageList) {
+                        violations.add(msg, target = targetSubject, dependencyPath = dependencyPath)
+                    } else {
+                        violations.add(msg)
+                    }
                 }
             }
         }
@@ -68,14 +77,21 @@ public interface ModulesShouldInboundDependencyAssertions {
                 }
             for (dep in dependents) {
                 if (!predicate(dep.path)) {
-                    violations.add(
+                    val msg =
                         getMessage(
                             "module.should.mayBeDependedOnBy",
                             module.path,
                             description,
                             dep.path,
-                        ),
-                    )
+                        )
+                    val targetSubject = Subject.ModuleSubject(module.path)
+                    val sourceSubject = Subject.ModuleSubject(dep.path)
+                    val dependencyPath = listOf(sourceSubject, targetSubject)
+                    if (violations is StructuredMessageList) {
+                        violations.add(msg, target = targetSubject, dependencyPath = dependencyPath)
+                    } else {
+                        violations.add(msg)
+                    }
                 }
             }
         }
@@ -101,14 +117,21 @@ public interface ModulesShouldInboundDependencyAssertions {
                     }
                 }
             if (offending.isNotEmpty()) {
-                violations.add(
+                val msg =
                     getMessage(
                         "module.should.mustNotBeDependedOnBy",
                         module.path,
                         normalizedTargets.joinToString(),
                         offending.joinToString { it.path },
-                    ),
-                )
+                    )
+                val targetSubject = Subject.ModuleSubject(module.path)
+                val sourceSubject = Subject.ModuleSubject(offending.first().path)
+                val dependencyPath = listOf(sourceSubject, targetSubject)
+                if (violations is StructuredMessageList) {
+                    violations.add(msg, target = targetSubject, dependencyPath = dependencyPath)
+                } else {
+                    violations.add(msg)
+                }
             }
         }
         return builder
@@ -134,14 +157,21 @@ public interface ModulesShouldInboundDependencyAssertions {
                 }
             val offending = dependents.filter { other -> predicate(other.path) }
             if (offending.isNotEmpty()) {
-                violations.add(
+                val msg =
                     getMessage(
                         "module.should.mustNotBeDependedOnBy",
                         module.path,
                         description,
                         offending.joinToString { it.path },
-                    ),
-                )
+                    )
+                val targetSubject = Subject.ModuleSubject(module.path)
+                val sourceSubject = Subject.ModuleSubject(offending.first().path)
+                val dependencyPath = listOf(sourceSubject, targetSubject)
+                if (violations is StructuredMessageList) {
+                    violations.add(msg, target = targetSubject, dependencyPath = dependencyPath)
+                } else {
+                    violations.add(msg)
+                }
             }
         }
         return builder
