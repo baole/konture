@@ -42,21 +42,30 @@ internal object ShortestPathFinder {
         val visited = mutableSetOf<T>()
         visited.add(startNode)
 
-        val queue = ArrayDeque<List<T>>()
-        queue.add(listOf(startNode))
+        val parent = mutableMapOf<T, T>()
+        val queue = ArrayDeque<T>()
+        queue.add(startNode)
 
         while (queue.isNotEmpty()) {
-            val currentPath = queue.removeFirst()
-            val currentNode = currentPath.last()
+            val currentNode = queue.removeFirst()
 
             val neighbors = getNeighbors(currentNode).sorted()
             for (neighbor in neighbors) {
                 if (isTarget(neighbor)) {
-                    return currentPath + neighbor
+                    val path = mutableListOf<T>()
+                    var curr: T? = currentNode
+                    while (curr != null) {
+                        path.add(curr)
+                        curr = parent[curr]
+                    }
+                    path.reverse()
+                    path.add(neighbor)
+                    return path
                 }
                 if (neighbor !in visited) {
                     visited.add(neighbor)
-                    queue.add(currentPath + neighbor)
+                    parent[neighbor] = currentNode
+                    queue.add(neighbor)
                 }
             }
         }

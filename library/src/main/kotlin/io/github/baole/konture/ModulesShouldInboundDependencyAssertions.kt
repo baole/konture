@@ -43,11 +43,11 @@ public interface ModulesShouldInboundDependencyAssertions {
                             normalizedPatterns.joinToString(),
                             dep.path,
                         )
-                    val targetSubject = Subject.ModuleSubject(module.path)
-                    val sourceSubject = Subject.ModuleSubject(dep.path)
-                    val dependencyPath = listOf(sourceSubject, targetSubject)
+                    val offendingSubject = Subject.ModuleSubject(dep.path)
+                    val ruleSubject = Subject.ModuleSubject(module.path)
+                    val dependencyPath = listOf(offendingSubject, ruleSubject)
                     if (violations is StructuredMessageList) {
-                        violations.add(msg, target = targetSubject, dependencyPath = dependencyPath)
+                        violations.add(msg, target = offendingSubject, dependencyPath = dependencyPath)
                     } else {
                         violations.add(msg)
                     }
@@ -84,11 +84,11 @@ public interface ModulesShouldInboundDependencyAssertions {
                             description,
                             dep.path,
                         )
-                    val targetSubject = Subject.ModuleSubject(module.path)
-                    val sourceSubject = Subject.ModuleSubject(dep.path)
-                    val dependencyPath = listOf(sourceSubject, targetSubject)
+                    val offendingSubject = Subject.ModuleSubject(dep.path)
+                    val ruleSubject = Subject.ModuleSubject(module.path)
+                    val dependencyPath = listOf(offendingSubject, ruleSubject)
                     if (violations is StructuredMessageList) {
-                        violations.add(msg, target = targetSubject, dependencyPath = dependencyPath)
+                        violations.add(msg, target = offendingSubject, dependencyPath = dependencyPath)
                     } else {
                         violations.add(msg)
                     }
@@ -124,11 +124,11 @@ public interface ModulesShouldInboundDependencyAssertions {
                         normalizedTargets.joinToString(),
                         offending.joinToString { it.path },
                     )
-                val targetSubject = Subject.ModuleSubject(module.path)
-                val sourceSubject = Subject.ModuleSubject(offending.first().path)
-                val dependencyPath = listOf(sourceSubject, targetSubject)
+                val offendingSubject = Subject.ModuleSubject(offending.first().path)
+                val ruleSubject = Subject.ModuleSubject(module.path)
+                val dependencyPath = listOf(offendingSubject, ruleSubject)
                 if (violations is StructuredMessageList) {
-                    violations.add(msg, target = targetSubject, dependencyPath = dependencyPath)
+                    violations.add(msg, target = offendingSubject, dependencyPath = dependencyPath)
                 } else {
                     violations.add(msg)
                 }
@@ -164,11 +164,11 @@ public interface ModulesShouldInboundDependencyAssertions {
                         description,
                         offending.joinToString { it.path },
                     )
-                val targetSubject = Subject.ModuleSubject(module.path)
-                val sourceSubject = Subject.ModuleSubject(offending.first().path)
-                val dependencyPath = listOf(sourceSubject, targetSubject)
+                val offendingSubject = Subject.ModuleSubject(offending.first().path)
+                val ruleSubject = Subject.ModuleSubject(module.path)
+                val dependencyPath = listOf(offendingSubject, ruleSubject)
                 if (violations is StructuredMessageList) {
-                    violations.add(msg, target = targetSubject, dependencyPath = dependencyPath)
+                    violations.add(msg, target = offendingSubject, dependencyPath = dependencyPath)
                 } else {
                     violations.add(msg)
                 }

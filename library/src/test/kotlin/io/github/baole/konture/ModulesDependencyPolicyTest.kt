@@ -320,4 +320,30 @@ class ModulesDependencyPolicyTest : RuleBuildersTestBase() {
             path,
         )
     }
+
+    @Test
+    fun `test inbound dependency assertions target and dependencyPath population`() {
+        val prodDep = Dependency("implementation", ":", ":core:security")
+        val modApp = moduleA.copy(path = ":app", dependencies = listOf(prodDep))
+        val modCore = moduleC.copy(path = ":core:security", dependencies = emptyList())
+        val graph = ProjectGraph(mapOf(":" to listOf(modApp, modCore)))
+
+        val list = io.github.baole.konture.impl.StructuredMessageList()
+        ModulesRuleBuilder(graph).should().mustNotBeDependedOnBy(":app")
+            .getShouldAssertion()!!(modCore, graph, list)
+
+        assertEquals(1, list.size)
+        val target = list.messageTargetMap[0]
+        val path = list.messageDependencyPathMap[0]
+
+        // Target should be the offending caller (:app), not the subject (:core:security)
+        assertEquals(io.github.baole.konture.core.model.Subject.ModuleSubject(":app"), target)
+        assertEquals(
+            listOf(
+                io.github.baole.konture.core.model.Subject.ModuleSubject(":app"),
+                io.github.baole.konture.core.model.Subject.ModuleSubject(":core:security"),
+            ),
+            path,
+        )
+    }
 }
