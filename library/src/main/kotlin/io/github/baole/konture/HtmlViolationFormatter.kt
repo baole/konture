@@ -53,6 +53,21 @@ public object HtmlViolationFormatter {
                         getMessage("report.messageLabel", cleanMessage),
                     )}</div>",
                 )
+                if (v.dependencyPath.size >= 2) {
+                    appendLine(
+                        "      <div class=\"konture-dependency-path-header\">${escapeHtml(
+                            getMessage("report.dependencyPathHeader"),
+                        )}</div>",
+                    )
+                    appendLine("      <ul class=\"konture-dependency-path\">")
+                    v.dependencyPath.forEachIndexed { stepIdx, step ->
+                        val prefix = if (stepIdx == 0) "" else "→ "
+                        appendLine(
+                            "        <li class=\"konture-path-step\">${escapeHtml(prefix + step.name)}</li>",
+                        )
+                    }
+                    appendLine("      </ul>")
+                }
                 val loc = v.sourceLocation ?: v.subject.location
                 if (loc != null) {
                     val lineSuffix = if (loc.line != null) ":${loc.line}" else ""

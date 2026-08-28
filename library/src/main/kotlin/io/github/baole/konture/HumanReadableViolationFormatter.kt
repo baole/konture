@@ -42,6 +42,16 @@ public object HumanReadableViolationFormatter {
                 appendLine("${index + 1}. ${v.subject.name}")
                 val cleanMessage = v.message.substringBeforeLast(" (at ").trim()
                 appendLine("   ${getMessage("report.messageLabel", cleanMessage)}")
+                if (v.dependencyPath.size >= 2) {
+                    appendLine("   ${getMessage("report.dependencyPathHeader")}")
+                    v.dependencyPath.forEachIndexed { stepIdx, step ->
+                        if (stepIdx == 0) {
+                            appendLine("   ${step.name}")
+                        } else {
+                            appendLine("     \u2192 ${step.name}")
+                        }
+                    }
+                }
                 val loc = v.sourceLocation ?: v.subject.location
                 if (loc != null) {
                     val lineSuffix = if (loc.line != null) ":${loc.line}" else ""

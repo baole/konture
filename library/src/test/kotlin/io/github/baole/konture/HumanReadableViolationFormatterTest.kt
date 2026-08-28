@@ -239,4 +239,43 @@ class HumanReadableViolationFormatterTest : RuleBuildersTestBase() {
             Konture.locale = originalLocale
         }
     }
+
+    @Test
+    fun `format renders dependency path when present`() {
+        val violation =
+            Violation(
+                ruleId = "module.dependency.check",
+                subject = Subject.ModuleSubject(path = ":app"),
+                target = Subject.ModuleSubject(path = ":core:database"),
+                dependencyPath =
+                    listOf(
+                        Subject.ModuleSubject(path = ":app"),
+                        Subject.ModuleSubject(path = ":feature:login"),
+                        Subject.ModuleSubject(path = ":core:database"),
+                    ),
+                message = "Module :app cannot depend on :core:database",
+            )
+        val report =
+            ViolationReport(
+                ruleId = "module.dependency.check",
+                violations = listOf(violation),
+            )
+
+        val formatted = HumanReadableViolationFormatter.format(report)
+        val expected =
+            """
+            ✗ Rule: module.dependency.check
+
+            1 violation(s) found:
+
+            1. :app
+               Message: Module :app cannot depend on :core:database
+               Found illegal dependency path:
+               :app
+                 → :feature:login
+                 → :core:database
+            """.trimIndent()
+
+        assertEquals(expected, formatted)
+    }
 }

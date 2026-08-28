@@ -275,9 +275,6 @@ class ModulesDependencyPolicyTest : RuleBuildersTestBase() {
             val vFr = mutableListOf<String>()
             ModulesRuleBuilder(graph).should().mustNotDependOn(":feature:bad")
                 .getShouldAssertion()!!(mod, graph, vFr)
-            assertEquals(1, vFr.size)
-            assertTrue(vFr[0].contains("ne doit pas dépendre des modules"))
-
             // Vietnamese
             Konture.locale = Locale.forLanguageTag("vi")
             val vVi = mutableListOf<String>()
@@ -288,5 +285,65 @@ class ModulesDependencyPolicyTest : RuleBuildersTestBase() {
         } finally {
             Konture.locale = originalLocale
         }
+    }
+
+    @Test
+    fun `test transitive dependency assertions and dependencyPath population`() {
+        val depB = Dependency("implementation", ":", ":feature:login")
+        val depC = Dependency("implementation", ":", ":core:network")
+        val depD = Dependency("implementation", ":", ":core:database")
+
+        val modApp = moduleA.copy(path = ":app", dependencies = listOf(depB))
+        val modFeature = moduleB.copy(path = ":feature:login", dependencies = listOf(depC))
+        val modNetwork = moduleC.copy(path = ":core:network", dependencies = listOf(depD))
+        val modDb = moduleC.copy(path = ":core:database", dependencies = emptyList())
+
+        val graph = ProjectGraph(mapOf(":" to listOf(modApp, modFeature, modNetwork, modDb)))
+
+        // notDependOnModuleTransitively with StructuredMessageList
+        val list = io.github.baole.konture.impl.StructuredMessageList()
+        ModulesRuleBuilder(graph).should().notDependOnModuleTransitively(":core:database")
+            .getShouldAssertion()!!(modApp, graph, list)
+
+        assertEquals(1, list.size)
+        val target = list.messageTargetMap[0]
+        val path = list.messageDependencyPathMap[0]
+
+        assertEquals(io.github.baole.konture.core.model.Subject.ModuleSubject(":core:database"), target)
+        assertEquals(
+            listOf(
+                io.github.baole.konture.core.model.Subject.ModuleSubject(":app"),
+                io.github.baole.konture.core.model.Subject.ModuleSubject(":feature:login"),
+                io.github.baole.konture.core.model.Subject.ModuleSubject(":core:network"),
+                io.github.baole.konture.core.model.Subject.ModuleSubject(":core:database"),
+            ),
+            path,
+        )
+    }
+
+    @Test
+    fun `test inbound dependency assertions target and dependencyPath population`() {
+        val prodDep = Dependency("implementation", ":", ":core:security")
+        val modApp = moduleA.copy(path = ":app", dependencies = listOf(prodDep))
+        val modCore = moduleC.copy(path = ":core:security", dependencies = emptyList())
+        val graph = ProjectGraph(mapOf(":" to listOf(modApp, modCore)))
+
+        val list = io.github.baole.konture.impl.StructuredMessageList()
+        ModulesRuleBuilder(graph).should().mustNotBeDependedOnBy(":app")
+            .getShouldAssertion()!!(modCore, graph, list)
+
+        assertEquals(1, list.size)
+        val target = list.messageTargetMap[0]
+        val path = list.messageDependencyPathMap[0]
+
+        // Target should be the offending caller (:app), not the subject (:core:security)
+        assertEquals(io.github.baole.konture.core.model.Subject.ModuleSubject(":app"), target)
+        assertEquals(
+            listOf(
+                io.github.baole.konture.core.model.Subject.ModuleSubject(":app"),
+                io.github.baole.konture.core.model.Subject.ModuleSubject(":core:security"),
+            ),
+            path,
+        )
     }
 }

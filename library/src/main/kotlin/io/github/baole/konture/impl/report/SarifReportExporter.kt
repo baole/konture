@@ -80,96 +80,12 @@ internal object SarifReportExporter {
                     )
             }
 
-            fun addResult(
-                v: Violation,
-                isSuppressed: Boolean,
-            ) {
-                val loc = v.sourceLocation ?: v.subject.location
-                val sarifLocations =
-                    if (loc != null) {
-                        val normalizedPath = JsonReportExporter.normalizePathString(loc.filePath, root)
-                        listOf(
-                            SarifLocation(
-                                physicalLocation =
-                                    SarifPhysicalLocation(
-                                        artifactLocation =
-                                            SarifArtifactLocation(
-                                                uri = normalizedPath,
-                                                uriBaseId = "%SRCROOT%",
-                                            ),
-                                        region =
-                                            if (loc.line != null) {
-                                                SarifRegion(
-                                                    startLine = loc.line,
-                                                    startColumn = loc.column,
-                                                )
-                                            } else {
-                                                null
-                                            },
-                                    ),
-                            ),
-                        )
-                    } else {
-                        null
-                    }
-
-                val flowLocations = mutableListOf<SarifThreadFlowLocation>()
-                buildThreadFlowLocation(v.subject, "Origin", loc, root)?.let { flowLocations.add(it) }
-                v.dependencyPath.forEach { step ->
-                    buildThreadFlowLocation(step, "Step", step.location, root)?.let { flowLocations.add(it) }
-                }
-                v.target?.let { target ->
-                    buildThreadFlowLocation(target, "Target", target.location, root)?.let { flowLocations.add(it) }
-                }
-
-                val codeFlows =
-                    if (flowLocations.size >= 2) {
-                        listOf(
-                            SarifCodeFlow(
-                                threadFlows =
-                                    listOf(
-                                        SarifThreadFlow(locations = flowLocations),
-                                    ),
-                            ),
-                        )
-                    } else {
-                        null
-                    }
-
-                val suppressions =
-                    if (isSuppressed) {
-                        val kind =
-                            when (v.suppression?.kind) {
-                                SuppressionKind.IN_SOURCE -> "inSource"
-                                SuppressionKind.PROGRAMMATIC -> "external"
-                                SuppressionKind.BASELINE, null -> "external"
-                            }
-                        val justification = v.suppression?.reason ?: "Architecture baseline record"
-                        listOf(
-                            SarifSuppression(
-                                kind = kind,
-                                status = "accepted",
-                                justification = justification,
-                            ),
-                        )
-                    } else {
-                        null
-                    }
-
-                results.add(
-                    SarifResult(
-                        ruleId = ruleId,
-                        level = v.severity.toSarifLevel(),
-                        message = SarifMessage(text = v.message),
-                        locations = sarifLocations ?: emptyList(),
-                        codeFlows = codeFlows,
-                        suppressions = suppressions,
-                    ),
-                )
+            eval.unsuppressedViolations.forEach { v ->
+                results.add(buildSarifResult(ruleId, v, isSuppressed = false, root = root))
             }
-
-            eval.unsuppressedViolations.forEach { addResult(it, isSuppressed = false) }
-            eval.suppressedViolations.forEach { addResult(it, isSuppressed = true) }
+            eval.suppressedViolations.forEach { v ->
+                results.add(buildSarifResult(ruleId, v, isSuppressed = true, root = root))
+            }
         }
 
         val run =
@@ -191,6 +107,115 @@ internal object SarifReportExporter {
             schema = "https://json.schemastore.org/sarif-2.1.0.json",
             version = "2.1.0",
             runs = listOf(run),
+        )
+    }
+
+    private fun buildSarifResult(
+        ruleId: String,
+        v: Violation,
+        isSuppressed: Boolean,
+        root: File,
+    ): SarifResult {
+        val loc = v.sourceLocation ?: v.subject.location
+        val sarifLocations = buildSarifLocation(loc, root)
+        val codeFlows = buildSarifCodeFlows(v, loc, root)
+        val suppressions = buildSarifSuppressions(v, isSuppressed)
+
+        return SarifResult(
+            ruleId = ruleId,
+            level = v.severity.toSarifLevel(),
+            message = SarifMessage(text = v.message),
+            locations = sarifLocations ?: emptyList(),
+            codeFlows = codeFlows,
+            suppressions = suppressions,
+        )
+    }
+
+    private fun buildSarifLocation(
+        loc: io.github.baole.konture.core.model.SourceLocation?,
+        root: File,
+    ): List<SarifLocation>? {
+        if (loc == null) return null
+        val normalizedPath = JsonReportExporter.normalizePathString(loc.filePath, root)
+        return listOf(
+            SarifLocation(
+                physicalLocation =
+                    SarifPhysicalLocation(
+                        artifactLocation =
+                            SarifArtifactLocation(
+                                uri = normalizedPath,
+                                uriBaseId = "%SRCROOT%",
+                            ),
+                        region =
+                            if (loc.line != null) {
+                                SarifRegion(
+                                    startLine = loc.line,
+                                    startColumn = loc.column,
+                                )
+                            } else {
+                                null
+                            },
+                    ),
+            ),
+        )
+    }
+
+    private fun buildSarifCodeFlows(
+        v: Violation,
+        loc: io.github.baole.konture.core.model.SourceLocation?,
+        root: File,
+    ): List<SarifCodeFlow>? {
+        val flowLocations = mutableListOf<SarifThreadFlowLocation>()
+        if (v.dependencyPath.size >= 2) {
+            v.dependencyPath.forEachIndexed { stepIdx, step ->
+                val label =
+                    when (stepIdx) {
+                        0 -> "Origin"
+                        v.dependencyPath.size - 1 -> "Target"
+                        else -> "Step"
+                    }
+                val stepLoc = if (stepIdx == 0) (loc ?: step.location) else step.location
+                buildThreadFlowLocation(step, label, stepLoc, root)?.let { flowLocations.add(it) }
+            }
+        } else {
+            buildThreadFlowLocation(v.subject, "Origin", loc, root)?.let { flowLocations.add(it) }
+            v.dependencyPath.forEach { step ->
+                buildThreadFlowLocation(step, "Step", step.location, root)?.let { flowLocations.add(it) }
+            }
+            v.target?.let { target ->
+                buildThreadFlowLocation(target, "Target", target.location, root)?.let { flowLocations.add(it) }
+            }
+        }
+
+        return if (flowLocations.size >= 2) {
+            listOf(
+                SarifCodeFlow(
+                    threadFlows = listOf(SarifThreadFlow(locations = flowLocations)),
+                ),
+            )
+        } else {
+            null
+        }
+    }
+
+    private fun buildSarifSuppressions(
+        v: Violation,
+        isSuppressed: Boolean,
+    ): List<SarifSuppression>? {
+        if (!isSuppressed) return null
+        val kind =
+            when (v.suppression?.kind) {
+                SuppressionKind.IN_SOURCE -> "inSource"
+                SuppressionKind.PROGRAMMATIC -> "external"
+                SuppressionKind.BASELINE, null -> "external"
+            }
+        val justification = v.suppression?.reason ?: "Architecture baseline record"
+        return listOf(
+            SarifSuppression(
+                kind = kind,
+                status = "accepted",
+                justification = justification,
+            ),
         )
     }
 

@@ -359,11 +359,14 @@ public class ModulesRuleBuilder(
                     val msgMeta = rawMessages.messageMetadataMap[index] ?: currentMeta
                     val ruleIdToUse = msgMeta?.id ?: activeRuleId
                     val severityToUse = msgMeta?.severity ?: activeSeverity
+                    val loc = rawMessages.messageSourceLocationMap[index] ?: SourceLocation(filePath = module.projectDir)
                     val subject =
                         Subject.ModuleSubject(
                             path = module.path,
-                            location = SourceLocation(filePath = module.projectDir),
+                            location = loc,
                         )
+                    val target = rawMessages.messageTargetMap[index]
+                    val dependencyPath = rawMessages.messageDependencyPathMap[index] ?: emptyList()
                     val suppression =
                         SuppressionEvaluator.evaluateModuleSuppression(
                             ruleId = ruleIdToUse,
@@ -374,6 +377,9 @@ public class ModulesRuleBuilder(
                         Violation(
                             ruleId = ruleIdToUse,
                             subject = subject,
+                            target = target,
+                            sourceLocation = loc,
+                            dependencyPath = dependencyPath,
                             message = rawMsg,
                             severity = severityToUse,
                             metadata = msgMeta,

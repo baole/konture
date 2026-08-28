@@ -210,4 +210,68 @@ class SarifReportExporterTest {
         assertEquals(1, rules.size)
         assertEquals("warning", rules[0].defaultConfiguration?.level)
     }
+
+    @Test
+    fun `generateReport handles full sequence dependencyPath with origin intermediate and target`() {
+        val buildRoot = File(tempDir, "app")
+        val originFile = File(buildRoot, "feature/src/Feature.kt")
+        val stepFile = File(buildRoot, "intermediate/src/Bridge.kt")
+        val targetFile = File(buildRoot, "internal/src/Internal.kt")
+
+        val violation =
+            Violation(
+                ruleId = "transitive-isolation",
+                subject =
+                    Subject.ClassSubject(
+                        fqName = "com.example.feature.FeatureScreen",
+                        simpleName = "FeatureScreen",
+                        location = SourceLocation(filePath = originFile.absolutePath, line = 25, column = 10),
+                    ),
+                target =
+                    Subject.ClassSubject(
+                        fqName = "com.example.internal.SecretEngine",
+                        simpleName = "SecretEngine",
+                        location = SourceLocation(filePath = targetFile.absolutePath, line = 5, column = 1),
+                    ),
+                sourceLocation = SourceLocation(filePath = originFile.absolutePath, line = 25, column = 10),
+                dependencyPath =
+                    listOf(
+                        Subject.ClassSubject(
+                            fqName = "com.example.feature.FeatureScreen",
+                            simpleName = "FeatureScreen",
+                            location = SourceLocation(filePath = originFile.absolutePath, line = 25, column = 10),
+                        ),
+                        Subject.ClassSubject(
+                            fqName = "com.example.intermediate.Bridge",
+                            simpleName = "Bridge",
+                            location = SourceLocation(filePath = stepFile.absolutePath, line = 12, column = 4),
+                        ),
+                        Subject.ClassSubject(
+                            fqName = "com.example.internal.SecretEngine",
+                            simpleName = "SecretEngine",
+                            location = SourceLocation(filePath = targetFile.absolutePath, line = 5, column = 1),
+                        ),
+                    ),
+                severity = Severity.ERROR,
+                message = "Transitive dependency forbidden",
+            )
+
+        val eval =
+            ReportAccumulator.RuleEvaluation(
+                ruleId = "transitive-isolation",
+                metadata = null,
+                unsuppressedViolations = listOf(violation),
+                suppressedViolations = emptyList(),
+            )
+
+        val report = SarifReportExporter.generateReport(listOf(eval), buildRoot)
+        val threadFlow = report.runs.first().results.first().codeFlows!!.first().threadFlows.first()
+        assertEquals(3, threadFlow.locations.size)
+        assertEquals("feature/src/Feature.kt", threadFlow.locations[0].location.physicalLocation.artifactLocation.uri)
+        assertEquals(
+            "intermediate/src/Bridge.kt",
+            threadFlow.locations[1].location.physicalLocation.artifactLocation.uri,
+        )
+        assertEquals("internal/src/Internal.kt", threadFlow.locations[2].location.physicalLocation.artifactLocation.uri)
+    }
 }
