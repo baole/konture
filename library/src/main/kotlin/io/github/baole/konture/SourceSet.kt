@@ -27,4 +27,17 @@ public data class SourceSet(
     public val srcDirs: List<String>,
     /** Filter or assertion criteria for platforms. */
     public val platforms: List<String> = emptyList(),
+    /** Source sets in this source set's Kotlin compilation/dependsOn visibility closure. */
+    public val dependsOnSourceSets: List<String> = emptyList(),
 )
+
+/**
+ * Converts this [SourceSet] to a [SourceSetId] for the specified [modulePath].
+ */
+public fun SourceSet.toSourceSetId(modulePath: String): SourceSetId =
+    SourceSetId(
+        modulePath = modulePath,
+        name = name,
+        kind = SourceSetKind.fromString(kind),
+        role = if (production) SourceSetRole.PRODUCTION else SourceSetRole.TEST,
+    )

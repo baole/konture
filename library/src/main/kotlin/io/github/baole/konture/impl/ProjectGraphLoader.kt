@@ -288,7 +288,7 @@ internal class ProjectGraphLoader {
                                     SourceSetId(
                                         modulePath = moduleModel.path,
                                         name = sourceSetModel.name,
-                                        kind = sourceSetModel.kind.toPublicKind(),
+                                        kind = SourceSetKind.fromCoreKind(sourceSetModel.kind),
                                         role = if (sourceSetModel.production) SourceSetRole.PRODUCTION else SourceSetRole.TEST,
                                     )
                                 val files = resolveSourceSetFiles(sourceSetModel, File(resolvedProjectDir), buildRoot)
@@ -350,6 +350,7 @@ internal class ProjectGraphLoader {
                                             production = ss.production,
                                             srcDirs = resolvedSrcDirs,
                                             platforms = ss.platforms,
+                                            dependsOnSourceSets = ss.dependsOnSourceSets,
                                         )
                                     },
                                 dependencies =
@@ -461,13 +462,6 @@ internal class ProjectGraphLoader {
         }
     }
 }
-
-private fun CoreSourceSetKind.toPublicKind(): SourceSetKind =
-    when (this) {
-        CoreSourceSetKind.KOTLIN_JVM -> SourceSetKind.JVM
-        CoreSourceSetKind.ANDROID_VARIANT -> SourceSetKind.ANDROID
-        CoreSourceSetKind.KMP -> SourceSetKind.KMP
-    }
 
 private fun resolveSourceSetFiles(
     sourceSetModel: SourceSetModel,

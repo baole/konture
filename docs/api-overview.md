@@ -99,6 +99,20 @@ Konture.properties {
 }
 ```
 
+### 7. Multiplatform `sourceSet {}` Policies
+```kotlin
+architecture {
+    sourceSet("commonMain") {
+        mustBePlatformIndependent()
+        mustNotDependOn("com.acme.legacy.**")
+        mustNotDependOnSourceSets("jvmMain", "androidMain", "iosMain")
+    }
+    sourceSet("androidMain") {
+        mayDependOn("android.**", "androidx.**")
+    }
+}
+```
+
 ---
 
 ## 🚨 Structured Violation Model

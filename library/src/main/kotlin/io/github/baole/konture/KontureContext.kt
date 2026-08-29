@@ -28,6 +28,8 @@ public class KontureContext(
 
     private val layerPolicies = mutableListOf<ArchitectureLayerPolicy>()
 
+    private val sourceSetPolicies = mutableListOf<ArchitectureSourceSetPolicy>()
+
     /** Returns a [ClassSelector] for all classes in the project graph. */
     public val classes: ClassSelector get() = KontureScope.fromProject(projectGraph)
 
@@ -144,6 +146,50 @@ public class KontureContext(
     }
 
     /**
+     * Declares a first-class source-set architecture policy for source sets matching [name].
+     *
+     * @param name The source set name (e.g., `"commonMain"`).
+     * @param block Declarative source-set policy scoped to [ArchitectureSourceSetPolicy].
+     */
+    public fun sourceSet(
+        name: String,
+        block: ArchitectureSourceSetPolicy.() -> Unit,
+    ) {
+        val policy = ArchitectureSourceSetPolicy(SourceSets.named(name), name).apply(block)
+        sourceSetPolicies.add(policy)
+    }
+
+    /**
+     * Declares a first-class source-set architecture policy for source sets matching any of [names].
+     *
+     * @param names The source set names.
+     * @param block Declarative source-set policy scoped to [ArchitectureSourceSetPolicy].
+     */
+    public fun sourceSet(
+        vararg names: String,
+        block: ArchitectureSourceSetPolicy.() -> Unit,
+    ) {
+        val selector = SourceSets.named(*names)
+        val label = names.joinToString()
+        val policy = ArchitectureSourceSetPolicy(selector, label).apply(block)
+        sourceSetPolicies.add(policy)
+    }
+
+    /**
+     * Declares a first-class source-set architecture policy using a custom [SourceSetSelector].
+     *
+     * @param selector The selector identifying targeted source sets.
+     * @param block Declarative source-set policy scoped to [ArchitectureSourceSetPolicy].
+     */
+    public fun sourceSet(
+        selector: SourceSetSelector,
+        block: ArchitectureSourceSetPolicy.() -> Unit,
+    ) {
+        val policy = ArchitectureSourceSetPolicy(selector, "custom").apply(block)
+        sourceSetPolicies.add(policy)
+    }
+
+    /**
      * Declares a nested, type-safe layered-architecture specification inside this architecture validation context.
      */
     public fun layered(block: LayeredArchitectureDsl.() -> Unit) {
@@ -176,6 +222,9 @@ public class KontureContext(
         /** Filter or assertion criteria for failures. */
         if (layerPolicies.isNotEmpty()) {
             addSuite("layers") { checkLayerPolicies(layerPolicies, projectGraph) }
+        }
+        if (sourceSetPolicies.isNotEmpty()) {
+            addSuite("sourceSets") { checkSourceSetPolicies(sourceSetPolicies, projectGraph) }
         }
         val failures = mutableListOf<String>()
         for (suite in ruleSuites) {
