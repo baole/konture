@@ -325,6 +325,84 @@ class ArchitectureSourceSetPolicyTest : RuleBuildersTestBase() {
     }
 
     @Test
+    fun `mustNotDependOnSourceSets catches violation on empty source set without files`() {
+        val module =
+            mockModule(
+                path = ":core",
+                files = emptyList(),
+                sourceSets =
+                    listOf(
+                        SourceSet(
+                            name = "commonMain",
+                            kind = "KMP",
+                            production = true,
+                            srcDirs = emptyList(),
+                            dependsOnSourceSets = listOf("jvmMain"),
+                        ),
+                    ),
+            )
+        graphWith(listOf(module))
+
+        val error =
+            assertThrows(AssertionError::class.java) {
+                architecture {
+                    sourceSet("commonMain") {
+                        mustNotDependOnSourceSets("jvmMain")
+                    }
+                }
+            }
+
+        assertTrue(
+            error.message!!.contains(
+                "must not depend on source sets [jvmMain], but depends on: jvmMain",
+            ),
+        )
+    }
+
+    @Test
+    fun `mustNotDependOnSourceSets reports violation only once for multiple files in module`() {
+        val files =
+            (1..5).map { index ->
+                FileDeclaration(
+                    name = "File$index.kt",
+                    packageName = "com.example.common",
+                    filePath = "core/src/commonMain/kotlin/com/example/common/File$index.kt",
+                    classes = listOf(mockClass("Class$index", "com.example.common")),
+                    sourceSets = listOf(sourceSetId(":core", "commonMain")),
+                )
+            }
+        val module =
+            mockModule(
+                path = ":core",
+                files = files,
+                sourceSets =
+                    listOf(
+                        SourceSet(
+                            name = "commonMain",
+                            kind = "KMP",
+                            production = true,
+                            srcDirs = emptyList(),
+                            dependsOnSourceSets = listOf("jvmMain"),
+                        ),
+                    ),
+            )
+        graphWith(listOf(module))
+
+        val error =
+            assertThrows(AssertionError::class.java) {
+                architecture {
+                    sourceSet("commonMain") {
+                        mustNotDependOnSourceSets("jvmMain")
+                    }
+                }
+            }
+
+        val pattern = "must not depend on source sets [jvmMain], but depends on: jvmMain"
+        val count = error.message!!.split(pattern).size - 1
+        org.junit.jupiter.api.Assertions.assertEquals(1, count, "Hierarchy violation should only be reported once")
+    }
+
+    @Test
     fun `sourceSet vararg applies policy across multiple source sets`() {
         val file1 =
             FileDeclaration(

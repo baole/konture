@@ -174,43 +174,66 @@ internal class ArchitectureSourceSetRegistry(
     }
 
     private fun ArchitectureSourceSetPolicy.collectViolationsForPolicy(out: MutableList<Violation>) {
+        val forbiddenSourceSets = mustNotDependOnSourceSets().toSet()
         for (module in allModules) {
-            val moduleSourceSetMap = module.sourceSets.associateBy { it.name }
-            for (file in module.files) {
-                val matchingMemberships = file.membershipsFor(module.path).filter { selector.matches(it) }
-                if (matchingMemberships.isEmpty()) continue
-
-                for (sourceSetId in matchingMemberships) {
-                    checkFileHierarchyConstraints(module, sourceSetId, moduleSourceSetMap, out)
-                    checkFilePackageConstraints(module, file, sourceSetId, out)
-                }
-            }
+            checkModuleHierarchy(module, forbiddenSourceSets, out)
+            checkModuleFiles(module, out)
         }
     }
 
-    private fun ArchitectureSourceSetPolicy.checkFileHierarchyConstraints(
+    private fun ArchitectureSourceSetPolicy.checkModuleHierarchy(
         module: Module,
-        sourceSetId: SourceSetId,
-        sourceSetMap: Map<String, SourceSet>,
+        forbiddenSourceSets: Set<String>,
         out: MutableList<Violation>,
     ) {
-        if (mustNotDependOnSourceSets().isEmpty()) return
-        val model = sourceSetMap[sourceSetId.name] ?: return
-        val forbidden = mustNotDependOnSourceSets().toSet()
-        for (dep in model.dependsOnSourceSets) {
-            if (dep in forbidden) {
+        if (forbiddenSourceSets.isEmpty()) return
+        for (sourceSet in module.sourceSets) {
+            checkSourceSetHierarchy(module, sourceSet, forbiddenSourceSets, out)
+        }
+    }
+
+    private fun ArchitectureSourceSetPolicy.checkSourceSetHierarchy(
+        module: Module,
+        sourceSet: SourceSet,
+        forbiddenSourceSets: Set<String>,
+        out: MutableList<Violation>,
+    ) {
+        val kind =
+            when (sourceSet.kind.uppercase()) {
+                "KMP" -> SourceSetKind.KMP
+                "ANDROID_VARIANT", "ANDROID" -> SourceSetKind.ANDROID
+                else -> SourceSetKind.JVM
+            }
+        val role = if (sourceSet.production) SourceSetRole.PRODUCTION else SourceSetRole.TEST
+        val sourceSetId = SourceSetId(module.path, sourceSet.name, kind, role)
+        if (!selector.matches(sourceSetId)) return
+
+        for (dep in sourceSet.dependsOnSourceSets) {
+            if (dep in forbiddenSourceSets) {
                 out.add(
                     newViolation(
                         sourceSubject = Subject.ModuleSubject(path = module.path),
                         targetSubject = Subject.CustomSubject(name = dep),
                         sourceLocation = SourceLocation(filePath = module.path),
                         messageKey = "architecture.sourceSet.mustNotDependOnSourceSets",
-                        sourceSetId.name,
+                        sourceSet.name,
                         module.path,
                         mustNotDependOnSourceSets().joinToString(),
                         dep,
                     ),
                 )
+            }
+        }
+    }
+
+    private fun ArchitectureSourceSetPolicy.checkModuleFiles(
+        module: Module,
+        out: MutableList<Violation>,
+    ) {
+        for (file in module.files) {
+            val matchingMemberships = file.membershipsFor(module.path).filter { selector.matches(it) }
+            for (sourceSetId in matchingMemberships) {
+                checkFilePackageConstraints(module, file, sourceSetId, out)
             }
         }
     }
