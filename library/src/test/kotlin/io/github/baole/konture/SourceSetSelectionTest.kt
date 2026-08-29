@@ -93,4 +93,45 @@ class SourceSetSelectionTest {
         assertEquals(1, membershipsCustom.size)
         assertEquals("customMain", membershipsCustom[0].name)
     }
+
+    @Test
+    fun `test SourceSetKind fromString and fromCoreKind`() {
+        assertEquals(SourceSetKind.KMP, SourceSetKind.fromString("KMP"))
+        assertEquals(SourceSetKind.KMP, SourceSetKind.fromString("kmp"))
+        assertEquals(SourceSetKind.ANDROID, SourceSetKind.fromString("ANDROID"))
+        assertEquals(SourceSetKind.ANDROID, SourceSetKind.fromString("android_variant"))
+        assertEquals(SourceSetKind.JVM, SourceSetKind.fromString("JVM"))
+        assertEquals(SourceSetKind.JVM, SourceSetKind.fromString("kotlin_jvm"))
+        assertEquals(SourceSetKind.JVM, SourceSetKind.fromString("UNKNOWN"))
+
+        assertEquals(
+            SourceSetKind.KMP,
+            SourceSetKind.fromCoreKind(io.github.baole.konture.core.SourceSetKind.KMP),
+        )
+        assertEquals(
+            SourceSetKind.ANDROID,
+            SourceSetKind.fromCoreKind(io.github.baole.konture.core.SourceSetKind.ANDROID_VARIANT),
+        )
+        assertEquals(
+            SourceSetKind.JVM,
+            SourceSetKind.fromCoreKind(io.github.baole.konture.core.SourceSetKind.KOTLIN_JVM),
+        )
+    }
+
+    @Test
+    fun `test SourceSet toSourceSetId conversion`() {
+        val sourceSet =
+            SourceSet(
+                name = "commonMain",
+                kind = "KMP",
+                production = true,
+                srcDirs = listOf("src/commonMain/kotlin"),
+            )
+        val id = sourceSet.toSourceSetId(":shared")
+
+        assertEquals(":shared", id.modulePath)
+        assertEquals("commonMain", id.name)
+        assertEquals(SourceSetKind.KMP, id.kind)
+        assertEquals(SourceSetRole.PRODUCTION, id.role)
+    }
 }

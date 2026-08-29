@@ -30,6 +30,33 @@ public enum class SourceSetKind {
 
     /** Kotlin Multiplatform source set. */
     KMP,
+
+    ;
+
+    /** Companion factory and parsing methods for [SourceSetKind]. */
+    public companion object {
+        /**
+         * Resolves a [SourceSetKind] from a string name (case-insensitive),
+         * supporting standard names ("KOTLIN_JVM", "ANDROID_VARIANT", "KMP", "JVM", "ANDROID").
+         */
+        public fun fromString(value: String): SourceSetKind =
+            when (value.trim().uppercase()) {
+                "KMP" -> KMP
+                "ANDROID", "ANDROID_VARIANT" -> ANDROID
+                "JVM", "KOTLIN_JVM" -> JVM
+                else -> JVM
+            }
+
+        /**
+         * Converts a core [io.github.baole.konture.core.SourceSetKind] to this public [SourceSetKind].
+         */
+        public fun fromCoreKind(coreKind: io.github.baole.konture.core.SourceSetKind): SourceSetKind =
+            when (coreKind) {
+                io.github.baole.konture.core.SourceSetKind.KOTLIN_JVM -> JVM
+                io.github.baole.konture.core.SourceSetKind.ANDROID_VARIANT -> ANDROID
+                io.github.baole.konture.core.SourceSetKind.KMP -> KMP
+            }
+    }
 }
 
 /** Indicates whether a source set contains production or test code. */

@@ -198,14 +198,7 @@ internal class ArchitectureSourceSetRegistry(
         forbiddenSourceSets: Set<String>,
         out: MutableList<Violation>,
     ) {
-        val kind =
-            when (sourceSet.kind.uppercase()) {
-                "KMP" -> SourceSetKind.KMP
-                "ANDROID_VARIANT", "ANDROID" -> SourceSetKind.ANDROID
-                else -> SourceSetKind.JVM
-            }
-        val role = if (sourceSet.production) SourceSetRole.PRODUCTION else SourceSetRole.TEST
-        val sourceSetId = SourceSetId(module.path, sourceSet.name, kind, role)
+        val sourceSetId = sourceSet.toSourceSetId(module.path)
         if (!selector.matches(sourceSetId)) return
 
         for (dep in sourceSet.dependsOnSourceSets) {

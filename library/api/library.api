@@ -5694,11 +5694,21 @@ public final class io/github/baole/konture/SourceSetId {
 
 public final class io/github/baole/konture/SourceSetKind : java/lang/Enum {
 	public static final field ANDROID Lio/github/baole/konture/SourceSetKind;
+	public static final field Companion Lio/github/baole/konture/SourceSetKind$Companion;
 	public static final field JVM Lio/github/baole/konture/SourceSetKind;
 	public static final field KMP Lio/github/baole/konture/SourceSetKind;
 	public static fun getEntries ()Lkotlin/enums/EnumEntries;
 	public static fun valueOf (Ljava/lang/String;)Lio/github/baole/konture/SourceSetKind;
 	public static fun values ()[Lio/github/baole/konture/SourceSetKind;
+}
+
+public final class io/github/baole/konture/SourceSetKind$Companion {
+	public final fun fromCoreKind (Lio/github/baole/konture/core/SourceSetKind;)Lio/github/baole/konture/SourceSetKind;
+	public final fun fromString (Ljava/lang/String;)Lio/github/baole/konture/SourceSetKind;
+}
+
+public final class io/github/baole/konture/SourceSetKt {
+	public static final fun toSourceSetId (Lio/github/baole/konture/SourceSet;Ljava/lang/String;)Lio/github/baole/konture/SourceSetId;
 }
 
 public final class io/github/baole/konture/SourceSetRole : java/lang/Enum {
