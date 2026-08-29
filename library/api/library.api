@@ -44,6 +44,19 @@ public final class io/github/baole/konture/ArchitectureLayerPolicy {
 	public final fun selector (Lkotlin/jvm/functions/Function1;)V
 }
 
+public final class io/github/baole/konture/ArchitectureSourceSetPolicy {
+	public final fun getLabel ()Ljava/lang/String;
+	public final fun getSelector ()Lio/github/baole/konture/SourceSetSelector;
+	public final fun mayDependOn (Ljava/util/List;)V
+	public final fun mayDependOn ([Ljava/lang/String;)V
+	public final fun mustBePlatformIndependent (Ljava/util/List;Ljava/util/List;)V
+	public static synthetic fun mustBePlatformIndependent$default (Lio/github/baole/konture/ArchitectureSourceSetPolicy;Ljava/util/List;Ljava/util/List;ILjava/lang/Object;)V
+	public final fun mustNotDependOn (Ljava/util/List;)V
+	public final fun mustNotDependOn ([Ljava/lang/String;)V
+	public final fun mustNotDependOnSourceSets (Ljava/util/List;)V
+	public final fun mustNotDependOnSourceSets ([Ljava/lang/String;)V
+}
+
 public final class io/github/baole/konture/ClassDeclaration {
 	public fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ZZLjava/util/List;Ljava/util/List;Ljava/util/Set;Ljava/lang/String;Lio/github/baole/konture/Visibility;Ljava/util/Set;Ljava/util/List;Lio/github/baole/konture/ConstructorDeclaration;Ljava/util/List;Ljava/util/List;Ljava/util/List;Lio/github/baole/konture/ClassDeclaration;Ljava/lang/String;Ljava/util/Map;ZI)V
 	public synthetic fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ZZLjava/util/List;Ljava/util/List;Ljava/util/Set;Ljava/lang/String;Lio/github/baole/konture/Visibility;Ljava/util/Set;Ljava/util/List;Lio/github/baole/konture/ConstructorDeclaration;Ljava/util/List;Ljava/util/List;Ljava/util/List;Lio/github/baole/konture/ClassDeclaration;Ljava/lang/String;Ljava/util/Map;ZIILkotlin/jvm/internal/DefaultConstructorMarker;)V
@@ -3424,6 +3437,9 @@ public final class io/github/baole/konture/KontureContext {
 	public final fun rule (Ljava/lang/String;Lkotlin/jvm/functions/Function1;)Lio/github/baole/konture/RuleDefinition;
 	public final fun slices (Ljava/lang/String;)Lio/github/baole/konture/KontureSliceScope;
 	public final fun slices (Lkotlin/jvm/functions/Function1;)V
+	public final fun sourceSet (Lio/github/baole/konture/SourceSetSelector;Lkotlin/jvm/functions/Function1;)V
+	public final fun sourceSet (Ljava/lang/String;Lkotlin/jvm/functions/Function1;)V
+	public final fun sourceSet ([Ljava/lang/String;Lkotlin/jvm/functions/Function1;)V
 }
 
 public abstract interface annotation class io/github/baole/konture/KontureDsl : java/lang/annotation/Annotation {
@@ -4519,6 +4535,11 @@ public final class io/github/baole/konture/ParameterDeclaration {
 	public final fun getType ()Ljava/lang/String;
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
+}
+
+public final class io/github/baole/konture/PlatformPackages {
+	public static final field INSTANCE Lio/github/baole/konture/PlatformPackages;
+	public final fun getDEFAULT_BANNED ()Ljava/util/List;
 }
 
 public final class io/github/baole/konture/ProblemMatcherViolationFormatter {
@@ -5633,16 +5654,18 @@ public final class io/github/baole/konture/SlicesThat {
 }
 
 public final class io/github/baole/konture/SourceSet {
-	public fun <init> (Ljava/lang/String;Ljava/lang/String;ZLjava/util/List;Ljava/util/List;)V
-	public synthetic fun <init> (Ljava/lang/String;Ljava/lang/String;ZLjava/util/List;Ljava/util/List;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;ZLjava/util/List;Ljava/util/List;Ljava/util/List;)V
+	public synthetic fun <init> (Ljava/lang/String;Ljava/lang/String;ZLjava/util/List;Ljava/util/List;Ljava/util/List;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun component1 ()Ljava/lang/String;
 	public final fun component2 ()Ljava/lang/String;
 	public final fun component3 ()Z
 	public final fun component4 ()Ljava/util/List;
 	public final fun component5 ()Ljava/util/List;
-	public final fun copy (Ljava/lang/String;Ljava/lang/String;ZLjava/util/List;Ljava/util/List;)Lio/github/baole/konture/SourceSet;
-	public static synthetic fun copy$default (Lio/github/baole/konture/SourceSet;Ljava/lang/String;Ljava/lang/String;ZLjava/util/List;Ljava/util/List;ILjava/lang/Object;)Lio/github/baole/konture/SourceSet;
+	public final fun component6 ()Ljava/util/List;
+	public final fun copy (Ljava/lang/String;Ljava/lang/String;ZLjava/util/List;Ljava/util/List;Ljava/util/List;)Lio/github/baole/konture/SourceSet;
+	public static synthetic fun copy$default (Lio/github/baole/konture/SourceSet;Ljava/lang/String;Ljava/lang/String;ZLjava/util/List;Ljava/util/List;Ljava/util/List;ILjava/lang/Object;)Lio/github/baole/konture/SourceSet;
 	public fun equals (Ljava/lang/Object;)Z
+	public final fun getDependsOnSourceSets ()Ljava/util/List;
 	public final fun getKind ()Ljava/lang/String;
 	public final fun getName ()Ljava/lang/String;
 	public final fun getPlatforms ()Ljava/util/List;

@@ -11,6 +11,7 @@ Welcome to the Konture Recipes catalog! This section provides copy-pasteable, ba
 *   [API Surface & Visibility Boundary Enforcement](visibility-boundaries.md)
 *   [Repositories Must Be Interfaces](repositories.md)
 *   [Naming Suffix Conventions](naming-conventions.md)
+*   [Multiplatform Source-Set Architecture Policies](source-sets.md)
 
 ---
 

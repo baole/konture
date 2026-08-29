@@ -27,4 +27,6 @@ public data class SourceSet(
     public val srcDirs: List<String>,
     /** Filter or assertion criteria for platforms. */
     public val platforms: List<String> = emptyList(),
+    /** Source sets in this source set's Kotlin compilation/dependsOn visibility closure. */
+    public val dependsOnSourceSets: List<String> = emptyList(),
 )

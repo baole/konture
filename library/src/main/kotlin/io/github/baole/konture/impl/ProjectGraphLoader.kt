@@ -350,6 +350,7 @@ internal class ProjectGraphLoader {
                                             production = ss.production,
                                             srcDirs = resolvedSrcDirs,
                                             platforms = ss.platforms,
+                                            dependsOnSourceSets = ss.dependsOnSourceSets,
                                         )
                                     },
                                 dependencies =
