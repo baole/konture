@@ -218,6 +218,36 @@ public class KontureContext(
         return ruleDef
     }
 
+    /**
+     * Imports and executes a reusable [RuleSet] inside this architecture validation context.
+     *
+     * Each declaration captured by the rule set (via [architectureRules]) is replayed
+     * into this context as if it had been declared inline. Multiple rule sets may be
+     * applied within a single `architecture { ... }` block, and rule sets may be
+     * combined with inline declarations and reused across separate blocks.
+     *
+     * Example:
+     * ```kotlin
+     * val cleanArchitecture = architectureRules {
+     *     classes {
+     *         that().resideInAPackage("com.example.domain..")
+     *         should().satisfy { !it.isAbstract }
+     *     }
+     * }
+     *
+     * architecture {
+     *     apply(cleanArchitecture)
+     * }
+     * ```
+     *
+     * @param ruleSet The reusable rule set to import and execute.
+     */
+    public fun apply(ruleSet: RuleSet) {
+        for (declaration in ruleSet.declarations) {
+            declaration()
+        }
+    }
+
     internal fun verifyAll() {
         /** Filter or assertion criteria for failures. */
         if (layerPolicies.isNotEmpty()) {

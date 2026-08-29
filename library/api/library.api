@@ -3421,6 +3421,7 @@ public final class io/github/baole/konture/Konture {
 
 public final class io/github/baole/konture/KontureContext {
 	public fun <init> (Lio/github/baole/konture/ProjectGraph;)V
+	public final fun apply (Lio/github/baole/konture/RuleSet;)V
 	public final fun classes (Lkotlin/jvm/functions/Function1;)V
 	public final fun files (Lkotlin/jvm/functions/Function1;)V
 	public final fun functions (Lkotlin/jvm/functions/Function1;)V
@@ -5397,6 +5398,30 @@ public final class io/github/baole/konture/RuleDefinition {
 
 public final class io/github/baole/konture/RuleDslKt {
 	public static final fun rule (Ljava/lang/String;Lkotlin/jvm/functions/Function1;)Lio/github/baole/konture/RuleDefinition;
+}
+
+public final class io/github/baole/konture/RuleSet {
+}
+
+public final class io/github/baole/konture/RuleSetBuilder {
+	public fun <init> ()V
+	public final fun classes (Lkotlin/jvm/functions/Function1;)V
+	public final fun files (Lkotlin/jvm/functions/Function1;)V
+	public final fun functions (Lkotlin/jvm/functions/Function1;)V
+	public final fun layer (Ljava/lang/String;Lkotlin/jvm/functions/Function1;)V
+	public final fun layered (Lkotlin/jvm/functions/Function1;)V
+	public final fun layeredArchitecture (Lkotlin/jvm/functions/Function1;)V
+	public final fun modules (Lkotlin/jvm/functions/Function1;)V
+	public final fun properties (Lkotlin/jvm/functions/Function1;)V
+	public final fun rule (Ljava/lang/String;Lkotlin/jvm/functions/Function1;)V
+	public final fun slices (Lkotlin/jvm/functions/Function1;)V
+	public final fun sourceSet (Lio/github/baole/konture/SourceSetSelector;Lkotlin/jvm/functions/Function1;)V
+	public final fun sourceSet (Ljava/lang/String;Lkotlin/jvm/functions/Function1;)V
+	public final fun sourceSet ([Ljava/lang/String;Lkotlin/jvm/functions/Function1;)V
+}
+
+public final class io/github/baole/konture/RuleSetKt {
+	public static final fun architectureRules (Lkotlin/jvm/functions/Function1;)Lio/github/baole/konture/RuleSet;
 }
 
 public final class io/github/baole/konture/RuleSuppressionBuilder {
