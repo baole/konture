@@ -14,4 +14,3 @@ internal interface SymbolLookup {
 
     fun lookupKey(): String = "${javaClass.name}@${hashCode()}"
 }
-

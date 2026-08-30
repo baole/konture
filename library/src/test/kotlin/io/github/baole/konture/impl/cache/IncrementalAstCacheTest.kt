@@ -11,7 +11,6 @@ import io.github.baole.konture.impl.PsiParser
 import io.github.baole.konture.impl.psi.MapSymbolLookup
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
@@ -41,27 +40,32 @@ class IncrementalAstCacheTest {
 
     @Test
     fun `getDeclaredClassFqNames hits cache on repeated calls with unchanged files`() {
-        val file1 = File(tempDir, "User.kt").apply {
-            writeText(
-                """
-                package com.example.domain
-                class User
-                class UserProfile
-                """.trimIndent(),
-            )
-        }
-        val file2 = File(tempDir, "Order.kt").apply {
-            writeText(
-                """
-                package com.example.order
-                class Order
-                """.trimIndent(),
-            )
-        }
+        val file1 =
+            File(tempDir, "User.kt").apply {
+                writeText(
+                    """
+                    package com.example.domain
+                    class User
+                    class UserProfile
+                    """.trimIndent(),
+                )
+            }
+        val file2 =
+            File(tempDir, "Order.kt").apply {
+                writeText(
+                    """
+                    package com.example.order
+                    class Order
+                    """.trimIndent(),
+                )
+            }
         val files = listOf(file1, file2)
 
         val firstScan = PsiParser.getDeclaredClassFqNames(files)
-        assertEquals(setOf("com.example.domain.User", "com.example.domain.UserProfile", "com.example.order.Order"), firstScan)
+        assertEquals(
+            setOf("com.example.domain.User", "com.example.domain.UserProfile", "com.example.order.Order"),
+            firstScan,
+        )
         assertEquals(2, IncrementalAstCache.classScanMisses)
         assertEquals(0, IncrementalAstCache.classScanHits)
 
@@ -74,15 +78,16 @@ class IncrementalAstCacheTest {
 
     @Test
     fun `getDeclaredTypeAliases hits cache on repeated calls with unchanged files`() {
-        val file = File(tempDir, "Aliases.kt").apply {
-            writeText(
-                """
-                package com.example.types
-                typealias UserId = String
-                typealias OrderId = Long
-                """.trimIndent(),
-            )
-        }
+        val file =
+            File(tempDir, "Aliases.kt").apply {
+                writeText(
+                    """
+                    package com.example.types
+                    typealias UserId = String
+                    typealias OrderId = Long
+                    """.trimIndent(),
+                )
+            }
         val files = listOf(file)
 
         val firstScan = PsiParser.getDeclaredTypeAliases(files)
@@ -97,18 +102,19 @@ class IncrementalAstCacheTest {
 
     @Test
     fun `parseFile hits cache on repeated calls for unchanged file`() {
-        val file = File(tempDir, "Service.kt").apply {
-            writeText(
-                """
-                package com.example.service
-                import com.example.domain.User
+        val file =
+            File(tempDir, "Service.kt").apply {
+                writeText(
+                    """
+                    package com.example.service
+                    import com.example.domain.User
 
-                class UserService(private val user: User) {
-                    fun getUser(): User = user
-                }
-                """.trimIndent(),
-            )
-        }
+                    class UserService(private val user: User) {
+                        fun getUser(): User = user
+                    }
+                    """.trimIndent(),
+                )
+            }
         val lookup = MapSymbolLookup(declaredClasses = setOf("com.example.domain.User"))
 
         val decl1 = PsiParser.parseFile(file, lookup)
@@ -127,14 +133,15 @@ class IncrementalAstCacheTest {
 
     @Test
     fun `modifying file content causes cache miss and re-parse with updated AST`() {
-        val file = File(tempDir, "Entity.kt").apply {
-            writeText(
-                """
-                package com.example
-                class EntityV1
-                """.trimIndent(),
-            )
-        }
+        val file =
+            File(tempDir, "Entity.kt").apply {
+                writeText(
+                    """
+                    package com.example
+                    class EntityV1
+                    """.trimIndent(),
+                )
+            }
 
         val decl1 = PsiParser.parseFile(file)
         assertNotNull(decl1)
@@ -160,14 +167,15 @@ class IncrementalAstCacheTest {
     fun `disabling incremental mode bypasses caching`() {
         Konture.incremental = false
 
-        val file = File(tempDir, "Bypass.kt").apply {
-            writeText(
-                """
-                package com.example
-                class Bypass
-                """.trimIndent(),
-            )
-        }
+        val file =
+            File(tempDir, "Bypass.kt").apply {
+                writeText(
+                    """
+                    package com.example
+                    class Bypass
+                    """.trimIndent(),
+                )
+            }
 
         val decl1 = PsiParser.parseFile(file)
         val decl2 = PsiParser.parseFile(file)
@@ -263,46 +271,51 @@ class IncrementalAstCacheTest {
         assertEquals(2, IncrementalAstCache.parseHits)
     }
 
-
     @Test
     fun `benchmark verifies sub-second incremental execution time`() {
-        val files = (1..50).map { i ->
-            File(tempDir, "Bench$i.kt").apply {
-                writeText(
-                    """
-                    package com.example.benchmark
-                    import java.util.UUID
+        val files =
+            (1..50).map { i ->
+                File(tempDir, "Bench$i.kt").apply {
+                    writeText(
+                        """
+                        package com.example.benchmark
+                        import java.util.UUID
 
-                    interface Service$i {
-                        fun execute(): String
-                    }
+                        interface Service$i {
+                            fun execute(): String
+                        }
 
-                    class ServiceImpl$i : Service$i {
-                        val id: String = UUID.randomUUID().toString()
-                        override fun execute(): String = id
-                    }
-                    """.trimIndent(),
-                )
+                        class ServiceImpl$i : Service$i {
+                            val id: String = UUID.randomUUID().toString()
+                            override fun execute(): String = id
+                        }
+                        """.trimIndent(),
+                    )
+                }
             }
-        }
 
         // Initial cold parse
-        val coldTime = measureTimeMillis {
-            PsiParser.getDeclaredClassFqNames(files)
-            PsiParser.getDeclaredTypeAliases(files)
-            files.forEach { PsiParser.parseFile(it) }
-        }
+        val coldTime =
+            measureTimeMillis {
+                PsiParser.getDeclaredClassFqNames(files)
+                PsiParser.getDeclaredTypeAliases(files)
+                files.forEach { PsiParser.parseFile(it) }
+            }
 
         // Incremental cached run
-        val warmTime = measureTimeMillis {
-            val classes = PsiParser.getDeclaredClassFqNames(files)
-            val aliases = PsiParser.getDeclaredTypeAliases(files)
-            val decls = files.mapNotNull { PsiParser.parseFile(it) }
-            assertEquals(100, classes.size) // 50 interfaces + 50 classes
-            assertEquals(50, decls.size)
-        }
+        val warmTime =
+            measureTimeMillis {
+                val classes = PsiParser.getDeclaredClassFqNames(files)
+                val aliases = PsiParser.getDeclaredTypeAliases(files)
+                val decls = files.mapNotNull { PsiParser.parseFile(it) }
+                assertEquals(100, classes.size) // 50 interfaces + 50 classes
+                assertEquals(50, decls.size)
+            }
 
         // Warm run must be well under 1000ms (sub-second)
-        assertTrue(warmTime < 1000, "Incremental re-analysis must execute in sub-second time, took: ${warmTime}ms (cold was: ${coldTime}ms)")
+        assertTrue(
+            warmTime < 1000,
+            "Incremental re-analysis must execute in sub-second time, took: ${warmTime}ms (cold was: ${coldTime}ms)",
+        )
     }
 }

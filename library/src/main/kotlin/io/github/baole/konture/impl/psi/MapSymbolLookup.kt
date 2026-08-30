@@ -28,4 +28,3 @@ internal class MapSymbolLookup(
         return result
     }
 }
-

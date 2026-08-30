@@ -114,7 +114,6 @@ internal object KontureRuntimeStateProvider {
         threadLocalState.set(KontureRuntimeState())
     }
 
-
     inline fun <T> runWithState(
         state: KontureRuntimeState,
         block: () -> T,

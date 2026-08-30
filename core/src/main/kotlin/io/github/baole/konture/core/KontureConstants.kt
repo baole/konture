@@ -121,4 +121,3 @@ public object KontureConstants {
      */
     public const val DEFAULT_INCREMENTAL_ENABLED: Boolean = true
 }
-

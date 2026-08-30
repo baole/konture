@@ -46,7 +46,10 @@ internal object IncrementalAstCache {
         return result
     }
 
-    fun putClassFqNames(hash: String, names: Set<String>) {
+    fun putClassFqNames(
+        hash: String,
+        names: Set<String>,
+    ) {
         classFqNamesCache[hash] = names
     }
 
@@ -60,7 +63,10 @@ internal object IncrementalAstCache {
         return result
     }
 
-    fun putTypeAliases(hash: String, aliases: Map<String, TypeAliasDefinition>) {
+    fun putTypeAliases(
+        hash: String,
+        aliases: Map<String, TypeAliasDefinition>,
+    ) {
         typeAliasesCache[hash] = aliases
     }
 
@@ -74,7 +80,10 @@ internal object IncrementalAstCache {
         return result
     }
 
-    fun putFileDeclaration(key: String, declaration: FileDeclaration) {
+    fun putFileDeclaration(
+        key: String,
+        declaration: FileDeclaration,
+    ) {
         fileDeclarationCache[key] = declaration
     }
 

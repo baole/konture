@@ -40,34 +40,38 @@ internal object PsiParser {
     /**
      * Scans a list of files to quickly extract all fully-qualified class names declared in them.
      */
-    @Suppress("SwallowedException", "TooGenericExceptionCaught")
     fun getDeclaredClassFqNames(files: List<File>): Set<String> {
         val fqNames = mutableSetOf<String>()
         val isIncremental = Konture.incremental
         files.forEach { file ->
             if (file.exists() && file.name.endsWith(".kt")) {
-                try {
-                    val content = file.readText()
-                    val hash = if (isIncremental) SourceHasher.hashString(content) else null
-                    if (isIncremental && hash != null) {
-                        val cached = IncrementalAstCache.getClassFqNames(hash)
-                        if (cached != null) {
-                            fqNames.addAll(cached)
-                            return@forEach
-                        }
-                    }
-                    val ktFile = environment.createKtFile(file.name, content)
-                    val collected = DeclaredClassScanner.collectFqNames(ktFile)
-                    if (isIncremental && hash != null) {
-                        IncrementalAstCache.putClassFqNames(hash, collected)
-                    }
-                    fqNames.addAll(collected)
-                } catch (e: Exception) {
-                    // Ignore parsing issues for individual files in global scan
-                }
+                scanClassFqNames(file, isIncremental)?.let { fqNames.addAll(it) }
             }
         }
         return fqNames
+    }
+
+    @Suppress("SwallowedException", "TooGenericExceptionCaught")
+    private fun scanClassFqNames(
+        file: File,
+        isIncremental: Boolean,
+    ): Set<String>? {
+        return try {
+            val content = file.readText()
+            val hash = if (isIncremental) SourceHasher.hashString(content) else null
+            if (isIncremental && hash != null) {
+                val cached = IncrementalAstCache.getClassFqNames(hash)
+                if (cached != null) return cached
+            }
+            val ktFile = environment.createKtFile(file.name, content)
+            val collected = DeclaredClassScanner.collectFqNames(ktFile)
+            if (isIncremental && hash != null) {
+                IncrementalAstCache.putClassFqNames(hash, collected)
+            }
+            collected
+        } catch (e: Exception) {
+            null
+        }
     }
 
     /**
@@ -77,33 +81,38 @@ internal object PsiParser {
      * versions. The target is resolved at use time so alias chains and
      * Kotlin's normal import precedence remain supported.
      */
-    @Suppress("SwallowedException", "TooGenericExceptionCaught")
     fun getDeclaredTypeAliases(files: List<File>): Map<String, TypeAliasDefinition> {
         val aliases = mutableMapOf<String, TypeAliasDefinition>()
         val isIncremental = Konture.incremental
         files.forEach { file ->
-            if (!file.exists() || !file.name.endsWith(".kt")) return@forEach
-            try {
-                val content = file.readText()
-                val hash = if (isIncremental) SourceHasher.hashString(content) else null
-                if (isIncremental && hash != null) {
-                    val cached = IncrementalAstCache.getTypeAliases(hash)
-                    if (cached != null) {
-                        aliases.putAll(cached)
-                        return@forEach
-                    }
-                }
-                val ktFile = environment.createKtFile(file.name, content)
-                val scanned = TypeAliasScanner.scan(ktFile, content)
-                if (isIncremental && hash != null) {
-                    IncrementalAstCache.putTypeAliases(hash, scanned)
-                }
-                aliases.putAll(scanned)
-            } catch (e: Exception) {
-                // Ignore parsing issues for individual files in global scan.
+            if (file.exists() && file.name.endsWith(".kt")) {
+                scanTypeAliases(file, isIncremental)?.let { aliases.putAll(it) }
             }
         }
         return aliases
+    }
+
+    @Suppress("SwallowedException", "TooGenericExceptionCaught")
+    private fun scanTypeAliases(
+        file: File,
+        isIncremental: Boolean,
+    ): Map<String, TypeAliasDefinition>? {
+        return try {
+            val content = file.readText()
+            val hash = if (isIncremental) SourceHasher.hashString(content) else null
+            if (isIncremental && hash != null) {
+                val cached = IncrementalAstCache.getTypeAliases(hash)
+                if (cached != null) return cached
+            }
+            val ktFile = environment.createKtFile(file.name, content)
+            val scanned = TypeAliasScanner.scan(ktFile, content)
+            if (isIncremental && hash != null) {
+                IncrementalAstCache.putTypeAliases(hash, scanned)
+            }
+            scanned
+        } catch (e: Exception) {
+            null
+        }
     }
 
     /**
@@ -244,4 +253,3 @@ internal object PsiParser {
         IncrementalAstCache.clear()
     }
 }
-
