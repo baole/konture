@@ -51,4 +51,5 @@ public fun Konture.architectureRules(
  * @param block DSL configuration block scoped to [RuleSetBuilder].
  * @return Reusable [RuleSet].
  */
-public fun Konture.architectureRules(block: RuleSetBuilder.() -> Unit): RuleSet = io.github.baole.konture.architectureRules(name = null, block = block)
+public fun Konture.architectureRules(block: RuleSetBuilder.() -> Unit): RuleSet =
+    io.github.baole.konture.architectureRules(name = null, block = block)
