@@ -200,6 +200,34 @@ Konture.modules {
 
 ```
 
+## 🎯 Unified Pattern Matchers (`under(...)`)
+
+Simplify matching syntax for packages and Gradle modules using unified `under(...)` helpers, avoiding the need to remember distinct wildcard syntax (`..` vs `**`):
+
+```kotlin
+// Matches :feature:checkout, :feature:profile, etc.
+modules.under(":feature")
+
+// Matches com.acme.domain, com.acme.domain.model, com.acme.domain.service.impl, etc.
+packages.under("com.acme.domain")
+
+// Usage in architecture layer definitions:
+architecture {
+    layer("feature") {
+        selector {
+            modules(modules.under(":feature"))
+            packages(packages.under("com.acme.feature"))
+        }
+        mayDependOn("core")
+    }
+}
+
+// Usage in declarative rules:
+Konture.classes {
+    that().resideInAPackage(packages.under("com.acme.feature"))
+        .should().notDependOnPackages(packages.under("com.acme.legacy"))
+}
+```
 
 Typed function and property rules compare the resolved raw declared type. For example, `List::class` matches `List<String>`, while explicit imports and import aliases resolve to their fully qualified types. Ambiguous references, generic arguments, nullability, type aliases, and type parameters still require the existing string or custom assertion APIs.
 
