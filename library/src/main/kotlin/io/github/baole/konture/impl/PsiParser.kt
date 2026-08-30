@@ -123,7 +123,7 @@ internal object PsiParser {
         val cacheKey =
             if (fileHash != null) {
                 val lookupKey = symbolLookup?.lookupKey() ?: "none"
-                "$fileHash:$lookupKey"
+                "${file.canonicalPath}:$fileHash:$lookupKey"
             } else {
                 null
             }

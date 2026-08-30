@@ -221,6 +221,48 @@ class IncrementalAstCacheTest {
         assertEquals(50 * 20L, IncrementalAstCache.parseHits)
     }
 
+    @Test
+    fun `two files with identical content in different paths retain their respective paths and are cached separately`() {
+        val fileA =
+            File(tempDir, "ModuleA_Config.kt").apply {
+                writeText(
+                    """
+                    package com.example.config
+                    class Config
+                    """.trimIndent(),
+                )
+            }
+        val fileB =
+            File(tempDir, "ModuleB_Config.kt").apply {
+                writeText(
+                    """
+                    package com.example.config
+                    class Config
+                    """.trimIndent(),
+                )
+            }
+
+        val declA = PsiParser.parseFile(fileA)
+        val declB = PsiParser.parseFile(fileB)
+
+        assertNotNull(declA)
+        assertNotNull(declB)
+        assertEquals(fileA.absolutePath, declA?.filePath)
+        assertEquals(fileB.absolutePath, declB?.filePath)
+        assertEquals("ModuleA_Config.kt", declA?.name)
+        assertEquals("ModuleB_Config.kt", declB?.name)
+
+        // Both files caused misses initially
+        assertEquals(2, IncrementalAstCache.parseMisses)
+
+        // Repeated parse hits cache for both files and maintains correct paths
+        val cachedA = PsiParser.parseFile(fileA)
+        val cachedB = PsiParser.parseFile(fileB)
+        assertEquals(fileA.absolutePath, cachedA?.filePath)
+        assertEquals(fileB.absolutePath, cachedB?.filePath)
+        assertEquals(2, IncrementalAstCache.parseHits)
+    }
+
 
     @Test
     fun `benchmark verifies sub-second incremental execution time`() {
