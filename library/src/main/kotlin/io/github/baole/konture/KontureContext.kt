@@ -219,33 +219,126 @@ public class KontureContext(
     }
 
     /**
-     * Imports and executes a reusable [RuleSet] inside this architecture validation context.
-     *
-     * Each declaration captured by the rule set (via [architectureRules]) is replayed
-     * into this context as if it had been declared inline. Multiple rule sets may be
-     * applied within a single `architecture { ... }` block, and rule sets may be
-     * combined with inline declarations and reused across separate blocks.
-     *
-     * Example:
-     * ```kotlin
-     * val cleanArchitecture = architectureRules {
-     *     classes {
-     *         that().resideInAPackage("com.example.domain..")
-     *         should().satisfy { !it.isAbstract }
-     *     }
-     * }
-     *
-     * architecture {
-     *     apply(cleanArchitecture)
-     * }
-     * ```
-     *
-     * @param ruleSet The reusable rule set to import and execute.
+     * Imports and executes all rules declared inside [ruleSet] in this architecture validation context.
      */
     public fun apply(ruleSet: RuleSet) {
-        for (declaration in ruleSet.declarations) {
-            declaration()
-        }
+        ruleSet.applyTo(this)
+    }
+
+    /**
+     * Imports and executes multiple [RuleSet] instances in this architecture validation context.
+     */
+    public fun apply(vararg ruleSets: RuleSet) {
+        ruleSets.forEach { it.applyTo(this) }
+    }
+
+    /**
+     * Imports and executes a collection of [RuleSet] instances in this architecture validation context.
+     */
+    public fun apply(ruleSets: Iterable<RuleSet>) {
+        ruleSets.forEach { it.applyTo(this) }
+    }
+
+    /**
+     * Imports and executes a [RuleDefinition] inside this architecture validation context.
+     */
+    public fun apply(rule: RuleDefinition) {
+        addSuite(rule.metadata.id) { rule.check() }
+    }
+
+    /**
+     * Imports and executes multiple [RuleDefinition] instances inside this architecture validation context.
+     */
+    public fun apply(vararg rules: RuleDefinition) {
+        rules.forEach { apply(it) }
+    }
+
+    /**
+     * Declares a suite of module structure/dependency rules scoped to specific source sets.
+     */
+    public fun modules(
+        sourceSets: SourceSetSelector,
+        block: ModulesRuleBuilder.() -> Unit,
+    ) {
+        val builder = ModulesRuleBuilder(projectGraph, sourceSets)
+        builder.apply(block)
+        addSuite("modules") { builder.check() }
+    }
+
+    /**
+     * Declares a suite of class structure/dependency rules scoped to specific source sets.
+     */
+    public fun classes(
+        sourceSets: SourceSetSelector,
+        block: ClassesRuleBuilder.() -> Unit,
+    ) {
+        val builder = ClassesRuleBuilder(projectGraph, sourceSets)
+        builder.apply(block)
+        addSuite("classes") { builder.check() }
+    }
+
+    /**
+     * Declares a suite of function structure/dependency rules scoped to specific source sets.
+     */
+    public fun functions(
+        sourceSets: SourceSetSelector,
+        block: FunctionsRuleBuilder.() -> Unit,
+    ) {
+        val builder = FunctionsRuleBuilder(projectGraph, sourceSets)
+        builder.apply(block)
+        addSuite("functions") { builder.check() }
+    }
+
+    /**
+     * Declares a suite of property structure/dependency rules scoped to specific source sets.
+     */
+    public fun properties(
+        sourceSets: SourceSetSelector,
+        block: PropertiesRuleBuilder.() -> Unit,
+    ) {
+        val builder = PropertiesRuleBuilder(projectGraph, sourceSets)
+        builder.apply(block)
+        addSuite("properties") { builder.check() }
+    }
+
+    /**
+     * Declares a suite of file structure/dependency rules scoped to specific source sets.
+     */
+    public fun files(
+        sourceSets: SourceSetSelector,
+        block: FilesRuleBuilder.() -> Unit,
+    ) {
+        val builder = FilesRuleBuilder(projectGraph, sourceSets)
+        builder.apply(block)
+        addSuite("files") { builder.check() }
+    }
+
+    /**
+     * Declares a suite of slice rules scoped to specific source sets.
+     */
+    public fun slices(
+        sourceSets: SourceSetSelector,
+        block: SlicesRuleBuilder.() -> Unit,
+    ) {
+        val builder = SlicesRuleBuilder(projectGraph, sourceSets)
+        builder.apply(block)
+        addSuite("slices") { builder.check() }
+    }
+
+    /**
+     * Verifies that there are no module dependency cycles in the project.
+     *
+     * @param includeTestConfigurations if true, test-related dependency configurations will also be analyzed.
+     */
+    public fun noCycles(includeTestConfigurations: Boolean = false) {
+        addSuite("noCycles") { projectGraph.assertNoCycles(includeTestConfigurations) }
+    }
+
+    /**
+     * Alias for [noCycles].
+     */
+    public fun assertNoCycles(includeTestConfigurations: Boolean = false) {
+        noCycles(includeTestConfigurations)
     }
 
     internal fun verifyAll() {

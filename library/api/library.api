@@ -44,6 +44,15 @@ public final class io/github/baole/konture/ArchitectureLayerPolicy {
 	public final fun selector (Lkotlin/jvm/functions/Function1;)V
 }
 
+public final class io/github/baole/konture/ArchitectureRulesKt {
+	public static final fun architectureRules (Lio/github/baole/konture/Konture;Ljava/lang/String;Lkotlin/jvm/functions/Function1;)Lio/github/baole/konture/RuleSet;
+	public static final fun architectureRules (Lio/github/baole/konture/Konture;Lkotlin/jvm/functions/Function1;)Lio/github/baole/konture/RuleSet;
+	public static final fun architectureRules (Ljava/lang/String;Lkotlin/jvm/functions/Function1;)Lio/github/baole/konture/RuleSet;
+	public static final fun architectureRules (Lkotlin/jvm/functions/Function1;)Lio/github/baole/konture/RuleSet;
+	public static synthetic fun architectureRules$default (Lio/github/baole/konture/Konture;Ljava/lang/String;Lkotlin/jvm/functions/Function1;ILjava/lang/Object;)Lio/github/baole/konture/RuleSet;
+	public static synthetic fun architectureRules$default (Ljava/lang/String;Lkotlin/jvm/functions/Function1;ILjava/lang/Object;)Lio/github/baole/konture/RuleSet;
+}
+
 public final class io/github/baole/konture/ArchitectureSourceSetPolicy {
 	public final fun getLabel ()Ljava/lang/String;
 	public final fun getSelector ()Lio/github/baole/konture/SourceSetSelector;
@@ -3421,9 +3430,18 @@ public final class io/github/baole/konture/Konture {
 
 public final class io/github/baole/konture/KontureContext {
 	public fun <init> (Lio/github/baole/konture/ProjectGraph;)V
+	public final fun apply (Lio/github/baole/konture/RuleDefinition;)V
 	public final fun apply (Lio/github/baole/konture/RuleSet;)V
+	public final fun apply (Ljava/lang/Iterable;)V
+	public final fun apply ([Lio/github/baole/konture/RuleDefinition;)V
+	public final fun apply ([Lio/github/baole/konture/RuleSet;)V
+	public final fun assertNoCycles (Z)V
+	public static synthetic fun assertNoCycles$default (Lio/github/baole/konture/KontureContext;ZILjava/lang/Object;)V
+	public final fun classes (Lio/github/baole/konture/SourceSetSelector;Lkotlin/jvm/functions/Function1;)V
 	public final fun classes (Lkotlin/jvm/functions/Function1;)V
+	public final fun files (Lio/github/baole/konture/SourceSetSelector;Lkotlin/jvm/functions/Function1;)V
 	public final fun files (Lkotlin/jvm/functions/Function1;)V
+	public final fun functions (Lio/github/baole/konture/SourceSetSelector;Lkotlin/jvm/functions/Function1;)V
 	public final fun functions (Lkotlin/jvm/functions/Function1;)V
 	public final fun getClasses ()Lio/github/baole/konture/KontureScope;
 	public final fun getFiles ()Lio/github/baole/konture/KontureFileScope;
@@ -3433,9 +3451,14 @@ public final class io/github/baole/konture/KontureContext {
 	public final fun layer (Ljava/lang/String;Lkotlin/jvm/functions/Function1;)V
 	public final fun layered (Lkotlin/jvm/functions/Function1;)V
 	public final fun layeredArchitecture (Lkotlin/jvm/functions/Function1;)V
+	public final fun modules (Lio/github/baole/konture/SourceSetSelector;Lkotlin/jvm/functions/Function1;)V
 	public final fun modules (Lkotlin/jvm/functions/Function1;)V
+	public final fun noCycles (Z)V
+	public static synthetic fun noCycles$default (Lio/github/baole/konture/KontureContext;ZILjava/lang/Object;)V
+	public final fun properties (Lio/github/baole/konture/SourceSetSelector;Lkotlin/jvm/functions/Function1;)V
 	public final fun properties (Lkotlin/jvm/functions/Function1;)V
 	public final fun rule (Ljava/lang/String;Lkotlin/jvm/functions/Function1;)Lio/github/baole/konture/RuleDefinition;
+	public final fun slices (Lio/github/baole/konture/SourceSetSelector;Lkotlin/jvm/functions/Function1;)V
 	public final fun slices (Ljava/lang/String;)Lio/github/baole/konture/KontureSliceScope;
 	public final fun slices (Lkotlin/jvm/functions/Function1;)V
 	public final fun sourceSet (Lio/github/baole/konture/SourceSetSelector;Lkotlin/jvm/functions/Function1;)V
@@ -5401,27 +5424,49 @@ public final class io/github/baole/konture/RuleDslKt {
 }
 
 public final class io/github/baole/konture/RuleSet {
+	public final fun check ()V
+	public final fun getDescription ()Ljava/lang/String;
+	public final fun getName ()Ljava/lang/String;
+	public final fun plus (Lio/github/baole/konture/RuleSet;)Lio/github/baole/konture/RuleSet;
+	public final fun verify ()V
 }
 
 public final class io/github/baole/konture/RuleSetBuilder {
 	public fun <init> ()V
+	public fun <init> (Ljava/lang/String;)V
+	public synthetic fun <init> (Ljava/lang/String;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun apply (Lio/github/baole/konture/RuleDefinition;)V
+	public final fun apply (Lio/github/baole/konture/RuleSet;)V
+	public final fun apply (Ljava/lang/Iterable;)V
+	public final fun apply ([Lio/github/baole/konture/RuleDefinition;)V
+	public final fun apply ([Lio/github/baole/konture/RuleSet;)V
+	public final fun assertNoCycles (Z)V
+	public static synthetic fun assertNoCycles$default (Lio/github/baole/konture/RuleSetBuilder;ZILjava/lang/Object;)V
+	public final fun classes (Lio/github/baole/konture/SourceSetSelector;Lkotlin/jvm/functions/Function1;)V
 	public final fun classes (Lkotlin/jvm/functions/Function1;)V
+	public final fun files (Lio/github/baole/konture/SourceSetSelector;Lkotlin/jvm/functions/Function1;)V
 	public final fun files (Lkotlin/jvm/functions/Function1;)V
+	public final fun functions (Lio/github/baole/konture/SourceSetSelector;Lkotlin/jvm/functions/Function1;)V
 	public final fun functions (Lkotlin/jvm/functions/Function1;)V
+	public final fun getDescription ()Ljava/lang/String;
+	public final fun getName ()Ljava/lang/String;
 	public final fun layer (Ljava/lang/String;Lkotlin/jvm/functions/Function1;)V
 	public final fun layered (Lkotlin/jvm/functions/Function1;)V
 	public final fun layeredArchitecture (Lkotlin/jvm/functions/Function1;)V
+	public final fun modules (Lio/github/baole/konture/SourceSetSelector;Lkotlin/jvm/functions/Function1;)V
 	public final fun modules (Lkotlin/jvm/functions/Function1;)V
+	public final fun noCycles (Z)V
+	public static synthetic fun noCycles$default (Lio/github/baole/konture/RuleSetBuilder;ZILjava/lang/Object;)V
+	public final fun properties (Lio/github/baole/konture/SourceSetSelector;Lkotlin/jvm/functions/Function1;)V
 	public final fun properties (Lkotlin/jvm/functions/Function1;)V
 	public final fun rule (Ljava/lang/String;Lkotlin/jvm/functions/Function1;)V
+	public final fun setDescription (Ljava/lang/String;)V
+	public final fun setName (Ljava/lang/String;)V
+	public final fun slices (Lio/github/baole/konture/SourceSetSelector;Lkotlin/jvm/functions/Function1;)V
 	public final fun slices (Lkotlin/jvm/functions/Function1;)V
 	public final fun sourceSet (Lio/github/baole/konture/SourceSetSelector;Lkotlin/jvm/functions/Function1;)V
 	public final fun sourceSet (Ljava/lang/String;Lkotlin/jvm/functions/Function1;)V
 	public final fun sourceSet ([Ljava/lang/String;Lkotlin/jvm/functions/Function1;)V
-}
-
-public final class io/github/baole/konture/RuleSetKt {
-	public static final fun architectureRules (Lkotlin/jvm/functions/Function1;)Lio/github/baole/konture/RuleSet;
 }
 
 public final class io/github/baole/konture/RuleSuppressionBuilder {
