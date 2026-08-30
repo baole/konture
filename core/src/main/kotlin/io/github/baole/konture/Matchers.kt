@@ -9,6 +9,7 @@ package io.github.baole.konture
 /**
  * Unified pattern matchers for Gradle module paths.
  */
+@Suppress("ClassName", "ClassNaming")
 public object modules {
     /**
      * Converts a module base path into a recursive glob pattern matching all submodules under it.
@@ -23,15 +24,15 @@ public object modules {
      */
     public fun under(path: String): String {
         val trimmed = path.trim()
-        val normalized =
-            when {
-                trimmed.isEmpty() || trimmed == ":" -> ":**"
-                trimmed.endsWith(":**") -> trimmed
-                trimmed.endsWith(":") -> "$trimmed**"
-                trimmed.startsWith(":") -> "$trimmed:**"
-                else -> ":$trimmed:**"
-            }
-        return normalized
+        if (trimmed.isEmpty() || trimmed == ":" || trimmed == ":**" || trimmed == "**") {
+            return ":**"
+        }
+        val withColon = if (trimmed.startsWith(":")) trimmed else ":$trimmed"
+        return when {
+            withColon.endsWith(":**") -> withColon
+            withColon.endsWith(":") -> "$withColon**"
+            else -> "$withColon:**"
+        }
     }
 
     /**
@@ -48,6 +49,7 @@ public object modules {
 /**
  * Unified pattern matchers for package names.
  */
+@Suppress("ClassName", "ClassNaming")
 public object packages {
     /**
      * Converts a base package name into a recursive package pattern matching the package and all its subpackages.
@@ -62,14 +64,12 @@ public object packages {
      */
     public fun under(packageName: String): String {
         val trimmed = packageName.trim()
-        val normalized =
-            when {
-                trimmed.isEmpty() || trimmed == ".." -> ".."
-                trimmed.endsWith("..") -> trimmed
-                trimmed.endsWith(".") -> "${trimmed}."
-                else -> "$trimmed.."
-            }
-        return normalized
+        return when {
+            trimmed.isEmpty() || trimmed == ".." -> ".."
+            trimmed.endsWith("..") -> trimmed
+            trimmed.endsWith(".") -> "$trimmed."
+            else -> "$trimmed.."
+        }
     }
 
     /**

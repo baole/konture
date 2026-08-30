@@ -200,6 +200,8 @@ Konture.modules {
 
 ```
 
+Typed function and property rules compare the resolved raw declared type. For example, `List::class` matches `List<String>`, while explicit imports and import aliases resolve to their fully qualified types. Ambiguous references, generic arguments, nullability, type aliases, and type parameters still require the existing string or custom assertion APIs.
+
 ## 🎯 Unified Pattern Matchers (`under(...)`)
 
 Simplify matching syntax for packages and Gradle modules using unified `under(...)` helpers, avoiding the need to remember distinct wildcard syntax (`..` vs `**`):
@@ -228,8 +230,6 @@ Konture.classes {
         .should().notDependOnPackages(packages.under("com.acme.legacy"))
 }
 ```
-
-Typed function and property rules compare the resolved raw declared type. For example, `List::class` matches `List<String>`, while explicit imports and import aliases resolve to their fully qualified types. Ambiguous references, generic arguments, nullability, type aliases, and type parameters still require the existing string or custom assertion APIs.
 
 Because Konture compiled layouts run as standard unit tests on the JVM, executing them is fast and seamless. Run the tests using your build system or trigger them directly from your IDE gutter.
 

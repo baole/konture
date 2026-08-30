@@ -19,12 +19,16 @@ class MatchersTest {
         assertEquals(":feature:**", modules.under(":feature"))
         assertEquals(":feature:**", modules.under("feature"))
         assertEquals(":feature:**", modules.under(":feature:"))
+        assertEquals(":feature:**", modules.under("feature:"))
         assertEquals(":feature:**", modules.under(":feature:**"))
+        assertEquals(":feature:**", modules.under("feature:**"))
         assertEquals(":feature:checkout:**", modules.under(":feature:checkout"))
         assertEquals(":feature:checkout:**", modules.under("feature:checkout"))
         assertEquals(":**", modules.under(":"))
         assertEquals(":**", modules.under(""))
         assertEquals(":**", modules.under("   "))
+        assertEquals(":**", modules.under("**"))
+        assertEquals(":**", modules.under(":**"))
     }
 
     @Test
