@@ -127,8 +127,9 @@ internal object PsiParser {
         symbolLookup: SymbolLookup? = null,
     ): FileDeclaration? {
         if (!file.exists()) return null
+        val content = file.readText()
         val isIncremental = Konture.incremental
-        val fileHash = if (isIncremental) SourceHasher.hashFile(file) else null
+        val fileHash = if (isIncremental) SourceHasher.hashString(content) else null
         val cacheKey =
             if (fileHash != null) {
                 val lookupKey = symbolLookup?.lookupKey() ?: "none"
@@ -144,7 +145,6 @@ internal object PsiParser {
             }
         }
 
-        val content = file.readText()
         val ktFile = environment.createKtFile(file.name, content)
 
         val packageName = ktFile.packageFqName.asString()
