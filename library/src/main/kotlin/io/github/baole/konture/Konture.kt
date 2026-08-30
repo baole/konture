@@ -53,6 +53,38 @@ public object Konture {
     public const val DEFAULT_BASELINE_FILENAME: String = KontureConstants.DEFAULT_BASELINE_FILENAME
 
     /**
+     * System property key used to enable/disable incremental AST analysis and caching.
+     */
+    public const val PROPERTY_INCREMENTAL_ENABLED: String = KontureConstants.PROPERTY_INCREMENTAL_ENABLED
+
+    /**
+     * Default value for incremental AST analysis.
+     */
+    public const val DEFAULT_INCREMENTAL_ENABLED: Boolean = KontureConstants.DEFAULT_INCREMENTAL_ENABLED
+
+    /**
+     * Whether incremental AST analysis and source hashing are enabled.
+     * When enabled, unchanged Kotlin files are resolved from the AST cache without re-parsing.
+     * Can be configured via system property "konture.incremental.enabled" or programmatically.
+     * Backed by ThreadLocal state; safe under parallel test execution.
+     */
+    public var incremental: Boolean
+        get() {
+            if (KontureRuntimeStateProvider.currentState.isIncrementalOverridden) {
+                return KontureRuntimeStateProvider.currentState.incremental
+            }
+            val systemProp = System.getProperty(PROPERTY_INCREMENTAL_ENABLED)
+            return systemProp?.toBoolean() ?: KontureRuntimeStateProvider.currentState.incremental
+        }
+        set(value) {
+            KontureRuntimeStateProvider.currentState =
+                KontureRuntimeStateProvider.currentState.copy(
+                    incremental = value,
+                    isIncrementalOverridden = true,
+                )
+        }
+
+    /**
      * The output format used when formatting architecture violation reports upon failure.
      * Can be configured via system property "konture.output.format" or programmatically.
      * Backed by ThreadLocal state; safe under parallel test execution.

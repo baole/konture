@@ -36,6 +36,8 @@ internal class KontureRuntimeState(
     val isReportResolvedViolationsOverridden: Boolean = false,
     val failOnResolvedViolations: Boolean = KontureConstants.DEFAULT_FAIL_ON_RESOLVED_VIOLATIONS,
     val isFailOnResolvedViolationsOverridden: Boolean = false,
+    val incremental: Boolean = KontureConstants.DEFAULT_INCREMENTAL_ENABLED,
+    val isIncrementalOverridden: Boolean = false,
 ) {
     val projectGraphLoader: ProjectGraphLoader = ProjectGraphLoader()
 
@@ -58,6 +60,8 @@ internal class KontureRuntimeState(
         isReportResolvedViolationsOverridden: Boolean = this.isReportResolvedViolationsOverridden,
         failOnResolvedViolations: Boolean = this.failOnResolvedViolations,
         isFailOnResolvedViolationsOverridden: Boolean = this.isFailOnResolvedViolationsOverridden,
+        incremental: Boolean = this.incremental,
+        isIncrementalOverridden: Boolean = this.isIncrementalOverridden,
     ): KontureRuntimeState {
         return KontureRuntimeState(
             baselinePath = baselinePath,
@@ -79,6 +83,8 @@ internal class KontureRuntimeState(
             isReportResolvedViolationsOverridden = isReportResolvedViolationsOverridden,
             failOnResolvedViolations = failOnResolvedViolations,
             isFailOnResolvedViolationsOverridden = isFailOnResolvedViolationsOverridden,
+            incremental = incremental,
+            isIncrementalOverridden = isIncrementalOverridden,
         )
     }
 }
@@ -101,11 +107,13 @@ internal object KontureRuntimeStateProvider {
         try {
             threadLocalState.get()?.baselineManager?.resetForTest()
             ReportAccumulator.clear()
+            io.github.baole.konture.impl.cache.IncrementalAstCache.clear()
         } catch (e: Exception) {
             // Ignore
         }
         threadLocalState.set(KontureRuntimeState())
     }
+
 
     inline fun <T> runWithState(
         state: KontureRuntimeState,

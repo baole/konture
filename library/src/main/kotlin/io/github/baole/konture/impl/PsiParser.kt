@@ -9,7 +9,10 @@ package io.github.baole.konture.impl
 import io.github.baole.konture.ClassDeclaration
 import io.github.baole.konture.FileDeclaration
 import io.github.baole.konture.FunctionDeclaration
+import io.github.baole.konture.Konture
 import io.github.baole.konture.PropertyDeclaration
+import io.github.baole.konture.impl.cache.IncrementalAstCache
+import io.github.baole.konture.impl.cache.SourceHasher
 import io.github.baole.konture.impl.psi.DeclarationParser
 import io.github.baole.konture.impl.psi.DeclaredClassScanner
 import io.github.baole.konture.impl.psi.PsiEnvironment
@@ -40,12 +43,25 @@ internal object PsiParser {
     @Suppress("SwallowedException", "TooGenericExceptionCaught")
     fun getDeclaredClassFqNames(files: List<File>): Set<String> {
         val fqNames = mutableSetOf<String>()
+        val isIncremental = Konture.incremental
         files.forEach { file ->
             if (file.exists() && file.name.endsWith(".kt")) {
                 try {
                     val content = file.readText()
+                    val hash = if (isIncremental) SourceHasher.hashString(content) else null
+                    if (isIncremental && hash != null) {
+                        val cached = IncrementalAstCache.getClassFqNames(hash)
+                        if (cached != null) {
+                            fqNames.addAll(cached)
+                            return@forEach
+                        }
+                    }
                     val ktFile = environment.createKtFile(file.name, content)
-                    fqNames.addAll(DeclaredClassScanner.collectFqNames(ktFile))
+                    val collected = DeclaredClassScanner.collectFqNames(ktFile)
+                    if (isIncremental && hash != null) {
+                        IncrementalAstCache.putClassFqNames(hash, collected)
+                    }
+                    fqNames.addAll(collected)
                 } catch (e: Exception) {
                     // Ignore parsing issues for individual files in global scan
                 }
@@ -64,12 +80,25 @@ internal object PsiParser {
     @Suppress("SwallowedException", "TooGenericExceptionCaught")
     fun getDeclaredTypeAliases(files: List<File>): Map<String, TypeAliasDefinition> {
         val aliases = mutableMapOf<String, TypeAliasDefinition>()
+        val isIncremental = Konture.incremental
         files.forEach { file ->
             if (!file.exists() || !file.name.endsWith(".kt")) return@forEach
             try {
                 val content = file.readText()
+                val hash = if (isIncremental) SourceHasher.hashString(content) else null
+                if (isIncremental && hash != null) {
+                    val cached = IncrementalAstCache.getTypeAliases(hash)
+                    if (cached != null) {
+                        aliases.putAll(cached)
+                        return@forEach
+                    }
+                }
                 val ktFile = environment.createKtFile(file.name, content)
-                aliases.putAll(TypeAliasScanner.scan(ktFile, content))
+                val scanned = TypeAliasScanner.scan(ktFile, content)
+                if (isIncremental && hash != null) {
+                    IncrementalAstCache.putTypeAliases(hash, scanned)
+                }
+                aliases.putAll(scanned)
             } catch (e: Exception) {
                 // Ignore parsing issues for individual files in global scan.
             }
@@ -89,6 +118,23 @@ internal object PsiParser {
         symbolLookup: SymbolLookup? = null,
     ): FileDeclaration? {
         if (!file.exists()) return null
+        val isIncremental = Konture.incremental
+        val fileHash = if (isIncremental) SourceHasher.hashFile(file) else null
+        val cacheKey =
+            if (fileHash != null) {
+                val lookupKey = symbolLookup?.lookupKey() ?: "none"
+                "$fileHash:$lookupKey"
+            } else {
+                null
+            }
+
+        if (isIncremental && cacheKey != null) {
+            val cached = IncrementalAstCache.getFileDeclaration(cacheKey)
+            if (cached != null) {
+                return cached
+            }
+        }
+
         val content = file.readText()
         val ktFile = environment.createKtFile(file.name, content)
 
@@ -168,19 +214,26 @@ internal object PsiParser {
                 context,
             )
 
-        return FileDeclaration(
-            name = file.name,
-            packageName = packageName,
-            imports = imports,
-            classes = classes,
-            topLevelFunctions = topLevelFunctions,
-            topLevelProperties = topLevelProperties,
-            kdocText = fileKDoc,
-            filePath = file.absolutePath,
-            importAliases = importAliases,
-            usages = usages,
-            annotations = fileAnnotations,
-        )
+        val fileDecl =
+            FileDeclaration(
+                name = file.name,
+                packageName = packageName,
+                imports = imports,
+                classes = classes,
+                topLevelFunctions = topLevelFunctions,
+                topLevelProperties = topLevelProperties,
+                kdocText = fileKDoc,
+                filePath = file.absolutePath,
+                importAliases = importAliases,
+                usages = usages,
+                annotations = fileAnnotations,
+            )
+
+        if (isIncremental && cacheKey != null) {
+            IncrementalAstCache.putFileDeclaration(cacheKey, fileDecl)
+        }
+
+        return fileDecl
     }
 
     /**
@@ -188,5 +241,7 @@ internal object PsiParser {
      */
     fun dispose() {
         environment.dispose()
+        IncrementalAstCache.clear()
     }
 }
+
