@@ -218,6 +218,129 @@ public class KontureContext(
         return ruleDef
     }
 
+    /**
+     * Imports and executes all rules declared inside [ruleSet] in this architecture validation context.
+     */
+    public fun apply(ruleSet: RuleSet) {
+        ruleSet.applyTo(this)
+    }
+
+    /**
+     * Imports and executes multiple [RuleSet] instances in this architecture validation context.
+     */
+    public fun apply(vararg ruleSets: RuleSet) {
+        ruleSets.forEach { it.applyTo(this) }
+    }
+
+    /**
+     * Imports and executes a collection of [RuleSet] instances in this architecture validation context.
+     */
+    public fun apply(ruleSets: Iterable<RuleSet>) {
+        ruleSets.forEach { it.applyTo(this) }
+    }
+
+    /**
+     * Imports and executes a [RuleDefinition] inside this architecture validation context.
+     */
+    public fun apply(rule: RuleDefinition) {
+        addSuite(rule.metadata.id) { rule.check() }
+    }
+
+    /**
+     * Imports and executes multiple [RuleDefinition] instances inside this architecture validation context.
+     */
+    public fun apply(vararg rules: RuleDefinition) {
+        rules.forEach { apply(it) }
+    }
+
+    /**
+     * Declares a suite of module structure/dependency rules scoped to specific source sets.
+     */
+    public fun modules(
+        sourceSets: SourceSetSelector,
+        block: ModulesRuleBuilder.() -> Unit,
+    ) {
+        val builder = ModulesRuleBuilder(projectGraph, sourceSets)
+        builder.apply(block)
+        addSuite("modules") { builder.check() }
+    }
+
+    /**
+     * Declares a suite of class structure/dependency rules scoped to specific source sets.
+     */
+    public fun classes(
+        sourceSets: SourceSetSelector,
+        block: ClassesRuleBuilder.() -> Unit,
+    ) {
+        val builder = ClassesRuleBuilder(projectGraph, sourceSets)
+        builder.apply(block)
+        addSuite("classes") { builder.check() }
+    }
+
+    /**
+     * Declares a suite of function structure/dependency rules scoped to specific source sets.
+     */
+    public fun functions(
+        sourceSets: SourceSetSelector,
+        block: FunctionsRuleBuilder.() -> Unit,
+    ) {
+        val builder = FunctionsRuleBuilder(projectGraph, sourceSets)
+        builder.apply(block)
+        addSuite("functions") { builder.check() }
+    }
+
+    /**
+     * Declares a suite of property structure/dependency rules scoped to specific source sets.
+     */
+    public fun properties(
+        sourceSets: SourceSetSelector,
+        block: PropertiesRuleBuilder.() -> Unit,
+    ) {
+        val builder = PropertiesRuleBuilder(projectGraph, sourceSets)
+        builder.apply(block)
+        addSuite("properties") { builder.check() }
+    }
+
+    /**
+     * Declares a suite of file structure/dependency rules scoped to specific source sets.
+     */
+    public fun files(
+        sourceSets: SourceSetSelector,
+        block: FilesRuleBuilder.() -> Unit,
+    ) {
+        val builder = FilesRuleBuilder(projectGraph, sourceSets)
+        builder.apply(block)
+        addSuite("files") { builder.check() }
+    }
+
+    /**
+     * Declares a suite of slice rules scoped to specific source sets.
+     */
+    public fun slices(
+        sourceSets: SourceSetSelector,
+        block: SlicesRuleBuilder.() -> Unit,
+    ) {
+        val builder = SlicesRuleBuilder(projectGraph, sourceSets)
+        builder.apply(block)
+        addSuite("slices") { builder.check() }
+    }
+
+    /**
+     * Verifies that there are no module dependency cycles in the project.
+     *
+     * @param includeTestConfigurations if true, test-related dependency configurations will also be analyzed.
+     */
+    public fun noCycles(includeTestConfigurations: Boolean = false) {
+        addSuite("noCycles") { projectGraph.assertNoCycles(includeTestConfigurations) }
+    }
+
+    /**
+     * Alias for [noCycles].
+     */
+    public fun assertNoCycles(includeTestConfigurations: Boolean = false) {
+        noCycles(includeTestConfigurations)
+    }
+
     internal fun verifyAll() {
         /** Filter or assertion criteria for failures. */
         if (layerPolicies.isNotEmpty()) {
