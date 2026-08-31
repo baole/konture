@@ -110,4 +110,14 @@ public object KontureConstants {
      * Default value for failing on resolved baseline violations.
      */
     public const val DEFAULT_FAIL_ON_RESOLVED_VIOLATIONS: Boolean = false
+
+    /**
+     * System property key used to enable/disable incremental AST analysis and caching.
+     */
+    public const val PROPERTY_INCREMENTAL_ENABLED: String = "konture.incremental.enabled"
+
+    /**
+     * Default value for incremental AST analysis.
+     */
+    public const val DEFAULT_INCREMENTAL_ENABLED: Boolean = true
 }
