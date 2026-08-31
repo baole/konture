@@ -1,6 +1,6 @@
 /*
  * Copyright 2026 The Konture Contributors
- * Contributors: Bao Le Duc (@baole)
+ * Contributors: Bao Le Duc (@baole), Octavio Calleya Garcia (@octaviospain)
  * SPDX-License-Identifier: Apache-2.0
  */
 
@@ -25,6 +25,32 @@ class KontureExtensionTest {
         assertEquals("en", extension.language.get())
         assertEquals(true, extension.reportResolvedViolations.get())
         assertEquals(false, extension.failOnResolvedViolations.get())
+        assertEquals(true, extension.analysis.incremental)
+        assertEquals(false, extension.analysis.cache)
+        assertEquals("", extension.analysis.cacheDir)
+    }
+
+    @Test
+    fun `analysis dsl configures incremental cache and cache dir`() {
+        val project = ProjectBuilder.builder().build()
+        val extension = KontureExtension(project)
+
+        extension.analysis.incremental = false
+        extension.analysis.cache = true
+        extension.analysis.cacheDir("custom/cache")
+
+        assertEquals(false, extension.analysis.incremental)
+        assertEquals(true, extension.analysis.cache)
+        assertEquals("custom/cache", extension.analysis.cacheDir)
+
+        // Function-style configuration mirrors the assignment-style DSL.
+        extension.analysis.incremental(true)
+        extension.analysis.cache(false)
+        extension.analysis.cacheDir("")
+
+        assertEquals(true, extension.analysis.incremental)
+        assertEquals(false, extension.analysis.cache)
+        assertEquals("", extension.analysis.cacheDir)
     }
 
     @Test

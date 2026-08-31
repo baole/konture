@@ -1,10 +1,12 @@
 /*
  * Copyright 2026 The Konture Contributors
- * Contributors: Bao Le Duc (@baole)
+ * Contributors: Bao Le Duc (@baole), Octavio Calleya Garcia (@octaviospain)
  * SPDX-License-Identifier: Apache-2.0
  */
 
 package io.github.baole.konture
+
+import kotlinx.serialization.Serializable
 
 /**
  * Represents a parameter in a function or constructor declaration.
@@ -15,6 +17,7 @@ package io.github.baole.konture
  * @property annotations List of annotations attached to this parameter.
  * @property resolvedType Fully qualified resolved type if available.
  */
+@Serializable
 public data class ParameterDeclaration(
     /** Filter or assertion criteria for name. */
     public val name: String,

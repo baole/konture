@@ -1,6 +1,6 @@
 /*
  * Copyright 2026 The Konture Contributors
- * Contributors: Bao Le Duc (@baole)
+ * Contributors: Bao Le Duc (@baole), Octavio Calleya Garcia (@octaviospain)
  * SPDX-License-Identifier: Apache-2.0
  */
 
@@ -13,6 +13,7 @@ import io.github.baole.konture.core.KontureConstants
 import io.github.baole.konture.core.model.RuleMetadata
 import io.github.baole.konture.core.model.Severity
 import io.github.baole.konture.impl.report.ReportAccumulator
+import java.io.File
 import java.util.Locale
 
 @Suppress("LongParameterList")
@@ -38,6 +39,10 @@ internal class KontureRuntimeState(
     val isFailOnResolvedViolationsOverridden: Boolean = false,
     val incremental: Boolean = KontureConstants.DEFAULT_INCREMENTAL_ENABLED,
     val isIncrementalOverridden: Boolean = false,
+    val cacheEnabled: Boolean = KontureConstants.DEFAULT_CACHE_ENABLED,
+    val isCacheEnabledOverridden: Boolean = false,
+    val cacheDir: File = File(KontureConstants.DEFAULT_CACHE_DIR),
+    val cacheFingerprint: String = "",
 ) {
     val projectGraphLoader: ProjectGraphLoader = ProjectGraphLoader()
 
@@ -62,6 +67,10 @@ internal class KontureRuntimeState(
         isFailOnResolvedViolationsOverridden: Boolean = this.isFailOnResolvedViolationsOverridden,
         incremental: Boolean = this.incremental,
         isIncrementalOverridden: Boolean = this.isIncrementalOverridden,
+        cacheEnabled: Boolean = this.cacheEnabled,
+        isCacheEnabledOverridden: Boolean = this.isCacheEnabledOverridden,
+        cacheDir: File = this.cacheDir,
+        cacheFingerprint: String = this.cacheFingerprint,
     ): KontureRuntimeState {
         return KontureRuntimeState(
             baselinePath = baselinePath,
@@ -85,6 +94,10 @@ internal class KontureRuntimeState(
             isFailOnResolvedViolationsOverridden = isFailOnResolvedViolationsOverridden,
             incremental = incremental,
             isIncrementalOverridden = isIncrementalOverridden,
+            cacheEnabled = cacheEnabled,
+            isCacheEnabledOverridden = isCacheEnabledOverridden,
+            cacheDir = cacheDir,
+            cacheFingerprint = cacheFingerprint,
         )
     }
 }

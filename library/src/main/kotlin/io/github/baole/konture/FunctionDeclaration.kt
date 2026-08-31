@@ -1,10 +1,12 @@
 /*
  * Copyright 2026 The Konture Contributors
- * Contributors: Bao Le Duc (@baole)
+ * Contributors: Bao Le Duc (@baole), Octavio Calleya Garcia (@octaviospain)
  * SPDX-License-Identifier: Apache-2.0
  */
 
 package io.github.baole.konture
+
+import kotlinx.serialization.Serializable
 
 /**
  * Represents a parsed function declaration within a Kotlin source file.
@@ -23,6 +25,7 @@ package io.github.baole.konture
  * @property sourceLine 1-based source code line number.
  * @property receiverType Receiver type string if this is an extension function.
  */
+@Serializable
 public data class FunctionDeclaration(
     /** Filter or assertion criteria for name. */
     public val name: String,

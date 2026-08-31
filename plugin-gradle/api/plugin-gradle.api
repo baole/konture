@@ -1,3 +1,16 @@
+public class io/github/baole/konture/plugin/AnalysisConfig {
+	public fun <init> (Lorg/gradle/api/Project;)V
+	public final fun cache (Z)V
+	public final fun cacheDir (Ljava/lang/String;)V
+	public final fun getCache ()Z
+	public final fun getCacheDir ()Ljava/lang/String;
+	public final fun getIncremental ()Z
+	public final fun incremental (Z)V
+	public final fun setCache (Z)V
+	public final fun setCacheDir (Ljava/lang/String;)V
+	public final fun setIncremental (Z)V
+}
+
 public final class io/github/baole/konture/plugin/DependencyData : java/io/Serializable {
 	public fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V
 	public final fun component1 ()Ljava/lang/String;
@@ -51,6 +64,7 @@ public class io/github/baole/konture/plugin/KontureExtension {
 	public final fun excludeModules ([Ljava/lang/String;)V
 	public final fun excludePackages ([Ljava/lang/String;)V
 	public final fun failOnResolvedViolations (Z)V
+	public final fun getAnalysis ()Lio/github/baole/konture/plugin/AnalysisConfig;
 	public final fun getBaselinePath ()Lorg/gradle/api/provider/Property;
 	public final fun getExcludeClasses ()Lorg/gradle/api/provider/ListProperty;
 	public final fun getExcludeConfigurations ()Lorg/gradle/api/provider/ListProperty;

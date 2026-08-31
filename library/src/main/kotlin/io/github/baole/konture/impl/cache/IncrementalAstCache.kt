@@ -1,6 +1,6 @@
 /*
  * Copyright 2026 The Konture Contributors
- * Contributors: Bao Le Duc (@baole)
+ * Contributors: Bao Le Duc (@baole), Octavio Calleya Garcia (@octaviospain)
  * SPDX-License-Identifier: Apache-2.0
  */
 
@@ -40,10 +40,14 @@ internal object IncrementalAstCache {
         val result = classFqNamesCache[hash]
         if (result != null) {
             classScanHitCount.incrementAndGet()
-        } else {
-            classScanMissCount.incrementAndGet()
+            return result
         }
-        return result
+        classScanMissCount.incrementAndGet()
+        val fromDisk = PersistentAstCacheStore.readClassFqNames(hash)
+        if (fromDisk != null) {
+            classFqNamesCache[hash] = fromDisk
+        }
+        return fromDisk
     }
 
     fun putClassFqNames(
@@ -51,16 +55,21 @@ internal object IncrementalAstCache {
         names: Set<String>,
     ) {
         classFqNamesCache[hash] = names
+        PersistentAstCacheStore.writeClassFqNames(hash, names)
     }
 
     fun getTypeAliases(hash: String): Map<String, TypeAliasDefinition>? {
         val result = typeAliasesCache[hash]
         if (result != null) {
             typeAliasScanHitCount.incrementAndGet()
-        } else {
-            typeAliasScanMissCount.incrementAndGet()
+            return result
         }
-        return result
+        typeAliasScanMissCount.incrementAndGet()
+        val fromDisk = PersistentAstCacheStore.readTypeAliases(hash)
+        if (fromDisk != null) {
+            typeAliasesCache[hash] = fromDisk
+        }
+        return fromDisk
     }
 
     fun putTypeAliases(
@@ -68,16 +77,21 @@ internal object IncrementalAstCache {
         aliases: Map<String, TypeAliasDefinition>,
     ) {
         typeAliasesCache[hash] = aliases
+        PersistentAstCacheStore.writeTypeAliases(hash, aliases)
     }
 
     fun getFileDeclaration(key: String): FileDeclaration? {
         val result = fileDeclarationCache[key]
         if (result != null) {
             parseHitCount.incrementAndGet()
-        } else {
-            parseMissCount.incrementAndGet()
+            return result
         }
-        return result
+        parseMissCount.incrementAndGet()
+        val fromDisk = PersistentAstCacheStore.readFileDeclaration(key)
+        if (fromDisk != null) {
+            fileDeclarationCache[key] = fromDisk
+        }
+        return fromDisk
     }
 
     fun putFileDeclaration(
@@ -85,6 +99,7 @@ internal object IncrementalAstCache {
         declaration: FileDeclaration,
     ) {
         fileDeclarationCache[key] = declaration
+        PersistentAstCacheStore.writeFileDeclaration(key, declaration)
     }
 
     fun clear() {
@@ -92,6 +107,7 @@ internal object IncrementalAstCache {
         typeAliasesCache.clear()
         fileDeclarationCache.clear()
         resetMetrics()
+        PersistentAstCacheStore.resetMetrics()
     }
 
     fun resetMetrics() {
@@ -101,7 +117,17 @@ internal object IncrementalAstCache {
         typeAliasScanMissCount.set(0)
         parseHitCount.set(0)
         parseMissCount.set(0)
+        PersistentAstCacheStore.resetMetrics()
     }
+
+    /** Number of entries successfully loaded from the persistent disk cache. */
+    val diskHits: Long get() = PersistentAstCacheStore.diskHits
+
+    /** Number of disk cache lookups that missed. */
+    val diskMisses: Long get() = PersistentAstCacheStore.diskMisses
+
+    /** Number of entries successfully written to the persistent disk cache. */
+    val diskWrites: Long get() = PersistentAstCacheStore.diskWrites
 
     val size: Int get() = classFqNamesCache.size + typeAliasesCache.size + fileDeclarationCache.size
 }

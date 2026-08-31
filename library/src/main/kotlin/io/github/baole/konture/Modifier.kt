@@ -1,14 +1,17 @@
 /*
  * Copyright 2026 The Konture Contributors
- * Contributors: Bao Le Duc (@baole)
+ * Contributors: Bao Le Duc (@baole), Octavio Calleya Garcia (@octaviospain)
  * SPDX-License-Identifier: Apache-2.0
  */
 
 package io.github.baole.konture
 
+import kotlinx.serialization.Serializable
+
 /**
  * Represents declaration modifiers in Kotlin source code (e.g. abstract, open, sealed, suspend, override).
  */
+@Serializable
 public enum class Modifier {
     /** Sealed class or interface modifier. */
     SEALED,

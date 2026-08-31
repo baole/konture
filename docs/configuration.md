@@ -34,8 +34,37 @@ konture {
 
     // Set translation language for violation messages (default is "en")
     language("fr")
+
+    // Tune analysis performance and persistent caching
+    analysis {
+        incremental = true   // incremental AST analysis (default: true)
+        cache = true         // persistent disk cache in .konture/cache (default: false)
+        // cacheDir = "custom/cache/path"   // optional override
+    }
 }
 ```
+
+### ⚡ Persistent Analysis Cache & Gradle Build Cache
+
+When `analysis { cache = true }` is enabled, parsed AST snapshots are persisted to a disk
+cache (`.konture/cache/<module-path>/<fingerprint>/ast/v1/` by default) and reused across
+test executions, so unchanged Kotlin files skip re-parsing entirely — even between separate
+JVM runs.
+
+- **Source changes invalidate automatically**: cache entries are keyed by the SHA-256 content
+  hash of each analyzed file, so editing a file always re-parses it.
+- **Rule/config changes invalidate automatically**: the cache directory is namespaced by a
+  fingerprint derived from the effective `analysis { }` configuration (and the rest of the
+  `konture { }` block). Changing any rule-affecting setting selects a fresh cache namespace,
+  leaving stale entries unused.
+- **Gradle build cache integration**: the cache directory is declared as an output of each
+  test task, so Gradle's up-to-date checks and build cache can snapshot, restore, and skip
+  evaluation entirely for unchanged inputs.
+- **Library-level control**: the same flags are available programmatically via
+  `Konture.cacheEnabled`, `Konture.cacheDir`, and `Konture.cacheFingerprint`, or via the
+  system properties `konture.cache.enabled`, `konture.cache.dir`,
+  `konture.cache.fingerprint`, and `konture.incremental.enabled`. Corruption is never fatal:
+  unreadable cache entries are treated as misses and re-parsed.
 
 ### Automatic test inputs
 
@@ -108,6 +137,9 @@ Declare your plugin configurations inside the `<configuration>` block of the `ko
 | **`outputFormat`** | `"HUMAN"` | Configures output formatting for architectural rule violations.<br>• Supported formats: `"HUMAN"` (default multi-line console output), `"PROBLEM_MATCHER"` (single-line IDE/CI problem matcher format `path:line:col: Konture [ruleId]: message`), `"HTML"` (standalone HTML report), `"JSON"` (schema-validated JSON report), `"SARIF"` (OASIS SARIF v2.1.0 standard for GitHub Code Scanning / SonarQube). Can also be overridden via system property `-Dkonture.output.format=json` or programmatically via `Konture.outputFormat`. |
 | **`reportPath`** | `"build/reports/konture/konture-report.html"` | Configures destination file path for standalone output report files.<br>• Can be overridden via system property `-Dkonture.report.path=build/reports/custom-report.html` or programmatically via `Konture.reportPath`. Format-specific paths can also be set via `konture.report.html.path`, `konture.report.json.path`, or `konture.report.sarif.path`. |
 | **`incremental`** | `true` | Enables incremental AST analysis and SHA-256 source content hashing to skip re-parsing unchanged Kotlin files.<br>• Can be overridden via system property `-Dkonture.incremental.enabled=false` or programmatically via `Konture.incremental`. |
+| **`analysis.incremental`** | `true` | Gradle DSL equivalent of `incremental` inside the `analysis { }` block. |
+| **`analysis.cache`** | `false` | Enables the persistent disk analysis cache (`.konture/cache`) so unchanged Kotlin files skip re-parsing across test executions.<br>• The cache directory is declared as a test-task output for Gradle build cache / up-to-date checks.<br>• Can be overridden via system property `-Dkonture.cache.enabled=false` or programmatically via `Konture.cacheEnabled`. |
+| **`analysis.cacheDir`** | `""` (auto) | Optional override of the persistent cache directory. The plugin always appends the module path to the resolved value, so the effective directory is `<cacheDir>/<module-path>/` (default `<rootProject>/.konture/cache/<module-path>/`) and consumer test tasks never share or overwrite the same directory. |
 
 ---
 

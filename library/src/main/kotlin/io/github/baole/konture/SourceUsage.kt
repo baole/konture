@@ -1,12 +1,15 @@
 /*
  * Copyright 2026 The Konture Contributors
- * Contributors: Bao Le Duc (@baole)
+ * Contributors: Bao Le Duc (@baole), Octavio Calleya Garcia (@octaviospain)
  * SPDX-License-Identifier: Apache-2.0
  */
 
 package io.github.baole.konture
 
+import kotlinx.serialization.Serializable
+
 /** Category of source code usage (e.g. function call or class reference). */
+@Serializable
 public enum class UsageKind {
     /** Direct function or constructor call. */
     CALL,
@@ -16,6 +19,7 @@ public enum class UsageKind {
 }
 
 /** Confidence level of a resolved symbol usage in source code analysis. */
+@Serializable
 public enum class ResolutionConfidence {
     /** Symbol usage was deterministically resolved. */
     RESOLVED,
@@ -28,6 +32,7 @@ public enum class ResolutionConfidence {
 }
 
 /** A resolved (or conservatively possible) Kotlin source usage. */
+@Serializable
 public data class SourceUsage(
     /** Filter or assertion criteria for kind. */
     public val kind: UsageKind,

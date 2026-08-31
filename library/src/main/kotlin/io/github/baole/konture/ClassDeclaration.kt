@@ -1,10 +1,12 @@
 /*
  * Copyright 2026 The Konture Contributors
- * Contributors: Bao Le Duc (@baole)
+ * Contributors: Bao Le Duc (@baole), Octavio Calleya Garcia (@octaviospain)
  * SPDX-License-Identifier: Apache-2.0
  */
 
 package io.github.baole.konture
+
+import kotlinx.serialization.Serializable
 
 /**
  * Represents a parsed Kotlin class, interface, or object declaration.
@@ -21,6 +23,7 @@ package io.github.baole.konture
  * @property referencedTypes Set of simple types referenced/accessed in this class body (used for dependency inference).
  * @property filePath The absolute path of the file containing this class.
  */
+@Serializable
 public data class ClassDeclaration(
     /** Filter or assertion criteria for name. */
     public val name: String,

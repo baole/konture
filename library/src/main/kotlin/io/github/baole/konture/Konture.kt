@@ -1,6 +1,6 @@
 /*
  * Copyright 2026 The Konture Contributors
- * Contributors: Bao Le Duc (@baole)
+ * Contributors: Bao Le Duc (@baole), Octavio Calleya Garcia (@octaviospain)
  * SPDX-License-Identifier: Apache-2.0
  */
 
@@ -10,6 +10,7 @@ import io.github.baole.konture.core.KontureConstants
 import io.github.baole.konture.core.model.Severity
 import io.github.baole.konture.impl.BaselineManager
 import io.github.baole.konture.impl.KontureRuntimeStateProvider
+import java.io.File
 import java.util.Locale
 
 /**
@@ -63,6 +64,31 @@ public object Konture {
     public const val DEFAULT_INCREMENTAL_ENABLED: Boolean = KontureConstants.DEFAULT_INCREMENTAL_ENABLED
 
     /**
+     * System property key used to enable/disable persistent disk caching of analysis results.
+     */
+    public const val PROPERTY_CACHE_ENABLED: String = KontureConstants.PROPERTY_CACHE_ENABLED
+
+    /**
+     * System property key used to override the persistent cache directory.
+     */
+    public const val PROPERTY_CACHE_DIR: String = KontureConstants.PROPERTY_CACHE_DIR
+
+    /**
+     * System property key used to override the persistent cache fingerprint.
+     */
+    public const val PROPERTY_CACHE_FINGERPRINT: String = KontureConstants.PROPERTY_CACHE_FINGERPRINT
+
+    /**
+     * Default value for persistent disk caching.
+     */
+    public const val DEFAULT_CACHE_ENABLED: Boolean = KontureConstants.DEFAULT_CACHE_ENABLED
+
+    /**
+     * Default persistent cache directory.
+     */
+    public const val DEFAULT_CACHE_DIR: String = KontureConstants.DEFAULT_CACHE_DIR
+
+    /**
      * Whether incremental AST analysis and source hashing are enabled.
      * When enabled, unchanged Kotlin files are resolved from the AST cache without re-parsing.
      * Can be configured via system property "konture.incremental.enabled" or programmatically.
@@ -82,6 +108,65 @@ public object Konture {
                     incremental = value,
                     isIncrementalOverridden = true,
                 )
+        }
+
+    /**
+     * Whether persistent disk caching of analysis results is enabled.
+     * When enabled (requires [incremental] too), parsed AST snapshots are written to
+     * [cacheDir] and reused across JVM runs, so unchanged Kotlin files skip re-parsing
+     * entirely in later test executions.
+     * Can be configured via system property "konture.cache.enabled" or programmatically.
+     * Backed by ThreadLocal state; safe under parallel test execution.
+     */
+    public var cacheEnabled: Boolean
+        get() {
+            if (KontureRuntimeStateProvider.currentState.isCacheEnabledOverridden) {
+                return KontureRuntimeStateProvider.currentState.cacheEnabled
+            }
+            val systemProp = System.getProperty(PROPERTY_CACHE_ENABLED)
+            return systemProp?.toBoolean() ?: KontureRuntimeStateProvider.currentState.cacheEnabled
+        }
+        set(value) {
+            KontureRuntimeStateProvider.currentState =
+                KontureRuntimeStateProvider.currentState.copy(
+                    cacheEnabled = value,
+                    isCacheEnabledOverridden = true,
+                )
+        }
+
+    /**
+     * The base directory of the persistent analysis cache.
+     * Defaults to ".konture/cache" resolved against the current working directory.
+     * Can be configured via system property "konture.cache.dir" or programmatically.
+     * Backed by ThreadLocal state; safe under parallel test execution.
+     */
+    public var cacheDir: File
+        get() {
+            val systemProp = System.getProperty(PROPERTY_CACHE_DIR)
+            return systemProp?.let(::File) ?: KontureRuntimeStateProvider.currentState.cacheDir
+        }
+        set(value) {
+            KontureRuntimeStateProvider.currentState =
+                KontureRuntimeStateProvider.currentState.copy(cacheDir = value)
+        }
+
+    /**
+     * Optional fingerprint used to namespace the persistent analysis cache.
+     * Changing the fingerprint invalidates previously stored entries, which is the
+     * recommended way to invalidate the cache when rule definitions or analysis
+     * configuration change. The Gradle plugin computes this automatically from the
+     * effective `konture { analysis { } }` configuration.
+     * Can be configured via system property "konture.cache.fingerprint" or programmatically.
+     * Backed by ThreadLocal state; safe under parallel test execution.
+     */
+    public var cacheFingerprint: String
+        get() {
+            val systemProp = System.getProperty(PROPERTY_CACHE_FINGERPRINT)
+            return systemProp ?: KontureRuntimeStateProvider.currentState.cacheFingerprint
+        }
+        set(value) {
+            KontureRuntimeStateProvider.currentState =
+                KontureRuntimeStateProvider.currentState.copy(cacheFingerprint = value)
         }
 
     /**

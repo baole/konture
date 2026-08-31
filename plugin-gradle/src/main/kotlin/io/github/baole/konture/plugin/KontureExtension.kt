@@ -1,6 +1,6 @@
 /*
  * Copyright 2026 The Konture Contributors
- * Contributors: Bao Le Duc (@baole)
+ * Contributors: Bao Le Duc (@baole), Octavio Calleya Garcia (@octaviospain)
  * SPDX-License-Identifier: Apache-2.0
  */
 
@@ -69,6 +69,20 @@ public open class KontureExtension(
     public fun logLevel(level: String) {
         logLevel.set(level)
     }
+
+    /**
+     * Analysis performance and caching configuration.
+     *
+     * ```kotlin
+     * konture {
+     *     analysis {
+     *         incremental = true
+     *         cache = true
+     *     }
+     * }
+     * ```
+     */
+    public val analysis: AnalysisConfig = AnalysisConfig(project)
 
     /** Sets the baseline relative [path]. */
     public fun baselinePath(path: String) {
