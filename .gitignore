@@ -9,6 +9,9 @@ build/
 .kotlin/
 **/.kotlin/
 
+# Konture
+.konture/
+
 # IntelliJ IDEA
 .idea/
 *.iml

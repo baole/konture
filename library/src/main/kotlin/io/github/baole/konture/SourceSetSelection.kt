@@ -1,14 +1,16 @@
 /*
  * Copyright 2026 The Konture Contributors
- * Contributors: Bao Le Duc (@baole)
+ * Contributors: Bao Le Duc (@baole), Octavio Calleya Garcia (@octaviospain)
  * SPDX-License-Identifier: Apache-2.0
  */
 
 package io.github.baole.konture
 
 import io.github.baole.konture.impl.PatternMatchers
+import kotlinx.serialization.Serializable
 
 /** A source set as exposed to architecture rules. */
+@Serializable
 public data class SourceSetId(
     /** Filter or assertion criteria for module path. */
     public val modulePath: String,
@@ -21,6 +23,7 @@ public data class SourceSetId(
 )
 
 /** Broad technology stack classification of a source set. */
+@Serializable
 public enum class SourceSetKind {
     /** JVM source set. */
     JVM,
@@ -60,6 +63,7 @@ public enum class SourceSetKind {
 }
 
 /** Indicates whether a source set contains production or test code. */
+@Serializable
 public enum class SourceSetRole {
     /** Production application or library source set. */
     PRODUCTION,

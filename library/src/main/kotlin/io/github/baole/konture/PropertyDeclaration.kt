@@ -1,10 +1,12 @@
 /*
  * Copyright 2026 The Konture Contributors
- * Contributors: Bao Le Duc (@baole)
+ * Contributors: Bao Le Duc (@baole), Octavio Calleya Garcia (@octaviospain)
  * SPDX-License-Identifier: Apache-2.0
  */
 
 package io.github.baole.konture
+
+import kotlinx.serialization.Serializable
 
 /**
  * Represents a property declaration within a Kotlin class or source file.
@@ -20,6 +22,7 @@ package io.github.baole.konture
  * @property resolvedType Fully qualified resolved type string if available.
  * @property sourceLine 1-based source code line number.
  */
+@Serializable
 public data class PropertyDeclaration(
     /** Filter or assertion criteria for name. */
     public val name: String,

@@ -1,10 +1,12 @@
 /*
  * Copyright 2026 The Konture Contributors
- * Contributors: Bao Le Duc (@baole)
+ * Contributors: Bao Le Duc (@baole), Octavio Calleya Garcia (@octaviospain)
  * SPDX-License-Identifier: Apache-2.0
  */
 
 package io.github.baole.konture
+
+import kotlinx.serialization.Serializable
 
 /**
  * Represents a parsed Kotlin annotation declared on a class.
@@ -13,6 +15,7 @@ package io.github.baole.konture
  * @property fqName The fully qualified name of the annotation if resolvable, or its simple name (e.g., `com.acme.annotations.UseCase`).
  * @property arguments List of arguments declared on the annotation.
  */
+@Serializable
 public data class AnnotationDeclaration(
     /** Filter or assertion criteria for name. */
     public val name: String,

@@ -1,6 +1,6 @@
 /*
  * Copyright 2026 The Konture Contributors
- * Contributors: Bao Le Duc (@baole)
+ * Contributors: Bao Le Duc (@baole), Octavio Calleya Garcia (@octaviospain)
  * SPDX-License-Identifier: Apache-2.0
  */
 
@@ -17,6 +17,7 @@ import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import java.io.File
+import java.util.regex.Pattern
 
 class KonturePluginTest {
     @Test
@@ -220,6 +221,120 @@ class KonturePluginTest {
         assertTrue(depTaskNames.contains("cleanArchitectureDependencyResource"))
         assertTrue(depTaskNames.contains("copyArchitectureDeps"))
     }
+
+    @Test
+    fun `analysis cache config wires test task system properties and outputs`() {
+        val project = ProjectBuilder.builder().withName("root").build()
+        project.plugins.apply("java")
+        project.plugins.apply("io.github.baole.konture.internal")
+
+        val extension = project.extensions.getByName("konture") as KontureExtension
+        extension.analysis.cache = true
+        extension.analysis.incremental = true
+
+        val testTask = project.tasks.getByName("test") as GradleTestTask
+
+        val cacheEnabled = resolveProviderValue(testTask.systemProperties[KontureConstants.PROPERTY_CACHE_ENABLED])
+        assertEquals("true", cacheEnabled)
+        val incremental = resolveProviderValue(testTask.systemProperties[KontureConstants.PROPERTY_INCREMENTAL_ENABLED])
+        assertEquals("true", incremental)
+
+        val cacheDir = resolveProviderValue(testTask.systemProperties[KontureConstants.PROPERTY_CACHE_DIR])
+        assertTrue(cacheDir.normalized().endsWith(".konture/cache/root"), "Unexpected cache dir: $cacheDir")
+        assertTrue(File(cacheDir).isAbsolute)
+
+        val fingerprint = resolveProviderValue(testTask.systemProperties[KontureConstants.PROPERTY_CACHE_FINGERPRINT])
+        assertTrue(Pattern.matches("[0-9a-f]{16}", fingerprint), "Unexpected fingerprint: $fingerprint")
+
+        assertTrue(
+            testTask.outputs.files.any { it.absolutePath.normalized().contains(".konture/cache") },
+            "Persistent cache directory must be declared as a task output",
+        )
+        assertTrue(
+            testTask.inputs.hasInputs,
+            "Fingerprint must be declared as a task input",
+        )
+    }
+
+    @Test
+    fun `analysis cache disabled keeps the library flag off while output stays optional`() {
+        val project = ProjectBuilder.builder().withName("root").build()
+        project.plugins.apply("java")
+        project.plugins.apply("io.github.baole.konture.internal")
+
+        val testTask = project.tasks.getByName("test") as GradleTestTask
+
+        val cacheEnabled = resolveProviderValue(testTask.systemProperties[KontureConstants.PROPERTY_CACHE_ENABLED])
+        assertEquals("false", cacheEnabled)
+
+        // The cache directory is always registered as an optional output so that a late
+        // `analysis { cache = true }` assignment in the build script is honored; the
+        // enabled/disabled decision is applied by the test JVM via the system property.
+        assertTrue(
+            testTask.outputs.files.any { it.absolutePath.normalized().contains(".konture/cache") },
+            "Cache directory must stay declared as an optional test task output",
+        )
+    }
+
+    @Test
+    fun `custom cache dir is qualified per module to avoid overlapping outputs`() {
+        val rootProject = ProjectBuilder.builder().withName("root").build()
+        rootProject.plugins.apply("java")
+        rootProject.plugins.apply("io.github.baole.konture.internal")
+        val rootExtension = rootProject.extensions.getByName("konture") as KontureExtension
+        rootExtension.analysis.cacheDir = File(rootProject.rootDir, "custom/cache").absolutePath
+
+        val subProject =
+            ProjectBuilder
+                .builder()
+                .withName("sub")
+                .withParent(rootProject)
+                .build()
+        subProject.plugins.apply("java")
+        subProject.plugins.apply("io.github.baole.konture.internal")
+
+        val rootTestTask = rootProject.tasks.getByName("test") as GradleTestTask
+        val rootCacheDir = resolveProviderValue(rootTestTask.systemProperties[KontureConstants.PROPERTY_CACHE_DIR])
+        assertTrue(rootCacheDir.normalized().endsWith("custom/cache/root"), "Unexpected root cache dir: $rootCacheDir")
+
+        val subTestTask = subProject.tasks.getByName("test") as GradleTestTask
+        val subCacheDir = resolveProviderValue(subTestTask.systemProperties[KontureConstants.PROPERTY_CACHE_DIR])
+        assertTrue(subCacheDir.normalized().endsWith("custom/cache/sub"), "Unexpected sub cache dir: $subCacheDir")
+        assertTrue(rootCacheDir != subCacheDir, "Root and subproject cache dirs must not overlap")
+    }
+
+    @Test
+    fun `consumer test task inherits analysis cache configuration from root extension`() {
+        val rootProject = ProjectBuilder.builder().withName("root").build()
+        rootProject.plugins.apply("io.github.baole.konture.internal")
+        val rootExtension = rootProject.extensions.getByName("konture") as KontureExtension
+        rootExtension.analysis.cache = true
+
+        val subProject =
+            ProjectBuilder
+                .builder()
+                .withName("sub")
+                .withParent(rootProject)
+                .build()
+        subProject.plugins.apply("java")
+        subProject.plugins.apply("io.github.baole.konture.internal")
+
+        val testTask = subProject.tasks.getByName("test") as GradleTestTask
+        val cacheEnabled = resolveProviderValue(testTask.systemProperties[KontureConstants.PROPERTY_CACHE_ENABLED])
+        assertEquals("true", cacheEnabled)
+
+        val cacheDir = resolveProviderValue(testTask.systemProperties[KontureConstants.PROPERTY_CACHE_DIR])
+        assertTrue(cacheDir.normalized().endsWith(".konture/cache/sub"), "Unexpected cache dir: $cacheDir")
+        assertTrue(testTask.outputs.files.any { it.absolutePath.normalized().contains(".konture/cache") })
+    }
+
+    private fun resolveProviderValue(value: Any?): String =
+        when (value) {
+            is Provider<*> -> value.get().toString()
+            else -> value?.toString() ?: ""
+        }
+
+    private fun String.normalized(): String = replace('\\', '/')
 
     @Test
     fun `testCollectAllSourceDirsFiltersBuildDir`() {

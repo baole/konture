@@ -1,6 +1,6 @@
 /*
  * Copyright 2026 The Konture Contributors
- * Contributors: Bao Le Duc (@baole)
+ * Contributors: Bao Le Duc (@baole), Octavio Calleya Garcia (@octaviospain)
  * SPDX-License-Identifier: Apache-2.0
  */
 
@@ -27,7 +27,7 @@ import java.io.File
  *    allow dedicated test modules to consume the generated layout schema safely in isolated projects.
  */
 public class KonturePlugin : Plugin<Project> {
-    @Suppress("CyclomaticComplexMethod")
+    @Suppress("CyclomaticComplexMethod", "LongMethod")
     override fun apply(project: Project) {
         val extension = project.extensions.create(EXTENSION_NAME, KontureExtension::class.java, project)
 
@@ -36,6 +36,14 @@ public class KonturePlugin : Plugin<Project> {
 
         if (isConsumer) {
             KonturePluginConfigurer.setupConsumerLayout(project)
+            val rootExtension = project.rootProject.extensions.findByType(KontureExtension::class.java)
+            if (rootExtension != null && rootExtension !== extension) {
+                // Inherit the root analysis configuration unless the consumer
+                // explicitly overrides it in its own `konture { }` block.
+                extension.analysis.incrementalProvider().convention(rootExtension.analysis.incrementalProvider())
+                extension.analysis.cacheProvider().convention(rootExtension.analysis.cacheProvider())
+                extension.analysis.cacheDirProvider().convention(rootExtension.analysis.cacheDirProvider())
+            }
         }
 
         project.tasks.register(TASK_GENERATE_BASELINE) { task ->
@@ -79,6 +87,43 @@ public class KonturePlugin : Plugin<Project> {
                     extension.failOnResolvedViolations.orElse(rootExtension.failOnResolvedViolations)
                 } else {
                     extension.failOnResolvedViolations
+                }
+
+            val effectiveIncremental = extension.analysis.incrementalProvider()
+            val effectiveCache = extension.analysis.cacheProvider()
+            val effectiveCacheDir = extension.analysis.cacheDirProvider()
+            val moduleSegment = project.path.removePrefix(":").replace(":", "_").ifEmpty { MODULE_ROOT_LABEL }
+            val defaultCacheDir =
+                project.rootProject.layout
+                    .projectDirectory
+                    .dir(KontureConstants.DEFAULT_CACHE_DIR)
+                    .asFile
+                    .absolutePath
+            val cacheDirProvider =
+                effectiveCacheDir.map { path ->
+                    val base = if (path.isBlank()) defaultCacheDir else File(path).absolutePath
+                    // Qualify the cache directory per module so consumer test tasks never
+                    // point at (and overwrite) the same directory, even when a shared
+                    // custom cacheDir is inherited from the root project.
+                    File(base, moduleSegment).absolutePath
+                }
+            val fingerprintProvider =
+                project.providers.provider {
+                    AnalysisFingerprint.compute(
+                        project.path,
+                        effectiveIncremental.get().toString(),
+                        effectiveCache.get().toString(),
+                        effectiveCacheDir.get(),
+                        extension.excludeModules.get().joinToString(","),
+                        extension.excludePackages.get().joinToString(","),
+                        extension.excludeClasses.get().joinToString(","),
+                        extension.excludeConfigurations.get().joinToString(","),
+                        effectiveBaselinePath.getOrElse(KontureConstants.DEFAULT_BASELINE_FILENAME),
+                        effectiveLanguage.getOrElse(""),
+                        effectiveReportResolved.getOrElse(false).toString(),
+                        effectiveFailOnResolved.getOrElse(false).toString(),
+                        extension.logLevel.getOrElse("INFO"),
+                    )
                 }
 
             val cliBaselinePath = project.providers.systemProperty(KontureConstants.PROPERTY_BASELINE_PATH).orNull
@@ -141,6 +186,28 @@ public class KonturePlugin : Plugin<Project> {
                 KontureConstants.PROPERTY_BASELINE_GENERATE,
                 (isRecordProperty || isRunningGenerateBaseline).toString(),
             )
+
+            testTask.systemProperty(
+                KontureConstants.PROPERTY_INCREMENTAL_ENABLED,
+                effectiveIncremental.map { it.toString() },
+            )
+            testTask.systemProperty(KontureConstants.PROPERTY_CACHE_ENABLED, effectiveCache.map { it.toString() })
+            testTask.systemProperty(KontureConstants.PROPERTY_CACHE_DIR, cacheDirProvider)
+            testTask.systemProperty(KontureConstants.PROPERTY_CACHE_FINGERPRINT, fingerprintProvider)
+
+            // Register the persistent analysis cache as a task output so Gradle's
+            // up-to-date checks and build cache can snapshot, restore, and skip the
+            // evaluation entirely for unchanged inputs. Registration is unconditional
+            // and optionally present: the "enabled" flag is only applied by the test
+            // JVM via the system property, which avoids a configureEach-time read of a
+            // property that a build script may set later in configuration.
+            testTask.outputs
+                .dir(cacheDirProvider)
+                .withPropertyName("kontureAnalysisCache")
+                .optional()
+            testTask.inputs
+                .property("kontureAnalysisFingerprint", fingerprintProvider)
+                .optional(true)
 
             val baselineFileProvider =
                 if (cliBaselinePath != null) {
@@ -347,6 +414,8 @@ public class KonturePlugin : Plugin<Project> {
         private const val PATH_LAYOUT_V2 = "konture/layout_v2.json"
         private const val PATH_DEPENDENCIES = "konture/dependencies.json"
         private const val PATH_EXTERNAL_RULES = "konture/external-dependency-rules.txt"
+
+        private const val MODULE_ROOT_LABEL = "root"
 
         private const val FILE_SETTINGS_KTS = "settings.gradle.kts"
         private const val FILE_SETTINGS_GROOVY = "settings.gradle"

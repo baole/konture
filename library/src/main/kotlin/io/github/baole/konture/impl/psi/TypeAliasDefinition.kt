@@ -1,10 +1,14 @@
 /*
- * Copyright 2026 Bao Le Duc
+ * Copyright 2026 The Konture Contributors
+ * Contributors: Bao Le Duc, Octavio Calleya Garcia (@octaviospain)
  * SPDX-License-Identifier: Apache-2.0
  */
 
 package io.github.baole.konture.impl.psi
 
+import kotlinx.serialization.Serializable
+
+@Serializable
 internal data class TypeAliasDefinition(
     val underlyingType: String,
     val typeParameters: List<String>,

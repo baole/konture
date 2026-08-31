@@ -1,12 +1,15 @@
 /*
  * Copyright 2026 The Konture Contributors
- * Contributors: Bao Le Duc (@baole)
+ * Contributors: Bao Le Duc (@baole), Octavio Calleya Garcia (@octaviospain)
  * SPDX-License-Identifier: Apache-2.0
  */
 
 package io.github.baole.konture
 
+import kotlinx.serialization.Serializable
+
 /** Represents a source file declaration containing classes, functions, properties, and imports. */
+@Serializable
 public data class FileDeclaration(
     /** Filter or assertion criteria for name. */
     public val name: String,

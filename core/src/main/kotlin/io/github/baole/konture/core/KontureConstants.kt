@@ -1,6 +1,6 @@
 /*
  * Copyright 2026 The Konture Contributors
- * Contributors: Bao Le Duc (@baole)
+ * Contributors: Bao Le Duc (@baole), Octavio Calleya Garcia (@octaviospain)
  * SPDX-License-Identifier: Apache-2.0
  */
 
@@ -120,4 +120,31 @@ public object KontureConstants {
      * Default value for incremental AST analysis.
      */
     public const val DEFAULT_INCREMENTAL_ENABLED: Boolean = true
+
+    /**
+     * System property key used to enable/disable persistent disk caching of analysis results.
+     */
+    public const val PROPERTY_CACHE_ENABLED: String = "konture.cache.enabled"
+
+    /**
+     * System property key used to override the persistent cache directory.
+     */
+    public const val PROPERTY_CACHE_DIR: String = "konture.cache.dir"
+
+    /**
+     * System property key used to override the persistent cache fingerprint.
+     * The fingerprint namespaces the disk cache so rule or configuration changes
+     * automatically invalidate previously stored entries.
+     */
+    public const val PROPERTY_CACHE_FINGERPRINT: String = "konture.cache.fingerprint"
+
+    /**
+     * Default value for persistent disk caching.
+     */
+    public const val DEFAULT_CACHE_ENABLED: Boolean = false
+
+    /**
+     * Default persistent cache directory (resolved against the current working directory).
+     */
+    public const val DEFAULT_CACHE_DIR: String = ".konture/cache"
 }
