@@ -34,6 +34,7 @@ internal class ReportAccumulator {
     )
 
     private val evaluations = ConcurrentLinkedQueue<RuleEvaluation>()
+    private val writeLock = Any()
 
     /**
      * Records a single rule evaluation.
@@ -70,8 +71,9 @@ internal class ReportAccumulator {
      * Generates and writes configured reports (JSON, SARIF, HTML) based on output format and system properties.
      */
     fun writeReports(buildRoot: File? = null) {
-        val currentEvaluations = getAllEvaluations()
-        val currentFormat = Konture.outputFormat
+        synchronized(writeLock) {
+            val currentEvaluations = getAllEvaluations()
+            val currentFormat = Konture.outputFormat
 
         val state = io.github.baole.konture.impl.KontureRuntimeStateProvider.currentState
 
@@ -115,6 +117,7 @@ internal class ReportAccumulator {
                 targetFile = File(Konture.htmlReportPath),
                 projectRoot = buildRoot,
             )
+        }
         }
     }
 

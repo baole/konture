@@ -8,6 +8,7 @@ package io.github.baole.konture
 
 import io.github.baole.konture.impl.KontureRuntimeState
 import io.github.baole.konture.impl.KontureRuntimeStateProvider
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
@@ -406,6 +407,10 @@ public class KontureContext(
                                 index to null
                             } catch (e: AssertionError) {
                                 index to "[${suite.label}]\n${e.message}"
+                            } catch (e: CancellationException) {
+                                throw e
+                            } catch (e: Throwable) {
+                                index to "[${suite.label}]\nUnexpected failure: ${e.message ?: e::class.simpleName}"
                             }
                         }
                     }
