@@ -176,8 +176,8 @@ class ParallelRuleEvaluationTest : RuleBuildersTestBase() {
         }
 
         assertTrue(
-            maxSimultaneousWorkers.get() <= 2,
-            "Simultaneous workers (${maxSimultaneousWorkers.get()}) should not exceed maxWorkers limit (2)",
+            maxSimultaneousWorkers.get() in 1..2,
+            "Simultaneous workers (${maxSimultaneousWorkers.get()}) should be between 1 and maxWorkers limit (2)",
         )
     }
 
@@ -189,15 +189,40 @@ class ParallelRuleEvaluationTest : RuleBuildersTestBase() {
         assertTrue(Konture.parallel)
         assertEquals(3, Konture.parallelMaxWorkers)
 
+        val executingThreads = ConcurrentHashMap.newKeySet<String>()
+        val observedWorkerParallelState = AtomicInteger(0)
+
         Konture.architecture {
             classes {
                 that().haveNameStartingWith("ClassA")
-                should().resideInAPackage("com.example")
+                should().satisfy {
+                    executingThreads.add(Thread.currentThread().name)
+                    if (io.github.baole.konture.impl.KontureRuntimeStateProvider.currentState.parallel) {
+                        observedWorkerParallelState.incrementAndGet()
+                    }
+                    true
+                }
             }
             modules {
                 that().haveNamePath(":moduleA")
-                should().satisfy { true }
+                should().satisfy {
+                    executingThreads.add(Thread.currentThread().name)
+                    if (io.github.baole.konture.impl.KontureRuntimeStateProvider.currentState.parallel) {
+                        observedWorkerParallelState.incrementAndGet()
+                    }
+                    true
+                }
             }
         }
+
+        assertEquals(
+            2,
+            observedWorkerParallelState.get(),
+            "Both worker suites should observe parallel = true in runtime state",
+        )
+        assertTrue(
+            executingThreads.any { it.contains("DefaultDispatcher") || it.contains("worker") },
+            "Expected execution on dispatcher worker threads, got: $executingThreads",
+        )
     }
 }

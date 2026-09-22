@@ -104,14 +104,15 @@ object LargeRepositoryBenchmarkGenerator {
         dependencyPaths: List<String>,
     ): ModuleModel {
         val moduleDir = File(rootDir, name).apply { mkdirs() }
-        val srcDir = File(moduleDir, "src/main/kotlin/com/example/$layer/$name").apply { mkdirs() }
+        val sanitizedName = name.replace("-", "_")
+        val srcDir = File(moduleDir, "src/main/kotlin/com/example/$layer/$sanitizedName").apply { mkdirs() }
 
-        val className = name.replace("-", "_").replaceFirstChar { it.uppercase() } + "Service"
-        val modelName = name.replace("-", "_").replaceFirstChar { it.uppercase() } + "Model"
+        val className = sanitizedName.replaceFirstChar { it.uppercase() } + "Service"
+        val modelName = sanitizedName.replaceFirstChar { it.uppercase() } + "Model"
 
         File(srcDir, "$className.kt").writeText(
             """
-            package com.example.$layer.$name
+            package com.example.$layer.$sanitizedName
 
             class $className {
                 val model = $modelName(1)
@@ -122,7 +123,7 @@ object LargeRepositoryBenchmarkGenerator {
 
         File(srcDir, "$modelName.kt").writeText(
             """
-            package com.example.$layer.$name
+            package com.example.$layer.$sanitizedName
 
             data class $modelName(val id: Int)
             """.trimIndent(),

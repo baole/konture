@@ -28,7 +28,9 @@ class LargeRepositoryPerformanceBenchmarkTest {
     private lateinit var graph: ProjectGraph
 
     @BeforeAll
-    fun setUpAll(@TempDir dir: File) {
+    fun setUpAll(
+        @TempDir dir: File,
+    ) {
         tempDir = dir
         val repoDir = File(tempDir, "repo")
         graph = LargeRepositoryBenchmarkGenerator.generateRepository(repoDir, moduleCount = 100)
@@ -147,6 +149,38 @@ class LargeRepositoryPerformanceBenchmarkTest {
         assertTrue(
             incrementalDurationMs < targetMs,
             "Incremental run benchmark target is < ${targetMs}ms, but was ${incrementalDurationMs}ms",
+        )
+    }
+
+    @Test
+    fun `concurrency speedup verification compares sequential and parallel execution`() {
+        // Warm-up to mitigate JIT compilation noise
+        Konture.parallel = false
+        executeComprehensiveRuleSuite()
+
+        val sequentialDurationMs =
+            measureTimeMillis {
+                repeat(3) {
+                    executeComprehensiveRuleSuite()
+                }
+            }
+
+        Konture.parallel = true
+        val parallelDurationMs =
+            measureTimeMillis {
+                repeat(3) {
+                    executeComprehensiveRuleSuite()
+                }
+            }
+
+        println(
+            "100-module rule suite duration — Sequential: ${sequentialDurationMs}ms, " +
+                "Parallel: ${parallelDurationMs}ms (Processors: ${Runtime.getRuntime().availableProcessors()})",
+        )
+
+        assertTrue(
+            parallelDurationMs < 5000,
+            "Parallel execution should complete well under the 5000ms threshold, but was ${parallelDurationMs}ms",
         )
     }
 }

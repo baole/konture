@@ -360,8 +360,9 @@ public class KontureContext(
         }
 
         val state = KontureRuntimeStateProvider.currentState
+        val parallelEnabled = Konture.parallel
         val failures =
-            if (state.parallel && ruleSuites.size > 1) {
+            if (parallelEnabled && ruleSuites.size > 1) {
                 runParallelSuites(state)
             } else {
                 runSequentialSuites()
@@ -387,8 +388,9 @@ public class KontureContext(
         return failures
     }
 
+    @Suppress("TooGenericExceptionCaught")
     private fun runParallelSuites(parentState: KontureRuntimeState): List<String> {
-        val maxWorkers = parentState.parallelMaxWorkers
+        val maxWorkers = Konture.parallelMaxWorkers
         val dispatcher: CoroutineDispatcher =
             if (maxWorkers > 0) {
                 Dispatchers.Default.limitedParallelism(maxWorkers)
@@ -400,7 +402,12 @@ public class KontureContext(
             ruleSuites
                 .mapIndexed { index, suite ->
                     async(dispatcher) {
-                        val workerState = parentState.copy()
+                        val workerState =
+                            parentState.copy(
+                                parallel = Konture.parallel,
+                                parallelMaxWorkers = maxWorkers,
+                                projectGraph = this@KontureContext.projectGraph,
+                            )
                         KontureRuntimeStateProvider.runWithState(workerState) {
                             try {
                                 suite.run()
@@ -410,6 +417,7 @@ public class KontureContext(
                             } catch (e: CancellationException) {
                                 throw e
                             } catch (e: Throwable) {
+                                if (e is Error) throw e
                                 index to "[${suite.label}]\nUnexpected failure: ${e.message ?: e::class.simpleName}"
                             }
                         }
