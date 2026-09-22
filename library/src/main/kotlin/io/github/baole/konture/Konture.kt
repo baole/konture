@@ -223,9 +223,11 @@ public object Konture {
                 return KontureRuntimeStateProvider.currentState.parallelMaxWorkers
             }
             val systemProp = System.getProperty(PROPERTY_PARALLEL_MAX_WORKERS)
-            return systemProp?.toIntOrNull() ?: KontureRuntimeStateProvider.currentState.parallelMaxWorkers
+            val parsed = systemProp?.toIntOrNull() ?: KontureRuntimeStateProvider.currentState.parallelMaxWorkers
+            return maxOf(0, parsed)
         }
         set(value) {
+            require(value >= 0) { "parallelMaxWorkers must be non-negative, got $value" }
             KontureRuntimeStateProvider.currentState =
                 KontureRuntimeStateProvider.currentState.copy(
                     parallelMaxWorkers = value,

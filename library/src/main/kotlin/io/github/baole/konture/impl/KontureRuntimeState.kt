@@ -47,9 +47,8 @@ internal class KontureRuntimeState(
     val isParallelOverridden: Boolean = false,
     val parallelMaxWorkers: Int = KontureConstants.DEFAULT_PARALLEL_MAX_WORKERS,
     val isParallelMaxWorkersOverridden: Boolean = false,
+    val projectGraphLoader: ProjectGraphLoader = ProjectGraphLoader(),
 ) {
-    val projectGraphLoader: ProjectGraphLoader = ProjectGraphLoader()
-
     fun copy(
         baselinePath: String = this.baselinePath,
         generateBaseline: Boolean = this.generateBaseline,
@@ -79,6 +78,7 @@ internal class KontureRuntimeState(
         isParallelOverridden: Boolean = this.isParallelOverridden,
         parallelMaxWorkers: Int = this.parallelMaxWorkers,
         isParallelMaxWorkersOverridden: Boolean = this.isParallelMaxWorkersOverridden,
+        projectGraphLoader: ProjectGraphLoader = this.projectGraphLoader,
     ): KontureRuntimeState {
         return KontureRuntimeState(
             baselinePath = baselinePath,
@@ -110,6 +110,7 @@ internal class KontureRuntimeState(
             isParallelOverridden = isParallelOverridden,
             parallelMaxWorkers = parallelMaxWorkers,
             isParallelMaxWorkersOverridden = isParallelMaxWorkersOverridden,
+            projectGraphLoader = projectGraphLoader,
         )
     }
 }

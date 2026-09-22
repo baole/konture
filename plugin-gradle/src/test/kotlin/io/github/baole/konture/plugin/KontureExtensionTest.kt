@@ -8,6 +8,7 @@ package io.github.baole.konture.plugin
 
 import org.gradle.testfixtures.ProjectBuilder
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertThrows
 import org.junit.jupiter.api.Test
 
 class KontureExtensionTest {
@@ -61,6 +62,13 @@ class KontureExtensionTest {
         assertEquals("", extension.analysis.cacheDir)
         assertEquals(false, extension.analysis.parallel)
         assertEquals(0, extension.analysis.maxWorkers)
+
+        assertThrows(IllegalArgumentException::class.java) {
+            extension.analysis.maxWorkers = -1
+        }
+        assertThrows(IllegalArgumentException::class.java) {
+            extension.analysis.maxWorkers(-1)
+        }
     }
 
     @Test

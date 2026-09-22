@@ -225,4 +225,44 @@ class ParallelRuleEvaluationTest : RuleBuildersTestBase() {
             "Expected execution on dispatcher worker threads, got: $executingThreads",
         )
     }
+
+    @Test
+    fun `parallel execution propagates unexpected runtime exceptions without swallowing`() {
+        Konture.parallel = true
+
+        val error =
+            assertThrows(IllegalStateException::class.java) {
+                Konture.architecture {
+                    classes {
+                        that().haveNameStartingWith("ClassA")
+                        should().satisfy {
+                            throw IllegalStateException("Simulated unexpected predicate failure")
+                        }
+                    }
+                    modules {
+                        that().haveNamePath(":moduleA")
+                        should().satisfy { module -> module.appliedPlugins.contains("kotlin") }
+                    }
+                }
+            }
+
+        assertEquals("Simulated unexpected predicate failure", error.message)
+    }
+
+    @Test
+    fun `parallel execution rejects negative maxWorkers programmatically and clamps negative system property`() {
+        var caughtException: IllegalArgumentException? = null
+        try {
+            Konture.parallelMaxWorkers = -1
+        } catch (e: IllegalArgumentException) {
+            caughtException = e
+        }
+        org.junit.jupiter.api.Assertions.assertNotNull(
+            caughtException,
+            "Expected IllegalArgumentException when setting negative parallelMaxWorkers",
+        )
+
+        System.setProperty(Konture.PROPERTY_PARALLEL_MAX_WORKERS, "-3")
+        assertEquals(0, Konture.parallelMaxWorkers)
+    }
 }

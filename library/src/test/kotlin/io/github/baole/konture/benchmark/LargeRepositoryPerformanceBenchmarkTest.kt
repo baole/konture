@@ -178,6 +178,9 @@ class LargeRepositoryPerformanceBenchmarkTest {
                 "Parallel: ${parallelDurationMs}ms (Processors: ${Runtime.getRuntime().availableProcessors()})",
         )
 
+        // Rule evaluation against preloaded in-memory graph models runs in tens of milliseconds. Coroutine
+        // dispatching overhead dominates micro-predicates, but parallel execution must still complete
+        // well within the scale ceiling (< 5000ms for 100 modules).
         assertTrue(
             parallelDurationMs < 5000,
             "Parallel execution should complete well under the 5000ms threshold, but was ${parallelDurationMs}ms",

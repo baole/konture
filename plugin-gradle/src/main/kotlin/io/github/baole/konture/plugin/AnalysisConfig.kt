@@ -89,6 +89,7 @@ public open class AnalysisConfig(
     public var maxWorkers: Int
         get() = maxWorkersProperty.get()
         set(value) {
+            require(value >= 0) { "maxWorkers must be non-negative, got $value" }
             maxWorkersProperty.set(value)
         }
 
