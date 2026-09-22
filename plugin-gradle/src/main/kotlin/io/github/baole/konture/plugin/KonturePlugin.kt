@@ -92,6 +92,8 @@ public class KonturePlugin : Plugin<Project> {
             val effectiveIncremental = extension.analysis.incrementalProvider()
             val effectiveCache = extension.analysis.cacheProvider()
             val effectiveCacheDir = extension.analysis.cacheDirProvider()
+            val effectiveParallel = extension.analysis.parallelProvider()
+            val effectiveMaxWorkers = extension.analysis.maxWorkersProvider()
             val moduleSegment = project.path.removePrefix(":").replace(":", "_").ifEmpty { MODULE_ROOT_LABEL }
             val defaultCacheDir =
                 project.rootProject.layout
@@ -133,6 +135,10 @@ public class KonturePlugin : Plugin<Project> {
                 project.providers.systemProperty(KontureConstants.PROPERTY_REPORT_RESOLVED_VIOLATIONS).orNull
             val cliFailOnResolved =
                 project.providers.systemProperty(KontureConstants.PROPERTY_FAIL_ON_RESOLVED_VIOLATIONS).orNull
+            val cliParallel =
+                project.providers.systemProperty(KontureConstants.PROPERTY_PARALLEL_ENABLED).orNull
+            val cliMaxWorkers =
+                project.providers.systemProperty(KontureConstants.PROPERTY_PARALLEL_MAX_WORKERS).orNull
 
             if (cliBaselineDir != null) {
                 testTask.systemProperty(KontureConstants.PROPERTY_BASELINE_DIR, cliBaselineDir)
@@ -167,6 +173,22 @@ public class KonturePlugin : Plugin<Project> {
                 testTask.systemProperty(
                     KontureConstants.PROPERTY_FAIL_ON_RESOLVED_VIOLATIONS,
                     effectiveFailOnResolved.getOrElse(false).toString(),
+                )
+            }
+            if (cliParallel != null) {
+                testTask.systemProperty(KontureConstants.PROPERTY_PARALLEL_ENABLED, cliParallel)
+            } else {
+                testTask.systemProperty(
+                    KontureConstants.PROPERTY_PARALLEL_ENABLED,
+                    effectiveParallel.map { it.toString() },
+                )
+            }
+            if (cliMaxWorkers != null) {
+                testTask.systemProperty(KontureConstants.PROPERTY_PARALLEL_MAX_WORKERS, cliMaxWorkers)
+            } else {
+                testTask.systemProperty(
+                    KontureConstants.PROPERTY_PARALLEL_MAX_WORKERS,
+                    effectiveMaxWorkers.map { it.toString() },
                 )
             }
             val isRecordProperty =

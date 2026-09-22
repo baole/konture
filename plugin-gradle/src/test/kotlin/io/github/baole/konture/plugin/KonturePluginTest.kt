@@ -364,4 +364,24 @@ class KonturePluginTest {
         // Verify source dir inside buildDir was filtered out
         assertTrue(sourceDirs.none { it.canonicalPath.startsWith(buildDir.canonicalPath) })
     }
+
+    @Test
+    fun `parallel analysis properties are wired to test task system properties`() {
+        val project = ProjectBuilder.builder().withName("root").build()
+        project.plugins.apply("java")
+        project.plugins.apply("io.github.baole.konture.internal")
+
+        val extension = project.extensions.getByName("konture") as KontureExtension
+        extension.analysis.parallel = true
+        extension.analysis.maxWorkers = 8
+
+        val testTask = project.tasks.getByName("test") as GradleTestTask
+
+        val parallelEnabled =
+            resolveProviderValue(testTask.systemProperties[KontureConstants.PROPERTY_PARALLEL_ENABLED])
+        assertEquals("true", parallelEnabled)
+
+        val maxWorkers = resolveProviderValue(testTask.systemProperties[KontureConstants.PROPERTY_PARALLEL_MAX_WORKERS])
+        assertEquals("8", maxWorkers)
+    }
 }

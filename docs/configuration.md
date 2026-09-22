@@ -35,11 +35,13 @@ konture {
     // Set translation language for violation messages (default is "en")
     language("fr")
 
-    // Tune analysis performance and persistent caching
+    // Tune analysis performance, parallel execution, and persistent caching
     analysis {
         incremental = true   // incremental AST analysis (default: true)
         cache = true         // persistent disk cache in .konture/cache (default: false)
         // cacheDir = "custom/cache/path"   // optional override
+        parallel = true      // evaluate architecture rule suites concurrently (default: false)
+        // maxWorkers = 4    // max worker coroutines for parallel evaluation (default: 0 = unconstrained)
     }
 }
 ```
@@ -65,6 +67,23 @@ JVM runs.
   system properties `konture.cache.enabled`, `konture.cache.dir`,
   `konture.cache.fingerprint`, and `konture.incremental.enabled`. Corruption is never fatal:
   unreadable cache entries are treated as misses and re-parsed.
+
+### 🚀 Parallel Rule Evaluation
+
+When `analysis { parallel = true }` is enabled, rule suites grouped within an `architecture { }` block
+(e.g., `classes { }`, `files { }`, `modules { }`, `slices { }`) are evaluated concurrently across coroutine
+workers using `kotlinx.coroutines`.
+
+- **Deterministic Failure Ordering**: Regardless of which rule suite finishes first, evaluation results
+  are collected and sorted deterministically based on rule definition order.
+- **Thread-Safe State & PSI**: Thread-local runtime state (such as rule metadata, severity thresholds,
+  and baselines) is replicated to each worker coroutine, while shared PSI parsing environments and baseline
+  caches are protected by internal concurrency synchronization.
+- **Worker Limits**: Configure `analysis { maxWorkers = 4 }` (or `-Dkonture.parallel.maxWorkers=4`) to
+  cap the concurrency pool on resource-constrained CI agents. Default `0` uses unconstrained parallelism
+  sized to the host's available processors.
+- **Library-level control**: Can be enabled via `Konture.parallel = true` and `Konture.parallelMaxWorkers = 4`,
+  or system properties `konture.parallel.enabled` and `konture.parallel.maxWorkers`.
 
 ### Automatic test inputs
 
@@ -140,6 +159,8 @@ Declare your plugin configurations inside the `<configuration>` block of the `ko
 | **`analysis.incremental`** | `true` | Gradle DSL equivalent of `incremental` inside the `analysis { }` block. |
 | **`analysis.cache`** | `false` | Enables the persistent disk analysis cache (`.konture/cache`) so unchanged Kotlin files skip re-parsing across test executions.<br>• The cache directory is declared as a test-task output for Gradle build cache / up-to-date checks.<br>• Can be overridden via system property `-Dkonture.cache.enabled=false` or programmatically via `Konture.cacheEnabled`. |
 | **`analysis.cacheDir`** | `""` (auto) | Optional override of the persistent cache directory. The plugin always appends the module path to the resolved value, so the effective directory is `<cacheDir>/<module-path>/` (default `<rootProject>/.konture/cache/<module-path>/`) and consumer test tasks never share or overwrite the same directory. |
+| **`analysis.parallel`** | `false` | Enables parallel evaluation of independent architecture rule suites within `architecture { }` blocks.<br>• Can be overridden via system property `-Dkonture.parallel.enabled=true` or programmatically via `Konture.parallel = true`. |
+| **`analysis.maxWorkers`** | `0` | Limits the maximum number of worker coroutines for parallel rule evaluation (`0` uses unconstrained parallelism).<br>• Can be overridden via system property `-Dkonture.parallel.maxWorkers=4` or programmatically via `Konture.parallelMaxWorkers = 4`. |
 
 ---
 

@@ -47,6 +47,16 @@ public open class AnalysisConfig(
             .property(String::class.java)
             .convention("")
 
+    private val parallelProperty: Property<Boolean> =
+        project.objects
+            .property(Boolean::class.javaObjectType)
+            .convention(KontureConstants.DEFAULT_PARALLEL_ENABLED)
+
+    private val maxWorkersProperty: Property<Int> =
+        project.objects
+            .property(Int::class.javaObjectType)
+            .convention(KontureConstants.DEFAULT_PARALLEL_MAX_WORKERS)
+
     /** Whether incremental AST analysis and source content hashing are enabled. */
     public var incremental: Boolean
         get() = incrementalProperty.get()
@@ -68,6 +78,20 @@ public open class AnalysisConfig(
             cacheDirProperty.set(value)
         }
 
+    /** Whether parallel evaluation of independent rules is enabled. */
+    public var parallel: Boolean
+        get() = parallelProperty.get()
+        set(value) {
+            parallelProperty.set(value)
+        }
+
+    /** Maximum number of worker threads for parallel evaluation (0 indicates automatic sizing based on CPU cores). */
+    public var maxWorkers: Int
+        get() = maxWorkersProperty.get()
+        set(value) {
+            maxWorkersProperty.set(value)
+        }
+
     /** Enables or disables incremental AST analysis. */
     public fun incremental(enabled: Boolean) {
         incremental = enabled
@@ -83,9 +107,23 @@ public open class AnalysisConfig(
         cacheDir = path
     }
 
+    /** Enables or disables parallel rule evaluation. */
+    public fun parallel(enabled: Boolean) {
+        parallel = enabled
+    }
+
+    /** Configures the maximum number of worker threads for parallel rule evaluation. */
+    public fun maxWorkers(workers: Int) {
+        maxWorkers = workers
+    }
+
     internal fun incrementalProvider(): Property<Boolean> = incrementalProperty
 
     internal fun cacheProvider(): Property<Boolean> = cacheProperty
 
     internal fun cacheDirProvider(): Property<String> = cacheDirProperty
+
+    internal fun parallelProvider(): Property<Boolean> = parallelProperty
+
+    internal fun maxWorkersProvider(): Property<Int> = maxWorkersProperty
 }

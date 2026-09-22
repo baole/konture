@@ -25,48 +25,65 @@ import org.jetbrains.kotlin.psi.KtFile
     K1Deprecation::class,
 )
 internal class PsiEnvironment {
+    private val lock = Any()
     private var disposable = Disposer.newDisposable()
+
+    @Volatile
     private var isDisposed = false
+
+    @Volatile
     private var projectInstance: Project? = null
 
     fun createKtFile(
         fileName: String,
         content: String,
     ): KtFile =
-        PsiFileFactory.getInstance(
-            project,
-        ).createFileFromText(fileName, KotlinFileType.INSTANCE, content) as KtFile
+        synchronized(lock) {
+            PsiFileFactory.getInstance(
+                project,
+            ).createFileFromText(fileName, KotlinFileType.INSTANCE, content) as KtFile
+        }
 
     fun dispose() {
-        if (!isDisposed) {
-            Disposer.dispose(disposable)
-            isDisposed = true
-            projectInstance = null
+        synchronized(lock) {
+            if (!isDisposed) {
+                Disposer.dispose(disposable)
+                isDisposed = true
+                projectInstance = null
+            }
         }
     }
 
     private val project: Project
         get() {
-            if (projectInstance == null || isDisposed) {
-                disposable = Disposer.newDisposable()
-                isDisposed = false
-                val configuration = CompilerConfiguration()
-                configuration.put(
-                    CommonConfigurationKeys.LANGUAGE_VERSION_SETTINGS,
-                    LanguageVersionSettingsImpl(
-                        LanguageVersionSettingsImpl.DEFAULT.languageVersion,
-                        LanguageVersionSettingsImpl.DEFAULT.apiVersion,
-                        emptyMap(),
-                        mapOf(LanguageFeature.NestedTypeAliases to LanguageFeature.State.ENABLED),
-                    ),
-                )
-                projectInstance =
-                    KotlinCoreEnvironment.createForProduction(
-                        disposable,
-                        configuration,
-                        EnvironmentConfigFiles.JVM_CONFIG_FILES,
-                    ).project
+            var instance = projectInstance
+            if (instance == null || isDisposed) {
+                synchronized(lock) {
+                    instance = projectInstance
+                    if (instance == null || isDisposed) {
+                        disposable = Disposer.newDisposable()
+                        isDisposed = false
+                        val configuration = CompilerConfiguration()
+                        configuration.put(
+                            CommonConfigurationKeys.LANGUAGE_VERSION_SETTINGS,
+                            LanguageVersionSettingsImpl(
+                                LanguageVersionSettingsImpl.DEFAULT.languageVersion,
+                                LanguageVersionSettingsImpl.DEFAULT.apiVersion,
+                                emptyMap(),
+                                mapOf(LanguageFeature.NestedTypeAliases to LanguageFeature.State.ENABLED),
+                            ),
+                        )
+                        val created =
+                            KotlinCoreEnvironment.createForProduction(
+                                disposable,
+                                configuration,
+                                EnvironmentConfigFiles.JVM_CONFIG_FILES,
+                            ).project
+                        projectInstance = created
+                        instance = created
+                    }
+                }
             }
-            return requireNotNull(projectInstance)
+            return requireNotNull(instance)
         }
 }

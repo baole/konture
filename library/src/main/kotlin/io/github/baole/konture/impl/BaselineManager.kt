@@ -176,7 +176,12 @@ internal class BaselineManager {
         val projectGraph: ProjectGraph?,
     )
 
+    private val baselineLock = Any()
+
+    @Volatile
     private var loadedCacheKey: BaselineCacheKey? = null
+
+    @Volatile
     private var loadedViolations: Set<FlatBaselineViolation>? = null
 
     // Existing baseline violations loaded from files (per-module if project graph is available, else fallback)
@@ -193,16 +198,22 @@ internal class BaselineManager {
                 return loaded
             }
 
-            val violations =
-                BaselineStorage.loadExistingViolations(
-                    currentPath,
-                    currentDirProp,
-                    currentGraph,
-                    buildRoot,
-                )
-            loadedCacheKey = cacheKey
-            loadedViolations = violations
-            return violations
+            synchronized(baselineLock) {
+                val currentLoaded = loadedViolations
+                if (currentLoaded != null && cacheKey == loadedCacheKey) {
+                    return currentLoaded
+                }
+                val violations =
+                    BaselineStorage.loadExistingViolations(
+                        currentPath,
+                        currentDirProp,
+                        currentGraph,
+                        buildRoot,
+                    )
+                loadedCacheKey = cacheKey
+                loadedViolations = violations
+                return violations
+            }
         }
 
     // Thread-safe set of newly recorded violations (shared across parallel test threads)
@@ -214,10 +225,12 @@ internal class BaselineManager {
         get() = globalEvaluatedViolations
 
     fun resetForTest() {
-        loadedViolations = null
-        loadedCacheKey = null
-        capturedBaselinePath = null
-        capturedGenerateBaseline = null
+        synchronized(baselineLock) {
+            loadedViolations = null
+            loadedCacheKey = null
+            capturedBaselinePath = null
+            capturedGenerateBaseline = null
+        }
         capturedProjectGraph = null
         capturedBuildRoot = null
         hasCapturedBuildRoot = false

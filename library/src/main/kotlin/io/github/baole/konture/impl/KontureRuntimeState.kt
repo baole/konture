@@ -43,6 +43,10 @@ internal class KontureRuntimeState(
     val isCacheEnabledOverridden: Boolean = false,
     val cacheDir: File = File(KontureConstants.DEFAULT_CACHE_DIR),
     val cacheFingerprint: String = "",
+    val parallel: Boolean = KontureConstants.DEFAULT_PARALLEL_ENABLED,
+    val isParallelOverridden: Boolean = false,
+    val parallelMaxWorkers: Int = KontureConstants.DEFAULT_PARALLEL_MAX_WORKERS,
+    val isParallelMaxWorkersOverridden: Boolean = false,
 ) {
     val projectGraphLoader: ProjectGraphLoader = ProjectGraphLoader()
 
@@ -71,6 +75,10 @@ internal class KontureRuntimeState(
         isCacheEnabledOverridden: Boolean = this.isCacheEnabledOverridden,
         cacheDir: File = this.cacheDir,
         cacheFingerprint: String = this.cacheFingerprint,
+        parallel: Boolean = this.parallel,
+        isParallelOverridden: Boolean = this.isParallelOverridden,
+        parallelMaxWorkers: Int = this.parallelMaxWorkers,
+        isParallelMaxWorkersOverridden: Boolean = this.isParallelMaxWorkersOverridden,
     ): KontureRuntimeState {
         return KontureRuntimeState(
             baselinePath = baselinePath,
@@ -98,6 +106,10 @@ internal class KontureRuntimeState(
             isCacheEnabledOverridden = isCacheEnabledOverridden,
             cacheDir = cacheDir,
             cacheFingerprint = cacheFingerprint,
+            parallel = parallel,
+            isParallelOverridden = isParallelOverridden,
+            parallelMaxWorkers = parallelMaxWorkers,
+            isParallelMaxWorkersOverridden = isParallelMaxWorkersOverridden,
         )
     }
 }

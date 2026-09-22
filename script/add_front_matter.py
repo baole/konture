@@ -64,6 +64,12 @@ FRONT_MATTER_MAP = {
         "nav_order": 57,
         "permalink": "/rule-metadata/"
     },
+    "performance.md": {
+        "layout": "default",
+        "title": "Performance & Scale",
+        "nav_order": 58,
+        "permalink": "/performance/"
+    },
     "showcases.md": {
         "layout": "default",
         "title": "Showcases",
