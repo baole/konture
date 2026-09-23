@@ -60,6 +60,7 @@ public final class io/github/baole/konture/AnnotationDeclaration$Companion {
 }
 
 public final class io/github/baole/konture/ArchitectureKt {
+	public static final fun architecture (Lio/github/baole/konture/ProjectGraph;Lkotlin/jvm/functions/Function1;)V
 	public static final fun architecture (Lkotlin/jvm/functions/Function1;)V
 }
 
@@ -1554,6 +1555,7 @@ public final class io/github/baole/konture/Dependency {
 }
 
 public final class io/github/baole/konture/ExtensionsKt {
+	public static final fun architecture (Lio/github/baole/konture/Konture;Lio/github/baole/konture/ProjectGraph;Lkotlin/jvm/functions/Function1;)V
 	public static final fun architecture (Lio/github/baole/konture/Konture;Lkotlin/jvm/functions/Function1;)V
 	public static final fun assertNoCycles (Lio/github/baole/konture/Konture;)V
 	public static final fun assertNoCycles (Lio/github/baole/konture/Konture;Z)V
@@ -3485,6 +3487,8 @@ public final class io/github/baole/konture/Konture {
 	public static final field DEFAULT_HTML_REPORT_PATH Ljava/lang/String;
 	public static final field DEFAULT_INCREMENTAL_ENABLED Z
 	public static final field DEFAULT_JSON_REPORT_PATH Ljava/lang/String;
+	public static final field DEFAULT_PARALLEL_ENABLED Z
+	public static final field DEFAULT_PARALLEL_MAX_WORKERS I
 	public static final field DEFAULT_REPORT_RESOLVED_VIOLATIONS Z
 	public static final field DEFAULT_SARIF_REPORT_PATH Ljava/lang/String;
 	public static final field INSTANCE Lio/github/baole/konture/Konture;
@@ -3499,6 +3503,8 @@ public final class io/github/baole/konture/Konture {
 	public static final field PROPERTY_INCREMENTAL_ENABLED Ljava/lang/String;
 	public static final field PROPERTY_LOCALE Ljava/lang/String;
 	public static final field PROPERTY_OUTPUT_FORMAT Ljava/lang/String;
+	public static final field PROPERTY_PARALLEL_ENABLED Ljava/lang/String;
+	public static final field PROPERTY_PARALLEL_MAX_WORKERS Ljava/lang/String;
 	public static final field PROPERTY_REPORT_HTML_PATH Ljava/lang/String;
 	public static final field PROPERTY_REPORT_JSON_PATH Ljava/lang/String;
 	public static final field PROPERTY_REPORT_PATH Ljava/lang/String;
@@ -3517,6 +3523,8 @@ public final class io/github/baole/konture/Konture {
 	public final fun getJsonReportPath ()Ljava/lang/String;
 	public final fun getLocale ()Ljava/util/Locale;
 	public final fun getOutputFormat ()Lio/github/baole/konture/OutputFormat;
+	public final fun getParallel ()Z
+	public final fun getParallelMaxWorkers ()I
 	public final fun getProjectGraph ()Lio/github/baole/konture/ProjectGraph;
 	public final fun getReportPath ()Ljava/lang/String;
 	public final fun getReportResolvedViolations ()Z
@@ -3534,6 +3542,8 @@ public final class io/github/baole/konture/Konture {
 	public final fun setJsonReportPath (Ljava/lang/String;)V
 	public final fun setLocale (Ljava/util/Locale;)V
 	public final fun setOutputFormat (Lio/github/baole/konture/OutputFormat;)V
+	public final fun setParallel (Z)V
+	public final fun setParallelMaxWorkers (I)V
 	public final fun setReportPath (Ljava/lang/String;)V
 	public final fun setReportResolvedViolations (Z)V
 	public final fun setSarifReportPath (Ljava/lang/String;)V

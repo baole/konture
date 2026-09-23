@@ -412,6 +412,18 @@ public fun Konture.architecture(block: KontureContext.() -> Unit) {
 }
 
 /**
+ * Unified multi-rule block supporting modules, classes, and layered architecture validations
+ * against a specific [ProjectGraph].
+ * Runs every declared suite and aggregates all violations before failing.
+ */
+public fun Konture.architecture(
+    graph: ProjectGraph,
+    block: KontureContext.() -> Unit,
+) {
+    KontureContext(graph).apply(block).verifyAll()
+}
+
+/**
  * Define and run a nested, type-safe layered architecture specification.
  * Automatically checks the layered rules at the end of the block.
  */

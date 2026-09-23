@@ -8,6 +8,7 @@ package io.github.baole.konture.plugin
 
 import org.gradle.testfixtures.ProjectBuilder
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertThrows
 import org.junit.jupiter.api.Test
 
 class KontureExtensionTest {
@@ -28,6 +29,8 @@ class KontureExtensionTest {
         assertEquals(true, extension.analysis.incremental)
         assertEquals(false, extension.analysis.cache)
         assertEquals("", extension.analysis.cacheDir)
+        assertEquals(false, extension.analysis.parallel)
+        assertEquals(0, extension.analysis.maxWorkers)
     }
 
     @Test
@@ -38,19 +41,34 @@ class KontureExtensionTest {
         extension.analysis.incremental = false
         extension.analysis.cache = true
         extension.analysis.cacheDir("custom/cache")
+        extension.analysis.parallel = true
+        extension.analysis.maxWorkers = 4
 
         assertEquals(false, extension.analysis.incremental)
         assertEquals(true, extension.analysis.cache)
         assertEquals("custom/cache", extension.analysis.cacheDir)
+        assertEquals(true, extension.analysis.parallel)
+        assertEquals(4, extension.analysis.maxWorkers)
 
         // Function-style configuration mirrors the assignment-style DSL.
         extension.analysis.incremental(true)
         extension.analysis.cache(false)
         extension.analysis.cacheDir("")
+        extension.analysis.parallel(false)
+        extension.analysis.maxWorkers(0)
 
         assertEquals(true, extension.analysis.incremental)
         assertEquals(false, extension.analysis.cache)
         assertEquals("", extension.analysis.cacheDir)
+        assertEquals(false, extension.analysis.parallel)
+        assertEquals(0, extension.analysis.maxWorkers)
+
+        assertThrows(IllegalArgumentException::class.java) {
+            extension.analysis.maxWorkers = -1
+        }
+        assertThrows(IllegalArgumentException::class.java) {
+            extension.analysis.maxWorkers(-1)
+        }
     }
 
     @Test

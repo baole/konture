@@ -141,6 +141,8 @@ public final class io/github/baole/konture/core/KontureConstants {
 	public static final field DEFAULT_HTML_REPORT_PATH Ljava/lang/String;
 	public static final field DEFAULT_INCREMENTAL_ENABLED Z
 	public static final field DEFAULT_JSON_REPORT_PATH Ljava/lang/String;
+	public static final field DEFAULT_PARALLEL_ENABLED Z
+	public static final field DEFAULT_PARALLEL_MAX_WORKERS I
 	public static final field DEFAULT_REPORT_PATH Ljava/lang/String;
 	public static final field DEFAULT_REPORT_RESOLVED_VIOLATIONS Z
 	public static final field DEFAULT_SARIF_REPORT_PATH Ljava/lang/String;
@@ -156,6 +158,8 @@ public final class io/github/baole/konture/core/KontureConstants {
 	public static final field PROPERTY_INCREMENTAL_ENABLED Ljava/lang/String;
 	public static final field PROPERTY_LOCALE Ljava/lang/String;
 	public static final field PROPERTY_OUTPUT_FORMAT Ljava/lang/String;
+	public static final field PROPERTY_PARALLEL_ENABLED Ljava/lang/String;
+	public static final field PROPERTY_PARALLEL_MAX_WORKERS Ljava/lang/String;
 	public static final field PROPERTY_REPORT_HTML_PATH Ljava/lang/String;
 	public static final field PROPERTY_REPORT_JSON_PATH Ljava/lang/String;
 	public static final field PROPERTY_REPORT_PATH Ljava/lang/String;

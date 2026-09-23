@@ -89,6 +89,26 @@ public object Konture {
     public const val DEFAULT_CACHE_DIR: String = KontureConstants.DEFAULT_CACHE_DIR
 
     /**
+     * System property key used to enable/disable parallel rule evaluation.
+     */
+    public const val PROPERTY_PARALLEL_ENABLED: String = KontureConstants.PROPERTY_PARALLEL_ENABLED
+
+    /**
+     * Default value for parallel rule evaluation.
+     */
+    public const val DEFAULT_PARALLEL_ENABLED: Boolean = KontureConstants.DEFAULT_PARALLEL_ENABLED
+
+    /**
+     * System property key used to configure the maximum number of worker threads for parallel rule evaluation.
+     */
+    public const val PROPERTY_PARALLEL_MAX_WORKERS: String = KontureConstants.PROPERTY_PARALLEL_MAX_WORKERS
+
+    /**
+     * Default maximum worker count for parallel evaluation (0 indicates automatic sizing based on available CPU cores).
+     */
+    public const val DEFAULT_PARALLEL_MAX_WORKERS: Int = KontureConstants.DEFAULT_PARALLEL_MAX_WORKERS
+
+    /**
      * Whether incremental AST analysis and source hashing are enabled.
      * When enabled, unchanged Kotlin files are resolved from the AST cache without re-parsing.
      * Can be configured via system property "konture.incremental.enabled" or programmatically.
@@ -167,6 +187,52 @@ public object Konture {
         set(value) {
             KontureRuntimeStateProvider.currentState =
                 KontureRuntimeStateProvider.currentState.copy(cacheFingerprint = value)
+        }
+
+    /**
+     * Whether parallel evaluation of independent rules is enabled.
+     * When enabled, rule suites are evaluated concurrently across CPU cores using coroutines.
+     * Can be configured via system property "konture.parallel.enabled" or programmatically.
+     * Backed by ThreadLocal state; safe under parallel test execution.
+     */
+    public var parallel: Boolean
+        get() {
+            if (KontureRuntimeStateProvider.currentState.isParallelOverridden) {
+                return KontureRuntimeStateProvider.currentState.parallel
+            }
+            val systemProp = System.getProperty(PROPERTY_PARALLEL_ENABLED)
+            return systemProp?.toBoolean() ?: KontureRuntimeStateProvider.currentState.parallel
+        }
+        set(value) {
+            KontureRuntimeStateProvider.currentState =
+                KontureRuntimeStateProvider.currentState.copy(
+                    parallel = value,
+                    isParallelOverridden = true,
+                )
+        }
+
+    /**
+     * The maximum number of worker threads for parallel rule evaluation.
+     * Defaults to 0 (automatic sizing using available processor cores).
+     * Can be configured via system property "konture.parallel.maxWorkers" or programmatically.
+     * Backed by ThreadLocal state; safe under parallel test execution.
+     */
+    public var parallelMaxWorkers: Int
+        get() {
+            if (KontureRuntimeStateProvider.currentState.isParallelMaxWorkersOverridden) {
+                return KontureRuntimeStateProvider.currentState.parallelMaxWorkers
+            }
+            val systemProp = System.getProperty(PROPERTY_PARALLEL_MAX_WORKERS)
+            val parsed = systemProp?.toIntOrNull() ?: KontureRuntimeStateProvider.currentState.parallelMaxWorkers
+            return maxOf(0, parsed)
+        }
+        set(value) {
+            require(value >= 0) { "parallelMaxWorkers must be non-negative, got $value" }
+            KontureRuntimeStateProvider.currentState =
+                KontureRuntimeStateProvider.currentState.copy(
+                    parallelMaxWorkers = value,
+                    isParallelMaxWorkersOverridden = true,
+                )
         }
 
     /**

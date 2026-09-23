@@ -147,4 +147,24 @@ public object KontureConstants {
      * Default persistent cache directory (resolved against the current working directory).
      */
     public const val DEFAULT_CACHE_DIR: String = ".konture/cache"
+
+    /**
+     * System property key used to enable/disable parallel rule evaluation.
+     */
+    public const val PROPERTY_PARALLEL_ENABLED: String = "konture.parallel.enabled"
+
+    /**
+     * Default value for parallel rule evaluation.
+     */
+    public const val DEFAULT_PARALLEL_ENABLED: Boolean = false
+
+    /**
+     * System property key used to configure the maximum number of worker threads for parallel rule evaluation.
+     */
+    public const val PROPERTY_PARALLEL_MAX_WORKERS: String = "konture.parallel.maxWorkers"
+
+    /**
+     * Default maximum worker count for parallel evaluation (0 indicates automatic sizing based on available CPU cores).
+     */
+    public const val DEFAULT_PARALLEL_MAX_WORKERS: Int = 0
 }

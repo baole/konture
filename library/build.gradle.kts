@@ -26,6 +26,7 @@ dependencies {
     api(project(":core"))
     implementation(libs.kotlin.compiler.embeddable)
     implementation(libs.kotlinx.serialization.json)
+    implementation(libs.kotlinx.coroutines.core)
 
     testImplementation(libs.junit.jupiter.api)
     testRuntimeOnly(libs.junit.jupiter.engine)

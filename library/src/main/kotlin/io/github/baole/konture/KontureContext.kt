@@ -6,6 +6,14 @@
 
 package io.github.baole.konture
 
+import io.github.baole.konture.impl.KontureRuntimeState
+import io.github.baole.konture.impl.KontureRuntimeStateProvider
+import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
+import kotlinx.coroutines.runBlocking
+
 /**
  * DSL Context wrapper that allows defining and verifying multiple independent rule suites.
  *
@@ -349,6 +357,25 @@ public class KontureContext(
         if (sourceSetPolicies.isNotEmpty()) {
             addSuite("sourceSets") { checkSourceSetPolicies(sourceSetPolicies, projectGraph) }
         }
+
+        val state = KontureRuntimeStateProvider.currentState
+        val parallelEnabled = Konture.parallel
+        val failures =
+            if (parallelEnabled && ruleSuites.size > 1) {
+                runParallelSuites(state)
+            } else {
+                runSequentialSuites()
+            }
+
+        if (failures.isNotEmpty()) {
+            throw AssertionError(
+                "Architecture validation failed in ${failures.size} suite(s):\n\n" +
+                    failures.joinToString("\n\n"),
+            )
+        }
+    }
+
+    private fun runSequentialSuites(): List<String> {
         val failures = mutableListOf<String>()
         for (suite in ruleSuites) {
             try {
@@ -357,11 +384,41 @@ public class KontureContext(
                 failures.add("[${suite.label}]\n${e.message}")
             }
         }
-        if (failures.isNotEmpty()) {
-            throw AssertionError(
-                "Architecture validation failed in ${failures.size} suite(s):\n\n" +
-                    failures.joinToString("\n\n"),
-            )
+        return failures
+    }
+
+    private fun runParallelSuites(parentState: KontureRuntimeState): List<String> {
+        val maxWorkers = maxOf(0, Konture.parallelMaxWorkers)
+        val dispatcher: CoroutineDispatcher =
+            if (maxWorkers > 0) {
+                Dispatchers.Default.limitedParallelism(maxWorkers)
+            } else {
+                Dispatchers.Default
+            }
+
+        return runBlocking {
+            ruleSuites
+                .mapIndexed { index, suite ->
+                    async(dispatcher) {
+                        val workerState =
+                            parentState.copy(
+                                parallel = Konture.parallel,
+                                parallelMaxWorkers = maxWorkers,
+                                projectGraph = this@KontureContext.projectGraph,
+                            )
+                        KontureRuntimeStateProvider.runWithState(workerState) {
+                            try {
+                                suite.run()
+                                index to null
+                            } catch (e: AssertionError) {
+                                index to "[${suite.label}]\n${e.message}"
+                            }
+                        }
+                    }
+                }
+                .awaitAll()
+                .sortedBy { it.first }
+                .mapNotNull { it.second }
         }
     }
 }

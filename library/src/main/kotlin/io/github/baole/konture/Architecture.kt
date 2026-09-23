@@ -16,3 +16,18 @@ package io.github.baole.konture
 public fun architecture(block: KontureContext.() -> Unit) {
     Konture.architecture(block)
 }
+
+/**
+ * Top-level entry point for defining and running architecture rule blocks against a specific [ProjectGraph].
+ *
+ * This function is an ergonomic shorthand for [Konture.architecture].
+ *
+ * @param graph The specific [ProjectGraph] to evaluate rules against.
+ * @param block DSL configuration block scoped to [KontureContext].
+ */
+public fun architecture(
+    graph: ProjectGraph,
+    block: KontureContext.() -> Unit,
+) {
+    Konture.architecture(graph, block)
+}

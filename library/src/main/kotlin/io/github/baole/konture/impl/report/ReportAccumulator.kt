@@ -34,6 +34,7 @@ internal class ReportAccumulator {
     )
 
     private val evaluations = ConcurrentLinkedQueue<RuleEvaluation>()
+    private val writeLock = Any()
 
     /**
      * Records a single rule evaluation.
@@ -70,51 +71,53 @@ internal class ReportAccumulator {
      * Generates and writes configured reports (JSON, SARIF, HTML) based on output format and system properties.
      */
     fun writeReports(buildRoot: File? = null) {
-        val currentEvaluations = getAllEvaluations()
-        val currentFormat = Konture.outputFormat
+        synchronized(writeLock) {
+            val currentEvaluations = getAllEvaluations().sortedBy { it.ruleId }
+            val currentFormat = Konture.outputFormat
 
-        val state = io.github.baole.konture.impl.KontureRuntimeStateProvider.currentState
+            val state = io.github.baole.konture.impl.KontureRuntimeStateProvider.currentState
 
-        val isJsonEnabled =
-            currentFormat == OutputFormat.JSON ||
-                System.getProperty(Konture.PROPERTY_REPORT_JSON_PATH) != null ||
-                (System.getProperty(Konture.PROPERTY_REPORT_PATH)?.endsWith(".json") == true) ||
-                state.jsonReportPath != io.github.baole.konture.core.KontureConstants.DEFAULT_JSON_REPORT_PATH ||
-                state.reportPath.endsWith(".json")
-        if (isJsonEnabled) {
-            val jsonReport = JsonReportExporter.generateReport(currentEvaluations, buildRoot)
-            JsonReportExporter.writeReport(jsonReport, File(Konture.jsonReportPath))
-        }
+            val isJsonEnabled =
+                currentFormat == OutputFormat.JSON ||
+                    System.getProperty(Konture.PROPERTY_REPORT_JSON_PATH) != null ||
+                    (System.getProperty(Konture.PROPERTY_REPORT_PATH)?.endsWith(".json") == true) ||
+                    state.jsonReportPath != io.github.baole.konture.core.KontureConstants.DEFAULT_JSON_REPORT_PATH ||
+                    state.reportPath.endsWith(".json")
+            if (isJsonEnabled) {
+                val jsonReport = JsonReportExporter.generateReport(currentEvaluations, buildRoot)
+                JsonReportExporter.writeReport(jsonReport, File(Konture.jsonReportPath))
+            }
 
-        val isSarifEnabled =
-            currentFormat == OutputFormat.SARIF ||
-                System.getProperty(Konture.PROPERTY_REPORT_SARIF_PATH) != null ||
-                (System.getProperty(Konture.PROPERTY_REPORT_PATH)?.endsWith(".sarif") == true) ||
-                state.sarifReportPath != io.github.baole.konture.core.KontureConstants.DEFAULT_SARIF_REPORT_PATH ||
-                state.reportPath.endsWith(".sarif")
-        if (isSarifEnabled) {
-            val sarifReport = SarifReportExporter.generateReport(currentEvaluations, buildRoot)
-            SarifReportExporter.writeReport(sarifReport, File(Konture.sarifReportPath))
-        }
+            val isSarifEnabled =
+                currentFormat == OutputFormat.SARIF ||
+                    System.getProperty(Konture.PROPERTY_REPORT_SARIF_PATH) != null ||
+                    (System.getProperty(Konture.PROPERTY_REPORT_PATH)?.endsWith(".sarif") == true) ||
+                    state.sarifReportPath != io.github.baole.konture.core.KontureConstants.DEFAULT_SARIF_REPORT_PATH ||
+                    state.reportPath.endsWith(".sarif")
+            if (isSarifEnabled) {
+                val sarifReport = SarifReportExporter.generateReport(currentEvaluations, buildRoot)
+                SarifReportExporter.writeReport(sarifReport, File(Konture.sarifReportPath))
+            }
 
-        val isHtmlEnabled =
-            currentFormat == OutputFormat.HTML ||
-                System.getProperty(Konture.PROPERTY_REPORT_HTML_PATH) != null ||
-                (System.getProperty(Konture.PROPERTY_REPORT_PATH)?.endsWith(".html") == true) ||
-                state.htmlReportPath != io.github.baole.konture.core.KontureConstants.DEFAULT_HTML_REPORT_PATH ||
-                state.reportPath.endsWith(".html")
-        if (isHtmlEnabled) {
-            val unsuppressed = currentEvaluations.flatMap { it.unsuppressedViolations }
-            val htmlViolationReport =
-                ViolationReport(
-                    ruleId = currentEvaluations.lastOrNull()?.ruleId ?: "konture",
-                    violations = unsuppressed,
+            val isHtmlEnabled =
+                currentFormat == OutputFormat.HTML ||
+                    System.getProperty(Konture.PROPERTY_REPORT_HTML_PATH) != null ||
+                    (System.getProperty(Konture.PROPERTY_REPORT_PATH)?.endsWith(".html") == true) ||
+                    state.htmlReportPath != io.github.baole.konture.core.KontureConstants.DEFAULT_HTML_REPORT_PATH ||
+                    state.reportPath.endsWith(".html")
+            if (isHtmlEnabled) {
+                val unsuppressed = currentEvaluations.flatMap { it.unsuppressedViolations }
+                val htmlViolationReport =
+                    ViolationReport(
+                        ruleId = currentEvaluations.lastOrNull()?.ruleId ?: "konture",
+                        violations = unsuppressed,
+                    )
+                HtmlReportWriter.writeReport(
+                    htmlViolationReport,
+                    targetFile = File(Konture.htmlReportPath),
+                    projectRoot = buildRoot,
                 )
-            HtmlReportWriter.writeReport(
-                htmlViolationReport,
-                targetFile = File(Konture.htmlReportPath),
-                projectRoot = buildRoot,
-            )
+            }
         }
     }
 
