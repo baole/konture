@@ -26,7 +26,7 @@ class ArchitectureTest {
             .that()
             .haveNamePath(":core")
             .should()
-            .onlyDependOnModules() // no other project modules
+            .onlyDependOn() // no other project modules
             .check()
 
         // :library should only depend on :core
@@ -35,7 +35,7 @@ class ArchitectureTest {
             .that()
             .haveNamePath(":library")
             .should()
-            .onlyDependOnModules(":core")
+            .onlyDependOn(":core")
             .check()
 
         // :plugin-gradle should only depend on :core
@@ -44,7 +44,7 @@ class ArchitectureTest {
             .that()
             .haveNamePath(":plugin-gradle")
             .should()
-            .onlyDependOnModules(":core")
+            .onlyDependOn(":core")
             .check()
     }
 }

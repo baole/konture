@@ -32,9 +32,9 @@ public class ClassesThat internal constructor(
 
     /** Filters classes annotated with annotation type parameter [T]. */
     public inline fun <reified T : Annotation> areAnnotatedWith(): ClassesRuleBuilder =
-        (this as ClassesThatMetadataFilter).areAnnotatedWith(T::class)
+        (this as ClassesThatMetadataFilter).annotatedWith(T::class)
 
     /** Filters classes having annotation type parameter [T]. */
     public inline fun <reified T : Annotation> haveAnnotationOf(): ClassesRuleBuilder =
-        (this as ClassesThatMetadataFilter).haveAnnotationOf(T::class)
+        (this as ClassesThatMetadataFilter).annotatedWith(T::class)
 }

@@ -27,13 +27,13 @@ class AutoCheckingDslTest {
     @Test
     fun `classes block DSL non-violation and violation`() {
         Konture.classes {
-            that().haveName("AutoCheckingClass")
+            that().named("AutoCheckingClass")
             should().beAssignableTo<Serializable>()
         }
 
         val error = violationsFound {
             Konture.classes {
-                that().haveName("AutoCheckingClass")
+                that().named("AutoCheckingClass")
                 should().beInterfaces()
             }
         }
@@ -43,13 +43,13 @@ class AutoCheckingDslTest {
     @Test
     fun `classes block DSL with sourceSets overload`() {
         Konture.classes(SourceSets.named("main")) {
-            that().haveName("AutoCheckingClass")
+            that().named("AutoCheckingClass")
             should().haveAnnotationOf<AutoCheckingMarker>()
         }
 
         val error = violationsFound {
             Konture.classes(SourceSets.named("nonexistent")) {
-                that().haveName("AutoCheckingClass")
+                that().named("AutoCheckingClass")
                 should().haveAnnotationOf<AutoCheckingMarker>()
             }
         }

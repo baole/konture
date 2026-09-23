@@ -23,7 +23,7 @@ class ArchitectureContextTest {
     fun `architecture context batch verification non-violation`() {
         Konture.architecture {
             classes {
-                that().haveName("ArchClass")
+                that().named("ArchClass")
                 should().beAssignableTo<Serializable>()
                 andShould().haveAnnotationOf<ArchMarker>()
             }
@@ -45,7 +45,7 @@ class ArchitectureContextTest {
 
             modules {
                 that().haveNamePath(":library")
-                should().onlyDependOnModules(":core")
+                should().onlyDependOn(":core")
             }
 
             slices {
@@ -61,7 +61,7 @@ class ArchitectureContextTest {
         val error = violationsFound {
             Konture.architecture {
                 classes {
-                    that().haveName("ArchClass")
+                    that().named("ArchClass")
                     should().beInterfaces()
                 }
             }
@@ -75,7 +75,7 @@ class ArchitectureContextTest {
         val error = violationsFound {
             Konture.architecture {
                 classes {
-                    that().haveName("ArchClass")
+                    that().named("ArchClass")
                     should().beInterfaces()
                 }
 

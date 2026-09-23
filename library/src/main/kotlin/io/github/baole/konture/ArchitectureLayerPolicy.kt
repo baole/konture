@@ -400,7 +400,7 @@ internal class ArchitectureLayerRegistry(
                 )
             }
         val dependencyPath =
-            if (sourceSubject != null && targetSubject != null) {
+            if (targetSubject != null) {
                 listOf(sourceSubject, targetSubject)
             } else {
                 emptyList()
