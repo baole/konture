@@ -157,6 +157,9 @@ internal class ClassesThatCoverageTest : KontureScopeTestFixture() {
         val builder5 = ClassesRuleBuilder(graph).that().areAnnotatedWith<Deprecated>()
         assertFalse(checkPred(builder5, classA))
 
+        val builder5b = ClassesRuleBuilder(graph).that().annotatedWith<Deprecated>()
+        assertFalse(checkPred(builder5b, classA))
+
         val builder6 = ClassesRuleBuilder(graph).that().haveAllAnnotationsOf("MyAnnotation")
         assertTrue(checkPred(builder6, classAnnotated))
 

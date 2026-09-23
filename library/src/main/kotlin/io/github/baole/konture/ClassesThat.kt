@@ -31,10 +31,16 @@ public class ClassesThat internal constructor(
         (this as ClassesThatStructureFilter).beChildOf(T::class)
 
     /** Filters classes annotated with annotation type parameter [T]. */
+    public inline fun <reified T : Annotation> annotatedWith(): ClassesRuleBuilder =
+        (this as ClassesThatMetadataFilter).annotatedWith(T::class)
+
+    /** Filters classes annotated with annotation type parameter [T]. */
+    @Deprecated("Use annotatedWith instead.", ReplaceWith("annotatedWith<T>()"))
     public inline fun <reified T : Annotation> areAnnotatedWith(): ClassesRuleBuilder =
         (this as ClassesThatMetadataFilter).annotatedWith(T::class)
 
     /** Filters classes having annotation type parameter [T]. */
+    @Deprecated("Use annotatedWith instead.", ReplaceWith("annotatedWith<T>()"))
     public inline fun <reified T : Annotation> haveAnnotationOf(): ClassesRuleBuilder =
         (this as ClassesThatMetadataFilter).annotatedWith(T::class)
 }
