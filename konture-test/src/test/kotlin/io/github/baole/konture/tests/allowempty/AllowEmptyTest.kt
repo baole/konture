@@ -92,13 +92,13 @@ class AllowEmptyTest {
         Konture.modules {
             that().haveNamePath(":nonexistentModule")
             allowEmpty()
-            should().onlyDependOnModules(":core")
+            should().onlyDependOn(":core")
         }
 
         val error = violationsFound {
             Konture.modules {
                 that().haveNamePath(":nonexistentModule")
-                should().onlyDependOnModules(":core")
+                should().onlyDependOn(":core")
             }
         }
         assertNotNull(error)

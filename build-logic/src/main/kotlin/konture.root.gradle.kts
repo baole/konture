@@ -4,12 +4,15 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import com.diffplug.gradle.spotless.SpotlessExtension
+import com.diffplug.spotless.LineEnding
 import io.github.baole.konture.buildlogic.UpdateKotlinContributors
 import org.jetbrains.dokka.gradle.DokkaMultiModuleTask
 
 plugins {
     base
     jacoco
+    id("com.diffplug.spotless")
 }
 
 tasks.register<UpdateKotlinContributors>("updateKotlinContributors") {
@@ -31,7 +34,7 @@ tasks.register<TestReport>("testReport") {
     destinationDirectory.set(layout.buildDirectory.dir("reports/all-tests"))
 
     dependsOn(subprojects.map { "${it.path}:test" })
-    testResults.from(subprojects.map { it.layout.buildDirectory.dir("test-results/test/binary") })
+    testResults.from(subprojects.map { it.isolated.projectDirectory.dir("build/test-results/test/binary") })
 }
 
 tasks.register<JacocoReport>("jacocoRootReport") {
@@ -45,7 +48,7 @@ tasks.register<JacocoReport>("jacocoRootReport") {
 
     val classDirs =
         coverageProjects.map { sub ->
-            sub.fileTree(sub.layout.buildDirectory.dir("classes/kotlin/main")) {
+            fileTree(sub.isolated.projectDirectory.dir("build/classes/kotlin/main")) {
                 exclude("**/DefaultImpls*", "**/*\$DefaultImpls*")
             }
         }
@@ -59,7 +62,7 @@ tasks.register<JacocoReport>("jacocoRootReport") {
 
     val execFiles =
         coverageProjects.map { sub ->
-            sub.layout.buildDirectory.file("jacoco/test.exec")
+            sub.isolated.projectDirectory.file("build/jacoco/test.exec")
         }
     executionData.setFrom(files(execFiles))
 
@@ -84,7 +87,7 @@ tasks.register<JacocoCoverageVerification>("jacocoRootCoverageVerification") {
 
     val classDirs =
         coverageProjects.map { sub ->
-            sub.fileTree(sub.layout.buildDirectory.dir("classes/kotlin/main")) {
+            fileTree(sub.isolated.projectDirectory.dir("build/classes/kotlin/main")) {
                 exclude("**/DefaultImpls*", "**/*\$DefaultImpls*")
             }
         }
@@ -99,7 +102,7 @@ tasks.register<JacocoCoverageVerification>("jacocoRootCoverageVerification") {
 
     val execFiles =
         coverageProjects.map { sub ->
-            sub.layout.buildDirectory.file("jacoco/test.exec")
+            sub.isolated.projectDirectory.file("build/jacoco/test.exec")
         }
     executionData.setFrom(files(execFiles))
 
@@ -125,4 +128,24 @@ tasks.withType<DokkaMultiModuleTask>().configureEach {
 
 tasks.named<Delete>("clean") {
     delete(layout.buildDirectory)
+}
+
+configure<SpotlessExtension> {
+    lineEndings = LineEnding.GIT_ATTRIBUTES
+    kotlin {
+        target("**/*.kt", "**/*.kts")
+        targetExclude("**/build/**", "**/.gradle/**", "showcases/**", "settings.gradle.kts")
+        custom("validate contributor header") { source ->
+            require(
+                Regex(
+                    """\A/\*\R \* Copyright \d{4}(?:-\d{4})? .+\R(?: \* Contributors: .+\R)? \* SPDX-License-Identifier: Apache-2\.0\R \*/\R\R""",
+                ).containsMatchIn(source),
+            ) { "Kotlin files must start with a copyright and SPDX header." }
+            source
+        }
+    }
+}
+
+tasks.matching { it.name == "spotlessApply" }.configureEach {
+    dependsOn(tasks.named("updateKotlinContributors"))
 }

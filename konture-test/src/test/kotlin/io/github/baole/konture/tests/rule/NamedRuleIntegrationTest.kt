@@ -27,8 +27,8 @@ class NamedRuleIntegrationTest {
                 tag("integration", "architecture")
 
                 classes {
-                    that().haveName("DeclarativeClass")
-                    should().resideInAPackage("io.github.baole.konture.tests.declarative..")
+                    that().named("DeclarativeClass")
+                    should().inPackage("io.github.baole.konture.tests.declarative..")
                 }
             }
 
@@ -48,7 +48,7 @@ class NamedRuleIntegrationTest {
                 severity = Severity.ERROR
 
                 classes {
-                    that().haveName("DeclarativeClass")
+                    that().named("DeclarativeClass")
                     should().beInterfaces()
                 }
             }
@@ -71,8 +71,8 @@ class NamedRuleIntegrationTest {
                 description = "Sub-rule in architecture suite"
 
                 classes {
-                    that().haveName("DeclarativeClass")
-                    should().resideInAPackage("io.github.baole.konture.tests.declarative..")
+                    that().named("DeclarativeClass")
+                    should().inPackage("io.github.baole.konture.tests.declarative..")
                 }
             }
         }

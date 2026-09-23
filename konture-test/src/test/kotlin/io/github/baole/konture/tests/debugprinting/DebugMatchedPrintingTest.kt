@@ -28,9 +28,9 @@ class DebugMatchedPrintingTest {
     fun `printMatchedClasses logs matched classes to custom logger`() {
         val matched = mutableListOf<ClassDeclaration>()
         Konture.classes {
-            that().haveName("DebugClass")
+            that().named("DebugClass")
             printMatchedClasses { matched.add(it) }
-            should().haveName("DebugClass")
+            should().named("DebugClass")
         }
         assertTrue(matched.any { it.name == "DebugClass" })
     }
@@ -39,7 +39,7 @@ class DebugMatchedPrintingTest {
     fun `printMatchedFiles logs matched files to custom logger`() {
         val matched = mutableListOf<FileDeclarationContext>()
         Konture.files {
-            that().haveNameMatching("DebugPrintingTargets.kt")
+            that().nameMatches("DebugPrintingTargets.kt")
             printMatchedFiles { matched.add(it) }
             should().containClass(DebugClass::class)
         }
@@ -74,7 +74,7 @@ class DebugMatchedPrintingTest {
         Konture.modules {
             that().haveNamePath(":konture-test")
             printMatchedModules { matched.add(it) }
-            should().onlyDependOnModules(":core")
+            should().onlyDependOn(":core")
         }
         assertTrue(matched.any { it.path == ":konture-test" })
     }

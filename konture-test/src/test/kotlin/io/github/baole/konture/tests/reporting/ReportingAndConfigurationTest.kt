@@ -27,7 +27,7 @@ class ReportingAndConfigurationTest {
                 tag("architecture", "domain")
 
                 classes {
-                    that().resideInAPackage(classStructurePkg).and().haveName("SampleInterface")
+                    that().inPackage(classStructurePkg).and().named("SampleInterface")
                     should().beInterfaces()
                 }
 
@@ -48,7 +48,7 @@ class ReportingAndConfigurationTest {
     @Test
     fun `custom predicate satisfy assertion on classes`() {
         Konture.classes {
-            that().resideInAPackage(classStructurePkg).and().haveName("SampleOpenClass")
+            that().inPackage(classStructurePkg).and().named("SampleOpenClass")
             should().satisfy { cls: io.github.baole.konture.ClassDeclaration ->
                 cls.name.startsWith("Sample") && cls.functions.isNotEmpty()
             }

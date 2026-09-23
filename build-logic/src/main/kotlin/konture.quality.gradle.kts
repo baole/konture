@@ -4,8 +4,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import com.diffplug.gradle.spotless.SpotlessExtension
-import com.diffplug.spotless.LineEnding
 import dev.detekt.gradle.extensions.DetektExtension
 import org.jetbrains.dokka.gradle.DokkaTaskPartial
 import org.jlleitschuh.gradle.ktlint.KtlintExtension
@@ -14,7 +12,6 @@ import org.jlleitschuh.gradle.ktlint.reporter.ReporterType
 plugins {
     id("dev.detekt")
     id("org.jlleitschuh.gradle.ktlint")
-    id("com.diffplug.spotless")
     jacoco
 }
 
@@ -76,24 +73,6 @@ configure<KtlintExtension> {
     }
 }
 
-configure<SpotlessExtension> {
-    lineEndings = LineEnding.GIT_ATTRIBUTES
-    kotlin {
-        target("**/*.kt", "**/*.kts")
-        custom("validate contributor header") { source ->
-            require(
-                Regex(
-                    """\A/\*\R \* Copyright \d{4}(?:-\d{4})? .+\R(?: \* Contributors: .+\R)? \* SPDX-License-Identifier: Apache-2\.0\R \*/\R\R""",
-                ).containsMatchIn(source),
-            ) { "Kotlin files must start with a copyright and SPDX header." }
-            source
-        }
-    }
-}
-
-tasks.matching { it.name == "spotlessApply" }.configureEach {
-    dependsOn(":updateKotlinContributors")
-}
 
 plugins.withId("org.jetbrains.dokka") {
     tasks.withType<DokkaTaskPartial>().configureEach {

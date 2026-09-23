@@ -13,7 +13,7 @@ import io.github.baole.konture.SourceSets
 import io.github.baole.konture.classes
 import io.github.baole.konture.files
 import io.github.baole.konture.functions
-import io.github.baole.konture.haveAnnotationOf
+import io.github.baole.konture.annotatedWith
 import io.github.baole.konture.haveAnnotationOfType
 import io.github.baole.konture.modules
 import io.github.baole.konture.properties
@@ -27,14 +27,14 @@ class SourceSetOverrideTest {
     @Test
     fun `classes source set selector overrides correctly`() {
         Konture.classes(SourceSets.named("main"))
-            .that().haveName("ProductionTarget")
-            .should().haveAnnotationOf<ProductionOnlyMarker>()
+            .that().named("ProductionTarget")
+            .should().annotatedWith<ProductionOnlyMarker>()
             .check()
 
         val error = violationsFound {
             Konture.classes(SourceSets.named("nonexistent"))
-                .that().haveName("ProductionTarget")
-                .should().haveAnnotationOf<ProductionOnlyMarker>()
+                .that().named("ProductionTarget")
+                .should().annotatedWith<ProductionOnlyMarker>()
                 .check()
         }
         assertNotNull(error)
@@ -43,13 +43,13 @@ class SourceSetOverrideTest {
     @Test
     fun `files source set selector overrides correctly`() {
         Konture.files(SourceSets.named("main"))
-            .that().haveNameMatching("SourceSetTargets.kt")
+            .that().nameMatches("SourceSetTargets.kt")
             .should().containClass(ProductionTarget::class)
             .check()
 
         val error = violationsFound {
             Konture.files(SourceSets.named("nonexistent"))
-                .that().haveNameMatching("SourceSetTargets.kt")
+                .that().nameMatches("SourceSetTargets.kt")
                 .should().containClass(ProductionTarget::class)
                 .check()
         }
@@ -110,13 +110,13 @@ class SourceSetOverrideTest {
     fun `modules source set selector overrides correctly`() {
         Konture.modules(SourceSets.named("main"))
             .that().haveNamePath(":library")
-            .should().onlyDependOnModules(":core")
+            .should().onlyDependOn(":core")
             .check()
 
         val error = violationsFound {
             Konture.modules(SourceSets.named("main"))
                 .that().haveNamePath(":library")
-                .should().notDependOnModule(":core")
+                .should().mustNotDependOn(":core")
                 .check()
         }
         assertNotNull(error)
@@ -125,56 +125,56 @@ class SourceSetOverrideTest {
     @Test
     fun `SourceSets production selector variation`() {
         Konture.classes(SourceSets.production())
-            .that().haveName("ProductionTarget")
-            .should().haveAnnotationOf<ProductionOnlyMarker>()
+            .that().named("ProductionTarget")
+            .should().annotatedWith<ProductionOnlyMarker>()
             .check()
     }
 
     @Test
     fun `SourceSets matchingName selector variation`() {
         Konture.classes(SourceSets.matchingName("mai*"))
-            .that().haveName("ProductionTarget")
-            .should().haveAnnotationOf<ProductionOnlyMarker>()
+            .that().named("ProductionTarget")
+            .should().annotatedWith<ProductionOnlyMarker>()
             .check()
     }
 
     @Test
     fun `SourceSets of selector variation`() {
         Konture.classes(SourceSets.of(role = SourceSetRole.PRODUCTION, kind = SourceSetKind.JVM))
-            .that().haveName("ProductionTarget")
-            .should().haveAnnotationOf<ProductionOnlyMarker>()
+            .that().named("ProductionTarget")
+            .should().annotatedWith<ProductionOnlyMarker>()
             .check()
     }
 
     @Test
     fun `SourceSets inModule selector variation`() {
         Konture.classes(SourceSets.inModule(":konture-test"))
-            .that().haveName("ProductionTarget")
-            .should().haveAnnotationOf<ProductionOnlyMarker>()
+            .that().named("ProductionTarget")
+            .should().annotatedWith<ProductionOnlyMarker>()
             .check()
     }
 
     @Test
     fun `SourceSets combination and variation`() {
         Konture.classes(SourceSets.production() and SourceSets.inModule(":konture-test"))
-            .that().haveName("ProductionTarget")
-            .should().haveAnnotationOf<ProductionOnlyMarker>()
+            .that().named("ProductionTarget")
+            .should().annotatedWith<ProductionOnlyMarker>()
             .check()
     }
 
     @Test
     fun `SourceSets combination or variation`() {
         Konture.classes(SourceSets.named("main") or SourceSets.named("test"))
-            .that().haveName("ProductionTarget")
-            .should().haveAnnotationOf<ProductionOnlyMarker>()
+            .that().named("ProductionTarget")
+            .should().annotatedWith<ProductionOnlyMarker>()
             .check()
     }
 
     @Test
     fun `SourceSets operator not variation`() {
         Konture.classes(!SourceSets.named("nonexistent"))
-            .that().haveName("ProductionTarget")
-            .should().haveAnnotationOf<ProductionOnlyMarker>()
+            .that().named("ProductionTarget")
+            .should().annotatedWith<ProductionOnlyMarker>()
             .check()
     }
 }

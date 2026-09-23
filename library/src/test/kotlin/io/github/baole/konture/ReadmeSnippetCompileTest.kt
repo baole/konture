@@ -1,5 +1,6 @@
 /*
- * Copyright 2026 Bao Le Duc
+ * Copyright 2026 The Konture Contributors
+ * Contributors: Bao Le Duc (@baole)
  * SPDX-License-Identifier: Apache-2.0
  */
 
@@ -73,14 +74,14 @@ class ReadmeSnippetCompileTest : RuleBuildersTestBase() {
             // 🎯 Select modules inside domain
             modules {
                 that().haveNamePath(":core:domain")
-                should().notDependOnModule(":core:data")
-                andShould().notDependOnModule(":feature:checkout")
+                should().mustNotDependOn(":core:data")
+                andShould().mustNotDependOn(":feature:checkout")
             }
 
             // 🎯 Verify class boundary rules
             classes {
-                that().resideInAPackage("..domain..")
-                that().haveNameEndingWith("Repository")
+                that().inPackage("..domain..")
+                that().nameEndsWith("Repository")
                 should().beInterfaces()
             }
         }

@@ -24,7 +24,7 @@ class DefaultImportsTest {
         val detected = violationsFound {
             architecture {
                 classes {
-                    that().resideInAPackage(PACKAGE)
+                    that().inPackage(PACKAGE)
                     should().notReferenceClass("java.io.File")
                 }
             }
@@ -38,7 +38,7 @@ class DefaultImportsTest {
         val detected = violationsFound {
             architecture {
                 classes {
-                    that().resideInAPackage(PACKAGE)
+                    that().inPackage(PACKAGE)
                     should().notReferenceClass("java.lang.ProcessBuilder")
                 }
             }
@@ -51,7 +51,7 @@ class DefaultImportsTest {
         val detected = violationsFound {
             architecture {
                 classes {
-                    that().resideInAPackage(PACKAGE)
+                    that().inPackage(PACKAGE)
                     should().notReferenceClass("java.lang.System")
                 }
             }
@@ -64,7 +64,7 @@ class DefaultImportsTest {
         val detected = violationsFound {
             architecture {
                 classes {
-                    that().resideInAPackage(PACKAGE)
+                    that().inPackage(PACKAGE)
                     should().notReferenceClass("java.lang.IllegalArgumentException")
                 }
             }
@@ -78,7 +78,7 @@ class DefaultImportsTest {
         val detected = violationsFound {
             architecture {
                 classes {
-                    that().resideInAPackage(PACKAGE)
+                    that().inPackage(PACKAGE)
                     should().notReferenceClass("kotlin.collections.Collection")
                 }
             }
@@ -92,7 +92,7 @@ class DefaultImportsTest {
         val detected = violationsFound {
             architecture {
                 classes {
-                    that().resideInAPackage(PACKAGE)
+                    that().inPackage(PACKAGE)
                     should().notReferenceClass("kotlin.ranges.IntRange")
                 }
             }
@@ -106,7 +106,7 @@ class DefaultImportsTest {
         val detected = violationsFound {
             architecture {
                 classes {
-                    that().resideInAPackage(PACKAGE)
+                    that().inPackage(PACKAGE)
                     should().notReferenceClass("kotlin.sequences.Sequence")
                 }
             }
@@ -120,7 +120,7 @@ class DefaultImportsTest {
         val detected = violationsFound {
             architecture {
                 classes {
-                    that().resideInAPackage(PACKAGE)
+                    that().inPackage(PACKAGE)
                     should().notReferenceClass("kotlin.text.StringBuilder")
                 }
             }
@@ -133,7 +133,7 @@ class DefaultImportsTest {
         val detected = violationsFound {
             architecture {
                 classes {
-                    that().resideInAPackage(PACKAGE)
+                    that().inPackage(PACKAGE)
                     should().notReferenceClass("kotlin.text.Regex")
                 }
             }
@@ -147,7 +147,7 @@ class DefaultImportsTest {
         val detected = violationsFound {
             architecture {
                 classes {
-                    that().resideInAPackage(PACKAGE)
+                    that().inPackage(PACKAGE)
                     should().notReferenceClass("kotlin.comparisons.Comparator")
                 }
             }
@@ -161,7 +161,7 @@ class DefaultImportsTest {
         val detected = violationsFound {
             architecture {
                 classes {
-                    that().resideInAPackage(PACKAGE)
+                    that().inPackage(PACKAGE)
                     should().notReferenceClass("kotlin.annotation.AnnotationRetention")
                 }
             }
@@ -175,7 +175,7 @@ class DefaultImportsTest {
         val detectedJava = violationsFound {
             architecture {
                 classes {
-                    that().resideInAPackage(PACKAGE)
+                    that().inPackage(PACKAGE)
                     should().notReferenceClass("java.util.Collection")
                 }
             }
@@ -185,7 +185,7 @@ class DefaultImportsTest {
         val detectedOther = violationsFound {
             architecture {
                 classes {
-                    that().resideInAPackage(PACKAGE)
+                    that().inPackage(PACKAGE)
                     should().notReferenceClass("java.util.List")
                 }
             }
@@ -199,7 +199,7 @@ class DefaultImportsTest {
         val detected = violationsFound {
             architecture {
                 classes {
-                    that().resideInAPackage(PACKAGE)
+                    that().inPackage(PACKAGE)
                     should().notReferenceClass("io.github.baole.konture.tests.defaultImports.CustomCollection")
                 }
             }
@@ -213,7 +213,7 @@ class DefaultImportsTest {
         val detected = violationsFound {
             architecture {
                 classes {
-                    that().resideInAPackage(PACKAGE)
+                    that().inPackage(PACKAGE)
                     should().notReferenceClass("JavaCollection")
                 }
             }
@@ -227,7 +227,7 @@ class DefaultImportsTest {
         val detected = violationsFound {
             architecture {
                 classes {
-                    that().resideInAPackage(PACKAGE)
+                    that().inPackage(PACKAGE)
                     should().notReferenceClass("AliasArrayList")
                 }
             }
@@ -241,7 +241,7 @@ class DefaultImportsTest {
         val detected = violationsFound {
             architecture {
                 classes {
-                    that().resideInAPackage(PACKAGE)
+                    that().inPackage(PACKAGE)
                     should().notReferenceClass("kotlin.collections.ArrayList")
                 }
             }

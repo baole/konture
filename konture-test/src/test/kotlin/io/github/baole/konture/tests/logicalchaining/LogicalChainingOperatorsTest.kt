@@ -7,10 +7,10 @@
 package io.github.baole.konture.tests.logicalchaining
 
 import io.github.baole.konture.Konture
+import io.github.baole.konture.annotatedWith
 import io.github.baole.konture.classes
 import io.github.baole.konture.files
 import io.github.baole.konture.functions
-import io.github.baole.konture.haveAnnotationOf
 import io.github.baole.konture.haveAnnotationOfType
 import io.github.baole.konture.modules
 import io.github.baole.konture.properties
@@ -24,30 +24,30 @@ class LogicalChainingOperatorsTest {
     @Test
     fun `classes logical chaining and, or, not`() {
         Konture.classes {
-            that().resideInAPackage(pkg).and().haveName("LogicalClassA").or().haveName("LogicalClassB")
-            should().haveNameMatching("LogicalClass*")
+            that().inPackage(pkg).and().named("LogicalClassA").or().named("LogicalClassB")
+            should().nameMatches("LogicalClass*")
         }
 
         Konture.classes {
-            that().resideInAPackage(pkg).and().haveNameMatching("LogicalClass*").and().haveAnnotationOf<LogicalMarkerA>()
-            should().haveName("LogicalClassA")
+            that().inPackage(pkg).and().nameMatches("LogicalClass*").and().annotatedWith<LogicalMarkerA>()
+            should().named("LogicalClassA")
         }
 
         Konture.classes {
-            that().resideInAPackage(pkg).and().haveNameMatching("LogicalClass*").and().not().haveName("LogicalClassB")
-            should().haveName("LogicalClassA")
+            that().inPackage(pkg).and().nameMatches("LogicalClass*").and().not().named("LogicalClassB")
+            should().named("LogicalClassA")
         }
     }
 
     @Test
     fun `files logical chaining and, or, not`() {
         Konture.files {
-            that().resideInAPackage(pkg).and().haveNameMatching("LogicalChainingTargets.kt").or().haveNameMatching("IgnoringTargets.kt")
+            that().inPackage(pkg).and().nameMatches("LogicalChainingTargets.kt").or().nameMatches("IgnoringTargets.kt")
             should().containClasses()
         }
 
         Konture.files {
-            that().resideInAPackage(pkg).and().haveNameMatching("LogicalChainingTargets.kt").and().not().haveNameMatching("IgnoringTargets.kt")
+            that().inPackage(pkg).and().nameMatches("LogicalChainingTargets.kt").and().not().nameMatches("IgnoringTargets.kt")
             should().containClass(LogicalClassA::class)
         }
     }
@@ -82,12 +82,12 @@ class LogicalChainingOperatorsTest {
     fun `modules logical chaining and, or, not`() {
         Konture.modules {
             that().haveNamePath(":konture-test").or().haveNamePath(":library")
-            should().onlyDependOnModules(":core")
+            should().onlyDependOn(":core")
         }
 
         Konture.modules {
             that().haveNamePath(":konture-test").and().not().haveNamePath(":library")
-            should().onlyDependOnModules(":core")
+            should().onlyDependOn(":core")
         }
     }
 

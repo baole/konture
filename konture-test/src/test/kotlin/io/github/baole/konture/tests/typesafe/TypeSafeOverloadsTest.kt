@@ -7,12 +7,14 @@
 package io.github.baole.konture.tests.typesafe
 
 import io.github.baole.konture.Konture
+import io.github.baole.konture.annotatedWith
 import io.github.baole.konture.beAnnotatedWith
 import io.github.baole.konture.classes
 import io.github.baole.konture.containClassesWithAnnotation
 import io.github.baole.konture.files
 import io.github.baole.konture.functions
 import io.github.baole.konture.haveAnnotationOf
+import io.github.baole.konture.inPackageOf
 import io.github.baole.konture.modules
 import io.github.baole.konture.notCall
 import io.github.baole.konture.notReferenceClass
@@ -26,15 +28,15 @@ class TypeSafeOverloadsTest {
     @Test
     fun `classes type safe overloads`() {
         Konture.classes {
-            that().resideInPackageOf(TypeSafeClass::class).and().haveAnnotationOf<TypeSafeMarker>()
-            should().beAnnotatedWith<TypeSafeMarker>().andShould().notCall<TypeSafeDep>()
+            that().inPackageOf(TypeSafeClass::class).and().annotatedWith<TypeSafeMarker>()
+            should().annotatedWith<TypeSafeMarker>().andShould().notCall<TypeSafeDep>()
         }
     }
 
     @Test
     fun `files type safe overloads`() {
         Konture.files {
-            that().resideInPackageOf(TypeSafeClass::class).and().haveName("TypeSafeTargets.kt")
+            that().inPackageOf(TypeSafeClass::class).and().named("TypeSafeTargets.kt")
             should().notReferenceClass(TypeSafeDep::class)
         }
     }

@@ -29,8 +29,8 @@ class DebugAllDiscoveredPrintingTest {
         val discovered = mutableListOf<ClassDeclaration>()
         Konture.classes {
             printAllClasses { discovered.add(it) }
-            that().haveName("DebugAllClass")
-            should().haveName("DebugAllClass")
+            that().named("DebugAllClass")
+            should().named("DebugAllClass")
         }
         assertTrue(discovered.any { it.name == "DebugAllClass" })
     }
@@ -40,7 +40,7 @@ class DebugAllDiscoveredPrintingTest {
         val discovered = mutableListOf<FileDeclarationContext>()
         Konture.files {
             printAllFiles { discovered.add(it) }
-            that().haveNameMatching("DebugAllTargets.kt")
+            that().nameMatches("DebugAllTargets.kt")
             should().containClass(DebugAllClass::class)
         }
         assertTrue(discovered.any { it.declaration.name == "DebugAllTargets.kt" })
@@ -74,7 +74,7 @@ class DebugAllDiscoveredPrintingTest {
         Konture.modules {
             printAllModules { discovered.add(it) }
             that().haveNamePath(":konture-test")
-            should().onlyDependOnModules(":core")
+            should().onlyDependOn(":core")
         }
         assertTrue(discovered.any { it.path == ":konture-test" })
     }

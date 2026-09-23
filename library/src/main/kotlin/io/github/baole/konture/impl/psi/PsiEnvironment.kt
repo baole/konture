@@ -6,12 +6,16 @@
 
 package io.github.baole.konture.impl.psi
 
+import org.jetbrains.kotlin.CoreEnvironmentDeprecation
 import org.jetbrains.kotlin.K1Deprecation
+import org.jetbrains.kotlin.cli.FrontendConfigurationKeys
 import org.jetbrains.kotlin.cli.jvm.compiler.EnvironmentConfigFiles
 import org.jetbrains.kotlin.cli.jvm.compiler.KotlinCoreEnvironment
 import org.jetbrains.kotlin.com.intellij.openapi.project.Project
 import org.jetbrains.kotlin.com.intellij.openapi.util.Disposer
 import org.jetbrains.kotlin.com.intellij.psi.PsiFileFactory
+import org.jetbrains.kotlin.compiler.plugin.CompilerPluginRegistrar
+import org.jetbrains.kotlin.compiler.plugin.ExperimentalCompilerApi
 import org.jetbrains.kotlin.config.CommonConfigurationKeys
 import org.jetbrains.kotlin.config.CompilerConfiguration
 import org.jetbrains.kotlin.config.LanguageFeature
@@ -22,6 +26,8 @@ import org.jetbrains.kotlin.psi.KtFile
 /** Owns the Kotlin compiler PSI project used for source parsing. */
 @OptIn(
     CompilerConfiguration.Internals::class,
+    CoreEnvironmentDeprecation::class,
+    ExperimentalCompilerApi::class,
     K1Deprecation::class,
 )
 internal class PsiEnvironment {
@@ -64,6 +70,10 @@ internal class PsiEnvironment {
                         disposable = Disposer.newDisposable()
                         isDisposed = false
                         val configuration = CompilerConfiguration()
+                        configuration.put(
+                            FrontendConfigurationKeys.EXTENSIONS_STORAGE,
+                            CompilerPluginRegistrar.ExtensionStorage(),
+                        )
                         configuration.put(
                             CommonConfigurationKeys.LANGUAGE_VERSION_SETTINGS,
                             LanguageVersionSettingsImpl(

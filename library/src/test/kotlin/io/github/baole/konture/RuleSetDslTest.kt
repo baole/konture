@@ -4,6 +4,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+@file:Suppress("USELESS_IS_CHECK")
+
 package io.github.baole.konture
 
 import org.junit.jupiter.api.Assertions.assertDoesNotThrow

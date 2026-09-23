@@ -23,8 +23,8 @@ class RuleSetTest : RuleBuildersTestBase() {
             architectureRules("clean-architecture") {
                 description = "Enforces clean architecture boundaries"
                 classes {
-                    that().haveNameStartingWith("ClassA")
-                    should().resideInAPackage("com.example")
+                    that().nameStartsWith("ClassA")
+                    should().inPackage("com.example")
                 }
             }
 
@@ -37,12 +37,12 @@ class RuleSetTest : RuleBuildersTestBase() {
         val cleanArchitecture =
             architectureRules {
                 classes {
-                    that().haveNameStartingWith("ClassA")
-                    should().resideInAPackage("com.example")
+                    that().nameStartsWith("ClassA")
+                    should().inPackage("com.example")
                 }
                 files {
-                    that().haveNameEndingWith("ClassB.kt")
-                    should().resideInAPackage("com.example")
+                    that().nameEndsWith("ClassB.kt")
+                    should().inPackage("com.example")
                 }
                 noCycles()
             }
@@ -59,8 +59,8 @@ class RuleSetTest : RuleBuildersTestBase() {
         val passingRuleSet =
             architectureRules("passing-suite") {
                 classes {
-                    that().haveNameStartingWith("ClassA")
-                    should().resideInAPackage("com.example")
+                    that().nameStartsWith("ClassA")
+                    should().inPackage("com.example")
                 }
             }
 
@@ -78,14 +78,14 @@ class RuleSetTest : RuleBuildersTestBase() {
         // Define custom extension functions on RuleSetBuilder
         fun RuleSetBuilder.domainIsolation() {
             classes {
-                that().haveNameStartingWith("ClassA")
-                should().resideInAPackage("com.example")
+                that().nameStartsWith("ClassA")
+                should().inPackage("com.example")
             }
         }
 
         fun RuleSetBuilder.repositoryInterfaces() {
             classes {
-                allowEmpty().that().haveNameEndingWith("Repository")
+                allowEmpty().that().nameEndsWith("Repository")
                 should().beInterfaces()
             }
         }
@@ -109,8 +109,8 @@ class RuleSetTest : RuleBuildersTestBase() {
         val strictArchitecture =
             architectureRules("strict") {
                 classes {
-                    that().haveNameStartingWith("ClassA")
-                    should().resideInAPackage("com.nonexistent")
+                    that().nameStartsWith("ClassA")
+                    should().inPackage("com.nonexistent")
                 }
                 modules {
                     that().haveNamePath(":moduleA")
@@ -135,16 +135,16 @@ class RuleSetTest : RuleBuildersTestBase() {
         val ruleSetA =
             architectureRules("setA") {
                 classes {
-                    that().haveNameStartingWith("ClassA")
-                    should().resideInAPackage("com.example")
+                    that().nameStartsWith("ClassA")
+                    should().inPackage("com.example")
                 }
             }
 
         val ruleSetB =
             architectureRules("setB") {
                 files {
-                    that().haveNameEndingWith("ClassB.kt")
-                    should().resideInAPackage("com.example")
+                    that().nameEndsWith("ClassB.kt")
+                    should().inPackage("com.example")
                 }
             }
 
@@ -168,8 +168,8 @@ class RuleSetTest : RuleBuildersTestBase() {
         val innerRules =
             architectureRules {
                 classes {
-                    that().haveNameStartingWith("ClassA")
-                    should().resideInAPackage("com.example")
+                    that().nameStartsWith("ClassA")
+                    should().inPackage("com.example")
                 }
             }
 
@@ -177,8 +177,8 @@ class RuleSetTest : RuleBuildersTestBase() {
             architectureRules {
                 apply(innerRules)
                 files {
-                    that().haveNameEndingWith("ClassB.kt")
-                    should().resideInAPackage("com.example")
+                    that().nameEndsWith("ClassB.kt")
+                    should().inPackage("com.example")
                 }
             }
 
@@ -192,24 +192,24 @@ class RuleSetTest : RuleBuildersTestBase() {
         val ruleSet1 =
             architectureRules {
                 classes {
-                    that().haveNameStartingWith("ClassA")
-                    should().resideInAPackage("com.example")
+                    that().nameStartsWith("ClassA")
+                    should().inPackage("com.example")
                 }
             }
 
         val ruleSet2 =
             architectureRules {
                 files {
-                    that().haveNameEndingWith("ClassB.kt")
-                    should().resideInAPackage("com.example")
+                    that().nameEndsWith("ClassB.kt")
+                    should().inPackage("com.example")
                 }
             }
 
         val standaloneRule =
             rule("standalone-class-check") {
                 classes {
-                    that().haveNameStartingWith("ClassA")
-                    should().resideInAPackage("com.example")
+                    that().nameStartsWith("ClassA")
+                    should().inPackage("com.example")
                 }
             }
 
@@ -273,8 +273,8 @@ class RuleSetTest : RuleBuildersTestBase() {
         val ruleSet =
             Konture.architectureRules("konture-rules") {
                 classes {
-                    that().haveNameStartingWith("ClassA")
-                    should().resideInAPackage("com.example")
+                    that().nameStartsWith("ClassA")
+                    should().inPackage("com.example")
                 }
             }
 

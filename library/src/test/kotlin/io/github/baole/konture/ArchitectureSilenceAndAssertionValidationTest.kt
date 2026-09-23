@@ -1,5 +1,6 @@
 /*
- * Copyright 2026 Bao Le Duc
+ * Copyright 2026 The Konture Contributors
+ * Contributors: Bao Le Duc (@baole)
  * SPDX-License-Identifier: Apache-2.0
  */
 
@@ -14,7 +15,7 @@ class ArchitectureSilenceAndAssertionValidationTest : RuleBuildersTestBase() {
         val builder =
             ClassesRuleBuilder(projectGraph)
                 .that()
-                .haveNameStartingWith("ClassA")
+                .nameStartsWith("ClassA")
 
         val exception =
             assertThrows(AssertionError::class.java) {
@@ -28,7 +29,7 @@ class ArchitectureSilenceAndAssertionValidationTest : RuleBuildersTestBase() {
         val builder =
             ClassesRuleBuilder(projectGraph)
                 .that()
-                .haveNameStartingWith("NonExistentClass")
+                .nameStartsWith("NonExistentClass")
                 .should()
                 .beInterfaces()
 
@@ -45,7 +46,7 @@ class ArchitectureSilenceAndAssertionValidationTest : RuleBuildersTestBase() {
             ClassesRuleBuilder(projectGraph)
                 .allowEmpty()
                 .that()
-                .haveNameStartingWith("NonExistentClass")
+                .nameStartsWith("NonExistentClass")
                 .should()
                 .beInterfaces()
 
@@ -58,7 +59,7 @@ class ArchitectureSilenceAndAssertionValidationTest : RuleBuildersTestBase() {
         val builder =
             FilesRuleBuilder(projectGraph)
                 .that()
-                .haveNameEndingWith(".kt")
+                .nameEndsWith(".kt")
 
         val exception =
             assertThrows(AssertionError::class.java) {
@@ -72,7 +73,7 @@ class ArchitectureSilenceAndAssertionValidationTest : RuleBuildersTestBase() {
         val builder =
             FilesRuleBuilder(projectGraph)
                 .that()
-                .haveNameEndingWith(".nonexistent")
+                .nameEndsWith(".nonexistent")
                 .should()
                 .beDocumentedWithKDoc()
 
@@ -89,7 +90,7 @@ class ArchitectureSilenceAndAssertionValidationTest : RuleBuildersTestBase() {
             FilesRuleBuilder(projectGraph)
                 .allowEmpty()
                 .that()
-                .haveNameEndingWith(".nonexistent")
+                .nameEndsWith(".nonexistent")
                 .should()
                 .beDocumentedWithKDoc()
 

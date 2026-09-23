@@ -22,25 +22,25 @@ class ModuleFilteringTest {
     @Test
     fun `classes resideInAModule and notResideInAModule`() {
         Konture.classes {
-            that().resideInAPackage(pkg).and().resideInAModule(":konture-test")
-            should().haveName("ModuleFilteringClass")
+            that().inPackage(pkg).and().inModule(":konture-test")
+            should().named("ModuleFilteringClass")
         }
 
         Konture.classes {
-            that().resideInAPackage(pkg).and().notResideInAModule(":library")
-            should().haveName("ModuleFilteringClass")
+            that().inPackage(pkg).and().notInModule(":library")
+            should().named("ModuleFilteringClass")
         }
     }
 
     @Test
     fun `files resideInAModule and notResideInAModule`() {
         Konture.files {
-            that().resideInAPackage(pkg).and().resideInAModule(":konture-test")
+            that().inPackage(pkg).and().inModule(":konture-test")
             should().containClass(ModuleFilteringClass::class)
         }
 
         Konture.files {
-            that().resideInAPackage(pkg).and().notResideInAModule(":library")
+            that().inPackage(pkg).and().notInModule(":library")
             should().containClass(ModuleFilteringClass::class)
         }
     }
@@ -75,12 +75,12 @@ class ModuleFilteringTest {
     fun `modules resideInAModule and resideInModules`() {
         Konture.modules {
             that().resideInAModule(":konture-test")
-            should().onlyDependOnModules(":core")
+            should().onlyDependOn(":core")
         }
 
         Konture.modules {
             that().resideInModules(listOf(":konture-test", ":library"))
-            should().onlyDependOnModules(":core")
+            should().onlyDependOn(":core")
         }
     }
 
@@ -88,7 +88,7 @@ class ModuleFilteringTest {
     fun `slices resideInModule`() {
         Konture.slices {
             matching("io.github.baole.konture.tests.(*)..")
-            that().haveName("modulefiltering").and().resideInModule(":konture-test")
+            that().haveName("modulefiltering").and().resideInAModule(":konture-test")
             should().containClasses()
         }
     }

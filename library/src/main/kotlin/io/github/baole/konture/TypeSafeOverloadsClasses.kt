@@ -51,6 +51,10 @@ public infix fun ClassesThat.haveAnnotationOf(annotation: KClass<out Annotation>
 @Deprecated("Use annotatedWith instead.", ReplaceWith("annotatedWith<T>()"))
 public inline fun <reified T : Annotation> ClassesThat.haveAnnotationOf(): ClassesRuleBuilder = annotatedWith<T>()
 
+/** Legacy areAnnotatedWith method. */
+@Deprecated("Use annotatedWith instead.", ReplaceWith("annotatedWith<T>()"))
+public inline fun <reified T : Annotation> ClassesThat.areAnnotatedWith(): ClassesRuleBuilder = annotatedWith<T>()
+
 /** Legacy haveAllAnnotationsOf method. */
 @Deprecated("Use annotatedWithAllOf instead.", ReplaceWith("annotatedWithAllOf(*annotations)"))
 public fun ClassesThat.haveAllAnnotationsOf(vararg annotations: KClass<out Annotation>): ClassesRuleBuilder =

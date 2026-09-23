@@ -26,7 +26,7 @@ class DeclarativeEntryPointsTest {
     @Test
     fun `classes entry point non-violation`() {
         Konture.classes()
-            .that().haveName("DeclarativeClass")
+            .that().named("DeclarativeClass")
             .should().beAssignableTo<Serializable>()
             .check()
     }
@@ -35,7 +35,7 @@ class DeclarativeEntryPointsTest {
     fun `classes entry point violation`() {
         val error = violationsFound {
             Konture.classes()
-                .that().haveName("DeclarativeClass")
+                .that().named("DeclarativeClass")
                 .should().beInterfaces()
                 .check()
         }
@@ -46,7 +46,7 @@ class DeclarativeEntryPointsTest {
     @Test
     fun `files entry point non-violation`() {
         Konture.files()
-            .that().haveNameMatching("DeclarativeTargets.kt")
+            .that().nameMatches("DeclarativeTargets.kt")
             .should().containClass(DeclarativeClass::class)
             .check()
     }
@@ -55,7 +55,7 @@ class DeclarativeEntryPointsTest {
     fun `files entry point violation`() {
         val error = violationsFound {
             Konture.files()
-                .that().haveNameMatching("DeclarativeTargets.kt")
+                .that().nameMatches("DeclarativeTargets.kt")
                 .should().notHaveImportOf("java.io.Serializable")
                 .check()
         }
@@ -107,7 +107,7 @@ class DeclarativeEntryPointsTest {
     fun `modules entry point non-violation`() {
         Konture.modules()
             .that().haveNamePath(":library")
-            .should().onlyDependOnModules(":core")
+            .should().onlyDependOn(":core")
             .check()
     }
 
@@ -116,7 +116,7 @@ class DeclarativeEntryPointsTest {
         val error = violationsFound {
             Konture.modules()
                 .that().haveNamePath(":library")
-                .should().notDependOnModule(":core")
+                .should().mustNotDependOn(":core")
                 .check()
         }
         assertNotNull(error)

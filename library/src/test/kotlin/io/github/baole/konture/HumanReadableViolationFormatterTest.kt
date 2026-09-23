@@ -152,7 +152,7 @@ class HumanReadableViolationFormatterTest : RuleBuildersTestBase() {
             assertThrows(AssertionError::class.java) {
                 rule("test.architecture.rule") {
                     classes {
-                        that().haveNameStartingWith("ClassA")
+                        that().nameStartsWith("ClassA")
                             .should().beInterfaces()
                     }
                 }.check()

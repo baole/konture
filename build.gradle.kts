@@ -4,8 +4,10 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-val applyPlugin = gradle.extensions.get("applyPlugin") as Boolean ||
-    System.getProperty("konture.applyPluginInternal").toBoolean()
+val applyPlugin = providers.systemProperty("idea.active").orNull.toBoolean() ||
+    providers.systemProperty("idea.sync.active").orNull.toBoolean() ||
+    providers.systemProperty("konture.applyPlugin").orNull.toBoolean() ||
+    providers.systemProperty("konture.applyPluginInternal").orNull.toBoolean()
 
 plugins {
     id("konture.root")
@@ -14,7 +16,6 @@ plugins {
     alias(libs.plugins.dokka)
     alias(libs.plugins.detekt) apply false
     alias(libs.plugins.ktlint) apply false
-    alias(libs.plugins.spotless) apply false
     alias(libs.plugins.nmcp)
     `maven-publish`
 }

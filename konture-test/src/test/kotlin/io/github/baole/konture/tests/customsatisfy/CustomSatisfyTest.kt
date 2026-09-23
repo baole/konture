@@ -25,7 +25,7 @@ class CustomSatisfyTest {
     @Test
     fun `classes satisfy on that and should`() {
         Konture.classes {
-            that().resideInAPackage(pkg).and().satisfy { it.name == "CustomSatisfyClass" }
+            that().inPackage(pkg).and().satisfy { it.name == "CustomSatisfyClass" }
             should().satisfy { cls, _ -> cls.name == "CustomSatisfyClass" }
         }
     }
@@ -34,7 +34,7 @@ class CustomSatisfyTest {
     fun `classes satisfy with structured context and rule metadata`() {
         var evaluatedCount = 0
         Konture.classes {
-            that().resideInAPackage(pkg)
+            that().inPackage(pkg)
             should().satisfy(
                 id = "rule.class.structured",
                 description = "Classes must pass structured validation",
@@ -51,7 +51,7 @@ class CustomSatisfyTest {
     @Test
     fun `files satisfy on that and should`() {
         Konture.files {
-            that().resideInAPackage(pkg).and().satisfy { it.declaration.name == "SatisfyTargets.kt" }
+            that().inPackage(pkg).and().satisfy { it.declaration.name == "SatisfyTargets.kt" }
             should().satisfy { file, _ -> file.declaration.name == "SatisfyTargets.kt" }
         }
     }
@@ -60,7 +60,7 @@ class CustomSatisfyTest {
     fun `files satisfy with structured context`() {
         var evaluated = false
         Konture.files {
-            that().resideInAPackage(pkg)
+            that().inPackage(pkg)
             should().satisfy(
                 id = "rule.file.structured",
                 description = "Files structured context check",

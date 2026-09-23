@@ -24,7 +24,7 @@ class SuppressionArchitectureTest {
         Konture.architecture {
             rule("classes.rule") {
                 classes {
-                    that().haveName("InSourceSuppressedClass")
+                    that().named("InSourceSuppressedClass")
                     should().beInterfaces()
                 }
             }
@@ -36,7 +36,7 @@ class SuppressionArchitectureTest {
         Konture.architecture {
             rule("custom.domain.rule") {
                 classes {
-                    that().haveName("WildcardSuppressedClass")
+                    that().named("WildcardSuppressedClass")
                     should().beInterfaces()
                 }
             }
@@ -48,7 +48,7 @@ class SuppressionArchitectureTest {
         Konture.architecture {
             rule("classes.rule") {
                 classes {
-                    that().haveName("JavaAnnotationSuppressedClass")
+                    that().named("JavaAnnotationSuppressedClass")
                     should().beInterfaces()
                 }
             }
@@ -60,7 +60,7 @@ class SuppressionArchitectureTest {
         Konture.architecture {
             rule("classes.rule") {
                 classes {
-                    that().haveName("FileLevelSuppressedClass")
+                    that().named("FileLevelSuppressedClass")
                     should().beInterfaces()
                 }
             }
@@ -94,7 +94,7 @@ class SuppressionArchitectureTest {
     @Test
     fun `programmatic class suppression with mandatory reason succeeds`() {
         Konture.classes {
-            that().haveName("ProgrammaticTargetClass")
+            that().named("ProgrammaticTargetClass")
             suppress {
                 classFqName(
                     "io.github.baole.konture.tests.suppression.ProgrammaticTargetClass",
@@ -130,7 +130,7 @@ class SuppressionArchitectureTest {
     @Test
     fun `programmatic file suppression with reason succeeds`() {
         Konture.files {
-            that().haveName("ProgrammaticSuppressionTargets.kt")
+            that().named("ProgrammaticSuppressionTargets.kt")
             suppress {
                 file("ProgrammaticSuppressionTargets.kt", reason = "Special test fixture file")
             }
@@ -145,7 +145,7 @@ class SuppressionArchitectureTest {
             suppress {
                 module(":konture-test", reason = "Allow konture-test module to depend on core")
             }
-            should().notDependOnModule(":core")
+            should().mustNotDependOn(":core")
         }
     }
 
@@ -165,7 +165,7 @@ class SuppressionArchitectureTest {
     fun `architecture batch block with mixed suppressions passes`() {
         Konture.architecture {
             classes {
-                that().haveName("ProgrammaticTargetClass")
+                that().named("ProgrammaticTargetClass")
                 suppress {
                     classes(reason = "Batch arch test exemption") { it.name == "ProgrammaticTargetClass" }
                 }
@@ -194,7 +194,7 @@ class SuppressionArchitectureTest {
     fun `unsuppressed target fails check as expected`() {
         assertThrows(AssertionError::class.java) {
             Konture.classes {
-                that().haveName("UnsuppressedTargetClass")
+                that().named("UnsuppressedTargetClass")
                 should().beInterfaces()
             }
         }

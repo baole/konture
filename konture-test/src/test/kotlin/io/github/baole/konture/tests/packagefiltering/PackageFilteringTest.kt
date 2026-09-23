@@ -10,6 +10,7 @@ import io.github.baole.konture.Konture
 import io.github.baole.konture.classes
 import io.github.baole.konture.files
 import io.github.baole.konture.functions
+import io.github.baole.konture.inPackageOf
 import io.github.baole.konture.modules
 import io.github.baole.konture.properties
 import io.github.baole.konture.resideInPackageOf
@@ -23,30 +24,30 @@ class PackageFilteringTest {
     @Test
     fun `classes resideInAPackage and resideInPackageOf`() {
         Konture.classes {
-            that().resideInAPackage(pkg)
-            should().haveName("PackageFilteringClass")
+            that().inPackage(pkg)
+            should().named("PackageFilteringClass")
         }
 
         Konture.classes {
-            that().resideInPackageOf(PackageFilteringClass::class)
-            should().haveName("PackageFilteringClass")
+            that().inPackageOf(PackageFilteringClass::class)
+            should().named("PackageFilteringClass")
         }
 
         Konture.classes {
-            that().resideInAPackage(pkg).and().notResideInAPackage("io.github.baole.konture.tests.declarative")
-            should().haveName("PackageFilteringClass")
+            that().inPackage(pkg).and().notInPackage("io.github.baole.konture.tests.declarative")
+            should().named("PackageFilteringClass")
         }
     }
 
     @Test
     fun `files resideInAPackage and resideInPackageOf`() {
         Konture.files {
-            that().resideInAPackage(pkg)
+            that().inPackage(pkg)
             should().containClass(PackageFilteringClass::class)
         }
 
         Konture.files {
-            that().resideInPackageOf(PackageFilteringClass::class)
+            that().inPackageOf(PackageFilteringClass::class)
             should().containClass(PackageFilteringClass::class)
         }
     }
@@ -80,13 +81,13 @@ class PackageFilteringTest {
     @Test
     fun `modules containPackage and resideInAPackage`() {
         Konture.modules {
-            that().containPackage(pkg)
-            should().onlyDependOnModules(":core")
+            that().resideInAPackage(pkg)
+            should().onlyDependOn(":core")
         }
 
         Konture.modules {
             that().resideInAPackage(pkg)
-            should().onlyDependOnModules(":core")
+            should().onlyDependOn(":core")
         }
     }
 
