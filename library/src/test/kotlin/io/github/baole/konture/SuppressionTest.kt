@@ -84,7 +84,7 @@ class SuppressionTest : RuleBuildersTestBase() {
         assertThrows(AssertionError::class.java) {
             ClassesRuleBuilder(graph)
                 .that()
-                .haveNameStartingWith("BadClass")
+                .nameStartsWith("BadClass")
                 .should()
                 .beInterfaces()
                 .check()
@@ -92,7 +92,7 @@ class SuppressionTest : RuleBuildersTestBase() {
 
         ClassesRuleBuilder(graph)
             .that()
-            .haveNameStartingWith("BadClass")
+            .nameStartsWith("BadClass")
             .suppress {
                 classFqName("com.example.BadClass", reason = "Acceptable deviation until v2.0")
                 classes(reason = "Predicate match") { it.name.startsWith("Bad") }
@@ -266,12 +266,12 @@ class SuppressionTest : RuleBuildersTestBase() {
 
         FilesRuleBuilder(graph)
             .that()
-            .haveNameEndingWith(".kt")
+            .nameEndsWith(".kt")
             .suppress {
                 file("TestClass.kt", reason = "Exempt file")
             }
             .should()
-            .resideInPackage("com.other")
+            .inPackage("com.other")
             .check()
 
         ModulesRuleBuilder(graph)
@@ -477,7 +477,7 @@ class SuppressionTest : RuleBuildersTestBase() {
 
         ClassesRuleBuilder(graph)
             .that()
-            .haveName("Inner")
+            .named("Inner")
             .should()
             .beInterfaces()
             .check()
@@ -616,7 +616,7 @@ class SuppressionTest : RuleBuildersTestBase() {
             BaselineManager.resetForTest()
             ClassesRuleBuilder(graph)
                 .that()
-                .resideInAPackage("com.example")
+                .inPackage("com.example")
                 .should()
                 .beInterfaces()
                 .check()

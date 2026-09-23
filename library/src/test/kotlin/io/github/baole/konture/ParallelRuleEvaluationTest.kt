@@ -38,8 +38,8 @@ class ParallelRuleEvaluationTest : RuleBuildersTestBase() {
 
         Konture.architecture {
             classes {
-                that().haveNameStartingWith("ClassA")
-                should().resideInAPackage("com.example")
+                that().nameStartsWith("ClassA")
+                should().inPackage("com.example")
             }
             modules {
                 that().haveNamePath(":moduleA")
@@ -54,16 +54,16 @@ class ParallelRuleEvaluationTest : RuleBuildersTestBase() {
 
         Konture.architecture {
             classes {
-                that().haveNameStartingWith("ClassA")
-                should().resideInAPackage("com.example")
+                that().nameStartsWith("ClassA")
+                should().inPackage("com.example")
             }
             modules {
                 that().haveNamePath(":moduleA")
                 should().satisfy { module -> module.appliedPlugins.contains("kotlin") }
             }
             files {
-                that().haveNameEndingWith("ClassB.kt")
-                should().resideInAPackage("com.example")
+                that().nameEndsWith("ClassB.kt")
+                should().inPackage("com.example")
             }
         }
     }
@@ -77,8 +77,8 @@ class ParallelRuleEvaluationTest : RuleBuildersTestBase() {
                 Konture.architecture {
                     // Suite 1: classes fails
                     classes {
-                        that().haveNameStartingWith("ClassA")
-                        should().resideInAPackage("com.wrong")
+                        that().nameStartsWith("ClassA")
+                        should().inPackage("com.wrong")
                     }
                     // Suite 2: modules fails
                     modules {
@@ -87,8 +87,8 @@ class ParallelRuleEvaluationTest : RuleBuildersTestBase() {
                     }
                     // Suite 3: files fails
                     files {
-                        that().haveNameEndingWith("ClassB.kt")
-                        should().resideInAPackage("com.wrong")
+                        that().nameEndsWith("ClassB.kt")
+                        should().inPackage("com.wrong")
                     }
                 }
             }
@@ -118,7 +118,7 @@ class ParallelRuleEvaluationTest : RuleBuildersTestBase() {
 
         Konture.architecture {
             classes {
-                that().haveNameStartingWith("ClassA")
+                that().nameStartsWith("ClassA")
                 should().satisfy {
                     observedSeverities["classes"] = Konture.failOnSeverity
                     observedBaselinePaths["classes"] = Konture.baselinePath
@@ -134,7 +134,7 @@ class ParallelRuleEvaluationTest : RuleBuildersTestBase() {
                 }
             }
             files {
-                that().haveNameEndingWith("ClassB.kt")
+                that().nameEndsWith("ClassB.kt")
                 should().satisfy {
                     observedSeverities["files"] = Konture.failOnSeverity
                     observedBaselinePaths["files"] = Konture.baselinePath
@@ -163,7 +163,7 @@ class ParallelRuleEvaluationTest : RuleBuildersTestBase() {
         Konture.architecture {
             repeat(10) { idx ->
                 classes {
-                    that().haveNameStartingWith("ClassA")
+                    that().nameStartsWith("ClassA")
                     should().satisfy {
                         val current = activeWorkers.incrementAndGet()
                         maxSimultaneousWorkers.updateAndGet { prev -> maxOf(prev, current) }
@@ -194,7 +194,7 @@ class ParallelRuleEvaluationTest : RuleBuildersTestBase() {
 
         Konture.architecture {
             classes {
-                that().haveNameStartingWith("ClassA")
+                that().nameStartsWith("ClassA")
                 should().satisfy {
                     executingThreads.add(Thread.currentThread().name)
                     if (io.github.baole.konture.impl.KontureRuntimeStateProvider.currentState.parallel) {
@@ -234,7 +234,7 @@ class ParallelRuleEvaluationTest : RuleBuildersTestBase() {
             assertThrows(IllegalStateException::class.java) {
                 Konture.architecture {
                     classes {
-                        that().haveNameStartingWith("ClassA")
+                        that().nameStartsWith("ClassA")
                         should().satisfy {
                             throw IllegalStateException("Simulated unexpected predicate failure")
                         }

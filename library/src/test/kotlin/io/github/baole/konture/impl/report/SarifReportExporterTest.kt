@@ -141,7 +141,7 @@ class SarifReportExporterTest {
         assertEquals("Access to internal engine forbidden", r0.message.text)
         assertNull(r0.suppressions)
         assertNotNull(r0.locations)
-        val loc = r0.locations!!.first().physicalLocation
+        val loc = r0.locations.first().physicalLocation
         assertEquals("feature/src/Feature.kt", loc.artifactLocation.uri)
         assertEquals("%SRCROOT%", loc.artifactLocation.uriBaseId)
         assertEquals(25, loc.region?.startLine)

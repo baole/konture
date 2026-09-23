@@ -117,13 +117,13 @@ internal class KontureExtensionsTest {
 
         // Block-based DSLs
         konture.modules {
-            that().haveNamePath(":submodule").should().notDependOnModule(":core")
+            that().haveNamePath(":submodule").should().mustNotDependOn(":core")
         }
         konture.classes {
-            that().resideInAPackage("com.example").should().resideInAPackage("com.example")
+            that().inPackage("com.example").should().inPackage("com.example")
         }
         konture.classes(SourceSets.production()) {
-            that().resideInAPackage("com.example").should().resideInAPackage("com.example")
+            that().inPackage("com.example").should().inPackage("com.example")
         }
         konture.functions {
             that().resideInAPackage("com.example").should().resideInAPackage("com.example")
@@ -138,10 +138,10 @@ internal class KontureExtensionsTest {
             that().resideInAPackage("com.example").should().resideInAPackage("com.example")
         }
         konture.files {
-            that().resideInAPackage("com.example").should().resideInAPackage("com.example")
+            that().inPackage("com.example").should().inPackage("com.example")
         }
         konture.files(SourceSets.production()) {
-            that().resideInAPackage("com.example").should().resideInAPackage("com.example")
+            that().inPackage("com.example").should().inPackage("com.example")
         }
         konture.slices {
             allowEmpty().matching("com.example.(*)..").should().beFreeOfCycles()
@@ -151,7 +151,7 @@ internal class KontureExtensionsTest {
         }
 
         konture.architecture {
-            classes { that().resideInAPackage("com.example").should().resideInAPackage("com.example") }
+            classes { that().inPackage("com.example").should().inPackage("com.example") }
         }
 
         konture.layered {

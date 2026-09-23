@@ -22,20 +22,20 @@ class CompositePredicatesTest {
     @Test
     fun `classes composite predicates anyOf, allOf, noneOf`() {
         Konture.classes {
-            that().anyOf({ resideInAPackage(pkg).and().haveName("CompositeClassA") }, { resideInAPackage(pkg).and().haveName("CompositeClassB") })
-            should().allOf({ haveNameMatching("CompositeClass*") })
+            that().anyOf({ inPackage(pkg).and().named("CompositeClassA") }, { inPackage(pkg).and().named("CompositeClassB") })
+            should().allOf({ nameMatches("CompositeClass*") })
         }
 
         Konture.classes {
-            that().resideInAPackage(pkg)
-            should().noneOf({ haveName("NonExistentClass") })
+            that().inPackage(pkg)
+            should().noneOf({ named("NonExistentClass") })
         }
     }
 
     @Test
     fun `files composite predicates anyOf, allOf, noneOf`() {
         Konture.files {
-            that().allOf({ resideInAPackage(pkg) }, { haveName("CompositeTargets.kt") })
+            that().allOf({ inPackage(pkg) }, { named("CompositeTargets.kt") })
             should().noneOf({ containClass(CompositePredicatesTest::class) })
         }
     }

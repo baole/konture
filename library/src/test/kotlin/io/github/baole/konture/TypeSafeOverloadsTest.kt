@@ -4,6 +4,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+@file:Suppress("DEPRECATION")
+
 package io.github.baole.konture
 
 import org.junit.jupiter.api.Assertions.assertThrows

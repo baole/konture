@@ -19,7 +19,7 @@ class StructuredSatisfyTest : RuleBuildersTestBase() {
         val error =
             assertThrows(AssertionError::class.java) {
                 ClassesRuleBuilder(projectGraph)
-                    .that().resideInAPackage("com.example")
+                    .that().inPackage("com.example")
                     .should().satisfy(
                         id = "class.naming.suffix",
                         description = "Classes in com.example must end with Z",
@@ -44,7 +44,7 @@ class StructuredSatisfyTest : RuleBuildersTestBase() {
         val error =
             assertThrows(AssertionError::class.java) {
                 ClassesRuleBuilder(projectGraph)
-                    .that().haveName("ClassA")
+                    .that().named("ClassA")
                     .should().satisfy(
                         id = "class.custom.context",
                         description = "Custom context check",
@@ -208,7 +208,7 @@ class StructuredSatisfyTest : RuleBuildersTestBase() {
         val error =
             assertThrows(AssertionError::class.java) {
                 ClassesRuleBuilder(projectGraph)
-                    .that().haveName("ClassA")
+                    .that().named("ClassA")
                     .should().satisfy(
                         id = "custom.id.only",
                         description = null,
@@ -225,7 +225,7 @@ class StructuredSatisfyTest : RuleBuildersTestBase() {
         val error =
             assertThrows(AssertionError::class.java) {
                 ClassesRuleBuilder(projectGraph)
-                    .that().haveName("ClassA")
+                    .that().named("ClassA")
                     .should().satisfy(
                         id = "custom.id",
                         description = "Custom description text",
@@ -243,7 +243,7 @@ class StructuredSatisfyTest : RuleBuildersTestBase() {
             assertThrows(AssertionError::class.java) {
                 val builder =
                     ClassesRuleBuilder(projectGraph)
-                        .that().haveName("ClassA")
+                        .that().named("ClassA")
                         .should() satisfy "Must satisfy infix custom condition"
                 builder.check()
             }

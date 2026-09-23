@@ -38,8 +38,8 @@ class RuleMetadataTest : RuleBuildersTestBase() {
                 tag("naming", "core")
 
                 classes {
-                    that().resideInAPackage("com.example")
-                    should().haveNameEndingWith("Service")
+                    that().inPackage("com.example")
+                    should().nameEndsWith("Service")
                 }
             }
 
@@ -62,7 +62,7 @@ class RuleMetadataTest : RuleBuildersTestBase() {
                     tag("documentation")
 
                     classes {
-                        that().resideInAPackage("com.other")
+                        that().inPackage("com.other")
                         should().beInterfaces()
                     }
                 }
@@ -80,7 +80,7 @@ class RuleMetadataTest : RuleBuildersTestBase() {
             rule("verify.test.rule") {
                 description = "Rule testing verify alias"
                 classes {
-                    that().resideInAPackage("com.example").and().areInterfaces()
+                    that().inPackage("com.example").and().areInterfaces()
                     should().beInterfaces()
                 }
             }
@@ -104,9 +104,9 @@ class RuleMetadataTest : RuleBuildersTestBase() {
                 description = "Testing all sub-rule builder registration"
 
                 files {
-                    that().resideInAPackage("non.existent")
+                    that().inPackage("non.existent")
                     allowEmpty()
-                    should().beAnnotatedWith(Deprecated::class)
+                    should().annotatedWith(Deprecated::class)
                     filesExecuted = true
                 }
 
@@ -178,15 +178,15 @@ class RuleMetadataTest : RuleBuildersTestBase() {
         val ruleDef =
             rule("sourceset.overloads.rule") {
                 classes(prodSelector) {
-                    that().resideInAPackage("non.existent")
+                    that().inPackage("non.existent")
                     allowEmpty()
                     should().beInterfaces()
                     classesSsExecuted = true
                 }
                 files(prodSelector) {
-                    that().resideInAPackage("non.existent")
+                    that().inPackage("non.existent")
                     allowEmpty()
-                    should().beAnnotatedWith(Deprecated::class)
+                    should().annotatedWith(Deprecated::class)
                     filesSsExecuted = true
                 }
                 functions(prodSelector) {

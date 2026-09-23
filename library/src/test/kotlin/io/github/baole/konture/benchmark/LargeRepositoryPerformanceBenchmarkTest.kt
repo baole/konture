@@ -79,31 +79,31 @@ class LargeRepositoryPerformanceBenchmarkTest {
 
             // Rule 6: Class naming convention for Services
             classes {
-                that().haveNameEndingWith("Service")
-                should().resideInAPackage("com.example..")
+                that().nameEndsWith("Service")
+                should().inPackage("com.example..")
             }
 
             // Rule 7: Class naming convention for Models
             classes {
-                that().haveNameEndingWith("Model")
-                should().resideInAPackage("com.example..")
+                that().nameEndsWith("Model")
+                should().inPackage("com.example..")
             }
 
             // Rule 8: File naming convention
             files {
-                that().haveNameEndingWith("Service.kt")
-                should().resideInAPackage("com.example..")
+                that().nameEndsWith("Service.kt")
+                should().inPackage("com.example..")
             }
 
             // Rule 9: File naming convention for models
             files {
-                that().haveNameEndingWith("Model.kt")
-                should().resideInAPackage("com.example..")
+                that().nameEndsWith("Model.kt")
+                should().inPackage("com.example..")
             }
 
             // Rule 10: General package structure assertion
             classes {
-                that().resideInAPackage("com.example..")
+                that().inPackage("com.example..")
                 should().satisfy { true }
             }
         }

@@ -1,5 +1,6 @@
 /*
- * Copyright 2026 Bao Le Duc
+ * Copyright 2026 The Konture Contributors
+ * Contributors: Bao Le Duc (@baole)
  * SPDX-License-Identifier: Apache-2.0
  */
 
@@ -173,7 +174,7 @@ class LayeredArchitectureBuilderTest : RuleBuildersTestBase() {
         assertDoesNotThrow {
             Konture.classes {
                 allowEmpty()
-                that().haveNameMatching("*")
+                that().nameMatches("*")
                 should().satisfy { true }
             }
         }
@@ -197,7 +198,7 @@ class LayeredArchitectureBuilderTest : RuleBuildersTestBase() {
         assertDoesNotThrow {
             Konture.files {
                 allowEmpty()
-                that().haveNameMatching("*")
+                that().nameMatches("*")
                 should().satisfy { true }
             }
         }
@@ -211,7 +212,7 @@ class LayeredArchitectureBuilderTest : RuleBuildersTestBase() {
                 }
                 classes {
                     allowEmpty()
-                    that().haveNameMatching("*")
+                    that().nameMatches("*")
                     should().satisfy { true }
                 }
                 functions {
@@ -226,7 +227,7 @@ class LayeredArchitectureBuilderTest : RuleBuildersTestBase() {
                 }
                 files {
                     allowEmpty()
-                    that().haveNameMatching("*")
+                    that().nameMatches("*")
                     should().satisfy { true }
                 }
                 layeredArchitecture {

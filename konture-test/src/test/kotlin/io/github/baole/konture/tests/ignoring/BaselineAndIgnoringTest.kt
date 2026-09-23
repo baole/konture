@@ -4,6 +4,14 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+@file:Suppress("DEPRECATION")
+
+/*
+ * Copyright 2026 The Konture Contributors
+ * Contributors: Bao Le Duc (@baole)
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 package io.github.baole.konture.tests.ignoring
 
 import io.github.baole.konture.Konture
@@ -20,7 +28,7 @@ class BaselineAndIgnoringTest {
     @Test
     fun `classes ignoreFailuresIn suppresses violations for ignored class`() {
         Konture.classes {
-            that().haveName("IgnoringClassA")
+            that().named("IgnoringClassA")
             ignoreFailuresIn("IgnoringClassA")
             should().beInterfaces()
         }
@@ -29,7 +37,7 @@ class BaselineAndIgnoringTest {
     @Test
     fun `files ignoreFailuresIn suppresses violations for ignored file`() {
         Konture.files {
-            that().haveName("IgnoringTargets.kt")
+            that().named("IgnoringTargets.kt")
             ignoreFailuresIn("IgnoringTargets.kt")
             should().notHaveImportOf("java.io.Serializable")
         }
@@ -58,7 +66,7 @@ class BaselineAndIgnoringTest {
         Konture.modules {
             that().haveNamePath(":konture-test")
             ignoreFailuresIn(":konture-test")
-            should().notDependOnModule(":core")
+            should().mustNotDependOn(":core")
         }
     }
 

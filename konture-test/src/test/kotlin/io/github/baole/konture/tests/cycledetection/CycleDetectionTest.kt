@@ -20,7 +20,7 @@ class CycleDetectionTest {
     @Test
     fun `classes beFreeOfCycles`() {
         Konture.classes {
-            that().resideInAPackage(pkg)
+            that().inPackage(pkg)
             should().beFreeOfCycles()
         }
     }
@@ -28,7 +28,7 @@ class CycleDetectionTest {
     @Test
     fun `files beFreeOfCycles`() {
         Konture.files {
-            that().resideInAPackage(pkg)
+            that().inPackage(pkg)
             should().beFreeOfCycles()
         }
     }

@@ -24,17 +24,17 @@ class VisibilityAndModifierTest {
     @Test
     fun `classes visibility and modifier controls`() {
         Konture.classes {
-            that().resideInAPackage(pkg).and().haveVisibility(Visibility.PUBLIC)
+            that().inPackage(pkg).and().haveVisibility(Visibility.PUBLIC)
             should().bePublic().andShould().beData()
         }
 
         Konture.classes {
-            that().resideInAPackage(pkg).and().haveVisibility(Visibility.INTERNAL)
+            that().inPackage(pkg).and().haveVisibility(Visibility.INTERNAL)
             should().beInternal().andShould().beSealed()
         }
 
         Konture.classes {
-            that().resideInAPackage(pkg).and().haveModifier(Modifier.DATA)
+            that().inPackage(pkg).and().haveModifier(Modifier.DATA)
             should().beData()
         }
     }
@@ -73,7 +73,7 @@ class VisibilityAndModifierTest {
     @Test
     fun `files contain visibility assertions`() {
         Konture.files {
-            that().resideInAPackage(pkg)
+            that().inPackage(pkg)
             should().containOnlyClassesWithVisibility(Visibility.PUBLIC, Visibility.INTERNAL)
                 .andShould().containOnlyFunctionsWithVisibility(Visibility.PUBLIC, Visibility.INTERNAL)
                 .andShould().containOnlyPropertiesWithVisibility(Visibility.PUBLIC, Visibility.INTERNAL)

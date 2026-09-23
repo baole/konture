@@ -8,6 +8,7 @@ package io.github.baole.konture.tests.autochecking
 
 import io.github.baole.konture.Konture
 import io.github.baole.konture.SourceSets
+import io.github.baole.konture.annotatedWith
 import io.github.baole.konture.beAssignableTo
 import io.github.baole.konture.classes
 import io.github.baole.konture.files
@@ -44,13 +45,13 @@ class AutoCheckingDslTest {
     fun `classes block DSL with sourceSets overload`() {
         Konture.classes(SourceSets.named("main")) {
             that().named("AutoCheckingClass")
-            should().haveAnnotationOf<AutoCheckingMarker>()
+            should().annotatedWith<AutoCheckingMarker>()
         }
 
         val error = violationsFound {
             Konture.classes(SourceSets.named("nonexistent")) {
                 that().named("AutoCheckingClass")
-                should().haveAnnotationOf<AutoCheckingMarker>()
+                should().annotatedWith<AutoCheckingMarker>()
             }
         }
         assertNotNull(error)
@@ -59,13 +60,13 @@ class AutoCheckingDslTest {
     @Test
     fun `files block DSL non-violation and violation`() {
         Konture.files {
-            that().haveNameMatching("AutoCheckingTargets.kt")
+            that().nameMatches("AutoCheckingTargets.kt")
             should().containClass(AutoCheckingClass::class)
         }
 
         val error = violationsFound {
             Konture.files {
-                that().haveNameMatching("AutoCheckingTargets.kt")
+                that().nameMatches("AutoCheckingTargets.kt")
                 should().notHaveImportOf("java.io.Serializable")
             }
         }
@@ -75,13 +76,13 @@ class AutoCheckingDslTest {
     @Test
     fun `files block DSL with sourceSets overload`() {
         Konture.files(SourceSets.named("main")) {
-            that().haveNameMatching("AutoCheckingTargets.kt")
+            that().nameMatches("AutoCheckingTargets.kt")
             should().containClass(AutoCheckingClass::class)
         }
 
         val error = violationsFound {
             Konture.files(SourceSets.named("nonexistent")) {
-                that().haveNameMatching("AutoCheckingTargets.kt")
+                that().nameMatches("AutoCheckingTargets.kt")
                 should().containClass(AutoCheckingClass::class)
             }
         }
@@ -156,13 +157,13 @@ class AutoCheckingDslTest {
     fun `modules block DSL non-violation and violation`() {
         Konture.modules {
             that().haveNamePath(":library")
-            should().onlyDependOnModules(":core")
+            should().onlyDependOn(":core")
         }
 
         val error = violationsFound {
             Konture.modules {
                 that().haveNamePath(":library")
-                should().notDependOnModule(":core")
+                should().mustNotDependOn(":core")
             }
         }
         assertNotNull(error)
@@ -172,13 +173,13 @@ class AutoCheckingDslTest {
     fun `modules block DSL with sourceSets overload`() {
         Konture.modules(SourceSets.named("main")) {
             that().haveNamePath(":library")
-            should().onlyDependOnModules(":core")
+            should().onlyDependOn(":core")
         }
 
         val error = violationsFound {
             Konture.modules(SourceSets.named("main")) {
                 that().haveNamePath(":library")
-                should().notDependOnModule(":core")
+                should().mustNotDependOn(":core")
             }
         }
         assertNotNull(error)

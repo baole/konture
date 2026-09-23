@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-@file:Suppress("LongMethod")
+@file:Suppress("LongMethod", "DEPRECATION")
 
 package io.github.baole.konture
 

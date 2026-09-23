@@ -7,10 +7,10 @@
 package io.github.baole.konture.tests.namepathfiltering
 
 import io.github.baole.konture.Konture
+import io.github.baole.konture.annotatedWith
 import io.github.baole.konture.classes
 import io.github.baole.konture.files
 import io.github.baole.konture.functions
-import io.github.baole.konture.haveAnnotationOf
 import io.github.baole.konture.haveAnnotationOfType
 import io.github.baole.konture.modules
 import io.github.baole.konture.properties
@@ -22,30 +22,30 @@ class NameAndPathFilteringTest {
     @Test
     fun `classes name filtering via haveName, haveSimpleName, haveNameMatching`() {
         Konture.classes {
-            that().haveName("io.github.baole.konture.tests.namepathfiltering.TargetNameClass")
-            should().haveAnnotationOf<NamePathMarker>()
+            that().named("io.github.baole.konture.tests.namepathfiltering.TargetNameClass")
+            should().annotatedWith<NamePathMarker>()
         }
 
         Konture.classes {
-            that().haveSimpleName("TargetNameClass")
-            should().haveAnnotationOf<NamePathMarker>()
+            that().simpleNamed("TargetNameClass")
+            should().annotatedWith<NamePathMarker>()
         }
 
         Konture.classes {
-            that().haveNameMatching("TargetName*")
-            should().haveAnnotationOf<NamePathMarker>()
+            that().nameMatches("TargetName*")
+            should().annotatedWith<NamePathMarker>()
         }
     }
 
     @Test
     fun `files name and path filtering`() {
         Konture.files {
-            that().haveName("NamePathTargets.kt")
+            that().named("NamePathTargets.kt")
             should().containClass(TargetNameClass::class)
         }
 
         Konture.files {
-            that().haveNameMatching("NamePath*.kt")
+            that().nameMatches("NamePath*.kt")
             should().containClass(TargetNameClass::class)
         }
     }
@@ -84,12 +84,12 @@ class NameAndPathFilteringTest {
     fun `modules path and name filtering`() {
         Konture.modules {
             that().haveNamePath(":konture-test")
-            should().onlyDependOnModules(":core")
+            should().onlyDependOn(":core")
         }
 
         Konture.modules {
             that().haveName("konture-test")
-            should().onlyDependOnModules(":core")
+            should().onlyDependOn(":core")
         }
     }
 

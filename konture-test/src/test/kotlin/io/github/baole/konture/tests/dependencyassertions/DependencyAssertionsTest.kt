@@ -22,7 +22,7 @@ class DependencyAssertionsTest {
     @Test
     fun `classes dependency assertions`() {
         Konture.classes {
-            that().resideInAPackage(pkg).and().haveName("DependencyClassA")
+            that().inPackage(pkg).and().named("DependencyClassA")
             should().notDependOnPackages("nonExistentPackage").andShould().notDependOnClasses(DependencyClassB::class)
         }
     }
@@ -30,7 +30,7 @@ class DependencyAssertionsTest {
     @Test
     fun `files dependency assertions`() {
         Konture.files {
-            that().resideInAPackage(pkg).and().haveName("DependencyTargets.kt")
+            that().inPackage(pkg).and().named("DependencyTargets.kt")
             should().notDependOnPackages("nonExistentPackage")
         }
     }
@@ -75,7 +75,7 @@ class DependencyAssertionsTest {
     fun `modules dependency assertions`() {
         Konture.modules {
             that().resideInAModule(":konture-test")
-            should().onlyDependOnModules(":core").andShould().notDependOnModule(":nonExistentModule")
+            should().onlyDependOn(":core").andShould().mustNotDependOn(":nonExistentModule")
         }
     }
 

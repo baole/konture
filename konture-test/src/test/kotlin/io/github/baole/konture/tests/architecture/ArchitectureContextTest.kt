@@ -7,6 +7,7 @@
 package io.github.baole.konture.tests.architecture
 
 import io.github.baole.konture.Konture
+import io.github.baole.konture.annotatedWith
 import io.github.baole.konture.architecture
 import io.github.baole.konture.beAssignableTo
 import io.github.baole.konture.haveAnnotationOf
@@ -25,11 +26,11 @@ class ArchitectureContextTest {
             classes {
                 that().named("ArchClass")
                 should().beAssignableTo<Serializable>()
-                andShould().haveAnnotationOf<ArchMarker>()
+                andShould().annotatedWith<ArchMarker>()
             }
 
             files {
-                that().haveNameMatching("ArchitectureTargets.kt")
+                that().nameMatches("ArchitectureTargets.kt")
                 should().containClass(ArchClass::class)
             }
 

@@ -24,7 +24,7 @@ class CallAndReferenceProhibitionsTest {
     @Test
     fun `classes notCall and notReferenceClass`() {
         Konture.classes {
-            that().resideInAPackage(pkg).and().haveName("CleanClass")
+            that().inPackage(pkg).and().named("CleanClass")
             should().notCall<CalleeClass>().andShould().notReferenceClass(CalleeClass::class)
         }
     }
@@ -32,7 +32,7 @@ class CallAndReferenceProhibitionsTest {
     @Test
     fun `files notCall and notReferenceClass`() {
         Konture.files {
-            that().resideInAPackage(pkg).and().haveName("ProhibitionTargets.kt")
+            that().inPackage(pkg).and().named("ProhibitionTargets.kt")
             should().notCall("io.github.baole.konture.tests.prohibitions.CalleeClass.nonExistentFunc")
         }
     }
