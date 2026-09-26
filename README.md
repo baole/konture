@@ -121,8 +121,8 @@ class ArchitectureGuardrails {
             // 🎯 Select modules via wildcard pattern matching
             modules {
                 that().haveNameMatching(":core:domain**")
-                should().notDependOnModule(":core:data**")
-                andShould().notDependOnModule(":feature:**")
+                should().mustNotDependOn(":core:data**")
+                andShould().mustNotDependOn(":feature:**")
             }
         }
     }

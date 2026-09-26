@@ -17,8 +17,15 @@ import io.github.baole.konture.Dependency
  * and must end at the end of the string or be followed by an uppercase letter or a non-alphanumeric
  * character.
  */
+private val NON_PRODUCTION_CONFIGURATION_TOKENS =
+    listOf("benchmark", "profile", "testedapks", "swiftpm", "metadata")
+
 internal fun Dependency.isTestConfiguration(): Boolean {
     val name = configuration
+    val lower = name.lowercase()
+    if (NON_PRODUCTION_CONFIGURATION_TOKENS.any { lower.contains(it) }) {
+        return true
+    }
     var start = 0
     while (true) {
         val index = name.indexOf("test", start, ignoreCase = true)

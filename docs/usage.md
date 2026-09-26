@@ -20,7 +20,7 @@ Konture provides a expressive DSL across six core scopes: `files {}`, `classes {
 | **Batch Context Integration** | ✅ `architecture { ... }` | ✅ `architecture { ... }` | ✅ `architecture { ... }` | ✅ `architecture { ... }` | ✅ `architecture { ... }` | ✅ `architecture { ... }` |
 | **Functional Inspection Scope** | ✅ `fileScope` | ✅ `classScope` | ✅ `functionScope` | ✅ `moduleScope` | ✅ `sliceScope(...)` | ✅ `propertyScope` |
 | **Module-Scoped Entry** | ✅ `fileScopeFromModule` | ✅ `classScopeFromModule` | ✅ `functionScopeFromModule` | ✅ `moduleScopeFromModule` | ✅ `sliceScopeFromModule` | ✅ `propertyScopeFromModule` |
-| **Package Filtering** | ✅ `inPackage` | ✅ `inPackage` | ✅ `resideInAPackage` | ✅ `resideInAPackage` | ✅ `resideInAPackage` | ✅ `resideInAPackage` |
+| **Package Filtering** | ✅ `inPackage` | ✅ `inPackage` | ✅ `resideInAPackage` | ✅ `inPackage` | ✅ `inPackage` | ✅ `resideInAPackage` |
 | **Annotation Filtering** | ✅ `annotatedWith` | ✅ `annotatedWith` | ✅ `haveAnnotationOf` | ✅ `containClassesWithAnnotation` | ✅ `containClassesWithAnnotation` | ✅ `haveAnnotationOf` |
 | **Call & Reference Prohibitions** | ✅ `notCall` / `notReferenceClass` | ✅ `notCall` / `notReferenceClass` | ✅ `notCall` / `notReferenceClass` | ✅ `notCall` / `notReferenceClass` | ✅ `notCall` / `notReferenceClass` | ✅ `notCall` / `notReferenceClass` |
 | **Dependency Assertions** | ✅ `onlyDependOn*` / `notDependOn*` | ✅ `onlyDependOn*` / `notDependOn*` | ➖ | ✅ `onlyDependOn` / `mustNotDependOn` | ✅ `onlyDependOnSlices` | ➖ |
@@ -191,8 +191,8 @@ Konture.slices {
 }
 
 Konture.modules {
-    that().resideInAModule(":feature-*")
-        .and().resideInAPackage("com.acme.feature..")
+    that().haveNameMatching(":feature-*")
+        .and().inPackage("com.acme.feature..")
         .should().beFreeOfCycles()
         .andShould().notCall("java.lang.System.exit")
 }

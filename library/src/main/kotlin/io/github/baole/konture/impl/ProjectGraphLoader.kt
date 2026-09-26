@@ -136,7 +136,13 @@ internal class ProjectGraphLoader {
                 }
         }
 
+        val nonProductionTokens = listOf("benchmark", "profile", "testedapks", "swiftpm", "metadata")
+
         fun isTestConfiguration(configuration: String): Boolean {
+            val lower = configuration.lowercase()
+            if (nonProductionTokens.any { lower.contains(it) }) {
+                return true
+            }
             var start = 0
             while (true) {
                 val index = configuration.indexOf("test", start, ignoreCase = true)

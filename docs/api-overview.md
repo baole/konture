@@ -29,10 +29,10 @@ The table below outlines all available builder entry points, scoping utilities, 
 | **Debug All Discovered Printing** (`printAll*()`) | ✅ `printAllFiles()` | ✅ `printAllClasses()` | ✅ `printAllFunctions()` | ✅ `printAllModules()` | ✅ `printAllSlices()` | ✅ `printAllProperties()` |
 | **Baseline & Violation Suppression** | ✅ `suppress { ... }` | ✅ `suppress { ... }` | ✅ `suppress { ... }` | ✅ `suppress { ... }` | ✅ `suppress { ... }` | ✅ `suppress { ... }` |
 | **Logical Chaining Operators** (`and`, `or`, `not`) | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
-| **Name / Path Filtering** (`that()`) | ✅ | ✅ | ✅ | ✅ (`havePath`, `haveName`) | ✅ (`matching`, `haveKey`) | ✅ |
-| **Module Filtering** (`inModule` / `resideInAModule`) | ✅ `inModule` | ✅ `inModule` | ✅ `resideInAModule` | ✅ `resideInAModule` | ✅ `resideInAModule` | ✅ `resideInAModule` |
-| **Package Filtering** (`inPackage` / `resideInAPackage`) | ✅ `inPackage` | ✅ `inPackage` | ✅ `resideInAPackage` | ✅ `resideInAPackage` | ✅ `resideInAPackage` | ✅ `resideInAPackage` |
-| **Annotation Filtering / Assertions** | ✅ (`containClassesWithAnnotation`) | ✅ (`beAnnotatedWith`) | ✅ (`beAnnotatedWith`) | ✅ (`containClassesWithAnnotation`) | ✅ (`containClassesWithAnnotation`) | ✅ (`beAnnotatedWith`) |
+| **Name / Path Filtering** (`that()`) | ✅ | ✅ | ✅ | ✅ (`namePath`, `name`) | ✅ (`matching`, `haveKey`) | ✅ |
+| **Module Filtering** (`inModule`) | ✅ `inModule` | ✅ `inModule` | ✅ `inModule` | ✅ `inPath` / `nameMatches` | ✅ `inModule` | ✅ `inModule` |
+| **Package Filtering** (`inPackage` / `resideInAPackage`) | ✅ `inPackage` | ✅ `inPackage` | ✅ `resideInAPackage` | ✅ `inPackage` | ✅ `inPackage` | ✅ `resideInAPackage` |
+| **Annotation Filtering / Assertions** | ✅ (`annotatedWith`) | ✅ (`annotatedWith`) | ✅ (`haveAnnotationOf` / `beAnnotatedWith`) | ✅ (`containClassesWithAnnotation`) | ✅ (`containClassesWithAnnotation`) | ✅ (`haveAnnotationOf` / `beAnnotatedWith`) |
 | **Visibility / Modifier Controls** | ➖ *(N/A)* | ✅ | ✅ | ➖ *(N/A)* | ➖ *(N/A)* | ✅ |
 | **Call / Reference Prohibitions** | ✅ `notCall`, `notReferenceClass` | ✅ `notCall`, `notReferenceClass` | ✅ `notCall`, `notReferenceClass` | ✅ `notCall`, `notReferenceClass` | ✅ `notCall`, `notReferenceClass` | ✅ `notCall`, `notReferenceClass` |
 | **Dependency Assertions** | ✅ `onlyDependOnPackages`, `notDependOnPackages`, `onlyDependOn`, `mustNotDependOn` | ✅ `onlyDependOn*`, `notDependOn*` | ➖ | ✅ `onlyDependOn`, `mustNotDependOn` | ✅ `onlyDependOnSlices`, `notDependOnSlice` | ➖ |
@@ -67,7 +67,7 @@ Konture.classes {
 ### 3. `functions {}` Scope
 ```kotlin
 Konture.functions {
-    that().haveNameStartingWith("get")
+    that().nameStartsWith("get")
     should().notReferenceClass<android.content.Context>()
 }
 ```
@@ -75,7 +75,7 @@ Konture.functions {
 ### 4. `modules {}` Scope
 ```kotlin
 Konture.modules {
-    that().resideInAModule(":feature-*")
+    that().nameMatches(":feature-*")
     should().mustNotDependOn(":feature-*")
     andShould().beFreeOfCycles()
     andShould().notCall("java.lang.System.exit")
