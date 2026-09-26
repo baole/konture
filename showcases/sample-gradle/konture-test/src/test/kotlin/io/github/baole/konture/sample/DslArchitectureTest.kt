@@ -174,7 +174,7 @@ class DslArchitectureTest {
             // 5. Property Violation (at property/line level)
             properties {
                 allowEmpty()
-                that().haveNameEndingWith("id")
+                that().haveNameEndingWith("testid")
                 should().haveType("kotlin.Int")
             }
         }
