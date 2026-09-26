@@ -192,7 +192,7 @@ Konture.slices {
 
 Konture.modules {
     that().haveNameMatching(":feature-*")
-        .and().inPackage("com.acme.feature..")
+        .and().resideInAPackage("com.acme.feature..")
         .should().beFreeOfCycles()
         .andShould().notCall("java.lang.System.exit")
 }

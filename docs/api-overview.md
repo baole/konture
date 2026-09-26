@@ -30,12 +30,12 @@ The table below outlines all available builder entry points, scoping utilities, 
 | **Baseline & Violation Suppression** | ✅ `suppress { ... }` | ✅ `suppress { ... }` | ✅ `suppress { ... }` | ✅ `suppress { ... }` | ✅ `suppress { ... }` | ✅ `suppress { ... }` |
 | **Logical Chaining Operators** (`and`, `or`, `not`) | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
 | **Name / Path Filtering** (`that()`) | ✅ | ✅ | ✅ | ✅ (`namePath`, `name`) | ✅ (`matching`, `haveKey`) | ✅ |
-| **Module Filtering** (`inModule`) | ✅ `inModule` | ✅ `inModule` | ✅ `inModule` | ✅ `inPath` / `nameMatches` | ✅ `inModule` | ✅ `inModule` |
-| **Package Filtering** (`inPackage` / `resideInAPackage`) | ✅ `inPackage` | ✅ `inPackage` | ✅ `resideInAPackage` | ✅ `inPackage` | ✅ `inPackage` | ✅ `resideInAPackage` |
+| **Module Filtering** (`inModule`) | ➖ | ✅ `inModule` | ✅ `resideInAModule` | ✅ `havePath` | ➖ | ➖ |
+| **Package Filtering** (`inPackage` / `resideInAPackage`) | ✅ `inPackage` | ✅ `inPackage` | ✅ `resideInAPackage` | ✅ `resideInAPackage` | ✅ `resideInAPackage` | ✅ `resideInAPackage` |
 | **Annotation Filtering / Assertions** | ✅ (`annotatedWith`) | ✅ (`annotatedWith`) | ✅ (`haveAnnotationOf` / `beAnnotatedWith`) | ✅ (`containClassesWithAnnotation`) | ✅ (`containClassesWithAnnotation`) | ✅ (`haveAnnotationOf` / `beAnnotatedWith`) |
 | **Visibility / Modifier Controls** | ➖ *(N/A)* | ✅ | ✅ | ➖ *(N/A)* | ➖ *(N/A)* | ✅ |
 | **Call / Reference Prohibitions** | ✅ `notCall`, `notReferenceClass` | ✅ `notCall`, `notReferenceClass` | ✅ `notCall`, `notReferenceClass` | ✅ `notCall`, `notReferenceClass` | ✅ `notCall`, `notReferenceClass` | ✅ `notCall`, `notReferenceClass` |
-| **Dependency Assertions** | ✅ `onlyDependOnPackages`, `notDependOnPackages`, `onlyDependOn`, `mustNotDependOn` | ✅ `onlyDependOn*`, `notDependOn*` | ➖ | ✅ `onlyDependOn`, `mustNotDependOn` | ✅ `onlyDependOnSlices`, `notDependOnSlice` | ➖ |
+| **Dependency Assertions** | ✅ `onlyDependOnPackages`, `notDependOnPackages`, `onlyDependOnModules`, `notDependOnModules` | ✅ `onlyDependOn*`, `notDependOn*` | ➖ | ✅ `onlyDependOn`, `mustNotDependOn` | ✅ `onlyDependOnSlices`, `notDependOnSlice` | ➖ |
 | **Cycle Detection Assertions** | ➖ | ✅ `beFreeOfCycles()` | ➖ | ✅ `beFreeOfCycles()` | ✅ `beFreeOfCycles()` | ➖ |
 | **Plugin / Asset Assertions** | ➖ | ➖ | ➖ | ✅ `havePlugin`, `notHavePlugin` | ➖ | ➖ |
 | **Type-Safe Overloads** (`KClass`, `reified T`) | ✅ | ✅ | ✅ | ✅ *(Calls/Refs/Annotations)* | ✅ *(Calls/Refs/Annotations)* | ✅ |
@@ -67,7 +67,7 @@ Konture.classes {
 ### 3. `functions {}` Scope
 ```kotlin
 Konture.functions {
-    that().nameStartsWith("get")
+    that().haveNameStartingWith("get")
     should().notReferenceClass<android.content.Context>()
 }
 ```
@@ -75,7 +75,7 @@ Konture.functions {
 ### 4. `modules {}` Scope
 ```kotlin
 Konture.modules {
-    that().nameMatches(":feature-*")
+    that().haveNameMatching(":feature-*")
     should().mustNotDependOn(":feature-*")
     andShould().beFreeOfCycles()
     andShould().notCall("java.lang.System.exit")
