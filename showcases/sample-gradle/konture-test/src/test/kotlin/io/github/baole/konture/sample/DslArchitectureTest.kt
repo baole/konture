@@ -19,12 +19,12 @@ class DslArchitectureTest {
         // Auto-verifying module block DSL
         Konture.modules {
             that().haveNamePath(":data")
-            should().onlyDependOnModules(":domain")
+            should().onlyDependOn(":domain")
         }
 
         // Auto-verifying class block DSL
         Konture.classes {
-            that().resideInAPackage("..domain..")
+            that().inPackage("..domain..")
             should().onlyDependOnClassesInAnyPackage("..domain..", "kotlin..", "java..")
         }
     }
@@ -50,12 +50,12 @@ class DslArchitectureTest {
         Konture.architecture {
             modules {
                 that().haveNamePath(":data")
-                should().notDependOnModule(":app")
+                should().mustNotDependOn(":app")
             }
 
             classes {
-                that().resideInAPackage("..domain..")
-                that().haveNameEndingWith("Repository")
+                that().inPackage("..domain..")
+                that().nameEndsWith("Repository")
                 should().beInterfaces()
             }
         }
@@ -84,16 +84,16 @@ class DslArchitectureTest {
         Konture.classes {
             // Match any class residing in either domain or data package
             that().anyOf(
-                { resideInAPackage("..domain..") },
-                { resideInAPackage("..data..") }
+                { inPackage("..domain..") },
+                { inPackage("..data..") }
             ).should().onlyDependOnClassesInAnyPackage(
                 "..domain..", "..data..", "kotlin..", "java..", "android.."
             )
             
             // Match repository interfaces using allOf
             that().allOf(
-                { resideInAPackage("..domain..") },
-                { haveNameEndingWith("Repository") }
+                { inPackage("..domain..") },
+                { nameEndsWith("Repository") }
             ).should().beInterfaces()
         }
     }
@@ -108,7 +108,7 @@ class DslArchitectureTest {
             classes {
                 allowEmpty()
                 // Match classes annotated with either of these annotations, or having certain modifiers
-                that().haveAnyAnnotationOf("Service", "Component")
+                that().annotatedWithAnyOf("Service", "Component")
                     .and().haveAllModifiers(Modifier.OPEN)
                 
                 // Assert that they reside in any of the specified visibilities or are assignable
@@ -146,22 +146,22 @@ class DslArchitectureTest {
             modules {
                 allowEmpty()
                 that().haveNamePath(":data")
-                should().notDependOnModule(":domain")
+                should().mustNotDependOn(":domain")
             }
 
             // 2. Class Violation (at class level)
             classes {
                 allowEmpty()
-                that().resideInAPackage("..domain..")
-                that().haveNameEndingWith("User")
-                should().haveNameEndingWith("Dto")
+                that().inPackage("..domain..")
+                that().nameEndsWith("User")
+                should().nameEndsWith("Dto")
             }
 
             // 3. File Violation (at file level)
             files {
                 allowEmpty()
-                that().haveNameEndingWith("UseCase.kt")
-                should().haveNameEndingWith("Action.kt")
+                that().nameEndsWith("UseCase.kt")
+                should().nameEndsWith("Action.kt")
             }
 
             // 4. Function Violation (at function level)
@@ -174,7 +174,7 @@ class DslArchitectureTest {
             // 5. Property Violation (at property/line level)
             properties {
                 allowEmpty()
-                that().haveNameEndingWith("id")
+                that().haveNameEndingWith("testid")
                 should().haveType("kotlin.Int")
             }
         }

@@ -4,8 +4,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-@file:Suppress("DEPRECATION")
-
 package io.github.baole.konture
 
 import org.junit.jupiter.api.Assertions.assertDoesNotThrow
@@ -103,7 +101,7 @@ class RuleBuildersExtendedAssertionsTest {
             FilesRuleBuilder(graph)
                 .that().containClass("ServiceA")
                 .and().haveImportOf("io.github.baole.konture.ModelB")
-                .should().resideInAPackage("io.github.baole.konture")
+                .should().inPackage("io.github.baole.konture")
                 .allowEmpty()
                 .check()
         }
@@ -204,12 +202,12 @@ class RuleBuildersExtendedAssertionsTest {
     }
 
     @Test
-    fun `ModulesThat dependOnModule and ModulesShould onlyDependOnModules work`() {
+    fun `ModulesThat dependOnModule and ModulesShould onlyDependOn work`() {
         val graph = testGraph()
         assertDoesNotThrow {
             ModulesRuleBuilder(graph)
                 .that().dependOnModule(":feature")
-                .should().onlyDependOnModules(":feature")
+                .should().onlyDependOn(":feature")
                 .allowEmpty()
                 .check()
         }
@@ -241,22 +239,18 @@ class RuleBuildersExtendedAssertionsTest {
     }
 
     @Test
-    fun `RuleBuilders printMatched, printAll, and ignoreFailuresIn work`() {
+    fun `RuleBuilders printMatched and printAll work`() {
         val graph = testGraph()
 
         val cb = ClassesRuleBuilder(graph)
         cb.printMatchedClasses { }
         cb.printAllClasses { }
-        cb.ignoreFailuresIn("ClassA")
-        cb.ignoreFailuresIn { it.name == "ClassA" }
         cb.orShould()
         cb.xorShould()
 
         val fb = FunctionsRuleBuilder(graph)
         fb.printMatchedFunctions { }
         fb.printAllFunctions { }
-        fb.ignoreFailuresIn("myFunc")
-        fb.ignoreFailuresIn { it.declaration.name == "myFunc" }
         fb.orShould()
         fb.xorShould()
         fb.andShould()
@@ -264,8 +258,6 @@ class RuleBuildersExtendedAssertionsTest {
         val pb = PropertiesRuleBuilder(graph)
         pb.printMatchedProperties { }
         pb.printAllProperties { }
-        pb.ignoreFailuresIn("myVal")
-        pb.ignoreFailuresIn { it.declaration.name == "myVal" }
         pb.orShould()
         pb.xorShould()
         pb.andShould()
@@ -273,16 +265,12 @@ class RuleBuildersExtendedAssertionsTest {
         val fileb = FilesRuleBuilder(graph)
         fileb.printMatchedFiles { }
         fileb.printAllFiles { }
-        fileb.ignoreFailuresIn("FileA.kt")
-        fileb.ignoreFailuresIn { it.declaration.filePath.endsWith("FileA.kt") }
         fileb.or()
         fileb.xor()
 
         val sb = SlicesRuleBuilder(graph)
         sb.printMatchedSlices { }
         sb.printAllSlices { }
-        sb.ignoreFailuresIn("sliceA")
-        sb.ignoreFailuresIn { it.key == "sliceA" }
         sb.or()
         sb.xor()
         sb.orShould()
@@ -291,8 +279,6 @@ class RuleBuildersExtendedAssertionsTest {
         val mb = ModulesRuleBuilder(graph)
         mb.printMatchedModules { }
         mb.printAllModules { }
-        mb.ignoreFailuresIn(":app")
-        mb.ignoreFailuresIn { it.path == ":app" }
         mb.or()
         mb.xor()
         mb.orShould()

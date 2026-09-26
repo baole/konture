@@ -79,34 +79,6 @@ public interface ClassesShouldMetadataAssertions {
      */
     public fun annotatedWithAnyOf(vararg names: String): ClassesRuleBuilder = annotatedWithAnyOf(names.asList())
 
-    /** Legacy haveAnnotationOf method. */
-    @Deprecated("Use annotatedWith instead.", ReplaceWith("annotatedWith(annotationFqName)"))
-    public infix fun haveAnnotationOf(annotationFqName: String): ClassesRuleBuilder = annotatedWith(annotationFqName)
-
-    /** Legacy haveAllAnnotationsOf method. */
-    @Deprecated("Use annotatedWithAllOf instead.", ReplaceWith("annotatedWithAllOf(name)"))
-    public infix fun haveAllAnnotationsOf(name: String): ClassesRuleBuilder = annotatedWithAllOf(name)
-
-    /** Legacy haveAllAnnotationsOf method. */
-    @Deprecated("Use annotatedWithAllOf instead.", ReplaceWith("annotatedWithAllOf(names)"))
-    public infix fun haveAllAnnotationsOf(names: List<String>): ClassesRuleBuilder = annotatedWithAllOf(names)
-
-    /** Legacy haveAllAnnotationsOf method. */
-    @Deprecated("Use annotatedWithAllOf instead.", ReplaceWith("annotatedWithAllOf(*names)"))
-    public fun haveAllAnnotationsOf(vararg names: String): ClassesRuleBuilder = annotatedWithAllOf(*names)
-
-    /** Legacy haveAnyAnnotationOf method. */
-    @Deprecated("Use annotatedWithAnyOf instead.", ReplaceWith("annotatedWithAnyOf(name)"))
-    public infix fun haveAnyAnnotationOf(name: String): ClassesRuleBuilder = annotatedWithAnyOf(name)
-
-    /** Legacy haveAnyAnnotationOf method. */
-    @Deprecated("Use annotatedWithAnyOf instead.", ReplaceWith("annotatedWithAnyOf(names)"))
-    public infix fun haveAnyAnnotationOf(names: List<String>): ClassesRuleBuilder = annotatedWithAnyOf(names)
-
-    /** Legacy haveAnyAnnotationOf method. */
-    @Deprecated("Use annotatedWithAnyOf instead.", ReplaceWith("annotatedWithAnyOf(*names)"))
-    public fun haveAnyAnnotationOf(vararg names: String): ClassesRuleBuilder = annotatedWithAnyOf(*names)
-
     /**
      * Asserts that selected classes have the specified annotation with a matching argument name and value.
      */

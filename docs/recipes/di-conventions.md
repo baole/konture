@@ -47,7 +47,7 @@ class KoinStaticConventionTest {
     @Test
     fun `koin module configurations must be internal and kept in di packages`() {
         Konture.classes {
-            that().resideInAPackage("..di..")
+            that().inPackage("..di..")
                 .should().beInternal()
         }
     }

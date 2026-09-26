@@ -69,7 +69,7 @@ class DomainPurityTest {
     @Test
     fun `domain classes must remain completely pure`() {
         Konture.classes {
-            that().resideInAPackage("..domain..")
+            that().inPackage("..domain..")
                 .should().onlyDependOnClassesInAnyPackage(
                     "..domain..",
                     "kotlin..",

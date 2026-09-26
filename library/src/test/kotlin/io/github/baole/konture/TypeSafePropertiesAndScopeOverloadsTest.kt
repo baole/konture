@@ -4,8 +4,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-@file:Suppress("DEPRECATION")
-
 package io.github.baole.konture
 
 import org.junit.jupiter.api.Assertions.assertThrows
@@ -145,19 +143,19 @@ class TypeSafePropertiesAndScopeOverloadsTest {
         val context = FileDeclarationContext(file, ":app")
 
         assertTrue(
-            FilesRuleBuilder(graph).that().resideInPackageOf(TypeSafeMarker::class).getThatPredicate()!!(context),
+            FilesRuleBuilder(graph).that().inPackageOf(TypeSafeMarker::class).getThatPredicate()!!(context),
         )
-        assertTrue(FilesRuleBuilder(graph).that().resideInPackageOf<TypeSafeMarker>().getThatPredicate()!!(context))
+        assertTrue(FilesRuleBuilder(graph).that().inPackageOf<TypeSafeMarker>().getThatPredicate()!!(context))
 
         val violations = mutableListOf<String>()
         FilesRuleBuilder(
             graph,
-        ).should().resideInPackageOf(TypeSafeMarker::class).getShouldAssertion()!!(context, emptyList(), violations)
+        ).should().inPackageOf(TypeSafeMarker::class).getShouldAssertion()!!(context, emptyList(), violations)
         assertTrue(violations.isEmpty())
 
         FilesRuleBuilder(
             graph,
-        ).should().resideInPackageOf<TypeSafeMarker>().getShouldAssertion()!!(context, emptyList(), violations)
+        ).should().inPackageOf<TypeSafeMarker>().getShouldAssertion()!!(context, emptyList(), violations)
         assertTrue(violations.isEmpty())
     }
 

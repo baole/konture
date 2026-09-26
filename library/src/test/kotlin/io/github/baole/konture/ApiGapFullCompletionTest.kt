@@ -4,8 +4,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-@file:Suppress("DEPRECATION")
-
 package io.github.baole.konture
 
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -20,25 +18,25 @@ annotation class SampleTestAnnotation
 
 class ApiGapFullCompletionTest {
     @Test
-    fun `test files that haveName overloads`() {
+    fun `test files that named overloads`() {
         val file = FileDeclaration(name = "SampleFile.kt", packageName = "com.example", filePath = "src/SampleFile.kt")
         val context = FileDeclarationContext(file, ":app", null)
 
         val builder1 = FilesRuleBuilder(ProjectGraph(emptyMap()))
-        builder1.that().haveName("SampleFile.kt")
+        builder1.that().named("SampleFile.kt")
         assertTrue(builder1.getThatPredicate()?.invoke(context) == true)
 
         val builder2 = FilesRuleBuilder(ProjectGraph(emptyMap()))
-        builder2.that().haveName(listOf("SampleFile.kt", "OtherFile.kt"))
+        builder2.that().named(listOf("SampleFile.kt", "OtherFile.kt"))
         assertTrue(builder2.getThatPredicate()?.invoke(context) == true)
 
         val builder3 = FilesRuleBuilder(ProjectGraph(emptyMap()))
-        builder3.that().haveName("OtherFile.kt")
+        builder3.that().named("OtherFile.kt")
         assertFalse(builder3.getThatPredicate()?.invoke(context) == true)
     }
 
     @Test
-    fun `test files should notResideInAPackage and notResideInAModule`() {
+    fun `test files should notInPackage and notInModule`() {
         val file =
             FileDeclaration(
                 name = "SampleFile.kt",
@@ -48,8 +46,8 @@ class ApiGapFullCompletionTest {
         val context = FileDeclarationContext(file, ":app", null)
 
         val builder = FilesRuleBuilder(ProjectGraph(emptyMap()))
-        builder.should().notResideInAPackage("com.example.legacy..")
-        builder.should().notResideInAModule(":legacy")
+        builder.should().notInPackage("com.example.legacy..")
+        builder.should().notInModule(":legacy")
 
         val violations = mutableListOf<String>()
         builder.getShouldAssertion()?.invoke(context, listOf(context), violations)
@@ -57,7 +55,7 @@ class ApiGapFullCompletionTest {
     }
 
     @Test
-    fun `test classesThat haveAnnotationOf overloads and classScope aliases`() {
+    fun `test classesThat annotatedWith overloads and classScope aliases`() {
         val annot = AnnotationDeclaration("SampleTestAnnotation", "io.github.baole.konture.SampleTestAnnotation")
         val cls =
             ClassDeclaration(
@@ -75,7 +73,7 @@ class ApiGapFullCompletionTest {
         val graph = ProjectGraph(mapOf("build" to listOf(mod)))
 
         val builder = ClassesRuleBuilder(graph)
-        builder.that().haveAnnotationOf<SampleTestAnnotation>()
+        builder.that().annotatedWith<SampleTestAnnotation>()
         assertTrue(builder.getThatPredicate()?.invoke(cls) == true)
 
         val scope1 = KontureScope.fromProject(graph)

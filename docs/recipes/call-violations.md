@@ -56,7 +56,7 @@ class LayerCrossingTest {
     @Test
     fun `controllers must not bypass services to access repositories directly`() {
         Konture.classes {
-            that().resideInAPackage("..presentation..")
+            that().inPackage("..presentation..")
                 .should().notDependOnClassesInAnyPackage("..data.repository..")
         }
     }
@@ -76,7 +76,7 @@ class RepositoryAccessControlTest {
     @Test
     fun `repositories must only be accessed by intermediate services`() {
         Konture.classes {
-            that().resideInAPackage("..data.repository..")
+            that().inPackage("..data.repository..")
                 .should().onlyBeAccessedByAnyPackage(
                     "..data.repository..", // Self-access
                     "..service..",        // Intermediate services

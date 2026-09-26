@@ -4,8 +4,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-@file:Suppress("DEPRECATION")
-
 package io.github.baole.konture
 
 import io.github.baole.konture.impl.SliceGraph
@@ -418,7 +416,7 @@ internal class SlicesCoverageTest : KontureScopeTestFixture() {
         val pNotEndNameSingle = SlicesRuleBuilder(graph).that().notHaveNameEndingWith("ing").getThatPredicate()!!
         assertTrue(pNotEndNameSingle(slice))
 
-        val pResideModSingle = SlicesRuleBuilder(graph).that().resideInModule("src").getThatPredicate()!!
+        val pResideModSingle = SlicesRuleBuilder(graph).that().resideInAModule("src").getThatPredicate()!!
         assertTrue(pResideModSingle(slice))
 
         val pResideModsList = SlicesRuleBuilder(graph).that().resideInModules(listOf("src")).getThatPredicate()!!
@@ -427,7 +425,7 @@ internal class SlicesCoverageTest : KontureScopeTestFixture() {
         val pResideModsVararg = SlicesRuleBuilder(graph).that().resideInModules("src", "core").getThatPredicate()!!
         assertTrue(pResideModsVararg(slice))
 
-        val pNotResideModSingle = SlicesRuleBuilder(graph).that().notResideInModule("core").getThatPredicate()!!
+        val pNotResideModSingle = SlicesRuleBuilder(graph).that().notResideInAModule("core").getThatPredicate()!!
         assertTrue(pNotResideModSingle(slice))
 
         val pNotResideModsList = SlicesRuleBuilder(graph).that().notResideInModules(listOf("core")).getThatPredicate()!!

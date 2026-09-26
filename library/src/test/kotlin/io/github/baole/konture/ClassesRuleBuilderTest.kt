@@ -4,8 +4,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-@file:Suppress("DEPRECATION")
-
 package io.github.baole.konture
 
 import org.junit.jupiter.api.Assertions.*
@@ -18,7 +16,7 @@ class ClassesRuleBuilderTest : RuleBuildersTestBase() {
         val rule1 =
             ClassesRuleBuilder(projectGraph)
                 .that()
-                .resideInAPackage("com.example")
+                .inPackage("com.example")
                 .and()
                 .areInterfaces()
         val pred1 = rule1.getThatPredicate()!!
@@ -30,9 +28,9 @@ class ClassesRuleBuilderTest : RuleBuildersTestBase() {
         val rule2 =
             ClassesRuleBuilder(projectGraph)
                 .that()
-                .haveNameStartingWith("ClassB")
+                .nameStartsWith("ClassB")
                 .or()
-                .haveNameStartingWith("ClassC")
+                .nameStartsWith("ClassC")
         val pred2 = rule2.getThatPredicate()!!
         assertFalse(pred2(classA))
         assertTrue(pred2(classB))
@@ -45,7 +43,7 @@ class ClassesRuleBuilderTest : RuleBuildersTestBase() {
         val rule3 =
             ClassesRuleBuilder(projectGraph)
                 .that()
-                .resideInAPackage("com.example")
+                .inPackage("com.example")
                 .xor()
                 .areInterfaces()
         val pred3 = rule3.getThatPredicate()!!
@@ -57,7 +55,7 @@ class ClassesRuleBuilderTest : RuleBuildersTestBase() {
         val rule4 =
             ClassesRuleBuilder(projectGraph)
                 .not()
-                .haveNameStartingWith("ClassA")
+                .nameStartsWith("ClassA")
         val pred4 = rule4.getThatPredicate()!!
         assertFalse(pred4(classA))
         assertTrue(pred4(classB))
@@ -99,7 +97,7 @@ class ClassesRuleBuilderTest : RuleBuildersTestBase() {
             assertThrows(AssertionError::class.java) {
                 ClassesRuleBuilder(projectGraph)
                     .that()
-                    .haveNameStartingWith("ClassA")
+                    .nameStartsWith("ClassA")
                     .should()
                     .beInterfaces()
                     .check()

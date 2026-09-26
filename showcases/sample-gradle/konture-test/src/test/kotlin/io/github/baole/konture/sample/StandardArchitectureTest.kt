@@ -17,18 +17,18 @@ class StandardArchitectureTest {
         // :domain should not depend on any other module
         Konture.modules()
             .that().haveNamePath(":domain")
-            .should().notDependOnModule(":data")
+            .should().mustNotDependOn(":data")
             .check()
 
         Konture.modules()
             .that().haveNamePath(":domain")
-            .should().notDependOnModule(":app")
+            .should().mustNotDependOn(":app")
             .check()
 
         // :data should only depend on :domain
         Konture.modules()
             .that().haveNamePath(":data")
-            .should().onlyDependOnModules(":domain")
+            .should().onlyDependOn(":domain")
             .check()
     }
 
@@ -36,21 +36,21 @@ class StandardArchitectureTest {
     fun `class dependency rules verified via standard archunit style`() {
         // Classes in domain package should only depend on domain, kotlin or java
         Konture.classes()
-            .that().resideInAPackage("..domain..")
+            .that().inPackage("..domain..")
             .should().onlyDependOnClassesInAnyPackage("..domain..", "kotlin..", "java..")
             .check()
 
         // Repositories should be interfaces
         Konture.classes()
-            .that().resideInAPackage("..domain..")
-            .that().haveNameEndingWith("Repository")
+            .that().inPackage("..domain..")
+            .that().nameEndsWith("Repository")
             .should().beInterfaces()
             .check()
 
         // Implementations should be classes
         Konture.classes()
-            .that().resideInAPackage("..data..")
-            .that().haveNameEndingWith("RepositoryImpl")
+            .that().inPackage("..data..")
+            .that().nameEndsWith("RepositoryImpl")
             .should().onlyBeAccessedByAnyPackage("..data..", "..app..")
             .check()
     }
@@ -82,7 +82,7 @@ class StandardArchitectureTest {
             assertThrows<AssertionError> {
                 Konture.modules()
                     .that().haveNamePath(":data")
-                    .should().onlyDependOnModules(":app")
+                    .should().onlyDependOn(":app")
                     .check()
             }
         } finally {
@@ -94,8 +94,8 @@ class StandardArchitectureTest {
     @Test
     fun `use cases must reside in domain package and have names ending with UseCase via archunit style`() {
         Konture.classes()
-            .that().haveNameEndingWith("UseCase")
-            .should().resideInAPackage("..domain..")
+            .that().nameEndsWith("UseCase")
+            .should().inPackage("..domain..")
             .check()
     }
 
@@ -113,7 +113,7 @@ class StandardArchitectureTest {
         // Assert that any module starting with ':da' (like :data) only depends on modules starting with ':do' (like :domain)
         Konture.modules()
             .that().haveNameMatching(":da*")
-            .should().onlyDependOnModules(":do*")
+            .should().onlyDependOn(":do*")
             .check()
 
         // Assert that domain module is only depended on by modules matching ':da*' (like :data) or ':ap*' (like :app)
@@ -125,7 +125,7 @@ class StandardArchitectureTest {
         // Assert that domain doesn't depend on any data module
         Konture.modules()
             .that().haveNamePath(":domain")
-            .should().notDependOnModule(":da*")
+            .should().mustNotDependOn(":da*")
             .check()
     }
 
@@ -133,8 +133,8 @@ class StandardArchitectureTest {
     fun `scalability package pattern matching using double dot wildcards`() {
         // Find classes in any subpackage containing '.domain' and verify they reside in the specific domain FQN
         Konture.classes()
-            .that().resideInAPackage("..domain..")
-            .should().resideInAPackage("io.github.baole.konture.sample.domain..")
+            .that().inPackage("..domain..")
+            .should().inPackage("io.github.baole.konture.sample.domain..")
             .check()
     }
 
@@ -181,7 +181,7 @@ class StandardArchitectureTest {
     fun `use cases must only be accessed by the presentation app layer`() {
         // Enforce strict call boundary check: domain logic entry points must be called only from app or domain itself
         Konture.classes()
-            .that().haveNameEndingWith("UseCase")
+            .that().nameEndsWith("UseCase")
             .should().onlyBeAccessedByAnyPackage("..app..", "..domain..")
             .check()
     }
@@ -190,7 +190,7 @@ class StandardArchitectureTest {
     fun `domain entities must have public visibility`() {
         // Enforce visibility boundary: domain model objects must be fully public for standard consumer access
         Konture.classes()
-            .that().haveNameEndingWith("User")
+            .that().nameEndsWith("User")
             .should().bePublic()
             .check()
     }

@@ -26,14 +26,14 @@ class ArchitectureGuardrails {
             // 🎯 Select modules inside domain
             modules {
                 that().haveNamePath(":core:domain")
-                should().notDependOnModule(":core:data")
-                andShould().notDependOnModule(":feature:checkout")
+                should().mustNotDependOn(":core:data")
+                andShould().mustNotDependOn(":feature:checkout")
             }
 
             // 🎯 Verify class boundary rules
             classes {
-                that().resideInAPackage("..domain..")
-                that().haveNameEndingWith("Repository")
+                that().inPackage("..domain..")
+                that().nameEndsWith("Repository")
                 should().beInterfaces()
             }
         }

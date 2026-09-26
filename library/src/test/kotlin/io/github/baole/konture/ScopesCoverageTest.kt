@@ -4,8 +4,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-@file:Suppress("DEPRECATION")
-
 package io.github.baole.konture
 
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -53,12 +51,12 @@ internal class ScopesCoverageTest : KontureScopeTestFixture() {
         val classes = listOf(classA, classB)
         val scope = KontureScope(classes)
 
-        val s1 = scope.withNameEndingWith("A")
+        val s1 = scope.haveNameEndingWith("A")
         assertEquals(1, s1.classes.size)
 
         val files = listOf(fileA, fileB)
         val fileScope = KontureFileScope(files)
-        val f1 = fileScope.withNameEndingWith("A.kt")
+        val f1 = fileScope.haveNameEndingWith("A.kt")
         assertEquals(1, f1.files.size)
 
         val funcDecl =

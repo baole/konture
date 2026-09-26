@@ -162,7 +162,7 @@ Block specific illegal edges that cause immediate team friction:
 fun `checkout implementation must not depend on profile implementation`() {
     Konture.modules {
         that().haveNamePath(":feature:checkout:impl")
-        should().notDependOnModule(":feature:profile:impl")
+        should().mustNotDependOn(":feature:profile:impl")
     }
 }
 ```
@@ -176,7 +176,7 @@ Shift PR discussions from *"Can we take this shortcut?"* to *"Which approved API
 fun `feature implementations must only depend on approved APIs and core`() {
     Konture.modules {
         that().haveNameMatching(":feature:**:impl")
-        should().onlyDependOnModules(
+        should().onlyDependOn(
             ":feature:**:api",
             ":shared:**",
             ":core:**",

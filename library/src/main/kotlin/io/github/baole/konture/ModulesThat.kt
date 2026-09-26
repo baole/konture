@@ -499,37 +499,6 @@ public class ModulesThat internal constructor(
      */
     public fun resideInAPackage(vararg packagePatterns: String): ModulesRuleBuilder =
         resideInAPackage(packagePatterns.toList())
-
-    /**
-     * Deprecated alias for [resideInAPackage].
-     */
-    @Deprecated(
-        message = "Renamed for consistency with resideInAPackage across all scopes.",
-        replaceWith = ReplaceWith("resideInAPackage(packagePattern)"),
-        level = DeprecationLevel.WARNING,
-    )
-    public infix fun containPackage(packagePattern: String): ModulesRuleBuilder = resideInAPackage(packagePattern)
-
-    /**
-     * Deprecated alias for [resideInAPackage].
-     */
-    @Deprecated(
-        message = "Renamed for consistency with resideInAPackage across all scopes.",
-        replaceWith = ReplaceWith("resideInAPackage(packagePatterns)"),
-        level = DeprecationLevel.WARNING,
-    )
-    public infix fun containPackage(packagePatterns: List<String>): ModulesRuleBuilder =
-        resideInAPackage(packagePatterns)
-
-    /**
-     * Deprecated alias for [resideInAPackage].
-     */
-    @Deprecated(
-        message = "Renamed for consistency with resideInAPackage across all scopes.",
-        replaceWith = ReplaceWith("resideInAPackage(*packagePatterns)"),
-        level = DeprecationLevel.WARNING,
-    )
-    public fun containPackage(vararg packagePatterns: String): ModulesRuleBuilder = resideInAPackage(*packagePatterns)
 }
 
 internal fun Module.classesFor(sourceSets: SourceSetSelector?): List<ClassDeclaration> {

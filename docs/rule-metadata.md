@@ -23,7 +23,7 @@ class RepositoryArchitectureTest {
             tag("architecture", "domain", "dip")
 
             classes {
-                that().resideInAPackage("..domain.repository..")
+                that().inPackage("..domain.repository..")
                 should().beInterfaces()
             }
         }
@@ -47,8 +47,8 @@ architecture {
         tag("naming", "convention")
 
         classes {
-            that().resideInAPackage("..service..")
-            should().haveNameEndingWith("Service")
+            that().inPackage("..service..")
+            should().nameEndsWith("Service")
         }
     }
 

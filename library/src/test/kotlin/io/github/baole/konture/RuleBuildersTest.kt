@@ -4,8 +4,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-@file:Suppress("DEPRECATION")
-
 package io.github.baole.konture
 
 import io.github.baole.konture.impl.PatternMatchers
@@ -33,7 +31,7 @@ class RuleBuildersTest : RuleBuildersTestBase() {
         assertThrows(AssertionError::class.java) {
             Konture.architecture {
                 files {
-                    that().resideInAPackage("com.example")
+                    that().inPackage("com.example")
                     should().beDocumentedWithKDoc()
                 }
             }
@@ -50,12 +48,12 @@ class RuleBuildersTest : RuleBuildersTestBase() {
                 should().satisfy { module -> module.appliedPlugins.contains("kotlin") }
             }
             classes {
-                that().haveNameStartingWith("ClassA")
-                should().resideInAPackage("com.example")
+                that().nameStartsWith("ClassA")
+                should().inPackage("com.example")
             }
             files {
-                that().haveNameEndingWith("ClassB.kt")
-                should().resideInAPackage("com.example")
+                that().nameEndsWith("ClassB.kt")
+                should().inPackage("com.example")
             }
         }
     }
@@ -70,8 +68,8 @@ class RuleBuildersTest : RuleBuildersTestBase() {
                         should().satisfy { module -> module.appliedPlugins.contains("java") } // moduleA only has kotlin
                     }
                     classes {
-                        that().haveNameStartingWith("ClassA")
-                        should().resideInAPackage("com.wrong") // also fails
+                        that().nameStartsWith("ClassA")
+                        should().inPackage("com.wrong") // also fails
                     }
                 }
             }

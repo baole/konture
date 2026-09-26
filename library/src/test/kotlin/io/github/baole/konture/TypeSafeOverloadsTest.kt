@@ -4,8 +4,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-@file:Suppress("DEPRECATION")
-
 package io.github.baole.konture
 
 import org.junit.jupiter.api.Assertions.assertThrows
@@ -61,7 +59,7 @@ class TypeSafeOverloadsTest {
             )
         val graph = graphWith(declaration)
 
-        val rule = ClassesRuleBuilder(graph).that().haveAnnotationOf<TypeSafeMarker>()
+        val rule = ClassesRuleBuilder(graph).that().annotatedWith<TypeSafeMarker>()
 
         assertTrue(rule.getThatPredicate()!!(declaration))
     }
@@ -102,7 +100,7 @@ class TypeSafeOverloadsTest {
                 referencedTypes = emptySet(),
                 filePath = "/src/Text.kt",
             )
-        val rule = ClassesRuleBuilder(graphWith(declaration)).that().resideInPackageOf<TypeSafeMarker>()
+        val rule = ClassesRuleBuilder(graphWith(declaration)).that().inPackageOf<TypeSafeMarker>()
 
         assertTrue(rule.getThatPredicate()!!(declaration))
     }
@@ -212,17 +210,17 @@ class TypeSafeOverloadsTest {
 
         // ClassesThat overloads
         assertTrue(
-            ClassesRuleBuilder(graph).that().haveAnnotationOf(TypeSafeMarker::class).getThatPredicate()!!(declaration),
+            ClassesRuleBuilder(graph).that().annotatedWith(TypeSafeMarker::class).getThatPredicate()!!(declaration),
         )
         assertTrue(
             ClassesRuleBuilder(
                 graph,
-            ).that().haveAllAnnotationsOf(TypeSafeMarker::class).getThatPredicate()!!(declaration),
+            ).that().annotatedWithAllOf(TypeSafeMarker::class).getThatPredicate()!!(declaration),
         )
         assertTrue(
             ClassesRuleBuilder(
                 graph,
-            ).that().haveAnyAnnotationOf(TypeSafeMarker::class).getThatPredicate()!!(declaration),
+            ).that().annotatedWithAnyOf(TypeSafeMarker::class).getThatPredicate()!!(declaration),
         )
         assertTrue(
             ClassesRuleBuilder(
@@ -257,10 +255,10 @@ class TypeSafeOverloadsTest {
             ).that().areAssignableFrom<TypeSafeChild>().getThatPredicate()!!(parentDecl),
         )
         assertTrue(
-            ClassesRuleBuilder(graph).that().resideInPackageOf(TypeSafeMarker::class).getThatPredicate()!!(declaration),
+            ClassesRuleBuilder(graph).that().inPackageOf(TypeSafeMarker::class).getThatPredicate()!!(declaration),
         )
         assertTrue(
-            ClassesRuleBuilder(graph).that().resideInPackageOf<TypeSafeMarker>().getThatPredicate()!!(declaration),
+            ClassesRuleBuilder(graph).that().inPackageOf<TypeSafeMarker>().getThatPredicate()!!(declaration),
         )
 
         // ClassesShould overloads
@@ -268,24 +266,24 @@ class TypeSafeOverloadsTest {
 
         ClassesRuleBuilder(
             graph,
-        ).should().haveAnnotationOf(TypeSafeMarker::class).getShouldAssertion()!!(declaration, emptyList(), violations)
+        ).should().annotatedWith(TypeSafeMarker::class).getShouldAssertion()!!(declaration, emptyList(), violations)
         assertTrue(violations.isEmpty())
 
         ClassesRuleBuilder(
             graph,
-        ).should().haveAnnotationOf<TypeSafeMarker>().getShouldAssertion()!!(declaration, emptyList(), violations)
+        ).should().annotatedWith<TypeSafeMarker>().getShouldAssertion()!!(declaration, emptyList(), violations)
         assertTrue(violations.isEmpty())
 
         ClassesRuleBuilder(
             graph,
-        ).should().haveAllAnnotationsOf(
+        ).should().annotatedWithAllOf(
             TypeSafeMarker::class,
         ).getShouldAssertion()!!(declaration, emptyList(), violations)
         assertTrue(violations.isEmpty())
 
         ClassesRuleBuilder(
             graph,
-        ).should().haveAnyAnnotationOf(
+        ).should().annotatedWithAnyOf(
             TypeSafeMarker::class,
         ).getShouldAssertion()!!(declaration, emptyList(), violations)
         assertTrue(violations.isEmpty())
@@ -343,12 +341,12 @@ class TypeSafeOverloadsTest {
 
         ClassesRuleBuilder(
             graph,
-        ).should().resideInPackageOf(TypeSafeMarker::class).getShouldAssertion()!!(declaration, emptyList(), violations)
+        ).should().inPackageOf(TypeSafeMarker::class).getShouldAssertion()!!(declaration, emptyList(), violations)
         assertTrue(violations.isEmpty())
 
         ClassesRuleBuilder(
             graph,
-        ).should().resideInPackageOf<TypeSafeMarker>().getShouldAssertion()!!(declaration, emptyList(), violations)
+        ).should().inPackageOf<TypeSafeMarker>().getShouldAssertion()!!(declaration, emptyList(), violations)
         assertTrue(violations.isEmpty())
     }
 }

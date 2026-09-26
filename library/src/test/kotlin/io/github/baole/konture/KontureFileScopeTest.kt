@@ -4,8 +4,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-@file:Suppress("DEPRECATION")
-
 package io.github.baole.konture
 
 import org.junit.jupiter.api.Assertions.*
@@ -177,17 +175,17 @@ class KontureFileScopeTest {
         val files = listOf(fileA, fileB, fileC)
         val kontureFileScope = KontureFileScope(files)
 
-        assertEquals(1, files.withNameEndingWith("A.kt").size)
-        assertEquals(1, kontureFileScope.withNameEndingWith("A.kt").files.size)
+        assertEquals(1, files.haveNameEndingWith("A.kt").size)
+        assertEquals(1, kontureFileScope.haveNameEndingWith("A.kt").files.size)
 
-        assertEquals(3, files.withNameStartingWith("Class").size)
-        assertEquals(3, kontureFileScope.withNameStartingWith("Class").files.size)
+        assertEquals(3, files.haveNameStartingWith("Class").size)
+        assertEquals(3, kontureFileScope.haveNameStartingWith("Class").files.size)
 
         assertEquals(1, files.withNameMatching("*B*").size)
         assertEquals(1, kontureFileScope.withNameMatching("*B*").files.size)
 
-        assertEquals(2, files.withPackage("com.example..").size)
-        assertEquals(2, kontureFileScope.withPackage("com.example..").files.size)
+        assertEquals(2, files.resideInAPackage("com.example..").size)
+        assertEquals(2, kontureFileScope.resideInAPackage("com.example..").files.size)
     }
 
     @Test

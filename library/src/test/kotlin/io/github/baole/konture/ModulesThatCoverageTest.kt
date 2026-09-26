@@ -4,8 +4,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-@file:Suppress("DEPRECATION")
-
 package io.github.baole.konture
 
 import io.github.baole.konture.core.DependencyGraphModel
@@ -291,18 +289,6 @@ class ModulesThatCoverageTest : RuleBuildersTestBase() {
 
         val predResideVararg = ModulesRuleBuilder(graph).that().resideInModules(":moduleA").getThatPredicate()!!
         assertTrue(predResideVararg(moduleA))
-
-        val predPkgSingle = ModulesRuleBuilder(graph).that().containPackage("com.example").getThatPredicate()!!
-        assertTrue(predPkgSingle(moduleA))
-
-        val predPkgList = ModulesRuleBuilder(graph).that().containPackage(listOf("com.example")).getThatPredicate()!!
-        assertTrue(predPkgList(moduleA))
-
-        val predPkgVararg =
-            ModulesRuleBuilder(
-                graph,
-            ).that().containPackage("com.example", "com.other").getThatPredicate()!!
-        assertTrue(predPkgVararg(moduleA))
 
         val predResidePkgSingle = ModulesRuleBuilder(graph).that().resideInAPackage("com.example").getThatPredicate()!!
         assertTrue(predResidePkgSingle(moduleA))

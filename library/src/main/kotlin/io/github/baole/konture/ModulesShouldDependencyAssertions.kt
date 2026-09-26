@@ -131,41 +131,6 @@ public interface ModulesShouldDependencyAssertions {
         predicate: (String) -> Boolean,
     ): ModulesRuleBuilder = mustNotDependOn(description, predicate)
 
-    @Deprecated("Use mustNotDependOn instead.", ReplaceWith("mustNotDependOn(targetPath)"))
-    /** Filter or assertion criteria for not depend on module. */
-    public infix fun notDependOnModule(targetPath: String): ModulesRuleBuilder = mustNotDependOn(targetPath)
-
-    @Deprecated("Use mustNotDependOn instead.", ReplaceWith("mustNotDependOn(targetPaths)"))
-    /** Filter or assertion criteria for not depend on module. */
-    public infix fun notDependOnModule(targetPaths: List<String>): ModulesRuleBuilder = mustNotDependOn(targetPaths)
-
-    @Deprecated("Use mustNotDependOn instead.", ReplaceWith("mustNotDependOn(*targetPaths)"))
-    /** Filter or assertion criteria for not depend on module. */
-    public fun notDependOnModule(vararg targetPaths: String): ModulesRuleBuilder = mustNotDependOn(*targetPaths)
-
-    @Deprecated("Use mustNotDependOn instead.", ReplaceWith("mustNotDependOn(predicate)"))
-    /** Filter or assertion criteria for not depend on module. */
-    public infix fun notDependOnModule(predicate: (String) -> Boolean): ModulesRuleBuilder = mustNotDependOn(predicate)
-
-    @Deprecated("Use mustNotDependOn instead.", ReplaceWith("mustNotDependOn(description, predicate)"))
-    /** Filter or assertion criteria for not depend on module. */
-    public fun notDependOnModule(
-        description: String,
-        predicate: (String) -> Boolean,
-    ): ModulesRuleBuilder = mustNotDependOn(description, predicate)
-
-    @Deprecated("Use mustNotDependOn instead.", ReplaceWith("mustNotDependOn(targetPath)"))
-    /** Filter or assertion criteria for not depend on modules. */
-    public infix fun notDependOnModules(targetPath: String): ModulesRuleBuilder = mustNotDependOn(targetPath)
-
-    @Deprecated("Use mustNotDependOn instead.", ReplaceWith("mustNotDependOn(targetPaths)"))
-    /** Filter or assertion criteria for not depend on modules. */
-    public infix fun notDependOnModules(targetPaths: List<String>): ModulesRuleBuilder = mustNotDependOn(targetPaths)
-
-    @Deprecated("Use mustNotDependOn instead.", ReplaceWith("mustNotDependOn(*targetPaths)"))
-    /** Filter or assertion criteria for not depend on modules. */
-    public fun notDependOnModules(vararg targetPaths: String): ModulesRuleBuilder = mustNotDependOn(*targetPaths)
-
     /** Filter or assertion criteria for may depend on module. */
     public infix fun mayDependOn(targetPath: String): ModulesRuleBuilder = mayDependOn(listOf(targetPath))
 
@@ -305,32 +270,6 @@ public interface ModulesShouldDependencyAssertions {
         }
         return builder
     }
-
-    @Deprecated("Use onlyDependOn instead.", ReplaceWith("onlyDependOn(allowedPattern)"))
-    /** Filter or assertion criteria for only depend on modules. */
-    public infix fun onlyDependOnModules(allowedPattern: String): ModulesRuleBuilder = onlyDependOn(allowedPattern)
-
-    @Deprecated("Use onlyDependOn instead.", ReplaceWith("onlyDependOn(allowedPatterns)"))
-    /** Filter or assertion criteria for only depend on modules. */
-    public infix fun onlyDependOnModules(allowedPatterns: List<String>): ModulesRuleBuilder =
-        onlyDependOn(
-            allowedPatterns,
-        )
-
-    @Deprecated("Use onlyDependOn instead.", ReplaceWith("onlyDependOn(*allowedPatterns)"))
-    /** Filter or assertion criteria for only depend on modules. */
-    public fun onlyDependOnModules(vararg allowedPatterns: String): ModulesRuleBuilder = onlyDependOn(*allowedPatterns)
-
-    @Deprecated("Use onlyDependOn instead.", ReplaceWith("onlyDependOn(predicate)"))
-    /** Filter or assertion criteria for only depend on modules. */
-    public infix fun onlyDependOnModules(predicate: (String) -> Boolean): ModulesRuleBuilder = onlyDependOn(predicate)
-
-    @Deprecated("Use onlyDependOn instead.", ReplaceWith("onlyDependOn(description, predicate)"))
-    /** Filter or assertion criteria for only depend on modules. */
-    public fun onlyDependOnModules(
-        description: String,
-        predicate: (String) -> Boolean,
-    ): ModulesRuleBuilder = onlyDependOn(description, predicate)
 
     /** Filter or assertion criteria for depend on module. */
     public infix fun dependOnModule(targetPath: String): ModulesRuleBuilder {

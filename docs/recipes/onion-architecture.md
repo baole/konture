@@ -75,7 +75,7 @@ class DomainPurityTest {
     @Test
     fun `domain model stays free of framework dependencies`() {
         Konture.classes {
-            that().resideInAPackage("..domain..")
+            that().inPackage("..domain..")
                 .should().onlyDependOnClassesInAnyPackage(
                     "..domain..",
                     "kotlin..",

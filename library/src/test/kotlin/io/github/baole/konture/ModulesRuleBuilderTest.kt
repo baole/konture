@@ -4,8 +4,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-@file:Suppress("DEPRECATION")
-
 package io.github.baole.konture
 
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -40,7 +38,7 @@ class ModulesRuleBuilderTest : RuleBuildersTestBase() {
         val builderNoEmpty =
             ModulesRuleBuilder(
                 emptyGraph,
-            ).that().haveNamePath(":nonexistent").should().notDependOnModule(":core")
+            ).that().haveNamePath(":nonexistent").should().mustNotDependOn(":core")
         assertThrows(AssertionError::class.java) {
             builderNoEmpty.check()
         }
@@ -48,7 +46,7 @@ class ModulesRuleBuilderTest : RuleBuildersTestBase() {
         val builderAllowEmpty =
             ModulesRuleBuilder(
                 emptyGraph,
-            ).allowEmpty().that().haveNamePath(":nonexistent").should().notDependOnModule(":core")
+            ).allowEmpty().that().haveNamePath(":nonexistent").should().mustNotDependOn(":core")
         // No assertion error should be thrown when allowEmpty is enabled
         builderAllowEmpty.check()
     }
@@ -92,7 +90,7 @@ class ModulesRuleBuilderTest : RuleBuildersTestBase() {
         val builderAnd =
             ModulesRuleBuilder(
                 graph,
-            ).should().notDependOnModule(":core").andShould().notDependOnModule(":feature")
+            ).should().mustNotDependOn(":core").andShould().mustNotDependOn(":feature")
         val violationsAnd = mutableListOf<String>()
         builderAnd.getShouldAssertion()!!(module, graph, violationsAnd)
         assertTrue(violationsAnd.isEmpty())
@@ -101,13 +99,13 @@ class ModulesRuleBuilderTest : RuleBuildersTestBase() {
         val builderOr =
             ModulesRuleBuilder(
                 graph,
-            ).should().notDependOnModule(":core").orShould().notDependOnModule(":app")
+            ).should().mustNotDependOn(":core").orShould().mustNotDependOn(":app")
         val violationsOr = mutableListOf<String>()
         builderOr.getShouldAssertion()!!(module, graph, violationsOr)
         assertTrue(violationsOr.isEmpty())
 
         // xorShould
-        val builderXorPass = ModulesRuleBuilder(graph).should().notDependOnModule(":core").xorShould().satisfy { false }
+        val builderXorPass = ModulesRuleBuilder(graph).should().mustNotDependOn(":core").xorShould().satisfy { false }
         val violationsXorPass = mutableListOf<String>()
         builderXorPass.getShouldAssertion()!!(module, graph, violationsXorPass)
         assertTrue(violationsXorPass.isEmpty())
@@ -115,7 +113,7 @@ class ModulesRuleBuilderTest : RuleBuildersTestBase() {
         val builderXorFail =
             ModulesRuleBuilder(
                 graph,
-            ).should().notDependOnModule(":core").xorShould().notDependOnModule(":feature")
+            ).should().mustNotDependOn(":core").xorShould().mustNotDependOn(":feature")
         val violationsXorFail = mutableListOf<String>()
         builderXorFail.getShouldAssertion()!!(module, graph, violationsXorFail)
         assertEquals(1, violationsXorFail.size)
@@ -126,7 +124,7 @@ class ModulesRuleBuilderTest : RuleBuildersTestBase() {
         builderNotPass.getShouldAssertion()!!(module, graph, violationsNotPass)
         assertTrue(violationsNotPass.isEmpty())
 
-        val builderNotFail = ModulesRuleBuilder(graph).notShould().notDependOnModule(":core")
+        val builderNotFail = ModulesRuleBuilder(graph).notShould().mustNotDependOn(":core")
         val violationsNotFail = mutableListOf<String>()
         builderNotFail.getShouldAssertion()!!(module, graph, violationsNotFail)
         assertEquals(1, violationsNotFail.size)
@@ -138,7 +136,7 @@ class ModulesRuleBuilderTest : RuleBuildersTestBase() {
         val graph = ProjectGraph(mapOf(":" to listOf(module)))
 
         // Success
-        ModulesRuleBuilder(graph).that().haveNamePath(":app").should().notDependOnModule(":core").check()
+        ModulesRuleBuilder(graph).that().haveNamePath(":app").should().mustNotDependOn(":core").check()
 
         // Missing assertion rule exception
         val noAssertionBuilder = ModulesRuleBuilder(graph).that().haveNamePath(":app")

@@ -136,19 +136,6 @@ internal class ProjectGraphLoader {
                 }
         }
 
-        fun isTestConfiguration(configuration: String): Boolean {
-            var start = 0
-            while (true) {
-                val index = configuration.indexOf("test", start, ignoreCase = true)
-                if (index == -1) return false
-                val end = index + 4
-                val leftBoundary = index == 0 || configuration[index].isUpperCase() || !configuration[index - 1].isLetterOrDigit()
-                val rightBoundary = end == configuration.length || configuration[end].isUpperCase() || !configuration[end].isLetterOrDigit()
-                if (leftBoundary && rightBoundary) return true
-                start = index + 1
-            }
-        }
-
         fun isCompileVisible(
             sourceSet: SourceSetModel,
             configuration: String,

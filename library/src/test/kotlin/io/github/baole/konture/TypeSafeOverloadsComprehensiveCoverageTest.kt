@@ -20,7 +20,6 @@ annotation class TestAnnotationB
 open class TestSuperClass
 
 class TypeSafeOverloadsComprehensiveCoverageTest : RuleBuildersTestBase() {
-    @Suppress("DEPRECATION")
     @Test
     fun `test type safe overloads for classes that and should`() {
         val classesThat = Konture.classes().that()
@@ -28,10 +27,6 @@ class TypeSafeOverloadsComprehensiveCoverageTest : RuleBuildersTestBase() {
         assertNotNull(classesThat.annotatedWith<TestAnnotationA>())
         assertNotNull(classesThat.annotatedWithAllOf(TestAnnotationA::class, TestAnnotationB::class))
         assertNotNull(classesThat.annotatedWithAnyOf(TestAnnotationA::class, TestAnnotationB::class))
-        assertNotNull(classesThat.haveAnnotationOf(TestAnnotationA::class))
-        assertNotNull(classesThat.haveAnnotationOf<TestAnnotationA>())
-        assertNotNull(classesThat.haveAllAnnotationsOf(TestAnnotationA::class))
-        assertNotNull(classesThat.haveAnyAnnotationOf(TestAnnotationA::class))
         assertNotNull(classesThat.haveAnnotationWithArgument(TestAnnotationA::class, "name", "val"))
         assertNotNull(classesThat.areAssignableTo(TestSuperClass::class))
         assertNotNull(classesThat.areAssignableTo<TestSuperClass>())
@@ -44,20 +39,12 @@ class TypeSafeOverloadsComprehensiveCoverageTest : RuleBuildersTestBase() {
         assertNotNull(classesThat.areNotAssignableFrom<TestSuperClass>())
         assertNotNull(classesThat.inPackageOf(TestSuperClass::class))
         assertNotNull(classesThat.inPackageOf<TestSuperClass>())
-        assertNotNull(classesThat.resideInPackageOf(TestSuperClass::class))
-        assertNotNull(classesThat.resideInPackageOf<TestSuperClass>())
 
         val classesShould = Konture.classes().should()
         assertNotNull(classesShould.annotatedWith(TestAnnotationA::class))
         assertNotNull(classesShould.annotatedWith<TestAnnotationA>())
         assertNotNull(classesShould.annotatedWithAllOf(TestAnnotationA::class, TestAnnotationB::class))
         assertNotNull(classesShould.annotatedWithAnyOf(TestAnnotationA::class, TestAnnotationB::class))
-        assertNotNull(classesShould.haveAnnotationOf(TestAnnotationA::class))
-        assertNotNull(classesShould.haveAnnotationOf<TestAnnotationA>())
-        assertNotNull(classesShould.haveAllAnnotationsOf(TestAnnotationA::class))
-        assertNotNull(classesShould.haveAnyAnnotationOf(TestAnnotationA::class))
-        assertNotNull(classesShould.beAnnotatedWith(TestAnnotationA::class))
-        assertNotNull(classesShould.beAnnotatedWith<TestAnnotationA>())
         assertNotNull(classesShould.haveAnnotationWithArgument(TestAnnotationA::class, "name", "val"))
         assertNotNull(classesShould.beAssignableTo(TestSuperClass::class))
         assertNotNull(classesShould.beAssignableTo<TestSuperClass>())
@@ -67,8 +54,6 @@ class TypeSafeOverloadsComprehensiveCoverageTest : RuleBuildersTestBase() {
         assertNotNull(classesShould.beAssignableFrom<TestSuperClass>())
         assertNotNull(classesShould.inPackageOf(TestSuperClass::class))
         assertNotNull(classesShould.inPackageOf<TestSuperClass>())
-        assertNotNull(classesShould.resideInPackageOf(TestSuperClass::class))
-        assertNotNull(classesShould.resideInPackageOf<TestSuperClass>())
         assertNotNull(classesShould.notDependOnClass<TestSuperClass>())
 
         val classList = listOf(classA, classB)
