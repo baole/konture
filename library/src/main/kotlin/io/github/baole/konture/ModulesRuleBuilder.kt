@@ -71,7 +71,6 @@ public class ModulesRuleBuilder(
             graph.getAllModules().forEach(logger)
         }
 
-    private val ignoredPredicates = mutableListOf<(Module) -> Boolean>()
     private val programmaticSuppressions = mutableListOf<ProgrammaticSuppression>()
 
     /**
@@ -89,34 +88,6 @@ public class ModulesRuleBuilder(
      */
     public fun allowEmpty(): ModulesRuleBuilder {
         allowEmpty = true
-        return this
-    }
-
-    /**
-     * Configures this builder to ignore failures for modules satisfying the given predicate.
-     */
-    @Deprecated(
-        message = "Use suppress { ... } with mandatory audit reason instead",
-        replaceWith = ReplaceWith("suppress { ... }"),
-    )
-    public fun ignoreFailuresIn(predicate: (Module) -> Boolean): ModulesRuleBuilder {
-        ignoredPredicates.add(predicate)
-        return this
-    }
-
-    /**
-     * Configures this builder to ignore failures for modules matching any of the specified paths or patterns.
-     */
-    @Deprecated(
-        message = "Use suppress { ... } with mandatory audit reason instead",
-        replaceWith = ReplaceWith("suppress { ... }"),
-    )
-    public fun ignoreFailuresIn(vararg modulePaths: String): ModulesRuleBuilder {
-        ignoredPredicates.add { module ->
-            modulePaths.any { path ->
-                module.path == path || io.github.baole.konture.impl.PatternMatchers.matchesModuleGlob(path, module.path)
-            }
-        }
         return this
     }
 
@@ -352,7 +323,6 @@ public class ModulesRuleBuilder(
 
         val runCheckReport = { list: MutableList<Violation> ->
             for (module in modulesToCheck) {
-                if (ignoredPredicates.any { it(module) }) continue
                 val rawMessages = StructuredMessageList()
                 assertion(module, g, rawMessages)
                 for ((index, rawMsg) in rawMessages.withIndex()) {

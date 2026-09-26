@@ -30,8 +30,8 @@ class NamingConventionTest {
     @Test
     fun `use cases must be named UseCase`() {
         Konture.classes()
-            .that().resideInAPackage("..usecase..")
-            .should().haveNameEndingWith("UseCase")
+            .that().inPackage("..usecase..")
+            .should().nameEndsWith("UseCase")
             .check()
     }
 }
@@ -53,7 +53,7 @@ class NamingConventionTest {
     @Test
     fun `viewmodels must have ViewModel suffix`() {
         Konture.classes()
-            .that { resideInAPackage("..presentation..") }
+            .that { inPackage("..presentation..") }
             .should { name.endsWith("ViewModel") }
             .check()
     }
@@ -70,7 +70,7 @@ class NamingConventionTest {
     @Test
     fun `viewmodels must have ViewModel suffix with check helper`() {
         Konture.classes()
-            .that { resideInAPackage("..presentation..") }
+            .that { inPackage("..presentation..") }
             .should {
                 check(name.endsWith("ViewModel"), "ViewModel $name must have 'ViewModel' suffix")
             }

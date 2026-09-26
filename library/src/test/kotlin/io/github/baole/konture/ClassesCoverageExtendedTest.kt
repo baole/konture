@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-@file:Suppress("LongMethod", "DEPRECATION")
+@file:Suppress("LongMethod")
 
 package io.github.baole.konture
 
@@ -27,99 +27,99 @@ class ClassesCoverageExtendedTest : RuleBuildersTestBase() {
 
         // ClassesThatPackageFilter
         val b1 = builder()
-        b1.that().resideInPackageOf(RuleBuildersTestBase::class)
+        b1.that().inPackageOf(RuleBuildersTestBase::class)
         assertNotNull(b1.getThatPredicate())
 
         val b2 = builder()
-        b2.that().resideInPackageOf<RuleBuildersTestBase>()
+        b2.that().inPackageOf<RuleBuildersTestBase>()
         assertNotNull(b2.getThatPredicate())
 
-        assertTrue(testPred(builder().that().resideInAPackage("com.example"), classA))
-        assertTrue(testPred(builder().that().resideInAPackage("com.example"), classB))
-        assertFalse(testPred(builder().that().resideInAPackage("com.example"), classC))
+        assertTrue(testPred(builder().that().inPackage("com.example"), classA))
+        assertTrue(testPred(builder().that().inPackage("com.example"), classB))
+        assertFalse(testPred(builder().that().inPackage("com.example"), classC))
 
-        assertTrue(testPred(builder().that().resideInAPackage("com.example.."), classA))
+        assertTrue(testPred(builder().that().inPackage("com.example.."), classA))
 
-        assertTrue(testPred(builder().that().resideInAPackage(listOf("com.example")), classA))
+        assertTrue(testPred(builder().that().inPackage(listOf("com.example")), classA))
 
-        assertTrue(testPred(builder().that().resideInAPackage("com.example", "com.other"), classA))
-        assertTrue(testPred(builder().that().resideInAPackage("com.example", "com.other"), classC))
+        assertTrue(testPred(builder().that().inPackage("com.example", "com.other"), classA))
+        assertTrue(testPred(builder().that().inPackage("com.example", "com.other"), classC))
 
-        assertTrue(testPred(builder().that().notResideInAPackage("com.other"), classA))
-        assertFalse(testPred(builder().that().notResideInAPackage("com.other"), classC))
+        assertTrue(testPred(builder().that().notInPackage("com.other"), classA))
+        assertFalse(testPred(builder().that().notInPackage("com.other"), classC))
 
-        assertTrue(testPred(builder().that().notResideInAPackage(listOf("com.other")), classA))
-        assertFalse(testPred(builder().that().notResideInAPackage(listOf("com.other")), classC))
+        assertTrue(testPred(builder().that().notInPackage(listOf("com.other")), classA))
+        assertFalse(testPred(builder().that().notInPackage(listOf("com.other")), classC))
 
-        assertTrue(testPred(builder().that().notResideInAPackage("com.other", "com.other2"), classA))
-        assertFalse(testPred(builder().that().notResideInAPackage("com.other", "com.other2"), classC))
+        assertTrue(testPred(builder().that().notInPackage("com.other", "com.other2"), classA))
+        assertFalse(testPred(builder().that().notInPackage("com.other", "com.other2"), classC))
 
-        assertTrue(testPred(builder().that().resideInAModule(":moduleA"), classA))
+        assertTrue(testPred(builder().that().inModule(":moduleA"), classA))
 
-        assertTrue(testPred(builder().that().resideInAModule(listOf(":moduleA")), classA))
+        assertTrue(testPred(builder().that().inModule(listOf(":moduleA")), classA))
 
-        assertTrue(testPred(builder().that().resideInAModule(":moduleA", ":moduleB"), classA))
+        assertTrue(testPred(builder().that().inModule(":moduleA", ":moduleB"), classA))
 
-        assertFalse(testPred(builder().that().notResideInAModule(":moduleA"), classA))
+        assertFalse(testPred(builder().that().notInModule(":moduleA"), classA))
 
-        assertFalse(testPred(builder().that().notResideInAModule(listOf(":moduleA")), classA))
+        assertFalse(testPred(builder().that().notInModule(listOf(":moduleA")), classA))
 
-        assertFalse(testPred(builder().that().notResideInAModule(":moduleA", ":moduleB"), classA))
+        assertFalse(testPred(builder().that().notInModule(":moduleA", ":moduleB"), classA))
 
         // ClassesThatNameFilter
-        assertTrue(testPred(builder().that().haveName("ClassA"), classA))
+        assertTrue(testPred(builder().that().named("ClassA"), classA))
 
-        assertTrue(testPred(builder().that().haveName(listOf("ClassA")), classA))
+        assertTrue(testPred(builder().that().named(listOf("ClassA")), classA))
 
-        assertTrue(testPred(builder().that().haveName("ClassA", "ClassB"), classA))
+        assertTrue(testPred(builder().that().named("ClassA", "ClassB"), classA))
 
-        assertFalse(testPred(builder().that().notHaveName("ClassA"), classA))
+        assertFalse(testPred(builder().that().notNamed("ClassA"), classA))
 
-        assertFalse(testPred(builder().that().notHaveName(listOf("ClassA")), classA))
+        assertFalse(testPred(builder().that().notNamed(listOf("ClassA")), classA))
 
-        assertFalse(testPred(builder().that().notHaveName("ClassA", "ClassB"), classA))
+        assertFalse(testPred(builder().that().notNamed("ClassA", "ClassB"), classA))
 
-        assertFalse(testPred(builder().that().notHaveName { it.startsWith("Class") }, classA))
+        assertFalse(testPred(builder().that().notNamed { it.startsWith("Class") }, classA))
 
-        assertTrue(testPred(builder().that().haveNameEndingWith("A"), classA))
+        assertTrue(testPred(builder().that().nameEndsWith("A"), classA))
 
-        assertTrue(testPred(builder().that().haveNameEndingWith(listOf("A")), classA))
+        assertTrue(testPred(builder().that().nameEndsWith(listOf("A")), classA))
 
-        assertTrue(testPred(builder().that().haveNameEndingWith("A", "B"), classA))
+        assertTrue(testPred(builder().that().nameEndsWith("A", "B"), classA))
 
-        assertFalse(testPred(builder().that().notHaveNameEndingWith("A"), classA))
+        assertFalse(testPred(builder().that().notNameEndsWith("A"), classA))
 
-        assertFalse(testPred(builder().that().notHaveNameEndingWith(listOf("A")), classA))
+        assertFalse(testPred(builder().that().notNameEndsWith(listOf("A")), classA))
 
-        assertFalse(testPred(builder().that().notHaveNameEndingWith("A", "B"), classA))
+        assertFalse(testPred(builder().that().notNameEndsWith("A", "B"), classA))
 
-        assertTrue(testPred(builder().that().haveNameStartingWith("Class"), classA))
+        assertTrue(testPred(builder().that().nameStartsWith("Class"), classA))
 
-        assertTrue(testPred(builder().that().haveNameStartingWith(listOf("Class")), classA))
+        assertTrue(testPred(builder().that().nameStartsWith(listOf("Class")), classA))
 
-        assertTrue(testPred(builder().that().haveNameStartingWith("Class", "Util"), classA))
+        assertTrue(testPred(builder().that().nameStartsWith("Class", "Util"), classA))
 
-        assertFalse(testPred(builder().that().notHaveNameStartingWith("Class"), classA))
+        assertFalse(testPred(builder().that().notNameStartsWith("Class"), classA))
 
-        assertFalse(testPred(builder().that().notHaveNameStartingWith(listOf("Class")), classA))
+        assertFalse(testPred(builder().that().notNameStartsWith(listOf("Class")), classA))
 
-        assertFalse(testPred(builder().that().notHaveNameStartingWith("Class", "Util"), classA))
+        assertFalse(testPred(builder().that().notNameStartsWith("Class", "Util"), classA))
 
-        assertTrue(testPred(builder().that().haveName { it.startsWith("Class") }, classA))
+        assertTrue(testPred(builder().that().named { it.startsWith("Class") }, classA))
 
-        assertTrue(testPred(builder().that().haveName("custom predicate") { it.startsWith("Class") }, classA))
+        assertTrue(testPred(builder().that().named("custom predicate") { it.startsWith("Class") }, classA))
 
-        assertTrue(testPred(builder().that().haveNameMatching("Class*"), classA))
+        assertTrue(testPred(builder().that().nameMatches("Class*"), classA))
 
-        assertTrue(testPred(builder().that().haveNameMatching(listOf("Class*")), classA))
+        assertTrue(testPred(builder().that().nameMatches(listOf("Class*")), classA))
 
-        assertTrue(testPred(builder().that().haveNameMatching("Class*", "Util*"), classA))
+        assertTrue(testPred(builder().that().nameMatches("Class*", "Util*"), classA))
 
-        assertFalse(testPred(builder().that().notHaveNameMatching("Class*"), classA))
+        assertFalse(testPred(builder().that().notNameMatches("Class*"), classA))
 
-        assertFalse(testPred(builder().that().notHaveNameMatching(listOf("Class*")), classA))
+        assertFalse(testPred(builder().that().notNameMatches(listOf("Class*")), classA))
 
-        assertFalse(testPred(builder().that().notHaveNameMatching("Class*", "Util*"), classA))
+        assertFalse(testPred(builder().that().notNameMatches("Class*", "Util*"), classA))
 
         assertTrue(testPred(builder().that().areAssignableToAnyOf("com.example.ClassA"), classA))
 
@@ -181,18 +181,18 @@ class ClassesCoverageExtendedTest : RuleBuildersTestBase() {
 
         assertNotNull(builder().that().areNotAssignableFrom(RuleBuildersTestBase::class).getThatPredicate())
 
-        assertFalse(testPred(builder().that().haveAnnotationOf("com.example.MyAnnotation"), classA))
-        assertTrue(testPred(builder().that().haveAnnotationOf("com.example.MyAnnotation"), classB))
+        assertFalse(testPred(builder().that().annotatedWith("com.example.MyAnnotation"), classA))
+        assertTrue(testPred(builder().that().annotatedWith("com.example.MyAnnotation"), classB))
 
-        assertTrue(testPred(builder().that().areAnnotatedWith("com.example.MyAnnotation"), classB))
+        assertTrue(testPred(builder().that().annotatedWith("com.example.MyAnnotation"), classB))
 
-        assertTrue(testPred(builder().that().haveAllAnnotationsOf(listOf("com.example.MyAnnotation")), classB))
+        assertTrue(testPred(builder().that().annotatedWithAllOf(listOf("com.example.MyAnnotation")), classB))
 
-        assertFalse(testPred(builder().that().haveAllAnnotationsOf("com.example.MyAnnotation", "Other"), classB))
+        assertFalse(testPred(builder().that().annotatedWithAllOf("com.example.MyAnnotation", "Other"), classB))
 
-        assertTrue(testPred(builder().that().haveAnyAnnotationOf(listOf("com.example.MyAnnotation")), classB))
+        assertTrue(testPred(builder().that().annotatedWithAnyOf(listOf("com.example.MyAnnotation")), classB))
 
-        assertTrue(testPred(builder().that().haveAnyAnnotationOf("com.example.MyAnnotation", "Other"), classB))
+        assertTrue(testPred(builder().that().annotatedWithAnyOf("com.example.MyAnnotation", "Other"), classB))
 
         assertFalse(testPred(builder().that().areOpen(), classA))
 
@@ -215,10 +215,10 @@ class ClassesCoverageExtendedTest : RuleBuildersTestBase() {
         assertFalse(testPred(builder().that().haveModifier(Modifier.OPEN), classA))
 
         // ClassesThatCompositeFilter
-        assertTrue(testPred(builder().that().haveName("ClassA").and().bePublic(), classA))
+        assertTrue(testPred(builder().that().named("ClassA").and().bePublic(), classA))
 
-        assertTrue(testPred(builder().that().haveName("ClassA").or().haveName("ClassB"), classA))
-        assertTrue(testPred(builder().that().haveName("ClassA").or().haveName("ClassB"), classB))
+        assertTrue(testPred(builder().that().named("ClassA").or().named("ClassB"), classA))
+        assertTrue(testPred(builder().that().named("ClassA").or().named("ClassB"), classB))
 
         assertTrue(testPred(builder().that().satisfy { it.name.contains("Class") }, classA))
     }

@@ -4,8 +4,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-@file:Suppress("DEPRECATION")
-
 package io.github.baole.konture
 
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -23,13 +21,13 @@ class ApiParityEnhancementsTest : RuleBuildersTestBase() {
     }
 
     @Test
-    fun `test ModulesThat resideInAModule and containPackage`() {
+    fun `test ModulesThat resideInAModule and resideInAPackage`() {
         val builder1 = ModulesRuleBuilder(projectGraph)
         builder1.that().resideInAModule(":moduleA")
         assertTrue(builder1.getThatPredicate()!!(moduleA))
 
         val builder2 = ModulesRuleBuilder(projectGraph)
-        builder2.that().containPackage("com.example..")
+        builder2.that().resideInAPackage("com.example..")
         assertTrue(builder2.getThatPredicate()!!(moduleA))
 
         val builder3 = ModulesRuleBuilder(projectGraph)

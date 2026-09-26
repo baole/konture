@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-@file:Suppress("LongMethod", "DEPRECATION")
+@file:Suppress("LongMethod")
 
 package io.github.baole.konture
 
@@ -59,8 +59,8 @@ internal class ClassesShouldTest : KontureScopeTestFixture() {
         // anyOf
         val builderAnyOf = ClassesRuleBuilder(graph)
         builderAnyOf.should().anyOf(
-            { resideInAPackage("com.example") },
-            { haveName("ClassB") },
+            { inPackage("com.example") },
+            { named("ClassB") },
         )
         val assertAnyOf = builderAnyOf.getShouldAssertion()!!
         val vAny1 = mutableListOf<String>()
@@ -74,8 +74,8 @@ internal class ClassesShouldTest : KontureScopeTestFixture() {
         // allOf
         val builderAllOf = ClassesRuleBuilder(graph)
         builderAllOf.should().allOf(
-            { resideInAPackage("com.example") },
-            { haveName("ClassA") },
+            { inPackage("com.example") },
+            { named("ClassA") },
         )
         val assertAllOf = builderAllOf.getShouldAssertion()!!
         val vAll1 = mutableListOf<String>()
@@ -89,8 +89,8 @@ internal class ClassesShouldTest : KontureScopeTestFixture() {
         // noneOf
         val builderNoneOf = ClassesRuleBuilder(graph)
         builderNoneOf.should().noneOf(
-            { resideInAPackage("com.other") },
-            { haveName("ClassB") },
+            { inPackage("com.other") },
+            { named("ClassB") },
         )
         val assertNoneOf = builderNoneOf.getShouldAssertion()!!
         val vNone1 = mutableListOf<String>()

@@ -111,7 +111,7 @@ class ArchitectureGuardrailsTest {
     fun `feature implementations must not depend on sibling feature implementations`() {
         Konture.modules {
             that().haveNameMatching(":feature:**:impl")
-            should().onlyDependOnModules(
+            should().onlyDependOn(
                 ":feature:**:api",
                 ":core:**",
                 ":shared",
@@ -128,8 +128,8 @@ For a simpler layered project, use wildcard pattern matching:
 ```kotlin
 Konture.modules {
     that().haveNameMatching(":core:domain**")
-    should().notDependOnModule(":core:data**")
-    should().notDependOnModule(":app**")
+    should().mustNotDependOn(":core:data**")
+    should().mustNotDependOn(":app**")
 }
 ```
 
@@ -156,7 +156,7 @@ A clean module graph does not guarantee clean source references. Add a source-le
 @Test
 fun `domain classes must only depend on domain and standard library types`() {
     Konture.classes {
-        that().resideInAPackage("..domain..")
+        that().inPackage("..domain..")
         should().onlyDependOnClassesInAnyPackage(
             "..domain..",
             "kotlin..",
@@ -170,7 +170,7 @@ If your domain layer deliberately depends on shared project code, say so explici
 
 ```kotlin
 Konture.classes {
-    that().resideInAPackage("..domain..")
+    that().inPackage("..domain..")
     should().onlyDependOnClassesInAnyPackage(
         "..domain..",
         "..shared..",
@@ -203,7 +203,7 @@ fun `domain must not import framework or persistence APIs`() {
 }
 ```
 
-`scopeFromPackage("com.acme.domain")` selects a concrete package prefix for custom assertions. By contrast, `resideInAPackage("..domain..")` uses Konture's wildcard package matching inside fluent class rules.
+`scopeFromPackage("com.acme.domain")` selects a concrete package prefix for custom assertions. By contrast, `inPackage("..domain..")` uses Konture's wildcard package matching inside fluent class rules.
 
 Tune the prefixes for the project. A backend may ban persistence annotations from domain. An Android app may ban Android and Compose APIs from shared or domain packages. A KMP project may apply different policies to `commonMain`, `androidMain`, and `iosMain`.
 
@@ -217,8 +217,8 @@ If your architecture treats repositories in the domain layer as contracts, encod
 @Test
 fun `repositories inside domain must be interfaces`() {
     Konture.classes {
-        that().resideInAPackage("..domain..")
-        that().haveNameEndingWith("Repository")
+        that().inPackage("..domain..")
+        that().nameEndsWith("Repository")
         should().beInterfaces()
     }
 }
@@ -242,7 +242,7 @@ Kotlin classes and members are public by default. In multi-module projects, acci
 @Test
 fun `implementation classes must remain internal`() {
     Konture.classes {
-        that().resideInAPackage("..impl..")
+        that().inPackage("..impl..")
         should().beInternal()
     }
 }
@@ -266,7 +266,7 @@ If you did not start with feature isolation, add it once the basic module rules 
 fun `feature implementations must not depend on sibling feature implementations`() {
     Konture.modules {
         that().haveNameMatching(":feature:**:impl")
-        should().onlyDependOnModules(
+        should().onlyDependOn(
             ":feature:**:api",
             ":core:**",
             ":shared",
@@ -400,11 +400,11 @@ fun `presentation boundary must hide transport models`() {
     Konture.architecture {
         modules {
             that().haveNamePath(":feature:profile:presentation")
-            should().notDependOnModule(":core:network")
+            should().mustNotDependOn(":core:network")
         }
 
         classes {
-            that().resideInAPackage("..profile.presentation..")
+            that().inPackage("..profile.presentation..")
             should().notDependOnClassesInAnyPackage(
                 "..network.dto..",
                 "..database..",
@@ -453,7 +453,7 @@ You can pair that with a module rule:
 ```kotlin
 Konture.modules {
     that().haveNamePath(":feature:profile:presentation")
-    should().notDependOnModule(":core:network")
+    should().mustNotDependOn(":core:network")
 }
 ```
 
@@ -467,8 +467,8 @@ Konture should not replace a runtime DI integration test. It can still protect s
 @Test
 fun `hilt modules must stay in di packages`() {
     Konture.classes {
-        that().haveAnnotationOf("dagger.Module")
-        should().resideInAPackage("..di..")
+        that().annotatedWith("dagger.Module")
+        should().inPackage("..di..")
     }
 }
 ```
@@ -482,7 +482,7 @@ fun `production koin modules must not live in test packages`() {
         that().satisfy { file ->
             file.imports.any { it == "org.koin.dsl.module" }
         }
-        should().resideInAPackage { packageName ->
+        should().inPackage { packageName ->
             !packageName.contains(".test.") &&
                 !packageName.contains(".fixtures.")
         }
@@ -663,7 +663,7 @@ class ArchitectureGuardrailsTest {
     fun `feature API modules must not depend on feature implementation modules`() {
         Konture.modules {
             that().haveNameMatching(":feature:**:api")
-            should().notDependOnModule(":feature:**:impl")
+            should().mustNotDependOn(":feature:**:impl")
         }
     }
 
@@ -671,7 +671,7 @@ class ArchitectureGuardrailsTest {
     fun `feature implementations must not depend on sibling feature implementations`() {
         Konture.modules {
             that().haveNameMatching(":feature:**:impl")
-            should().onlyDependOnModules(
+            should().onlyDependOn(
                 ":feature:**:api",
                 ":core:**",
                 ":shared",
@@ -682,7 +682,7 @@ class ArchitectureGuardrailsTest {
     @Test
     fun `domain classes must only depend on domain and standard library types`() {
         Konture.classes {
-            that().resideInAPackage("..domain..")
+            that().inPackage("..domain..")
             should().onlyDependOnClassesInAnyPackage(
                 "..domain..",
                 "kotlin..",
@@ -694,7 +694,7 @@ class ArchitectureGuardrailsTest {
     @Test
     fun `implementation classes must remain internal`() {
         Konture.classes {
-            that().resideInAPackage("..impl..")
+            that().inPackage("..impl..")
             should().beInternal()
         }
     }
@@ -728,12 +728,12 @@ class ArchitectureSuiteTest {
         Konture.architecture {
             modules {
                 that().haveNameMatching(":feature:**:api")
-                should().notDependOnModule(":feature:**:impl")
+                should().mustNotDependOn(":feature:**:impl")
             }
 
             modules {
                 that().haveNameMatching(":feature:**:impl")
-                should().onlyDependOnModules(
+                should().onlyDependOn(
                     ":feature:**:api",
                     ":core:**",
                     ":shared",
@@ -747,11 +747,11 @@ class ArchitectureSuiteTest {
         Konture.architecture {
             modules {
                 that().haveNamePath(":core:domain")
-                should().notDependOnModule(":core:data")
+                should().mustNotDependOn(":core:data")
             }
 
             classes {
-                that().resideInAPackage("..domain..")
+                that().inPackage("..domain..")
                 should().notDependOnClassesInAnyPackage(
                     "..data..",
                     "..database..",

@@ -30,12 +30,12 @@ The table below outlines all available builder entry points, scoping utilities, 
 | **Baseline & Violation Suppression** | ✅ `suppress { ... }` | ✅ `suppress { ... }` | ✅ `suppress { ... }` | ✅ `suppress { ... }` | ✅ `suppress { ... }` | ✅ `suppress { ... }` |
 | **Logical Chaining Operators** (`and`, `or`, `not`) | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
 | **Name / Path Filtering** (`that()`) | ✅ | ✅ | ✅ | ✅ (`havePath`, `haveName`) | ✅ (`matching`, `haveKey`) | ✅ |
-| **Module Filtering** (`resideInAModule`) | ✅ | ✅ | ✅ | ✅ `resideInAModule` | ✅ `resideInAModule` | ✅ |
-| **Package Filtering** (`resideInAPackage`) | ✅ | ✅ | ✅ | ✅ `resideInAPackage` | ✅ `resideInAPackage` | ✅ |
+| **Module Filtering** (`inModule` / `resideInAModule`) | ✅ `inModule` | ✅ `inModule` | ✅ `resideInAModule` | ✅ `resideInAModule` | ✅ `resideInAModule` | ✅ `resideInAModule` |
+| **Package Filtering** (`inPackage` / `resideInAPackage`) | ✅ `inPackage` | ✅ `inPackage` | ✅ `resideInAPackage` | ✅ `resideInAPackage` | ✅ `resideInAPackage` | ✅ `resideInAPackage` |
 | **Annotation Filtering / Assertions** | ✅ (`containClassesWithAnnotation`) | ✅ (`beAnnotatedWith`) | ✅ (`beAnnotatedWith`) | ✅ (`containClassesWithAnnotation`) | ✅ (`containClassesWithAnnotation`) | ✅ (`beAnnotatedWith`) |
 | **Visibility / Modifier Controls** | ➖ *(N/A)* | ✅ | ✅ | ➖ *(N/A)* | ➖ *(N/A)* | ✅ |
 | **Call / Reference Prohibitions** | ✅ `notCall`, `notReferenceClass` | ✅ `notCall`, `notReferenceClass` | ✅ `notCall`, `notReferenceClass` | ✅ `notCall`, `notReferenceClass` | ✅ `notCall`, `notReferenceClass` | ✅ `notCall`, `notReferenceClass` |
-| **Dependency Assertions** | ✅ `onlyDependOnPackages`, `notDependOnPackages`, `onlyDependOnModules`, `notDependOnModules` | ✅ `onlyDependOn*`, `notDependOn*` | ➖ | ✅ `onlyDependOnModules`, `notDependOnModules` | ✅ `onlyDependOnSlices`, `notDependOnSlice` | ➖ |
+| **Dependency Assertions** | ✅ `onlyDependOnPackages`, `notDependOnPackages`, `onlyDependOn`, `mustNotDependOn` | ✅ `onlyDependOn*`, `notDependOn*` | ➖ | ✅ `onlyDependOn`, `mustNotDependOn` | ✅ `onlyDependOnSlices`, `notDependOnSlice` | ➖ |
 | **Cycle Detection Assertions** | ➖ | ✅ `beFreeOfCycles()` | ➖ | ✅ `beFreeOfCycles()` | ✅ `beFreeOfCycles()` | ➖ |
 | **Plugin / Asset Assertions** | ➖ | ➖ | ➖ | ✅ `havePlugin`, `notHavePlugin` | ➖ | ➖ |
 | **Type-Safe Overloads** (`KClass`, `reified T`) | ✅ | ✅ | ✅ | ✅ *(Calls/Refs/Annotations)* | ✅ *(Calls/Refs/Annotations)* | ✅ |
@@ -49,7 +49,7 @@ The table below outlines all available builder entry points, scoping utilities, 
 ### 1. `files {}` Scope
 ```kotlin
 Konture.files {
-    that().resideInAPackage("com.acme.feature..")
+    that().inPackage("com.acme.feature..")
     should().onlyDependOnPackages("com.acme.core..", "kotlin..")
     andShould().notUseWildcardImports()
 }
@@ -58,9 +58,9 @@ Konture.files {
 ### 2. `classes {}` Scope
 ```kotlin
 Konture.classes {
-    that().haveNameEndingWith("Repository")
+    that().nameEndsWith("Repository")
     should().beInterfaces()
-    andShould().resideInAPackage("com.acme.domain..")
+    andShould().inPackage("com.acme.domain..")
 }
 ```
 
@@ -76,7 +76,7 @@ Konture.functions {
 ```kotlin
 Konture.modules {
     that().resideInAModule(":feature-*")
-    should().notDependOnModules(":feature-*")
+    should().mustNotDependOn(":feature-*")
     andShould().beFreeOfCycles()
     andShould().notCall("java.lang.System.exit")
 }

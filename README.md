@@ -132,8 +132,8 @@ class ArchitectureGuardrails {
         architecture {
             // 🎯 Select classes inside domain package
             classes {
-                that().resideInAPackage("..domain..")
-                that().haveNameEndingWith("Repository")
+                that().inPackage("..domain..")
+                that().nameEndsWith("Repository")
                 should().beInterfaces()
             }
         }

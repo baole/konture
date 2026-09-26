@@ -41,7 +41,6 @@ class ScopesFactoryAndFilterDeepCoverageTest : RuleBuildersTestBase() {
         isExtension = false,
     )
 
-    @Suppress("DEPRECATION")
     @Test
     fun `test KontureFunctionScope factory and operations`() {
         val scopeFromProject = KontureFunctionScope.fromProject(projectGraph)
@@ -64,12 +63,9 @@ class ScopesFactoryAndFilterDeepCoverageTest : RuleBuildersTestBase() {
         // Test filtering extensions
         val funcList = scopeFromProject.functions
         assertNotNull(funcList.haveNameEndingWith("Action"))
-        assertNotNull(funcList.withNameEndingWith("Action"))
         assertNotNull(funcList.haveNameStartingWith("do"))
-        assertNotNull(funcList.withNameStartingWith("do"))
         assertNotNull(funcList.withNameMatching("*Action*"))
         assertNotNull(funcList.resideInAPackage("com.example.."))
-        assertNotNull(funcList.withPackage("com.example.."))
         assertNotNull(funcList.memberFunctions())
         assertNotNull(funcList.topLevelFunctions())
         assertNotNull(funcList.extensionFunctions())
@@ -86,12 +82,9 @@ class ScopesFactoryAndFilterDeepCoverageTest : RuleBuildersTestBase() {
         assertNotNull(scope.withParameterOf("String"))
         assertNotNull(scope.withAnnotationOf("Deprecated"))
         assertNotNull(scope.haveNameEndingWith("Action"))
-        assertNotNull(scope.withNameEndingWith("Action"))
         assertNotNull(scope.haveNameStartingWith("do"))
-        assertNotNull(scope.withNameStartingWith("do"))
         assertNotNull(scope.resideInAPackage("com.example.."))
         assertNotNull(scope.withNameMatching("*Action*"))
-        assertNotNull(scope.withPackage("com.example.."))
         assertNotNull(scope.withVisibility(Visibility.PUBLIC))
 
         // Assertions on empty scope or matching
@@ -110,7 +103,6 @@ class ScopesFactoryAndFilterDeepCoverageTest : RuleBuildersTestBase() {
         }
     }
 
-    @Suppress("DEPRECATION")
     @Test
     fun `test KonturePropertyScope factory and operations`() {
         val scopeFromProject = KonturePropertyScope.fromProject(projectGraph)
@@ -132,16 +124,12 @@ class ScopesFactoryAndFilterDeepCoverageTest : RuleBuildersTestBase() {
 
         val propList = scopeFromProject.properties
         assertNotNull(propList.haveNameEndingWith("Name"))
-        assertNotNull(propList.withNameEndingWith("Name"))
         assertNotNull(propList.haveNameStartingWith("user"))
-        assertNotNull(propList.withNameStartingWith("user"))
         assertNotNull(propList.withNameMatching("*Name*"))
         assertNotNull(propList.resideInAPackage("com.example.."))
-        assertNotNull(propList.withPackage("com.example.."))
         assertNotNull(propList.valProperties())
     }
 
-    @Suppress("DEPRECATION")
     @Test
     fun `test KontureFileScope factory and operations`() {
         val scopeFromProject = KontureFileScope.fromProject(projectGraph)

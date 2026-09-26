@@ -87,7 +87,7 @@ stopping as soon as you have enough to proceed confidently:
    ("should `feature:checkout` be allowed to depend on `feature:profile` at
    all, or is that the sideways dependency you want blocked?") is better than
    a confident-sounding rule built on an assumed shape.
-4. **Prefer wildcard & pattern matching**: Avoid hardcoding long lists of full individual module paths or package names. Use wildcard/pattern selectors (`haveNameMatching(":feature:**")`, `haveNameMatching(":core:domain**")`, `resideInAPackage("..domain..")`) so rules automatically scale and cover newly added modules or packages.
+4. **Prefer wildcard & pattern matching**: Avoid hardcoding long lists of full individual module paths or package names. Use wildcard/pattern selectors (`haveNameMatching(":feature:**")`, `haveNameMatching(":core:domain**")`, `inPackage("..domain..")`) so rules automatically scale and cover newly added modules or packages.
 
 ### Step 3. Locate or scaffold the dedicated test module
 
@@ -110,7 +110,7 @@ against the version resolved in this project.
 Use [resources/ArchitectureGuardrails.kt.template](resources/ArchitectureGuardrails.kt.template)
 as the starting shape for the test class, then:
 
-- Use wildcard/pattern matching (`haveNameMatching(":feature:**")`, `haveNameMatching(":core:domain**")`, `resideInAPackage("..domain..")`) rather than hardcoding explicit full module/package lists.
+- Use wildcard/pattern matching (`haveNameMatching(":feature:**")`, `haveNameMatching(":core:domain**")`, `inPackage("..domain..")`) rather than hardcoding explicit full module/package lists.
 - Name each test after the policy, not the mechanism — e.g.
   `` `repositories inside domain must be declared as interfaces` `` rather than
   `test1`. The test name is the architecture's live documentation.

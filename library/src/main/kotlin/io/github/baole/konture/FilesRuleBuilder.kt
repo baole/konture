@@ -103,7 +103,6 @@ public class FilesRuleBuilder(
             }.forEach(logger)
         }
 
-    private val ignoredPredicates = mutableListOf<(FileDeclarationContext) -> Boolean>()
     private val programmaticSuppressions = mutableListOf<ProgrammaticSuppression>()
 
     /**
@@ -121,34 +120,6 @@ public class FilesRuleBuilder(
      */
     public fun allowEmpty(): FilesRuleBuilder {
         allowEmpty = true
-        return this
-    }
-
-    /**
-     * Configures this builder to ignore failures for files satisfying the given predicate.
-     */
-    @Deprecated(
-        message = "Use suppress { ... } with mandatory audit reason instead",
-        replaceWith = ReplaceWith("suppress { ... }"),
-    )
-    public fun ignoreFailuresIn(predicate: (FileDeclarationContext) -> Boolean): FilesRuleBuilder {
-        ignoredPredicates.add(predicate)
-        return this
-    }
-
-    /**
-     * Configures this builder to ignore failures for files matching any of the specified names or patterns.
-     */
-    @Deprecated(
-        message = "Use suppress { ... } with mandatory audit reason instead",
-        replaceWith = ReplaceWith("suppress { ... }"),
-    )
-    public fun ignoreFailuresIn(vararg fileNames: String): FilesRuleBuilder {
-        ignoredPredicates.add { ctx ->
-            fileNames.any { name ->
-                ctx.declaration.name == name || ctx.declaration.filePath == name || io.github.baole.konture.impl.PatternMatchers.matchesSimpleGlob(name, ctx.declaration.name)
-            }
-        }
         return this
     }
 
@@ -395,7 +366,6 @@ public class FilesRuleBuilder(
 
         val runCheckReport = { list: MutableList<Violation> ->
             for (file in filesToCheck) {
-                if (ignoredPredicates.any { it(file) }) continue
                 val rawMessages = StructuredMessageList()
                 assertion(file, allFiles, rawMessages)
                 for ((index, rawMsg) in rawMessages.withIndex()) {

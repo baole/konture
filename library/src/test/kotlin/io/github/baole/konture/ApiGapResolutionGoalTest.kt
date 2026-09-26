@@ -4,8 +4,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-@file:Suppress("DEPRECATION")
-
 package io.github.baole.konture
 
 import org.junit.jupiter.api.Assertions.assertDoesNotThrow
@@ -88,7 +86,7 @@ class ApiGapResolutionGoalTest {
                 .that().containTopLevelFunctions()
                 .and().containTopLevelProperties()
                 .and().containClasses()
-                .should().resideInAModule(":user")
+                .should().inModule(":user")
                 .andShould().containClass("User")
                 .andShould().haveImportOf("kotlin.collections.List")
                 .check()

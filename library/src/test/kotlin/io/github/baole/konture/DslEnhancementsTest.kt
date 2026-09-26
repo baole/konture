@@ -4,8 +4,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-@file:Suppress("DEPRECATION")
-
 package io.github.baole.konture
 
 import org.junit.jupiter.api.Test
@@ -154,12 +152,12 @@ class DslEnhancementsTest {
     @Test
     fun `test files DSL enhancements`() {
         val fileBuilder = FilesRuleBuilder(graph)
-        fileBuilder.that().haveAnnotationOf("JvmName")
-        fileBuilder.that().haveAllAnnotationsOf(listOf("JvmName"))
-        fileBuilder.that().haveAnyAnnotationOf(listOf("JvmName"))
-        fileBuilder.that().anyOf({ haveName("FooService.kt") })
-        fileBuilder.that().allOf({ haveName("FooService.kt") })
-        fileBuilder.that().noneOf({ haveName("NonExistent.kt") })
+        fileBuilder.that().annotatedWith("JvmName")
+        fileBuilder.that().annotatedWithAllOf(listOf("JvmName"))
+        fileBuilder.that().annotatedWithAnyOf(listOf("JvmName"))
+        fileBuilder.that().anyOf({ named("FooService.kt") })
+        fileBuilder.that().allOf({ named("FooService.kt") })
+        fileBuilder.that().noneOf({ named("NonExistent.kt") })
 
         fileBuilder.should().containTopLevelFunctions()
         fileBuilder.should().containTopLevelProperties()

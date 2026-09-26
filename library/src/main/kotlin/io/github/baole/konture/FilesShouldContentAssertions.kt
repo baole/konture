@@ -352,24 +352,6 @@ public interface FilesShouldContentAssertions {
     public infix fun containClassesWithAnnotation(annotation: KClass<out Annotation>): FilesRuleBuilder =
         containClassesWithAnnotation(annotation.kontureQualifiedName())
 
-    /** Filter or assertion criteria for have annotation of. */
-    @Deprecated(
-        message = "Renamed to containClassesWithAnnotation for consistency across file/module/slice scopes.",
-        replaceWith = ReplaceWith("containClassesWithAnnotation(annotationName)"),
-        level = DeprecationLevel.WARNING,
-    )
-    public infix fun haveAnnotationOf(annotationName: String): FilesRuleBuilder =
-        containClassesWithAnnotation(annotationName)
-
-    /** Filter or assertion criteria for have annotation of. */
-    @Deprecated(
-        message = "Renamed to containClassesWithAnnotation for consistency across file/module/slice scopes.",
-        replaceWith = ReplaceWith("containClassesWithAnnotation(annotation)"),
-        level = DeprecationLevel.WARNING,
-    )
-    public infix fun haveAnnotationOf(annotation: KClass<out Annotation>): FilesRuleBuilder =
-        containClassesWithAnnotation(annotation)
-
     /** Filter or assertion criteria for not contain top level properties. */
     public fun notContainTopLevelProperties(): FilesRuleBuilder {
         builder.setShould { file, _, violations ->

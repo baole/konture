@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-@file:Suppress("LongMethod", "DEPRECATION")
+@file:Suppress("LongMethod")
 
 package io.github.baole.konture
 
@@ -22,43 +22,43 @@ internal class ClassesCoverageMetaDataTest : KontureScopeTestFixture() {
         val vAnnotSingle = mutableListOf<String>()
         ClassesRuleBuilder(
             graph,
-        ).should().haveAnnotationOf("Other").getShouldAssertion()!!(classA, listOf(classA), vAnnotSingle)
+        ).should().annotatedWith("Other").getShouldAssertion()!!(classA, listOf(classA), vAnnotSingle)
         assertEquals(1, vAnnotSingle.size)
 
         val vAllAnnotSingle = mutableListOf<String>()
         ClassesRuleBuilder(
             graph,
-        ).should().haveAllAnnotationsOf("Other").getShouldAssertion()!!(classA, listOf(classA), vAllAnnotSingle)
+        ).should().annotatedWithAllOf("Other").getShouldAssertion()!!(classA, listOf(classA), vAllAnnotSingle)
         assertEquals(1, vAllAnnotSingle.size)
 
         val vAllAnnotList = mutableListOf<String>()
         ClassesRuleBuilder(
             graph,
-        ).should().haveAllAnnotationsOf(listOf("Other")).getShouldAssertion()!!(classA, listOf(classA), vAllAnnotList)
+        ).should().annotatedWithAllOf(listOf("Other")).getShouldAssertion()!!(classA, listOf(classA), vAllAnnotList)
         assertEquals(1, vAllAnnotList.size)
 
         val vAllAnnotVararg = mutableListOf<String>()
         ClassesRuleBuilder(
             graph,
-        ).should().haveAllAnnotationsOf("Other", "X").getShouldAssertion()!!(classA, listOf(classA), vAllAnnotVararg)
+        ).should().annotatedWithAllOf("Other", "X").getShouldAssertion()!!(classA, listOf(classA), vAllAnnotVararg)
         assertEquals(1, vAllAnnotVararg.size)
 
         val vAnyAnnotSingle = mutableListOf<String>()
         ClassesRuleBuilder(
             graph,
-        ).should().haveAnyAnnotationOf("Other").getShouldAssertion()!!(classA, listOf(classA), vAnyAnnotSingle)
+        ).should().annotatedWithAnyOf("Other").getShouldAssertion()!!(classA, listOf(classA), vAnyAnnotSingle)
         assertEquals(1, vAnyAnnotSingle.size)
 
         val vAnyAnnotList = mutableListOf<String>()
         ClassesRuleBuilder(
             graph,
-        ).should().haveAnyAnnotationOf(listOf("Other")).getShouldAssertion()!!(classA, listOf(classA), vAnyAnnotList)
+        ).should().annotatedWithAnyOf(listOf("Other")).getShouldAssertion()!!(classA, listOf(classA), vAnyAnnotList)
         assertEquals(1, vAnyAnnotList.size)
 
         val vAnyAnnotVararg = mutableListOf<String>()
         ClassesRuleBuilder(
             graph,
-        ).should().haveAnyAnnotationOf("Other", "X").getShouldAssertion()!!(classA, listOf(classA), vAnyAnnotVararg)
+        ).should().annotatedWithAnyOf("Other", "X").getShouldAssertion()!!(classA, listOf(classA), vAnyAnnotVararg)
         assertEquals(1, vAnyAnnotVararg.size)
 
         val vAnnotArg = mutableListOf<String>()

@@ -20,10 +20,10 @@ Konture provides a expressive DSL across six core scopes: `files {}`, `classes {
 | **Batch Context Integration** | ✅ `architecture { ... }` | ✅ `architecture { ... }` | ✅ `architecture { ... }` | ✅ `architecture { ... }` | ✅ `architecture { ... }` | ✅ `architecture { ... }` |
 | **Functional Inspection Scope** | ✅ `fileScope` | ✅ `classScope` | ✅ `functionScope` | ✅ `moduleScope` | ✅ `sliceScope(...)` | ✅ `propertyScope` |
 | **Module-Scoped Entry** | ✅ `fileScopeFromModule` | ✅ `classScopeFromModule` | ✅ `functionScopeFromModule` | ✅ `moduleScopeFromModule` | ✅ `sliceScopeFromModule` | ✅ `propertyScopeFromModule` |
-| **Package Filtering** | ✅ `resideInAPackage` | ✅ `resideInAPackage` | ✅ `resideInAPackage` | ✅ `resideInAPackage` | ✅ `resideInAPackage` | ✅ `resideInAPackage` |
-| **Annotation Filtering** | ✅ `containClassesWithAnnotation` | ✅ `beAnnotatedWith` | ✅ `beAnnotatedWith` | ✅ `containClassesWithAnnotation` | ✅ `containClassesWithAnnotation` | ✅ `beAnnotatedWith` |
+| **Package Filtering** | ✅ `inPackage` | ✅ `inPackage` | ✅ `resideInAPackage` | ✅ `resideInAPackage` | ✅ `resideInAPackage` | ✅ `resideInAPackage` |
+| **Annotation Filtering** | ✅ `annotatedWith` | ✅ `annotatedWith` | ✅ `haveAnnotationOf` | ✅ `containClassesWithAnnotation` | ✅ `containClassesWithAnnotation` | ✅ `haveAnnotationOf` |
 | **Call & Reference Prohibitions** | ✅ `notCall` / `notReferenceClass` | ✅ `notCall` / `notReferenceClass` | ✅ `notCall` / `notReferenceClass` | ✅ `notCall` / `notReferenceClass` | ✅ `notCall` / `notReferenceClass` | ✅ `notCall` / `notReferenceClass` |
-| **Dependency Assertions** | ✅ `onlyDependOn*` / `notDependOn*` | ✅ `onlyDependOn*` / `notDependOn*` | ➖ | ✅ `onlyDependOnModules` | ✅ `onlyDependOnSlices` | ➖ |
+| **Dependency Assertions** | ✅ `onlyDependOn*` / `notDependOn*` | ✅ `onlyDependOn*` / `notDependOn*` | ➖ | ✅ `onlyDependOn` / `mustNotDependOn` | ✅ `onlyDependOnSlices` | ➖ |
 | **Cycle Detection** | ➖ | ✅ `beFreeOfCycles()` | ➖ | ✅ `beFreeOfCycles()` | ✅ `beFreeOfCycles()` | ➖ |
 
 ---
@@ -103,7 +103,7 @@ class DeclarativeArchitectureTest {
     fun "core modules dependency isolation"() {
         Konture.modules()
             .that().haveNameMatching(":core:*")
-            .should().notDependOnModule(":app")
+            .should().mustNotDependOn(":app")
             .check()
     }
 }
@@ -152,9 +152,9 @@ Where a rule identifies a concrete Kotlin type or annotation, Konture also accep
 
 ```kotlin
 Konture.classes {
-    that().haveAnnotationOf<Inject>()
-    and().resideInPackageOf<MarkerClass>()
-    and().resideInAModule(":core")
+    that().annotatedWith<Inject>()
+    and().inPackageOf<MarkerClass>()
+    and().inModule(":core")
     should().beAssignableTo(Repository::class)
 }
 
@@ -174,12 +174,12 @@ Konture.properties {
 }
 
 Konture.files {
-    that().resideInPackageOf<MarkerClass>()
+    that().inPackageOf<MarkerClass>()
     should().notReferenceClass<LegacyClient>()
     andShould().onlyDependOnPackages("com.acme..", "kotlin..")
     andShould().anyOf(
-        { resideInAPackage("com.acme.core..") },
-        { resideInAPackage("com.acme.feature..") }
+        { inPackage("com.acme.core..") },
+        { inPackage("com.acme.feature..") }
     )
 }
 
@@ -226,7 +226,7 @@ architecture {
 
 // Usage in declarative rules:
 Konture.classes {
-    that().resideInAPackage(packages.under("com.acme.feature"))
+    that().inPackage(packages.under("com.acme.feature"))
         .should().notDependOnPackages(packages.under("com.acme.legacy"))
 }
 ```
@@ -279,7 +279,7 @@ Konture.classes()
 Modern Kotlin value classes (`value class` with `@JvmInline`) parse with `Modifier.VALUE` instead of the legacy `Modifier.INLINE`, but they represent the same architectural concept. Konture's inline rules automatically evaluate both transparently.
 ```kotlin
 Konture.classes()
-    .that().haveNameEndingWith("Id")
+    .that().nameEndsWith("Id")
     .should().beInline()
     .check()
 ```
@@ -295,13 +295,13 @@ Both assertions fully support transitive lookups, type-safe `KClass` parameters,
 ```kotlin
 // UP: Ensure services extend BaseService
 Konture.classes()
-    .that().haveNameEndingWith("Service")
+    .that().nameEndsWith("Service")
     .should().beAssignableTo(BaseService::class)
     .check()
 
 // DOWN: Ensure base controllers are assignable from a specific specialized controller
 Konture.classes()
-    .that().haveNameEndingWith("Controller")
+    .that().nameEndsWith("Controller")
     .should().beAssignableFrom<SpecializedController>()
     .check()
 ```

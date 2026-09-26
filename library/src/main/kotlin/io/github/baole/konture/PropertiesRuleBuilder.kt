@@ -98,7 +98,6 @@ public class PropertiesRuleBuilder(
             }.distinctBy { listOf(it.modulePath, it.className, it.declaration.name) }.forEach(logger)
         }
 
-    private val ignoredPredicates = mutableListOf<(PropertyDeclarationContext) -> Boolean>()
     private val programmaticSuppressions = mutableListOf<ProgrammaticSuppression>()
 
     /**
@@ -116,34 +115,6 @@ public class PropertiesRuleBuilder(
      */
     public fun allowEmpty(): PropertiesRuleBuilder {
         allowEmpty = true
-        return this
-    }
-
-    /**
-     * Configures this builder to ignore failures for properties satisfying the given predicate.
-     */
-    @Deprecated(
-        message = "Use suppress { ... } with mandatory audit reason instead",
-        replaceWith = ReplaceWith("suppress { ... }"),
-    )
-    public fun ignoreFailuresIn(predicate: (PropertyDeclarationContext) -> Boolean): PropertiesRuleBuilder {
-        ignoredPredicates.add(predicate)
-        return this
-    }
-
-    /**
-     * Configures this builder to ignore failures for properties matching any of the specified names or patterns.
-     */
-    @Deprecated(
-        message = "Use suppress { ... } with mandatory audit reason instead",
-        replaceWith = ReplaceWith("suppress { ... }"),
-    )
-    public fun ignoreFailuresIn(vararg propertyNames: String): PropertiesRuleBuilder {
-        ignoredPredicates.add { ctx ->
-            propertyNames.any { name ->
-                ctx.declaration.name == name || ctx.qualifiedName == name || io.github.baole.konture.impl.PatternMatchers.matchesSimpleGlob(name, ctx.declaration.name)
-            }
-        }
         return this
     }
 
@@ -421,7 +392,6 @@ public class PropertiesRuleBuilder(
 
         val runCheckReport = { list: MutableList<Violation> ->
             for (prop in propertiesToCheck) {
-                if (ignoredPredicates.any { it(prop) }) continue
                 val rawMessages = StructuredMessageList()
                 assertion(prop, allProperties, rawMessages)
                 for ((index, rawMsg) in rawMessages.withIndex()) {

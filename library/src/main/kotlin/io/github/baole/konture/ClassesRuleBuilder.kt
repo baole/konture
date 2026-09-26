@@ -89,7 +89,6 @@ public class ClassesRuleBuilder(
         return this
     }
 
-    private val ignoredPredicates = mutableListOf<(ClassDeclaration) -> Boolean>()
     private val programmaticSuppressions = mutableListOf<ProgrammaticSuppression>()
 
     /**
@@ -98,34 +97,6 @@ public class ClassesRuleBuilder(
     public fun suppress(block: RuleSuppressionBuilder.() -> Unit): ClassesRuleBuilder {
         val builder = RuleSuppressionBuilder().apply(block)
         programmaticSuppressions.addAll(builder.suppressions)
-        return this
-    }
-
-    /**
-     * Configures this builder to ignore failures for classes satisfying the given predicate.
-     */
-    @Deprecated(
-        message = "Use suppress { ... } with mandatory audit reason instead",
-        replaceWith = ReplaceWith("suppress { ... }"),
-    )
-    public fun ignoreFailuresIn(predicate: (ClassDeclaration) -> Boolean): ClassesRuleBuilder {
-        ignoredPredicates.add(predicate)
-        return this
-    }
-
-    /**
-     * Configures this builder to ignore failures for classes matching any of the specified names or patterns.
-     */
-    @Deprecated(
-        message = "Use suppress { ... } with mandatory audit reason instead",
-        replaceWith = ReplaceWith("suppress { ... }"),
-    )
-    public fun ignoreFailuresIn(vararg classNames: String): ClassesRuleBuilder {
-        ignoredPredicates.add { cls ->
-            classNames.any { name ->
-                cls.fqName == name || cls.name == name || io.github.baole.konture.impl.PatternMatchers.matchesSimpleGlob(name, cls.fqName)
-            }
-        }
         return this
     }
 
@@ -377,7 +348,6 @@ public class ClassesRuleBuilder(
 
         val runCheckReport = { list: MutableList<Violation> ->
             for ((cls, modulePath, sourceSetName) in classesToCheck) {
-                if (ignoredPredicates.any { it(cls) }) continue
                 val rawMessages = StructuredMessageList()
                 assertion(cls, allClasses, rawMessages)
                 for ((index, rawMsg) in rawMessages.withIndex()) {

@@ -4,8 +4,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-@file:Suppress("DEPRECATION")
-
 package io.github.baole.konture
 
 import org.junit.jupiter.api.Assertions.*
@@ -45,13 +43,13 @@ class FilesRuleBuilderTest : RuleBuildersTestBase() {
                 }
             }
 
-        // 1. resideInAPackage and resideInAModule filtering
+        // 1. inPackage and inModule filtering
         val rule1 =
             FilesRuleBuilder(projectGraph)
                 .that()
-                .resideInAPackage("com.example")
+                .inPackage("com.example")
                 .and()
-                .resideInAModule(":moduleA")
+                .inModule(":moduleA")
         val pred1 = rule1.getThatPredicate()!!
 
         val fileAContext = files.find { it.declaration.name == "ClassA.kt" }!!
@@ -60,22 +58,22 @@ class FilesRuleBuilderTest : RuleBuildersTestBase() {
         assertTrue(pred1(fileAContext))
         assertFalse(pred1(fileCContext)) // in :lib
 
-        // 2. resideInAPackage with lambda
+        // 2. inPackage with lambda
         val ruleLambdaPkg =
             FilesRuleBuilder(projectGraph)
                 .that()
-                .resideInAPackage { it.contains("other") }
+                .inPackage { it.contains("other") }
         val predLambdaPkg = ruleLambdaPkg.getThatPredicate()!!
         assertFalse(predLambdaPkg(fileAContext))
         assertTrue(predLambdaPkg(fileCContext))
 
-        // 3. haveNameStartingWith and haveNameEndingWith
+        // 3. nameStartsWith and nameEndsWith
         val ruleName =
             FilesRuleBuilder(projectGraph)
                 .that()
-                .haveNameStartingWith("Class")
+                .nameStartsWith("Class")
                 .and()
-                .haveNameEndingWith(".kt")
+                .nameEndsWith(".kt")
         val predName = ruleName.getThatPredicate()!!
         assertTrue(predName(fileAContext))
 
@@ -83,9 +81,9 @@ class FilesRuleBuilderTest : RuleBuildersTestBase() {
         val ruleXor =
             FilesRuleBuilder(projectGraph)
                 .that()
-                .haveNameStartingWith("ClassA")
+                .nameStartsWith("ClassA")
                 .xor()
-                .resideInAModule(":moduleC")
+                .inModule(":moduleC")
         val predXor = ruleXor.getThatPredicate()!!
         // ClassA: name starts with ClassA (T) xor in :moduleC (F) -> T
         // ClassC: name starts with ClassA (F) xor in :moduleC (T) -> T
@@ -99,7 +97,7 @@ class FilesRuleBuilderTest : RuleBuildersTestBase() {
         val ruleNot =
             FilesRuleBuilder(projectGraph)
                 .not()
-                .resideInAModule(":moduleC")
+                .inModule(":moduleC")
         val predNot = ruleNot.getThatPredicate()!!
         assertTrue(predNot(fileAContext))
         assertFalse(predNot(fileCContext))
@@ -116,8 +114,8 @@ class FilesRuleBuilderTest : RuleBuildersTestBase() {
         val fileAContext = files.find { it.declaration.name == "ClassA.kt" }!!
         val fileCContext = files.find { it.declaration.name == "ClassC.kt" }!!
 
-        // Test haveNameMatching
-        val ruleMatch = FilesRuleBuilder(projectGraph).should().haveNameMatching("Class*")
+        // Test nameMatches
+        val ruleMatch = FilesRuleBuilder(projectGraph).should().nameMatches("Class*")
         val assertMatch = ruleMatch.getShouldAssertion()!!
         val vMatch = mutableListOf<String>()
         assertMatch(fileAContext, files, vMatch)
@@ -135,8 +133,8 @@ class FilesRuleBuilderTest : RuleBuildersTestBase() {
         assertMatch(fileDContext, files, vMatch)
         assertEquals(1, vMatch.size)
 
-        // Test resideInAPackage (lambda and string pattern)
-        val rulePkgString = FilesRuleBuilder(projectGraph).should().resideInAPackage("com.other")
+        // Test inPackage (lambda and string pattern)
+        val rulePkgString = FilesRuleBuilder(projectGraph).should().inPackage("com.other")
         val assertPkgString = rulePkgString.getShouldAssertion()!!
         val vPkgString = mutableListOf<String>()
         assertPkgString(fileCContext, files, vPkgString)
@@ -145,14 +143,14 @@ class FilesRuleBuilderTest : RuleBuildersTestBase() {
         assertPkgString(fileAContext, files, vPkgString)
         assertEquals(1, vPkgString.size)
 
-        val rulePkgLambda = FilesRuleBuilder(projectGraph).should().resideInAPackage { it.startsWith("com") }
+        val rulePkgLambda = FilesRuleBuilder(projectGraph).should().inPackage { it.startsWith("com") }
         val assertPkgLambda = rulePkgLambda.getShouldAssertion()!!
         val vPkgLambda = mutableListOf<String>()
         assertPkgLambda(fileAContext, files, vPkgLambda)
         assertTrue(vPkgLambda.isEmpty())
 
-        // Test haveNameStartingWith and haveNameEndingWith
-        val ruleEnds = FilesRuleBuilder(projectGraph).should().haveNameEndingWith("C.kt")
+        // Test nameStartsWith and nameEndsWith
+        val ruleEnds = FilesRuleBuilder(projectGraph).should().nameEndsWith("C.kt")
         val assertEnds = ruleEnds.getShouldAssertion()!!
         val vEnds = mutableListOf<String>()
         assertEnds(fileCContext, files, vEnds)
@@ -337,9 +335,9 @@ class FilesRuleBuilderTest : RuleBuildersTestBase() {
         val ruleAnd =
             FilesRuleBuilder(projectGraph)
                 .should()
-                .resideInAPackage("com.example")
+                .inPackage("com.example")
                 .andShould()
-                .haveNameStartingWith("Class")
+                .nameStartsWith("Class")
         val assertAnd = ruleAnd.getShouldAssertion()!!
         val vAnd = mutableListOf<String>()
         assertAnd(fileAContext, files, vAnd)
@@ -352,9 +350,9 @@ class FilesRuleBuilderTest : RuleBuildersTestBase() {
         val ruleOr =
             FilesRuleBuilder(projectGraph)
                 .should()
-                .resideInAPackage("com.other")
+                .inPackage("com.other")
                 .orShould()
-                .haveNameStartingWith("ClassA")
+                .nameStartsWith("ClassA")
         val assertOr = ruleOr.getShouldAssertion()!!
         val vOr = mutableListOf<String>()
         assertOr(fileAContext, files, vOr) // package is com.example (F) but name starts with ClassA (T) -> passes OR
@@ -371,9 +369,9 @@ class FilesRuleBuilderTest : RuleBuildersTestBase() {
         val ruleXor =
             FilesRuleBuilder(projectGraph)
                 .should()
-                .resideInAPackage("com.example")
+                .inPackage("com.example")
                 .xorShould()
-                .haveNameStartingWith("ClassA")
+                .nameStartsWith("ClassA")
         val assertXor = ruleXor.getShouldAssertion()!!
         val vXor = mutableListOf<String>()
         assertXor(fileBContext, files, vXor) // package com.example (T) xor starts with ClassA (F) -> passes
@@ -386,7 +384,7 @@ class FilesRuleBuilderTest : RuleBuildersTestBase() {
         val ruleNot =
             FilesRuleBuilder(projectGraph)
                 .notShould()
-                .resideInAPackage("com.other")
+                .inPackage("com.other")
         val assertNot = ruleNot.getShouldAssertion()!!
         val vNot = mutableListOf<String>()
         assertNot(fileAContext, files, vNot) // package is com.example -> passes NOT(com.other)
@@ -398,8 +396,8 @@ class FilesRuleBuilderTest : RuleBuildersTestBase() {
         // Composite assertions test: anyOf
         val ruleAnyOf =
             FilesRuleBuilder(projectGraph).should().anyOf(
-                { resideInAPackage("com.example") },
-                { resideInAPackage("com.other") },
+                { inPackage("com.example") },
+                { inPackage("com.other") },
             )
         val assertAnyOf = ruleAnyOf.getShouldAssertion()!!
         val vAnyOf = mutableListOf<String>()

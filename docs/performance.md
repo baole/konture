@@ -64,13 +64,13 @@ class EnterpriseArchitectureTest {
     fun `verify architecture guardrails concurrently`() {
         Konture.architecture {
             classes {
-                that().resideInAPackage("..domain..")
-                should().notDependOnClassesThat().resideInAPackage("..presentation..")
+                that().inPackage("..domain..")
+                should().notDependOnClassesThat().inPackage("..presentation..")
             }
 
             files {
-                that().haveNameEndingWith("Repository.kt")
-                should().resideInAPackage("..data..")
+                that().nameEndsWith("Repository.kt")
+                should().inPackage("..data..")
             }
 
             modules {
@@ -103,4 +103,4 @@ Parallel execution in Konture adheres to strict safety guarantees:
 3. **Tune Worker Limits in CI**:
    In containerized CI environments (such as Docker or Kubernetes executors with constrained CPU quotas), set `maxWorkers` matching the allotted CPU cores (`-Dkonture.parallel.maxWorkers=2` or `4`) to prevent CPU throttling.
 4. **Prefer Scoped Module Matchers**:
-   Scope rules to target packages or module globs (e.g., `that().resideInAPackage("..domain..")` or `that().haveNameStartingWith(":feature:")`) rather than analyzing all declarations for every rule.
+   Scope rules to target packages or module globs (e.g., `that().inPackage("..domain..")` or `that().haveNameStartingWith(":feature:")`) rather than analyzing all declarations for every rule.

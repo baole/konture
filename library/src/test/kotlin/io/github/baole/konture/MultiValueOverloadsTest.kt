@@ -4,8 +4,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-@file:Suppress("DEPRECATION")
-
 package io.github.baole.konture
 
 import org.junit.jupiter.api.Assertions.*
@@ -15,25 +13,25 @@ class MultiValueOverloadsTest : RuleBuildersTestBase() {
     @Test
     fun `test classes rule builder multi-value that and should overloads`() {
         // ClassesThat package matching
-        val rulePkgList = ClassesRuleBuilder(projectGraph).that().resideInAPackage(listOf("com.example", "com.none"))
+        val rulePkgList = ClassesRuleBuilder(projectGraph).that().inPackage(listOf("com.example", "com.none"))
         assertTrue(rulePkgList.getThatPredicate()!!(classA))
         assertFalse(rulePkgList.getThatPredicate()!!(classC))
 
-        val rulePkgVararg = ClassesRuleBuilder(projectGraph).that().resideInAPackage("com.other", "com.none")
+        val rulePkgVararg = ClassesRuleBuilder(projectGraph).that().inPackage("com.other", "com.none")
         assertTrue(rulePkgVararg.getThatPredicate()!!(classC))
         assertFalse(rulePkgVararg.getThatPredicate()!!(classA))
 
         // ClassesThat name matching
-        val ruleNameList = ClassesRuleBuilder(projectGraph).that().haveNameStartingWith(listOf("ClassA", "ClassB"))
+        val ruleNameList = ClassesRuleBuilder(projectGraph).that().nameStartsWith(listOf("ClassA", "ClassB"))
         assertTrue(ruleNameList.getThatPredicate()!!(classA))
         assertFalse(ruleNameList.getThatPredicate()!!(classC))
 
-        val ruleNameVararg = ClassesRuleBuilder(projectGraph).that().haveNameEndingWith("A", "C")
+        val ruleNameVararg = ClassesRuleBuilder(projectGraph).that().nameEndsWith("A", "C")
         assertTrue(ruleNameVararg.getThatPredicate()!!(classA))
         assertTrue(ruleNameVararg.getThatPredicate()!!(classC))
         assertFalse(ruleNameVararg.getThatPredicate()!!(classB))
 
-        val ruleMatchList = ClassesRuleBuilder(projectGraph).that().haveNameMatching(listOf("Class*B", "Class*C"))
+        val ruleMatchList = ClassesRuleBuilder(projectGraph).that().nameMatches(listOf("Class*B", "Class*C"))
         assertTrue(ruleMatchList.getThatPredicate()!!(classB))
         assertTrue(ruleMatchList.getThatPredicate()!!(classC))
         assertFalse(ruleMatchList.getThatPredicate()!!(classA))
@@ -42,7 +40,7 @@ class MultiValueOverloadsTest : RuleBuildersTestBase() {
         val shouldPkgList =
             ClassesRuleBuilder(
                 projectGraph,
-            ).should().resideInAPackage(listOf("com.example", "com.other"))
+            ).should().inPackage(listOf("com.example", "com.other"))
         val violationsPkgList = mutableListOf<String>()
         shouldPkgList.getShouldAssertion()!!(classA, emptyList(), violationsPkgList)
         assertTrue(violationsPkgList.isEmpty())
@@ -55,7 +53,7 @@ class MultiValueOverloadsTest : RuleBuildersTestBase() {
         )
         assertFalse(violationsPkgListFail.isEmpty())
 
-        val shouldNameList = ClassesRuleBuilder(projectGraph).should().haveNameStartingWith(listOf("ClassA", "ClassB"))
+        val shouldNameList = ClassesRuleBuilder(projectGraph).should().nameStartsWith(listOf("ClassA", "ClassB"))
         val violationsNameList = mutableListOf<String>()
         shouldNameList.getShouldAssertion()!!(classA, emptyList(), violationsNameList)
         assertTrue(violationsNameList.isEmpty())
@@ -86,33 +84,33 @@ class MultiValueOverloadsTest : RuleBuildersTestBase() {
         val f2Context = FileDeclarationContext(f2, ":module1")
 
         // FilesThat package matching
-        val rulePkgList = FilesRuleBuilder(graph).that().resideInAPackage(listOf("com.example", "com.none"))
+        val rulePkgList = FilesRuleBuilder(graph).that().inPackage(listOf("com.example", "com.none"))
         assertTrue(rulePkgList.getThatPredicate()!!(f1Context))
         assertFalse(rulePkgList.getThatPredicate()!!(f2Context))
 
-        val rulePkgVararg = FilesRuleBuilder(graph).that().resideInAPackage("com.other", "com.none")
+        val rulePkgVararg = FilesRuleBuilder(graph).that().inPackage("com.other", "com.none")
         assertTrue(rulePkgVararg.getThatPredicate()!!(f2Context))
         assertFalse(rulePkgVararg.getThatPredicate()!!(f1Context))
 
         // FilesThat name matching
-        val ruleNameList = FilesRuleBuilder(graph).that().haveNameStartingWith(listOf("Service", "None"))
+        val ruleNameList = FilesRuleBuilder(graph).that().nameStartsWith(listOf("Service", "None"))
         assertTrue(ruleNameList.getThatPredicate()!!(f1Context))
         assertFalse(ruleNameList.getThatPredicate()!!(f2Context))
 
-        val ruleNameVararg = FilesRuleBuilder(graph).that().haveNameEndingWith("A.kt", "B.kt")
+        val ruleNameVararg = FilesRuleBuilder(graph).that().nameEndsWith("A.kt", "B.kt")
         assertTrue(ruleNameVararg.getThatPredicate()!!(f1Context))
         assertTrue(ruleNameVararg.getThatPredicate()!!(f2Context))
 
-        val ruleMatchList = FilesRuleBuilder(graph).that().haveNameMatching(listOf("*A.kt", "*B.kt"))
+        val ruleMatchList = FilesRuleBuilder(graph).that().nameMatches(listOf("*A.kt", "*B.kt"))
         assertTrue(ruleMatchList.getThatPredicate()!!(f1Context))
         assertTrue(ruleMatchList.getThatPredicate()!!(f2Context))
 
-        // FilesThat resideInAModule
-        val ruleModList = FilesRuleBuilder(graph).that().resideInAModule(listOf(":module1"))
+        // FilesThat inModules
+        val ruleModList = FilesRuleBuilder(graph).that().inModules(listOf(":module1"))
         assertTrue(ruleModList.getThatPredicate()!!(f1Context))
 
         // FilesShould overloads
-        val shouldPkgList = FilesRuleBuilder(graph).should().resideInAPackage(listOf("com.example", "com.other"))
+        val shouldPkgList = FilesRuleBuilder(graph).should().inPackage(listOf("com.example", "com.other"))
         val violationsPkgList = mutableListOf<String>()
         shouldPkgList.getShouldAssertion()!!(f1Context, emptyList(), violationsPkgList)
         assertTrue(violationsPkgList.isEmpty())
@@ -280,10 +278,10 @@ class MultiValueOverloadsTest : RuleBuildersTestBase() {
 
     @Test
     fun `test classes rule builder new single-value overloads`() {
-        val ruleSingleAnn = ClassesRuleBuilder(projectGraph).that().haveAnyAnnotationOf("MyAnnotation")
+        val ruleSingleAnn = ClassesRuleBuilder(projectGraph).that().annotatedWithAnyOf("MyAnnotation")
         assertTrue(ruleSingleAnn.getThatPredicate()!!(classB))
 
-        val shouldSingleAnn = ClassesRuleBuilder(projectGraph).should().haveAllAnnotationsOf("MyAnnotation")
+        val shouldSingleAnn = ClassesRuleBuilder(projectGraph).should().annotatedWithAllOf("MyAnnotation")
         val violations = mutableListOf<String>()
         shouldSingleAnn.getShouldAssertion()!!(classB, emptyList(), violations)
         assertTrue(violations.isEmpty())
@@ -322,20 +320,20 @@ class MultiValueOverloadsTest : RuleBuildersTestBase() {
                 ),
             )
 
-        // should notDependOnModule
-        val ruleNoDepList = ModulesRuleBuilder(graph).should().notDependOnModule(listOf(":api"))
+        // should mustNotDependOn
+        val ruleNoDepList = ModulesRuleBuilder(graph).should().mustNotDependOn(listOf(":api"))
         val violationsList = mutableListOf<String>()
         val moduleImpl = graph.getAllModules().first { it.path == ":impl" }
         ruleNoDepList.getShouldAssertion()!!(moduleImpl, graph, violationsList)
         assertFalse(violationsList.isEmpty())
 
-        val ruleNoDepSingle = ModulesRuleBuilder(graph).should().notDependOnModule(":api")
+        val ruleNoDepSingle = ModulesRuleBuilder(graph).should().mustNotDependOn(":api")
         val violationsSingle = mutableListOf<String>()
         ruleNoDepSingle.getShouldAssertion()!!(moduleImpl, graph, violationsSingle)
         assertFalse(violationsSingle.isEmpty())
 
-        // should onlyDependOnModules
-        val ruleOnlyDepSingle = ModulesRuleBuilder(graph).should().onlyDependOnModules(":api")
+        // should onlyDependOn
+        val ruleOnlyDepSingle = ModulesRuleBuilder(graph).should().onlyDependOn(":api")
         val violationsOnlySingle = mutableListOf<String>()
         ruleOnlyDepSingle.getShouldAssertion()!!(moduleImpl, graph, violationsOnlySingle)
         assertTrue(violationsOnlySingle.isEmpty())

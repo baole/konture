@@ -4,8 +4,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-@file:Suppress("DEPRECATION")
-
 package io.github.baole.konture
 
 import org.junit.jupiter.api.Assertions.assertDoesNotThrow
@@ -70,15 +68,15 @@ class ApiGapResolutionTest {
     }
 
     @Test
-    fun `FilesThat resideInPackageOf and resideInAModule work correctly`() {
+    fun `FilesThat inPackageOf and inModule work correctly`() {
         val cls = testClass("io.github.baole.konture", "TestFile")
         val graph = testGraph(cls)
 
         assertDoesNotThrow {
             FilesRuleBuilder(graph)
-                .that().resideInPackageOf<ApiGapResolutionTest>()
-                .and().resideInAModule(":core")
-                .and().haveName { it.startsWith("Test") }
+                .that().inPackageOf<ApiGapResolutionTest>()
+                .and().inModule(":core")
+                .and().named { it.startsWith("Test") }
                 .should().beDocumentedWithKDoc()
                 .allowEmpty()
                 .check()
@@ -86,14 +84,14 @@ class ApiGapResolutionTest {
     }
 
     @Test
-    fun `ClassesThat resideInPackageOf, resideInAModule, and assignability overloads work correctly`() {
+    fun `ClassesThat inPackageOf, inModule, and assignability overloads work correctly`() {
         val cls = testClass("io.github.baole.konture", "MyRepository", superType = "java.lang.CharSequence")
         val graph = testGraph(cls)
 
         assertDoesNotThrow {
             ClassesRuleBuilder(graph)
-                .that().resideInPackageOf<ApiGapResolutionTest>()
-                .and().resideInAModule(":core")
+                .that().inPackageOf<ApiGapResolutionTest>()
+                .and().inModule(":core")
                 .and().areAssignableTo<CharSequence>()
                 .should().beDocumentedWithKDoc()
                 .allowEmpty()

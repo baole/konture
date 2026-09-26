@@ -4,8 +4,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-@file:Suppress("DEPRECATION")
-
 package io.github.baole.konture
 
 import io.github.baole.konture.core.DependencyGraphModel
@@ -16,32 +14,32 @@ import org.junit.jupiter.api.Test
 
 class ModulesShouldCoverageTest : RuleBuildersTestBase() {
     @Test
-    fun `test ModulesShould notDependOnModule variants`() {
+    fun `test ModulesShould mustNotDependOn variants`() {
         val dep = Dependency("implementation", ":", ":moduleB")
         val modAWithDep = moduleA.copy(dependencies = listOf(dep))
         val graph = ProjectGraph(mapOf(":" to listOf(modAWithDep, moduleB)))
 
         // List overload
         val violationsList = mutableListOf<String>()
-        ModulesRuleBuilder(graph).should().notDependOnModule(listOf(":moduleB", ":moduleC"))
+        ModulesRuleBuilder(graph).should().mustNotDependOn(listOf(":moduleB", ":moduleC"))
             .getShouldAssertion()!!(modAWithDep, graph, violationsList)
         assertEquals(1, violationsList.size)
 
         // Vararg overload
         val violationsVararg = mutableListOf<String>()
-        ModulesRuleBuilder(graph).should().notDependOnModule(":moduleB", ":moduleC")
+        ModulesRuleBuilder(graph).should().mustNotDependOn(":moduleB", ":moduleC")
             .getShouldAssertion()!!(modAWithDep, graph, violationsVararg)
         assertEquals(1, violationsVararg.size)
 
         // Predicate overload
         val violationsPred = mutableListOf<String>()
-        ModulesRuleBuilder(graph).should().notDependOnModule("starts with B") { it.startsWith(":moduleB") }
+        ModulesRuleBuilder(graph).should().mustNotDependOn("starts with B") { it.startsWith(":moduleB") }
             .getShouldAssertion()!!(modAWithDep, graph, violationsPred)
         assertEquals(1, violationsPred.size)
     }
 
     @Test
-    fun `test ModulesShould onlyDependOnModules variants`() {
+    fun `test ModulesShould onlyDependOn variants`() {
         val depB = Dependency("implementation", ":", ":moduleB")
         val depC = Dependency("implementation", ":", ":moduleC")
         val modAWithDeps = moduleA.copy(dependencies = listOf(depB, depC))
@@ -49,19 +47,19 @@ class ModulesShouldCoverageTest : RuleBuildersTestBase() {
 
         // String overload
         val v1 = mutableListOf<String>()
-        ModulesRuleBuilder(graph).should().onlyDependOnModules(":moduleB")
+        ModulesRuleBuilder(graph).should().onlyDependOn(":moduleB")
             .getShouldAssertion()!!(modAWithDeps, graph, v1)
         assertEquals(1, v1.size)
 
         // Vararg overload
         val v2 = mutableListOf<String>()
-        ModulesRuleBuilder(graph).should().onlyDependOnModules(":moduleB", ":moduleC")
+        ModulesRuleBuilder(graph).should().onlyDependOn(":moduleB", ":moduleC")
             .getShouldAssertion()!!(modAWithDeps, graph, v2)
         assertTrue(v2.isEmpty())
 
         // Predicate overload
         val v3 = mutableListOf<String>()
-        ModulesRuleBuilder(graph).should().onlyDependOnModules { it == ":moduleB" }
+        ModulesRuleBuilder(graph).should().onlyDependOn { it == ":moduleB" }
             .getShouldAssertion()!!(modAWithDeps, graph, v3)
         assertEquals(1, v3.size)
     }
