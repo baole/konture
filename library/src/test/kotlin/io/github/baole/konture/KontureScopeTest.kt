@@ -4,8 +4,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-@file:Suppress("DEPRECATION")
-
 package io.github.baole.konture
 
 import org.junit.jupiter.api.Assertions.*
@@ -33,10 +31,10 @@ internal class KontureScopeTest : KontureScopeTestFixture() {
             )
 
         // package and naming filters
-        assertEquals(1, classes.withPackage("com.example.service").size)
-        assertEquals(13, classes.withPackage("com.example..").size)
-        assertEquals(1, classes.withNameEndingWith("Interface").size)
-        assertEquals(2, classes.withNameStartingWith("My").size)
+        assertEquals(1, classes.resideInAPackage("com.example.service").size)
+        assertEquals(13, classes.resideInAPackage("com.example..").size)
+        assertEquals(1, classes.haveNameEndingWith("Interface").size)
+        assertEquals(2, classes.haveNameStartingWith("My").size)
         assertEquals(12, classes.withNameMatching("Class*").size)
 
         // interfaces & classes
@@ -91,9 +89,9 @@ internal class KontureScopeTest : KontureScopeTestFixture() {
                 ),
             )
 
-        assertEquals(1, kontureScope.withPackage("com.example.service").classes.size)
-        assertEquals(1, kontureScope.withNameEndingWith("Interface").classes.size)
-        assertEquals(2, kontureScope.withNameStartingWith("My").classes.size)
+        assertEquals(1, kontureScope.resideInAPackage("com.example.service").classes.size)
+        assertEquals(1, kontureScope.haveNameEndingWith("Interface").classes.size)
+        assertEquals(2, kontureScope.haveNameStartingWith("My").classes.size)
         assertEquals(2, kontureScope.interfaces().classes.size)
         assertEquals(12, kontureScope.classes().classes.size)
         assertEquals(1, kontureScope.withAnnotationOf("MyAnnotation").classes.size)

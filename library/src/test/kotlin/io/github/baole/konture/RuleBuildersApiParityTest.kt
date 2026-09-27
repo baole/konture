@@ -4,8 +4,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-@file:Suppress("DEPRECATION")
-
 package io.github.baole.konture
 
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -481,7 +479,7 @@ class RuleBuildersApiParityTest : RuleBuildersTestBase() {
                 .andShould()
                 .notHaveImportOf("com.example.ClassC")
                 .andShould()
-                .haveAnnotationOf("com.example.Anno")
+                .containClassesWithAnnotation("com.example.Anno")
                 .check()
         } catch (_: AssertionError) {
         }
@@ -522,21 +520,21 @@ class RuleBuildersApiParityTest : RuleBuildersTestBase() {
         try {
             FilesRuleBuilder(projectGraph)
                 .should()
-                .haveNameIn("FileA.kt", "FileB.kt")
+                .named("FileA.kt", "FileB.kt")
                 .andShould()
-                .notHaveNameIn("FileA.kt", "FileB.kt")
+                .notNamed("FileA.kt", "FileB.kt")
                 .andShould()
-                .notHaveNameStartingWith("X")
+                .notNameStartsWith("X")
                 .andShould()
-                .notHaveNameStartingWith(listOf("X"))
+                .notNameStartsWith(listOf("X"))
                 .andShould()
-                .notHaveNameEndingWith("X")
+                .notNameEndsWith("X")
                 .andShould()
-                .notHaveNameEndingWith(listOf("X"))
+                .notNameEndsWith(listOf("X"))
                 .andShould()
-                .notHaveNameMatching("X.*")
+                .notNameMatches("X.*")
                 .andShould()
-                .notHaveNameMatching(listOf("X.*"))
+                .notNameMatches(listOf("X.*"))
                 .check()
         } catch (_: AssertionError) {
         }
@@ -570,13 +568,13 @@ class RuleBuildersApiParityTest : RuleBuildersTestBase() {
         try {
             ModulesRuleBuilder(projectGraph)
                 .should()
-                .notDependOnModules(":feature")
+                .mustNotDependOn(":feature")
                 .andShould()
-                .notDependOnModules(listOf(":feature"))
+                .mustNotDependOn(listOf(":feature"))
                 .andShould()
-                .onlyDependOnModules(":feature")
+                .onlyDependOn(":feature")
                 .andShould()
-                .onlyDependOnModules(listOf(":feature"))
+                .onlyDependOn(listOf(":feature"))
                 .andShould()
                 .beFreeOfCycles()
                 .check()
@@ -586,17 +584,17 @@ class RuleBuildersApiParityTest : RuleBuildersTestBase() {
         try {
             ClassesRuleBuilder(projectGraph)
                 .should()
-                .resideInAModule(":app")
+                .inModule(":app")
                 .andShould()
-                .resideInAModule(listOf(":app"))
+                .inModules(listOf(":app"))
                 .andShould()
-                .resideInModules(listOf(":app"))
+                .inModules(listOf(":app"))
                 .andShould()
-                .notResideInAModule(":app")
+                .notInModule(":app")
                 .andShould()
-                .notResideInAModule(listOf(":app"))
+                .notInModules(listOf(":app"))
                 .andShould()
-                .notResideInModules(listOf(":app"))
+                .notInModules(listOf(":app"))
                 .check()
         } catch (_: AssertionError) {
         }

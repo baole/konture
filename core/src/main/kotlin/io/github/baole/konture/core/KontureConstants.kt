@@ -41,12 +41,6 @@ public object KontureConstants {
     public const val PROPERTY_REPORT_PATH: String = "konture.report.path"
 
     /**
-     * Default output report file path relative to project build directory.
-     */
-    @Deprecated("Use DEFAULT_HTML_REPORT_PATH instead.", ReplaceWith("DEFAULT_HTML_REPORT_PATH"))
-    public const val DEFAULT_REPORT_PATH: String = "build/reports/konture/konture-report.html"
-
-    /**
      * Current release version of Konture.
      */
     public const val VERSION: String = "0.8.1"

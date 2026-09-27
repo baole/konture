@@ -40,50 +40,6 @@ public fun ClassesShould.annotatedWithAllOf(vararg annotations: KClass<out Annot
 public fun ClassesShould.annotatedWithAnyOf(vararg annotations: KClass<out Annotation>): ClassesRuleBuilder =
     annotatedWithAnyOf(*annotations.map { it.kontureQualifiedName() }.toTypedArray())
 
-// Legacy deprecations for annotation overloads on ClassesThat and ClassesShould
-
-/** Legacy haveAnnotationOf method. */
-@Deprecated("Use annotatedWith instead.", ReplaceWith("annotatedWith(annotation)"))
-public infix fun ClassesThat.haveAnnotationOf(annotation: KClass<out Annotation>): ClassesRuleBuilder =
-    annotatedWith(annotation)
-
-/** Legacy haveAnnotationOf method. */
-@Deprecated("Use annotatedWith instead.", ReplaceWith("annotatedWith<T>()"))
-public inline fun <reified T : Annotation> ClassesThat.haveAnnotationOf(): ClassesRuleBuilder = annotatedWith<T>()
-
-/** Legacy areAnnotatedWith method. */
-@Deprecated("Use annotatedWith instead.", ReplaceWith("annotatedWith<T>()"))
-public inline fun <reified T : Annotation> ClassesThat.areAnnotatedWith(): ClassesRuleBuilder = annotatedWith<T>()
-
-/** Legacy haveAllAnnotationsOf method. */
-@Deprecated("Use annotatedWithAllOf instead.", ReplaceWith("annotatedWithAllOf(*annotations)"))
-public fun ClassesThat.haveAllAnnotationsOf(vararg annotations: KClass<out Annotation>): ClassesRuleBuilder =
-    annotatedWithAllOf(*annotations)
-
-/** Legacy haveAnyAnnotationOf method. */
-@Deprecated("Use annotatedWithAnyOf instead.", ReplaceWith("annotatedWithAnyOf(*annotations)"))
-public fun ClassesThat.haveAnyAnnotationOf(vararg annotations: KClass<out Annotation>): ClassesRuleBuilder =
-    annotatedWithAnyOf(*annotations)
-
-/** Legacy haveAnnotationOf method. */
-@Deprecated("Use annotatedWith instead.", ReplaceWith("annotatedWith(annotation)"))
-public infix fun ClassesShould.haveAnnotationOf(annotation: KClass<out Annotation>): ClassesRuleBuilder =
-    annotatedWith(annotation)
-
-/** Legacy haveAnnotationOf method. */
-@Deprecated("Use annotatedWith instead.", ReplaceWith("annotatedWith<T>()"))
-public inline fun <reified T : Annotation> ClassesShould.haveAnnotationOf(): ClassesRuleBuilder = annotatedWith<T>()
-
-/** Legacy haveAllAnnotationsOf method. */
-@Deprecated("Use annotatedWithAllOf instead.", ReplaceWith("annotatedWithAllOf(*annotations)"))
-public fun ClassesShould.haveAllAnnotationsOf(vararg annotations: KClass<out Annotation>): ClassesRuleBuilder =
-    annotatedWithAllOf(*annotations)
-
-/** Legacy haveAnyAnnotationOf method. */
-@Deprecated("Use annotatedWithAnyOf instead.", ReplaceWith("annotatedWithAnyOf(*annotations)"))
-public fun ClassesShould.haveAnyAnnotationOf(vararg annotations: KClass<out Annotation>): ClassesRuleBuilder =
-    annotatedWithAnyOf(*annotations)
-
 /** Filters classes having an annotation [annotation] with argument [argName] equal to [argValue]. */
 public fun ClassesThat.haveAnnotationWithArgument(
     annotation: KClass<out Annotation>,
@@ -255,37 +211,12 @@ public infix fun ClassesShould.inPackageOf(type: KClass<*>): ClassesRuleBuilder 
 /** Asserts that classes reside in the package of type parameter [T]. */
 public inline fun <reified T : Any> ClassesShould.inPackageOf(): ClassesRuleBuilder = inPackageOf(T::class)
 
-/** Legacy resideInPackageOf method. */
-@Deprecated("Use inPackageOf instead.", ReplaceWith("inPackageOf(type)"))
-public infix fun ClassesThat.resideInPackageOf(type: KClass<*>): ClassesRuleBuilder = inPackageOf(type)
-
-/** Legacy resideInPackageOf method. */
-@Deprecated("Use inPackageOf instead.", ReplaceWith("inPackageOf<T>()"))
-public inline fun <reified T : Any> ClassesThat.resideInPackageOf(): ClassesRuleBuilder = inPackageOf<T>()
-
-/** Legacy resideInPackageOf method. */
-@Deprecated("Use inPackageOf instead.", ReplaceWith("inPackageOf(type)"))
-public infix fun ClassesShould.resideInPackageOf(type: KClass<*>): ClassesRuleBuilder = inPackageOf(type)
-
-/** Legacy resideInPackageOf method. */
-@Deprecated("Use inPackageOf instead.", ReplaceWith("inPackageOf<T>()"))
-public inline fun <reified T : Any> ClassesShould.resideInPackageOf(): ClassesRuleBuilder = inPackageOf<T>()
-
 /** Filters classes that are not assignable to type parameter [T]. */
 public inline fun <reified T : Any> ClassesThat.areNotAssignableTo(): ClassesRuleBuilder = areNotAssignableTo(T::class)
 
 /** Filters classes that are not assignable from type parameter [T]. */
 public inline fun <reified T : Any> ClassesThat.areNotAssignableFrom(): ClassesRuleBuilder =
     areNotAssignableFrom(T::class)
-
-/** Legacy beAnnotatedWith method. */
-@Deprecated("Use annotatedWith instead.", ReplaceWith("annotatedWith(annotation)"))
-public infix fun ClassesShould.beAnnotatedWith(annotation: KClass<out Annotation>): ClassesRuleBuilder =
-    annotatedWith(annotation)
-
-/** Legacy beAnnotatedWith method. */
-@Deprecated("Use annotatedWith instead.", ReplaceWith("annotatedWith<T>()"))
-public inline fun <reified T : Annotation> ClassesShould.beAnnotatedWith(): ClassesRuleBuilder = annotatedWith<T>()
 
 /** Asserts that classes do not depend on class type parameter [T]. */
 public inline fun <reified T : Any> ClassesShould.notDependOnClass(): ClassesRuleBuilder = notReferenceClass(T::class)

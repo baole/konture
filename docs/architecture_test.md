@@ -100,7 +100,7 @@ architecture {
 architecture {
     modules {
         that().haveNameMatching(":core:domain")
-        should().notDependOnModule(
+        should().mustNotDependOn(
             ":core:data",
             ":core:presentation",
             ":core:infrastructure"
@@ -153,7 +153,7 @@ architecture {
 architecture {
     modules {
         that().haveNameMatching(":feature:checkout")
-        should().notDependOnModule(":feature:profile")
+        should().mustNotDependOn(":feature:profile")
     }
 }
 ```
@@ -186,7 +186,7 @@ Type leakage violates the **Stable Dependencies Principle**. If your UI layer re
 ```kotlin
 architecture {
     classes {
-        that().resideInAPackage("..domain..")
+        that().inPackage("..domain..")
         should().notHaveSignaturesWithTypesAnnotatedWith("jakarta.persistence.Entity")
     }
 }
@@ -221,7 +221,7 @@ Bypassing intermediate layers bypasses vital business logic. Service layers ofte
 ```text
 Conceptual example (illustrating restricted call-graph package rules, not literal Konture API):
 classes()
-    .that().resideInAPackage("..controller..")
+    .that().inPackage("..controller..")
     .should().onlyCallMethodsInPackages("..service..", "java..", "kotlin..")
 ```
 
@@ -229,7 +229,7 @@ classes()
 // Real, compiling Konture dependency enforcement:
 architecture {
     classes {
-        that().resideInAPackage("..controller..")
+        that().inPackage("..controller..")
         should().onlyDependOnClassesInAnyPackage(
             "..service..",
             "java..",
@@ -290,13 +290,13 @@ Once internal implementation details leak into the public API space, other modul
 ```kotlin
 // Conceptual Example (illustrating visibility bounds)
 classes()
-    .that().resideInAPackage("..impl..")
+    .that().inPackage("..impl..")
     .should().beInternal()
 
 // Real, compiling Konture visibility check:
 architecture {
     classes {
-        that().resideInAPackage("..impl..")
+        that().inPackage("..impl..")
         should().satisfy { cls, violations ->
             if (cls.visibility != io.github.baole.konture.Visibility.INTERNAL) {
                 violations.add("Class ${cls.fqName} is inside an 'impl' package but is not internal.")
@@ -323,7 +323,7 @@ Every software project has its own unique set of guidelines, conventions, and le
 // Conceptual Example (illustrating ViewModel naming convention)
 classes()
     .that().inheritFrom("androidx.lifecycle.ViewModel")
-    .should().haveNameEndingWith("ViewModel")
+    .should().nameEndsWith("ViewModel")
 
 // Real, compiling Konture naming check:
 architecture {

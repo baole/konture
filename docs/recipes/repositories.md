@@ -28,7 +28,7 @@ class RepositoryArchitectureTest {
     @Test
     fun `repositories must be declared as interfaces`() {
         Konture.classes()
-            .that().haveNameEndingWith("Repository")
+            .that().nameEndsWith("Repository")
             .should().beInterfaces()
             .check()
     }

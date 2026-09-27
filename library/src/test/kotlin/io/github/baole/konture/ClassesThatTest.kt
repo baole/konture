@@ -4,8 +4,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-@file:Suppress("DEPRECATION")
-
 package io.github.baole.konture
 
 import org.junit.jupiter.api.Assertions.*
@@ -40,8 +38,8 @@ internal class ClassesThatTest : KontureScopeTestFixture() {
             ClassesRuleBuilder(projectGraph)
                 .that()
                 .anyOf(
-                    { haveNameStartingWith("ClassA") },
-                    { haveNameStartingWith("ClassC") },
+                    { nameStartsWith("ClassA") },
+                    { nameStartsWith("ClassC") },
                 )
         val predAny = ruleAny.getThatPredicate()!!
         assertTrue(predAny(classA))
@@ -52,7 +50,7 @@ internal class ClassesThatTest : KontureScopeTestFixture() {
             ClassesRuleBuilder(projectGraph)
                 .that()
                 .allOf(
-                    { resideInAPackage("com.example") },
+                    { inPackage("com.example") },
                     { areInterfaces() },
                 )
         val predAll = ruleAll.getThatPredicate()!!
@@ -64,7 +62,7 @@ internal class ClassesThatTest : KontureScopeTestFixture() {
             ClassesRuleBuilder(projectGraph)
                 .that()
                 .noneOf(
-                    { haveNameStartingWith("ClassA") },
+                    { nameStartsWith("ClassA") },
                     { areInterfaces() },
                 )
         val predNone = ruleNone.getThatPredicate()!!
@@ -76,13 +74,13 @@ internal class ClassesThatTest : KontureScopeTestFixture() {
     @Test
     fun `test ClassesThat additions`() {
         // test haveNamePredicate
-        val ruleNamePred = ClassesRuleBuilder(projectGraph).that().haveName { it.endsWith("A") }
+        val ruleNamePred = ClassesRuleBuilder(projectGraph).that().named { it.endsWith("A") }
         val predNamePred = ruleNamePred.getThatPredicate()!!
         assertTrue(predNamePred(classA))
         assertFalse(predNamePred(classB))
 
         // test haveNameMatching glob
-        val ruleNameGlob = ClassesRuleBuilder(projectGraph).that().haveNameMatching("*C")
+        val ruleNameGlob = ClassesRuleBuilder(projectGraph).that().nameMatches("*C")
         val predNameGlob = ruleNameGlob.getThatPredicate()!!
         assertTrue(predNameGlob(classC))
         assertFalse(predNameGlob(classA))
@@ -220,13 +218,13 @@ internal class ClassesThatTest : KontureScopeTestFixture() {
                 visibility = Visibility.INTERNAL,
             )
 
-        val ruleAllAnno = ClassesRuleBuilder(projectGraph).that().haveAllAnnotationsOf("A1", "A2")
+        val ruleAllAnno = ClassesRuleBuilder(projectGraph).that().annotatedWithAllOf("A1", "A2")
         assertTrue(ruleAllAnno.getThatPredicate()!!(classMulti))
 
-        val ruleAnyAnno = ClassesRuleBuilder(projectGraph).that().haveAnyAnnotationOf("A2", "A3")
+        val ruleAnyAnno = ClassesRuleBuilder(projectGraph).that().annotatedWithAnyOf("A2", "A3")
         assertTrue(ruleAnyAnno.getThatPredicate()!!(classMulti))
 
-        val ruleNotAnno = ClassesRuleBuilder(projectGraph).that().haveAllAnnotationsOf("A1", "A3")
+        val ruleNotAnno = ClassesRuleBuilder(projectGraph).that().annotatedWithAllOf("A1", "A3")
         assertFalse(ruleNotAnno.getThatPredicate()!!(classMulti))
 
         val ruleAllMod = ClassesRuleBuilder(projectGraph).that().haveAllModifiers(Modifier.SEALED, Modifier.DATA)
@@ -251,10 +249,10 @@ internal class ClassesThatTest : KontureScopeTestFixture() {
         assertFalse(ruleNotVis.getThatPredicate()!!(classMulti))
 
         // List-based overloads
-        val ruleAllAnnoList = ClassesRuleBuilder(projectGraph).that().haveAllAnnotationsOf(listOf("A1", "A2"))
+        val ruleAllAnnoList = ClassesRuleBuilder(projectGraph).that().annotatedWithAllOf(listOf("A1", "A2"))
         assertTrue(ruleAllAnnoList.getThatPredicate()!!(classMulti))
 
-        val ruleAnyAnnoList = ClassesRuleBuilder(projectGraph).that().haveAnyAnnotationOf(listOf("A2", "A3"))
+        val ruleAnyAnnoList = ClassesRuleBuilder(projectGraph).that().annotatedWithAnyOf(listOf("A2", "A3"))
         assertTrue(ruleAnyAnnoList.getThatPredicate()!!(classMulti))
 
         val ruleAllModList =
@@ -442,49 +440,49 @@ internal class ClassesThatTest : KontureScopeTestFixture() {
 
     @Test
     fun `test additional ClassesThat package, name, annotation, visibility and modifier overloads`() {
-        // resideInAPackage overloads
-        val rulePkgList = ClassesRuleBuilder(projectGraph).that().resideInAPackage(listOf("com.example", "com.other"))
+        // inPackage overloads
+        val rulePkgList = ClassesRuleBuilder(projectGraph).that().inPackage(listOf("com.example", "com.other"))
         assertTrue(rulePkgList.getThatPredicate()!!(classA))
 
-        val rulePkgVararg = ClassesRuleBuilder(projectGraph).that().resideInAPackage("com.other", "com.none")
+        val rulePkgVararg = ClassesRuleBuilder(projectGraph).that().inPackage("com.other", "com.none")
         assertFalse(rulePkgVararg.getThatPredicate()!!(classA))
 
-        val rulePkgPred = ClassesRuleBuilder(projectGraph).that().resideInAPackage { it.startsWith("com.ex") }
+        val rulePkgPred = ClassesRuleBuilder(projectGraph).that().inPackage { it.startsWith("com.ex") }
         assertTrue(rulePkgPred.getThatPredicate()!!(classA))
 
         // name overloads
-        val ruleNameEndingList = ClassesRuleBuilder(projectGraph).that().haveNameEndingWith(listOf("ClassA", "ClassB"))
+        val ruleNameEndingList = ClassesRuleBuilder(projectGraph).that().nameEndsWith(listOf("ClassA", "ClassB"))
         assertTrue(ruleNameEndingList.getThatPredicate()!!(classA))
 
-        val ruleNameEndingVararg = ClassesRuleBuilder(projectGraph).that().haveNameEndingWith("Foo", "Bar")
+        val ruleNameEndingVararg = ClassesRuleBuilder(projectGraph).that().nameEndsWith("Foo", "Bar")
         assertFalse(ruleNameEndingVararg.getThatPredicate()!!(classA))
 
-        val ruleNameStartList = ClassesRuleBuilder(projectGraph).that().haveNameStartingWith(listOf("Class", "My"))
+        val ruleNameStartList = ClassesRuleBuilder(projectGraph).that().nameStartsWith(listOf("Class", "My"))
         assertTrue(ruleNameStartList.getThatPredicate()!!(classA))
 
-        val ruleNameStartVararg = ClassesRuleBuilder(projectGraph).that().haveNameStartingWith("Foo", "Bar")
+        val ruleNameStartVararg = ClassesRuleBuilder(projectGraph).that().nameStartsWith("Foo", "Bar")
         assertFalse(ruleNameStartVararg.getThatPredicate()!!(classA))
 
-        val ruleNameDesc = ClassesRuleBuilder(projectGraph).that().haveName("class A name", { it == "ClassA" })
+        val ruleNameDesc = ClassesRuleBuilder(projectGraph).that().named("class A name", { it == "ClassA" })
         assertTrue(ruleNameDesc.getThatPredicate()!!(classA))
 
-        val ruleNameGlobList = ClassesRuleBuilder(projectGraph).that().haveNameMatching(listOf("Class*", "My*"))
+        val ruleNameGlobList = ClassesRuleBuilder(projectGraph).that().nameMatches(listOf("Class*", "My*"))
         assertTrue(ruleNameGlobList.getThatPredicate()!!(classA))
 
-        val ruleNameGlobVararg = ClassesRuleBuilder(projectGraph).that().haveNameMatching("Foo*", "Bar*")
+        val ruleNameGlobVararg = ClassesRuleBuilder(projectGraph).that().nameMatches("Foo*", "Bar*")
         assertFalse(ruleNameGlobVararg.getThatPredicate()!!(classA))
 
         // annotations single/vararg/list
-        val ruleAnnoSingle = ClassesRuleBuilder(projectGraph).that().haveAnnotationOf("MyAnnotation")
+        val ruleAnnoSingle = ClassesRuleBuilder(projectGraph).that().annotatedWith("MyAnnotation")
         assertTrue(ruleAnnoSingle.getThatPredicate()!!(classAnnotated))
 
-        val ruleAllAnnoVararg = ClassesRuleBuilder(projectGraph).that().haveAllAnnotationsOf("MyAnnotation")
+        val ruleAllAnnoVararg = ClassesRuleBuilder(projectGraph).that().annotatedWithAllOf("MyAnnotation")
         assertTrue(ruleAllAnnoVararg.getThatPredicate()!!(classAnnotated))
 
-        val ruleAnyAnnoSingle = ClassesRuleBuilder(projectGraph).that().haveAnyAnnotationOf("MyAnnotation")
+        val ruleAnyAnnoSingle = ClassesRuleBuilder(projectGraph).that().annotatedWithAnyOf("MyAnnotation")
         assertTrue(ruleAnyAnnoSingle.getThatPredicate()!!(classAnnotated))
 
-        val ruleAnyAnnoVararg = ClassesRuleBuilder(projectGraph).that().haveAnyAnnotationOf("MyAnnotation", "Other")
+        val ruleAnyAnnoVararg = ClassesRuleBuilder(projectGraph).that().annotatedWithAnyOf("MyAnnotation", "Other")
         assertTrue(ruleAnyAnnoVararg.getThatPredicate()!!(classAnnotated))
 
         // visibility & modifiers

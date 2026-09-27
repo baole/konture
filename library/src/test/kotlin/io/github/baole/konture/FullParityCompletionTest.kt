@@ -4,8 +4,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-@file:Suppress("DEPRECATION")
-
 package io.github.baole.konture
 
 import org.junit.jupiter.api.Assertions.assertDoesNotThrow
@@ -22,10 +20,10 @@ class FullParityCompletionTest : RuleBuildersTestBase() {
                 .and().haveNameStartingWith("c")
                 .and().haveNameEndingWith("e")
                 .and().notHaveName("forbidden")
-                .and().resideInModule(":library")
-                .and().resideInModules(":library", ":core")
-                .and().notResideInModule(":forbidden")
-                .and().notResideInModules(":forbidden", ":other")
+                .and().resideInAModule(":library")
+                .and().resideInAModule(":library", ":core")
+                .and().notResideInAModule(":forbidden")
+                .and().notResideInAModule(":forbidden", ":other")
                 .and().resideInAPackage("io.github.baole..")
                 .and().notResideInAPackage("com.forbidden..")
                 .and().notContainClass<FullParityCompletionTest>()
@@ -47,7 +45,7 @@ class FullParityCompletionTest : RuleBuildersTestBase() {
     fun `test files reified negative methods`() {
         assertDoesNotThrow {
             FilesRuleBuilder(projectGraph)
-                .that().haveName("FullParityCompletionTest.kt")
+                .that().named("FullParityCompletionTest.kt")
                 .and().notHaveImportOf<Test>()
         }
     }
@@ -56,7 +54,7 @@ class FullParityCompletionTest : RuleBuildersTestBase() {
     fun `test classes and functions reified negative methods`() {
         assertDoesNotThrow {
             ClassesRuleBuilder(projectGraph)
-                .that().haveName("FullParityCompletionTest")
+                .that().named("FullParityCompletionTest")
                 .and().areNotAssignableTo<String>()
                 .and().areNotAssignableFrom<String>()
             FunctionsRuleBuilder(projectGraph)

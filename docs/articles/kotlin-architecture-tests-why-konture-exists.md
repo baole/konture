@@ -154,11 +154,11 @@ Konture supports both focused standalone assertions, such as `Konture.modules { 
 Konture.architecture {
     modules {
         that().haveNamePath(":shared")
-        should().notDependOnModule(":androidApp")
+        should().mustNotDependOn(":androidApp")
     }
 
     classes {
-        that().resideInAPackage("..shared..")
+        that().inPackage("..shared..")
         should().onlyDependOnClassesInAnyPackage(
             "..shared..",
             "kotlin..",
@@ -241,7 +241,7 @@ A Gradle-aware rule makes the boundary executable:
 ```kotlin
 Konture.modules {
     that().haveNameMatching(":feature:**:impl")
-    should().onlyDependOnModules(
+    should().onlyDependOn(
         ":feature:**:api",
         ":core:**",
         ":shared",
@@ -273,7 +273,7 @@ Architecture tests can inspect imports, packages, declarations, visibility, and 
 
 ```kotlin
 Konture.classes {
-    that().resideInAPackage("..domain..")
+    that().inPackage("..domain..")
     should().onlyDependOnClassesInAnyPackage(
         "..domain..",
         "kotlin..",
@@ -296,7 +296,7 @@ Konture.scopeFromPackage("com.acme.domain")
     }
 ```
 
-`scopeFromPackage("com.acme.domain")` selects a concrete package prefix for custom assertions. By contrast, `resideInAPackage("..domain..")` uses Konture's wildcard package matching inside fluent class rules.
+`scopeFromPackage("com.acme.domain")` selects a concrete package prefix for custom assertions. By contrast, `inPackage("..domain..")` uses Konture's wildcard package matching inside fluent class rules.
 
 That is the source-level half of architecture governance: not just which modules can link, but which concepts are allowed to appear in which parts of the code.
 

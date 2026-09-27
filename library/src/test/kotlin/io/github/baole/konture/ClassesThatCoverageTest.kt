@@ -4,8 +4,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-@file:Suppress("DEPRECATION")
-
 package io.github.baole.konture
 
 import org.junit.jupiter.api.Assertions.assertFalse
@@ -31,151 +29,151 @@ internal class ClassesThatCoverageTest : KontureScopeTestFixture() {
 
     @Test
     fun `test ClassesThat module filters`() {
-        val builder1 = ClassesRuleBuilder(graph).that().resideInAModule("app")
+        val builder1 = ClassesRuleBuilder(graph).that().inModule("app")
         assertTrue(checkPred(builder1, classA))
 
-        val builder2 = ClassesRuleBuilder(graph).that().resideInAModule(listOf("app"))
+        val builder2 = ClassesRuleBuilder(graph).that().inModules(listOf("app"))
         assertTrue(checkPred(builder2, classA))
 
-        val builder3 = ClassesRuleBuilder(graph).that().resideInAModule("app", "core")
+        val builder3 = ClassesRuleBuilder(graph).that().inModules("app", "core")
         assertTrue(checkPred(builder3, classA))
 
-        val builder4 = ClassesRuleBuilder(graph).that().resideInModule("app")
+        val builder4 = ClassesRuleBuilder(graph).that().inModule("app")
         assertTrue(checkPred(builder4, classA))
 
-        val builder5 = ClassesRuleBuilder(graph).that().resideInModules("app")
+        val builder5 = ClassesRuleBuilder(graph).that().inModules("app")
         assertTrue(checkPred(builder5, classA))
 
-        val builder6 = ClassesRuleBuilder(graph).that().resideInModules(listOf("app"))
+        val builder6 = ClassesRuleBuilder(graph).that().inModules(listOf("app"))
         assertTrue(checkPred(builder6, classA))
 
-        val builder7 = ClassesRuleBuilder(graph).that().notResideInAModule("feature")
+        val builder7 = ClassesRuleBuilder(graph).that().notInModule("feature")
         assertTrue(checkPred(builder7, classA))
 
-        val builder8 = ClassesRuleBuilder(graph).that().notResideInAModule(listOf("feature"))
+        val builder8 = ClassesRuleBuilder(graph).that().notInModules(listOf("feature"))
         assertTrue(checkPred(builder8, classA))
 
-        val builder9 = ClassesRuleBuilder(graph).that().notResideInAModule("feature", "other")
+        val builder9 = ClassesRuleBuilder(graph).that().notInModules("feature", "other")
         assertTrue(checkPred(builder9, classA))
 
-        val builder10 = ClassesRuleBuilder(graph).that().notResideInModule("feature")
+        val builder10 = ClassesRuleBuilder(graph).that().notInModule("feature")
         assertTrue(checkPred(builder10, classA))
 
-        val builder11 = ClassesRuleBuilder(graph).that().notResideInModules("feature")
+        val builder11 = ClassesRuleBuilder(graph).that().notInModules("feature")
         assertTrue(checkPred(builder11, classA))
 
-        val builder12 = ClassesRuleBuilder(graph).that().notResideInModules(listOf("feature"))
+        val builder12 = ClassesRuleBuilder(graph).that().notInModules(listOf("feature"))
         assertTrue(checkPred(builder12, classA))
     }
 
     @Test
     fun `test ClassesThat name and package filters`() {
-        val builder1 = ClassesRuleBuilder(graph).that().resideInPackageOf(String::class)
+        val builder1 = ClassesRuleBuilder(graph).that().inPackageOf(String::class)
         assertFalse(checkPred(builder1, classA))
 
-        val builder2 = ClassesRuleBuilder(graph).that().haveName("desc") { it == "ClassA" }
+        val builder2 = ClassesRuleBuilder(graph).that().named("desc") { it == "ClassA" }
         assertTrue(checkPred(builder2, classA))
 
-        val builder3 = ClassesRuleBuilder(graph).that().haveName(listOf("ClassA", "ClassB"))
+        val builder3 = ClassesRuleBuilder(graph).that().named(listOf("ClassA", "ClassB"))
         assertTrue(checkPred(builder3, classA))
 
-        val builder4 = ClassesRuleBuilder(graph).that().haveName("ClassA", "ClassB")
+        val builder4 = ClassesRuleBuilder(graph).that().named("ClassA", "ClassB")
         assertTrue(checkPred(builder4, classA))
 
-        val builder5 = ClassesRuleBuilder(graph).that().notHaveName("ClassB")
+        val builder5 = ClassesRuleBuilder(graph).that().notNamed("ClassB")
         assertTrue(checkPred(builder5, classA))
 
-        val builder6 = ClassesRuleBuilder(graph).that().notHaveName(listOf("ClassB"))
+        val builder6 = ClassesRuleBuilder(graph).that().notNamed(listOf("ClassB"))
         assertTrue(checkPred(builder6, classA))
 
-        val builder7 = ClassesRuleBuilder(graph).that().notHaveName("ClassB", "ClassC")
+        val builder7 = ClassesRuleBuilder(graph).that().notNamed("ClassB", "ClassC")
         assertTrue(checkPred(builder7, classA))
 
-        val builder8 = ClassesRuleBuilder(graph).that().notHaveName { it == "ClassB" }
+        val builder8 = ClassesRuleBuilder(graph).that().notNamed { it == "ClassB" }
         assertTrue(checkPred(builder8, classA))
 
-        val builder9 = ClassesRuleBuilder(graph).that().haveNameEndingWith(listOf("A", "B"))
+        val builder9 = ClassesRuleBuilder(graph).that().nameEndsWith(listOf("A", "B"))
         assertTrue(checkPred(builder9, classA))
 
-        val builder10 = ClassesRuleBuilder(graph).that().haveNameEndingWith("A", "B")
+        val builder10 = ClassesRuleBuilder(graph).that().nameEndsWith("A", "B")
         assertTrue(checkPred(builder10, classA))
 
-        val builder11 = ClassesRuleBuilder(graph).that().notHaveNameEndingWith("Z")
+        val builder11 = ClassesRuleBuilder(graph).that().notNameEndsWith("Z")
         assertTrue(checkPred(builder11, classA))
 
-        val builder12 = ClassesRuleBuilder(graph).that().notHaveNameEndingWith(listOf("Z"))
+        val builder12 = ClassesRuleBuilder(graph).that().notNameEndsWith(listOf("Z"))
         assertTrue(checkPred(builder12, classA))
 
-        val builder13 = ClassesRuleBuilder(graph).that().notHaveNameEndingWith("Z", "Y")
+        val builder13 = ClassesRuleBuilder(graph).that().notNameEndsWith("Z", "Y")
         assertTrue(checkPred(builder13, classA))
 
-        val builder14 = ClassesRuleBuilder(graph).that().haveNameStartingWith(listOf("Cl", "My"))
+        val builder14 = ClassesRuleBuilder(graph).that().nameStartsWith(listOf("Cl", "My"))
         assertTrue(checkPred(builder14, classA))
 
-        val builder15 = ClassesRuleBuilder(graph).that().haveNameStartingWith("Cl", "My")
+        val builder15 = ClassesRuleBuilder(graph).that().nameStartsWith("Cl", "My")
         assertTrue(checkPred(builder15, classA))
 
-        val builder16 = ClassesRuleBuilder(graph).that().notHaveNameStartingWith("Z")
+        val builder16 = ClassesRuleBuilder(graph).that().notNameStartsWith("Z")
         assertTrue(checkPred(builder16, classA))
 
-        val builder17 = ClassesRuleBuilder(graph).that().notHaveNameStartingWith(listOf("Z"))
+        val builder17 = ClassesRuleBuilder(graph).that().notNameStartsWith(listOf("Z"))
         assertTrue(checkPred(builder17, classA))
 
-        val builder18 = ClassesRuleBuilder(graph).that().notHaveNameStartingWith("Z", "Y")
+        val builder18 = ClassesRuleBuilder(graph).that().notNameStartsWith("Z", "Y")
         assertTrue(checkPred(builder18, classA))
 
-        val builder19 = ClassesRuleBuilder(graph).that().haveNameMatching(listOf("Class*", "Other*"))
+        val builder19 = ClassesRuleBuilder(graph).that().nameMatches(listOf("Class*", "Other*"))
         assertTrue(checkPred(builder19, classA))
 
-        val builder20 = ClassesRuleBuilder(graph).that().haveNameMatching("Class*", "Other*")
+        val builder20 = ClassesRuleBuilder(graph).that().nameMatches("Class*", "Other*")
         assertTrue(checkPred(builder20, classA))
 
-        val builder21 = ClassesRuleBuilder(graph).that().notHaveNameMatching("Wrong*")
+        val builder21 = ClassesRuleBuilder(graph).that().notNameMatches("Wrong*")
         assertTrue(checkPred(builder21, classA))
 
-        val builder22 = ClassesRuleBuilder(graph).that().notHaveNameMatching(listOf("Wrong*"))
+        val builder22 = ClassesRuleBuilder(graph).that().notNameMatches(listOf("Wrong*"))
         assertTrue(checkPred(builder22, classA))
 
-        val builder23 = ClassesRuleBuilder(graph).that().notHaveNameMatching("Wrong*", "Bad*")
+        val builder23 = ClassesRuleBuilder(graph).that().notNameMatches("Wrong*", "Bad*")
         assertTrue(checkPred(builder23, classA))
     }
 
     @Test
     fun `test ClassesThat annotation and visibility filters`() {
-        val builder1 = ClassesRuleBuilder(graph).that().haveAnnotationOf(Deprecated::class)
+        val builder1 = ClassesRuleBuilder(graph).that().annotatedWith(Deprecated::class)
         assertFalse(checkPred(builder1, classA))
 
-        val builder2 = ClassesRuleBuilder(graph).that().haveAnnotationOf<Deprecated>()
+        val builder2 = ClassesRuleBuilder(graph).that().annotatedWith<Deprecated>()
         assertFalse(checkPred(builder2, classA))
 
-        val builder3 = ClassesRuleBuilder(graph).that().areAnnotatedWith("com.example.MyAnnotation")
+        val builder3 = ClassesRuleBuilder(graph).that().annotatedWith("com.example.MyAnnotation")
         assertTrue(checkPred(builder3, classAnnotated))
 
-        val builder4 = ClassesRuleBuilder(graph).that().areAnnotatedWith(Deprecated::class)
+        val builder4 = ClassesRuleBuilder(graph).that().annotatedWith(Deprecated::class)
         assertFalse(checkPred(builder4, classA))
 
-        val builder5 = ClassesRuleBuilder(graph).that().areAnnotatedWith<Deprecated>()
+        val builder5 = ClassesRuleBuilder(graph).that().annotatedWith<Deprecated>()
         assertFalse(checkPred(builder5, classA))
 
         val builder5b = ClassesRuleBuilder(graph).that().annotatedWith<Deprecated>()
         assertFalse(checkPred(builder5b, classA))
 
-        val builder6 = ClassesRuleBuilder(graph).that().haveAllAnnotationsOf("MyAnnotation")
+        val builder6 = ClassesRuleBuilder(graph).that().annotatedWithAllOf("MyAnnotation")
         assertTrue(checkPred(builder6, classAnnotated))
 
-        val builder7 = ClassesRuleBuilder(graph).that().haveAllAnnotationsOf(listOf("MyAnnotation"))
+        val builder7 = ClassesRuleBuilder(graph).that().annotatedWithAllOf(listOf("MyAnnotation"))
         assertTrue(checkPred(builder7, classAnnotated))
 
-        val builder8 = ClassesRuleBuilder(graph).that().haveAllAnnotationsOf("MyAnnotation", "Other")
+        val builder8 = ClassesRuleBuilder(graph).that().annotatedWithAllOf("MyAnnotation", "Other")
         assertFalse(checkPred(builder8, classAnnotated))
 
-        val builder9 = ClassesRuleBuilder(graph).that().haveAnyAnnotationOf("MyAnnotation")
+        val builder9 = ClassesRuleBuilder(graph).that().annotatedWithAnyOf("MyAnnotation")
         assertTrue(checkPred(builder9, classAnnotated))
 
-        val builder10 = ClassesRuleBuilder(graph).that().haveAnyAnnotationOf(listOf("MyAnnotation"))
+        val builder10 = ClassesRuleBuilder(graph).that().annotatedWithAnyOf(listOf("MyAnnotation"))
         assertTrue(checkPred(builder10, classAnnotated))
 
-        val builder11 = ClassesRuleBuilder(graph).that().haveAnyAnnotationOf("MyAnnotation", "Other")
+        val builder11 = ClassesRuleBuilder(graph).that().annotatedWithAnyOf("MyAnnotation", "Other")
         assertTrue(checkPred(builder11, classAnnotated))
 
         val builder12 = ClassesRuleBuilder(graph).that().haveAnnotationWithArgument("MyAnnotation", "key", "val")
@@ -334,25 +332,25 @@ internal class ClassesThatCoverageTest : KontureScopeTestFixture() {
         val builder38 = ClassesRuleBuilder(graph).that().beDocumentedWithKDoc()
         assertTrue(checkPred(builder38, classWithKdoc))
 
-        val builder39 = ClassesRuleBuilder(graph).that().anyOf({ haveName("ClassA") }, { haveName("ClassB") })
+        val builder39 = ClassesRuleBuilder(graph).that().anyOf({ named("ClassA") }, { named("ClassB") })
         assertTrue(checkPred(builder39, classA))
 
         val builder40 =
             ClassesRuleBuilder(
                 graph,
-            ).that().allOf({ haveName("ClassA") }, { resideInAPackage("com.example") })
+            ).that().allOf({ named("ClassA") }, { inPackage("com.example") })
         assertTrue(checkPred(builder40, classA))
 
-        val builder41 = ClassesRuleBuilder(graph).that().noneOf({ haveName("ClassB") })
+        val builder41 = ClassesRuleBuilder(graph).that().noneOf({ named("ClassB") })
         assertTrue(checkPred(builder41, classA))
     }
 
     @Test
     fun `test ClassesThat package exclusions and member matching`() {
-        val cb1 = ClassesRuleBuilder(graph).that().notResideInAPackage(listOf("com.example"))
+        val cb1 = ClassesRuleBuilder(graph).that().notInPackage(listOf("com.example"))
         assertFalse(checkPred(cb1, classA))
 
-        val cb2 = ClassesRuleBuilder(graph).that().notResideInAPackage("com.example", "com.other")
+        val cb2 = ClassesRuleBuilder(graph).that().notInPackage("com.example", "com.other")
         assertFalse(checkPred(cb2, classA))
 
         val cb3 = ClassesRuleBuilder(graph).that().containProperty(listOf("propA"))

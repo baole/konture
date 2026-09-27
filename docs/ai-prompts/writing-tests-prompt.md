@@ -66,7 +66,7 @@ project's intended architecture is unclear.
 Use the Konture DSL APIs that are present in the installed project version.
 Strictly reuse the project's existing test framework annotations and style (e.g., Kotest `FunSpec`/`StringSpec`, JUnit 5 `@Test`, JUnit 4 `@Test`, or `kotlin.test` `@Test`). Do **not** introduce JUnit 5 imports or annotations if the project standardizes on Kotest or another test library.
 
-**Prefer Wildcard & Pattern Matching**: Use wildcard/pattern selectors (`haveNameMatching(":core:domain**")`, `haveNameMatching(":feature:**")`, `resideInAPackage("..domain..")`) rather than hardcoding long lists of full individual module or package names. Wildcards and patterns ensure rules automatically cover newly created modules and packages.
+**Prefer Wildcard & Pattern Matching**: Use wildcard/pattern selectors (`haveNameMatching(":core:domain**")`, `haveNameMatching(":feature:**")`, `inPackage("..domain..")`) rather than hardcoding long lists of full individual module or package names. Wildcards and patterns ensure rules automatically cover newly created modules and packages.
 
 Common rule shapes:
 
@@ -76,12 +76,12 @@ import io.github.baole.konture.*
 Konture.architecture {
     modules {
         that().haveNameMatching(":core:domain**")
-        should().notDependOnModule(":core:data**")
-        andShould().notDependOnModule(":feature:**")
+        should().mustNotDependOn(":core:data**")
+        andShould().mustNotDependOn(":feature:**")
     }
 
     classes {
-        that().resideInAPackage("..domain..")
+        that().inPackage("..domain..")
         should().onlyDependOnClassesInAnyPackage("..domain..", "kotlin..")
     }
 }
@@ -112,7 +112,7 @@ import io.github.baole.konture.*
 
 Konture.modules()
     .that().haveNameMatching(":feature:**:impl")
-    .should().onlyDependOnModules(":feature:**:api", ":core:**", ":shared")
+    .should().onlyDependOn(":feature:**:api", ":core:**", ":shared")
     .check()
 ```
 
@@ -120,18 +120,18 @@ Konture.modules()
 import io.github.baole.konture.*
 
 Konture.classes()
-    .that().haveNameEndingWith("Repository")
+    .that().nameEndsWith("Repository")
     .should().beInterfaces()
     .check()
 ```
 
 Available module filters/assertions include:
 - Filters: `haveNamePath(path)`, `haveNameMatching(glob)`
-- Assertions: `onlyDependOnModules(vararg paths)`, `notDependOnModule(path)`
+- Assertions: `onlyDependOn(vararg paths)`, `mustNotDependOn(path)`
 
 Available class filters/assertions include:
-- Filters: `resideInAPackage(pkg)`, `haveNameEndingWith(suffix)`,
-  `areInterfaces()`, `haveAnnotationOf(fqName)`
+- Filters: `inPackage(pkg)`, `nameEndsWith(suffix)`,
+  `areInterfaces()`, `annotatedWith(fqName)`
 - Assertions: `beInterfaces()`, `beInternal()`, `bePublic()`,
   `notHaveSignaturesWithTypesAnnotatedWith(annotation)`,
   `notDependOnClassesInAnyPackage(vararg pkgs)`,

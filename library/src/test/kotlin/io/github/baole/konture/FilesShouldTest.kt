@@ -4,8 +4,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-@file:Suppress("DEPRECATION")
-
 package io.github.baole.konture
 
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -78,23 +76,23 @@ internal class FilesShouldTest : KontureScopeTestFixture() {
     fun `test FilesShould package assertions`() {
         val fileCtx = FileDeclarationContext(fileA, ":app")
 
-        // resideInAPackage single, list, vararg, predicate
-        val ruleSingle = FilesRuleBuilder(projectGraph).should().resideInAPackage("com.example")
+        // inPackage single, list, vararg, predicate
+        val ruleSingle = FilesRuleBuilder(projectGraph).should().inPackage("com.example")
         val violationsSingle = mutableListOf<String>()
         ruleSingle.getShouldAssertion()!!(fileCtx, listOf(fileCtx), violationsSingle)
         assertTrue(violationsSingle.isEmpty())
 
-        val ruleList = FilesRuleBuilder(projectGraph).should().resideInAPackage(listOf("com.example", "com.other"))
+        val ruleList = FilesRuleBuilder(projectGraph).should().inPackage(listOf("com.example", "com.other"))
         val violationsList = mutableListOf<String>()
         ruleList.getShouldAssertion()!!(fileCtx, listOf(fileCtx), violationsList)
         assertTrue(violationsList.isEmpty())
 
-        val ruleVararg = FilesRuleBuilder(projectGraph).should().resideInAPackage("com.other", "com.none")
+        val ruleVararg = FilesRuleBuilder(projectGraph).should().inPackage("com.other", "com.none")
         val violationsVararg = mutableListOf<String>()
         ruleVararg.getShouldAssertion()!!(fileCtx, listOf(fileCtx), violationsVararg)
         assertEquals(1, violationsVararg.size)
 
-        val rulePred = FilesRuleBuilder(projectGraph).should().resideInAPackage { it.contains("example") }
+        val rulePred = FilesRuleBuilder(projectGraph).should().inPackage { it.contains("example") }
         val violationsPred = mutableListOf<String>()
         rulePred.getShouldAssertion()!!(fileCtx, listOf(fileCtx), violationsPred)
         assertTrue(violationsPred.isEmpty())
@@ -104,50 +102,50 @@ internal class FilesShouldTest : KontureScopeTestFixture() {
     fun `test FilesShould name assertions`() {
         val fileCtx = FileDeclarationContext(fileA, ":app")
 
-        // haveNameEndingWith
-        val ruleEnding = FilesRuleBuilder(projectGraph).should().haveNameEndingWith(".kt")
+        // nameEndsWith
+        val ruleEnding = FilesRuleBuilder(projectGraph).should().nameEndsWith(".kt")
         val violationsEnding = mutableListOf<String>()
         ruleEnding.getShouldAssertion()!!(fileCtx, listOf(fileCtx), violationsEnding)
         assertTrue(violationsEnding.isEmpty())
 
-        val ruleEndingList = FilesRuleBuilder(projectGraph).should().haveNameEndingWith(listOf(".kt", ".java"))
+        val ruleEndingList = FilesRuleBuilder(projectGraph).should().nameEndsWith(listOf(".kt", ".java"))
         val violationsEndingList = mutableListOf<String>()
         ruleEndingList.getShouldAssertion()!!(fileCtx, listOf(fileCtx), violationsEndingList)
         assertTrue(violationsEndingList.isEmpty())
 
-        val ruleEndingVararg = FilesRuleBuilder(projectGraph).should().haveNameEndingWith(".java", ".txt")
+        val ruleEndingVararg = FilesRuleBuilder(projectGraph).should().nameEndsWith(".java", ".txt")
         val violationsEndingVararg = mutableListOf<String>()
         ruleEndingVararg.getShouldAssertion()!!(fileCtx, listOf(fileCtx), violationsEndingVararg)
         assertEquals(1, violationsEndingVararg.size)
 
-        // haveNameStartingWith
-        val ruleStarting = FilesRuleBuilder(projectGraph).should().haveNameStartingWith("Class")
+        // nameStartsWith
+        val ruleStarting = FilesRuleBuilder(projectGraph).should().nameStartsWith("Class")
         val violationsStarting = mutableListOf<String>()
         ruleStarting.getShouldAssertion()!!(fileCtx, listOf(fileCtx), violationsStarting)
         assertTrue(violationsStarting.isEmpty())
 
-        val ruleStartingList = FilesRuleBuilder(projectGraph).should().haveNameStartingWith(listOf("Class", "File"))
+        val ruleStartingList = FilesRuleBuilder(projectGraph).should().nameStartsWith(listOf("Class", "File"))
         val violationsStartingList = mutableListOf<String>()
         ruleStartingList.getShouldAssertion()!!(fileCtx, listOf(fileCtx), violationsStartingList)
         assertTrue(violationsStartingList.isEmpty())
 
-        val ruleStartingVararg = FilesRuleBuilder(projectGraph).should().haveNameStartingWith("Foo", "Bar")
+        val ruleStartingVararg = FilesRuleBuilder(projectGraph).should().nameStartsWith("Foo", "Bar")
         val violationsStartingVararg = mutableListOf<String>()
         ruleStartingVararg.getShouldAssertion()!!(fileCtx, listOf(fileCtx), violationsStartingVararg)
         assertEquals(1, violationsStartingVararg.size)
 
-        // haveNameMatching
-        val ruleMatch = FilesRuleBuilder(projectGraph).should().haveNameMatching("Class*.kt")
+        // nameMatches
+        val ruleMatch = FilesRuleBuilder(projectGraph).should().nameMatches("Class*.kt")
         val violationsMatch = mutableListOf<String>()
         ruleMatch.getShouldAssertion()!!(fileCtx, listOf(fileCtx), violationsMatch)
         assertTrue(violationsMatch.isEmpty())
 
-        val ruleMatchList = FilesRuleBuilder(projectGraph).should().haveNameMatching(listOf("Class*.kt", "File*.kt"))
+        val ruleMatchList = FilesRuleBuilder(projectGraph).should().nameMatches(listOf("Class*.kt", "File*.kt"))
         val violationsMatchList = mutableListOf<String>()
         ruleMatchList.getShouldAssertion()!!(fileCtx, listOf(fileCtx), violationsMatchList)
         assertTrue(violationsMatchList.isEmpty())
 
-        val ruleMatchVararg = FilesRuleBuilder(projectGraph).should().haveNameMatching("Foo*", "*Bar")
+        val ruleMatchVararg = FilesRuleBuilder(projectGraph).should().nameMatches("Foo*", "*Bar")
         val violationsMatchVararg = mutableListOf<String>()
         ruleMatchVararg.getShouldAssertion()!!(fileCtx, listOf(fileCtx), violationsMatchVararg)
         assertEquals(1, violationsMatchVararg.size)
@@ -220,8 +218,8 @@ internal class FilesShouldTest : KontureScopeTestFixture() {
         // anyOf
         val ruleAny =
             FilesRuleBuilder(projectGraph).should().anyOf(
-                { resideInAPackage("com.example") },
-                { resideInAPackage("com.other") },
+                { inPackage("com.example") },
+                { inPackage("com.other") },
             )
         val violationsAny = mutableListOf<String>()
         ruleAny.getShouldAssertion()!!(fileCtxA, listOf(fileCtxA), violationsAny)
@@ -230,8 +228,8 @@ internal class FilesShouldTest : KontureScopeTestFixture() {
         // allOf
         val ruleAll =
             FilesRuleBuilder(projectGraph).should().allOf(
-                { resideInAPackage("com.example") },
-                { haveNameEndingWith(".kt") },
+                { inPackage("com.example") },
+                { nameEndsWith(".kt") },
             )
         val violationsAll = mutableListOf<String>()
         ruleAll.getShouldAssertion()!!(fileCtxA, listOf(fileCtxA), violationsAll)
@@ -240,8 +238,8 @@ internal class FilesShouldTest : KontureScopeTestFixture() {
         // noneOf
         val ruleNone =
             FilesRuleBuilder(projectGraph).should().noneOf(
-                { resideInAPackage("com.other") },
-                { haveNameStartingWith("Wrong") },
+                { inPackage("com.other") },
+                { nameStartsWith("Wrong") },
             )
         val violationsNone = mutableListOf<String>()
         ruleNone.getShouldAssertion()!!(fileCtxA, listOf(fileCtxA), violationsNone)

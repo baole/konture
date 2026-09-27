@@ -77,7 +77,7 @@ class DSLConsistencyTest {
     @Test
     fun `domain classes and functions reside in package of marker class`() {
         classes {
-            that().resideInPackageOf<DomainMarker>()
+            that().inPackageOf<DomainMarker>()
                 .and().areAssignableTo<BaseRepository>()
                 .should().beDocumentedWithKDoc()
                 .check()

@@ -138,7 +138,7 @@
     <rect class="rule" width="540" height="150"/>
     <text class="rule-text" x="34" y="21">Konture.modules {</text>
     <text class="rule-text" x="57" y="39">that().haveNameMatching(":feature:**:impl")</text>
-    <text class="rule-text" x="57" y="57">should().onlyDependOnModules(</text>
+    <text class="rule-text" x="57" y="57">should().onlyDependOn(</text>
     <text class="rule-text" x="80" y="75">":feature:**:api",</text>
     <text class="rule-text" x="80" y="93">":shared:**",</text>
     <text class="rule-text" x="80" y="111">":core:**",</text>

@@ -121,8 +121,8 @@ class ArchitectureGuardrails {
             // 🎯 Select modules via wildcard pattern matching
             modules {
                 that().haveNameMatching(":core:domain**")
-                should().notDependOnModule(":core:data**")
-                andShould().notDependOnModule(":feature:**")
+                should().mustNotDependOn(":core:data**")
+                andShould().mustNotDependOn(":feature:**")
             }
         }
     }
@@ -132,8 +132,8 @@ class ArchitectureGuardrails {
         architecture {
             // 🎯 Select classes inside domain package
             classes {
-                that().resideInAPackage("..domain..")
-                that().haveNameEndingWith("Repository")
+                that().inPackage("..domain..")
+                that().nameEndsWith("Repository")
                 should().beInterfaces()
             }
         }

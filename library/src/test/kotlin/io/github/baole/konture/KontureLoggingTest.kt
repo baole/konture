@@ -4,8 +4,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-@file:Suppress("DEPRECATION")
-
 package io.github.baole.konture
 
 import io.github.baole.konture.core.KontureLogger
@@ -56,7 +54,7 @@ class KontureLoggingTest : RuleBuildersTestBase() {
         ClassesRuleBuilder(projectGraph)
             .allowEmpty()
             .that()
-            .haveNameStartingWith("NonExistentClass")
+            .nameStartsWith("NonExistentClass")
             .should()
             .satisfy { _, _ -> }
             .check()
@@ -94,7 +92,7 @@ class KontureLoggingTest : RuleBuildersTestBase() {
         FilesRuleBuilder(projectGraph)
             .allowEmpty()
             .that()
-            .haveNameStartingWith("NonExistentFile")
+            .nameStartsWith("NonExistentFile")
             .should()
             .satisfy { _, _ -> }
             .check()

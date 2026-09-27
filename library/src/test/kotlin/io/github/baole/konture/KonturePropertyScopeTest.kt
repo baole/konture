@@ -4,8 +4,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-@file:Suppress("DEPRECATION")
-
 package io.github.baole.konture
 
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -101,17 +99,17 @@ class KonturePropertyScopeTest : RuleBuildersTestBase() {
 
         val list = listOf(topCtx, memCtx)
 
-        assertEquals(1, list.withNameEndingWith("Val").size)
-        assertEquals(topCtx, list.withNameEndingWith("Val").first())
+        assertEquals(1, list.haveNameEndingWith("Val").size)
+        assertEquals(topCtx, list.haveNameEndingWith("Val").first())
 
-        assertEquals(1, list.withNameStartingWith("member").size)
-        assertEquals(memCtx, list.withNameStartingWith("member").first())
+        assertEquals(1, list.haveNameStartingWith("member").size)
+        assertEquals(memCtx, list.haveNameStartingWith("member").first())
 
         assertEquals(1, list.withNameMatching("*Var").size)
         assertEquals(memCtx, list.withNameMatching("*Var").first())
 
-        assertEquals(1, list.withPackage("..service").size)
-        assertEquals(topCtx, list.withPackage("..service").first())
+        assertEquals(1, list.resideInAPackage("..service").size)
+        assertEquals(topCtx, list.resideInAPackage("..service").first())
 
         assertEquals(1, list.valProperties().size)
         assertEquals(topCtx, list.valProperties().first())

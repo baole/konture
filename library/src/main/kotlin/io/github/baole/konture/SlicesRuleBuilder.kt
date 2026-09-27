@@ -91,7 +91,6 @@ public class SlicesRuleBuilder(
         assertions.forEach { it(sliceGraph, violations) }
     }
 
-    private val ignoredPredicates = mutableListOf<(Slice) -> Boolean>()
     private val programmaticSuppressions = mutableListOf<ProgrammaticSuppression>()
 
     /**
@@ -109,34 +108,6 @@ public class SlicesRuleBuilder(
      */
     public fun allowEmpty(): SlicesRuleBuilder {
         allowEmpty = true
-        return this
-    }
-
-    /**
-     * Configures this builder to ignore failures for slices satisfying the given predicate.
-     */
-    @Deprecated(
-        message = "Use suppress { ... } with mandatory audit reason instead",
-        replaceWith = ReplaceWith("suppress { ... }"),
-    )
-    public fun ignoreFailuresIn(predicate: (Slice) -> Boolean): SlicesRuleBuilder {
-        ignoredPredicates.add(predicate)
-        return this
-    }
-
-    /**
-     * Configures this builder to ignore failures for slices matching any of the specified slice keys or patterns.
-     */
-    @Deprecated(
-        message = "Use suppress { ... } with mandatory audit reason instead",
-        replaceWith = ReplaceWith("suppress { ... }"),
-    )
-    public fun ignoreFailuresIn(vararg sliceKeys: String): SlicesRuleBuilder {
-        ignoredPredicates.add { slice ->
-            sliceKeys.any { key ->
-                slice.key == key || io.github.baole.konture.impl.PatternMatchers.matchesSimpleGlob(key, slice.key)
-            }
-        }
         return this
     }
 
@@ -324,11 +295,8 @@ public class SlicesRuleBuilder(
         }
 
         if (assertions.isEmpty()) throw AssertionError(getMessage("slices.rule.noAssertion"))
-        /** Filter or assertion criteria for active slices. */
-        val activeSlices = slices.filterNot { slice -> ignoredPredicates.any { it(slice) } }
-
         /** Filter or assertion criteria for slice graph. */
-        val sliceGraph = SliceCycleDetector.buildGraph(activeSlices, packageToSlice, allClasses, slicePattern)
+        val sliceGraph = SliceCycleDetector.buildGraph(slices, packageToSlice, allClasses, slicePattern)
 
         /** Filter or assertion criteria for run check. */
         val runCheckReport = { list: MutableList<Violation> ->
@@ -340,10 +308,10 @@ public class SlicesRuleBuilder(
                 val severityToUse = msgMeta?.severity ?: activeSeverity
                 val subject = Subject.CustomSubject(name = slicePattern)
                 val candidateKeys =
-                    activeSlices
+                    slices
                         .map { it.key }
                         .filter { key -> rawMsg.contains(key) }
-                        .ifEmpty { activeSlices.map { it.key } }
+                        .ifEmpty { slices.map { it.key } }
                 val suppression =
                     SuppressionEvaluator.evaluateSliceSuppression(
                         ruleId = ruleIdToUse,

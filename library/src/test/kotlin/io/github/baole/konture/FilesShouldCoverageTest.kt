@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-@file:Suppress("LongMethod", "DEPRECATION")
+@file:Suppress("LongMethod")
 
 package io.github.baole.konture
 
@@ -20,12 +20,12 @@ internal class FilesShouldCoverageTest : KontureScopeTestFixture() {
                 mapOf(":" to listOf(Module(":", ":app", "app", emptyList(), emptyList(), emptyList(), listOf(fileA)))),
             )
 
-        val assertModSingle = FilesRuleBuilder(graph).should().resideInAModule(":app").getShouldAssertion()!!
+        val assertModSingle = FilesRuleBuilder(graph).should().inModule(":app").getShouldAssertion()!!
         val v1 = mutableListOf<String>()
         assertModSingle(fileCtx, listOf(fileCtx), v1)
         assertTrue(v1.isEmpty())
 
-        val assertModList = FilesRuleBuilder(graph).should().resideInAModule(listOf(":app")).getShouldAssertion()!!
+        val assertModList = FilesRuleBuilder(graph).should().inModules(listOf(":app")).getShouldAssertion()!!
         val v2 = mutableListOf<String>()
         assertModList(fileCtx, listOf(fileCtx), v2)
         assertTrue(v2.isEmpty())
@@ -33,7 +33,7 @@ internal class FilesShouldCoverageTest : KontureScopeTestFixture() {
         val assertModVararg =
             FilesRuleBuilder(
                 graph,
-            ).should().resideInAModule(":app", ":core").getShouldAssertion()!!
+            ).should().inModules(":app", ":core").getShouldAssertion()!!
         val v3 = mutableListOf<String>()
         assertModVararg(fileCtx, listOf(fileCtx), v3)
         assertTrue(v3.isEmpty())
@@ -41,7 +41,7 @@ internal class FilesShouldCoverageTest : KontureScopeTestFixture() {
         val assertNotModSingle =
             FilesRuleBuilder(
                 graph,
-            ).should().notResideInAModule(":forbidden").getShouldAssertion()!!
+            ).should().notInModule(":forbidden").getShouldAssertion()!!
         val v4 = mutableListOf<String>()
         assertNotModSingle(fileCtx, listOf(fileCtx), v4)
         assertTrue(v4.isEmpty())
@@ -49,7 +49,7 @@ internal class FilesShouldCoverageTest : KontureScopeTestFixture() {
         val assertNotModList =
             FilesRuleBuilder(
                 graph,
-            ).should().notResideInAModule(listOf(":forbidden")).getShouldAssertion()!!
+            ).should().notInModules(listOf(":forbidden")).getShouldAssertion()!!
         val v5 = mutableListOf<String>()
         assertNotModList(fileCtx, listOf(fileCtx), v5)
         assertTrue(v5.isEmpty())
@@ -57,7 +57,7 @@ internal class FilesShouldCoverageTest : KontureScopeTestFixture() {
         val assertNotModVararg =
             FilesRuleBuilder(
                 graph,
-            ).should().notResideInAModule(":forbidden", ":other").getShouldAssertion()!!
+            ).should().notInModules(":forbidden", ":other").getShouldAssertion()!!
         val v6 = mutableListOf<String>()
         assertNotModVararg(fileCtx, listOf(fileCtx), v6)
         assertTrue(v6.isEmpty())
@@ -214,12 +214,12 @@ internal class FilesShouldCoverageTest : KontureScopeTestFixture() {
                 mapOf(":" to listOf(Module(":", ":app", "app", emptyList(), emptyList(), emptyList(), listOf(fileA)))),
             )
 
-        val assertNameSingle = FilesRuleBuilder(graph).should().haveName("ClassA.kt").getShouldAssertion()!!
+        val assertNameSingle = FilesRuleBuilder(graph).should().named("ClassA.kt").getShouldAssertion()!!
         val v1 = mutableListOf<String>()
         assertNameSingle(fileCtx, listOf(fileCtx), v1)
         assertTrue(v1.isEmpty())
 
-        val assertNameList = FilesRuleBuilder(graph).should().haveName(listOf("ClassA.kt")).getShouldAssertion()!!
+        val assertNameList = FilesRuleBuilder(graph).should().named(listOf("ClassA.kt")).getShouldAssertion()!!
         val v2 = mutableListOf<String>()
         assertNameList(fileCtx, listOf(fileCtx), v2)
         assertTrue(v2.isEmpty())
@@ -227,7 +227,7 @@ internal class FilesShouldCoverageTest : KontureScopeTestFixture() {
         val assertNameVararg =
             FilesRuleBuilder(
                 graph,
-            ).should().haveName("ClassA.kt", "FileB.kt").getShouldAssertion()!!
+            ).should().named("ClassA.kt", "FileB.kt").getShouldAssertion()!!
         val v3 = mutableListOf<String>()
         assertNameVararg(fileCtx, listOf(fileCtx), v3)
         assertTrue(v3.isEmpty())
@@ -235,12 +235,12 @@ internal class FilesShouldCoverageTest : KontureScopeTestFixture() {
         val assertNamePred =
             FilesRuleBuilder(
                 graph,
-            ).should().haveName { it.startsWith("ClassA") }.getShouldAssertion()!!
+            ).should().named { it.startsWith("ClassA") }.getShouldAssertion()!!
         val v4 = mutableListOf<String>()
         assertNamePred(fileCtx, listOf(fileCtx), v4)
         assertTrue(v4.isEmpty())
 
-        val assertNotNameSingle = FilesRuleBuilder(graph).should().notHaveName("Other.kt").getShouldAssertion()!!
+        val assertNotNameSingle = FilesRuleBuilder(graph).should().notNamed("Other.kt").getShouldAssertion()!!
         val v6 = mutableListOf<String>()
         assertNotNameSingle(fileCtx, listOf(fileCtx), v6)
         assertTrue(v6.isEmpty())
@@ -248,7 +248,7 @@ internal class FilesShouldCoverageTest : KontureScopeTestFixture() {
         val assertNotNameList =
             FilesRuleBuilder(
                 graph,
-            ).should().notHaveName(listOf("Other.kt")).getShouldAssertion()!!
+            ).should().notNamed(listOf("Other.kt")).getShouldAssertion()!!
         val v7 = mutableListOf<String>()
         assertNotNameList(fileCtx, listOf(fileCtx), v7)
         assertTrue(v7.isEmpty())
@@ -256,17 +256,17 @@ internal class FilesShouldCoverageTest : KontureScopeTestFixture() {
         val assertNotNameVararg =
             FilesRuleBuilder(
                 graph,
-            ).should().notHaveName("Other.kt", "Wrong.kt").getShouldAssertion()!!
+            ).should().notNamed("Other.kt", "Wrong.kt").getShouldAssertion()!!
         val v8 = mutableListOf<String>()
         assertNotNameVararg(fileCtx, listOf(fileCtx), v8)
         assertTrue(v8.isEmpty())
 
-        val assertEndSingle = FilesRuleBuilder(graph).should().haveNameEndingWith(".kt").getShouldAssertion()!!
+        val assertEndSingle = FilesRuleBuilder(graph).should().nameEndsWith(".kt").getShouldAssertion()!!
         val v10 = mutableListOf<String>()
         assertEndSingle(fileCtx, listOf(fileCtx), v10)
         assertTrue(v10.isEmpty())
 
-        val assertEndList = FilesRuleBuilder(graph).should().haveNameEndingWith(listOf(".kt")).getShouldAssertion()!!
+        val assertEndList = FilesRuleBuilder(graph).should().nameEndsWith(listOf(".kt")).getShouldAssertion()!!
         val v11 = mutableListOf<String>()
         assertEndList(fileCtx, listOf(fileCtx), v11)
         assertTrue(v11.isEmpty())
@@ -274,7 +274,7 @@ internal class FilesShouldCoverageTest : KontureScopeTestFixture() {
         val assertEndVararg =
             FilesRuleBuilder(
                 graph,
-            ).should().haveNameEndingWith(".kt", ".kts").getShouldAssertion()!!
+            ).should().nameEndsWith(".kt", ".kts").getShouldAssertion()!!
         val v12 = mutableListOf<String>()
         assertEndVararg(fileCtx, listOf(fileCtx), v12)
         assertTrue(v12.isEmpty())
@@ -282,7 +282,7 @@ internal class FilesShouldCoverageTest : KontureScopeTestFixture() {
         val assertNotEndSingle =
             FilesRuleBuilder(
                 graph,
-            ).should().notHaveNameEndingWith(".java").getShouldAssertion()!!
+            ).should().notNameEndsWith(".java").getShouldAssertion()!!
         val v13 = mutableListOf<String>()
         assertNotEndSingle(fileCtx, listOf(fileCtx), v13)
         assertTrue(v13.isEmpty())
@@ -290,7 +290,7 @@ internal class FilesShouldCoverageTest : KontureScopeTestFixture() {
         val assertNotEndList =
             FilesRuleBuilder(
                 graph,
-            ).should().notHaveNameEndingWith(listOf(".java")).getShouldAssertion()!!
+            ).should().notNameEndsWith(listOf(".java")).getShouldAssertion()!!
         val v14 = mutableListOf<String>()
         assertNotEndList(fileCtx, listOf(fileCtx), v14)
         assertTrue(v14.isEmpty())
@@ -298,12 +298,12 @@ internal class FilesShouldCoverageTest : KontureScopeTestFixture() {
         val assertNotEndVararg =
             FilesRuleBuilder(
                 graph,
-            ).should().notHaveNameEndingWith(".java", ".cpp").getShouldAssertion()!!
+            ).should().notNameEndsWith(".java", ".cpp").getShouldAssertion()!!
         val v15 = mutableListOf<String>()
         assertNotEndVararg(fileCtx, listOf(fileCtx), v15)
         assertTrue(v15.isEmpty())
 
-        val assertStartSingle = FilesRuleBuilder(graph).should().haveNameStartingWith("Class").getShouldAssertion()!!
+        val assertStartSingle = FilesRuleBuilder(graph).should().nameStartsWith("Class").getShouldAssertion()!!
         val v16 = mutableListOf<String>()
         assertStartSingle(fileCtx, listOf(fileCtx), v16)
         assertTrue(v16.isEmpty())
@@ -311,7 +311,7 @@ internal class FilesShouldCoverageTest : KontureScopeTestFixture() {
         val assertStartList =
             FilesRuleBuilder(
                 graph,
-            ).should().haveNameStartingWith(listOf("Class")).getShouldAssertion()!!
+            ).should().nameStartsWith(listOf("Class")).getShouldAssertion()!!
         val v17 = mutableListOf<String>()
         assertStartList(fileCtx, listOf(fileCtx), v17)
         assertTrue(v17.isEmpty())
@@ -319,7 +319,7 @@ internal class FilesShouldCoverageTest : KontureScopeTestFixture() {
         val assertStartVararg =
             FilesRuleBuilder(
                 graph,
-            ).should().haveNameStartingWith("Class", "File").getShouldAssertion()!!
+            ).should().nameStartsWith("Class", "File").getShouldAssertion()!!
         val v18 = mutableListOf<String>()
         assertStartVararg(fileCtx, listOf(fileCtx), v18)
         assertTrue(v18.isEmpty())
@@ -327,7 +327,7 @@ internal class FilesShouldCoverageTest : KontureScopeTestFixture() {
         val assertNotStartSingle =
             FilesRuleBuilder(
                 graph,
-            ).should().notHaveNameStartingWith("Other").getShouldAssertion()!!
+            ).should().notNameStartsWith("Other").getShouldAssertion()!!
         val v19 = mutableListOf<String>()
         assertNotStartSingle(fileCtx, listOf(fileCtx), v19)
         assertTrue(v19.isEmpty())
@@ -335,7 +335,7 @@ internal class FilesShouldCoverageTest : KontureScopeTestFixture() {
         val assertNotStartList =
             FilesRuleBuilder(
                 graph,
-            ).should().notHaveNameStartingWith(listOf("Other")).getShouldAssertion()!!
+            ).should().notNameStartsWith(listOf("Other")).getShouldAssertion()!!
         val v20 = mutableListOf<String>()
         assertNotStartList(fileCtx, listOf(fileCtx), v20)
         assertTrue(v20.isEmpty())
@@ -343,12 +343,12 @@ internal class FilesShouldCoverageTest : KontureScopeTestFixture() {
         val assertNotStartVararg =
             FilesRuleBuilder(
                 graph,
-            ).should().notHaveNameStartingWith("Other", "Wrong").getShouldAssertion()!!
+            ).should().notNameStartsWith("Other", "Wrong").getShouldAssertion()!!
         val v21 = mutableListOf<String>()
         assertNotStartVararg(fileCtx, listOf(fileCtx), v21)
         assertTrue(v21.isEmpty())
 
-        val assertMatchSingle = FilesRuleBuilder(graph).should().haveNameMatching("Class*").getShouldAssertion()!!
+        val assertMatchSingle = FilesRuleBuilder(graph).should().nameMatches("Class*").getShouldAssertion()!!
         val v22 = mutableListOf<String>()
         assertMatchSingle(fileCtx, listOf(fileCtx), v22)
         assertTrue(v22.isEmpty())
@@ -356,7 +356,7 @@ internal class FilesShouldCoverageTest : KontureScopeTestFixture() {
         val assertMatchList =
             FilesRuleBuilder(
                 graph,
-            ).should().haveNameMatching(listOf("Class*")).getShouldAssertion()!!
+            ).should().nameMatches(listOf("Class*")).getShouldAssertion()!!
         val v23 = mutableListOf<String>()
         assertMatchList(fileCtx, listOf(fileCtx), v23)
         assertTrue(v23.isEmpty())
@@ -364,7 +364,7 @@ internal class FilesShouldCoverageTest : KontureScopeTestFixture() {
         val assertMatchVararg =
             FilesRuleBuilder(
                 graph,
-            ).should().haveNameMatching("Class*", "File*").getShouldAssertion()!!
+            ).should().nameMatches("Class*", "File*").getShouldAssertion()!!
         val v24 = mutableListOf<String>()
         assertMatchVararg(fileCtx, listOf(fileCtx), v24)
         assertTrue(v24.isEmpty())
@@ -372,7 +372,7 @@ internal class FilesShouldCoverageTest : KontureScopeTestFixture() {
         val assertNotMatchSingle =
             FilesRuleBuilder(
                 graph,
-            ).should().notHaveNameMatching("Other*").getShouldAssertion()!!
+            ).should().notNameMatches("Other*").getShouldAssertion()!!
         val v25 = mutableListOf<String>()
         assertNotMatchSingle(fileCtx, listOf(fileCtx), v25)
         assertTrue(v25.isEmpty())
@@ -380,7 +380,7 @@ internal class FilesShouldCoverageTest : KontureScopeTestFixture() {
         val assertNotMatchList =
             FilesRuleBuilder(
                 graph,
-            ).should().notHaveNameMatching(listOf("Other*")).getShouldAssertion()!!
+            ).should().notNameMatches(listOf("Other*")).getShouldAssertion()!!
         val v26 = mutableListOf<String>()
         assertNotMatchList(fileCtx, listOf(fileCtx), v26)
         assertTrue(v26.isEmpty())
@@ -388,7 +388,7 @@ internal class FilesShouldCoverageTest : KontureScopeTestFixture() {
         val assertNotMatchVararg =
             FilesRuleBuilder(
                 graph,
-            ).should().notHaveNameMatching("Other*", "Wrong*").getShouldAssertion()!!
+            ).should().notNameMatches("Other*", "Wrong*").getShouldAssertion()!!
         val v27 = mutableListOf<String>()
         assertNotMatchVararg(fileCtx, listOf(fileCtx), v27)
         assertTrue(v27.isEmpty())

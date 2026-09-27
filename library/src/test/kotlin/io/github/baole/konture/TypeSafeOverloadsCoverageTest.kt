@@ -4,8 +4,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-@file:Suppress("DEPRECATION")
-
 package io.github.baole.konture
 
 import org.junit.jupiter.api.Assertions.assertNotNull
@@ -24,18 +22,18 @@ internal class TypeSafeOverloadsCoverageTest : KontureScopeTestFixture() {
                 mapOf(":" to listOf(Module(":", ":app", "app", emptyList(), emptyList(), emptyList(), listOf(fileA)))),
             )
 
-        assertNotNull(ClassesRuleBuilder(graph).that().haveAnnotationOf(TestTypeSafeAnnotation::class))
-        assertNotNull(ClassesRuleBuilder(graph).that().haveAnnotationOf<TestTypeSafeAnnotation>())
-        assertNotNull(ClassesRuleBuilder(graph).that().haveAllAnnotationsOf(TestTypeSafeAnnotation::class))
-        assertNotNull(ClassesRuleBuilder(graph).that().haveAnyAnnotationOf(TestTypeSafeAnnotation::class))
+        assertNotNull(ClassesRuleBuilder(graph).that().annotatedWith(TestTypeSafeAnnotation::class))
+        assertNotNull(ClassesRuleBuilder(graph).that().annotatedWith<TestTypeSafeAnnotation>())
+        assertNotNull(ClassesRuleBuilder(graph).that().annotatedWithAllOf(TestTypeSafeAnnotation::class))
+        assertNotNull(ClassesRuleBuilder(graph).that().annotatedWithAnyOf(TestTypeSafeAnnotation::class))
         assertNotNull(
             ClassesRuleBuilder(graph).that().haveAnnotationWithArgument(TestTypeSafeAnnotation::class, "arg", "val"),
         )
 
-        assertNotNull(ClassesRuleBuilder(graph).should().haveAnnotationOf(TestTypeSafeAnnotation::class))
-        assertNotNull(ClassesRuleBuilder(graph).should().haveAnnotationOf<TestTypeSafeAnnotation>())
-        assertNotNull(ClassesRuleBuilder(graph).should().haveAllAnnotationsOf(TestTypeSafeAnnotation::class))
-        assertNotNull(ClassesRuleBuilder(graph).should().haveAnyAnnotationOf(TestTypeSafeAnnotation::class))
+        assertNotNull(ClassesRuleBuilder(graph).should().annotatedWith(TestTypeSafeAnnotation::class))
+        assertNotNull(ClassesRuleBuilder(graph).should().annotatedWith<TestTypeSafeAnnotation>())
+        assertNotNull(ClassesRuleBuilder(graph).should().annotatedWithAllOf(TestTypeSafeAnnotation::class))
+        assertNotNull(ClassesRuleBuilder(graph).should().annotatedWithAnyOf(TestTypeSafeAnnotation::class))
         assertNotNull(
             ClassesRuleBuilder(graph).should().haveAnnotationWithArgument(TestTypeSafeAnnotation::class, "arg", "val"),
         )
@@ -58,10 +56,10 @@ internal class TypeSafeOverloadsCoverageTest : KontureScopeTestFixture() {
         assertNotNull(ClassesRuleBuilder(graph).that().areNotAssignableTo<TestTypeSafeTarget>())
         assertNotNull(ClassesRuleBuilder(graph).that().areNotAssignableFrom<TestTypeSafeTarget>())
 
-        assertNotNull(ClassesRuleBuilder(graph).that().resideInPackageOf(TestTypeSafeTarget::class))
-        assertNotNull(ClassesRuleBuilder(graph).that().resideInPackageOf<TestTypeSafeTarget>())
-        assertNotNull(ClassesRuleBuilder(graph).should().resideInPackageOf(TestTypeSafeTarget::class))
-        assertNotNull(ClassesRuleBuilder(graph).should().resideInPackageOf<TestTypeSafeTarget>())
+        assertNotNull(ClassesRuleBuilder(graph).that().inPackageOf(TestTypeSafeTarget::class))
+        assertNotNull(ClassesRuleBuilder(graph).that().inPackageOf<TestTypeSafeTarget>())
+        assertNotNull(ClassesRuleBuilder(graph).should().inPackageOf(TestTypeSafeTarget::class))
+        assertNotNull(ClassesRuleBuilder(graph).should().inPackageOf<TestTypeSafeTarget>())
     }
 
     @Test
@@ -148,10 +146,10 @@ internal class TypeSafeOverloadsCoverageTest : KontureScopeTestFixture() {
         assertNotNull(PropertiesRuleBuilder(graph).should().notDependOnPackageOf<TestTypeSafeTarget>())
 
         assertNotNull(FilesRuleBuilder(graph).should().notContainCycles())
-        assertNotNull(FilesRuleBuilder(graph).that().resideInPackageOf(TestTypeSafeTarget::class))
-        assertNotNull(FilesRuleBuilder(graph).that().resideInPackageOf<TestTypeSafeTarget>())
-        assertNotNull(FilesRuleBuilder(graph).should().resideInPackageOf(TestTypeSafeTarget::class))
-        assertNotNull(FilesRuleBuilder(graph).should().resideInPackageOf<TestTypeSafeTarget>())
+        assertNotNull(FilesRuleBuilder(graph).that().inPackageOf(TestTypeSafeTarget::class))
+        assertNotNull(FilesRuleBuilder(graph).that().inPackageOf<TestTypeSafeTarget>())
+        assertNotNull(FilesRuleBuilder(graph).should().inPackageOf(TestTypeSafeTarget::class))
+        assertNotNull(FilesRuleBuilder(graph).should().inPackageOf<TestTypeSafeTarget>())
 
         assertNotNull(FilesRuleBuilder(graph).that().notContainClass<TestTypeSafeTarget>())
         assertNotNull(FilesRuleBuilder(graph).that().notContainClassesWithAnnotation<TestTypeSafeAnnotation>())

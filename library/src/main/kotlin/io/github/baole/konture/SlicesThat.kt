@@ -443,14 +443,6 @@ public class SlicesThat internal constructor(
     /** Filter or assertion criteria for reside in modules. */
     public fun resideInModules(vararg modulePaths: String): SlicesRuleBuilder = resideInAModule(modulePaths.toList())
 
-    /** Filter or assertion criteria for reside in module. */
-    @Deprecated(
-        message = "Renamed for consistency with resideInAModule across all scopes.",
-        replaceWith = ReplaceWith("resideInAModule(modulePath)"),
-        level = DeprecationLevel.WARNING,
-    )
-    public infix fun resideInModule(modulePath: String): SlicesRuleBuilder = resideInAModule(modulePath)
-
     /** Filter or assertion criteria for not reside in a module. */
     public infix fun notResideInAModule(modulePath: String): SlicesRuleBuilder {
         /** Filter or assertion criteria for clean name. */
@@ -489,14 +481,6 @@ public class SlicesThat internal constructor(
     /** Filter or assertion criteria for not reside in modules. */
     public fun notResideInModules(vararg modulePaths: String): SlicesRuleBuilder =
         notResideInAModule(modulePaths.toList())
-
-    /** Filter or assertion criteria for not reside in module. */
-    @Deprecated(
-        message = "Renamed for consistency with notResideInAModule across all scopes.",
-        replaceWith = ReplaceWith("notResideInAModule(modulePath)"),
-        level = DeprecationLevel.WARNING,
-    )
-    public infix fun notResideInModule(modulePath: String): SlicesRuleBuilder = notResideInAModule(modulePath)
 
     // Package location aliases
 

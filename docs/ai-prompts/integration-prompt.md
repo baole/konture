@@ -79,7 +79,7 @@ Using Konture's Fluent Lambda DSL (`io.github.baole.konture.architecture`),
 write a starter `ArchitectureGuardrails.kt` test class with rules tailored to
 this project's actual module and package structure. At minimum, cover:
 1. **Layer isolation** — domain/core modules must not depend on data or feature
-   modules. **Prefer wildcard/pattern matching** (e.g., `haveNameMatching(":core:domain**")`, `haveNameMatching(":feature:**")`, `resideInAPackage("..domain..")`) over listing explicit full module or package names so that rules automatically scale as new modules and packages are created.
+   modules. **Prefer wildcard/pattern matching** (e.g., `haveNameMatching(":core:domain**")`, `haveNameMatching(":feature:**")`, `inPackage("..domain..")`) over listing explicit full module or package names so that rules automatically scale as new modules and packages are created.
 2. **Interface conventions** — e.g. repository classes ending in `Repository`
    must be interfaces, if that convention exists in the codebase.
 3. Any other convention you find already informally followed in the codebase

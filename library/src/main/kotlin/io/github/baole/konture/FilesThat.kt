@@ -48,26 +48,6 @@ public class FilesThat internal constructor(
     public infix fun inPackageOf(type: kotlin.reflect.KClass<*>): FilesRuleBuilder =
         inPackage(type.toKonturePackageReference().packageName)
 
-    /** Legacy resideInAPackage method. */
-    @Deprecated("Use inPackage instead.", ReplaceWith("inPackage(packagePattern)"))
-    public infix fun resideInAPackage(packagePattern: String): FilesRuleBuilder = inPackage(packagePattern)
-
-    /** Legacy resideInAPackage method. */
-    @Deprecated("Use inPackage instead.", ReplaceWith("inPackage(packagePatterns)"))
-    public infix fun resideInAPackage(packagePatterns: List<String>): FilesRuleBuilder = inPackage(packagePatterns)
-
-    /** Legacy resideInAPackage method. */
-    @Deprecated("Use inPackage instead.", ReplaceWith("inPackage(*packagePatterns)"))
-    public fun resideInAPackage(vararg packagePatterns: String): FilesRuleBuilder = inPackage(*packagePatterns)
-
-    /** Legacy resideInAPackage method. */
-    @Deprecated("Use inPackage instead.", ReplaceWith("inPackage(predicate)"))
-    public infix fun resideInAPackage(predicate: (String) -> Boolean): FilesRuleBuilder = inPackage(predicate)
-
-    /** Legacy resideInPackageOf method. */
-    @Deprecated("Use inPackageOf instead.", ReplaceWith("inPackageOf(type)"))
-    public infix fun resideInPackageOf(type: kotlin.reflect.KClass<*>): FilesRuleBuilder = inPackageOf(type)
-
     /** Filter or assertion criteria for have name. */
     public infix fun named(name: String): FilesRuleBuilder {
         builder.setThat { it.declaration.name == name }
@@ -96,29 +76,6 @@ public class FilesThat internal constructor(
         return builder
     }
 
-    /** Legacy haveName method. */
-    @Deprecated("Use named instead.", ReplaceWith("named(name)"))
-    public infix fun haveName(name: String): FilesRuleBuilder = named(name)
-
-    /** Legacy haveName method. */
-    @Deprecated("Use named instead.", ReplaceWith("named(names)"))
-    public infix fun haveName(names: List<String>): FilesRuleBuilder = named(names)
-
-    /** Legacy haveName method. */
-    @Deprecated("Use named instead.", ReplaceWith("named(*names)"))
-    public fun haveName(vararg names: String): FilesRuleBuilder = named(*names)
-
-    /** Legacy haveName method. */
-    @Deprecated("Use named instead.", ReplaceWith("named(predicate)"))
-    public infix fun haveName(predicate: (String) -> Boolean): FilesRuleBuilder = named(predicate)
-
-    /** Legacy haveName method. */
-    @Deprecated("Use named instead.", ReplaceWith("named(description, predicate)"))
-    public fun haveName(
-        description: String,
-        predicate: (String) -> Boolean,
-    ): FilesRuleBuilder = named(description, predicate)
-
     /** Filter or assertion criteria for name ending with. */
     public infix fun nameEndsWith(suffix: String): FilesRuleBuilder {
         builder.setThat { it.declaration.name.endsWith(suffix) }
@@ -135,18 +92,6 @@ public class FilesThat internal constructor(
 
     /** Filter or assertion criteria for name ending with. */
     public fun nameEndsWith(vararg suffixes: String): FilesRuleBuilder = nameEndsWith(suffixes.toList())
-
-    /** Legacy haveNameEndingWith method. */
-    @Deprecated("Use nameEndsWith instead.", ReplaceWith("nameEndsWith(suffix)"))
-    public infix fun haveNameEndingWith(suffix: String): FilesRuleBuilder = nameEndsWith(suffix)
-
-    /** Legacy haveNameEndingWith method. */
-    @Deprecated("Use nameEndsWith instead.", ReplaceWith("nameEndsWith(suffixes)"))
-    public infix fun haveNameEndingWith(suffixes: List<String>): FilesRuleBuilder = nameEndsWith(suffixes)
-
-    /** Legacy haveNameEndingWith method. */
-    @Deprecated("Use nameEndsWith instead.", ReplaceWith("nameEndsWith(*suffixes)"))
-    public fun haveNameEndingWith(vararg suffixes: String): FilesRuleBuilder = nameEndsWith(*suffixes)
 
     /** Filter or assertion criteria for name starting with. */
     public infix fun nameStartsWith(prefix: String): FilesRuleBuilder {
@@ -165,18 +110,6 @@ public class FilesThat internal constructor(
     /** Filter or assertion criteria for name starting with. */
     public fun nameStartsWith(vararg prefixes: String): FilesRuleBuilder = nameStartsWith(prefixes.toList())
 
-    /** Legacy haveNameStartingWith method. */
-    @Deprecated("Use nameStartsWith instead.", ReplaceWith("nameStartsWith(prefix)"))
-    public infix fun haveNameStartingWith(prefix: String): FilesRuleBuilder = nameStartsWith(prefix)
-
-    /** Legacy haveNameStartingWith method. */
-    @Deprecated("Use nameStartsWith instead.", ReplaceWith("nameStartsWith(prefixes)"))
-    public infix fun haveNameStartingWith(prefixes: List<String>): FilesRuleBuilder = nameStartsWith(prefixes)
-
-    /** Legacy haveNameStartingWith method. */
-    @Deprecated("Use nameStartsWith instead.", ReplaceWith("nameStartsWith(*prefixes)"))
-    public fun haveNameStartingWith(vararg prefixes: String): FilesRuleBuilder = nameStartsWith(*prefixes)
-
     /** Filter or assertion criteria for name matching. */
     public infix fun nameMatches(pattern: String): FilesRuleBuilder {
         builder.setThat { PatternMatchers.matchesSimpleGlob(pattern, it.declaration.name) }
@@ -193,18 +126,6 @@ public class FilesThat internal constructor(
 
     /** Filter or assertion criteria for name matching. */
     public fun nameMatches(vararg patterns: String): FilesRuleBuilder = nameMatches(patterns.toList())
-
-    /** Legacy haveNameMatching method. */
-    @Deprecated("Use nameMatches instead.", ReplaceWith("nameMatches(pattern)"))
-    public infix fun haveNameMatching(pattern: String): FilesRuleBuilder = nameMatches(pattern)
-
-    /** Legacy haveNameMatching method. */
-    @Deprecated("Use nameMatches instead.", ReplaceWith("nameMatches(patterns)"))
-    public infix fun haveNameMatching(patterns: List<String>): FilesRuleBuilder = nameMatches(patterns)
-
-    /** Legacy haveNameMatching method. */
-    @Deprecated("Use nameMatches instead.", ReplaceWith("nameMatches(*patterns)"))
-    public fun haveNameMatching(vararg patterns: String): FilesRuleBuilder = nameMatches(*patterns)
 
     /** Filters files in a module matching [modulePath]. */
     public infix fun inModule(modulePath: String): FilesRuleBuilder {
@@ -245,30 +166,6 @@ public class FilesThat internal constructor(
     /** Filters files in modules matching [modulePaths]. */
     public fun inModules(vararg modulePaths: String): FilesRuleBuilder = inModules(modulePaths.toList())
 
-    /** Legacy resideInAModule method. */
-    @Deprecated("Use inModule instead.", ReplaceWith("inModule(modulePath)"))
-    public infix fun resideInAModule(modulePath: String): FilesRuleBuilder = inModule(modulePath)
-
-    /** Legacy resideInAModule method. */
-    @Deprecated("Use inModules instead.", ReplaceWith("inModules(modulePaths)"))
-    public infix fun resideInAModule(modulePaths: List<String>): FilesRuleBuilder = inModules(modulePaths)
-
-    /** Legacy resideInAModule method. */
-    @Deprecated("Use inModules instead.", ReplaceWith("inModules(*modulePaths)"))
-    public fun resideInAModule(vararg modulePaths: String): FilesRuleBuilder = inModules(*modulePaths)
-
-    /** Legacy resideInModule method. */
-    @Deprecated("Use inModule instead.", ReplaceWith("inModule(modulePath)"))
-    public infix fun resideInModule(modulePath: String): FilesRuleBuilder = inModule(modulePath)
-
-    /** Legacy resideInModules method. */
-    @Deprecated("Use inModules instead.", ReplaceWith("inModules(modulePaths)"))
-    public infix fun resideInModules(modulePaths: List<String>): FilesRuleBuilder = inModules(modulePaths)
-
-    /** Legacy resideInModules method. */
-    @Deprecated("Use inModules instead.", ReplaceWith("inModules(*modulePaths)"))
-    public fun resideInModules(vararg modulePaths: String): FilesRuleBuilder = inModules(*modulePaths)
-
     /** Filters files not in a module matching [modulePath]. */
     public infix fun notInModule(modulePath: String): FilesRuleBuilder {
         val normalized =
@@ -304,30 +201,6 @@ public class FilesThat internal constructor(
     /** Filters files not in modules matching [modulePaths]. */
     public fun notInModules(vararg modulePaths: String): FilesRuleBuilder = notInModules(modulePaths.toList())
 
-    /** Legacy notResideInAModule method. */
-    @Deprecated("Use notInModule instead.", ReplaceWith("notInModule(modulePath)"))
-    public infix fun notResideInAModule(modulePath: String): FilesRuleBuilder = notInModule(modulePath)
-
-    /** Legacy notResideInAModule method. */
-    @Deprecated("Use notInModules instead.", ReplaceWith("notInModules(modulePaths)"))
-    public infix fun notResideInAModule(modulePaths: List<String>): FilesRuleBuilder = notInModules(modulePaths)
-
-    /** Legacy notResideInAModule method. */
-    @Deprecated("Use notInModules instead.", ReplaceWith("notInModules(*modulePaths)"))
-    public fun notResideInAModule(vararg modulePaths: String): FilesRuleBuilder = notInModules(*modulePaths)
-
-    /** Legacy notResideInModule method. */
-    @Deprecated("Use notInModule instead.", ReplaceWith("notInModule(modulePath)"))
-    public infix fun notResideInModule(modulePath: String): FilesRuleBuilder = notInModule(modulePath)
-
-    /** Legacy notResideInModules method. */
-    @Deprecated("Use notInModules instead.", ReplaceWith("notInModules(modulePaths)"))
-    public infix fun notResideInModules(modulePaths: List<String>): FilesRuleBuilder = notInModules(modulePaths)
-
-    /** Legacy notResideInModules method. */
-    @Deprecated("Use notInModules instead.", ReplaceWith("notInModules(*modulePaths)"))
-    public fun notResideInModules(vararg modulePaths: String): FilesRuleBuilder = notInModules(*modulePaths)
-
     /** Filter or assertion criteria for not have name. */
     public infix fun notNamed(name: String): FilesRuleBuilder {
         builder.setThat { it.declaration.name != name }
@@ -349,22 +222,6 @@ public class FilesThat internal constructor(
         return builder
     }
 
-    /** Legacy notHaveName method. */
-    @Deprecated("Use notNamed instead.", ReplaceWith("notNamed(name)"))
-    public infix fun notHaveName(name: String): FilesRuleBuilder = notNamed(name)
-
-    /** Legacy notHaveName method. */
-    @Deprecated("Use notNamed instead.", ReplaceWith("notNamed(names)"))
-    public infix fun notHaveName(names: List<String>): FilesRuleBuilder = notNamed(names)
-
-    /** Legacy notHaveName method. */
-    @Deprecated("Use notNamed instead.", ReplaceWith("notNamed(*names)"))
-    public fun notHaveName(vararg names: String): FilesRuleBuilder = notNamed(*names)
-
-    /** Legacy notHaveName method. */
-    @Deprecated("Use notNamed instead.", ReplaceWith("notNamed(predicate)"))
-    public infix fun notHaveName(predicate: (String) -> Boolean): FilesRuleBuilder = notNamed(predicate)
-
     /** Filter or assertion criteria for not have name starting with. */
     public infix fun notNameStartsWith(prefix: String): FilesRuleBuilder {
         builder.setThat { !it.declaration.name.startsWith(prefix) }
@@ -381,18 +238,6 @@ public class FilesThat internal constructor(
 
     /** Filter or assertion criteria for not have name starting with. */
     public fun notNameStartsWith(vararg prefixes: String): FilesRuleBuilder = notNameStartsWith(prefixes.toList())
-
-    /** Legacy notHaveNameStartingWith method. */
-    @Deprecated("Use notNameStartsWith instead.", ReplaceWith("notNameStartsWith(prefix)"))
-    public infix fun notHaveNameStartingWith(prefix: String): FilesRuleBuilder = notNameStartsWith(prefix)
-
-    /** Legacy notHaveNameStartingWith method. */
-    @Deprecated("Use notNameStartsWith instead.", ReplaceWith("notNameStartsWith(prefixes)"))
-    public infix fun notHaveNameStartingWith(prefixes: List<String>): FilesRuleBuilder = notNameStartsWith(prefixes)
-
-    /** Legacy notHaveNameStartingWith method. */
-    @Deprecated("Use notNameStartsWith instead.", ReplaceWith("notNameStartsWith(*prefixes)"))
-    public fun notHaveNameStartingWith(vararg prefixes: String): FilesRuleBuilder = notNameStartsWith(*prefixes)
 
     /** Filter or assertion criteria for not have name ending with. */
     public infix fun notNameEndsWith(suffix: String): FilesRuleBuilder {
@@ -411,18 +256,6 @@ public class FilesThat internal constructor(
     /** Filter or assertion criteria for not have name ending with. */
     public fun notNameEndsWith(vararg suffixes: String): FilesRuleBuilder = notNameEndsWith(suffixes.toList())
 
-    /** Legacy notHaveNameEndingWith method. */
-    @Deprecated("Use notNameEndsWith instead.", ReplaceWith("notNameEndsWith(suffix)"))
-    public infix fun notHaveNameEndingWith(suffix: String): FilesRuleBuilder = notNameEndsWith(suffix)
-
-    /** Legacy notHaveNameEndingWith method. */
-    @Deprecated("Use notNameEndsWith instead.", ReplaceWith("notNameEndsWith(suffixes)"))
-    public infix fun notHaveNameEndingWith(suffixes: List<String>): FilesRuleBuilder = notNameEndsWith(suffixes)
-
-    /** Legacy notHaveNameEndingWith method. */
-    @Deprecated("Use notNameEndsWith instead.", ReplaceWith("notNameEndsWith(*suffixes)"))
-    public fun notHaveNameEndingWith(vararg suffixes: String): FilesRuleBuilder = notNameEndsWith(*suffixes)
-
     /** Filter or assertion criteria for not have name matching. */
     public infix fun notNameMatches(pattern: String): FilesRuleBuilder {
         builder.setThat { !PatternMatchers.matchesSimpleGlob(pattern, it.declaration.name) }
@@ -439,18 +272,6 @@ public class FilesThat internal constructor(
 
     /** Filter or assertion criteria for not have name matching. */
     public fun notNameMatches(vararg patterns: String): FilesRuleBuilder = notNameMatches(patterns.toList())
-
-    /** Legacy notHaveNameMatching method. */
-    @Deprecated("Use notNameMatches instead.", ReplaceWith("notNameMatches(pattern)"))
-    public infix fun notHaveNameMatching(pattern: String): FilesRuleBuilder = notNameMatches(pattern)
-
-    /** Legacy notHaveNameMatching method. */
-    @Deprecated("Use notNameMatches instead.", ReplaceWith("notNameMatches(patterns)"))
-    public infix fun notHaveNameMatching(patterns: List<String>): FilesRuleBuilder = notNameMatches(patterns)
-
-    /** Legacy notHaveNameMatching method. */
-    @Deprecated("Use notNameMatches instead.", ReplaceWith("notNameMatches(*patterns)"))
-    public fun notHaveNameMatching(vararg patterns: String): FilesRuleBuilder = notNameMatches(*patterns)
 
     /** Filter or assertion criteria for contain class. */
     public infix fun containClass(fqName: String): FilesRuleBuilder {
@@ -585,25 +406,6 @@ public class FilesThat internal constructor(
     /** Filters files containing classes with annotation [T]. */
     public inline fun <reified T : Annotation> annotatedWith(): FilesRuleBuilder = containClassesWithAnnotation<T>()
 
-    /** Legacy areAnnotatedWith method. */
-    @Deprecated("Use annotatedWith instead.", ReplaceWith("annotatedWith(annotationFqName)"))
-    public infix fun areAnnotatedWith(annotationFqName: String): FilesRuleBuilder = annotatedWith(annotationFqName)
-
-    /** Legacy areAnnotatedWith method. */
-    @Deprecated("Use annotatedWith instead.", ReplaceWith("annotatedWith(annotation)"))
-    public infix fun areAnnotatedWith(annotation: kotlin.reflect.KClass<out Annotation>): FilesRuleBuilder =
-        annotatedWith(annotation)
-
-    /** Legacy containClassesWithAnnotation method. */
-    @Deprecated("Use annotatedWith instead.", ReplaceWith("annotatedWith(annotationFqName)"))
-    public infix fun haveAnnotationOf(annotationName: String): FilesRuleBuilder =
-        containClassesWithAnnotation(annotationName)
-
-    /** Legacy containClassesWithAnnotation method. */
-    @Deprecated("Use annotatedWith instead.", ReplaceWith("annotatedWith(annotation)"))
-    public infix fun haveAnnotationOf(annotation: kotlin.reflect.KClass<out Annotation>): FilesRuleBuilder =
-        containClassesWithAnnotation(annotation)
-
     /** Filter or assertion criteria for annotatedWithAllOf. */
     public infix fun annotatedWithAllOf(names: List<String>): FilesRuleBuilder {
         builder.setThat { file ->
@@ -619,14 +421,6 @@ public class FilesThat internal constructor(
     /** Filter or assertion criteria for annotatedWithAllOf. */
     public fun annotatedWithAllOf(vararg names: String): FilesRuleBuilder = annotatedWithAllOf(names.asList())
 
-    /** Legacy haveAllAnnotationsOf method. */
-    @Deprecated("Use annotatedWithAllOf instead.", ReplaceWith("annotatedWithAllOf(names)"))
-    public infix fun haveAllAnnotationsOf(names: List<String>): FilesRuleBuilder = annotatedWithAllOf(names)
-
-    /** Legacy haveAllAnnotationsOf method. */
-    @Deprecated("Use annotatedWithAllOf instead.", ReplaceWith("annotatedWithAllOf(*names)"))
-    public fun haveAllAnnotationsOf(vararg names: String): FilesRuleBuilder = annotatedWithAllOf(*names)
-
     /** Filter or assertion criteria for annotatedWithAnyOf. */
     public infix fun annotatedWithAnyOf(names: List<String>): FilesRuleBuilder {
         builder.setThat { file ->
@@ -641,14 +435,6 @@ public class FilesThat internal constructor(
 
     /** Filter or assertion criteria for annotatedWithAnyOf. */
     public fun annotatedWithAnyOf(vararg names: String): FilesRuleBuilder = annotatedWithAnyOf(names.asList())
-
-    /** Legacy haveAnyAnnotationOf method. */
-    @Deprecated("Use annotatedWithAnyOf instead.", ReplaceWith("annotatedWithAnyOf(names)"))
-    public infix fun haveAnyAnnotationOf(names: List<String>): FilesRuleBuilder = annotatedWithAnyOf(names)
-
-    /** Legacy haveAnyAnnotationOf method. */
-    @Deprecated("Use annotatedWithAnyOf instead.", ReplaceWith("annotatedWithAnyOf(*names)"))
-    public fun haveAnyAnnotationOf(vararg names: String): FilesRuleBuilder = annotatedWithAnyOf(*names)
 
     /** Filter or assertion criteria for any of. */
     public fun anyOf(vararg blocks: FilesThat.() -> Unit): FilesRuleBuilder {
@@ -708,19 +494,6 @@ public class FilesThat internal constructor(
 
     /** Filter or assertion criteria for not in package. */
     public fun notInPackage(vararg packagePatterns: String): FilesRuleBuilder = notInPackage(packagePatterns.toList())
-
-    /** Legacy notResideInAPackage method. */
-    @Deprecated("Use notInPackage instead.", ReplaceWith("notInPackage(packagePattern)"))
-    public infix fun notResideInAPackage(packagePattern: String): FilesRuleBuilder = notInPackage(packagePattern)
-
-    /** Legacy notResideInAPackage method. */
-    @Deprecated("Use notInPackage instead.", ReplaceWith("notInPackage(packagePatterns)"))
-    public infix fun notResideInAPackage(packagePatterns: List<String>): FilesRuleBuilder =
-        notInPackage(packagePatterns)
-
-    /** Legacy notResideInAPackage method. */
-    @Deprecated("Use notInPackage instead.", ReplaceWith("notInPackage(*packagePatterns)"))
-    public fun notResideInAPackage(vararg packagePatterns: String): FilesRuleBuilder = notInPackage(*packagePatterns)
 
     /** Filter or assertion criteria for not contain class. */
     public infix fun notContainClass(fqName: String): FilesRuleBuilder {

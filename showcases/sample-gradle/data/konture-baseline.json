@@ -9,7 +9,7 @@
                     "violations": [
                         {
                             "location": ":data",
-                            "message": "should not depend on :domain, but a dependency was found."
+                            "message": "must not depend on modules matching [:domain], but depends on: :domain"
                         },
                         {
                             "location": ":data, main source set) (io.github.baole.konture.sample.data.UserRepositoryImpl(UserRepositoryImpl.kt:7)",

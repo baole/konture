@@ -48,8 +48,8 @@ class EncapsulationTest {
     @Test
     fun `implementation classes must remain strictly internal`() {
         Konture.classes {
-            that().resideInAPackage("..internal..")
-                .or().resideInAPackage("..impl..")
+            that().inPackage("..internal..")
+                .or().inPackage("..impl..")
                 .should().beInternal()
         }
     }

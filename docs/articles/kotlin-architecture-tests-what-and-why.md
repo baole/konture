@@ -30,7 +30,7 @@ Architecture tests turn that convention into an executable rule:
 
 ```kotlin
 Konture.classes {
-    that().resideInAPackage("..domain..")
+    that().inPackage("..domain..")
     should().onlyDependOnClassesInAnyPackage(
         "..domain..",
         "kotlin..",
@@ -217,8 +217,8 @@ An architecture test gives a rule a durable form:
 fun `domain must not depend on data or app modules`() {
     Konture.modules {
         that().haveNamePath(":domain")
-        should().notDependOnModule(":data")
-        should().notDependOnModule(":app")
+        should().mustNotDependOn(":data")
+        should().mustNotDependOn(":app")
     }
 }
 ```
