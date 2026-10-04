@@ -13,6 +13,7 @@ import org.gradle.api.provider.Provider
 import org.gradle.api.tasks.testing.Test as GradleTestTask
 import org.gradle.testfixtures.ProjectBuilder
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
@@ -383,5 +384,82 @@ class KonturePluginTest {
 
         val maxWorkers = resolveProviderValue(testTask.systemProperties[KontureConstants.PROPERTY_PARALLEL_MAX_WORKERS])
         assertEquals("8", maxWorkers)
+    }
+
+    @Test
+    fun `consumer test task declares analysed sources as input files`() {
+        val rootProject = ProjectBuilder.builder().withName("root").build()
+        val child = ProjectBuilder.builder().withName("child").withParent(rootProject).build()
+        val testConsumer = ProjectBuilder.builder().withName("konture-test").withParent(rootProject).build()
+
+        child.plugins.apply("org.jetbrains.kotlin.jvm")
+        testConsumer.plugins.apply("java")
+
+        val prodSrcDir = File(child.projectDir, "src/main/kotlin")
+        prodSrcDir.mkdirs()
+        val prodSourceFile = File(prodSrcDir, "ProductionService.kt")
+        prodSourceFile.writeText("package com.example\nclass ProductionService")
+
+        val ktsFile = File(prodSrcDir, "Script.kts")
+        ktsFile.writeText("println(\"konture\")")
+
+        val readmeFile = File(prodSrcDir, "README.md")
+        readmeFile.writeText("# Documentation")
+
+        rootProject.plugins.apply("io.github.baole.konture.internal")
+        child.plugins.apply("io.github.baole.konture.internal")
+        testConsumer.plugins.apply("io.github.baole.konture.internal")
+
+        (rootProject as ProjectInternal).evaluate()
+        (child as ProjectInternal).evaluate()
+        (testConsumer as ProjectInternal).evaluate()
+
+        val testTask = testConsumer.tasks.getByName("test") as GradleTestTask
+        val inputFiles = testTask.inputs.files.files
+
+        assertTrue(
+            inputFiles.contains(prodSourceFile.canonicalFile),
+            "Consumer test task must declare production sources as input files",
+        )
+        assertTrue(
+            inputFiles.contains(ktsFile.canonicalFile),
+            "Consumer test task must declare .kts scripts as input files",
+        )
+        assertFalse(
+            inputFiles.contains(readmeFile.canonicalFile),
+            "Non-source files must not be tracked as kontureSources inputs",
+        )
+
+        // Dynamic lazy evaluation: adding a new file is reflected without re-evaluating projects
+        val secondSource = File(prodSrcDir, "SecondService.kt")
+        secondSource.writeText("package com.example\nclass SecondService")
+        assertTrue(
+            testTask.inputs.files.files.contains(secondSource.canonicalFile),
+            "Newly added Kotlin source files must be dynamically tracked by kontureSources",
+        )
+    }
+
+    @Test
+    fun `single project test task declares analysed sources as input files`() {
+        val project = ProjectBuilder.builder().withName("root").build()
+        project.repositories.mavenCentral()
+        project.plugins.apply("java")
+        project.plugins.apply("org.jetbrains.kotlin.jvm")
+
+        val srcDir = File(project.projectDir, "src/main/kotlin")
+        srcDir.mkdirs()
+        val sourceFile = File(srcDir, "SingleProjectService.kt")
+        sourceFile.writeText("class SingleProjectService")
+
+        project.plugins.apply("io.github.baole.konture.internal")
+        (project as ProjectInternal).evaluate()
+
+        val testTask = project.tasks.getByName("test") as GradleTestTask
+        val inputFiles = testTask.inputs.files.files
+
+        assertTrue(
+            inputFiles.contains(sourceFile.canonicalFile),
+            "Single project test task must declare its sources as input files",
+        )
     }
 }

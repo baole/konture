@@ -245,50 +245,52 @@ internal object KonturePluginConfigurer {
 
     fun collectAllSourceDirs(proj: Project): List<File> {
         val list = mutableListOf<File>()
-        if (proj.hasAndroidPlugin()) {
-            AgpInspector.collectAndroidSourceDirs(proj, list)
-        }
-        if (proj.hasKotlinPlugin()) {
-            KgpInspector.collectKotlinSourceDirs(proj, list)
-        }
-        if (list.isEmpty()) {
-            val javaSourceSets = proj.extensions.findByName(EXTENSION_SOURCE_SETS) as? SourceSetContainer
+        val allProjects =
+            try {
+                proj.rootProject.allprojects
+            } catch (_: Exception) {
+                listOf(proj)
+            }
+        allProjects.forEach { p ->
+            if (p.hasAndroidPlugin()) {
+                AgpInspector.collectAndroidSourceDirs(p, list)
+            }
+            if (p.hasKotlinPlugin()) {
+                KgpInspector.collectKotlinSourceDirs(p, list)
+            }
+            val javaSourceSets = p.extensions.findByName(EXTENSION_SOURCE_SETS) as? SourceSetContainer
             if (javaSourceSets != null) {
                 for (ss in javaSourceSets) {
                     for (dir in ss.allSource.srcDirs) {
-                        list.add(if (dir.isAbsolute) dir else File(proj.projectDir, dir.path))
+                        list.add(if (dir.isAbsolute) dir else File(p.projectDir, dir.path))
                     }
                 }
             }
-        }
-        proj.rootProject.subprojects.forEach { sub ->
-            val srcDir = File(sub.projectDir, DIR_SRC)
+            val srcDir = File(p.projectDir, DIR_SRC)
             if (srcDir.exists()) {
                 srcDir.walkTopDown().filter { it.isDirectory && (it.name == "kotlin" || it.name == "java") }.forEach {
                     list.add(it)
                 }
             }
         }
-        val buildDir =
-            try {
-                proj.layout.buildDirectory
-                    .get()
-                    .asFile.canonicalFile
-            } catch (_: Exception) {
-                null
-            }
-        return if (buildDir != null) {
-            list.filter { dir ->
+        val buildDirs =
+            allProjects.mapNotNull { p ->
                 try {
-                    val canonicalDir = dir.canonicalFile
-                    !canonicalDir.startsWith(buildDir)
+                    p.layout.buildDirectory
+                        .get()
+                        .asFile.canonicalFile
                 } catch (_: Exception) {
-                    true
+                    null
                 }
             }
-        } else {
-            list
-        }
+        return list.filter { dir ->
+            try {
+                val canonicalDir = dir.canonicalFile
+                buildDirs.none { buildDir -> canonicalDir.startsWith(buildDir) }
+            } catch (_: Exception) {
+                true
+            }
+        }.distinctBy { it.canonicalPath }
     }
 
     private fun Project.hasAndroidPlugin(): Boolean =

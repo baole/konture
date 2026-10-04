@@ -241,6 +241,23 @@ public class KonturePlugin : Plugin<Project> {
                 .withPropertyName("kontureBaseline")
                 .withPathSensitivity(org.gradle.api.tasks.PathSensitivity.RELATIVE)
 
+            val sourcesCollection =
+                project.files(
+                    project.provider {
+                        KonturePluginConfigurer.collectAllSourceDirs(project.rootProject)
+                            .filter { it.exists() }
+                            .map { dir ->
+                                project.fileTree(dir) { tree ->
+                                    tree.include("**/*.kt", "**/*.kts", "**/*.java")
+                                }
+                            }
+                    },
+                )
+            testTask.inputs.files(sourcesCollection)
+                .withPropertyName("kontureSources")
+                .withPathSensitivity(org.gradle.api.tasks.PathSensitivity.RELATIVE)
+                .optional(true)
+
             if (isRecordProperty || isRunningGenerateBaseline) {
                 testTask.outputs.file(baselineFileProvider)
                 testTask.outputs.upToDateWhen { false }
