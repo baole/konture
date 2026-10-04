@@ -252,6 +252,7 @@ internal object KonturePluginConfigurer {
                 listOf(proj)
             }
         allProjects.forEach { p ->
+            val initialSize = list.size
             if (p.hasAndroidPlugin()) {
                 AgpInspector.collectAndroidSourceDirs(p, list)
             }
@@ -266,10 +267,13 @@ internal object KonturePluginConfigurer {
                     }
                 }
             }
-            val srcDir = File(p.projectDir, DIR_SRC)
-            if (srcDir.exists()) {
-                srcDir.walkTopDown().filter { it.isDirectory && (it.name == "kotlin" || it.name == "java") }.forEach {
-                    list.add(it)
+            if (list.size == initialSize) {
+                val srcDir = File(p.projectDir, DIR_SRC)
+                if (srcDir.exists()) {
+                    srcDir.walkTopDown()
+                        .maxDepth(MAX_SRC_DIR_WALK_DEPTH)
+                        .filter { it.isDirectory && (it.name == "kotlin" || it.name == "java") }
+                        .forEach { list.add(it) }
                 }
             }
         }
@@ -356,4 +360,5 @@ internal object KonturePluginConfigurer {
     private const val CONFIG_COMPILE_CLASSPATH_LOWER = "compileClasspath"
 
     private const val DIR_SRC = "src"
+    private const val MAX_SRC_DIR_WALK_DEPTH = 3
 }
