@@ -17,6 +17,7 @@ import org.gradle.testfixtures.ProjectBuilder
 import org.jetbrains.kotlin.gradle.dsl.KotlinMultiplatformExtension
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
+import org.junit.jupiter.api.Assertions.assertNotEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertThrows
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -671,5 +672,53 @@ class KontureLayoutGenerationTest {
         val moduleData = KonturePluginConfigurer.collectModuleDataForProject(project)
         assertTrue(moduleData.appliedPlugins.contains("android-kmp-library"))
         assertTrue(moduleData.appliedPlugins.contains("kotlin-multiplatform"))
+    }
+
+    @Test
+    fun `testArchitectureLayoutFingerprintChangesOnSourceModification`() {
+        val rootProject = ProjectBuilder.builder().withName("root").build()
+        val child = ProjectBuilder.builder().withName("child").withParent(rootProject).build()
+        child.plugins.apply("org.jetbrains.kotlin.jvm")
+        rootProject.plugins.apply("io.github.baole.konture.internal")
+
+        val srcDir = File(child.projectDir, "src/main/kotlin/com/example")
+        srcDir.mkdirs()
+        val sourceFile = File(srcDir, "Example.kt")
+        sourceFile.writeText("package com.example\nclass Example")
+
+        (rootProject as ProjectInternal).evaluate()
+        (child as ProjectInternal).evaluate()
+
+        val task = rootProject.tasks.getByName("generateArchitectureLayout") as GenerateArchitectureLayout
+        task.generate()
+
+        val outputFile = task.outputFile.get().asFile
+        val layoutModel1 = Json.decodeFromString(LayoutModel.serializer(), outputFile.readText())
+        val initialFingerprint = layoutModel1.sourcesFingerprint
+        assertTrue(initialFingerprint.isNotBlank(), "Fingerprint must not be blank")
+
+        // Modify source file content
+        sourceFile.writeText("package com.example\nclass ExampleModified")
+        task.generate()
+
+        val layoutModel2 = Json.decodeFromString(LayoutModel.serializer(), outputFile.readText())
+        val modifiedFingerprint = layoutModel2.sourcesFingerprint
+        assertNotEquals(
+            initialFingerprint,
+            modifiedFingerprint,
+            "Fingerprint must change when source file content changes",
+        )
+
+        // Non-source file modification should NOT change fingerprint
+        val nonSourceFile = File(srcDir, "notes.txt")
+        nonSourceFile.writeText("some notes")
+        task.generate()
+
+        val layoutModel3 = Json.decodeFromString(LayoutModel.serializer(), outputFile.readText())
+        assertEquals(
+            modifiedFingerprint,
+            layoutModel3.sourcesFingerprint,
+            "Non-source files must not affect fingerprint",
+        )
     }
 }

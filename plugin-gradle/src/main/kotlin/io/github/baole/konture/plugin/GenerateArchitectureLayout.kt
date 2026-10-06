@@ -203,6 +203,23 @@ public abstract class GenerateArchitectureLayout : DefaultTask() {
                 )
             }
 
+        val md = java.security.MessageDigest.getInstance("SHA-256")
+        val buffer = ByteArray(BUFFER_SIZE)
+        sourceFiles.asFileTree
+            .filter { it.isFile && (it.name.endsWith(".kt") || it.name.endsWith(".kts") || it.name.endsWith(".java")) }
+            .sortedBy { it.relativeToOrSelf(rootDir).invariantSeparatorsPath }
+            .forEach { file ->
+                val relPath = file.relativeToOrSelf(rootDir).invariantSeparatorsPath
+                md.update(relPath.toByteArray(Charsets.UTF_8))
+                file.inputStream().use { input ->
+                    var bytesRead: Int
+                    while (input.read(buffer).also { bytesRead = it } != -1) {
+                        md.update(buffer, 0, bytesRead)
+                    }
+                }
+            }
+        val sourcesFingerprint = md.digest().joinToString("") { "%02x".format(it) }
+
         val layoutModel =
             LayoutModel(
                 schemaVersion = LayoutModel.CURRENT_SCHEMA_VERSION,
@@ -221,9 +238,16 @@ public abstract class GenerateArchitectureLayout : DefaultTask() {
                         excludeConfigurations = excludeConfigurations.getOrElse(emptyList()),
                     ),
                 logLevel = levelStr,
+                sourcesFingerprint = sourcesFingerprint,
             )
 
         val jsonText = json.encodeToString(LayoutModel.serializer(), layoutModel)
-        outputFile.get().asFile.writeText(jsonText)
+        val file = outputFile.get().asFile
+        file.parentFile?.mkdirs()
+        file.writeText(jsonText)
+    }
+
+    private companion object {
+        private const val BUFFER_SIZE = 8192
     }
 }
