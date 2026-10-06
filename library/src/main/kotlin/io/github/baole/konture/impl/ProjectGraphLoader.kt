@@ -172,6 +172,35 @@ internal class ProjectGraphLoader {
             }
         }
 
+        fun targetBase(name: String): String {
+            for (suffix in TARGET_SUFFIXES) {
+                if (name.endsWith(suffix, ignoreCase = true)) {
+                    return name.substring(0, name.length - suffix.length)
+                }
+            }
+            return name
+        }
+
+        fun isProductionSourceSetVisibleToKmpTest(
+            consumer: SourceSetModel,
+            candidate: SourceSetModel,
+        ): Boolean {
+            if (!candidate.production) return false
+            if (candidate.name.equals("commonMain", ignoreCase = true)) return true
+
+            val hasPlatforms = consumer.platforms.isNotEmpty() && candidate.platforms.isNotEmpty()
+            if (hasPlatforms && !hasCompatiblePlatforms(consumer, candidate)) return false
+
+            val consumerBase = targetBase(consumer.name)
+            val candidateBase = targetBase(candidate.name)
+            if (consumerBase.isNotEmpty() && candidateBase.isNotEmpty()) {
+                return consumerBase.equals(candidateBase, ignoreCase = true)
+            }
+
+            return consumer.name.equals("test", ignoreCase = true) &&
+                candidate.name.equals("main", ignoreCase = true)
+        }
+
         data class VisibleSymbols(
             val classes: Set<String>,
             val typeAliases: Map<String, TypeAliasDefinition>,
@@ -204,7 +233,22 @@ internal class ProjectGraphLoader {
                     }
                     val ownSourceSets =
                         if (sourceSet.kind == CoreSourceSetKind.KMP) {
-                            sourceSetClosure(key)
+                            val base = sourceSetClosure(key)
+                            if (sourceSet.production) {
+                                base
+                            } else {
+                                val compatibleProduction =
+                                    sourceSetModels.keys.filter { candidate ->
+                                        candidate.first == key.first && candidate.second == key.second &&
+                                            base.any { baseKey ->
+                                                isProductionSourceSetVisibleToKmpTest(
+                                                    sourceSetModels.getValue(baseKey),
+                                                    sourceSetModels.getValue(candidate),
+                                                )
+                                            }
+                                    }
+                                (compatibleProduction.flatMap { sourceSetClosure(it) } + base).toSet()
+                            }
                         } else {
                             sourceSetModels.keys.filter { candidate ->
                                 candidate.first == key.first && candidate.second == key.second &&
@@ -449,6 +493,16 @@ internal class ProjectGraphLoader {
         }
     }
 }
+
+private val TARGET_SUFFIXES =
+    listOf(
+        "InstrumentedTest",
+        "DeviceTest",
+        "HostTest",
+        "UnitTest",
+        "Test",
+        "Main",
+    )
 
 private fun resolveSourceSetFiles(
     sourceSetModel: SourceSetModel,
