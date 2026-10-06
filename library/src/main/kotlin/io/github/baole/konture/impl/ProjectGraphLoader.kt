@@ -186,7 +186,7 @@ internal class ProjectGraphLoader {
             candidate: SourceSetModel,
         ): Boolean {
             if (!candidate.production) return false
-            if (candidate.name == "commonMain") return true
+            if (candidate.name.equals("commonMain", ignoreCase = true)) return true
 
             val hasPlatforms = consumer.platforms.isNotEmpty() && candidate.platforms.isNotEmpty()
             if (hasPlatforms && !hasCompatiblePlatforms(consumer, candidate)) return false
@@ -240,12 +240,14 @@ internal class ProjectGraphLoader {
                                 val compatibleProduction =
                                     sourceSetModels.keys.filter { candidate ->
                                         candidate.first == key.first && candidate.second == key.second &&
-                                            isProductionSourceSetVisibleToKmpTest(
-                                                sourceSet,
-                                                sourceSetModels.getValue(candidate),
-                                            )
+                                            base.any { baseKey ->
+                                                isProductionSourceSetVisibleToKmpTest(
+                                                    sourceSetModels.getValue(baseKey),
+                                                    sourceSetModels.getValue(candidate),
+                                                )
+                                            }
                                     }
-                                base + compatibleProduction.flatMap { sourceSetClosure(it) }
+                                (compatibleProduction.flatMap { sourceSetClosure(it) } + base).toSet()
                             }
                         } else {
                             sourceSetModels.keys.filter { candidate ->

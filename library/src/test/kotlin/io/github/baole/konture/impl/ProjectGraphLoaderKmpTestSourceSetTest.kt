@@ -451,4 +451,161 @@ internal class ProjectGraphLoaderKmpTestSourceSetTest : KontureScopeTestFixture(
 
         assertEquals("sample.FastestService", consumer.functions.single().resolvedReturnType)
     }
+
+    @Test
+    fun `KMP derived test source set inherits visible production source sets from parent test source set`() {
+        val moduleDir = File(tempDir, "derived-test-kmp").apply { mkdirs() }
+        val commonMainDir = File(moduleDir, "commonMain").apply { mkdirs() }
+        val jvmMainDir = File(moduleDir, "jvmMain").apply { mkdirs() }
+        val commonTestDir = File(moduleDir, "commonTest").apply { mkdirs() }
+        val jvmTestDir = File(moduleDir, "jvmTest").apply { mkdirs() }
+        val jvmIntegrationTestDir = File(moduleDir, "jvmIntegrationTest").apply { mkdirs() }
+
+        File(commonMainDir, "CommonService.kt").apply {
+            writeText("package sample\nclass CommonService")
+        }
+        File(jvmMainDir, "JvmService.kt").apply {
+            writeText("package sample\nclass JvmService")
+        }
+        File(jvmIntegrationTestDir, "IntegrationTestConsumer.kt").apply {
+            writeText(
+                """
+                package sample
+                class IntegrationTestConsumer {
+                    fun common(): CommonService = TODO()
+                    fun jvm(): JvmService = TODO()
+                }
+                """.trimIndent(),
+            )
+        }
+
+        val module =
+            ModuleModel(
+                path = ":derived-test-kmp",
+                projectDir = moduleDir.absolutePath,
+                appliedPlugins = listOf("kotlin-multiplatform"),
+                sourceSets =
+                    listOf(
+                        SourceSetModel(
+                            "commonMain",
+                            SourceSetKind.KMP,
+                            true,
+                            listOf(commonMainDir.absolutePath),
+                            platforms = listOf("jvm"),
+                        ),
+                        SourceSetModel(
+                            "jvmMain",
+                            SourceSetKind.KMP,
+                            true,
+                            listOf(jvmMainDir.absolutePath),
+                            platforms = listOf("jvm"),
+                            dependsOnSourceSets = listOf("commonMain"),
+                        ),
+                        SourceSetModel(
+                            "commonTest",
+                            SourceSetKind.KMP,
+                            false,
+                            listOf(commonTestDir.absolutePath),
+                            platforms = listOf("jvm"),
+                        ),
+                        SourceSetModel(
+                            "jvmTest",
+                            SourceSetKind.KMP,
+                            false,
+                            listOf(jvmTestDir.absolutePath),
+                            platforms = listOf("jvm"),
+                            dependsOnSourceSets = listOf("commonTest"),
+                        ),
+                        SourceSetModel(
+                            "jvmIntegrationTest",
+                            SourceSetKind.KMP,
+                            false,
+                            listOf(jvmIntegrationTestDir.absolutePath),
+                            platforms = listOf("jvm"),
+                            dependsOnSourceSets = listOf("jvmTest"),
+                        ),
+                    ),
+                dependencies = emptyList(),
+            )
+        val layout = LayoutModel(LayoutModel.CURRENT_SCHEMA_VERSION, builds = listOf(BuildModel(":", listOf(module))))
+
+        val graph = ProjectGraphLoader.loadFromStream(ByteArrayInputStream(json.encodeToString(layout).toByteArray()))
+        val consumer =
+            graph.getAllModules()
+                .single()
+                .files
+                .single { it.name == "IntegrationTestConsumer.kt" }
+                .classes
+                .single()
+
+        assertEquals("sample.CommonService", consumer.functions.single { it.name == "common" }.resolvedReturnType)
+        assertEquals("sample.JvmService", consumer.functions.single { it.name == "jvm" }.resolvedReturnType)
+    }
+
+    @Test
+    fun `KMP test source set type alias shadows production type alias with same name`() {
+        val moduleDir = File(tempDir, "typealias-shadowing-kmp").apply { mkdirs() }
+        val commonMainDir = File(moduleDir, "commonMain").apply { mkdirs() }
+        val commonTestDir = File(moduleDir, "commonTest").apply { mkdirs() }
+
+        File(commonMainDir, "CommonModels.kt").apply {
+            writeText(
+                """
+                package sample
+                class CommonTarget
+                typealias TargetAlias = CommonTarget
+                """.trimIndent(),
+            )
+        }
+        File(commonTestDir, "TestModels.kt").apply {
+            writeText(
+                """
+                package sample
+                class TestTarget
+                typealias TargetAlias = TestTarget
+                class AliasConsumer {
+                    fun target(): TargetAlias = TODO()
+                }
+                """.trimIndent(),
+            )
+        }
+
+        val module =
+            ModuleModel(
+                path = ":typealias-shadowing-kmp",
+                projectDir = moduleDir.absolutePath,
+                appliedPlugins = listOf("kotlin-multiplatform"),
+                sourceSets =
+                    listOf(
+                        SourceSetModel(
+                            "commonMain",
+                            SourceSetKind.KMP,
+                            true,
+                            listOf(commonMainDir.absolutePath),
+                            platforms = listOf("jvm"),
+                        ),
+                        SourceSetModel(
+                            "commonTest",
+                            SourceSetKind.KMP,
+                            false,
+                            listOf(commonTestDir.absolutePath),
+                            platforms = listOf("jvm"),
+                        ),
+                    ),
+                dependencies = emptyList(),
+            )
+        val layout = LayoutModel(LayoutModel.CURRENT_SCHEMA_VERSION, builds = listOf(BuildModel(":", listOf(module))))
+
+        val graph = ProjectGraphLoader.loadFromStream(ByteArrayInputStream(json.encodeToString(layout).toByteArray()))
+        val consumer =
+            graph.getAllModules()
+                .single()
+                .files
+                .single { it.name == "TestModels.kt" }
+                .classes
+                .single { it.name == "AliasConsumer" }
+
+        assertEquals("sample.TestTarget", consumer.functions.single().resolvedReturnType)
+    }
 }
+
