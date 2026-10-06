@@ -172,14 +172,14 @@ internal class ProjectGraphLoader {
             }
         }
 
-        fun targetBase(name: String): String =
-            name
-                .removeSuffix("UnitTest").removeSuffix("unittest")
-                .removeSuffix("HostTest").removeSuffix("hosttest")
-                .removeSuffix("DeviceTest").removeSuffix("devicetest")
-                .removeSuffix("InstrumentedTest").removeSuffix("instrumentedtest")
-                .removeSuffix("Test").removeSuffix("test")
-                .removeSuffix("Main").removeSuffix("main")
+        fun targetBase(name: String): String {
+            for (suffix in TARGET_SUFFIXES) {
+                if (name.endsWith(suffix, ignoreCase = true)) {
+                    return name.substring(0, name.length - suffix.length)
+                }
+            }
+            return name
+        }
 
         fun isProductionSourceSetVisibleToKmpTest(
             consumer: SourceSetModel,
@@ -491,6 +491,16 @@ internal class ProjectGraphLoader {
         }
     }
 }
+
+private val TARGET_SUFFIXES =
+    listOf(
+        "InstrumentedTest",
+        "DeviceTest",
+        "HostTest",
+        "UnitTest",
+        "Test",
+        "Main",
+    )
 
 private fun resolveSourceSetFiles(
     sourceSetModel: SourceSetModel,

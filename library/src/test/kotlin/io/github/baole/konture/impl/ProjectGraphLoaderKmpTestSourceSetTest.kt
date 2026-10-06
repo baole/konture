@@ -301,7 +301,7 @@ internal class ProjectGraphLoaderKmpTestSourceSetTest : KontureScopeTestFixture(
             writeText("package app\nclass AppService")
         }
         File(appCommonTestDir, "AppTest.kt").apply {
-            writeText("package app\nimport lib.LibraryService\nclass AppTest { fun test(): LibraryService = TODO() }")
+            writeText("package app\nimport lib.*\nclass AppTest { fun test(): LibraryService = TODO() }")
         }
 
         val app =
@@ -317,6 +317,7 @@ internal class ProjectGraphLoaderKmpTestSourceSetTest : KontureScopeTestFixture(
                             true,
                             listOf(appCommonMainDir.absolutePath),
                             platforms = listOf("jvm", "native"),
+                            targetNames = listOf("iosArm64"),
                             dependencyConfigurations = listOf("commonMainImplementation"),
                         ),
                         SourceSetModel(
@@ -325,6 +326,7 @@ internal class ProjectGraphLoaderKmpTestSourceSetTest : KontureScopeTestFixture(
                             false,
                             listOf(appCommonTestDir.absolutePath),
                             platforms = listOf("jvm", "native"),
+                            targetNames = listOf("iosArm64"),
                             dependsOnSourceSets = emptyList(),
                         ),
                     ),
@@ -343,6 +345,7 @@ internal class ProjectGraphLoaderKmpTestSourceSetTest : KontureScopeTestFixture(
                             true,
                             listOf(libCommonMainDir.absolutePath),
                             platforms = listOf("jvm", "native"),
+                            targetNames = listOf("iosArm64"),
                         ),
                     ),
                 dependencies = emptyList(),
@@ -350,7 +353,13 @@ internal class ProjectGraphLoaderKmpTestSourceSetTest : KontureScopeTestFixture(
         val layout = LayoutModel(LayoutModel.CURRENT_SCHEMA_VERSION, builds = listOf(BuildModel(":", listOf(app, lib))))
 
         val graph = ProjectGraphLoader.loadFromStream(ByteArrayInputStream(json.encodeToString(layout).toByteArray()))
-        val appTestClass = graph.getAllModules().single { it.path == ":app" }.files.single { it.name == "AppTest.kt" }.classes.single()
+        val appTestClass =
+            graph.getAllModules()
+                .single { it.path == ":app" }
+                .files
+                .single { it.name == "AppTest.kt" }
+                .classes
+                .single()
 
         assertEquals("lib.LibraryService", appTestClass.functions.single().resolvedReturnType)
     }
@@ -397,5 +406,49 @@ internal class ProjectGraphLoaderKmpTestSourceSetTest : KontureScopeTestFixture(
 
         assertEquals(null, consumer.functions.single().resolvedReturnType)
     }
-}
 
+    @Test
+    fun `KMP test source set matches targets whose names contain suffix words`() {
+        val moduleDir = File(tempDir, "target-suffix-words").apply { mkdirs() }
+        val fastestMainDir = File(moduleDir, "fastestMain").apply { mkdirs() }
+        val fastestTestDir = File(moduleDir, "fastestTest").apply { mkdirs() }
+
+        File(fastestMainDir, "FastestService.kt").apply {
+            writeText("package sample\nclass FastestService")
+        }
+        File(fastestTestDir, "FastestTestConsumer.kt").apply {
+            writeText("package sample\nclass FastestTestConsumer { fun service(): FastestService = TODO() }")
+        }
+
+        val module =
+            ModuleModel(
+                path = ":target-suffix-words",
+                projectDir = moduleDir.absolutePath,
+                appliedPlugins = listOf("kotlin-multiplatform"),
+                sourceSets =
+                    listOf(
+                        SourceSetModel(
+                            "fastestMain",
+                            SourceSetKind.KMP,
+                            true,
+                            listOf(fastestMainDir.absolutePath),
+                            platforms = listOf("jvm"),
+                        ),
+                        SourceSetModel(
+                            "fastestTest",
+                            SourceSetKind.KMP,
+                            false,
+                            listOf(fastestTestDir.absolutePath),
+                            platforms = listOf("jvm"),
+                        ),
+                    ),
+                dependencies = emptyList(),
+            )
+        val layout = LayoutModel(LayoutModel.CURRENT_SCHEMA_VERSION, builds = listOf(BuildModel(":", listOf(module))))
+
+        val graph = ProjectGraphLoader.loadFromStream(ByteArrayInputStream(json.encodeToString(layout).toByteArray()))
+        val consumer = graph.getAllModules().single().files.single { it.name == "FastestTestConsumer.kt" }.classes.single()
+
+        assertEquals("sample.FastestService", consumer.functions.single().resolvedReturnType)
+    }
+}
