@@ -194,11 +194,11 @@ internal class ProjectGraphLoader {
             val consumerBase = targetBase(consumer.name)
             val candidateBase = targetBase(candidate.name)
             if (consumerBase.isNotEmpty() && candidateBase.isNotEmpty()) {
-                return consumerBase.equals(candidateBase, ignoreCase = true) ||
-                    consumerBase.startsWith(candidateBase, ignoreCase = true)
+                return consumerBase.equals(candidateBase, ignoreCase = true)
             }
 
-            return hasPlatforms || (consumer.platforms.isEmpty() && candidate.platforms.isEmpty())
+            return consumer.name.equals("test", ignoreCase = true) &&
+                candidate.name.equals("main", ignoreCase = true)
         }
 
         data class VisibleSymbols(

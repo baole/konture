@@ -354,4 +354,48 @@ internal class ProjectGraphLoaderKmpTestSourceSetTest : KontureScopeTestFixture(
 
         assertEquals("lib.LibraryService", appTestClass.functions.single().resolvedReturnType)
     }
+
+    @Test
+    fun `KMP test source set isolates targets when one target name prefixes another`() {
+        val moduleDir = File(tempDir, "prefix-kmp").apply { mkdirs() }
+        val apiMainDir = File(moduleDir, "apiMain").apply { mkdirs() }
+        val apiV2TestDir = File(moduleDir, "apiV2Test").apply { mkdirs() }
+
+        File(apiMainDir, "ApiOnly.kt").apply { writeText("package sample\nclass ApiOnly") }
+        File(apiV2TestDir, "ApiV2TestConsumer.kt").apply {
+            writeText("package sample\nclass ApiV2TestConsumer { fun invalid(): ApiOnly = TODO() }")
+        }
+
+        val module =
+            ModuleModel(
+                path = ":prefix-kmp",
+                projectDir = moduleDir.absolutePath,
+                appliedPlugins = listOf("kotlin-multiplatform"),
+                sourceSets =
+                    listOf(
+                        SourceSetModel(
+                            "apiMain",
+                            SourceSetKind.KMP,
+                            true,
+                            listOf(apiMainDir.absolutePath),
+                            platforms = listOf("jvm"),
+                        ),
+                        SourceSetModel(
+                            "apiV2Test",
+                            SourceSetKind.KMP,
+                            false,
+                            listOf(apiV2TestDir.absolutePath),
+                            platforms = listOf("jvm"),
+                        ),
+                    ),
+                dependencies = emptyList(),
+            )
+        val layout = LayoutModel(LayoutModel.CURRENT_SCHEMA_VERSION, builds = listOf(BuildModel(":", listOf(module))))
+
+        val graph = ProjectGraphLoader.loadFromStream(ByteArrayInputStream(json.encodeToString(layout).toByteArray()))
+        val consumer = graph.getAllModules().single().files.single { it.name == "ApiV2TestConsumer.kt" }.classes.single()
+
+        assertEquals(null, consumer.functions.single().resolvedReturnType)
+    }
 }
+
