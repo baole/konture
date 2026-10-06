@@ -608,4 +608,3 @@ internal class ProjectGraphLoaderKmpTestSourceSetTest : KontureScopeTestFixture(
         assertEquals("sample.TestTarget", consumer.functions.single().resolvedReturnType)
     }
 }
-
