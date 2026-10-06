@@ -172,6 +172,35 @@ internal class ProjectGraphLoader {
             }
         }
 
+        fun targetBase(name: String): String =
+            name
+                .removeSuffix("UnitTest").removeSuffix("unittest")
+                .removeSuffix("HostTest").removeSuffix("hosttest")
+                .removeSuffix("DeviceTest").removeSuffix("devicetest")
+                .removeSuffix("InstrumentedTest").removeSuffix("instrumentedtest")
+                .removeSuffix("Test").removeSuffix("test")
+                .removeSuffix("Main").removeSuffix("main")
+
+        fun isProductionSourceSetVisibleToKmpTest(
+            consumer: SourceSetModel,
+            candidate: SourceSetModel,
+        ): Boolean {
+            if (!candidate.production) return false
+            if (candidate.name == "commonMain") return true
+
+            val hasPlatforms = consumer.platforms.isNotEmpty() && candidate.platforms.isNotEmpty()
+            if (hasPlatforms && !hasCompatiblePlatforms(consumer, candidate)) return false
+
+            val consumerBase = targetBase(consumer.name)
+            val candidateBase = targetBase(candidate.name)
+            if (consumerBase.isNotEmpty() && candidateBase.isNotEmpty()) {
+                return consumerBase.equals(candidateBase, ignoreCase = true) ||
+                    consumerBase.startsWith(candidateBase, ignoreCase = true)
+            }
+
+            return hasPlatforms || (consumer.platforms.isEmpty() && candidate.platforms.isEmpty())
+        }
+
         data class VisibleSymbols(
             val classes: Set<String>,
             val typeAliases: Map<String, TypeAliasDefinition>,
@@ -204,7 +233,20 @@ internal class ProjectGraphLoader {
                     }
                     val ownSourceSets =
                         if (sourceSet.kind == CoreSourceSetKind.KMP) {
-                            sourceSetClosure(key)
+                            val base = sourceSetClosure(key)
+                            if (sourceSet.production) {
+                                base
+                            } else {
+                                val compatibleProduction =
+                                    sourceSetModels.keys.filter { candidate ->
+                                        candidate.first == key.first && candidate.second == key.second &&
+                                            isProductionSourceSetVisibleToKmpTest(
+                                                sourceSet,
+                                                sourceSetModels.getValue(candidate),
+                                            )
+                                    }
+                                base + compatibleProduction.flatMap { sourceSetClosure(it) }
+                            }
                         } else {
                             sourceSetModels.keys.filter { candidate ->
                                 candidate.first == key.first && candidate.second == key.second &&
