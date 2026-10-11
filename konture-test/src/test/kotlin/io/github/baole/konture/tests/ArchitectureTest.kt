@@ -8,6 +8,7 @@ package io.github.baole.konture.tests
 
 import io.github.baole.konture.Konture
 import io.github.baole.konture.assertNoCycles
+import io.github.baole.konture.classes
 import io.github.baole.konture.modules
 import org.junit.jupiter.api.Test
 
@@ -45,6 +46,17 @@ class ArchitectureTest {
             .haveNamePath(":plugin-gradle")
             .should()
             .onlyDependOn(":core")
+            .check()
+    }
+
+    @Test
+    fun `core module classes must not depend on Kotlin compiler embeddable or PSI`() {
+        Konture
+            .classes()
+            .that()
+            .inModule(":core")
+            .should()
+            .notDependOnPackages("org.jetbrains.kotlin.psi..", "org.jetbrains.kotlin.cli..", "org.jetbrains.kotlin.compiler..")
             .check()
     }
 }

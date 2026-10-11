@@ -43,6 +43,3 @@ _site/
 docs/kdoc/
 docs/skills/
 /articles
-
-# Agent skills and workflows
-.agents/
