@@ -10,18 +10,7 @@ plugins {
 
 repositories {
     google()
-    maven {
-        name = "MavenCentral"
-        url = uri("https://repo.maven.apache.org/maven2")
-        allowInsecureContinueWhenDisabled.set(true)
-    }
-    maven {
-        name = "MavenCentralKotlinFallback"
-        url = uri("https://repo1.maven.org/maven2")
-        content {
-            includeGroup("org.jetbrains.kotlin")
-        }
-    }
+    mavenCentral()
     gradlePluginPortal()
 }
 
