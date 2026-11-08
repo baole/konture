@@ -28,14 +28,16 @@ plugins.withType<JavaPlugin> {
             }
             plugins.withId("com.gradleup.nmcp") {
                 configure<nmcp.NmcpExtension> {
-                    publish("mavenJava") {
-                        username =
-                            providers.gradleProperty("mavenCentralUsername").orNull
-                                ?: System.getenv("MAVEN_CENTRAL_USERNAME")
-                        password =
-                            providers.gradleProperty("mavenCentralPassword").orNull
-                                ?: System.getenv("MAVEN_CENTRAL_PASSWORD")
-                        publicationType = "AUTOMATIC"
+                    publishAllPublicationsToCentralPortal {
+                        username.set(
+                            providers.gradleProperty("mavenCentralUsername")
+                                .orElse(providers.environmentVariable("MAVEN_CENTRAL_USERNAME")),
+                        )
+                        password.set(
+                            providers.gradleProperty("mavenCentralPassword")
+                                .orElse(providers.environmentVariable("MAVEN_CENTRAL_PASSWORD")),
+                        )
+                        publishingType.set("AUTOMATIC")
                     }
                 }
             }

@@ -63,6 +63,7 @@ configure<DetektExtension> {
 }
 
 configure<KtlintExtension> {
+    version.set("1.0.1")
     verbose.set(true)
     outputToConsole.set(true)
     coloredOutput.set(true)

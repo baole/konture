@@ -6,6 +6,7 @@
 
 import com.diffplug.gradle.spotless.SpotlessExtension
 import com.diffplug.spotless.LineEnding
+import io.github.baole.konture.buildlogic.KotlinHeaderValidator
 import io.github.baole.konture.buildlogic.UpdateKotlinContributors
 import org.jetbrains.dokka.gradle.DokkaMultiModuleTask
 
@@ -131,18 +132,11 @@ tasks.named<Delete>("clean") {
 }
 
 configure<SpotlessExtension> {
-    lineEndings = LineEnding.GIT_ATTRIBUTES
+    lineEndings = LineEnding.GIT_ATTRIBUTES_FAST_ALLSAME
     kotlin {
         target("**/*.kt", "**/*.kts")
         targetExclude("**/build/**", "**/.gradle/**", "showcases/**", "settings.gradle.kts")
-        custom("validate contributor header") { source ->
-            require(
-                Regex(
-                    """\A/\*\R \* Copyright \d{4}(?:-\d{4})? .+\R(?: \* Contributors: .+\R)? \* SPDX-License-Identifier: Apache-2\.0\R \*/\R\R""",
-                ).containsMatchIn(source),
-            ) { "Kotlin files must start with a copyright and SPDX header." }
-            source
-        }
+        custom("validate contributor header", KotlinHeaderValidator())
     }
 }
 
