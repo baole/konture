@@ -117,10 +117,10 @@ To compile, package, and install your modified artifacts to your machine's local
 ./gradlew publishToMavenLocal
 ```
 
-This will publish the modules with version `1.0.3`:
-- `io.github.baole:konture-core:1.0.3` (shared core data models)
-- `io.github.baole:konture:1.0.3` (primary public API library)
-- `io.github.baole.konture:plugin-gradle:1.0.3` (Gradle plugin)
+This will publish the modules with version `1.0.4`:
+- `io.github.baole:konture-core:1.0.4` (shared core data models)
+- `io.github.baole:konture:1.0.4` (primary public API library)
+- `io.github.baole.konture:plugin-gradle:1.0.4` (Gradle plugin)
 
 
 ### Step 2: Test Using the `sample` Sandbox
