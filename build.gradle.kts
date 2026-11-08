@@ -20,6 +20,20 @@ plugins {
     `maven-publish`
 }
 
+configure<nmcp.NmcpExtension> {
+    publishAllPublicationsToCentralPortal {
+        username.set(
+            providers.gradleProperty("mavenCentralUsername")
+                .orElse(providers.environmentVariable("MAVEN_CENTRAL_USERNAME")),
+        )
+        password.set(
+            providers.gradleProperty("mavenCentralPassword")
+                .orElse(providers.environmentVariable("MAVEN_CENTRAL_PASSWORD")),
+        )
+        publishingType.set("AUTOMATIC")
+    }
+}
+
 if (applyPlugin) {
     pluginManager.apply("io.github.baole.konture.internal")
 }
