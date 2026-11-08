@@ -13,7 +13,7 @@ This directory contains the autonomous sub-agent definitions for developing, ref
 | **[`konture-plugin-engineer`](agents/konture-plugin-engineer.md)** | Build Tool Plugins (Gradle & Maven) | Maintains `plugin-gradle` and `plugin-maven`, enforces Gradle Configuration Cache and Project Isolation compatibility (via `archLayoutElements`), AGP/KGP inspectors, and layout generation tasks. | `view_file`, `replace_file_content`, `write_to_file`, `run_command` |
 | **[`konture-test-engineer`](agents/konture-test-engineer.md)** | Test Lifecycle & Dogfooding | Full test lifecycle: unit tests in `:core` and `:library`, integration tests in `:plugin-gradle`, negative violation assertions (`assertFailsWith`), and dogfooding architecture tests in `konture-test`. | `view_file`, `replace_file_content`, `write_to_file`, `run_command` |
 | **[`konture-i18n-specialist`](agents/konture-i18n-specialist.md)** | 8-Language Localization (i18n) | Manages resource bundles across 8 supported locales (`en`, `fr`, `es`, `it`, `vi`, `zh`, `zh_CN`, `zh_TW`), `MessageFormat` apostrophe escaping (`''`), and locale-neutral baseline persistence. | `view_file`, `replace_file_content`, `write_to_file`, `run_command` |
-| **[`konture-docs-specialist`](agents/konture-docs-specialist.md)** | Documentation, Jekyll & Dokka | Manages Jekyll docs in `docs/` adhering to the zero-front-matter rule, registers metadata in `script/add_front_matter.py`, generates Dokka API docs (`dokkaHtmlMultiModule`), and authors architecture recipes. | `view_file`, `replace_file_content`, `write_to_file`, `run_command` |
+| **[`konture-docs-specialist`](agents/konture-docs-specialist.md)** | Documentation, Jekyll & Dokka | Manages Jekyll docs in `docs/` adhering to the zero-front-matter rule, registers metadata in `script/add_front_matter.py`, generates Dokka API docs (`:dokkaGenerate`), and authors architecture recipes. | `view_file`, `replace_file_content`, `write_to_file`, `run_command` |
 | **[`konture-quality-verifier`](agents/konture-quality-verifier.md)** | Code Review, ABI & Quality Gates | 3-stage semantic code review (Architecture, Craft/I/O/Memory, Tests), JaCoCo 80% coverage enforcement, file size limits (>300 lines), and runs the local pipeline (`./script/check.sh`). | `view_file`, `replace_file_content`, `write_to_file`, `run_command` |
 | **[`konture-showcase-runner`](agents/konture-showcase-runner.md)** | Showcases & Benchmarks | Validates real-world showcases (`nowinandroid`, `sample-gradle`, `sample-maven`, `ktor-arrow-example`, `kotlinconf-app`) and benchmarks large repository performance (`LargeRepositoryPerformanceBenchmarkTest`). | `view_file`, `replace_file_content`, `write_to_file`, `run_command` |
 
@@ -97,7 +97,7 @@ When adding or updating recipes, articles, or guides:
    - Edit or create markdown files in `docs/` without adding YAML front matter.
    - For new files, add entry to `FRONT_MATTER_MAP` in `script/add_front_matter.py`.
    - Validate metadata: `python3 script/add_front_matter.py --validate`.
-   - Generate Dokka docs: `./gradlew -q dokkaHtmlMultiModule`.
+   - Generate Dokka docs: `./gradlew -q :dokkaGenerate`.
 2. **`konture-quality-verifier`**: Verify documentation links and code snippets.
 
 ---

@@ -8,7 +8,7 @@ import com.diffplug.gradle.spotless.SpotlessExtension
 import com.diffplug.spotless.LineEnding
 import io.github.baole.konture.buildlogic.KotlinHeaderValidator
 import io.github.baole.konture.buildlogic.UpdateKotlinContributors
-import org.jetbrains.dokka.gradle.DokkaMultiModuleTask
+import org.jetbrains.dokka.gradle.DokkaExtension
 
 plugins {
     base
@@ -123,8 +123,12 @@ tasks.matching { it.name == "check" }.configureEach {
     dependsOn(tasks.named("jacocoRootCoverageVerification"))
 }
 
-tasks.withType<DokkaMultiModuleTask>().configureEach {
-    outputDirectory.set(layout.projectDirectory.dir("docs/kdoc"))
+plugins.withId("org.jetbrains.dokka") {
+    extensions.configure<DokkaExtension> {
+        dokkaPublications.named("html") {
+            outputDirectory.set(layout.projectDirectory.dir("docs/kdoc"))
+        }
+    }
 }
 
 tasks.named<Delete>("clean") {
@@ -132,7 +136,7 @@ tasks.named<Delete>("clean") {
 }
 
 configure<SpotlessExtension> {
-    lineEndings = LineEnding.GIT_ATTRIBUTES_FAST_ALLSAME
+    lineEndings = LineEnding.UNIX
     kotlin {
         target("**/*.kt", "**/*.kts")
         targetExclude("**/build/**", "**/.gradle/**", "showcases/**", "settings.gradle.kts")

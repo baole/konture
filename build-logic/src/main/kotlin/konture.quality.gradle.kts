@@ -5,7 +5,7 @@
  */
 
 import dev.detekt.gradle.extensions.DetektExtension
-import org.jetbrains.dokka.gradle.DokkaTaskPartial
+import org.jetbrains.dokka.gradle.DokkaExtension
 import org.jlleitschuh.gradle.ktlint.KtlintExtension
 import org.jlleitschuh.gradle.ktlint.reporter.ReporterType
 
@@ -76,7 +76,7 @@ configure<KtlintExtension> {
 
 
 plugins.withId("org.jetbrains.dokka") {
-    tasks.withType<DokkaTaskPartial>().configureEach {
+    extensions.configure<DokkaExtension> {
         dokkaSourceSets.configureEach {
             perPackageOption {
                 matchingRegex.set("io\\.github\\.baole\\.konture\\.impl(\\..*)?")

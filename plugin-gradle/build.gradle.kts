@@ -10,6 +10,7 @@ plugins {
     id("konture.quality")
     id("konture.publishing")
     alias(libs.plugins.kotlin.serialization)
+    alias(libs.plugins.dokka)
     alias(libs.plugins.gradle.publish)
 }
 private val descriptionText =

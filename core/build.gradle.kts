@@ -9,6 +9,7 @@ plugins {
     id("konture.quality")
     id("konture.publishing")
     alias(libs.plugins.kotlin.serialization)
+    alias(libs.plugins.dokka)
 }
 
 group = "io.github.baole"

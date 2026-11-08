@@ -15,7 +15,7 @@ The primary agent operates as an **Orchestrator** and **automatically delegates*
 | **[`konture-plugin-engineer`](.agents/agents/konture-plugin-engineer.md)** | Build Tool Plugins (Gradle & Maven) | Maintains `plugin-gradle` and `plugin-maven`, enforces Gradle Configuration Cache and Project Isolation compatibility (via `archLayoutElements`), AGP/KGP inspectors, and layout tasks. |
 | **[`konture-test-engineer`](.agents/agents/konture-test-engineer.md)** | Test Lifecycle & Dogfooding | Authors unit tests in `:core` and `:library`, integration tests in `:plugin-gradle`, negative violation assertions (`assertFailsWith`), and dogfooding architecture tests in `konture-test`. |
 | **[`konture-i18n-specialist`](.agents/agents/konture-i18n-specialist.md)** | 8-Language Localization (i18n) | Manages resource bundles across 8 supported locales (`en`, `fr`, `es`, `it`, `vi`, `zh`, `zh_CN`, `zh_TW`), `MessageFormat` apostrophe escaping (`''`), and locale-neutral baseline persistence. |
-| **[`konture-docs-specialist`](.agents/agents/konture-docs-specialist.md)** | Documentation, Jekyll & Dokka | Manages Jekyll docs in `docs/` adhering to the zero-front-matter rule, registers metadata in `script/add_front_matter.py`, generates Dokka API docs (`dokkaHtmlMultiModule`), and authors architecture recipes. |
+| **[`konture-docs-specialist`](.agents/agents/konture-docs-specialist.md)** | Documentation, Jekyll & Dokka | Manages Jekyll docs in `docs/` adhering to the zero-front-matter rule, registers metadata in `script/add_front_matter.py`, generates Dokka API docs (`:dokkaGenerate`), and authors architecture recipes. |
 | **[`konture-quality-verifier`](.agents/agents/konture-quality-verifier.md)** | Code Review, ABI & Quality Gates | Conducts 3-stage semantic code reviews (Architecture, Craft/I/O/Memory, Tests), JaCoCo 80% coverage enforcement, file size limits (>300 lines), and runs the local pipeline (`./script/check.sh`). |
 | **[`konture-showcase-runner`](.agents/agents/konture-showcase-runner.md)** | Showcases & Benchmarks | Validates real-world showcases (`nowinandroid`, `sample-gradle`, `sample-maven`, `ktor-arrow-example`, `kotlinconf-app`) and benchmarks large repository performance (`LargeRepositoryPerformanceBenchmarkTest`). |
 
@@ -61,7 +61,7 @@ Always use `-q`/`--quiet` when running `./gradlew` commands to avoid noisy outpu
 - **Check binary compatibility (ABI)**: `./gradlew -q checkKotlinAbi`
 - **Update binary compatibility dumps**: `./gradlew -q updateKotlinAbi`
 - **Apply Kotlin code formatting**: `./gradlew -q spotlessApply`
-- **Generate API documentation (Dokka)**: `./gradlew -q dokkaHtmlMultiModule`
+- **Generate API documentation (Dokka)**: `./gradlew -q :dokkaGenerate`
 - **Fast Agent Pre-Flight Quality Gate (<5s)**: `./script/preflight.sh`
 - **Audit 8-Language i18n Parity & Syntax**: `python3 script/audit_i18n.py`
 - **Audit Architecture Invariants & File Sizes**: `python3 script/audit_architecture.py --changed-only`

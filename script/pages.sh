@@ -111,10 +111,9 @@ fi
 # Print Bundler version
 log_info "Using Bundler: $(bundle -v)"
 
-# Regenerate KDocs (API Reference) via Gradle
-# Note: Dokka is not compatible with Gradle configuration cache, so we disable it for this run.
+# Regenerate KDocs (API Reference) via Dokka Gradle Plugin v2.
 log_info "Regenerating KDocs (API Reference) via Gradle..."
-./gradlew dokkaHtmlMultiModule --no-configuration-cache
+./gradlew :dokkaGenerate
 
 # Clean up any leftover temporary workspace from a crashed run
 if [ -d ".docs_temp" ]; then

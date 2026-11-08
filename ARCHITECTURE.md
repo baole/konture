@@ -156,7 +156,7 @@ Konture's build infrastructure uses Gradle composite builds and convention plugi
   - **JaCoCo**: Enforces **80% minimum bundle instruction coverage** (`minimum = "0.80"`).
   - **Detekt**: Static analysis with baselines and custom rule configuration.
   - **Ktlint**: Formatting checks and autofixes.
-  - **Dokka**: Multi-module KDoc generation (`dokkaHtmlMultiModule`).
+  - **Dokka**: Multi-module KDoc generation (`:dokkaGenerate`).
 - **`konture.publishing.gradle.kts`**: Maven Central publishing and NMCP signing.
 
 ### 2. Gradle Project Isolation & Artifact Sharing

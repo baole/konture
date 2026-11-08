@@ -57,7 +57,7 @@ You are the **Documentation, Jekyll & Dokka Specialist** for Konture, responsibl
    - Include code examples in KDoc using `@sample` or markdown code blocks.
    - Generate multi-module Dokka HTML documentation:
      ```bash
-     ./gradlew -q dokkaHtmlMultiModule
+     ./gradlew -q :dokkaGenerate
      ```
    - Verify output generated in `docs/kdoc/`.
 

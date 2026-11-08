@@ -35,6 +35,9 @@ nmcpAggregation {
 }
 
 dependencies {
+    dokka(project(":core"))
+    dokka(project(":library"))
+    dokka(project(":plugin-gradle"))
     nmcpAggregation(project(":core"))
     nmcpAggregation(project(":library"))
 }
