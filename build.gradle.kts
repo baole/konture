@@ -16,12 +16,12 @@ plugins {
     alias(libs.plugins.dokka)
     alias(libs.plugins.detekt) apply false
     alias(libs.plugins.ktlint) apply false
-    alias(libs.plugins.nmcp)
+    alias(libs.plugins.nmcp.aggregation)
     `maven-publish`
 }
 
-configure<nmcp.NmcpExtension> {
-    publishAllPublicationsToCentralPortal {
+nmcpAggregation {
+    centralPortal {
         username.set(
             providers.gradleProperty("mavenCentralUsername")
                 .orElse(providers.environmentVariable("MAVEN_CENTRAL_USERNAME")),
@@ -32,6 +32,11 @@ configure<nmcp.NmcpExtension> {
         )
         publishingType.set("AUTOMATIC")
     }
+}
+
+dependencies {
+    nmcpAggregation(project(":core"))
+    nmcpAggregation(project(":library"))
 }
 
 if (applyPlugin) {

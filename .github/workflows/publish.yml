@@ -43,7 +43,8 @@ jobs:
           GPG_SIGNING_PASSWORD: ${{ secrets.GPG_SIGNING_PASSWORD }}
         # Automatically validates and releases Gradle libraries (core & library) to Central Portal
         run: |
-          ./gradlew publishAllPublicationsToCentralPortal \
+          ./gradlew -Dorg.gradle.isolated-projects.dangerously-ignore-problems=false \
+            publishAggregationToCentralPortal \
             -PreleaseBuild=true \
             -PsigningKey="$GPG_SIGNING_KEY" \
             -PsigningPassword="$GPG_SIGNING_PASSWORD"
